@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 255)->unique();
             $table->boolean('is_active')->default(true)->comment('Disable without deleting');
+            $table->timestamps();
         });
     }
 

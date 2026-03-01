@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->boolean('is_trending')->default(false)->comment('Trending pack');
             $table->boolean('is_active')->default(true)->comment('Disable without deleting');
+            $table->timestamps();
         });
     }
 

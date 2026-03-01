@@ -14,9 +14,9 @@ class PaymentSeeder extends Seeder
     {
         $now = now();
         DB::table('payments')->insert([
-            ['order_id' => 1, 'amount' => 557.00, 'payment_method' => 'card', 'gateway_reference' => 'ch_xxx1', 'paid_at' => $now->copy()->subDays(10)],
-            ['order_id' => 2, 'amount' => 699.00, 'payment_method' => 'card', 'gateway_reference' => null, 'paid_at' => null],
-            ['order_id' => 3, 'amount' => 575.00, 'payment_method' => 'bizum', 'gateway_reference' => 'biz_xxx1', 'paid_at' => $now->copy()->subDays(1)],
+            ['order_id' => 1, 'amount' => 557.00, 'payment_method' => 'card', 'gateway_reference' => 'ch_xxx1', 'paid_at' => $now->copy()->subDays(10), 'created_at' => $now, 'updated_at' => $now],
+            ['order_id' => 2, 'amount' => 699.00, 'payment_method' => 'card', 'gateway_reference' => null, 'paid_at' => null, 'created_at' => $now, 'updated_at' => $now],
+            ['order_id' => 3, 'amount' => 575.00, 'payment_method' => 'bizum', 'gateway_reference' => 'biz_xxx1', 'paid_at' => $now->copy()->subDays(1), 'created_at' => $now, 'updated_at' => $now],
         ]);
     }
 }

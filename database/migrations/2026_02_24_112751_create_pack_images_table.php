@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('content_type', 100);
             $table->integer('sort_order')->default(0)->comment('Display order; primary when 1 or min');
             $table->boolean('is_active')->default(true)->comment('Soft delete');
+            $table->timestamps();
         });
     }
 

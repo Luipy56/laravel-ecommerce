@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('username', 255)->unique();
             $table->string('password', 255);
             $table->boolean('is_active')->default(true)->comment('Soft delete');
+            $table->timestamps();
         });
     }
 

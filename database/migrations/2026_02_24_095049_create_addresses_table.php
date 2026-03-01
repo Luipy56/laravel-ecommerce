@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('province', 100)->nullable()->comment('Provincia');
             $table->string('postal_code', 20)->nullable();
             $table->boolean('is_active')->default(true)->comment('Soft delete');
+            $table->timestamps();
         });
     }
 

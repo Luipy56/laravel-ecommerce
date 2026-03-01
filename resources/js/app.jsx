@@ -1,12 +1,11 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import '@vitejs/plugin-react/preamble';
+import './i18n';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
 
-function App() {
-    return (
-        <div className="p-10 text-3xl font-bold">
-            Hola Laia 🚀 React + Laravel funcionando
-        </div>
-    )
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

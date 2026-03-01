@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamp('order_date')->nullable()->comment('Null while cart; set on checkout');
             $table->timestamp('shipping_date')->nullable();
             $table->decimal('shipping_price', 10, 2)->nullable();
+            $table->timestamps();
         });
     }
 

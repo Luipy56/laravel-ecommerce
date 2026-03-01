@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('province', 100)->nullable()->comment('Provincia');
             $table->string('postal_code', 20)->nullable();
             $table->text('note')->nullable()->comment('e.g. If I\'m not there..., I\'ll be there at 3...');
+            $table->timestamps();
         });
     }
 

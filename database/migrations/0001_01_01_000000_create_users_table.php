@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('login_email', 255)->unique()->comment('Email for authentication');
             $table->string('password', 255);
             $table->boolean('is_active')->default(true)->comment('Soft delete');
+            $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

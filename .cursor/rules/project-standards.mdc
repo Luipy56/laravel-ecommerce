@@ -33,6 +33,20 @@ $table->string('status')->comment('Order status'); // values from lang: shop.sta
 - Use **Tailwind CSS** for all styling (utility-first, mobile-first). Use **daisyUI** for ready-made components (cards, modals, navbar, etc.); see **`.cursor/rules/daisyui.mdc`** and **`.cursor/rules/tailwind.mdc`**.
 - Put theme tokens and overrides in a global **`styles.css`** (e.g. CSS variables, Tailwind/daisyUI theme). Add a separate CSS file per page or component only when the style does not repeat and is necessary.
 
+## Product variants
+
+- Products can optionally be grouped as **siblings** (variants) via **`product_variant_groups`**. A product belongs to at most one group (`products.variant_group_id`); products in the same group are "brothers" (e.g. same screw 30mm, 40mm, 50mm). No sort column: order variants by name or value in SQL (e.g. `ORDER BY name ASC`). See **`trash/diagramZero.dbml`** for the schema. Model: `ProductVariantGroup`, `Product::variantGroup()`, `Product::variantSiblings()`.
+
+## Shared UI components
+
+- **Page titles:** Use the shared **PageTitle** component (`resources/js/components/PageTitle.jsx`) for the main h1 on every content page (Cart, Orders, Products, Checkout, Profile, etc.). Do not use a raw `<h1 className="...">` for the page heading; keep the same style (bold, tracking-tight, border-bottom) everywhere. See **`.cursor/rules/components.mdc`**.
+- Product grids and product tiles use the shared **ProductCard** component (`resources/js/components/ProductCard.jsx`). Use it on the home page (featured) and on the product list page so layout and behaviour stay consistent. See **`.cursor/rules/components.mdc`** for details and other shared components.
+
+## Empty / missing data from the database
+
+- When a field is expected from the API/DB and **nothing is received** (null, undefined, empty), render the field **blank** in the UI.
+- **Do not** use placeholders such as em dash ("—"), "N/A", "–", or similar for missing values. Leave the cell or label content empty (e.g. `''` or nothing).
+
 ## Assets and build
 
 - Use **Vite** for asset compilation (Laravel default). See **`.cursor/rules/vite.mdc`** for entry points. The main app is React; Blade is only for the HTML shell that loads the React bundle when needed.

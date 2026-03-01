@@ -1,0 +1,20 @@
+---
+description: SVG and icon usage - single source of truth, no hardcoded SVGs
+globs: "**/*.jsx,**/*.tsx,**/*.blade.php"
+alwaysApply: false
+---
+
+# SVG and icons
+
+- **Master file:** All UI icons (stroke/outline icons used in buttons, nav, etc.) live in **`resources/js/components/icons/index.jsx`**. Do not paste inline `<svg>` markup in components or pages.
+- **Usage:** Import the needed icon from the master file and render it with a `className` for size and color:
+  ```jsx
+  import { IconCart, IconMenu, IconChevronUp } from '../components/icons';  // or from './icons' inside components/
+
+  <IconCart className="h-4 w-4 shrink-0" aria-hidden="true" />
+  <IconMenu className="h-6 w-6" />
+  ```
+- **Sizing:** Control size with Tailwind (e.g. `h-4 w-4`, `h-6 w-6`). Icons use `viewBox="0 0 24 24"` and `stroke="currentColor"` so they inherit text color and scale with the class.
+- **Accessibility:** For decorative icons (e.g. next to "Add to cart" text), pass `aria-hidden="true"`. When the icon is the only label, ensure the parent control has an `aria-label` (e.g. button with `aria-label={t('shop.cart.add')}`).
+- **Adding icons:** To add a new icon, add a new exported component in `resources/js/components/icons/index.jsx` using the existing `IconWrapper` and a `<path>` (or `<path>`s) with `strokeWidth={2}`. Keep a single source of truth; do not duplicate SVG paths elsewhere.
+- **Logos and illustrations:** Brand logos or one-off illustrations can stay as image files (e.g. `public/images/logoweb.png`) or be imported as React components from a dedicated asset if needed. The “master icons” file is for **reusable UI icons** (cart, menu, chevrons, etc.), not for full logos or complex graphics.

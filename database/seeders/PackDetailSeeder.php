@@ -2,22 +2,36 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class PackDetailSeeder extends Seeder
 {
     /**
-     * Seeds pack_items (products that belong to a pack).
+     * Seeds pack_items. Productes segons enunciat: Cilindres, Escut, Segon pany.
      */
     public function run(): void
     {
-        DB::table('pack_items')->insert([
-            ['pack_id' => 1, 'product_id' => 1, 'is_active' => true],
-            ['pack_id' => 1, 'product_id' => 4, 'is_active' => true],
-            ['pack_id' => 2, 'product_id' => 1, 'is_active' => true],
-            ['pack_id' => 2, 'product_id' => 3, 'is_active' => true],
-            ['pack_id' => 3, 'product_id' => 2, 'is_active' => true],
-        ]);
+        $items = [
+            ['pack_id' => 1, 'product_code' => 'CIL-30'],
+            ['pack_id' => 1, 'product_code' => 'ESC-EST'],
+            ['pack_id' => 2, 'product_code' => 'CIL-SEG'],
+            ['pack_id' => 2, 'product_code' => 'ESC-SEG'],
+            ['pack_id' => 3, 'product_code' => 'SP-EST'],
+            ['pack_id' => 3, 'product_code' => 'CIL-40'],
+        ];
+
+        $rows = [];
+        foreach ($items as $item) {
+            $productId = Product::where('code', $item['product_code'])->value('id');
+            if ($productId) {
+                $rows[] = ['pack_id' => $item['pack_id'], 'product_id' => $productId, 'is_active' => true];
+            }
+        }
+
+        if (! empty($rows)) {
+            DB::table('pack_items')->insert($rows);
+        }
     }
 }

@@ -21,6 +21,8 @@ class OrderSeeder extends Seeder
                 'order_date' => $now->copy()->subDays(10),
                 'shipping_date' => $now->copy()->subDays(5),
                 'shipping_price' => 12.00,
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
                 'client_id' => 2,
@@ -29,14 +31,18 @@ class OrderSeeder extends Seeder
                 'order_date' => $now->copy()->subDays(3),
                 'shipping_date' => null,
                 'shipping_price' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
                 'client_id' => 3,
                 'kind' => 'order',
-                'status' => 'installation_pending',
+                'status' => 'installation_confirmed',
                 'order_date' => $now->copy()->subDays(1),
                 'shipping_date' => null,
                 'shipping_price' => 15.00,
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
         ]);
     }

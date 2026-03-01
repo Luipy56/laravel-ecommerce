@@ -1,0 +1,38 @@
+---
+description: Ecommerce SEO rules aligned with Google Search Central (product data, URLs, structure, pagination)
+alwaysApply: false
+globs: "**/routes/**/*.php,**/resources/views/**/*.blade.php,**/resources/js/**/*.{js,jsx,ts,tsx},**/app/Http/Controllers/**/*.php,**/app/Models/*.php"
+---
+
+# Ecommerce SEO (Google Search Central)
+
+Follow [Google’s ecommerce SEO guides](https://developers.google.com/search/docs/specialty/ecommerce) so product and catalog content can be discovered and shown correctly in Search.
+
+## Structured data
+
+- **Product pages**: Add [Product](https://developers.google.com/search/docs/appearance/structured-data/product) (and [Offer](https://developers.google.com/search/docs/appearance/structured-data/product#offer)) JSON-LD so Google can show price, availability, and rich results.
+- **Breadcrumbs**: Add [BreadcrumbList](https://developers.google.com/search/docs/appearance/structured-data/breadcrumb) JSON-LD on category and product pages.
+- **Reviews**: If you show reviews, use [Review](https://developers.google.com/search/docs/appearance/structured-data/review-snippet) / aggregate rating; keep review content substantive and useful (see Google’s [high-quality reviews](https://developers.google.com/search/docs/specialty/ecommerce/write-high-quality-reviews) guidance).
+- Emit structured data in the HTML (e.g. Blade or the React shell) so it’s present in the initial response; avoid data only in client-only React if the page must be indexable.
+
+## URL structure
+
+- **Stable, readable URLs**: e.g. `/categories/{slug}`, `/products/{slug}`. No session IDs, sort params, or tracking junk in the canonical URL.
+- **Canonical**: Use one canonical URL per product/category; use `rel="canonical"` (and/or 301) to consolidate duplicates (e.g. with query params).
+- **Consistent scheme/host**: Prefer one scheme (https) and one preferred domain; redirect the other variant.
+
+## Site structure and crawling
+
+- **Navigation and links**: Clear hierarchy (e.g. home → categories → product). Link to important category and product pages from the main nav/footer so crawlers can reach them.
+- **Sitemaps**: Include product and category URLs in the sitemap; keep URLs in sitemaps consistent with canonical URLs.
+- **Important content crawlable**: Avoid putting key product/category content only behind infinite scroll or “load more” without crawlable links; provide pagination or static links so Google can reach all important pages.
+
+## Pagination and “load more”
+
+- **Pagination**: Use crawlable links (e.g. `?page=2`) and `rel="prev"` / `rel="next"` in the `<head>` so Google understands sequences.
+- **Infinite scroll / “load more”**: If used, still provide a way for crawlers to reach subsequent content (e.g. numbered page links or a “View all” that exposes full list), so it’s not only loaded via JavaScript without link targets. See [pagination and incremental loading](https://developers.google.com/search/docs/specialty/ecommerce/pagination-and-incremental-page-loading).
+
+## Launch and indexing
+
+- When launching or moving the site, use [launch guidance](https://developers.google.com/search/docs/specialty/ecommerce/how-to-launch-an-ecommerce-website) (e.g. Search Console, sitemap submission, checking indexation).
+- Prefer sharing product data via the live site (structured data + clear URLs + sitemaps) unless you have a specific need for feeds (e.g. Merchant Center); see [share product data with Google](https://developers.google.com/search/docs/specialty/ecommerce/share-your-product-data-with-google).

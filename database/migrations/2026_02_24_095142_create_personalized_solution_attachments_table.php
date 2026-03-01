@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('content_type', 100);
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true)->comment('Soft delete');
+            $table->timestamps();
         });
     }
 

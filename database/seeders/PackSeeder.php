@@ -10,9 +10,9 @@ class PackSeeder extends Seeder
     public function run(): void
     {
         DB::table('packs')->insert([
-            ['name' => 'Pack entrada completa', 'description' => 'Porta blindada + persiana. Ideal per a reformes.', 'price' => 699.00, 'is_trending' => true, 'is_active' => true],
-            ['name' => 'Pack premium', 'description' => 'Porta blindada + finestra. Qualitat màxima.', 'price' => 899.00, 'is_trending' => true, 'is_active' => true],
-            ['name' => 'Pack bàsic', 'description' => 'Porta de fusta. Bon preu.', 'price' => 549.00, 'is_trending' => false, 'is_active' => true],
+            ['name' => 'Pack cilindre + escut', 'description' => 'Cilindre estàndard i escut. Ideal per canviar cana.', 'price' => 46.00, 'is_trending' => true, 'is_active' => true],
+            ['name' => 'Pack seguretat', 'description' => 'Cilindre alta seguretat i escut reforçat.', 'price' => 130.00, 'is_trending' => true, 'is_active' => true],
+            ['name' => 'Pack segon pany', 'description' => 'Segon pany estàndard i cilindre 40mm.', 'price' => 83.00, 'is_trending' => false, 'is_active' => true],
         ]);
     }
 }

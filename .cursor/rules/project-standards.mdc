@@ -1,0 +1,38 @@
+---
+description: Serrallería Solidaria project conventions (migrations, language, stack)
+alwaysApply: true
+---
+
+# Project Standards
+
+## Migrations
+
+- **Do not create new migrations** to add, delete, or modify columns on existing tables.
+- **Only add migrations** for entirely new tables.
+- To change an existing table: **edit the existing migration file**, then run `php artisan migrate:fresh` (or clear cache) and verify.
+
+## Language and locale
+
+- **Comments**: English only.
+- **Code/DB**: Field and variable names in English.
+- **User-facing strings** (HTML, labels, messages): **Translatable**; supported locales are **Catalan (ca)** and **Spanish / Castellano (es)**. No hardcoded UI strings; use Laravel lang keys or React i18n. See **`.cursor/rules/i18n.mdc`**.
+- **Enums** (values shown to users): Store labels in lang files so they translate (e.g. `shop.status.pending` → "Pendent" / "Pendiente").
+
+```php
+// ✅ Comment in English; translation key for UI
+$table->string('status')->comment('Order status'); // values from lang: shop.status.*
+```
+
+## Stack
+
+- **Laravel as API + SPA (React).** Front-end talks to Laravel via **API REST**; React is the default UI. Laravel = backend, API routes, auth. Use **Blade only when necessary** (e.g. HTML shell that loads React, or a single login page if you keep it server-rendered). Do not use Inertia for this project.
+- **Auth:** **Custom** (no Breeze). LoginController + session guard, like `~/Repos/abp-app`. See **`.cursor/rules/auth.mdc`**. See also **`.cursor/rules/react-use.mdc`**, **`.cursor/rules/api.mdc`**, **`.cursor/rules/security.mdc`**, **`.cursor/rules/i18n.mdc`**.
+
+## Styling
+
+- Use **Tailwind CSS** for all styling (utility-first, mobile-first). Use **daisyUI** for ready-made components (cards, modals, navbar, etc.); see **`.cursor/rules/daisyui.mdc`** and **`.cursor/rules/tailwind.mdc`**.
+- Put theme tokens and overrides in a global **`styles.css`** (e.g. CSS variables, Tailwind/daisyUI theme). Add a separate CSS file per page or component only when the style does not repeat and is necessary.
+
+## Assets and build
+
+- Use **Vite** for asset compilation (Laravel default). See **`.cursor/rules/vite.mdc`** for entry points. The main app is React; Blade is only for the HTML shell that loads the React bundle when needed.

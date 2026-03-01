@@ -1,0 +1,48 @@
+---
+description: Blade only when needed (layout shell, login/error); default UI is React
+globs: resources/views/**/*.blade.php
+alwaysApply: false
+---
+
+# Blade and Views
+
+Match the default UI is React; use Blade only when needed (e.g. shell, login, error). When using Blade, match reference app’s view layout and patterns.
+
+## Structure
+
+- **Layout**: Main views `@extends('app')` and use `@section('content')`.
+- **Path**: `resources/views/components/contents/{resource}/` for a resource:
+  - `{resource}Form.blade.php` (create), `{resource}Edit.blade.php`, `{resource}Show.blade.php`
+  - `{resource}List.blade.php` (list page), `tables/{resource}ListTable.blade.php` (AJAX table partial)
+- **Partials**: Reuse `components/partials/` (e.g. `modal`, `documents-section`, `notes-section`, `breadcrumb`, `search-bar`) via `<x-partials.name />`.
+
+## Naming
+
+- Blade file names in **camelCase** for the resource: `materialAssignmentForm.blade.php`, `materialAssignmentShow.blade.php`.
+
+## Forms and links
+
+- Use `route('route_name')` or `route('route_name', $model)` for actions and links.
+- Use `old('field_name', $model->field ?? '')` to repopulate inputs on validation errors.
+- Always `@csrf` in forms.
+
+## Validation errors
+
+- Show errors in Catalan. Example:
+
+```blade
+@if ($errors->any())
+    <div class="alert alert-error ...">
+        <h3 class="...">Hi ha errors en el formulari:</h3>
+        <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+    </div>
+@endif
+```
+
+## Styling in views
+
+- Use **Tailwind** utility classes and **daisyUI** component classes. See `.cursor/rules/tailwind.mdc` and `.cursor/rules/daisyui.mdc` for correct class names and patterns.
+
+## Copy
+
+- All user-visible text (labels, buttons, titles, messages) must be in **Catalan**, as per project standards.

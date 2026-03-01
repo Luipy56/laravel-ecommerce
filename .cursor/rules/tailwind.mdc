@@ -1,0 +1,13 @@
+---
+description: Tailwind CSS - utility-first, mobile-first, responsive
+globs: "**/*.blade.php,**/*.tsx,**/*.jsx,**/*.css"
+alwaysApply: false
+---
+
+# Tailwind CSS
+
+- **Utility-first:** Use Tailwind utility classes in markup. Prefer direct classes over `@apply` in CSS.
+- **Mobile-first:** Write base styles for mobile; use `sm:`, `md:`, `lg:`, `xl:` for larger breakpoints.
+- **Responsive:** Use Tailwind responsive prefixes consistently. Use spacing/sizing scale (e.g. `p-4`, `gap-2`, `text-sm`).
+- **Consistency:** Use the same color/size tokens across the app; extend theme in `styles.css` or Tailwind config if needed.
+- For **component classes** (buttons, cards, modals), use **daisyUI** when possible; see `.cursor/rules/daisyui.mdc`. Otherwise compose with Tailwind utilities.

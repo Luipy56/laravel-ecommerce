@@ -1,0 +1,45 @@
+---
+description: Laravel REST API — structure, resources, validation, responses, errors
+globs: routes/api.php,app/Http/Controllers/Api/**/*.php,app/Http/Resources/**/*.php
+alwaysApply: false
+---
+
+# Laravel REST API
+
+## Structure
+
+- **Routes**: `routes/api.php`. Use `Route::prefix('v1')` for versioning. Group by resource; protected routes with `middleware('auth:sanctum')` or session-based auth as per project.
+- **Controllers**: API Resource controllers (index, store, show, update, destroy). Keep controllers **light**: request handling and response only; put business logic in models, services, or actions.
+- **API Resources**: Use **Eloquent API Resources** to shape JSON. Do not expose internal fields. Use `Resource::collection($query->paginate())` for lists.
+
+## RESTful design
+
+- **HTTP methods**: GET (read), POST (create), PUT/PATCH (update), DELETE (destroy). Use correct **status codes** (200, 201, 204, 400, 401, 403, 404, 422, 500).
+- **Consistent response format**: Success — `['data' => ...]` or return Resource; errors — unified structure (see below). User-facing messages in **Catalan** (or translated via i18n).
+
+## Validation and auth
+
+- Validate **all** input: `$request->validate([...])` or **Form Requests** for complex rules. Return **422** with validation errors in a consistent shape.
+- **Auth**: Sanctum (tokens or SPA cookie). Never return tokens in URLs.
+
+## Performance
+
+- **Eager loading**: Use `with()` / `load()` to avoid N+1 (e.g. `Model::with('relation')->get()`).
+- **Pagination**: Use Laravel pagination for list endpoints (e.g. `->paginate(15)`); return pagination meta in the response.
+- Keep queries lean; use indexes on frequently queried columns.
+
+## Error responses (unified)
+
+Use a consistent JSON structure for errors:
+
+```json
+{
+  "success": false,
+  "message": "Error description (Catalan when user-facing)",
+  "errors": { "field_name": ["Specific error details"] },
+  "error_code": "OPTIONAL_CODE"
+}
+```
+
+- **Exception handling**: Use Laravel's exception handler (e.g. `render()` in `Handler`) to return the same structure for validation, auth, and server errors. Use appropriate HTTP status (400, 401, 403, 404, 422, 500).
+- **Logging**: Log API errors and slow requests; do not log sensitive data.

@@ -1,0 +1,47 @@
+---
+description: Laravel conventions (controllers, models, routes) — resource pattern, validation, responses
+globs: app/**/*.php,routes/**/*.php,database/migrations/*.php
+alwaysApply: false
+---
+
+# Laravel PHP Conventions
+
+Follow resource-style CRUD and consistent patterns from the reference codebase.
+
+## Routes (`routes/web.php`)
+
+- Group by resource with comment blocks: `/* ------------------------ RESOURCE ------------------------ */`
+- Use `Route::middleware('auth')` on protected routes.
+- Named routes in **snake_case**: `resource_form`, `resource_add`, `resources_list`, `resource_show`, `resource_edit`, `resource_update`, `resource_delete`.
+- Prefer **route model binding** when the URL carries a model: `get('/resource/show/{model}', ...)` with type-hinted `Model $model` in the controller.
+
+## Controllers
+
+- **Resource methods**: `index`, `create`, `store`, `show`, `edit`, `update`, `destroy`.
+- **Validation**: Use `$request->validate([...])` in the controller; keep rules next to the action.
+- **Responses**: `return view('...')->with([...])` or `compact()`; redirect with `->with('success', 'Message in Catalan')`.
+- **AJAX list**: In `index`, when `$request->ajax()` return the table partial only; otherwise return the full list view.
+- Use `findOrFail($id)` when not using route model binding; use type-hinted model (e.g. `MaterialAssignment $materialAssignment`) when the route defines it.
+
+```php
+// ✅ show with route model binding
+public function show(MaterialAssignment $materialAssignment)
+{
+    $materialAssignment->load(['professional', 'assignedBy', 'documents', 'notes']);
+    return view('components.contents.materialassignment.materialAssignmentShow')
+        ->with('materialAssignment', $materialAssignment);
+}
+```
+
+## Models
+
+- Set `protected $table` and `protected $fillable`; use `$casts` for dates and similar.
+- **Relationships**: Prefer return type hints (`BelongsTo`, `HasMany`, `MorphMany`). One-line methods when trivial.
+- **Scopes / helpers**: Use static methods on the model when logic is reusable (e.g. `getLatestShirtSize($professionalId)`).
+- **Mutators**: Use attribute mutators (e.g. `setPasswordAttribute`) for hashing or normalisation when setting a value.
+- **Model events**: Use `booted()` for `created` / `deleting` etc., not inline in controllers.
+
+## Migrations
+
+- Use `$table->id()`; `$table->foreignId('x')->constrained('table')->onDelete('cascade'|'set null')`; `$table->timestamps()`.
+- Use `->comment('...')` on columns where it helps. For fixed value sets, consider `enum()` in the migration (values as per project language rules).

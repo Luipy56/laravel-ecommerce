@@ -1,0 +1,12 @@
+---
+description: Auth — custom LoginController + session, no Breeze (like abp-app)
+globs: app/Http/Controllers/*Login*.php,app/Http/Controllers/*Auth*.php,routes/web.php,config/auth.php
+alwaysApply: false
+---
+
+# Authentication
+
+- **No Breeze.** Use a **custom auth** flow: one **LoginController** (e.g. `show()` for login form, `login(Request $request)` for POST, `logout(Request $request)`). Validate credentials, then `Auth::attempt()` or manual check + `Auth::login($user)`, and `$request->session()->regenerate()`.
+- **Guard:** Use Laravel **session** guard (default `web`). Configure `config/auth.php` with your user provider (e.g. `users` → User model, or a custom provider like `professionals` if you use a different model).
+- **Routes:** Guest routes for GET/POST login; one POST logout; protect the rest with `middleware('auth')`. Same pattern as the reference app in `~/Repos/abp-app` (LoginController, no Breeze).
+- **SPA:** If the login form is in React, POST credentials to a Laravel route that validates and creates the session; use `withCredentials: true` (or equivalent) on API requests so the session cookie is sent. No need for token storage if the app is same-origin.

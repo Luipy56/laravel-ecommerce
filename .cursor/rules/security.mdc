@@ -1,0 +1,14 @@
+---
+description: Security for Laravel and front-end — auth, validation, CSRF, headers, secrets
+alwaysApply: true
+---
+
+# Security
+
+- **CSRF**: Do not disable Laravel’s CSRF protection for web routes. Use `@csrf` in Blade forms; for SPA/API, use Sanctum cookie auth or ensure API is stateless with token auth (no CSRF on token-based API).
+- **Auth**: Protect routes with `middleware('auth')` (web) or `auth:sanctum` (API). Check permissions in controllers or policies; never trust client for authorization.
+- **Input**: Validate **all** user input on the server (`$request->validate()` or Form Requests). Use Eloquent’s `$fillable` (or guarded) to prevent **mass assignment**; never `Model::create($request->all())` without a whitelist.
+- **Output**: Blade escapes by default; in React avoid `dangerouslySetInnerHTML` unless content is sanitized. Do not expose stack traces or internal paths in production error responses.
+- **Secrets**: No API keys, passwords, or tokens in front-end code or in repo. Use `.env` and `config()`; ensure `.env` is in `.gitignore`. Do not log sensitive data.
+- **Headers**: In production, use secure headers (e.g. HSTS, X-Content-Type-Options, X-Frame-Options). Laravel or the web server can add these; do not remove security-related headers.
+- **Rate limiting**: Use Laravel’s `throttle` middleware on API or login routes to limit abuse (e.g. `Route::middleware('throttle:60,1')`).

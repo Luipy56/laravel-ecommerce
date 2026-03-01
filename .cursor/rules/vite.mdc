@@ -1,0 +1,12 @@
+---
+description: Vite for Laravel - assets, build, and Blade/React entry
+globs: "vite.config.*,resources/js/**/*,resources/css/**/*"
+alwaysApply: false
+---
+
+# Vite (Laravel)
+
+- Use **Vite** for asset bundling (CSS, JS, React). Laravel’s default is Vite; use `npm run dev` / `npm run build`.
+- Entry: `resources/js/app.js` (or `app.tsx` for React); import global CSS (e.g. `resources/css/app.css`) from the entry.
+- In Blade, use `@vite(['resources/css/app.css', 'resources/js/app.js'])` in the layout.
+- Keep **Tailwind and daisyUI** in the main CSS (`@import "tailwindcss";` and daisyUI plugin as per [daisyUI install](https://daisyui.com/docs/install/)).

@@ -1,0 +1,39 @@
+---
+description: React with Laravel (API + SPA) — patterns, naming, hooks, a11y
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# React Use
+
+## Stack
+
+- **React is the default UI.** Use **Laravel as API + SPA (React)** (no Inertia). Laravel = backend and API; React uses React Router and calls the API. Do not use Blade for new pages; use React.
+- **Language**: Comments and code in English; all user-facing strings **translatable** (Catalan and Spanish). Use i18next/react-i18next and `t('key')`; see `.cursor/rules/i18n.mdc`.
+- **Placement**: React under `resources/js` (e.g. `resources/js/Pages`, `resources/js/Components`, `resources/js/locales` for i18n).
+- **Styling**: Tailwind and daisyUI; see `.cursor/rules/tailwind.mdc` and `.cursor/rules/daisyui.mdc`.
+
+## Component and code style
+
+- **Functional components** with TypeScript interfaces. Use `function` for components, not `const`.
+- **Naming**: PascalCase components; camelCase for variables/functions; `handle*` for event handlers (e.g. `handleClick`); `is*`/`has*` for booleans (e.g. `isLoading`, `hasError`).
+- **Structure**: Hooks first, then derived values, then handlers, then effects, then return. Keep components under ~150 lines; decompose if larger.
+- **Early returns**: Use guard clauses and early returns; avoid deep nesting. No unnecessary `else` after `return`.
+- **No components inside render**: Define subcomponents outside the main component or memoize them; never define a component inside another component’s render.
+
+## Hooks and async
+
+- **useEffect + async**: Use **AbortController** for any fetch/async in `useEffect`. Pass `signal` to the request and call `controller.abort()` in the cleanup. Check `err.name !== 'AbortError'` before setting error state.
+- **Cleanup**: Every `useEffect` that starts timers, subscriptions, or async work must return a cleanup function (clear timeout, abort controller, unsubscribe).
+
+## Forms (React Hook Form)
+
+- **useWatch over watch()**: Use `useWatch({ name: 'fieldName', control })` for reactive field values; avoid `watch()` or `methods.watch()` as they re-render on every form change.
+- **Memoize validation schemas**: Define Yup (or Zod) schema with `useMemo(() => schema, [])` or outside the component so it is not recreated every render.
+- **Structure**: Wrap form with `FormProvider` and spread `{...methods}`; use `methods.handleSubmit(handleSubmit)` on the form. Display errors via `formState.errors` and associate with inputs (e.g. `helperText={errors.email?.message}`).
+
+## Accessibility
+
+- Use **semantic HTML** (`<button>`, `<nav>`, `<main>`, etc.). Icon-only buttons must have `aria-label`.
+- **Forms**: Associate labels with inputs (`<label htmlFor="id">` or `aria-label`). Expose errors to screen readers (e.g. `aria-describedby` or live region).
+- **Keyboard**: Support Enter/Space for custom clickable elements; support Escape to close modals. Ensure visible focus (e.g. `:focus-visible`), never remove outline without a visible replacement.

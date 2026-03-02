@@ -7,7 +7,7 @@ import { useCart } from '../contexts/CartContext';
 import { IconCart, IconChevronLeft, IconChevronRight, IconChevronUp } from '../components/icons';
 
 const ZOOM_SCALE = 2.5;
-const ZOOM_PANEL_SIZE = 280;
+const ZOOM_PANEL_SIZE = 420;
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -44,11 +44,19 @@ export default function ProductDetailPage() {
   const hasMultipleImages = imageUrls.length > 1;
 
   const handleZoomMove = useCallback((e) => {
-    const el = imageRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
+    const containerEl = galleryRef.current;
+    const imageEl = imageRef.current;
+    if (!containerEl || !imageEl) return;
+    const containerRect = containerEl.getBoundingClientRect();
+    const imageRect = imageEl.getBoundingClientRect();
+    const x0 = (imageRect.left - containerRect.left) / containerRect.width;
+    const y0 = (imageRect.top - containerRect.top) / containerRect.height;
+    const w = imageRect.width / containerRect.width;
+    const h = imageRect.height / containerRect.height;
+    const cx = (e.clientX - containerRect.left) / containerRect.width;
+    const cy = (e.clientY - containerRect.top) / containerRect.height;
+    const x = w > 0 ? (cx - x0) / w : 0.5;
+    const y = h > 0 ? (cy - y0) / h : 0.5;
     setZoomPos({
       x: Math.max(0, Math.min(1, x)),
       y: Math.max(0, Math.min(1, y)),
@@ -66,10 +74,10 @@ export default function ProductDetailPage() {
         <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
       </div>
 
-      <div className="card card-border bg-base-100 shadow-lg overflow-hidden">
+      <div className="card card-border bg-base-100 shadow-lg overflow-visible">
         <div className="flex flex-col lg:flex-row">
-          {/* Gallery + zoom */}
-          <div className="flex flex-col lg:w-1/2 gap-3 p-4 bg-base-200/50">
+          {/* Gallery + zoom — overflow-visible so zoom panel is not clipped */}
+          <div className="flex flex-col lg:w-1/2 gap-3 p-4 bg-base-200/50 overflow-visible">
             <div className="flex flex-col sm:flex-row gap-3">
               <div
                 className="relative flex-1 aspect-square max-h-[360px] bg-base-200 rounded-lg"
@@ -117,7 +125,7 @@ export default function ProductDetailPage() {
                     <img
                       src={mainImageUrl}
                       alt=""
-                      className="absolute select-none"
+                      className="absolute select-none object-contain"
                       style={{
                         width: `${ZOOM_SCALE * 100}%`,
                         height: `${ZOOM_SCALE * 100}%`,
@@ -198,7 +206,7 @@ export default function ProductDetailPage() {
                     }}
                   >
                     <span>{t('shop.product.variants_count', { count: product.variant_options.length })}</span>
-                    <span className="text-primary">— {variantsExpanded ? t('shop.product.hide_variants') : t('shop.product.see_all_variants')}</span>
+                    <span className="text-primary">· {variantsExpanded ? t('shop.product.hide_variants') : t('shop.product.see_all_variants')}</span>
                     <IconChevronUp
                       className={`h-4 w-4 ml-auto shrink-0 transition-transform ${variantsExpanded ? '' : 'rotate-180'}`}
                       aria-hidden

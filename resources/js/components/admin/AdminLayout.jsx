@@ -1,13 +1,82 @@
-import React from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import { IconMenu } from '../icons';
 import { AdminToastProvider } from '../../contexts/AdminToastContext';
 
+const SECTION_NAV_KEYS = {
+  admins: 'admin.nav.admins',
+  products: 'admin.nav.products',
+  'variant-groups': 'admin.nav.variant_groups',
+  clients: 'admin.nav.clients',
+  orders: 'admin.nav.orders',
+  'personalized-solutions': 'admin.nav.personalized_solutions',
+  features: 'admin.nav.features',
+  'feature-names': 'admin.nav.feature_types',
+  packs: 'admin.nav.packs',
+};
+
+const SECTION_NEW_KEYS = {
+  admins: 'admin.admins.new',
+  products: 'admin.products.new',
+  features: 'admin.features.new',
+  'feature-names': 'admin.feature_types.new',
+  packs: 'admin.packs.new',
+  'variant-groups': 'admin.variant_groups.new',
+};
+
+function getBreadcrumbs(pathname, t) {
+  const parts = pathname.replace(/^\/admin\/?/, '').split('/').filter(Boolean);
+  const crumbs = [{ label: t('admin.breadcrumb.admin'), path: '/admin' }];
+  if (parts.length === 0) {
+    crumbs[0].label = t('admin.nav.dashboard');
+    return crumbs;
+  }
+  const section = parts[0];
+  const sectionLabel = SECTION_NAV_KEYS[section] ? t(SECTION_NAV_KEYS[section]) : section;
+  crumbs.push({ label: sectionLabel, path: `/admin/${section}` });
+  if (parts.length >= 2) {
+    if (parts[1] === 'new') {
+      const newKey = SECTION_NEW_KEYS[section];
+      crumbs.push({ label: newKey ? t(newKey) : t('common.create'), path: null });
+    } else if (parts.length >= 3 && parts[2] === 'edit') {
+      crumbs.push({ label: t('admin.breadcrumb.detail'), path: `/admin/${section}/${parts[1]}` });
+      crumbs.push({ label: t('common.edit'), path: null });
+    } else {
+      crumbs.push({ label: t('admin.breadcrumb.detail'), path: null });
+    }
+  }
+  return crumbs;
+}
+
+function closeDrawer() {
+  document.getElementById('admin-drawer')?.click();
+}
+
 export default function AdminLayout() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const [locale, setLocale] = useState(i18n.language);
+
+  useEffect(() => {
+    setLocale(i18n.language);
+  }, [i18n.language]);
+
+  const handleLocale = (lng) => {
+    i18n.changeLanguage(lng);
+    setLocale(lng);
+    localStorage.setItem('locale', lng);
+  };
+
+  const breadcrumbs = useMemo(() => getBreadcrumbs(pathname, t), [pathname, t]);
+
+  const isActive = (path) => {
+    if (path === '/admin') return pathname === '/admin' || pathname === '/admin/';
+    return pathname === path || pathname.startsWith(path + '/');
+  };
 
   const handleLogout = async () => {
     try {
@@ -17,6 +86,19 @@ export default function AdminLayout() {
       navigate('/admin/login');
     }
   };
+
+  const navItems = [
+    { to: '/admin', labelKey: 'admin.nav.dashboard' },
+    { to: '/admin/admins', labelKey: 'admin.nav.admins' },
+    { to: '/admin/products', labelKey: 'admin.nav.products' },
+    { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups' },
+    { to: '/admin/clients', labelKey: 'admin.nav.clients' },
+    { to: '/admin/orders', labelKey: 'admin.nav.orders' },
+    { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions' },
+    { to: '/admin/features', labelKey: 'admin.nav.features' },
+    { to: '/admin/feature-names', labelKey: 'admin.nav.feature_types' },
+    { to: '/admin/packs', labelKey: 'admin.nav.packs' },
+  ];
 
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-base-200">
@@ -29,7 +111,35 @@ export default function AdminLayout() {
         >
           <IconMenu className="h-6 w-6" />
         </label>
-        <main className="flex-1 container mx-auto px-4 pt-14 pb-6 lg:pt-6 lg:px-6">
+        <header className="sticky top-0 z-10 bg-base-100 border-b border-base-200 shrink-0">
+          <div className="container mx-auto pl-14 pr-4 py-3 lg:pl-6 lg:pr-6 flex items-center justify-between gap-4">
+            <nav className="breadcrumbs text-sm min-w-0" aria-label="Breadcrumb">
+              <ul>
+                {breadcrumbs.map((crumb, i) => (
+                  <li key={i}>
+                    {crumb.path ? (
+                      <Link to={crumb.path} className="text-base-content/80 hover:text-base-content">
+                        {crumb.label}
+                      </Link>
+                    ) : (
+                      <span className="text-base-content font-medium" aria-current="page">{crumb.label}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <div className="dropdown dropdown-end shrink-0">
+              <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={locale === 'ca' ? 'Català' : 'Español'}>
+                {locale === 'ca' ? 'CA' : 'ES'}
+              </label>
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-32 p-2 shadow border border-base-200">
+                <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
+                <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
+              </ul>
+            </div>
+          </div>
+        </header>
+        <main className="flex-1 container mx-auto px-4 pb-6 lg:px-6">
           <AdminToastProvider>
             <Outlet />
           </AdminToastProvider>
@@ -43,58 +153,20 @@ export default function AdminLayout() {
             <span className="block text-sm text-base-content/70">Admin</span>
           </div>
           <ul className="menu p-4 flex-1">
+            {navItems.map(({ to, labelKey }) => (
+              <li key={to}>
+                <Link
+                  to={to}
+                  className={`rounded-lg ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-base-300 -ml-px' : ''}`}
+                  onClick={closeDrawer}
+                  aria-current={isActive(to) ? 'page' : undefined}
+                >
+                  {t(labelKey)}
+                </Link>
+              </li>
+            ))}
             <li>
-              <Link to="/admin" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.dashboard')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/admins" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.admins')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/products" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.products')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/variant-groups" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.variant_groups')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/clients" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.clients')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/orders" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.orders')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/personalized-solutions" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.personalized_solutions')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/features" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.features')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/feature-names" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.feature_types')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/admin/packs" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
-                {t('admin.nav.packs')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/" className="rounded-lg" onClick={() => document.getElementById('admin-drawer')?.click()}>
+              <Link to="/" className="rounded-lg" onClick={closeDrawer}>
                 {t('admin.back_to_shop')}
               </Link>
             </li>

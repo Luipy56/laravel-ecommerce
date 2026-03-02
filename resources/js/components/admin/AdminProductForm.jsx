@@ -53,8 +53,13 @@ export default function AdminProductForm({ product = null, categories = [], vari
     return { ...defaultProduct };
   });
   const [featureIds, setFeatureIds] = useState(() => (product?.features ?? []).map((f) => f.id) ?? []);
+  const [featuresExpanded, setFeaturesExpanded] = useState({});
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+
+  const toggleFeaturesGroup = (name) => {
+    setFeaturesExpanded((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
 
   const toggleFeature = (id) => {
     setFeatureIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -127,7 +132,7 @@ export default function AdminProductForm({ product = null, categories = [], vari
               onChange={(e) => update('variant_group_id', e.target.value)}
               aria-label={t('admin.products.variant_group')}
             >
-              <option value="">—</option>
+              <option value=""></option>
               {variantGroups.map((g) => (
                 <option key={g.id} value={g.id}>
                   #{g.id} ({g.products_count ?? g.products?.length ?? 0} {t('admin.products.name').toLowerCase()})
@@ -193,25 +198,45 @@ export default function AdminProductForm({ product = null, categories = [], vari
         <div className="form-field">
           <span className="form-label">{t('admin.products.features')}</span>
           <div className="space-y-4 rounded-box border border-base-300 bg-base-200/50 p-4">
-            {groupFeaturesByType(features).map(({ name, list }) => (
-              <div key={name || 'unnamed'}>
-                <p className="text-sm font-medium text-base-content/80 mb-2">{name || '—'}</p>
-                <div className="flex flex-wrap gap-2">
-                  {list.map((f) => (
-                    <label key={f.id} className="label cursor-pointer gap-2 bg-base-100 px-3 py-2 rounded-lg border border-base-300">
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-sm"
-                        checked={featureIds.includes(f.id)}
-                        onChange={() => toggleFeature(f.id)}
-                        aria-label={f.value}
-                      />
-                      <span className="label-text text-sm">{f.value}</span>
-                    </label>
-                  ))}
+            {groupFeaturesByType(features).map(({ name, list }) => {
+              const key = name || 'unnamed';
+              const isExpanded = featuresExpanded[key];
+              const visibleCount = 3;
+              const visible = isExpanded ? list : list.slice(0, visibleCount);
+              const hasMore = list.length > visibleCount;
+              const hiddenCount = list.length - visibleCount;
+              return (
+                <div key={key}>
+                  <p className="text-sm font-medium text-base-content/80 mb-2">{name || ''}</p>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {visible.map((f) => (
+                      <label key={f.id} className="label cursor-pointer gap-2 bg-base-100 px-3 py-2 rounded-lg border border-base-300">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-sm"
+                          checked={featureIds.includes(f.id)}
+                          onChange={() => toggleFeature(f.id)}
+                          aria-label={f.value}
+                        />
+                        <span className="label-text text-sm">{f.value}</span>
+                      </label>
+                    ))}
+                    {hasMore && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm btn-square shrink-0"
+                        onClick={() => toggleFeaturesGroup(key)}
+                        aria-expanded={isExpanded}
+                        aria-label={isExpanded ? t('common.close') : undefined}
+                        title={isExpanded ? t('common.close') : `+${hiddenCount}`}
+                      >
+                        {isExpanded ? '−' : `+${hiddenCount}`}
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

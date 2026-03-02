@@ -26,12 +26,14 @@ class AdminAdminController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $admins = $query->get(['id', 'username', 'is_active']);
+        $admins = $query->get(['id', 'username', 'is_active', 'last_login_at', 'created_at']);
 
         $data = $admins->map(fn ($a) => [
             'id' => $a->id,
             'username' => $a->username,
             'is_active' => (bool) $a->is_active,
+            'last_login_at' => $a->last_login_at?->toIso8601String(),
+            'created_at' => $a->created_at?->toIso8601String(),
         ])->values()->all();
 
         return response()->json([
@@ -69,6 +71,8 @@ class AdminAdminController extends Controller
                 'id' => $admin->id,
                 'username' => $admin->username,
                 'is_active' => (bool) $admin->is_active,
+                'last_login_at' => $admin->last_login_at?->toIso8601String(),
+                'created_at' => $admin->created_at?->toIso8601String(),
             ],
         ]);
     }

@@ -85,66 +85,88 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="h-16 flex-shrink-0" aria-hidden="true" />
+      {/* Spacer: taller on mobile due to search row */}
+      <div className="h-24 lg:h-16 flex-shrink-0" aria-hidden="true" />
       <header
-        className="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-out"
+        className="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-out bg-base-100 shadow-lg"
         style={{ transform: visible ? 'translateY(0)' : 'translateY(-100%)' }}
       >
-        <div className="navbar bg-base-100 shadow-lg">
-      <div className="navbar-start">
-        <label htmlFor="drawer-nav" className="btn btn-ghost btn-square drawer-button lg:hidden" aria-label={t('common.menu')}>
-          <IconMenu className="h-6 w-6" />
-        </label>
-        <Link to="/" className="btn btn-ghost text-xl">Serralleria Solidària</Link>
-        <Link to="/products" className="btn btn-ghost hidden sm:inline-flex">{t('shop.products')}</Link>
-        <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex">{t('shop.custom_solution')}</Link>
-      </div>
-      <div className="navbar-center hidden lg:flex">
-        <form onSubmit={handleSearch} className="join">
-          <input
-            type="search"
-            className="input input-bordered join-item w-64"
-            placeholder={t('shop.search_placeholder')}
-            value={searchQ}
-            onChange={(e) => setSearchQ(e.target.value)}
-            aria-label={t('shop.search_placeholder')}
-          />
-          <button type="submit" className="btn btn-primary join-item">
-            {t('common.search')}
-          </button>
-        </form>
-      </div>
-      <div className="navbar-end gap-2">
-        <div className="dropdown dropdown-end">
-          <label tabIndex={0} className="btn btn-ghost btn-sm">
-            {locale === 'ca' ? 'CA' : 'ES'}
-          </label>
-          <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-32 p-2 shadow">
-            <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
-            <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
-          </ul>
-        </div>
-        <CartDropTarget to="/cart" className="btn btn-ghost btn-circle indicator">
-          <span className="indicator-item badge badge-primary" id="cart-count">0</span>
-          <IconCart className="h-6 w-6" aria-hidden="true" />
-        </CartDropTarget>
-        {user ? (
-          <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost">
-              {[user.name, user.surname].filter(Boolean).join(' ') || user.login_email}
+        {/* Main row: no overlap; start can shrink, end stays fixed */}
+        <div className="navbar min-h-0 flex-nowrap gap-1 sm:gap-2 px-2 sm:px-4">
+          <div className="navbar-start min-w-0 flex-1 flex items-center flex-nowrap gap-1 sm:gap-2">
+            <label htmlFor="drawer-nav" className="btn btn-ghost btn-square btn-sm shrink-0 lg:hidden" aria-label={t('common.menu')}>
+              <IconMenu className="h-6 w-6" />
             </label>
-            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow">
-              <li><Link to="/profile">{t('shop.profile')}</Link></li>
-              <li><Link to="/orders">{t('shop.orders')}</Link></li>
-              <li><button type="button" onClick={handleLogout}>{t('auth.logout')}</button></li>
-            </ul>
+            <Link
+              to="/"
+              className="btn btn-ghost text-lg sm:text-xl min-w-0 px-1 sm:px-2 truncate shrink-0"
+              title="Serralleria Solidària"
+            >
+              <span className="truncate">Serralleria Solidària</span>
+            </Link>
+            <Link to="/products" className="btn btn-ghost hidden sm:inline-flex shrink-0">{t('shop.products')}</Link>
+            <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex shrink-0">{t('shop.custom_solution')}</Link>
+            <form onSubmit={handleSearch} className="join hidden lg:flex shrink-0 min-w-0">
+              <input
+                type="search"
+                className="input input-bordered join-item w-36 xl:w-48 input-sm min-w-0"
+                placeholder={t('shop.search_placeholder')}
+                value={searchQ}
+                onChange={(e) => setSearchQ(e.target.value)}
+                aria-label={t('shop.search_placeholder')}
+              />
+              <button type="submit" className="btn btn-primary join-item btn-sm">
+                {t('common.search')}
+              </button>
+            </form>
           </div>
-        ) : (
-          <Link to="/login" className="btn btn-primary btn-sm">
-            {t('auth.login')}
-          </Link>
-        )}
-      </div>
+          <div className="navbar-end gap-1 sm:gap-2 shrink-0">
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="btn btn-ghost btn-sm btn-square sm:btn-sm">
+                {locale === 'ca' ? 'CA' : 'ES'}
+              </label>
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-32 p-2 shadow">
+                <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
+                <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
+              </ul>
+            </div>
+            <CartDropTarget to="/cart" className="btn btn-ghost btn-circle btn-sm indicator">
+              <span className="indicator-item badge badge-primary badge-sm" id="cart-count">0</span>
+              <IconCart className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+            </CartDropTarget>
+            {user ? (
+              <div className="dropdown dropdown-end">
+                <label tabIndex={0} className="btn btn-ghost btn-sm max-w-[7rem] sm:max-w-none truncate">
+                  <span className="truncate">{[user.name, user.surname].filter(Boolean).join(' ') || user.login_email}</span>
+                </label>
+                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow">
+                  <li><Link to="/profile">{t('shop.profile')}</Link></li>
+                  <li><Link to="/orders">{t('shop.orders')}</Link></li>
+                  <li><button type="button" onClick={handleLogout}>{t('auth.logout')}</button></li>
+                </ul>
+              </div>
+            ) : (
+              <Link to="/login" className="btn btn-primary btn-sm shrink-0">
+                {t('auth.login')}
+              </Link>
+            )}
+          </div>
+        </div>
+        {/* Mobile/tablet: search in its own row */}
+        <div className="lg:hidden border-t border-base-200 px-2 py-2 sm:px-4">
+          <form onSubmit={handleSearch} className="flex gap-2 w-full">
+            <input
+              type="search"
+              className="input input-bordered input-sm flex-1 min-w-0"
+              placeholder={t('shop.search_placeholder')}
+              value={searchQ}
+              onChange={(e) => setSearchQ(e.target.value)}
+              aria-label={t('shop.search_placeholder')}
+            />
+            <button type="submit" className="btn btn-primary btn-sm shrink-0">
+              {t('common.search')}
+            </button>
+          </form>
         </div>
       </header>
     </>

@@ -45,45 +45,49 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <PageTitle>{t('admin.orders.title')}</PageTitle>
-      </div>
+      <PageTitle>{t('admin.orders.title')}</PageTitle>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 flex-wrap">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <input
           type="search"
-          className="input input-bordered flex-1 min-w-[180px] max-w-xs"
+          className="input input-bordered input-sm sm:input-md w-full min-w-0 max-w-xs"
           placeholder={t('admin.orders.search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label={t('admin.orders.search_placeholder')}
         />
-        <select
-          className="select select-bordered w-full sm:w-40"
-          value={kindFilter}
-          onChange={(e) => {
-            setKindFilter(e.target.value);
-            if (e.target.value !== 'order') setStatusFilter('');
-          }}
-          aria-label={t('admin.orders.filter_kind')}
-        >
-          <option value="">{t('admin.orders.kind_all')}</option>
-          {KINDS.map((k) => (
-            <option key={k} value={k}>{t(`admin.orders.kind_${k}`)}</option>
-          ))}
-        </select>
-        <select
-          className="select select-bordered w-full sm:w-48"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          aria-label={t('admin.orders.filter_status')}
-          disabled={kindFilter === 'cart'}
-        >
-          <option value="">{t('admin.orders.status_all')}</option>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>{t(`admin.orders.status_${s}`)}</option>
-          ))}
-        </select>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.orders.filter_kind')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-40"
+            value={kindFilter}
+            onChange={(e) => {
+              setKindFilter(e.target.value);
+              if (e.target.value !== 'order') setStatusFilter('');
+            }}
+            aria-label={t('admin.orders.filter_kind')}
+          >
+            <option value="">{t('admin.orders.kind_all')}</option>
+            {KINDS.map((k) => (
+              <option key={k} value={k}>{t(`admin.orders.kind_${k}`)}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.orders.filter_status')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-48"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label={t('admin.orders.filter_status')}
+            disabled={kindFilter === 'cart'}
+          >
+            <option value="">{t('admin.orders.status_all')}</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>{t(`admin.orders.status_${s}`)}</option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
@@ -97,7 +101,7 @@ export default function AdminOrdersPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table table-zebra">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
               <thead>
                 <tr>
                   <th>{t('admin.orders.id')}</th>
@@ -128,8 +132,8 @@ export default function AdminOrdersPage() {
                     <td className="font-mono">#{o.id}</td>
                     <td><span className={`badge ${o.kind === 'cart' ? 'badge-ghost' : 'badge-primary'}`}>{t(`admin.orders.kind_${o.kind}`)}</span></td>
                     <td>{o.client_login_email ?? ''}</td>
-                    <td>{o.kind === 'order' && o.status ? t(`admin.orders.status_${o.status}`) : '—'}</td>
-                    <td>{o.order_date ? new Date(o.order_date).toLocaleDateString() : '—'}</td>
+                    <td>{o.kind === 'order' && o.status ? t(`admin.orders.status_${o.status}`) : ''}</td>
+                    <td>{o.order_date ? new Date(o.order_date).toLocaleDateString() : ''}</td>
                     <td>{o.lines_count ?? 0}</td>
                     <td className="text-end font-medium">{o.total != null ? Number(o.total).toFixed(2) : '0.00'} €</td>
                     <td className="text-base-content/70 text-sm">{o.updated_at ? new Date(o.updated_at).toLocaleString() : ''}</td>

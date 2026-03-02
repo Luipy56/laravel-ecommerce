@@ -64,6 +64,8 @@ export default function AdminAdminShowPage() {
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div><dt className="text-sm text-base-content/70">{t('admin.admins.username')}</dt><dd>{admin.username}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_active')}</dt><dd>{admin.is_active ? t('common.yes') : t('common.no')}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.admins.last_login_at')}</dt><dd>{admin.last_login_at ? new Date(admin.last_login_at).toLocaleString() : ''}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.admins.created_at')}</dt><dd>{admin.created_at ? new Date(admin.created_at).toLocaleDateString() : ''}</dd></div>
           </dl>
         </div>
       </div>

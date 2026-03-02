@@ -65,32 +65,35 @@ export default function AdminProductsPage() {
     <div className="space-y-6">
       <PageTitle>{t('admin.products.title')}</PageTitle>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1 min-w-0">
           <input
             type="search"
-            className="input input-bordered flex-1 max-w-xs"
+            className="input input-bordered input-sm sm:input-md w-full min-w-0 max-w-xs"
             placeholder={t('admin.products.search_placeholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             aria-label={t('admin.products.search_placeholder')}
           />
-          <select
-            className="select select-bordered w-full sm:w-48"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            aria-label={t('admin.products.filter_category')}
-          >
-            <option value="">{t('shop.categories.all')}</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <label className="flex items-center gap-2 shrink-0">
+            <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.products.filter_category')}</span>
+            <select
+              className="select select-bordered select-sm sm:select-md w-full sm:w-48"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              aria-label={t('admin.products.filter_category')}
+            >
+              <option value="">{t('shop.categories.all')}</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-        <Link to="/admin/products/new" className="btn btn-primary btn-sm sm:btn-md shrink-0">
-          {t('admin.products.add')}
+        <Link to="/admin/products/new" className="btn btn-primary btn-circle btn-sm sm:btn-md shrink-0 ml-auto" aria-label={t('admin.products.add')}>
+          <span className="text-xl sm:text-2xl leading-none" aria-hidden="true">+</span>
         </Link>
       </div>
 
@@ -105,7 +108,7 @@ export default function AdminProductsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table table-zebra">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
               <thead>
                 <tr>
                   <th>{t('admin.products.code')}</th>

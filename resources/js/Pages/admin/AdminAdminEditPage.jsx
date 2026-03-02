@@ -79,7 +79,7 @@ export default function AdminAdminEditPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <PageTitle className="mb-0">{t('admin.admins.edit')} — {username}</PageTitle>
+        <PageTitle className="mb-0">{t('admin.admins.edit')} · {username}</PageTitle>
         <Link to={`/admin/admins/${id}`} className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
       </div>
       <div className="card bg-base-100 shadow border border-base-200">

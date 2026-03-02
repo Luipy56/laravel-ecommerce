@@ -42,42 +42,48 @@ export default function AdminPacksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <PageTitle>{t('admin.packs.title')}</PageTitle>
-        <Link to="/admin/packs/new" className="btn btn-primary btn-sm sm:btn-md shrink-0">
-          {t('admin.packs.add')}
-        </Link>
-      </div>
+      <PageTitle>{t('admin.packs.title')}</PageTitle>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-        <input
-          type="search"
-          className="input input-bordered flex-1 max-w-xs"
-          placeholder={t('admin.packs.search_placeholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label={t('admin.packs.search_placeholder')}
-        />
-        <select
-          className="select select-bordered w-full sm:w-40"
-          value={activeFilter}
-          onChange={(e) => setActiveFilter(e.target.value)}
-          aria-label={t('admin.packs.filter_active')}
-        >
-          <option value="">{t('shop.categories.all')}</option>
-          <option value="1">{t('common.yes')}</option>
-          <option value="0">{t('common.no')}</option>
-        </select>
-        <select
-          className="select select-bordered w-full sm:w-40"
-          value={trendingFilter}
-          onChange={(e) => setTrendingFilter(e.target.value)}
-          aria-label={t('admin.packs.filter_trending')}
-        >
-          <option value="">{t('shop.categories.all')}</option>
-          <option value="1">{t('common.yes')}</option>
-          <option value="0">{t('common.no')}</option>
-        </select>
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1 min-w-0">
+          <input
+            type="search"
+            className="input input-bordered input-sm sm:input-md w-full min-w-0 max-w-xs"
+            placeholder={t('admin.packs.search_placeholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label={t('admin.packs.search_placeholder')}
+          />
+          <label className="flex items-center gap-2 shrink-0">
+            <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.packs.filter_active')}</span>
+            <select
+              className="select select-bordered select-sm sm:select-md w-full sm:w-40"
+              value={activeFilter}
+              onChange={(e) => setActiveFilter(e.target.value)}
+              aria-label={t('admin.packs.filter_active')}
+            >
+              <option value="">{t('shop.categories.all')}</option>
+              <option value="1">{t('common.yes')}</option>
+              <option value="0">{t('common.no')}</option>
+            </select>
+          </label>
+          <label className="flex items-center gap-2 shrink-0">
+            <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.packs.filter_trending')}</span>
+            <select
+              className="select select-bordered select-sm sm:select-md w-full sm:w-40"
+              value={trendingFilter}
+              onChange={(e) => setTrendingFilter(e.target.value)}
+              aria-label={t('admin.packs.filter_trending')}
+            >
+              <option value="">{t('shop.categories.all')}</option>
+              <option value="1">{t('common.yes')}</option>
+              <option value="0">{t('common.no')}</option>
+            </select>
+          </label>
+        </div>
+        <Link to="/admin/packs/new" className="btn btn-primary btn-circle btn-sm sm:btn-md shrink-0 ml-auto" aria-label={t('admin.packs.add')}>
+          <span className="text-xl sm:text-2xl leading-none" aria-hidden="true">+</span>
+        </Link>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
@@ -91,7 +97,7 @@ export default function AdminPacksPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table table-zebra">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
               <thead>
                 <tr>
                   <th>{t('admin.products.name')}</th>

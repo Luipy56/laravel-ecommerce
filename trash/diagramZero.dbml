@@ -185,6 +185,7 @@ Table ADMINS {
   username varchar(255) [not null, unique]
   password varchar(255) [not null]
   is_active boolean [not null, default: true, note: 'Soft delete']
+  last_login_at timestamp [null, note: 'Last successful login']
 }
 
 Table PACKS {

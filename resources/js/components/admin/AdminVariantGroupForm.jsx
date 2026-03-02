@@ -46,7 +46,7 @@ export default function AdminVariantGroupForm({ group = null, products = [], onS
           <div className="space-y-4 rounded-box border border-base-300 bg-base-200/50 p-4">
             {grouped.map(({ name: catName, list }) => (
               <div key={catName || 'unnamed'}>
-                <p className="text-sm font-medium text-base-content/80 mb-2">{catName || '—'}</p>
+                <p className="text-sm font-medium text-base-content/80 mb-2">{catName || ''}</p>
                 <div className="flex flex-wrap gap-2">
                   {list.map((p) => (
                     <label

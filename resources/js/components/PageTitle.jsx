@@ -8,7 +8,7 @@ import React from 'react';
 export default function PageTitle({ children, className = '' }) {
   return (
     <h1
-      className={`text-2xl font-bold tracking-tight text-base-content pb-2 border-b border-base-300 mb-6 ${className}`.trim()}
+      className={`text-2xl font-bold tracking-tight text-base-content pt-4 pb-2 border-b border-base-300 mb-6 ${className}`.trim()}
     >
       {children}
     </h1>

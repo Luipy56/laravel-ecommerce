@@ -7,7 +7,7 @@ import PageTitle from '../../components/PageTitle';
 function lineDisplayName(line) {
   if (line.product) return line.product.name + (line.product.code ? ` (${line.product.code})` : '');
   if (line.pack) return line.pack.name;
-  return '—';
+  return '';
 }
 
 export default function AdminOrderShowPage() {
@@ -17,6 +17,7 @@ export default function AdminOrderShowPage() {
   const [order, setOrder] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
+  const [labelModalOpen, setLabelModalOpen] = useState(false);
 
   const fetchOrder = useCallback(async () => {
     if (!id) return;
@@ -59,8 +60,6 @@ export default function AdminOrderShowPage() {
   const shippingAddress = order.addresses?.find((a) => a.type === 'shipping');
   const installationAddress = order.addresses?.find((a) => a.type === 'installation');
 
-  const [labelModalOpen, setLabelModalOpen] = useState(false);
-
   const handlePrintLabel = () => {
     if (!shippingAddress) return;
     const addressLines = [shippingAddress.street, shippingAddress.city, shippingAddress.province, shippingAddress.postal_code].filter(Boolean).join(', ');
@@ -86,7 +85,7 @@ export default function AdminOrderShowPage() {
     ${shippingAddress.note ? `<div style="margin-top:6px;font-size:12px;color:#666">${shippingAddress.note.replace(/</g, '&lt;')}</div>` : ''}
   </div>
   <div class="date">${t('admin.orders.order_date')}: ${orderDateStr}</div>
-  <div class="items">${linesSummary || '—'}</div>
+  <div class="items">${linesSummary || ''}</div>
 </body></html>`;
     const w = window.open('', '_blank', 'width=420,height=600');
     if (w) {
@@ -167,28 +166,37 @@ export default function AdminOrderShowPage() {
         <div className="card-body p-0">
           <h2 className="card-title text-base px-4 pt-4 pb-2">{t('admin.orders.lines')}</h2>
           <div className="overflow-x-auto">
-            <table className="table table-zebra table-pin-rows">
+            <table className="table table-zebra table-pin-rows [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
               <thead>
                 <tr>
                   <th>{t('admin.orders.line_product')}</th>
                   <th className="text-center">{t('admin.orders.line_quantity')}</th>
                   <th className="text-end">{t('admin.orders.line_unit_price')}</th>
+                  <th className="text-end">{t('admin.orders.line_extra_keys_price')}</th>
+                  <th className="text-end">{t('admin.orders.line_installation_price')}</th>
                   <th className="text-end">{t('admin.orders.line_total')}</th>
                 </tr>
               </thead>
               <tbody>
-                {(order.lines || []).map((line) => (
-                  <tr key={line.id}>
-                    <td>
-                      {lineDisplayName(line)}
-                      {line.is_installation_requested && <span className="badge badge-sm badge-ghost ml-1">{t('admin.orders.installation')}</span>}
-                      {line.extra_keys_qty > 0 && <span className="badge badge-sm badge-ghost ml-1">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>}
-                    </td>
-                    <td className="text-center">{line.quantity}</td>
-                    <td className="text-end">{line.unit_price != null ? Number(line.unit_price).toFixed(2) : '—'} €</td>
-                    <td className="text-end font-medium">{line.line_total != null ? Number(line.line_total).toFixed(2) : '0.00'} €</td>
-                  </tr>
-                ))}
+                {(order.lines || []).map((line) => {
+                  const extraKeysTotal = line.extra_keys_qty > 0 && line.extra_key_unit_price != null
+                    ? line.extra_keys_qty * line.extra_key_unit_price
+                    : null;
+                  return (
+                    <tr key={line.id}>
+                      <td>
+                        {lineDisplayName(line)}
+                        {line.is_installation_requested && <span className="badge badge-sm badge-ghost ml-1">{t('admin.orders.installation')}</span>}
+                        {line.extra_keys_qty > 0 && <span className="badge badge-sm badge-ghost ml-1">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>}
+                      </td>
+                      <td className="text-center">{line.quantity}</td>
+                      <td className="text-end">{line.unit_price != null ? `${Number(line.unit_price).toFixed(2)} €` : ''}</td>
+                      <td className="text-end">{extraKeysTotal != null ? `${Number(extraKeysTotal).toFixed(2)} €` : ''}</td>
+                      <td className="text-end">{line.is_installation_requested && line.installation_price != null ? `${Number(line.installation_price).toFixed(2)} €` : ''}</td>
+                      <td className="text-end font-medium">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -205,7 +213,7 @@ export default function AdminOrderShowPage() {
           <div className="card-body">
             <h2 className="card-title text-base">{t('admin.orders.payments')}</h2>
             <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm">
+              <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
                 <thead>
                   <tr>
                     <th>{t('admin.orders.payment_method')}</th>
@@ -219,7 +227,7 @@ export default function AdminOrderShowPage() {
                     <tr key={p.id}>
                       <td>{t(`admin.orders.payment_${p.payment_method}`)}</td>
                       <td className="text-end font-medium">{Number(p.amount).toFixed(2)} €</td>
-                      <td>{p.paid_at ? new Date(p.paid_at).toLocaleString() : '—'}</td>
+                      <td>{p.paid_at ? new Date(p.paid_at).toLocaleString() : ''}</td>
                       <td className="font-mono text-sm">{p.gateway_reference ?? ''}</td>
                     </tr>
                   ))}
@@ -231,7 +239,7 @@ export default function AdminOrderShowPage() {
       )}
 
       <div className="text-sm text-base-content/70">
-        {t('admin.orders.created_at')}: {order.created_at ? new Date(order.created_at).toLocaleString() : '—'}
+        {t('admin.orders.created_at')}: {order.created_at ? new Date(order.created_at).toLocaleString() : ''}
         {order.updated_at && <> · {t('admin.orders.updated_at')}: {new Date(order.updated_at).toLocaleString()}</>}
       </div>
 
@@ -246,8 +254,8 @@ export default function AdminOrderShowPage() {
                 {order.client?.login_email && <p>{order.client.login_email}</p>}
                 <p className="mt-1">{[shippingAddress.street, shippingAddress.city, shippingAddress.province, shippingAddress.postal_code].filter(Boolean).join(', ')}</p>
                 {shippingAddress.note && <p className="mt-2 text-base-content/70">{shippingAddress.note}</p>}
-                <p className="mt-3 text-base-content/70">{t('admin.orders.order_date')}: {order.order_date ? new Date(order.order_date).toLocaleDateString() : '—'}</p>
-                <p className="mt-1 font-mono text-xs">{(order.lines || []).map((l) => `${lineDisplayName(l)} × ${l.quantity}`).join(' · ') || '—'}</p>
+                <p className="mt-3 text-base-content/70">{t('admin.orders.order_date')}: {order.order_date ? new Date(order.order_date).toLocaleDateString() : ''}</p>
+                <p className="mt-1 font-mono text-xs">{(order.lines || []).map((l) => `${lineDisplayName(l)} × ${l.quantity}`).join(' · ') || ''}</p>
               </div>
             </div>
           )}

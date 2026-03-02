@@ -63,56 +63,57 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && <div className="alert alert-error text-sm">{error}</div>}
 
-          <label className="form-field w-full">
-            <span className="form-label">{t('register.account_type')} *</span>
-            <div className="join w-full max-w-xs">
-              <label className={`join-item btn flex-1 ${form.type === 'person' ? 'btn-active' : ''}`}>
-                <input type="radio" name="type" value="person" checked={form.type === 'person'} onChange={handleChange} className="sr-only" />
+          <div className="form-field w-full" role="group" aria-labelledby="register-type-legend">
+            <span id="register-type-legend" className="form-label block">{t('register.account_type')} *</span>
+            <div className="join w-full max-w-xs mt-1">
+              <label htmlFor="register-type-person" className={`join-item btn flex-1 ${form.type === 'person' ? 'btn-active' : ''}`}>
+                <input id="register-type-person" type="radio" name="type" value="person" checked={form.type === 'person'} onChange={handleChange} className="sr-only" />
                 {t('register.type_person')}
               </label>
-              <label className={`join-item btn flex-1 ${form.type === 'company' ? 'btn-active' : ''}`}>
-                <input type="radio" name="type" value="company" checked={form.type === 'company'} onChange={handleChange} className="sr-only" />
+              <label htmlFor="register-type-company" className={`join-item btn flex-1 ${form.type === 'company' ? 'btn-active' : ''}`}>
+                <input id="register-type-company" type="radio" name="type" value="company" checked={form.type === 'company'} onChange={handleChange} className="sr-only" />
                 {t('register.type_company')}
               </label>
             </div>
-          </label>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-5">
               <h2 className="font-semibold text-base-content border-b border-base-300 pb-1">{t('register.section_access')}</h2>
-              <label className="form-field w-full">
+              <label htmlFor="register-login_email" className="form-field w-full">
                 <span className="form-label">{t('auth.email')} *</span>
-                <input type="email" name="login_email" className="input input-bordered w-full" value={form.login_email} onChange={handleChange} required />
+                <input id="register-login_email" type="email" name="login_email" className="input input-bordered w-full" value={form.login_email} onChange={handleChange} required />
               </label>
-              <label className="form-field w-full">
+              <label htmlFor="register-password" className="form-field w-full">
                 <span className="form-label">{t('auth.password')} *</span>
-                <input type="password" name="password" className="input input-bordered w-full" value={form.password} onChange={handleChange} required minLength={8} />
+                <input id="register-password" type="password" name="password" className="input input-bordered w-full" value={form.password} onChange={handleChange} required minLength={8} />
               </label>
-              <label className="form-field w-full">
+              <label htmlFor="register-password_confirmation" className="form-field w-full">
                 <span className="form-label">{t('auth.password_confirmation')} *</span>
-                <input type="password" name="password_confirmation" className="input input-bordered w-full" value={form.password_confirmation} onChange={handleChange} required />
+                <input id="register-password_confirmation" type="password" name="password_confirmation" className="input input-bordered w-full" value={form.password_confirmation} onChange={handleChange} required />
               </label>
             </div>
             <div className="space-y-5">
               <h2 className="font-semibold text-base-content border-b border-base-300 pb-1">{t('register.section_contact')}</h2>
-              <label className="form-field w-full">
+              <label htmlFor="register-name" className="form-field w-full">
                 <span className="form-label">
                   {t('profile.name')} *
                   {isCompany && <span className="text-base-content/60 font-normal"> ({t('register.contact_name_hint')})</span>}
                 </span>
-                <input type="text" name="name" className="input input-bordered w-full" value={form.name} onChange={handleChange} required />
+                <input id="register-name" type="text" name="name" className="input input-bordered w-full" value={form.name} onChange={handleChange} required />
               </label>
-              <label className="form-field w-full">
+              <label htmlFor="register-surname" className="form-field w-full">
                 <span className="form-label">{t('profile.surname')}</span>
-                <input type="text" name="surname" className="input input-bordered w-full" value={form.surname} onChange={handleChange} />
+                <input id="register-surname" type="text" name="surname" className="input input-bordered w-full" value={form.surname} onChange={handleChange} />
               </label>
-              <label className="form-field w-full">
+              <label htmlFor="register-phone" className="form-field w-full">
                 <span className="form-label">{t('profile.phone')}</span>
-                <input type="tel" name="phone" className="input input-bordered w-full" value={form.phone} onChange={handleChange} />
+                <input id="register-phone" type="tel" name="phone" className="input input-bordered w-full" value={form.phone} onChange={handleChange} />
               </label>
-              <label className="form-field w-full">
+              <label htmlFor="register-identification" className="form-field w-full">
                 <span className="form-label">{t('register.identification')}</span>
                 <input
+                  id="register-identification"
                   type="text"
                   name="identification"
                   className="input input-bordered w-full"
@@ -127,23 +128,23 @@ export default function RegisterPage() {
 
           <fieldset className="form-field space-y-5 border border-base-300 rounded-lg p-4">
             <legend className="form-label px-1">{t('register.address_optional')}</legend>
-            <label className="form-field w-full">
+            <label htmlFor="register-address_street" className="form-field w-full">
               <span className="form-label">{t('checkout.street')}</span>
-              <input name="address_street" className="input input-bordered w-full" value={form.address_street} onChange={handleChange} />
+              <input id="register-address_street" name="address_street" className="input input-bordered w-full" value={form.address_street} onChange={handleChange} />
             </label>
             <div className="flex gap-2">
-              <label className="form-field flex-1">
+              <label htmlFor="register-address_city" className="form-field flex-1">
                 <span className="form-label">{t('profile.city')}</span>
-                <input name="address_city" className="input input-bordered w-full" value={form.address_city} onChange={handleChange} />
+                <input id="register-address_city" name="address_city" className="input input-bordered w-full" value={form.address_city} onChange={handleChange} />
               </label>
-              <label className="form-field w-28">
+              <label htmlFor="register-address_postal_code" className="form-field w-28">
                 <span className="form-label">{t('profile.postal_code')}</span>
-                <input name="address_postal_code" className="input input-bordered w-full" value={form.address_postal_code} onChange={handleChange} />
+                <input id="register-address_postal_code" name="address_postal_code" className="input input-bordered w-full" value={form.address_postal_code} onChange={handleChange} />
               </label>
             </div>
-            <label className="form-field w-full">
+            <label htmlFor="register-address_province" className="form-field w-full">
               <span className="form-label">{t('profile.province')}</span>
-              <input name="address_province" className="input input-bordered w-full" value={form.address_province} onChange={handleChange} />
+              <input id="register-address_province" name="address_province" className="input input-bordered w-full" value={form.address_province} onChange={handleChange} />
             </label>
           </fieldset>
 

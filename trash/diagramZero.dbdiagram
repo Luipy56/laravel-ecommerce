@@ -1,0 +1,131 @@
+{
+  "version": "1.0.0",
+  "darkMode": true,
+  "gridEnabling": false,
+  "detailLevel": "All",
+  "tablePositions": [
+    {
+      "name": "CLIENTS",
+      "schemaName": "public",
+      "x": 199.15709488207446,
+      "y": -156.1653910953201
+    },
+    {
+      "name": "CLIENT_CONTACTS",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 12
+    },
+    {
+      "name": "CLIENT_ADDRESSES",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 378
+    },
+    {
+      "name": "PRODUCT_CATEGORIES",
+      "schemaName": "public",
+      "x": 339.431640625,
+      "y": 282
+    },
+    {
+      "name": "PRODUCT_VARIANT_GROUPS",
+      "schemaName": "public",
+      "x": 339.431640625,
+      "y": 488
+    },
+    {
+      "name": "PRODUCTS",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 744
+    },
+    {
+      "name": "FEATURE_NAMES",
+      "schemaName": "public",
+      "x": 339.431640625,
+      "y": 598
+    },
+    {
+      "name": "FEATURES",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 1302
+    },
+    {
+      "name": "PRODUCT_FEATURES",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 378
+    },
+    {
+      "name": "PRODUCT_IMAGES",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 12
+    },
+    {
+      "name": "ORDERS",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 1508
+    },
+    {
+      "name": "ORDER_ADDRESSES",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 520
+    },
+    {
+      "name": "ORDER_LINES",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 854
+    },
+    {
+      "name": "PAYMENTS",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 1284
+    },
+    {
+      "name": "ADMINS",
+      "schemaName": "public",
+      "x": -282.49451416204835,
+      "y": -345.65907569541247
+    },
+    {
+      "name": "PACKS",
+      "schemaName": "public",
+      "x": 339.431640625,
+      "y": 772
+    },
+    {
+      "name": "PACK_IMAGES",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 1810
+    },
+    {
+      "name": "PACK_ITEMS",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 1554
+    },
+    {
+      "name": "PERSONALIZED_SOLUTIONS",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 1760
+    },
+    {
+      "name": "PERSONALIZED_SOLUTION_ATTACHMENTS",
+      "schemaName": "public",
+      "x": 2165.359375,
+      "y": 12
+    }
+  ],
+  "tableGroupCollapseStates": [],
+  "stickyNoteLayouts": [],
+  "referencePaths": []
+}

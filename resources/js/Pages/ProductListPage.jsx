@@ -148,15 +148,29 @@ export default function ProductListPage() {
   }, [categoryIds.join(','), featureIds.join(','), search, currentPage]);
 
   useEffect(() => {
-    api.get('categories').then((r) => {
-      if (r.data.success) setCategories(r.data.data || []);
-    });
+    const ac = new AbortController();
+    api
+      .get('categories', { signal: ac.signal })
+      .then((r) => {
+        if (r.data.success) setCategories(r.data.data || []);
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') setCategories([]);
+      });
+    return () => ac.abort();
   }, []);
 
   useEffect(() => {
-    api.get('features').then((r) => {
-      if (r.data.success) setFeaturesList(r.data.data || []);
-    });
+    const ac = new AbortController();
+    api
+      .get('features', { signal: ac.signal })
+      .then((r) => {
+        if (r.data.success) setFeaturesList(r.data.data || []);
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') setFeaturesList([]);
+      });
+    return () => ac.abort();
   }, []);
 
   const featuresByGroup = useMemo(() => {

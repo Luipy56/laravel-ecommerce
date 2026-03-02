@@ -51,7 +51,7 @@ import AdminPersonalizedSolutionsPage from './Pages/admin/AdminPersonalizedSolut
 import AdminPersonalizedSolutionShowPage from './Pages/admin/AdminPersonalizedSolutionShowPage';
 import AdminPersonalizedSolutionEditPage from './Pages/admin/AdminPersonalizedSolutionEditPage';
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -114,5 +114,3 @@ function App() {
     </BrowserRouter>
   );
 }
-
-export default App;

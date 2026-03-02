@@ -89,7 +89,7 @@ export default function AdminPackEditPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <PageTitle className="mb-0">{t('admin.packs.edit')} — {pack.name}</PageTitle>
+        <PageTitle className="mb-0">{t('admin.packs.edit')} · {pack.name}</PageTitle>
         <Link to="/admin/packs" className="btn btn-ghost btn-sm shrink-0">
           {t('common.back')}
         </Link>

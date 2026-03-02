@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class PersonalizedSolutionAttachment extends Model
 {
@@ -33,11 +32,12 @@ class PersonalizedSolutionAttachment extends Model
         return $this->belongsTo(PersonalizedSolution::class, 'personalized_solution_id');
     }
 
+    /** URL for display (files in public disk, same as ProductImage). */
     public function getUrlAttribute(): string
     {
         if (empty($this->storage_path)) {
             return '';
         }
-        return Storage::url($this->storage_path);
+        return '/storage/' . ltrim($this->storage_path, '/');
     }
 }

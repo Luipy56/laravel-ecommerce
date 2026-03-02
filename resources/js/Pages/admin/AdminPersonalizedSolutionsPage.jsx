@@ -44,40 +44,44 @@ export default function AdminPersonalizedSolutionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <PageTitle>{t('admin.personalized_solutions.title')}</PageTitle>
-      </div>
+      <PageTitle>{t('admin.personalized_solutions.title')}</PageTitle>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <input
           type="search"
-          className="input input-bordered flex-1 max-w-xs"
+          className="input input-bordered input-sm sm:input-md w-full min-w-0 max-w-xs"
           placeholder={t('admin.personalized_solutions.search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label={t('admin.personalized_solutions.search_placeholder')}
         />
-        <select
-          className="select select-bordered w-full sm:w-44"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          aria-label={t('admin.personalized_solutions.filter_status')}
-        >
-          <option value="">{t('admin.personalized_solutions.status_all')}</option>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>{t(`admin.personalized_solutions.status_${s}`)}</option>
-          ))}
-        </select>
-        <select
-          className="select select-bordered w-full sm:w-40"
-          value={activeFilter}
-          onChange={(e) => setActiveFilter(e.target.value)}
-          aria-label={t('admin.personalized_solutions.filter_active')}
-        >
-          <option value="">{t('shop.categories.all')}</option>
-          <option value="1">{t('common.yes')}</option>
-          <option value="0">{t('common.no')}</option>
-        </select>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.personalized_solutions.filter_status')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-44"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label={t('admin.personalized_solutions.filter_status')}
+          >
+            <option value="">{t('admin.personalized_solutions.status_all')}</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>{t(`admin.personalized_solutions.status_${s}`)}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.personalized_solutions.filter_active')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-40"
+            value={activeFilter}
+            onChange={(e) => setActiveFilter(e.target.value)}
+            aria-label={t('admin.personalized_solutions.filter_active')}
+          >
+            <option value="">{t('shop.categories.all')}</option>
+            <option value="1">{t('common.yes')}</option>
+            <option value="0">{t('common.no')}</option>
+          </select>
+        </label>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
@@ -91,7 +95,7 @@ export default function AdminPersonalizedSolutionsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table table-zebra">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
               <thead>
                 <tr>
                   <th>{t('admin.personalized_solutions.email')}</th>

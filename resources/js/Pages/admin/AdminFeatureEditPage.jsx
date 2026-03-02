@@ -87,7 +87,7 @@ export default function AdminFeatureEditPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <PageTitle className="mb-0">{t('admin.features.edit')} — {feature.feature_name}: {feature.value}</PageTitle>
+        <PageTitle className="mb-0">{t('admin.features.edit')} · {feature.feature_name}: {feature.value}</PageTitle>
       </div>
       <div className="card bg-base-100 shadow border border-base-200">
         <div className="card-body">

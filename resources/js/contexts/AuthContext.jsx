@@ -7,20 +7,22 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const loadUser = useCallback(async () => {
+  const loadUser = useCallback(async (signal) => {
     try {
-      const { data } = await api.get('user');
+      const { data } = await api.get('user', signal ? { signal } : {});
       if (data.success && data.data) setUser(data.data);
       else setUser(null);
-    } catch {
-      setUser(null);
+    } catch (err) {
+      if (err.name !== 'AbortError') setUser(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadUser();
+    const ac = new AbortController();
+    loadUser(ac.signal);
+    return () => ac.abort();
   }, [loadUser]);
 
   const login = useCallback(async (loginEmail, password, remember = false) => {
@@ -49,7 +51,8 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const value = { user, loading, login, register, logout, refreshUser: loadUser };
+  const refreshUser = useCallback(() => loadUser(null), [loadUser]);
+  const value = { user, loading, login, register, logout, refreshUser };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

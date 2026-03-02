@@ -23,6 +23,8 @@ export default function AdminClientShowPage() {
   const [client, setClient] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
+  const [contactsOpen, setContactsOpen] = useState(false);
+  const [addressesOpen, setAddressesOpen] = useState(false);
 
   const fetchClient = useCallback(async () => {
     if (!id) return;
@@ -66,7 +68,7 @@ export default function AdminClientShowPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <PageTitle className="mb-0">{t('admin.clients.ficha')} — {client.login_email}</PageTitle>
+        <PageTitle className="mb-0">{t('admin.clients.ficha')}</PageTitle>
         <Link to="/admin/clients" className="btn btn-ghost btn-sm shrink-0">
           {t('common.back')}
         </Link>
@@ -97,78 +99,112 @@ export default function AdminClientShowPage() {
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200">
-        <div className="card-body">
-          <h2 className="font-semibold text-lg border-b border-base-300 pb-2 mb-4">
-            {t('admin.clients.contacts')} ({client.contacts?.length ?? 0})
-          </h2>
-          {!client.contacts?.length ? (
-            <p className="text-base-content/70">{t('admin.clients.no_contacts')}</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm">
-                <thead>
-                  <tr>
-                    <th>{t('profile.name')}</th>
-                    <th>{t('profile.surname')}</th>
-                    <th>{t('profile.phone')}</th>
-                    <th>{t('admin.clients.phone2')}</th>
-                    <th>{t('admin.clients.email')}</th>
-                    <th>{t('admin.clients.primary')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {client.contacts.map((c) => (
-                    <tr key={c.id}>
-                      <td>{c.name}</td>
-                      <td>{c.surname}</td>
-                      <td>{c.phone}</td>
-                      <td>{c.phone2}</td>
-                      <td>{c.email}</td>
-                      <td>{c.is_primary ? t('common.yes') : ''}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="card-body p-0">
+          <button
+            type="button"
+            className="w-full px-6 py-4 text-left font-semibold text-lg border-b border-base-300 flex items-center justify-between gap-2 cursor-pointer hover:bg-base-200/50 transition-colors rounded-t-2xl"
+            onClick={() => setContactsOpen((v) => !v)}
+            aria-expanded={contactsOpen}
+          >
+            <span>{t('admin.clients.contacts')} ({client.contacts?.length ?? 0})</span>
+            <span className="text-base-content transition-transform duration-300" aria-hidden="true">
+              {contactsOpen ? '▼' : '▶'}
+            </span>
+          </button>
+          <div
+            className="grid transition-[grid-template-rows] duration-300 ease-out"
+            style={{ gridTemplateRows: contactsOpen ? '1fr' : '0fr' }}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="px-6 pb-4 pt-2">
+                {!client.contacts?.length ? (
+                  <p className="text-base-content/70">{t('admin.clients.no_contacts')}</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+                      <thead>
+                        <tr>
+                          <th>{t('profile.name')}</th>
+                          <th>{t('profile.surname')}</th>
+                          <th>{t('profile.phone')}</th>
+                          <th>{t('admin.clients.phone2')}</th>
+                          <th>{t('admin.clients.email')}</th>
+                          <th>{t('admin.clients.primary')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {client.contacts.map((c) => (
+                          <tr key={c.id}>
+                            <td>{c.name}</td>
+                            <td>{c.surname}</td>
+                            <td>{c.phone}</td>
+                            <td>{c.phone2}</td>
+                            <td>{c.email}</td>
+                            <td>{c.is_primary ? t('common.yes') : ''}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200">
-        <div className="card-body">
-          <h2 className="font-semibold text-lg border-b border-base-300 pb-2 mb-4">
-            {t('admin.clients.addresses')} ({client.addresses?.length ?? 0})
-          </h2>
-          {!client.addresses?.length ? (
-            <p className="text-base-content/70">{t('admin.clients.no_addresses')}</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm">
-                <thead>
-                  <tr>
-                    <th>{t('profile.address_type')}</th>
-                    <th>{t('admin.clients.address_label')}</th>
-                    <th>{t('profile.street')}</th>
-                    <th>{t('profile.city')}</th>
-                    <th>{t('profile.postal_code')}</th>
-                    <th>{t('profile.province')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {client.addresses.map((a) => (
-                    <tr key={a.id}>
-                      <td>{addressTypeLabel(a.type, t)}</td>
-                      <td>{a.label}</td>
-                      <td>{a.street}</td>
-                      <td>{a.city}</td>
-                      <td>{a.postal_code}</td>
-                      <td>{a.province}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="card-body p-0">
+          <button
+            type="button"
+            className="w-full px-6 py-4 text-left font-semibold text-lg border-b border-base-300 flex items-center justify-between gap-2 cursor-pointer hover:bg-base-200/50 transition-colors rounded-t-2xl"
+            onClick={() => setAddressesOpen((v) => !v)}
+            aria-expanded={addressesOpen}
+          >
+            <span>{t('admin.clients.addresses')} ({client.addresses?.length ?? 0})</span>
+            <span className="text-base-content transition-transform duration-300" aria-hidden="true">
+              {addressesOpen ? '▼' : '▶'}
+            </span>
+          </button>
+          <div
+            className="grid transition-[grid-template-rows] duration-300 ease-out"
+            style={{ gridTemplateRows: addressesOpen ? '1fr' : '0fr' }}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="px-6 pb-4 pt-2">
+                {!client.addresses?.length ? (
+                  <p className="text-base-content/70">{t('admin.clients.no_addresses')}</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+                      <thead>
+                        <tr>
+                          <th>{t('profile.address_type')}</th>
+                          <th>{t('admin.clients.address_label')}</th>
+                          <th>{t('profile.street')}</th>
+                          <th>{t('profile.city')}</th>
+                          <th>{t('profile.postal_code')}</th>
+                          <th>{t('profile.province')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {client.addresses.map((a) => (
+                          <tr key={a.id}>
+                            <td>{addressTypeLabel(a.type, t)}</td>
+                            <td>{a.label}</td>
+                            <td>{a.street}</td>
+                            <td>{a.city}</td>
+                            <td>{a.postal_code}</td>
+                            <td>{a.province}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

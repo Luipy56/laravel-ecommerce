@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import PageTitle from '../components/PageTitle';
+
+const TOAST_DURATION_MS = 3000;
 
 export default function CustomSolutionPage() {
   const { t } = useTranslation();
@@ -17,8 +19,26 @@ export default function CustomSolutionPage() {
     files: [],
   });
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [error, setError] = useState('');
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const toastTimeoutRef = useRef(null);
+  const confirmModalRef = useRef(null);
+
+  useEffect(() => {
+    const el = confirmModalRef.current;
+    if (!el) return;
+    if (confirmModalOpen) el.showModal();
+    else el.close();
+  }, [confirmModalOpen]);
+
+  useEffect(() => {
+    const el = confirmModalRef.current;
+    if (!el) return;
+    const onClose = () => setConfirmModalOpen(false);
+    el.addEventListener('close', onClose);
+    return () => el.removeEventListener('close', onClose);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,8 +49,8 @@ export default function CustomSolutionPage() {
     setForm((f) => ({ ...f, files: Array.from(e.target.files || []) }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const submitForm = useCallback(async () => {
+    setConfirmModalOpen(false);
     setError('');
     setLoading(true);
     const formData = new FormData();
@@ -48,7 +68,12 @@ export default function CustomSolutionPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (r.data.success) {
-        setSent(true);
+        if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+        setShowSuccessToast(true);
+        toastTimeoutRef.current = setTimeout(() => {
+          setShowSuccessToast(false);
+          toastTimeoutRef.current = null;
+        }, TOAST_DURATION_MS);
         setForm({
           email: '',
           phone: '',
@@ -66,14 +91,52 @@ export default function CustomSolutionPage() {
     } finally {
       setLoading(false);
     }
+  }, [form, t]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setConfirmModalOpen(true);
   };
 
   return (
     <div className="max-w-4xl mx-auto">
       <PageTitle>{t('shop.custom_solution')}</PageTitle>
       <p className="text-sm text-base-content/70 mb-4">{t('register.required_note')}</p>
-      {sent && <div className="alert alert-success mb-4">{t('shop.custom_solution.success')}</div>}
       {error && <div className="alert alert-error mb-4">{error}</div>}
+      {showSuccessToast && (
+        <div
+          className="toast toast-end toast-bottom z-50 p-4"
+          role="status"
+          aria-live="polite"
+          aria-label={t('shop.custom_solution.success')}
+        >
+          <div className="alert alert-success shadow-lg">
+            <span>{t('shop.custom_solution.success')}</span>
+          </div>
+        </div>
+      )}
+      <dialog ref={confirmModalRef} className="modal" aria-labelledby="custom-solution-confirm-title">
+        <div className="modal-box">
+          <h3 id="custom-solution-confirm-title" className="font-bold text-lg">{t('shop.custom_solution.submit')}</h3>
+          <p className="py-2">{t('shop.custom_solution.confirm_message')}</p>
+          <div className="modal-action">
+            <button type="button" className="btn btn-ghost" onClick={() => setConfirmModalOpen(false)}>
+              {t('common.cancel')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={loading}
+              onClick={submitForm}
+            >
+              {loading ? t('common.loading') : t('common.confirm')}
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button type="submit">{t('common.close')}</button>
+        </form>
+      </dialog>
       <form onSubmit={handleSubmit} className="card bg-base-100 shadow">
         <div className="card-body space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

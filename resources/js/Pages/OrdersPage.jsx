@@ -42,7 +42,7 @@ export default function OrdersPage() {
                 <div>
                   <p className="font-semibold">Comanda #{o.id}</p>
                   <p className="text-sm text-base-content/70">
-                    {o.order_date ? new Date(o.order_date).toLocaleDateString() : ''} — {o.status}
+                    {o.order_date ? new Date(o.order_date).toLocaleDateString() : ''} · {o.status}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

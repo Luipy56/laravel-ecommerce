@@ -45,22 +45,22 @@ export default function AdminVariantGroupsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <PageTitle>{t('admin.variant_groups.title')}</PageTitle>
-        <Link to="/admin/variant-groups/new" className="btn btn-primary btn-sm sm:btn-md shrink-0">
-          {t('admin.variant_groups.add')}
-        </Link>
-      </div>
+      <PageTitle>{t('admin.variant_groups.title')}</PageTitle>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-        <input
-          type="search"
-          className="input input-bordered flex-1 max-w-xs"
-          placeholder={t('admin.variant_groups.search_placeholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label={t('admin.variant_groups.search_placeholder')}
-        />
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1 min-w-0">
+          <input
+            type="search"
+            className="input input-bordered input-sm sm:input-md w-full min-w-0 max-w-xs"
+            placeholder={t('admin.variant_groups.search_placeholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label={t('admin.variant_groups.search_placeholder')}
+          />
+        </div>
+        <Link to="/admin/variant-groups/new" className="btn btn-primary btn-circle btn-sm sm:btn-md shrink-0 ml-auto" aria-label={t('admin.variant_groups.add')}>
+          <span className="text-xl sm:text-2xl leading-none" aria-hidden="true">+</span>
+        </Link>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
@@ -74,7 +74,7 @@ export default function AdminVariantGroupsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table table-zebra">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
               <thead>
                 <tr>
                   <th>{t('admin.variant_groups.group_label')}</th>
@@ -99,7 +99,7 @@ export default function AdminVariantGroupsPage() {
                     <td>#{g.id}</td>
                     <td>
                       {g.products_count === 0
-                        ? '—'
+                        ? ''
                         : groupLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
                     </td>
                   </tr>

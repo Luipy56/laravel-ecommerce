@@ -34,7 +34,7 @@ export default function AdminFeatureForm({ feature = null, featureNames = [], on
           required
           aria-label={t('admin.features.type')}
         >
-          <option value="">—</option>
+          <option value=""></option>
           {featureNames.map((n) => (
             <option key={n.id} value={n.id}>
               {n.name}

@@ -63,7 +63,9 @@ class AdminVariantGroupController extends Controller
 
     public function show(ProductVariantGroup $variant_group): JsonResponse
     {
-        $variant_group->load(['products' => fn ($q) => $q->orderBy('name')]);
+        $variant_group->load([
+            'products' => fn ($q) => $q->orderBy('name')->with(['category', 'images']),
+        ]);
 
         return response()->json([
             'success' => true,
@@ -115,6 +117,15 @@ class AdminVariantGroupController extends Controller
                 'id' => $p->id,
                 'name' => $p->name,
                 'code' => $p->code,
+                'price' => $p->price !== null ? (float) $p->price : null,
+                'stock' => (int) $p->stock,
+                'is_active' => (bool) $p->is_active,
+                'category' => $p->relationLoaded('category') && $p->category
+                    ? ['id' => $p->category->id, 'name' => $p->category->name]
+                    : null,
+                'image_url' => $p->relationLoaded('images') && $p->images->isNotEmpty()
+                    ? $p->images->first()->url
+                    : null,
             ])->values()->all(),
         ];
     }

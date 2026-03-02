@@ -42,9 +42,10 @@ export default function LoginPage() {
         <h1 className="card-title text-2xl">{t('auth.login')}</h1>
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && <div className="alert alert-error text-sm">{error}</div>}
-          <label className="form-field w-full">
+          <label htmlFor="login-email" className="form-field w-full">
             <span className="form-label">{t('auth.email')}</span>
             <input
+              id="login-email"
               type="email"
               className="input input-bordered w-full"
               value={loginEmail}
@@ -53,9 +54,10 @@ export default function LoginPage() {
               autoComplete="email"
             />
           </label>
-          <label className="form-field w-full">
+          <label htmlFor="login-password" className="form-field w-full">
             <span className="form-label">{t('auth.password')}</span>
             <input
+              id="login-password"
               type="password"
               className="input input-bordered w-full"
               value={password}
@@ -64,8 +66,8 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
           </label>
-          <label className="label cursor-pointer justify-start gap-2">
-            <input type="checkbox" className="checkbox checkbox-sm" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+          <label htmlFor="login-remember" className="label cursor-pointer justify-start gap-2">
+            <input id="login-remember" type="checkbox" className="checkbox checkbox-sm" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
             <span className="label-text">{t('auth.remember')}</span>
           </label>
           <button type="submit" className="btn btn-primary w-full" disabled={loading}>

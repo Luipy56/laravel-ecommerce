@@ -17,22 +17,24 @@ export function CartProvider({ children }) {
   const [showAddedFeedback, setShowAddedFeedback] = useState(false);
   const addedFeedbackTimeoutRef = useRef(null);
 
-  const fetchCart = useCallback(async () => {
+  const fetchCart = useCallback(async (signal) => {
     setLoading(true);
     try {
-      const { data } = await api.get('cart');
+      const { data } = await api.get('cart', signal ? { signal } : {});
       if (data.success && data.data) {
         setCart({ id: data.data.id, lines: data.data.lines || [], total: data.data.total ?? 0 });
       }
-    } catch {
-      setCart({ lines: [], total: 0 });
+    } catch (err) {
+      if (err.name !== 'AbortError') setCart({ lines: [], total: 0 });
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchCart();
+    const ac = new AbortController();
+    fetchCart(ac.signal);
+    return () => ac.abort();
   }, [fetchCart, user?.id]);
 
   const mergeCart = useCallback(async () => {

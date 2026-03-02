@@ -112,28 +112,32 @@ export default function AdminDashboardPage() {
   const [lowStock, setLowStock] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchStats = useCallback(async () => {
+  const fetchStats = useCallback(async (signal) => {
     try {
       const [s, tP, lS] = await Promise.all([
-        api.get('admin/stats/sales-by-period'),
-        api.get('admin/stats/top-products'),
-        api.get('admin/stats/low-stock'),
+        api.get('admin/stats/sales-by-period', signal ? { signal } : {}),
+        api.get('admin/stats/top-products', signal ? { signal } : {}),
+        api.get('admin/stats/low-stock', signal ? { signal } : {}),
       ]);
       if (s.data.success) setSales(s.data.data || []);
       if (tP.data.success) setTopProducts(tP.data.data || []);
       if (lS.data.success) setLowStock(lS.data.data || []);
     } catch (err) {
-      if (err.response?.status === 401) navigate('/admin/login');
-      setSales([]);
-      setTopProducts([]);
-      setLowStock([]);
+      if (err.name !== 'AbortError') {
+        if (err.response?.status === 401) navigate('/admin/login');
+        setSales([]);
+        setTopProducts([]);
+        setLowStock([]);
+      }
     } finally {
       setLoading(false);
     }
   }, [navigate]);
 
   useEffect(() => {
-    fetchStats();
+    const ac = new AbortController();
+    fetchStats(ac.signal);
+    return () => ac.abort();
   }, [fetchStats]);
 
   const totalSales = sales.reduce((acc, d) => acc + (d.total || 0), 0);

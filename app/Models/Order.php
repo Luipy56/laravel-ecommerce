@@ -33,6 +33,7 @@ class Order extends Model
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_SENT = 'sent';
+    public const STATUS_INSTALLATION_PENDING = 'installation_pending';
     public const STATUS_INSTALLATION_CONFIRMED = 'installation_confirmed';
 
     public function client(): BelongsTo
@@ -53,6 +54,12 @@ class Order extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /** Display reference for admin (e.g. invoices, links). */
+    public function getReferenceAttribute(): string
+    {
+        return 'ORD-' . $this->id;
     }
 
     public function isCart(): bool

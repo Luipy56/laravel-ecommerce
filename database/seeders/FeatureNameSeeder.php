@@ -25,6 +25,7 @@ class FeatureNameSeeder extends Seeder
             ['name' => 'Vidre', 'is_active' => true],
             ['name' => 'Marc', 'is_active' => true],
             ['name' => 'Tipus persiana', 'is_active' => true],
+            ['name' => 'Longitud', 'is_active' => true],
         ]);
     }
 }

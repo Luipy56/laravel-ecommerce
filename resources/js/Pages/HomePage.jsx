@@ -29,21 +29,13 @@ export default function HomePage() {
   return (
     <div className="space-y-10">
       <section className="hero hero-gradient rounded-box text-primary-content min-h-[200px] sm:min-h-[240px]">
-        <div className="hero-content text-center max-w-2xl px-4 py-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+        <div className="hero-content flex flex-col items-center text-center max-w-2xl px-4 py-8">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-2">
             {t('home.hero.title')}
           </h1>
-          <p className="mt-2 text-primary-content/90 text-base sm:text-lg">
+          <p className="text-primary-content/90 text-base sm:text-lg">
             {t('home.hero.tagline')}
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link to="/products" className="btn btn-secondary btn-md sm:btn-lg text-secondary-content">
-              {t('home.hero.cta_products')}
-            </Link>
-            <Link to="/custom-solution" className="btn btn-ghost btn-md sm:btn-lg border border-primary-content/30 text-primary-content hover:bg-primary-content/10 hover:border-primary-content/50">
-              {t('home.hero.cta_custom')}
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -69,7 +61,7 @@ export default function HomePage() {
         {loading ? (
           <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>
         ) : featured.length === 0 ? (
-          <p className="text-base-content/70 py-8">{t('shop.cart.empty')}</p>
+          <p className="text-base-content/70 py-8">{t('shop.featured_empty')}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {featured.map((product) => (

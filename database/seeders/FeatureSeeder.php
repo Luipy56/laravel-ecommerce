@@ -125,6 +125,19 @@ class FeatureSeeder extends Seeder
             ['feature_name_id' => 15, 'value' => 'Persiana plisada', 'is_active' => true],
             ['feature_name_id' => 15, 'value' => 'Persiana romana', 'is_active' => true],
             ['feature_name_id' => 15, 'value' => 'Toldó', 'is_active' => true],
+            // 16 Longitud (cylinder length in mm)
+            ['feature_name_id' => 16, 'value' => '35mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '40mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '45mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '50mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '55mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '60mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '65mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '70mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '75mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '80mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '90mm', 'is_active' => true],
+            ['feature_name_id' => 16, 'value' => '100mm', 'is_active' => true],
         ];
 
         DB::table('features')->insert($features);

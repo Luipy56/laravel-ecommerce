@@ -31,6 +31,12 @@ class Pack extends Model
         return $this->hasMany(PackItem::class, 'pack_id')->where('is_active', true);
     }
 
+    /** All pack items (no is_active filter); use for admin. */
+    public function packItems(): HasMany
+    {
+        return $this->hasMany(PackItem::class, 'pack_id');
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(PackImage::class)->where('is_active', true)->orderBy('sort_order');

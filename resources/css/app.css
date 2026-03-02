@@ -49,6 +49,22 @@
   background: linear-gradient(135deg, #882200 0%, #fb5412 100%);
 }
 
+/* ----- Admin login: animated gradient background ----- */
+.bg-admin-login-animated {
+  background: linear-gradient(-45deg, #882200, #fb5412, #d94a0f, #6b2a0a);
+  background-size: 400% 400%;
+  animation: gradient-admin-login 14s ease infinite;
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+@keyframes gradient-admin-login {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* ----- Form fields: consistent layout and spacing ----- */
 .form-field {
   display: flex;

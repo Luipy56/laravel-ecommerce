@@ -1,14 +1,24 @@
 <?php
 
+use App\Http\Controllers\Api\AdminAdminController;
 use App\Http\Controllers\Api\AdminAuthController;
+use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminDashboardController;
+use App\Http\Controllers\Api\AdminFeatureController;
+use App\Http\Controllers\Api\AdminFeatureNameController;
+use App\Http\Controllers\Api\AdminPackController;
+use App\Http\Controllers\Api\AdminOrderController;
+use App\Http\Controllers\Api\AdminPersonalizedSolutionController;
+use App\Http\Controllers\Api\AdminProductController;
+use App\Http\Controllers\Api\AdminVariantGroupController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackController;
 use App\Http\Controllers\Api\PersonalizedSolutionController;
+use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +29,7 @@ Route::post('register', [AuthController::class, 'register']);
 Route::get('user', [AuthController::class, 'user']);
 
 Route::get('categories', [CategoryController::class, 'index']);
+Route::get('features', [FeatureController::class, 'index']);
 Route::get('products', [ProductController::class, 'index']);
 Route::get('products/featured', [ProductController::class, 'featured']);
 Route::get('products/search', [ProductController::class, 'search']);
@@ -63,4 +74,22 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('stats/top-products', [AdminDashboardController::class, 'topProducts']);
     Route::get('stats/low-stock', [AdminDashboardController::class, 'lowStock']);
     Route::apiResource('categories', AdminCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('feature-names', [AdminFeatureNameController::class, 'index']);
+    Route::post('feature-names', [AdminFeatureNameController::class, 'store']);
+    Route::get('feature-names/{featureName}', [AdminFeatureNameController::class, 'show']);
+    Route::put('feature-names/{featureName}', [AdminFeatureNameController::class, 'update']);
+    Route::apiResource('features', AdminFeatureController::class);
+    Route::apiResource('products', AdminProductController::class);
+    Route::apiResource('packs', AdminPackController::class);
+    Route::apiResource('variant-groups', AdminVariantGroupController::class);
+    Route::get('clients', [AdminClientController::class, 'index']);
+    Route::get('clients/{client}', [AdminClientController::class, 'show']);
+    Route::get('orders', [AdminOrderController::class, 'index']);
+    Route::get('orders/{order}', [AdminOrderController::class, 'show']);
+    Route::put('orders/{order}', [AdminOrderController::class, 'update']);
+    Route::apiResource('admins', AdminAdminController::class);
+    Route::get('personalized-solutions', [AdminPersonalizedSolutionController::class, 'index']);
+    Route::get('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'show']);
+    Route::put('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'update']);
+    Route::delete('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'destroy']);
 });

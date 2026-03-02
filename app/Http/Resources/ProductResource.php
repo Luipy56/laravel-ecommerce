@@ -37,11 +37,23 @@ class ProductResource extends JsonResource
             ])),
             'variant_options' => $this->whenLoaded('variantGroup', function () {
                 $products = $this->variantGroup?->products ?? collect();
-                return $products->map(fn ($p) => [
-                    'id' => $p->id,
-                    'name' => $p->name,
-                    'code' => $p->code,
-                ])->values()->all();
+                return $products->map(function ($p) {
+                    $firstFeature = $p->features->first();
+                    $variantLabel = $firstFeature
+                        ? trim(($firstFeature->featureName?->name ? $firstFeature->featureName->name . ': ' : '') . ($firstFeature->value ?? ''))
+                        : ($p->name ?: $p->code ?? '');
+                    $price = (float) $p->price;
+
+                    return [
+                        'id' => $p->id,
+                        'name' => $p->name,
+                        'code' => $p->code,
+                        'price' => $price,
+                        'formatted_price' => number_format($price, 2, ',', '.') . ' €',
+                        'image_url' => $p->images->first()?->url,
+                        'variant_label' => $variantLabel,
+                    ];
+                })->values()->all();
             }),
         ];
     }

@@ -37,7 +37,7 @@ class ProductSeeder extends Seeder
             'code' => 'CIL-PERFIL', 'name' => 'Cilindre perfil europeu', 'description' => 'Cilindre perfil europeu. 5 pines.', 'price' => 42.00, 'stock' => 45, 'extra_key_unit_price' => 12.00, 'is_trending' => true,
         ]);
         $products[] = array_merge($cilBase, [
-            'code' => 'CIL-SEG', 'name' => 'Cilindre alta seguretat', 'description' => 'Cilindre alta seguretat. Anti-bumping, anti-taladro.', 'price' => 95.00, 'stock' => 25, 'extra_key_unit_price' => 22.00, 'is_featured' => true,
+            'code' => 'CIL-SEG', 'name' => 'Cilindre alta seguretat', 'description' => 'Cilindre alta seguretat. Anti-bumping, anti-taladro.', 'price' => 95.00, 'stock' => 25, 'extra_key_unit_price' => 22.00, 'is_featured' => true, 'is_installable' => true, 'installation_price' => 35.00,
         ]);
         $products[] = array_merge($cilBase, [
             'code' => 'CIL-DOBLE', 'name' => 'Cilindre doble', 'description' => 'Cilindre doble per portes de dos costats.', 'price' => 48.00, 'stock' => 35, 'extra_key_unit_price' => 12.00,
@@ -45,7 +45,7 @@ class ProductSeeder extends Seeder
         foreach ([35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100] as $len) {
             $products[] = array_merge($cilBase, [
                 'code' => 'CIL-30-' . $len,
-                'name' => "Cilindre 30mm longitud {$len}mm",
+                'name' => 'Cilindre 30mm',
                 'description' => "Cilindre seguretat 30mm, longitud {$len} mm.",
                 'price' => round(22 + $len * 0.2, 2),
                 'stock' => rand(30, 70),
@@ -55,7 +55,7 @@ class ProductSeeder extends Seeder
         foreach ([40, 50, 60, 70, 80] as $len) {
             $products[] = array_merge($cilBase, [
                 'code' => 'CIL-40-' . $len,
-                'name' => "Cilindre 40mm longitud {$len}mm",
+                'name' => 'Cilindre 40mm',
                 'description' => "Cilindre 40mm, longitud {$len} mm.",
                 'price' => round(28 + $len * 0.25, 2),
                 'stock' => rand(25, 55),
@@ -79,7 +79,7 @@ class ProductSeeder extends Seeder
                 $products[] = array_merge($base, [
                     'category_id' => 2,
                     'code' => 'ESC-' . $t . '-' . $v,
-                    'name' => "Escut {$t} variant {$v}",
+                    'name' => "Escut {$t} {$v}",
                     'description' => 'Escut cilindre.',
                     'price' => (float) $p,
                     'stock' => rand(25, 65),
@@ -111,7 +111,7 @@ class ProductSeeder extends Seeder
         foreach (range(1, 25) as $i) {
             $products[] = array_merge($spBase, [
                 'code' => 'SP-VAR-' . $i,
-                'name' => "Segon pany varietat {$i}",
+                'name' => "Segon pany {$i}",
                 'description' => 'Segon pany per porta. Diversos models.',
                 'price' => round(38 + $i * 1.5, 2),
                 'stock' => rand(15, 45),

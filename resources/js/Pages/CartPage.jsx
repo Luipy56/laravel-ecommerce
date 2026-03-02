@@ -30,7 +30,7 @@ function CartLine({ line, updateLine, removeLine, t }) {
 
   return (
     <tr className={isIncluded ? '' : 'opacity-60 saturate-0'}>
-      <td className="align-top pt-4">
+      <td className="align-middle">
         <input
           type="checkbox"
           className="checkbox checkbox-sm checkbox-primary"
@@ -39,7 +39,7 @@ function CartLine({ line, updateLine, removeLine, t }) {
           aria-label={t('shop.cart.include')}
         />
       </td>
-      <td>
+      <td className="align-middle">
         <div className="flex items-center gap-3">
           <figure className="mask mask-squircle w-16 h-16 shrink-0 bg-base-300 flex items-center justify-center overflow-hidden">
             <img src={imageUrl} alt="" className="w-full h-full object-cover" />
@@ -54,8 +54,8 @@ function CartLine({ line, updateLine, removeLine, t }) {
           </div>
         </div>
       </td>
-      <td className="text-right align-top pt-4 whitespace-nowrap">{Number(line.unit_price).toFixed(2)} €</td>
-      <td className="align-top pt-4">
+      <td className="text-right align-middle whitespace-nowrap">{Number(line.unit_price).toFixed(2)} €</td>
+      <td className="align-middle">
         <input
           type="number"
           min={1}
@@ -65,14 +65,14 @@ function CartLine({ line, updateLine, removeLine, t }) {
           className="input input-bordered input-sm w-20 text-right"
         />
       </td>
-      <td className="text-right align-top pt-4 whitespace-nowrap">
+      <td className="text-right align-middle whitespace-nowrap">
         {isProduct && installationPrice != null ? `${Number(installationPrice).toFixed(2)} €` : ''}
       </td>
-      <td className="align-top pt-4 text-center">
+      <td className="align-middle text-center">
         {isProduct && (
           <input
             type="checkbox"
-            className="checkbox checkbox-sm checkbox-secondary"
+            className="checkbox checkbox-sm checkbox-primary"
             checked={wantsInstallation}
             onChange={handleInstallChange}
             disabled={!isInstallable}
@@ -82,8 +82,8 @@ function CartLine({ line, updateLine, removeLine, t }) {
         )}
         {!isProduct && ''}
       </td>
-      <td className="text-right font-medium align-top pt-4 whitespace-nowrap">{Number(line.line_total).toFixed(2)} €</td>
-      <td className="align-top pt-4">
+      <td className="text-right font-medium align-middle whitespace-nowrap">{Number(line.line_total).toFixed(2)} €</td>
+      <td className="align-middle">
         <button
           type="button"
           className="btn btn-ghost btn-sm btn-circle"
@@ -112,7 +112,10 @@ export default function CartPage() {
   if (!cart.lines?.length) {
     return (
       <div className="max-w-5xl mx-auto">
-        <PageTitle>{t('shop.cart')}</PageTitle>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
+          <Link to="/products" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+        </div>
         <div className="text-center py-12">
           <p className="text-xl text-base-content/70 mb-4">{t('shop.cart.empty')}</p>
         <Link to="/products" className="btn btn-primary">
@@ -125,7 +128,10 @@ export default function CartPage() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <PageTitle>{t('shop.cart')}</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
+        <Link to="/products" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+      </div>
 
       <div className="card bg-base-100 shadow border border-base-300 overflow-hidden rounded-2xl">
         <div className="overflow-x-auto">
@@ -156,12 +162,12 @@ export default function CartPage() {
           </table>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-end items-end gap-4 p-4 bg-base-100 border-t border-base-300">
-          <p className="flex items-baseline gap-2 whitespace-nowrap">
+        <div className="flex flex-col sm:flex-row justify-center sm:justify-end items-center gap-4 p-4 bg-base-100 border-t border-base-300">
+          <p className="flex items-center gap-2 whitespace-nowrap">
             <span className="font-semibold text-base-content">{t('shop.total')}:</span>
             <span className="text-2xl font-bold text-primary">{Number(cart.total).toFixed(2)} €</span>
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center sm:justify-end">
             <Link to="/products" className="btn btn-ghost">
               {t('common.back')}
             </Link>

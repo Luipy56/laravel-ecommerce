@@ -1,9 +1,7 @@
 ---
 description: Vite for Laravel - assets, build, and Blade/React entry
-globs: "vite.config.*,resources/js/**/*,resources/css/**/*"
 alwaysApply: false
 ---
-
 # Vite (Laravel)
 
 - Use **Vite** for asset bundling (CSS, JS, React). Laravel’s default is Vite; use `npm run dev` / `npm run build`.

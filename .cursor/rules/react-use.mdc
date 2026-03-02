@@ -1,9 +1,7 @@
 ---
 description: React with Laravel (API + SPA) — patterns, naming, hooks, a11y
-globs: "**/*.tsx"
 alwaysApply: false
 ---
-
 # React Use
 
 ## Stack

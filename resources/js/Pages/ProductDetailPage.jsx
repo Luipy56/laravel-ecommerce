@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
-import { IconCart, IconChevronLeft, IconChevronRight } from '../components/icons';
+import { IconCart, IconChevronLeft, IconChevronRight, IconChevronUp } from '../components/icons';
 
 const ZOOM_SCALE = 2.5;
 const ZOOM_PANEL_SIZE = 280;
@@ -19,6 +19,7 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [zoomVisible, setZoomVisible] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 0.5, y: 0.5 });
+  const [variantsExpanded, setVariantsExpanded] = useState(false);
   const imageRef = useRef(null);
   const galleryRef = useRef(null);
   const { addLine } = useCart();
@@ -61,7 +62,9 @@ export default function ProductDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-2 sm:px-4">
-      <Link to="/products" className="btn btn-ghost btn-sm mb-4">{t('common.back')}</Link>
+      <div className="flex justify-end mb-4">
+        <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
+      </div>
 
       <div className="card card-border bg-base-100 shadow-lg overflow-hidden">
         <div className="flex flex-col lg:flex-row">
@@ -177,33 +180,74 @@ export default function ProductDetailPage() {
 
             {hasVariants && (
               <div className="mt-3" role="group" aria-label={t('shop.product.variant')}>
-                <p className="text-sm font-medium text-base-content/80 mb-2">{t('shop.product.variant')}</p>
-                <ul className="flex flex-wrap gap-2 list-none p-0 m-0" role="radiogroup" aria-label={t('shop.product.variant')}>
-                  {product.variant_options.map((opt) => {
-                    const isSelected = opt.id === product.id;
-                    return (
-                      <li key={opt.id} className="contents">
-                        <button
-                          type="button"
-                          role="radio"
-                          aria-checked={isSelected}
-                          aria-label={opt.code ? `${opt.name} (${opt.code})` : opt.name}
-                          onClick={() => { if (!isSelected) navigate(`/products/${opt.id}`); }}
-                          className={`
-                            min-h-10 px-4 py-2 rounded-lg border-2 text-left transition-all
-                            ${isSelected
-                              ? 'border-primary bg-primary/10 ring-2 ring-primary/30 font-medium'
-                              : 'border-base-300 bg-base-200 hover:border-primary/50 hover:bg-base-300'
-                            }
-                          `}
-                        >
-                          <span className="block text-sm truncate max-w-[10rem] sm:max-w-[14rem]" title={opt.name}>{opt.name}</span>
-                          {opt.code && <span className="block text-xs text-base-content/60 font-mono">{opt.code}</span>}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <div
+                  className={`collapse border border-base-300 rounded-lg bg-base-200/50 ${variantsExpanded ? 'collapse-open' : 'collapse-close'}`}
+                >
+                  <div
+                    className="collapse-title min-h-0 py-2 pr-10 font-medium text-sm text-base-content/80 flex items-center gap-2"
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={variantsExpanded}
+                    aria-label={variantsExpanded ? t('shop.product.hide_variants') : t('shop.product.see_all_variants')}
+                    onClick={() => setVariantsExpanded(!variantsExpanded)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setVariantsExpanded((v) => !v);
+                      }
+                    }}
+                  >
+                    <span>{t('shop.product.variants_count', { count: product.variant_options.length })}</span>
+                    <span className="text-primary">— {variantsExpanded ? t('shop.product.hide_variants') : t('shop.product.see_all_variants')}</span>
+                    <IconChevronUp
+                      className={`h-4 w-4 ml-auto shrink-0 transition-transform ${variantsExpanded ? '' : 'rotate-180'}`}
+                      aria-hidden
+                    />
+                  </div>
+                  <div className="collapse-content">
+                    <ul className="flex flex-wrap gap-2 list-none p-0 m-0 pt-2" role="radiogroup" aria-label={t('shop.product.variant')}>
+                      {product.variant_options.map((opt) => {
+                        const isSelected = opt.id === product.id;
+                        const thumbUrl = opt.image_url && String(opt.image_url).trim() ? opt.image_url : Product.fallbackImageUrl;
+                        const label = opt.variant_label || opt.name || opt.code || '';
+                        const priceStr = opt.formatted_price != null ? opt.formatted_price : (opt.price != null && Number(opt.price) >= 0
+                          ? new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(Number(opt.price))
+                          : '');
+                        return (
+                          <li key={opt.id} className="list-none">
+                            <button
+                              type="button"
+                              role="radio"
+                              aria-checked={isSelected}
+                              aria-label={opt.code ? `${label} (${opt.code}) ${priceStr}` : `${label} ${priceStr}`}
+                              onClick={() => { if (!isSelected) navigate(`/products/${opt.id}`); }}
+                              className={`
+                                flex items-center gap-3 w-full min-w-0 max-w-[16rem] rounded-lg border-2 text-left transition-all p-2
+                                ${isSelected
+                                  ? 'border-primary bg-primary/10 ring-2 ring-primary/30'
+                                  : 'border-base-300 bg-base-200 hover:border-primary/50 hover:bg-base-300'
+                                }
+                              `}
+                            >
+                              <div className="w-14 h-14 shrink-0 rounded overflow-hidden bg-base-300">
+                                <img
+                                  src={thumbUrl}
+                                  alt=""
+                                  className="object-cover w-full h-full"
+                                  onError={(e) => { e.target.onerror = null; e.target.src = Product.fallbackImageUrl; }}
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                {label && <span className="block text-sm font-medium truncate" title={label}>{label}</span>}
+                                {priceStr && <span className="block text-sm text-primary font-semibold">{priceStr}</span>}
+                              </div>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
               </div>
             )}
 

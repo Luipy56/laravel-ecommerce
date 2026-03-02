@@ -47,6 +47,16 @@ $table->string('status')->comment('Order status'); // values from lang: shop.sta
 - When a field is expected from the API/DB and **nothing is received** (null, undefined, empty), render the field **blank** in the UI.
 - **Do not** use placeholders such as em dash ("—"), "N/A", "–", or similar for missing values. Leave the cell or label content empty (e.g. `''` or nothing).
 
+## Admin area
+
+- **Layout:** Admin pages use **AdminLayout** (`resources/js/components/admin/AdminLayout.jsx`): drawer/sidebar, no top header; links to Dashboard, Productes, Característiques, Tipos de característiques, Tornar a la botiga, Logout. All admin routes live under `/admin` and are wrapped by this layout.
+- **List pages:** Every admin list (products, features, feature types) must include:
+  - **Search:** An `input type="search"` with **debounced** value (e.g. 300 ms) sent as query param to the API. Use local state for the input and a separate `searchDebounce` state updated in a `useEffect` with `setTimeout`/`clearTimeout`.
+  - **Filters:** Select dropdowns for relevant dimensions (e.g. category, type, active). Send filter values as query params; use empty string for “All” (do not send the param when “All”).
+  - **Clickable rows:** Table rows navigate to the edit page on click (and Enter/Space for a11y). Use `role="button"`, `tabIndex={0}`, `onClick` and `onKeyDown`; do not add a separate “Edit” button column unless required.
+- **CRUD resources:** Products (`admin/products`), Features (`admin/features`), Feature names / types (`admin/feature-names`). Backend: controllers under `App\Http\Controllers\Api\Admin*`; list endpoints accept `search`, `is_active`, and resource-specific filters (e.g. `category_id`, `feature_name_id`). Response shape: `{ success: true, data: [...] }` (and `meta` for paginated lists).
+- **i18n:** All admin UI strings use keys under `admin.*` in `resources/js/locales/ca.json` and `es.json` (e.g. `admin.products.title`, `admin.features.search_placeholder`, `admin.feature_types.filter_active`). Reuse `shop.categories.all` for “All” in filters and `common.yes` / `common.no` where appropriate.
+
 ## Assets and build
 
 - Use **Vite** for asset compilation (Laravel default). See **`.cursor/rules/vite.mdc`** for entry points. The main app is React; Blade is only for the HTML shell that loads the React bundle when needed.

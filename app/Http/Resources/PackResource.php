@@ -16,7 +16,11 @@ class PackResource extends JsonResource
             'price' => (float) $this->price,
             'items' => $this->whenLoaded('items', fn () => $this->items->map(fn ($i) => [
                 'product_id' => $i->product_id,
-                'product' => $i->product ? ['id' => $i->product->id, 'name' => $i->product->name] : null,
+                'product' => $i->product ? [
+                    'id' => $i->product->id,
+                    'name' => $i->product->name,
+                    'code' => $i->product->code,
+                ] : null,
             ])),
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => [
                 'id' => $img->id,

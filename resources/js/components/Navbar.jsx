@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
@@ -29,11 +29,20 @@ export default function Navbar() {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [locale, setLocale] = useState(i18n.language);
   const [searchQ, setSearchQ] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
+
+  // Sync search input with URL when on product list (so clearing + Enter updates list)
+  useEffect(() => {
+    if (location.pathname === '/products') {
+      const q = new URLSearchParams(location.search).get('search');
+      setSearchQ(q ?? '');
+    }
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,7 +74,12 @@ export default function Navbar() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQ.trim()) navigate('/products?search=' + encodeURIComponent(searchQ.trim()));
+    const term = searchQ.trim();
+    if (term) {
+      navigate('/products?search=' + encodeURIComponent(term));
+    } else {
+      navigate('/products');
+    }
     setDrawerOpen(false);
   };
 

@@ -26,8 +26,10 @@ export default function OrderDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <Link to="/orders" className="btn btn-ghost btn-sm mb-4">{t('common.back')}</Link>
-      <PageTitle className="mb-4">Comanda #{order.id}</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <PageTitle className="mb-0">Comanda #{order.id}</PageTitle>
+        <Link to="/orders" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+      </div>
       <p><strong>Estat:</strong> {order.status}</p>
       <p><strong>Data:</strong> {order.order_date ? new Date(order.order_date).toLocaleString() : ''}</p>
       <table className="table table-zebra mt-4">

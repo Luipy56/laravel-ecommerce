@@ -16,6 +16,7 @@ class AdminAuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $validated['is_active'] = true;
         if (! Auth::guard('admin')->attempt($validated)) {
             return response()->json(['success' => false, 'message' => 'Invalid credentials'], 422);
         }

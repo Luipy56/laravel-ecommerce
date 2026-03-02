@@ -33,12 +33,12 @@ class ProductImage extends Model
         return $this->belongsTo(Product::class);
     }
 
-    /** URL for display (storage path or placeholder). */
+    /** URL for display (path relative to app origin so it works regardless of APP_URL/port). */
     public function getUrlAttribute(): string
     {
         if (empty($this->storage_path)) {
             return '/images/dummy.jpg';
         }
-        return Storage::url($this->storage_path);
+        return '/storage/' . ltrim($this->storage_path, '/');
     }
 }

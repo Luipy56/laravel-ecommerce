@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
+import ConfirmModal from '../components/ConfirmModal';
 
 const ADDRESS_TYPES = ['shipping', 'installation', 'other'];
 
@@ -37,6 +38,10 @@ export default function ProfilePage() {
     postal_code: '',
   });
   const [addressSaving, setAddressSaving] = useState(false);
+
+  // Delete confirmation: { type: 'address'|'contact', id } or null
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Contact modal
   const [contactModal, setContactModal] = useState(null);
@@ -167,14 +172,22 @@ export default function ProfilePage() {
     }
   };
 
-  const handleDeleteAddress = async (id) => {
-    if (!window.confirm(t('profile.delete_address_confirm'))) return;
+  const handleDeleteAddress = (id) => {
+    setDeleteConfirm({ type: 'address', id });
+  };
+
+  const doDeleteAddress = async () => {
+    if (deleteConfirm?.type !== 'address') return;
+    setDeleteLoading(true);
     try {
-      await api.delete(`profile/addresses/${id}`);
+      await api.delete(`profile/addresses/${deleteConfirm.id}`);
       await fetchProfile();
       setSaved(true);
+      setDeleteConfirm(null);
     } catch (err) {
       // ignore
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -227,14 +240,22 @@ export default function ProfilePage() {
     }
   };
 
-  const handleDeleteContact = async (id) => {
-    if (!window.confirm(t('profile.delete_contact_confirm'))) return;
+  const handleDeleteContact = (id) => {
+    setDeleteConfirm({ type: 'contact', id });
+  };
+
+  const doDeleteContact = async () => {
+    if (deleteConfirm?.type !== 'contact') return;
+    setDeleteLoading(true);
     try {
-      await api.delete(`profile/contacts/${id}`);
+      await api.delete(`profile/contacts/${deleteConfirm.id}`);
       await fetchProfile();
       setSaved(true);
+      setDeleteConfirm(null);
     } catch (err) {
       // ignore
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -593,6 +614,28 @@ export default function ProfilePage() {
           <button type="button" onClick={() => setContactModal(null)}>{t('common.close')}</button>
         </form>
       </dialog>
+
+      {/* Delete confirmation modals */}
+      <ConfirmModal
+        open={deleteConfirm?.type === 'address'}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={doDeleteAddress}
+        title={t('common.delete')}
+        message={t('profile.delete_address_confirm')}
+        confirmLabel={t('common.delete')}
+        loading={deleteLoading}
+        confirmVariant="error"
+      />
+      <ConfirmModal
+        open={deleteConfirm?.type === 'contact'}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={doDeleteContact}
+        title={t('common.delete')}
+        message={t('profile.delete_contact_confirm')}
+        confirmLabel={t('common.delete')}
+        loading={deleteLoading}
+        confirmVariant="error"
+      />
     </div>
   );
 }

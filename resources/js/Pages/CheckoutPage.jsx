@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import PageTitle from '../components/PageTitle';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function CheckoutPage() {
   const { t } = useTranslation();
@@ -12,6 +13,7 @@ export default function CheckoutPage() {
   const { cart, fetchCart } = useCart();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [form, setForm] = useState({
     payment_method: 'card',
     shipping_street: '',
@@ -29,8 +31,8 @@ export default function CheckoutPage() {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const doCheckout = useCallback(async () => {
+    setConfirmOpen(false);
     setLoading(true);
     try {
       const { data } = await api.post('orders/checkout', form);
@@ -43,6 +45,11 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false);
     }
+  }, [form, navigate, fetchCart]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setConfirmOpen(true);
   };
 
   if (!user) {
@@ -66,6 +73,14 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <PageTitle>{t('shop.checkout')}</PageTitle>
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={doCheckout}
+        title={t('shop.checkout')}
+        message={t('checkout.confirm_message')}
+        loading={loading}
+      />
       <form onSubmit={handleSubmit} className="card bg-base-100 shadow">
         <div className="card-body space-y-5">
           <h2 className="font-semibold text-base-content">{t('checkout.shipping_address')}</h2>

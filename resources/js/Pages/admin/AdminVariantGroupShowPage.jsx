@@ -56,7 +56,7 @@ export default function AdminVariantGroupShowPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <PageTitle className="mb-0">{t('admin.variant_groups.group_label')} #{group.id}</PageTitle>
+        <PageTitle className="mb-0">{group.name || `${t('admin.variant_groups.group_label')} #${group.id}`}</PageTitle>
         <div className="flex gap-2">
           <Link to="/admin/variant-groups" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
           <Link to={`/admin/variant-groups/${id}/edit`} className="btn btn-primary btn-sm shrink-0">{t('common.edit')}</Link>

@@ -67,7 +67,7 @@ class OrderLine extends Model
         }
         $sub = (float) $this->unit_price * (int) $this->quantity;
         $off = (float) ($this->offer ?? 0);
-        return round($sub - $off + (float) ($this->installation_price ?? 0) * (int) ($this->is_installation_requested ? 1 : 0)
+        return round($sub - $off + (float) ($this->installation_price ?? 0) * (int) ($this->is_installation_requested ? $this->quantity : 0)
             + (int) ($this->extra_keys_qty ?? 0) * (float) ($this->extra_key_unit_price ?? 0), 2);
     }
 }

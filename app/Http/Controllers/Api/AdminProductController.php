@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AdminProductResource;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -62,6 +63,8 @@ class AdminProductController extends Controller
             'is_active' => ['boolean'],
             'feature_ids' => ['nullable', 'array'],
             'feature_ids.*' => ['integer', 'exists:features,id'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['file', 'image', 'max:10240'],
         ]);
 
         $defaults = [
@@ -71,13 +74,61 @@ class AdminProductController extends Controller
             'is_trending' => false,
             'is_active' => true,
         ];
-        $product = Product::create(array_merge($defaults, collect($validated)->except('feature_ids')->all()));
+        $product = Product::create(array_merge($defaults, collect($validated)->except(['feature_ids', 'images'])->all()));
         $product->features()->sync($validated['feature_ids'] ?? []);
+
+        if ($request->hasFile('images')) {
+            $this->storeProductImages($product, $request->file('images'));
+        }
 
         return response()->json([
             'success' => true,
-            'data' => new AdminProductResource($product->load(['category', 'features.featureName'])),
+            'data' => new AdminProductResource($product->load(['category', 'features.featureName', 'images'])),
         ], 201);
+    }
+
+    public function storeImages(Request $request, Product $product): JsonResponse
+    {
+        $validated = $request->validate([
+            'images' => ['required', 'array'],
+            'images.*' => ['required', 'file', 'image', 'max:10240'],
+        ]);
+
+        $this->storeProductImages($product, $validated['images']);
+
+        return response()->json([
+            'success' => true,
+            'data' => new AdminProductResource($product->load(['category', 'features.featureName', 'images'])),
+        ]);
+    }
+
+    public function destroyImage(Product $product, ProductImage $productImage): JsonResponse
+    {
+        if ($productImage->product_id !== $product->id) {
+            abort(404);
+        }
+        $productImage->update(['is_active' => false]);
+
+        return response()->json(['success' => true]);
+    }
+
+    private function storeProductImages(Product $product, array $files): void
+    {
+        $maxSort = (int) ProductImage::where('product_id', $product->id)->max('sort_order');
+        foreach ($files as $file) {
+            $maxSort++;
+            $path = $file->store('products/' . $product->id, 'public');
+            ProductImage::create([
+                'product_id' => $product->id,
+                'storage_path' => $path,
+                'filename' => $file->getClientOriginalName(),
+                'size_bytes' => $file->getSize(),
+                'checksum' => null,
+                'content_type' => $file->getMimeType(),
+                'sort_order' => $maxSort,
+                'is_active' => true,
+            ]);
+        }
     }
 
     public function show(Product $product): JsonResponse
@@ -116,7 +167,7 @@ class AdminProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => new AdminProductResource($product->fresh()->load(['category', 'features.featureName'])),
+            'data' => new AdminProductResource($product->fresh()->load(['category', 'features.featureName', 'images'])),
         ]);
     }
 

@@ -13,7 +13,7 @@ export default function AdminFeaturesPage() {
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [typeId, setTypeId] = useState('');
-  const [activeFilter, setActiveFilter] = useState(''); // '' = all, '1' = yes, '0' = no
+  const [activeFilter, setActiveFilter] = useState('1'); // '' = all, '1' = yes, '0' = no
 
   const fetchFeatureNames = useCallback(async () => {
     try {

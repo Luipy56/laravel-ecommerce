@@ -14,6 +14,7 @@ return new class extends Migration
     {
         Schema::create('product_variant_groups', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 255)->nullable()->comment('Optional display name for the variant group');
             $table->timestamps();
         });
     }

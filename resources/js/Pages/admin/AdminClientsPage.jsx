@@ -18,7 +18,7 @@ export default function AdminClientsPage() {
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
-  const [activeFilter, setActiveFilter] = useState('');
+  const [activeFilter, setActiveFilter] = useState('1');
 
   const fetchClients = useCallback(async () => {
     setLoading(true);

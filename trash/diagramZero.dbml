@@ -83,6 +83,7 @@ Table PRODUCT_CATEGORIES {
 
 Table PRODUCT_VARIANT_GROUPS [note: 'Optional grouping of products as siblings (e.g. same screw 30mm, 40mm, 50mm). Order variants by name or value in SQL.'] {
   id int [pk, increment]
+  name varchar(255) [null, note: 'Optional display name for the variant group']
 }
 
 Table PRODUCTS {

@@ -80,6 +80,8 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::put('feature-names/{featureName}', [AdminFeatureNameController::class, 'update']);
     Route::apiResource('features', AdminFeatureController::class);
     Route::apiResource('products', AdminProductController::class);
+    Route::post('products/{product}/images', [AdminProductController::class, 'storeImages']);
+    Route::delete('products/{product}/images/{productImage}', [AdminProductController::class, 'destroyImage']);
     Route::apiResource('packs', AdminPackController::class);
     Route::apiResource('variant-groups', AdminVariantGroupController::class);
     Route::get('clients', [AdminClientController::class, 'index']);

@@ -4,6 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending_review': return 'badge-warning';
+    case 'reviewed': return 'badge-info';
+    case 'client_contacted': return 'badge-success';
+    case 'rejected': return 'badge-error';
+    case 'completed': return 'badge-success';
+    default: return 'badge-ghost';
+  }
+}
+
 export default function AdminPersonalizedSolutionShowPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -104,7 +115,7 @@ export default function AdminPersonalizedSolutionShowPage() {
             <section>
               <h2 className="text-lg font-semibold mb-2">{t('admin.personalized_solutions.admin_response')}</h2>
               <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.status')}</dt><dd>{t(`admin.personalized_solutions.status_${solution.status}`)}</dd></div>
+                <div><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.status')}</dt><dd><span className={`badge badge-sm ${getStatusBadgeClass(solution.status)}`}>{t(`admin.personalized_solutions.status_${solution.status}`)}</span></dd></div>
                 {solution.resolution && <div className="sm:col-span-2"><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.resolution')}</dt><dd className="whitespace-pre-wrap">{solution.resolution}</dd></div>}
               </dl>
             </section>

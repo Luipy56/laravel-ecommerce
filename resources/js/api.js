@@ -1,15 +1,26 @@
 import axios from 'axios';
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
+/**
+ * Use xsrfCookieName/xsrfHeaderName so axios reads the XSRF-TOKEN cookie before each request.
+ * The meta tag token is stale after login (session regeneration), causing 419 on cart/merge.
+ * Laravel sends the fresh token in the cookie with every response.
+ */
 export const api = axios.create({
   baseURL: '/api/v1',
   withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
-    ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken }),
   },
+});
+
+api.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+  return config;
 });
 
 api.interceptors.response.use(

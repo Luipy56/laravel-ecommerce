@@ -9,6 +9,8 @@ class ProductVariantGroup extends Model
 {
     protected $table = 'product_variant_groups';
 
+    protected $fillable = ['name'];
+
     public function products(): HasMany
     {
         return $this->hasMany(Product::class, 'variant_group_id');

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
-function groupLabel(products) {
+function productsLabel(products) {
   if (!products?.length) return '';
   const names = products.map((p) => p.name || p.code).filter(Boolean);
   if (names.length <= 2) return names.join(', ');
@@ -96,11 +96,11 @@ export default function AdminVariantGroupsPage() {
                       }
                     }}
                   >
-                    <td>#{g.id}</td>
+                    <td>{g.name || `#${g.id}`}</td>
                     <td>
                       {g.products_count === 0
                         ? ''
-                        : groupLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
+                        : productsLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
                     </td>
                   </tr>
                 ))}

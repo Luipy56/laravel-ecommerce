@@ -7,6 +7,16 @@ import PageTitle from '../../components/PageTitle';
 const KINDS = ['cart', 'order'];
 const STATUSES = ['pending', 'sent', 'installation_pending', 'installation_confirmed'];
 
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending': return 'badge-warning';
+    case 'sent': return 'badge-info';
+    case 'installation_pending': return 'badge-warning';
+    case 'installation_confirmed': return 'badge-success';
+    default: return 'badge-ghost';
+  }
+}
+
 export default function AdminOrdersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -132,7 +142,13 @@ export default function AdminOrdersPage() {
                     <td className="font-mono">#{o.id}</td>
                     <td><span className={`badge ${o.kind === 'cart' ? 'badge-ghost' : 'badge-primary'}`}>{t(`admin.orders.kind_${o.kind}`)}</span></td>
                     <td>{o.client_login_email ?? ''}</td>
-                    <td>{o.kind === 'order' && o.status ? t(`admin.orders.status_${o.status}`) : ''}</td>
+                    <td>
+                      {o.kind === 'order' && o.status ? (
+                        <span className={`badge badge-sm ${getStatusBadgeClass(o.status)}`}>{t(`admin.orders.status_${o.status}`)}</span>
+                      ) : (
+                        ''
+                      )}
+                    </td>
                     <td>{o.order_date ? new Date(o.order_date).toLocaleDateString() : ''}</td>
                     <td>{o.lines_count ?? 0}</td>
                     <td className="text-end font-medium">{o.total != null ? Number(o.total).toFixed(2) : '0.00'} €</td>

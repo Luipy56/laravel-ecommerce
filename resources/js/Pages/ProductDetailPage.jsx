@@ -6,7 +6,7 @@ import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
 import { IconCart, IconChevronLeft, IconChevronRight, IconChevronUp } from '../components/icons';
 
-const ZOOM_SCALE = 2.5;
+const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
 
 export default function ProductDetailPage() {
@@ -47,16 +47,25 @@ export default function ProductDetailPage() {
     const containerEl = galleryRef.current;
     const imageEl = imageRef.current;
     if (!containerEl || !imageEl) return;
-    const containerRect = containerEl.getBoundingClientRect();
-    const imageRect = imageEl.getBoundingClientRect();
-    const x0 = (imageRect.left - containerRect.left) / containerRect.width;
-    const y0 = (imageRect.top - containerRect.top) / containerRect.height;
-    const w = imageRect.width / containerRect.width;
-    const h = imageRect.height / containerRect.height;
-    const cx = (e.clientX - containerRect.left) / containerRect.width;
-    const cy = (e.clientY - containerRect.top) / containerRect.height;
-    const x = w > 0 ? (cx - x0) / w : 0.5;
-    const y = h > 0 ? (cy - y0) / h : 0.5;
+    const rect = containerEl.getBoundingClientRect();
+    const nw = imageEl.naturalWidth || 0;
+    const nh = imageEl.naturalHeight || 0;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    let x = 0.5;
+    let y = 0.5;
+    if (nw > 0 && nh > 0 && rect.width > 0 && rect.height > 0) {
+      const scale = Math.min(rect.width / nw, rect.height / nh);
+      const displayW = nw * scale;
+      const displayH = nh * scale;
+      const contentLeft = (rect.width - displayW) / 2;
+      const contentTop = (rect.height - displayH) / 2;
+      x = displayW > 0 ? (mouseX - contentLeft) / displayW : 0.5;
+      y = displayH > 0 ? (mouseY - contentTop) / displayH : 0.5;
+    } else {
+      x = rect.width > 0 ? mouseX / rect.width : 0.5;
+      y = rect.height > 0 ? mouseY / rect.height : 0.5;
+    }
     setZoomPos({
       x: Math.max(0, Math.min(1, x)),
       y: Math.max(0, Math.min(1, y)),
@@ -116,25 +125,19 @@ export default function ProductDetailPage() {
                     onError={(e) => { e.target.onerror = null; e.target.src = Product.fallbackImageUrl; }}
                   />
                 </div>
-                {/* Amazon-style zoom: panel to the right of the image */}
+                {/* Amazon-style zoom: panel to the right of the image — background-image for exact positioning */}
                 {zoomVisible && (
                   <div
-                    className="hidden lg:block absolute z-10 top-0 left-full ml-2 w-[var(--zoom-size)] h-[var(--zoom-size)] border-2 border-primary bg-base-100 shadow-xl pointer-events-none overflow-hidden rounded-lg"
-                    style={{ '--zoom-size': `${ZOOM_PANEL_SIZE}px` }}
-                  >
-                    <img
-                      src={mainImageUrl}
-                      alt=""
-                      className="absolute select-none object-contain"
-                      style={{
-                        width: `${ZOOM_SCALE * 100}%`,
-                        height: `${ZOOM_SCALE * 100}%`,
-                        left: `${(0.5 - zoomPos.x * ZOOM_SCALE) * 100}%`,
-                        top: `${(0.5 - zoomPos.y * ZOOM_SCALE) * 100}%`,
-                      }}
-                      draggable={false}
-                    />
-                  </div>
+                    className="hidden lg:block absolute z-10 top-0 left-full ml-2 w-[var(--zoom-size)] h-[var(--zoom-size)] border-2 border-primary bg-base-100 shadow-xl pointer-events-none overflow-hidden rounded-lg bg-no-repeat"
+                    style={{
+                      '--zoom-size': `${ZOOM_PANEL_SIZE}px`,
+                      backgroundImage: `url(${mainImageUrl})`,
+                      backgroundSize: `${ZOOM_SCALE * 100}%`,
+                      backgroundPosition: `${100 * (0.5 - zoomPos.x * ZOOM_SCALE) / (1 - ZOOM_SCALE)}% ${100 * (0.5 - zoomPos.y * ZOOM_SCALE) / (1 - ZOOM_SCALE)}%`,
+                    }}
+                    role="img"
+                    aria-label=""
+                  />
                 )}
               </div>
             </div>

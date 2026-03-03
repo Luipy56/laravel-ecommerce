@@ -11,7 +11,7 @@ export default function AdminPacksPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
-  const [activeFilter, setActiveFilter] = useState('');
+  const [activeFilter, setActiveFilter] = useState('1');
   const [trendingFilter, setTrendingFilter] = useState('');
 
   const fetchPacks = useCallback(async () => {

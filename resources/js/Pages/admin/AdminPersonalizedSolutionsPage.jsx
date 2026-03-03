@@ -4,7 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
-const STATUSES = ['pending_review', 'reviewed', 'client_contacted'];
+const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 'completed'];
+
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending_review': return 'badge-warning';
+    case 'reviewed': return 'badge-info';
+    case 'client_contacted': return 'badge-success';
+    case 'rejected': return 'badge-error';
+    case 'completed': return 'badge-success';
+    default: return 'badge-ghost';
+  }
+}
 
 export default function AdminPersonalizedSolutionsPage() {
   const { t } = useTranslation();
@@ -14,7 +25,7 @@ export default function AdminPersonalizedSolutionsPage() {
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [activeFilter, setActiveFilter] = useState('');
+  const [activeFilter, setActiveFilter] = useState('1');
 
   const fetchSolutions = useCallback(async () => {
     setLoading(true);
@@ -124,7 +135,7 @@ export default function AdminPersonalizedSolutionsPage() {
                     <td>{s.email ?? ''}</td>
                     <td>{s.phone ?? ''}</td>
                     <td className="max-w-[200px] truncate">{s.problem_description ?? ''}</td>
-                    <td>{t(`admin.personalized_solutions.status_${s.status}`)}</td>
+                    <td><span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>{t(`admin.personalized_solutions.status_${s.status}`)}</span></td>
                     <td>{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</td>
                     <td>{s.is_active ? t('common.yes') : t('common.no')}</td>
                   </tr>

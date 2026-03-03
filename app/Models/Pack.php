@@ -15,14 +15,18 @@ class Pack extends Model
         'price',
         'is_trending',
         'is_active',
+        'is_installable',
+        'installation_price',
     ];
 
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
+            'installation_price' => 'decimal:2',
             'is_trending' => 'boolean',
             'is_active' => 'boolean',
+            'is_installable' => 'boolean',
         ];
     }
 

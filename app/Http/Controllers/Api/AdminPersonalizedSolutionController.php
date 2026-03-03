@@ -102,18 +102,44 @@ class AdminPersonalizedSolutionController extends Controller
 
     public function update(Request $request, PersonalizedSolution $personalized_solution): JsonResponse
     {
+        $request->merge([
+            'client_id' => $request->client_id === '' ? null : $request->client_id,
+            'order_id' => $request->order_id === '' ? null : $request->order_id,
+        ]);
         $validated = $request->validate([
+            'email' => ['nullable', 'string', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'address_street' => ['nullable', 'string', 'max:255'],
+            'address_city' => ['nullable', 'string', 'max:100'],
+            'address_province' => ['nullable', 'string', 'max:100'],
+            'address_postal_code' => ['nullable', 'string', 'max:20'],
+            'address_note' => ['nullable', 'string', 'max:1000'],
+            'problem_description' => ['nullable', 'string', 'max:5000'],
             'resolution' => ['nullable', 'string', 'max:10000'],
             'status' => ['required', 'string', 'in:' . implode(',', [
                 PersonalizedSolution::STATUS_PENDING_REVIEW,
                 PersonalizedSolution::STATUS_REVIEWED,
                 PersonalizedSolution::STATUS_CLIENT_CONTACTED,
+                PersonalizedSolution::STATUS_REJECTED,
+                PersonalizedSolution::STATUS_COMPLETED,
             ])],
+            'client_id' => ['nullable', 'integer', 'exists:clients,id'],
+            'order_id' => ['nullable', 'integer', 'exists:orders,id'],
             'is_active' => ['boolean'],
         ]);
 
-        $personalized_solution->resolution = $validated['resolution'] ?? $personalized_solution->resolution;
+        $personalized_solution->email = $validated['email'] ?? null;
+        $personalized_solution->phone = $validated['phone'] ?? null;
+        $personalized_solution->address_street = $validated['address_street'] ?? null;
+        $personalized_solution->address_city = $validated['address_city'] ?? null;
+        $personalized_solution->address_province = $validated['address_province'] ?? null;
+        $personalized_solution->address_postal_code = $validated['address_postal_code'] ?? null;
+        $personalized_solution->address_note = $validated['address_note'] ?? null;
+        $personalized_solution->problem_description = $validated['problem_description'] ?? null;
+        $personalized_solution->resolution = $validated['resolution'] ?? null;
         $personalized_solution->status = $validated['status'];
+        $personalized_solution->client_id = $validated['client_id'] ?? null;
+        $personalized_solution->order_id = $validated['order_id'] ?? null;
         if (array_key_exists('is_active', $validated)) {
             $personalized_solution->is_active = $validated['is_active'];
         }
@@ -121,12 +147,7 @@ class AdminPersonalizedSolutionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $personalized_solution->id,
-                'status' => $personalized_solution->status,
-                'resolution' => $personalized_solution->resolution,
-                'is_active' => (bool) $personalized_solution->is_active,
-            ],
+            'data' => ['id' => $personalized_solution->id],
         ]);
     }
 

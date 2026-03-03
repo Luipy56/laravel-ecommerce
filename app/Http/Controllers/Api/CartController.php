@@ -27,7 +27,7 @@ class CartController extends Controller
         $cart = Order::query()
             ->where('client_id', $client->id)
             ->where('kind', Order::KIND_CART)
-            ->with(['lines.product.images', 'lines.product.features.featureName', 'lines.pack'])
+            ->with(['lines.product.images', 'lines.product.features.featureName', 'lines.pack.images'])
             ->first();
         $lines = $cart ? $this->formatLines($cart->lines) : [];
         $total = $cart ? $cart->lines->sum(fn ($l) => $l->line_total) : 0;
@@ -55,7 +55,9 @@ class CartController extends Controller
                 $product = Product::with(['images', 'features.featureName'])->find($item['product_id']);
                 if ($product && $product->is_active) {
                     $unitPrice = (float) $product->price;
-                    $installPrice = $wantsInstallation && $product->is_installable ? (float) ($product->installation_price ?? 0) : 0;
+                    $installPrice = $wantsInstallation && $product->is_installable
+                        ? $qty * (float) ($product->installation_price ?? 0)
+                        : 0;
                     $lineTotal = $included ? round($qty * $unitPrice + $installPrice, 2) : 0;
                     $total += $lineTotal;
                     $lines[] = [
@@ -72,22 +74,25 @@ class CartController extends Controller
                     ];
                 }
             } elseif ($item['pack_id'] ?? null) {
-                $pack = Pack::find($item['pack_id']);
+                $pack = Pack::with('images')->find($item['pack_id']);
                 if ($pack && $pack->is_active) {
                     $unitPrice = (float) $pack->price;
-                    $lineTotal = $included ? round($qty * $unitPrice, 2) : 0;
+                    $installPrice = $wantsInstallation && ($pack->is_installable ?? false)
+                        ? $qty * (float) ($pack->installation_price ?? 0)
+                        : 0;
+                    $lineTotal = $included ? round($qty * $unitPrice + $installPrice, 2) : 0;
                     $total += $lineTotal;
                     $lines[] = [
                         'id' => $key,
                         'product_id' => null,
                         'pack_id' => $pack->id,
                         'product' => null,
-                        'pack' => ['id' => $pack->id, 'name' => $pack->name, 'price' => $pack->price, 'image_url' => null],
+                        'pack' => $this->formatPackForCart($pack),
                         'quantity' => $qty,
                         'unit_price' => $unitPrice,
                         'line_total' => $lineTotal,
                         'is_included' => $included,
-                        'is_installation_requested' => false,
+                        'is_installation_requested' => $wantsInstallation,
                     ];
                 }
             }
@@ -101,6 +106,23 @@ class CartController extends Controller
                 'total' => round($total, 2),
             ],
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function formatPackForCart(Pack $pack): array
+    {
+        $firstImage = $pack->relationLoaded('images') ? $pack->images->first() : $pack->images()->first();
+
+        return [
+            'id' => $pack->id,
+            'name' => $pack->name,
+            'price' => (float) $pack->price,
+            'image_url' => $firstImage ? $firstImage->url : null,
+            'is_installable' => (bool) ($pack->is_installable ?? false),
+            'installation_price' => isset($pack->installation_price) && $pack->installation_price !== null
+                ? (float) $pack->installation_price
+                : null,
+        ];
     }
 
     /** @return array<string, mixed> */
@@ -213,7 +235,7 @@ class CartController extends Controller
         $quantity = (int) $validated['quantity'];
 
         if ($request->user()) {
-            $orderLine = OrderLine::with('product')->find($line);
+            $orderLine = OrderLine::with(['product', 'pack'])->find($line);
             if (! $orderLine || $orderLine->order->client_id !== $request->user()->id || $orderLine->order->kind !== Order::KIND_CART) {
                 return response()->json(['success' => false, 'message' => 'Line not found.'], 404);
             }
@@ -226,11 +248,11 @@ class CartController extends Controller
                 }
                 if (array_key_exists('is_installation_requested', $validated)) {
                     $updates['is_installation_requested'] = $validated['is_installation_requested'];
-                    if ($validated['is_installation_requested'] && $orderLine->product?->is_installable) {
-                        $updates['installation_price'] = $orderLine->product->installation_price;
-                    } else {
-                        $updates['installation_price'] = null;
-                    }
+                    $installable = $orderLine->product?->is_installable || $orderLine->pack?->is_installable;
+                    $installPrice = $orderLine->product?->is_installable
+                        ? $orderLine->product->installation_price
+                        : ($orderLine->pack?->is_installable ? $orderLine->pack->installation_price : null);
+                    $updates['installation_price'] = $validated['is_installation_requested'] && $installable ? $installPrice : null;
                 }
                 $orderLine->update($updates);
             }
@@ -311,7 +333,7 @@ class CartController extends Controller
             'product_id' => $line->product_id,
             'pack_id' => $line->pack_id,
             'product' => $product ? $this->formatProductForCart($product) : null,
-            'pack' => $pack ? ['id' => $pack->id, 'name' => $pack->name, 'price' => (float) $pack->price, 'image_url' => null] : null,
+            'pack' => $pack ? $this->formatPackForCart($pack) : null,
             'quantity' => $line->quantity,
             'unit_price' => (float) $line->unit_price,
             'line_total' => (float) $line->line_total,

@@ -16,6 +16,7 @@ export default function AdminProductEditPage() {
   const [variantGroups, setVariantGroups] = useState([]);
   const [features, setFeatures] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [imagesLoading, setImagesLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [submitError, setSubmitError] = useState('');
 
@@ -72,7 +73,8 @@ export default function AdminProductEditPage() {
     setSubmitError('');
     setLoading(true);
     try {
-      const { data } = await api.put(`admin/products/${id}`, payload);
+      const { files: _, ...rest } = payload;
+      const { data } = await api.put(`admin/products/${id}`, rest);
       if (data.success) {
         showSuccess(t('common.saved'));
         setProduct(data.data);
@@ -83,6 +85,47 @@ export default function AdminProductEditPage() {
       setSubmitError(err.response?.data?.message || err.response?.data?.errors?.name?.[0] || t('common.error'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddImages = async (files) => {
+    if (!files?.length) return;
+    setSubmitError('');
+    setImagesLoading(true);
+    try {
+      const formData = new FormData();
+      files.forEach((f) => formData.append('images[]', f));
+      const { data } = await api.post(`admin/products/${id}/images`, formData);
+      if (data.success) {
+        showSuccess(t('common.saved'));
+        setProduct(data.data);
+      } else {
+        setSubmitError(data.message || t('common.error'));
+      }
+    } catch (err) {
+      setSubmitError(err.response?.data?.message || t('common.error'));
+    } finally {
+      setImagesLoading(false);
+    }
+  };
+
+  const handleRemoveImage = async (imageId) => {
+    setSubmitError('');
+    setImagesLoading(true);
+    try {
+      const { data } = await api.delete(`admin/products/${id}/images/${imageId}`);
+      if (data.success) {
+        setProduct((p) => ({
+          ...p,
+          images: (p.images || []).filter((img) => img.id !== imageId),
+        }));
+      } else {
+        setSubmitError(data.message || t('common.error'));
+      }
+    } catch (err) {
+      setSubmitError(err.response?.data?.message || t('common.error'));
+    } finally {
+      setImagesLoading(false);
     }
   };
 
@@ -123,7 +166,10 @@ export default function AdminProductEditPage() {
             variantGroups={variantGroups}
             features={features}
             onSubmit={handleSubmit}
+            onAddImages={handleAddImages}
+            onRemoveImage={handleRemoveImage}
             loading={loading}
+            imagesLoading={imagesLoading}
             error={submitError}
           />
         </div>

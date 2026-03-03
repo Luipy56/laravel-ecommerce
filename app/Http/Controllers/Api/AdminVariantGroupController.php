@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 /**
  * Admin CRUD for product variant groups (siblings).
- * A group has no name; it is just a set of products (e.g. same screw 30mm, 40mm, 50mm).
+ * A group may have an optional name; it is a set of products (e.g. same screw 30mm, 40mm, 50mm).
  */
 class AdminVariantGroupController extends Controller
 {
@@ -20,13 +20,17 @@ class AdminVariantGroupController extends Controller
 
         if ($request->filled('search')) {
             $term = '%' . $request->string('search')->trim() . '%';
-            $query->whereHas('products', fn ($q) => $q->where('name', 'like', $term)->orWhere('code', 'like', $term));
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', $term)
+                    ->orWhereHas('products', fn ($pq) => $pq->where('name', 'like', $term)->orWhere('code', 'like', $term));
+            });
         }
 
         $groups = $query->orderBy('id')->get();
 
         $data = $groups->map(fn ($g) => [
             'id' => $g->id,
+            'name' => $g->name,
             'products_count' => $g->products->count(),
             'products' => $g->products->map(fn ($p) => [
                 'id' => $p->id,
@@ -44,11 +48,14 @@ class AdminVariantGroupController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'name' => ['nullable', 'string', 'max:255'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
         ]);
 
-        $group = ProductVariantGroup::create([]);
+        $group = ProductVariantGroup::create([
+            'name' => $validated['name'] ?? null,
+        ]);
         $productIds = array_unique($validated['product_ids'] ?? []);
 
         $this->assignProductsToGroup($group->id, $productIds);
@@ -76,9 +83,12 @@ class AdminVariantGroupController extends Controller
     public function update(Request $request, ProductVariantGroup $variant_group): JsonResponse
     {
         $validated = $request->validate([
+            'name' => ['nullable', 'string', 'max:255'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
         ]);
+
+        $variant_group->update(['name' => $validated['name'] ?? null]);
 
         $productIds = array_unique($validated['product_ids'] ?? []);
 
@@ -112,6 +122,7 @@ class AdminVariantGroupController extends Controller
     {
         return [
             'id' => $g->id,
+            'name' => $g->name,
             'product_ids' => $g->products->pluck('id')->values()->all(),
             'products' => $g->products->map(fn ($p) => [
                 'id' => $p->id,

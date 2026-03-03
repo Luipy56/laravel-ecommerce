@@ -4,6 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending': return 'badge-warning';
+    case 'sent': return 'badge-info';
+    case 'installation_pending': return 'badge-warning';
+    case 'installation_confirmed': return 'badge-success';
+    default: return 'badge-ghost';
+  }
+}
+
 function lineDisplayName(line) {
   if (line.product) return line.product.name + (line.product.code ? ` (${line.product.code})` : '');
   if (line.pack) return line.pack.name;
@@ -129,7 +139,7 @@ export default function AdminOrderShowPage() {
                 </div>
               )}
               <div><dt className="text-sm text-base-content/70">{t('admin.orders.kind')}</dt><dd>{t(`admin.orders.kind_${order.kind}`)}</dd></div>
-              {isOrder && order.status && <div><dt className="text-sm text-base-content/70">{t('admin.orders.status')}</dt><dd><span className="badge badge-primary badge-sm">{t(`admin.orders.status_${order.status}`)}</span></dd></div>}
+              {isOrder && order.status && <div><dt className="text-sm text-base-content/70">{t('admin.orders.status')}</dt><dd><span className={`badge badge-sm ${getStatusBadgeClass(order.status)}`}>{t(`admin.orders.status_${order.status}`)}</span></dd></div>}
               {order.order_date && <div><dt className="text-sm text-base-content/70">{t('admin.orders.order_date')}</dt><dd>{new Date(order.order_date).toLocaleString()}</dd></div>}
               {order.shipping_date && <div><dt className="text-sm text-base-content/70">{t('admin.orders.shipping_date')}</dt><dd>{new Date(order.shipping_date).toLocaleString()}</dd></div>}
               {order.shipping_price != null && <div><dt className="text-sm text-base-content/70">{t('admin.orders.shipping_price')}</dt><dd>{Number(order.shipping_price).toFixed(2)} €</dd></div>}

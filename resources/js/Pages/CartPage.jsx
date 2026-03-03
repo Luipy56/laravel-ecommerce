@@ -10,8 +10,8 @@ function CartLine({ line, updateLine, removeLine, t }) {
   const imageUrl = line.product?.image_url ?? line.pack?.image_url ?? '/images/dummy.jpg';
   const isIncluded = line.is_included !== false;
   const wantsInstallation = !!line.is_installation_requested;
-  const isInstallable = !!line.product?.is_installable;
-  const installationPrice = line.product?.installation_price ?? null;
+  const isInstallable = line.product?.is_installable || line.pack?.is_installable || false;
+  const installationPrice = line.product?.installation_price ?? line.pack?.installation_price ?? null;
   const features = line.product?.features ?? [];
 
   const handleIncludeChange = () => {
@@ -28,9 +28,11 @@ function CartLine({ line, updateLine, removeLine, t }) {
     if (!Number.isNaN(v)) updateLine(line.id, Math.max(0, Math.min(99, v)));
   };
 
+  const detailUrl = isProduct ? `/products/${line.product.id}` : `/packs/${line.pack.id}`;
+
   return (
     <tr className={isIncluded ? '' : 'opacity-60 saturate-0'}>
-      <td className="align-middle">
+      <td className="align-middle text-center">
         <input
           type="checkbox"
           className="checkbox checkbox-sm checkbox-primary"
@@ -40,50 +42,52 @@ function CartLine({ line, updateLine, removeLine, t }) {
         />
       </td>
       <td className="align-middle">
-        <div className="flex items-center gap-3">
+        <Link
+          to={detailUrl}
+          className="flex items-center gap-3 no-underline text-base-content hover:text-primary transition-colors block"
+        >
           <figure className="mask mask-squircle w-16 h-16 shrink-0 bg-base-300 flex items-center justify-center overflow-hidden">
             <img src={imageUrl} alt="" className="w-full h-full object-cover" />
           </figure>
           <div>
-            <p className="font-medium text-base-content">{name}</p>
+            <p className="font-medium">{name}</p>
             {features.length > 0 && (
               <p className="text-sm text-base-content/70 mt-0.5">
                 {features.map((f) => `${f.name}: ${f.value}`).join(' · ')}
               </p>
             )}
           </div>
+        </Link>
+      </td>
+      <td className="text-center align-middle whitespace-nowrap">{Number(line.unit_price).toFixed(2)} €</td>
+      <td className="align-middle">
+        <div className="flex justify-center">
+          <input
+            type="number"
+            min={1}
+            max={99}
+            value={line.quantity}
+            onChange={handleQuantityChange}
+            className="input input-bordered input-sm w-20 text-center"
+          />
         </div>
       </td>
-      <td className="text-right align-middle whitespace-nowrap">{Number(line.unit_price).toFixed(2)} €</td>
-      <td className="align-middle">
-        <input
-          type="number"
-          min={1}
-          max={99}
-          value={line.quantity}
-          onChange={handleQuantityChange}
-          className="input input-bordered input-sm w-20 text-right"
-        />
-      </td>
-      <td className="text-right align-middle whitespace-nowrap">
-        {isProduct && installationPrice != null ? `${Number(installationPrice).toFixed(2)} €` : ''}
+      <td className="text-center align-middle whitespace-nowrap">
+        {(isProduct || line.pack) && installationPrice != null ? `${Number(installationPrice).toFixed(2)} €` : ''}
       </td>
       <td className="align-middle text-center">
-        {isProduct && (
-          <input
-            type="checkbox"
-            className="checkbox checkbox-sm checkbox-primary"
-            checked={wantsInstallation}
-            onChange={handleInstallChange}
-            disabled={!isInstallable}
-            aria-label={t('shop.cart.install_for_me')}
-            title={!isInstallable ? t('shop.product.installation_available') : undefined}
-          />
-        )}
-        {!isProduct && ''}
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm checkbox-primary"
+          checked={wantsInstallation}
+          onChange={handleInstallChange}
+          disabled={!isInstallable}
+          aria-label={t('shop.cart.install_for_me')}
+          title={!isInstallable ? t('shop.product.installation_available') : undefined}
+        />
       </td>
       <td className="text-right font-medium align-middle whitespace-nowrap">{Number(line.line_total).toFixed(2)} €</td>
-      <td className="align-middle">
+      <td className="align-middle text-center">
         <button
           type="button"
           className="btn btn-ghost btn-sm btn-circle"
@@ -112,9 +116,8 @@ export default function CartPage() {
   if (!cart.lines?.length) {
     return (
       <div className="max-w-5xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div className="mb-4">
           <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
-          <Link to="/products" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
         </div>
         <div className="text-center py-12">
           <p className="text-xl text-base-content/70 mb-4">{t('shop.cart.empty')}</p>
@@ -128,9 +131,8 @@ export default function CartPage() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+      <div className="mb-4">
         <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
-        <Link to="/products" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-300 overflow-hidden rounded-2xl">
@@ -138,14 +140,14 @@ export default function CartPage() {
           <table className="table">
             <thead>
               <tr className="bg-base-100 border-b border-base-300">
-                <th className="w-12" aria-label={t('shop.cart.include')} />
+                <th className="w-12 text-center" aria-label={t('shop.cart.include')} />
                 <th>{t('shop.products')}</th>
-                <th className="text-right whitespace-nowrap">{t('shop.price')}</th>
-                <th className="text-right whitespace-nowrap">{t('shop.quantity')}</th>
-                <th className="text-right whitespace-nowrap">{t('shop.cart.installation_price')}</th>
+                <th className="text-center whitespace-nowrap">{t('shop.price')}</th>
+                <th className="text-center whitespace-nowrap">{t('shop.quantity')}</th>
+                <th className="text-center whitespace-nowrap">{t('shop.cart.installation_price')}</th>
                 <th className="text-center w-24">{t('shop.cart.install_for_me')}</th>
                 <th className="text-right whitespace-nowrap">{t('shop.total')}</th>
-                <th className="w-12" />
+                <th className="w-12 text-center" />
               </tr>
             </thead>
             <tbody>
@@ -168,9 +170,6 @@ export default function CartPage() {
             <span className="text-2xl font-bold text-primary">{Number(cart.total).toFixed(2)} €</span>
           </p>
           <div className="flex gap-2 justify-center sm:justify-end">
-            <Link to="/products" className="btn btn-ghost">
-              {t('common.back')}
-            </Link>
             <Link to="/checkout" className="btn btn-primary">
               {t('shop.checkout')}
             </Link>

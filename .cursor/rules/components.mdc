@@ -24,3 +24,10 @@ Use these components instead of duplicating markup. Keep list and behaviour cons
 - **Props:** `product` — object with `id`, `name`, `primaryImageUrl`, `formattedPrice` (e.g. from `Product.fromApi()`).
 - **Behaviour:** Title links to `/products/:id`; “+” button adds one unit to cart (via `useCart().addLine`); card is draggable for drop-on-navbar cart. Same styling: `card card-border`, shadow, hover (shadow-lg, slight translate). Image height `h-40`, fallback image from `Product.fallbackImageUrl`.
 - **Do not:** Inline a different card layout for products on home vs list; use `ProductCard` in both places so the look and behaviour stay the same.
+
+## ConfirmModal
+
+- **Path:** `resources/js/components/ConfirmModal.jsx`
+- **Use for:** Confirmation before submit (e.g. CustomSolution, Checkout) or destructive actions (e.g. delete address, delete contact).
+- **Props:** `open`, `onClose`, `onConfirm`, `title`, `message`, `confirmLabel` (optional), `loading` (optional), `confirmVariant` ('primary' | 'error').
+- **Do not:** Use `window.confirm()` for user confirmations; use `ConfirmModal` instead for consistent UI and accessibility.

@@ -16,6 +16,7 @@ function groupProductsByCategory(products) {
 
 export default function AdminVariantGroupForm({ group = null, products = [], onSubmit, loading = false, error = '' }) {
   const { t } = useTranslation();
+  const [name, setName] = useState(group?.name ?? '');
   const [productIds, setProductIds] = useState(() => group?.product_ids ?? []);
 
   const toggleProduct = (id) => {
@@ -24,7 +25,7 @@ export default function AdminVariantGroupForm({ group = null, products = [], onS
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ product_ids: productIds });
+    onSubmit({ name: name.trim() || null, product_ids: productIds });
   };
 
   const grouped = groupProductsByCategory(products);
@@ -36,6 +37,17 @@ export default function AdminVariantGroupForm({ group = null, products = [], onS
           {error}
         </div>
       )}
+
+      <label className="form-field">
+        <span className="form-label">{t('admin.variant_groups.name')}</span>
+        <input
+          type="text"
+          className="input input-bordered w-full"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          aria-label={t('admin.variant_groups.name')}
+        />
+      </label>
 
       {products.length > 0 ? (
         <div className="form-field">

@@ -51,4 +51,6 @@ class PersonalizedSolution extends Model
     public const STATUS_PENDING_REVIEW = 'pending_review';
     public const STATUS_REVIEWED = 'reviewed';
     public const STATUS_CLIENT_CONTACTED = 'client_contacted';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_COMPLETED = 'completed';
 }

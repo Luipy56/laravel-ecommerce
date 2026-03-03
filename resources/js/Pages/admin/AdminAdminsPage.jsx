@@ -86,7 +86,7 @@ export default function AdminAdminsPage() {
               <thead>
                 <tr>
                   <th>{t('admin.admins.username')}</th>
-                  <th>{t('admin.products.is_active')}</th>
+                  <th className="text-center">{t('admin.products.is_active')}</th>
                   <th>{t('admin.admins.last_login_at')}</th>
                   <th>{t('admin.admins.created_at')}</th>
                 </tr>
@@ -107,7 +107,7 @@ export default function AdminAdminsPage() {
                     }}
                   >
                     <td>{a.username}</td>
-                    <td>{a.is_active ? t('common.yes') : t('common.no')}</td>
+                    <td className="text-center">{a.is_active ? t('common.yes') : t('common.no')}</td>
                     <td>{a.last_login_at ? new Date(a.last_login_at).toLocaleString() : ''}</td>
                     <td>{a.created_at ? new Date(a.created_at).toLocaleDateString() : ''}</td>
                   </tr>

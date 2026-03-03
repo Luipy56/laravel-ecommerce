@@ -97,6 +97,7 @@ class AdminClientController extends Controller
                     'city' => $a->city,
                     'province' => $a->province,
                     'postal_code' => $a->postal_code,
+                    'is_primary' => (bool) $a->is_primary,
                     'is_active' => (bool) $a->is_active,
                 ])->values()->all(),
             ],

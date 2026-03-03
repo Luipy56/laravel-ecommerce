@@ -83,6 +83,8 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::post('products/{product}/images', [AdminProductController::class, 'storeImages']);
     Route::delete('products/{product}/images/{productImage}', [AdminProductController::class, 'destroyImage']);
     Route::apiResource('packs', AdminPackController::class);
+    Route::post('packs/{pack}/images', [AdminPackController::class, 'storeImages']);
+    Route::delete('packs/{pack}/images/{packImage}', [AdminPackController::class, 'destroyImage']);
     Route::apiResource('variant-groups', AdminVariantGroupController::class);
     Route::get('clients', [AdminClientController::class, 'index']);
     Route::get('clients/{client}', [AdminClientController::class, 'show']);

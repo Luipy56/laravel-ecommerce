@@ -17,12 +17,14 @@ class ClientAddress extends Model
         'city',
         'province',
         'postal_code',
+        'is_primary',
         'is_active',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_primary' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

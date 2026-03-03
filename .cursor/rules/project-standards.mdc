@@ -31,6 +31,7 @@ $table->string('status')->comment('Order status'); // values from lang: shop.sta
 ## Styling
 
 - Use **Tailwind CSS** for all styling (utility-first, mobile-first). Use **daisyUI** for ready-made components (cards, modals, navbar, etc.); see **`.cursor/rules/daisyui.mdc`** and **`.cursor/rules/tailwind.mdc`**.
+- **Form submit buttons:** Place the primary "Save" / "Guardar" button **aligned to the right**. Use `flex justify-end` for the submit row, or `modal-action` in modals (cancel left, save right).
 - Put theme tokens and overrides in a global **`styles.css`** (e.g. CSS variables, Tailwind/daisyUI theme). Add a separate CSS file per page or component only when the style does not repeat and is necessary.
 
 ## Product variants
@@ -61,6 +62,7 @@ $table->string('status')->comment('Order status'); // values from lang: shop.sta
   - **Search:** An `input type="search"` with **debounced** value (e.g. 300 ms) sent as query param to the API. Use local state for the input and a separate `searchDebounce` state updated in a `useEffect` with `setTimeout`/`clearTimeout`.
   - **Filters:** Select dropdowns for relevant dimensions (e.g. category, type, active). Send filter values as query params; use empty string for “All” (do not send the param when “All”).
   - **Clickable rows:** Table rows navigate to the edit page on click (and Enter/Space for a11y). Use `role="button"`, `tabIndex={0}`, `onClick` and `onKeyDown`; do not add a separate “Edit” button column unless required.
+  - **Table column alignment:** Apply consistent alignment so `th` and `td` in the same column share classes. Use `text-end` for numeric columns (price, stock, counts, totals); add `tabular-nums` on `td` for numeric cells. Use `text-center` for boolean/status columns (is_active, badges). Keep text columns (names, codes, emails) left-aligned (default).
 - **CRUD resources:** Products (`admin/products`), Features (`admin/features`), Feature names / types (`admin/feature-names`). Backend: controllers under `App\Http\Controllers\Api\Admin*`; list endpoints accept `search`, `is_active`, and resource-specific filters (e.g. `category_id`, `feature_name_id`). Response shape: `{ success: true, data: [...] }` (and `meta` for paginated lists).
 - **i18n:** All admin UI strings use keys under `admin.*` in `resources/js/locales/ca.json` and `es.json` (e.g. `admin.products.title`, `admin.features.search_placeholder`, `admin.feature_types.filter_active`). Reuse `shop.categories.all` for “All” in filters and `common.yes` / `common.no` where appropriate.
 

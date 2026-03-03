@@ -87,18 +87,22 @@ export default function AdminLayout() {
     }
   };
 
-  const navItems = [
-    { to: '/admin', labelKey: 'admin.nav.dashboard' },
-    { to: '/admin/admins', labelKey: 'admin.nav.admins' },
-    { to: '/admin/products', labelKey: 'admin.nav.products' },
-    { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups' },
-    { to: '/admin/clients', labelKey: 'admin.nav.clients' },
-    { to: '/admin/orders', labelKey: 'admin.nav.orders' },
-    { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions' },
-    { to: '/admin/features', labelKey: 'admin.nav.features' },
-    { to: '/admin/feature-names', labelKey: 'admin.nav.feature_types' },
-    { to: '/admin/packs', labelKey: 'admin.nav.packs' },
-  ];
+  const navItems = useMemo(() => {
+    const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard' };
+    const mainItems = [
+      { to: '/admin/admins', labelKey: 'admin.nav.admins' },
+      { to: '/admin/products', labelKey: 'admin.nav.products' },
+      { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups' },
+      { to: '/admin/clients', labelKey: 'admin.nav.clients' },
+      { to: '/admin/orders', labelKey: 'admin.nav.orders' },
+      { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions' },
+      { to: '/admin/features', labelKey: 'admin.nav.features' },
+      { to: '/admin/feature-names', labelKey: 'admin.nav.feature_types' },
+      { to: '/admin/packs', labelKey: 'admin.nav.packs' },
+    ];
+    const sorted = [...mainItems].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
+    return [dashboard, ...sorted];
+  }, [t]);
 
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-base-200">

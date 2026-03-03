@@ -30,13 +30,13 @@ class AdminOrderController extends Controller
             }
         }
         if ($request->filled('kind')) {
-            $kind = $request->string('kind');
-            if (in_array($kind, [Order::KIND_CART, Order::KIND_ORDER], true)) {
+            $kind = (string) $request->input('kind');
+            if (in_array($kind, [Order::KIND_CART, Order::KIND_ORDER, Order::KIND_LIKE], true)) {
                 $query->where('kind', $kind);
             }
         }
         if ($request->filled('status')) {
-            $query->where('kind', Order::KIND_ORDER)->where('status', $request->string('status'));
+            $query->where('kind', Order::KIND_ORDER)->where('status', (string) $request->input('status'));
         }
 
         $orders = $query->get();

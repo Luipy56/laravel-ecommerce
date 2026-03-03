@@ -105,9 +105,9 @@ export default function AdminClientsPage() {
                   <th>{t('admin.clients.filter_type')}</th>
                   <th>{t('admin.clients.identification')}</th>
                   <th>{t('admin.clients.primary_contact')}</th>
-                  <th>{t('admin.clients.contacts_count')}</th>
-                  <th>{t('admin.clients.addresses_count')}</th>
-                  <th>{t('admin.products.is_active')}</th>
+                  <th className="text-center">{t('admin.clients.contacts_count')}</th>
+                  <th className="text-center">{t('admin.clients.addresses_count')}</th>
+                  <th className="text-center">{t('admin.products.is_active')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -129,9 +129,9 @@ export default function AdminClientsPage() {
                     <td>{clientTypeLabel(c.type, t)}</td>
                     <td>{c.identification}</td>
                     <td>{c.primary_contact_name}</td>
-                    <td>{c.contacts_count ?? 0}</td>
-                    <td>{c.addresses_count ?? 0}</td>
-                    <td>{c.is_active ? t('common.yes') : t('common.no')}</td>
+                    <td className="text-center tabular-nums">{c.contacts_count ?? 0}</td>
+                    <td className="text-center tabular-nums">{c.addresses_count ?? 0}</td>
+                    <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td>
                   </tr>
                 ))}
               </tbody>

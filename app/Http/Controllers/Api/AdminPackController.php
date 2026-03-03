@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AdminPackResource;
 use App\Models\Pack;
+use App\Models\PackImage;
 use App\Models\PackItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,22 +57,28 @@ class AdminPackController extends Controller
             'is_active' => ['boolean'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['file', 'image', 'max:10240'],
         ]);
 
         $defaults = ['is_trending' => false, 'is_active' => true];
-        $pack = Pack::create(array_merge($defaults, collect($validated)->except('product_ids')->all()));
+        $pack = Pack::create(array_merge($defaults, collect($validated)->except(['product_ids', 'images'])->all()));
 
         $this->syncPackItems($pack, $validated['product_ids'] ?? []);
 
+        if ($request->hasFile('images')) {
+            $this->storePackImages($pack, $request->file('images'));
+        }
+
         return response()->json([
             'success' => true,
-            'data' => new AdminPackResource($pack->load('packItems.product')),
+            'data' => new AdminPackResource($pack->load(['packItems.product', 'images'])),
         ], 201);
     }
 
     public function show(Pack $pack): JsonResponse
     {
-        $pack->load(['packItems.product', 'images']);
+        $pack->load(['packItems.product.category', 'packItems.product.images', 'images']);
 
         return response()->json([
             'success' => true,
@@ -96,8 +103,52 @@ class AdminPackController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => new AdminPackResource($pack->fresh()->load('packItems.product')),
+            'data' => new AdminPackResource($pack->fresh()->load(['packItems.product', 'images'])),
         ]);
+    }
+
+    public function storeImages(Request $request, Pack $pack): JsonResponse
+    {
+        $validated = $request->validate([
+            'images' => ['required', 'array'],
+            'images.*' => ['required', 'file', 'image', 'max:10240'],
+        ]);
+
+        $this->storePackImages($pack, $validated['images']);
+
+        return response()->json([
+            'success' => true,
+            'data' => new AdminPackResource($pack->load(['packItems.product', 'images'])),
+        ]);
+    }
+
+    public function destroyImage(Pack $pack, PackImage $packImage): JsonResponse
+    {
+        if ($packImage->pack_id !== $pack->id) {
+            abort(404);
+        }
+        $packImage->update(['is_active' => false]);
+
+        return response()->json(['success' => true]);
+    }
+
+    private function storePackImages(Pack $pack, array $files): void
+    {
+        $maxSort = (int) PackImage::where('pack_id', $pack->id)->max('sort_order');
+        foreach ($files as $file) {
+            $maxSort++;
+            $path = $file->store('packs/' . $pack->id, 'public');
+            PackImage::create([
+                'pack_id' => $pack->id,
+                'storage_path' => $path,
+                'filename' => $file->getClientOriginalName(),
+                'size_bytes' => $file->getSize(),
+                'checksum' => null,
+                'content_type' => $file->getMimeType(),
+                'sort_order' => $maxSort,
+                'is_active' => true,
+            ]);
+        }
     }
 
     public function destroy(Pack $pack): JsonResponse

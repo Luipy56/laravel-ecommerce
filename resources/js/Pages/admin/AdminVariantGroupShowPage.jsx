@@ -81,10 +81,9 @@ export default function AdminVariantGroupShowPage() {
                       <th>{t('admin.products.name')}</th>
                       <th>{t('admin.products.code')}</th>
                       <th className="text-end">{t('admin.products.price')}</th>
-                      <th className="text-end">{t('admin.products.stock')}</th>
+                      <th className="text-center">{t('admin.products.stock')}</th>
                       <th>{t('admin.products.category')}</th>
-                      <th>{t('admin.products.is_active')}</th>
-                      <th className="w-24" />
+                      <th className="text-center">{t('admin.products.is_active')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -118,21 +117,10 @@ export default function AdminVariantGroupShowPage() {
                         <td className="text-end tabular-nums">
                           {p.price != null ? Number(p.price).toFixed(2) : ''} €
                         </td>
-                        <td className="text-end tabular-nums">{p.stock}</td>
+                        <td className="text-center tabular-nums">{p.stock}</td>
                         <td className="text-base-content/70">{p.category?.name}</td>
-                        <td>
-                          <span className={`badge badge-sm ${p.is_active ? 'badge-success' : 'badge-ghost'}`}>
-                            {p.is_active ? t('common.yes') : t('common.no')}
-                          </span>
-                        </td>
-                        <td onClick={(e) => e.stopPropagation()}>
-                          <Link
-                            to={`/admin/products/${p.id}/edit`}
-                            className="btn btn-ghost btn-xs"
-                            aria-label={t('admin.products.edit')}
-                          >
-                            {t('common.edit')}
-                          </Link>
+                        <td className="text-center">
+                          {p.is_active ? t('common.yes') : t('common.no')}
                         </td>
                       </tr>
                     ))}
@@ -173,20 +161,9 @@ export default function AdminVariantGroupShowPage() {
                           <span className="text-sm text-base-content/70">
                             {t('admin.products.stock')}: {p.stock}
                           </span>
-                          <span className={`badge badge-sm ${p.is_active ? 'badge-success' : 'badge-ghost'}`}>
-                            {p.is_active ? t('common.yes') : t('common.no')}
-                          </span>
+                          {p.is_active ? t('common.yes') : t('common.no')}
                         </div>
                       </div>
-                      <span onClick={(e) => e.stopPropagation()}>
-                        <Link
-                          to={`/admin/products/${p.id}/edit`}
-                          className="btn btn-ghost btn-sm shrink-0"
-                          aria-label={t('admin.products.edit')}
-                        >
-                          {t('common.edit')}
-                        </Link>
-                      </span>
                     </div>
                   </Link>
                 ))}

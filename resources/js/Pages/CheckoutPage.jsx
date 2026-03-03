@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
@@ -7,6 +7,19 @@ import { useCart } from '../contexts/CartContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 
+const INITIAL_FORM = {
+  payment_method: 'card',
+  shipping_street: '',
+  shipping_city: '',
+  shipping_province: '',
+  shipping_postal_code: '',
+  shipping_note: '',
+  installation_street: '',
+  installation_city: '',
+  installation_postal_code: '',
+  installation_note: '',
+};
+
 export default function CheckoutPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -14,18 +27,26 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [form, setForm] = useState({
-    payment_method: 'card',
-    shipping_street: '',
-    shipping_city: '',
-    shipping_province: '',
-    shipping_postal_code: '',
-    shipping_note: '',
-    installation_street: '',
-    installation_city: '',
-    installation_postal_code: '',
-    installation_note: '',
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
+
+  useEffect(() => {
+    if (!user) return;
+    api.get('profile').then(({ data }) => {
+      if (data.success && data.data?.address) {
+        const addr = data.data.address;
+        setForm((f) => ({
+          ...f,
+          shipping_street: addr.street ?? '',
+          shipping_city: addr.city ?? '',
+          shipping_province: addr.province ?? '',
+          shipping_postal_code: addr.postal_code ?? '',
+          installation_street: addr.street ?? '',
+          installation_city: addr.city ?? '',
+          installation_postal_code: addr.postal_code ?? '',
+        }));
+      }
+    });
+  }, [user?.id]);
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -111,10 +132,12 @@ export default function CheckoutPage() {
             </select>
           </label>
 
-          <p className="text-lg font-semibold mt-4">{t('shop.total')}: {Number(cart.total).toFixed(2)} €</p>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? t('common.loading') : t('shop.checkout')}
-          </button>
+          <div className="flex flex-wrap items-center justify-between gap-4 mt-4">
+            <p className="text-lg font-semibold">{t('shop.total')}: {Number(cart.total).toFixed(2)} €</p>
+            <button type="submit" className="btn btn-primary shrink-0" disabled={loading}>
+              {loading ? t('common.loading') : t('shop.checkout')}
+            </button>
+          </div>
         </div>
       </form>
     </div>

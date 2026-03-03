@@ -86,7 +86,7 @@ export default function AdminFeatureNamesPage() {
               <thead>
                 <tr>
                   <th>{t('admin.features.type')}</th>
-                  <th>{t('admin.products.is_active')}</th>
+                  <th className="text-center">{t('admin.products.is_active')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -100,7 +100,7 @@ export default function AdminFeatureNamesPage() {
                     onKeyDown={(e) => e.key === 'Enter' && navigate(`/admin/feature-names/${n.id}`)}
                   >
                     <td>{n.name}</td>
-                    <td>{n.is_active ? t('common.yes') : t('common.no')}</td>
+                    <td className="text-center">{n.is_active ? t('common.yes') : t('common.no')}</td>
                   </tr>
                 ))}
               </tbody>

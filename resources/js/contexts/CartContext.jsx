@@ -73,6 +73,7 @@ export function CartProvider({ children }) {
     if (typeof payload !== 'number') {
       if (payload.included !== undefined) body.included = payload.included;
       if (payload.is_installation_requested !== undefined) body.is_installation_requested = payload.is_installation_requested;
+      if (payload.extra_keys_qty !== undefined) body.extra_keys_qty = payload.extra_keys_qty;
     }
     const { data } = await api.put(`cart/lines/${lineId}`, body);
     if (data.success && data.data) {

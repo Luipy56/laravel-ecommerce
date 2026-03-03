@@ -119,7 +119,7 @@ export default function AdminFeaturesPage() {
                 <tr>
                   <th>{t('admin.features.type')}</th>
                   <th>{t('admin.features.value')}</th>
-                  <th>{t('admin.products.is_active')}</th>
+                  <th className="text-center">{t('admin.products.is_active')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,7 +139,7 @@ export default function AdminFeaturesPage() {
                   >
                     <td>{f.feature_name}</td>
                     <td>{f.value}</td>
-                    <td>{f.is_active ? t('common.yes') : t('common.no')}</td>
+                    <td className="text-center">{f.is_active ? t('common.yes') : t('common.no')}</td>
                   </tr>
                 ))}
               </tbody>

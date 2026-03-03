@@ -31,13 +31,31 @@ export default function AdminPackNewPage() {
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.post('admin/packs', payload);
+      let response;
+      if (payload.files?.length) {
+        const formData = new FormData();
+        const { files, ...rest } = payload;
+        const boolKeys = ['is_trending', 'is_active'];
+        Object.entries(rest).forEach(([k, v]) => {
+          if (v === null || v === undefined) return;
+          if (Array.isArray(v)) v.forEach((x) => formData.append(`${k}[]`, x));
+          else if (boolKeys.includes(k)) formData.append(k, v ? '1' : '0');
+          else formData.append(k, v);
+        });
+        files.forEach((f) => formData.append('images[]', f));
+        response = await api.post('admin/packs', formData);
+      } else {
+        const { files: _, ...rest } = payload;
+        response = await api.post('admin/packs', rest);
+      }
+      const { data } = response;
       if (data.success) {
         showSuccess(t('common.saved'));
         navigate('/admin/packs');
       } else setError(data.message || t('common.error'));
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.errors?.name?.[0] || t('common.error'));
+      if (err.response?.status === 401) navigate('/admin/login');
+      else setError(err.response?.data?.message || err.response?.data?.errors?.name?.[0] || t('common.error'));
     } finally {
       setLoading(false);
     }

@@ -112,9 +112,9 @@ export default function AdminPersonalizedSolutionsPage() {
                   <th>{t('admin.personalized_solutions.email')}</th>
                   <th>{t('admin.personalized_solutions.phone')}</th>
                   <th>{t('admin.personalized_solutions.problem_description')}</th>
-                  <th>{t('admin.personalized_solutions.status')}</th>
-                  <th>{t('admin.personalized_solutions.created_at')}</th>
-                  <th>{t('admin.products.is_active')}</th>
+                  <th className="text-center">{t('admin.personalized_solutions.status')}</th>
+                  <th className="text-end">{t('admin.personalized_solutions.created_at')}</th>
+                  <th className="text-center">{t('admin.products.is_active')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,9 +135,9 @@ export default function AdminPersonalizedSolutionsPage() {
                     <td>{s.email ?? ''}</td>
                     <td>{s.phone ?? ''}</td>
                     <td className="max-w-[200px] truncate">{s.problem_description ?? ''}</td>
-                    <td><span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>{t(`admin.personalized_solutions.status_${s.status}`)}</span></td>
-                    <td>{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</td>
-                    <td>{s.is_active ? t('common.yes') : t('common.no')}</td>
+                    <td className="text-center"><span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>{t(`admin.personalized_solutions.status_${s.status}`)}</span></td>
+                    <td className="text-end">{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</td>
+                    <td className="text-center">{s.is_active ? t('common.yes') : t('common.no')}</td>
                   </tr>
                 ))}
               </tbody>

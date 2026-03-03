@@ -5,6 +5,7 @@
 Enum order_kind {
   cart [note: 'User cart, not yet confirmed as order']
   order [note: 'Confirmed order (paid or being processed)']
+  like [note: 'Favorites/wishlist (product/pack likes)']
 }
 
 Enum order_status {
@@ -71,6 +72,7 @@ Table CLIENT_ADDRESSES {
   city varchar(100) [not null]
   province varchar(100) [null, note: 'Provincia']
   postal_code varchar(20) [null]
+  is_primary boolean [not null, default: false, note: 'Main address for this client']
   is_active boolean [not null, default: true, note: 'Soft delete']
 }
 

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { IconChevronDown, IconChevronRight } from '../../components/icons';
 
 function clientTypeLabel(type, t) {
   if (type === 'person') return t('admin.clients.type_person');
@@ -107,8 +108,8 @@ export default function AdminClientShowPage() {
             aria-expanded={contactsOpen}
           >
             <span>{t('admin.clients.contacts')} ({client.contacts?.length ?? 0})</span>
-            <span className="text-base-content transition-transform duration-300" aria-hidden="true">
-              {contactsOpen ? '▼' : '▶'}
+            <span className="shrink-0" aria-hidden="true">
+              {contactsOpen ? <IconChevronDown className="h-5 w-5" /> : <IconChevronRight className="h-5 w-5" />}
             </span>
           </button>
           <div
@@ -129,7 +130,7 @@ export default function AdminClientShowPage() {
                           <th>{t('profile.phone')}</th>
                           <th>{t('admin.clients.phone2')}</th>
                           <th>{t('admin.clients.email')}</th>
-                          <th>{t('admin.clients.primary')}</th>
+                          <th className="text-center">{t('admin.clients.primary')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -140,7 +141,7 @@ export default function AdminClientShowPage() {
                             <td>{c.phone}</td>
                             <td>{c.phone2}</td>
                             <td>{c.email}</td>
-                            <td>{c.is_primary ? t('common.yes') : ''}</td>
+                            <td className="text-center">{c.is_primary ? t('common.yes') : ''}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -162,8 +163,8 @@ export default function AdminClientShowPage() {
             aria-expanded={addressesOpen}
           >
             <span>{t('admin.clients.addresses')} ({client.addresses?.length ?? 0})</span>
-            <span className="text-base-content transition-transform duration-300" aria-hidden="true">
-              {addressesOpen ? '▼' : '▶'}
+            <span className="shrink-0" aria-hidden="true">
+              {addressesOpen ? <IconChevronDown className="h-5 w-5" /> : <IconChevronRight className="h-5 w-5" />}
             </span>
           </button>
           <div
@@ -185,6 +186,7 @@ export default function AdminClientShowPage() {
                           <th>{t('profile.city')}</th>
                           <th>{t('profile.postal_code')}</th>
                           <th>{t('profile.province')}</th>
+                          <th className="text-center">{t('admin.clients.primary')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -196,6 +198,7 @@ export default function AdminClientShowPage() {
                             <td>{a.city}</td>
                             <td>{a.postal_code}</td>
                             <td>{a.province}</td>
+                            <td className="text-center">{a.is_primary ? t('common.yes') : ''}</td>
                           </tr>
                         ))}
                       </tbody>

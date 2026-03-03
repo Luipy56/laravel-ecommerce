@@ -12,6 +12,9 @@ function CartLine({ line, updateLine, removeLine, t }) {
   const wantsInstallation = !!line.is_installation_requested;
   const isInstallable = line.product?.is_installable || line.pack?.is_installable || false;
   const installationPrice = line.product?.installation_price ?? line.pack?.installation_price ?? null;
+  const isExtraKeysAvailable = !!line.product?.is_extra_keys_available;
+  const extraKeyUnitPrice = line.product?.extra_key_unit_price ?? null;
+  const extraKeysQty = line.extra_keys_qty ?? 0;
   const features = line.product?.features ?? [];
 
   const handleIncludeChange = () => {
@@ -26,6 +29,16 @@ function CartLine({ line, updateLine, removeLine, t }) {
   const handleQuantityChange = (e) => {
     const v = parseInt(e.target.value, 10);
     if (!Number.isNaN(v)) updateLine(line.id, Math.max(0, Math.min(99, v)));
+  };
+
+  const handleExtraKeysChange = (e) => {
+    const v = parseInt(e.target.value, 10);
+    if (!Number.isNaN(v)) {
+      updateLine(line.id, {
+        quantity: line.quantity,
+        extra_keys_qty: Math.max(0, Math.min(99, v)),
+      });
+    }
   };
 
   const detailUrl = isProduct ? `/products/${line.product.id}` : `/packs/${line.pack.id}`;
@@ -72,19 +85,41 @@ function CartLine({ line, updateLine, removeLine, t }) {
           />
         </div>
       </td>
-      <td className="text-center align-middle whitespace-nowrap">
-        {(isProduct || line.pack) && installationPrice != null ? `${Number(installationPrice).toFixed(2)} €` : ''}
+      <td className="align-middle text-center">
+        <div className="flex flex-col items-center gap-0.5">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm checkbox-primary"
+            checked={wantsInstallation}
+            onChange={handleInstallChange}
+            disabled={!isInstallable}
+            aria-label={t('shop.cart.install_for_me')}
+            title={!isInstallable ? t('shop.product.installation_available') : undefined}
+          />
+          {(installationPrice != null && installationPrice !== '') && (
+            <span className="text-xs text-base-content/70">{Number(installationPrice).toFixed(2)} €/u</span>
+          )}
+        </div>
       </td>
       <td className="align-middle text-center">
-        <input
-          type="checkbox"
-          className="checkbox checkbox-sm checkbox-primary"
-          checked={wantsInstallation}
-          onChange={handleInstallChange}
-          disabled={!isInstallable}
-          aria-label={t('shop.cart.install_for_me')}
-          title={!isInstallable ? t('shop.product.installation_available') : undefined}
-        />
+        {isExtraKeysAvailable ? (
+          <div className="flex flex-col items-center gap-0.5">
+            <input
+              type="number"
+              min={0}
+              max={99}
+              value={extraKeysQty}
+              onChange={handleExtraKeysChange}
+              className="input input-bordered input-sm w-16 text-center"
+              aria-label={t('shop.cart.extra_keys')}
+            />
+            {extraKeyUnitPrice != null && (
+              <span className="text-xs text-base-content/70">{Number(extraKeyUnitPrice).toFixed(2)} €/u</span>
+            )}
+          </div>
+        ) : (
+          ''
+        )}
       </td>
       <td className="text-right font-medium align-middle whitespace-nowrap">{Number(line.line_total).toFixed(2)} €</td>
       <td className="align-middle text-center">
@@ -144,8 +179,8 @@ export default function CartPage() {
                 <th>{t('shop.products')}</th>
                 <th className="text-center whitespace-nowrap">{t('shop.price')}</th>
                 <th className="text-center whitespace-nowrap">{t('shop.quantity')}</th>
-                <th className="text-center whitespace-nowrap">{t('shop.cart.installation_price')}</th>
                 <th className="text-center w-24">{t('shop.cart.install_for_me')}</th>
+                <th className="text-center whitespace-nowrap">{t('shop.cart.extra_keys')}</th>
                 <th className="text-right whitespace-nowrap">{t('shop.total')}</th>
                 <th className="w-12 text-center" />
               </tr>

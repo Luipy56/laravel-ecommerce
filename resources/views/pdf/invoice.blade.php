@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <title>{{ __('shop.orders') }} #{{ $order->id }}</title>
+    <title>{{ __('shop.invoice_title') }} #{{ $order->id }}</title>
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; }
         table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
@@ -13,26 +13,26 @@
     </style>
 </head>
 <body>
-    <h1>{{ __('shop.orders') }} #{{ $order->id }}</h1>
-    <p>{{ __('shop.status.pending') }}: {{ $order->status }}</p>
-    <p>{{ __('shop.orders') }}: {{ $order->order_date?->format('d/m/Y H:i') }}</p>
+    <h1>{{ __('shop.invoice_title') }} #{{ $order->id }}</h1>
+    <p>{{ __('shop.order_status') }}: {{ __('shop.status.' . $order->status) }}</p>
+    <p>{{ __('shop.order_date') }}: {{ $order->order_date?->format('d/m/Y H:i') }}</p>
 
     @php
         $primary = $order->client->contacts->where('is_primary', true)->first();
         $addr = $order->addresses->where('type', 'shipping')->first();
     @endphp
-    <h2>Client</h2>
+    <h2>{{ __('shop.order_client') }}</h2>
     <p>{{ $primary?->name }} {{ $primary?->surname }}<br>
     {{ $order->client->login_email }}</p>
     @if($addr)
     <p>{{ $addr->street }}, {{ $addr->postal_code }} {{ $addr->city }}</p>
     @endif
 
-    <h2>Línies</h2>
+    <h2>{{ __('shop.order_lines') }}</h2>
     <table>
         <thead>
             <tr>
-                <th>Producte / Pack</th>
+                <th>{{ __('shop.order_product_pack') }}</th>
                 <th class="text-right">{{ __('shop.quantity') }}</th>
                 <th class="text-right">{{ __('shop.price') }}</th>
                 <th class="text-right">{{ __('shop.total') }}</th>

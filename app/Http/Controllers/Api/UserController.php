@@ -16,7 +16,7 @@ class UserController extends Controller
         $client = $request->user();
         $client->load([
             'contacts' => fn ($q) => $q->where('is_active', true)->orderByDesc('is_primary')->orderBy('id'),
-            'addresses' => fn ($q) => $q->where('is_active', true)->orderBy('id'),
+            'addresses' => fn ($q) => $q->where('is_active', true)->orderByDesc('is_primary')->orderBy('id'),
         ]);
 
         $primary = $client->contacts->first(fn ($c) => $c->is_primary) ?? $client->contacts->first();
@@ -46,6 +46,7 @@ class UserController extends Controller
                     'city' => $a->city,
                     'province' => $a->province,
                     'postal_code' => $a->postal_code,
+                    'is_primary' => $a->is_primary,
                 ])->values()->all(),
                 'contacts' => $client->contacts->map(fn ($c) => [
                     'id' => $c->id,
@@ -110,7 +111,12 @@ class UserController extends Controller
             'city' => ['required', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
+            'is_primary' => ['boolean'],
         ]);
+
+        if (! empty($validated['is_primary'])) {
+            $client->addresses()->update(['is_primary' => false]);
+        }
 
         $address = $client->addresses()->create([
             'type' => $validated['type'],
@@ -119,6 +125,7 @@ class UserController extends Controller
             'city' => $validated['city'],
             'province' => $validated['province'] ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
+            'is_primary' => $validated['is_primary'] ?? false,
             'is_active' => true,
         ]);
 
@@ -135,8 +142,12 @@ class UserController extends Controller
             'city' => ['sometimes', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
+            'is_primary' => ['boolean'],
         ]);
 
+        if (array_key_exists('is_primary', $validated) && ! empty($validated['is_primary'])) {
+            $request->user()->addresses()->update(['is_primary' => false]);
+        }
         $address->update($validated);
 
         return response()->json(['success' => true, 'data' => $this->formatAddress($address->fresh())]);
@@ -220,6 +231,7 @@ class UserController extends Controller
             'city' => $a->city,
             'province' => $a->province,
             'postal_code' => $a->postal_code,
+            'is_primary' => $a->is_primary,
         ];
     }
 

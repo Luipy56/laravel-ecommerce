@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
@@ -36,25 +37,29 @@ export default function OrdersPage() {
         <p>{t('shop.cart.empty')}</p>
       ) : (
         <ul className="space-y-4">
-          {orders.map((o) => (
-            <li key={o.id} className="card bg-base-100 shadow">
-              <div className="card-body flex-row justify-between items-center">
-                <div>
-                  <p className="font-semibold">Comanda #{o.id}</p>
-                  <p className="text-sm text-base-content/70">
-                    {o.order_date ? new Date(o.order_date).toLocaleDateString() : ''} · {o.status}
-                  </p>
+          {orders.map((o) => {
+            const statusKey = `shop.status.${o.status}`;
+            const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : o.status;
+            return (
+              <li key={o.id} className="card bg-base-100 shadow">
+                <div className="card-body flex-row justify-between items-center">
+                  <div>
+                    <p className="font-semibold">{t('shop.order')} #{o.id}</p>
+                    <p className="text-sm text-base-content/70">
+                      {o.order_date ? new Date(o.order_date).toLocaleDateString() : ''} · {statusLabel}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{Number(o.total).toFixed(2)} €</span>
+                    <Link to={`/orders/${o.id}`} className="btn btn-ghost btn-sm">{t('common.detail')}</Link>
+                    <a href={`/api/v1/orders/${o.id}/invoice?locale=${i18n.language || 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+                      {t('shop.invoice')}
+                    </a>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">{Number(o.total).toFixed(2)} €</span>
-                  <Link to={`/orders/${o.id}`} className="btn btn-ghost btn-sm">Detall</Link>
-                  <a href={`/api/v1/orders/${o.id}/invoice`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
-                    {t('shop.invoice')}
-                  </a>
-                </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

@@ -30,6 +30,7 @@ class Order extends Model
 
     public const KIND_CART = 'cart';
     public const KIND_ORDER = 'order';
+    public const KIND_LIKE = 'like';
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_SENT = 'sent';
@@ -75,5 +76,10 @@ class Order extends Model
     public function scopeOrders($query)
     {
         return $query->where('kind', self::KIND_ORDER);
+    }
+
+    public function scopeLikes($query)
+    {
+        return $query->where('kind', self::KIND_LIKE);
     }
 }

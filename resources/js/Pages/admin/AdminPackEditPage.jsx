@@ -14,6 +14,7 @@ export default function AdminPackEditPage() {
   const [pack, setPack] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [imagesLoading, setImagesLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [submitError, setSubmitError] = useState('');
@@ -65,6 +66,45 @@ export default function AdminPackEditPage() {
     }
   };
 
+  const handleAddImages = async (files) => {
+    if (!files?.length) return;
+    setSubmitError('');
+    setImagesLoading(true);
+    try {
+      const formData = new FormData();
+      files.forEach((f) => formData.append('images[]', f));
+      const { data } = await api.post(`admin/packs/${id}/images`, formData);
+      if (data.success) {
+        showSuccess(t('common.saved'));
+        setPack(data.data);
+      } else setSubmitError(data.message || t('common.error'));
+    } catch (err) {
+      if (err.response?.status === 401) navigate('/admin/login');
+      else setSubmitError(err.response?.data?.message || t('common.error'));
+    } finally {
+      setImagesLoading(false);
+    }
+  };
+
+  const handleRemoveImage = async (imageId) => {
+    setSubmitError('');
+    setImagesLoading(true);
+    try {
+      const { data } = await api.delete(`admin/packs/${id}/images/${imageId}`);
+      if (data.success) {
+        setPack((p) => ({
+          ...p,
+          images: (p.images || []).filter((img) => img.id !== imageId),
+        }));
+      } else setSubmitError(data.message || t('common.error'));
+    } catch (err) {
+      if (err.response?.status === 401) navigate('/admin/login');
+      else setSubmitError(err.response?.data?.message || t('common.error'));
+    } finally {
+      setImagesLoading(false);
+    }
+  };
+
   if (loadError) {
     return (
       <div className="space-y-4">
@@ -100,7 +140,10 @@ export default function AdminPackEditPage() {
             pack={pack}
             products={products}
             onSubmit={handleSubmit}
+            onAddImages={handleAddImages}
+            onRemoveImage={handleRemoveImage}
             loading={loading}
+            imagesLoading={imagesLoading}
             error={submitError}
           />
         </div>

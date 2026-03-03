@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
-const KINDS = ['cart', 'order'];
+const KINDS = ['cart', 'order', 'like'];
 const STATUSES = ['pending', 'sent', 'installation_pending', 'installation_confirmed'];
 
 function getStatusBadgeClass(status) {
@@ -24,7 +24,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
-  const [kindFilter, setKindFilter] = useState('');
+  const [kindFilter, setKindFilter] = useState('order');
   const [statusFilter, setStatusFilter] = useState('');
 
   const fetchOrders = useCallback(async () => {
@@ -90,7 +90,7 @@ export default function AdminOrdersPage() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             aria-label={t('admin.orders.filter_status')}
-            disabled={kindFilter === 'cart'}
+            disabled={kindFilter === 'cart' || kindFilter === 'like'}
           >
             <option value="">{t('admin.orders.status_all')}</option>
             {STATUSES.map((s) => (
@@ -115,13 +115,12 @@ export default function AdminOrdersPage() {
               <thead>
                 <tr>
                   <th>{t('admin.orders.id')}</th>
-                  <th>{t('admin.orders.kind')}</th>
+                  <th className="text-center">{t('admin.orders.kind')}</th>
                   <th>{t('admin.orders.client')}</th>
-                  <th>{t('admin.orders.status')}</th>
-                  <th>{t('admin.orders.order_date')}</th>
-                  <th>{t('admin.orders.lines_count')}</th>
+                  <th className="text-end">{t('admin.orders.order_date')}</th>
+                  <th className="text-center">{t('admin.orders.lines_count')}</th>
                   <th className="text-end">{t('admin.orders.total')}</th>
-                  <th>{t('admin.orders.updated_at')}</th>
+                  <th className="text-center">{t('admin.orders.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,20 +138,19 @@ export default function AdminOrdersPage() {
                       }
                     }}
                   >
-                    <td className="font-mono">#{o.id}</td>
-                    <td><span className={`badge ${o.kind === 'cart' ? 'badge-ghost' : 'badge-primary'}`}>{t(`admin.orders.kind_${o.kind}`)}</span></td>
+                    <td className="font-mono text-center">#{o.id}</td>
+                    <td className="text-center"><span className="badge badge-ghost">{t(`admin.orders.kind_${o.kind}`)}</span></td>
                     <td>{o.client_login_email ?? ''}</td>
-                    <td>
+                    <td className="text-end">{o.order_date ? new Date(o.order_date).toLocaleDateString() : ''}</td>
+                    <td className="text-center tabular-nums">{o.lines_count ?? 0}</td>
+                    <td className="text-end font-medium tabular-nums">{o.total != null ? Number(o.total).toFixed(2) : '0.00'} €</td>
+                    <td className="text-center">
                       {o.kind === 'order' && o.status ? (
                         <span className={`badge badge-sm ${getStatusBadgeClass(o.status)}`}>{t(`admin.orders.status_${o.status}`)}</span>
                       ) : (
                         ''
                       )}
                     </td>
-                    <td>{o.order_date ? new Date(o.order_date).toLocaleDateString() : ''}</td>
-                    <td>{o.lines_count ?? 0}</td>
-                    <td className="text-end font-medium">{o.total != null ? Number(o.total).toFixed(2) : '0.00'} €</td>
-                    <td className="text-base-content/70 text-sm">{o.updated_at ? new Date(o.updated_at).toLocaleString() : ''}</td>
                   </tr>
                 ))}
               </tbody>

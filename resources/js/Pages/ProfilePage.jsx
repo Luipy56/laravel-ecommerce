@@ -36,6 +36,7 @@ export default function ProfilePage() {
     city: '',
     province: '',
     postal_code: '',
+    is_primary: false,
   });
   const [addressSaving, setAddressSaving] = useState(false);
 
@@ -136,6 +137,7 @@ export default function ProfilePage() {
         city: addr.city,
         province: addr.province ?? '',
         postal_code: addr.postal_code ?? '',
+        is_primary: addr.is_primary ?? false,
       });
     } else {
       setAddressModal({});
@@ -146,13 +148,17 @@ export default function ProfilePage() {
         city: '',
         province: '',
         postal_code: '',
+        is_primary: false,
       });
     }
   };
 
   const handleAddressFormChange = (e) => {
-    const { name, value } = e.target;
-    setAddressForm((f) => ({ ...f, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setAddressForm((f) => ({
+      ...f,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   const handleAddressSubmit = async (e) => {
@@ -291,10 +297,10 @@ export default function ProfilePage() {
         <div className="card-body">
           <h2 className="card-title text-lg">{t('profile.account_data')}</h2>
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="badge badge-neutral">
-              {profile.type === 'company' ? t('profile.type_company') : t('profile.type_person')}
+            <span className="text-sm">
+              <span className="text-base-content/70">{t('profile.email')}: </span>
+              <span className="text-base-content font-medium">{profile.login_email}</span>
             </span>
-            <span className="text-base-content/70 text-sm">{t('profile.email')}: {profile.login_email}</span>
           </div>
           <form onSubmit={handleAccountSubmit} className="space-y-4 mt-4">
             <label className="label">
@@ -334,9 +340,11 @@ export default function ProfilePage() {
               onChange={handleAccountChange}
               placeholder={t('profile.phone')}
             />
-            <button type="submit" className="btn btn-primary" disabled={accountSaving}>
-              {accountSaving ? t('common.loading') : t('common.save')}
-            </button>
+            <div className="flex justify-end">
+              <button type="submit" className="btn btn-primary" disabled={accountSaving}>
+                {accountSaving ? t('common.loading') : t('common.save')}
+              </button>
+            </div>
           </form>
         </div>
       </section>
@@ -366,11 +374,19 @@ export default function ProfilePage() {
                         {c.email && <span> · {c.email}</span>}
                       </div>
                     </div>
-                    <div className="flex gap-1">
-                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => openContactModal(c)}>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline btn-neutral"
+                        onClick={() => openContactModal(c)}
+                      >
                         {t('common.edit')}
                       </button>
-                      <button type="button" className="btn btn-ghost btn-sm text-error" onClick={() => handleDeleteContact(c.id)}>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-ghost text-error hover:bg-error/10"
+                        onClick={() => handleDeleteContact(c.id)}
+                      >
                         {t('profile.delete')}
                       </button>
                     </div>
@@ -393,25 +409,35 @@ export default function ProfilePage() {
               {t('profile.add_address')}
             </button>
           </div>
-          {profile.addresses?.length ? (
+            {profile.addresses?.length ? (
             <ul className="space-y-3">
               {profile.addresses.map((addr) => (
-                <li key={addr.id} className="flex flex-wrap items-start justify-between gap-2 p-3 bg-base-200 rounded-lg">
-                  <div>
+                <li key={addr.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-base-200 rounded-lg border border-base-300/50">
+                  <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap gap-2 items-center">
-                      <span className="badge badge-outline">{addressTypeLabel(addr.type)}</span>
+                      <span className="badge badge-outline badge-sm">{addressTypeLabel(addr.type)}</span>
+                      {addr.is_primary && (
+                        <span className="badge badge-sm badge-primary">{t('profile.primary_address')}</span>
+                      )}
                       {addr.label && <span className="text-sm font-medium">{addr.label}</span>}
                     </div>
-                    <p className="text-sm mt-1">
-                      {addr.street}, {addr.postal_code} {addr.city}
-                      {addr.province ? `, ${addr.province}` : ''}
+                    <p className="text-sm mt-1.5 text-base-content">
+                      {[addr.street, addr.postal_code, addr.city, addr.province].filter(Boolean).join(', ')}
                     </p>
                   </div>
-                  <div className="flex gap-1">
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => openAddressModal(addr)}>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline btn-neutral"
+                      onClick={() => openAddressModal(addr)}
+                    >
                       {t('common.edit')}
                     </button>
-                    <button type="button" className="btn btn-ghost btn-sm text-error" onClick={() => handleDeleteAddress(addr.id)}>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-ghost text-error hover:bg-error/10"
+                      onClick={() => handleDeleteAddress(addr.id)}
+                    >
                       {t('profile.delete')}
                     </button>
                   </div>
@@ -446,9 +472,11 @@ export default function ProfilePage() {
               onChange={handlePasswordChange}
               placeholder={t('auth.password_confirmation')}
             />
-            <button type="submit" className="btn btn-neutral" disabled={passwordSaving || !passwordForm.password}>
-              {passwordSaving ? t('common.loading') : t('common.save')}
-            </button>
+            <div className="flex justify-end">
+              <button type="submit" className="btn btn-neutral" disabled={passwordSaving || !passwordForm.password}>
+                {passwordSaving ? t('common.loading') : t('common.save')}
+              </button>
+            </div>
           </form>
         </div>
       </section>
@@ -527,6 +555,16 @@ export default function ProfilePage() {
               value={addressForm.province}
               onChange={handleAddressFormChange}
             />
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="is_primary"
+                className="checkbox checkbox-sm"
+                checked={addressForm.is_primary}
+                onChange={handleAddressFormChange}
+              />
+              <span className="label-text">{t('profile.primary_address')}</span>
+            </label>
             <div className="modal-action">
               <button type="button" className="btn btn-ghost" onClick={() => setAddressModal(null)}>
                 {t('common.cancel')}

@@ -44,6 +44,15 @@ export function IconChevronUp({ className, strokeWidth, ...rest }) {
   );
 }
 
+/** Chevron pointing down (e.g. expandable section when open). */
+export function IconChevronDown({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path strokeWidth={strokeWidth ?? 2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+    </IconWrapper>
+  );
+}
+
 /** Chevron left (e.g. gallery prev). */
 export function IconChevronLeft({ className, strokeWidth, ...rest }) {
   return (

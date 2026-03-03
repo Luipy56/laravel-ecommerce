@@ -58,7 +58,12 @@ class CartController extends Controller
                     $installPrice = $wantsInstallation && $product->is_installable
                         ? $qty * (float) ($product->installation_price ?? 0)
                         : 0;
-                    $lineTotal = $included ? round($qty * $unitPrice + $installPrice, 2) : 0;
+                    $extraKeysQty = (int) ($item['extra_keys_qty'] ?? 0);
+                    $extraKeyPrice = $product->is_extra_keys_available && $product->extra_key_unit_price
+                        ? (float) $product->extra_key_unit_price
+                        : null;
+                    $extraKeysPrice = $extraKeyPrice !== null ? $extraKeysQty * $extraKeyPrice : 0;
+                    $lineTotal = $included ? round($qty * $unitPrice + $installPrice + $extraKeysPrice, 2) : 0;
                     $total += $lineTotal;
                     $lines[] = [
                         'id' => $key,
@@ -68,6 +73,8 @@ class CartController extends Controller
                         'pack' => null,
                         'quantity' => $qty,
                         'unit_price' => $unitPrice,
+                        'extra_keys_qty' => $extraKeysQty,
+                        'extra_key_unit_price' => $extraKeyPrice,
                         'line_total' => $lineTotal,
                         'is_included' => $included,
                         'is_installation_requested' => $wantsInstallation,
@@ -136,7 +143,11 @@ class CartController extends Controller
             'price' => (float) $product->price,
             'image_url' => $firstImage ? $firstImage->url : null,
             'is_installable' => (bool) $product->is_installable,
-            'installation_price' => $product->installation_price ? (float) $product->installation_price : null,
+            'installation_price' => isset($product->installation_price) && $product->installation_price !== null
+                ? (float) $product->installation_price
+                : null,
+            'is_extra_keys_available' => (bool) $product->is_extra_keys_available,
+            'extra_key_unit_price' => $product->extra_key_unit_price ? (float) $product->extra_key_unit_price : null,
             'features' => $product->features->take(2)->map(fn ($f) => [
                 'name' => $f->featureName?->name,
                 'value' => $f->value,
@@ -215,6 +226,7 @@ class CartController extends Controller
             'pack_id' => $validated['pack_id'] ?? null,
             'included' => true,
             'wants_installation' => false,
+            'extra_keys_qty' => 0,
         ];
         $current['quantity'] = ($current['quantity'] ?? 0) + (int) $validated['quantity'];
         $current['included'] = $current['included'] ?? true;
@@ -231,6 +243,7 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:0', 'max:99'],
             'included' => ['sometimes', 'boolean'],
             'is_installation_requested' => ['sometimes', 'boolean'],
+            'extra_keys_qty' => ['sometimes', 'integer', 'min:0', 'max:99'],
         ]);
         $quantity = (int) $validated['quantity'];
 
@@ -254,6 +267,12 @@ class CartController extends Controller
                         : ($orderLine->pack?->is_installable ? $orderLine->pack->installation_price : null);
                     $updates['installation_price'] = $validated['is_installation_requested'] && $installable ? $installPrice : null;
                 }
+                if (array_key_exists('extra_keys_qty', $validated)) {
+                    $updates['extra_keys_qty'] = $validated['extra_keys_qty'];
+                    $updates['extra_key_unit_price'] = $orderLine->product?->is_extra_keys_available
+                        ? $orderLine->product->extra_key_unit_price
+                        : null;
+                }
                 $orderLine->update($updates);
             }
             return $this->showDbCart($request->user());
@@ -273,6 +292,9 @@ class CartController extends Controller
             }
             if (array_key_exists('is_installation_requested', $validated)) {
                 $lines[$line]['wants_installation'] = $validated['is_installation_requested'];
+            }
+            if (array_key_exists('extra_keys_qty', $validated)) {
+                $lines[$line]['extra_keys_qty'] = $validated['extra_keys_qty'];
             }
         }
         $session->put(self::SESSION_CART_KEY, $lines);
@@ -304,14 +326,40 @@ class CartController extends Controller
             }
             $existing = $cart->lines()->where('product_id', $productId)->where('pack_id', $packId)->first();
             if ($existing) {
-                $existing->update(['quantity' => $existing->quantity + $qty]);
+                $updates = ['quantity' => $existing->quantity + $qty];
+                if (isset($item['extra_keys_qty'])) {
+                    $updates['extra_keys_qty'] = (int) $item['extra_keys_qty'];
+                    $product = $existing->product;
+                    $updates['extra_key_unit_price'] = $product?->is_extra_keys_available ? $product->extra_key_unit_price : null;
+                }
+                if (isset($item['wants_installation'])) {
+                    $updates['is_installation_requested'] = (bool) $item['wants_installation'];
+                    $installable = $existing->product?->is_installable || $existing->pack?->is_installable;
+                    $updates['installation_price'] = $updates['is_installation_requested'] && $installable
+                        ? ($existing->product?->installation_price ?? $existing->pack?->installation_price)
+                        : null;
+                }
+                $existing->update($updates);
             } else {
                 $unitPrice = $productId ? Product::find($productId)?->price : Pack::find($packId)?->price;
+                $product = $productId ? Product::find($productId) : null;
+                $pack = $packId ? Pack::find($packId) : null;
+                $extraKeysQty = (int) ($item['extra_keys_qty'] ?? 0);
+                $extraKeyUnitPrice = $product?->is_extra_keys_available ? $product->extra_key_unit_price : null;
+                $wantsInstallation = (bool) ($item['wants_installation'] ?? false);
+                $installable = $product?->is_installable || $pack?->is_installable;
+                $installationPrice = $wantsInstallation && $installable
+                    ? ($product?->installation_price ?? $pack?->installation_price)
+                    : null;
                 $cart->lines()->create([
                     'product_id' => $productId,
                     'pack_id' => $packId,
                     'quantity' => $qty,
                     'unit_price' => $unitPrice,
+                    'extra_keys_qty' => $extraKeysQty,
+                    'extra_key_unit_price' => $extraKeyUnitPrice,
+                    'is_installation_requested' => $wantsInstallation,
+                    'installation_price' => $installationPrice,
                 ]);
             }
         }
@@ -336,6 +384,8 @@ class CartController extends Controller
             'pack' => $pack ? $this->formatPackForCart($pack) : null,
             'quantity' => $line->quantity,
             'unit_price' => (float) $line->unit_price,
+            'extra_keys_qty' => (int) ($line->extra_keys_qty ?? 0),
+            'extra_key_unit_price' => $line->extra_key_unit_price !== null ? (float) $line->extra_key_unit_price : null,
             'line_total' => (float) $line->line_total,
             'is_included' => (bool) ($line->is_included ?? true),
             'is_installation_requested' => (bool) ($line->is_installation_requested ?? false),

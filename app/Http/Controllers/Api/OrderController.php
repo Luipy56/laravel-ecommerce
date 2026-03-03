@@ -148,6 +148,12 @@ class OrderController extends Controller
         if ($order->client_id !== $request->user()->id || $order->kind !== Order::KIND_ORDER) {
             abort(404);
         }
+        $locale = $request->query('locale');
+        if (! in_array($locale, ['ca', 'es'], true)) {
+            $pref = $request->header('Accept-Language', '');
+            $locale = (preg_match('/^(ca|es)([-_]|$)/i', $pref, $m) ? $m[1] : null) ?? config('app.locale');
+        }
+        app()->setLocale($locale);
         $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
 
         // Simple PDF via HTML response; can be replaced with DomPDF or similar

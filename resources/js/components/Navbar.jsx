@@ -137,7 +137,7 @@ export default function Navbar() {
             {user ? (
               <div className="dropdown dropdown-end">
                 <label tabIndex={0} className="btn btn-ghost btn-sm max-w-[7rem] sm:max-w-none truncate">
-                  <span className="truncate">{[user.name, user.surname].filter(Boolean).join(' ') || user.login_email}</span>
+                  <span className="truncate">{user.name?.trim() || user.login_email}</span>
                 </label>
                 <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow">
                   <li><Link to="/profile">{t('shop.profile')}</Link></li>

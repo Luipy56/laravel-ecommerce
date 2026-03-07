@@ -21,11 +21,11 @@ class OrderController extends Controller
             'shipping_street' => ['required', 'string', 'max:255'],
             'shipping_city' => ['required', 'string', 'max:100'],
             'shipping_province' => ['nullable', 'string', 'max:100'],
-            'shipping_postal_code' => ['nullable', 'string', 'max:20'],
+            'shipping_postal_code' => ['required', 'string', 'max:20'],
             'shipping_note' => ['nullable', 'string'],
             'installation_street' => ['nullable', 'string', 'max:255'],
             'installation_city' => ['nullable', 'string', 'max:100'],
-            'installation_postal_code' => ['nullable', 'string', 'max:20'],
+            'installation_postal_code' => ['required_with:installation_street,installation_city', 'nullable', 'string', 'max:20'],
             'installation_note' => ['nullable', 'string'],
         ]);
 

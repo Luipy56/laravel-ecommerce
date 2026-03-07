@@ -138,8 +138,8 @@ export default function RegisterPage() {
                 <input id="register-address_city" name="address_city" className="input input-bordered w-full" value={form.address_city} onChange={handleChange} />
               </label>
               <label htmlFor="register-address_postal_code" className="form-field w-28">
-                <span className="form-label">{t('profile.postal_code')}</span>
-                <input id="register-address_postal_code" name="address_postal_code" className="input input-bordered w-full" value={form.address_postal_code} onChange={handleChange} />
+                <span className="form-label">{t('profile.postal_code')} *</span>
+                <input id="register-address_postal_code" name="address_postal_code" className="input input-bordered w-full" value={form.address_postal_code} onChange={handleChange} required />
               </label>
             </div>
             <label htmlFor="register-address_province" className="form-field w-full">

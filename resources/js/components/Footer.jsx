@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { APP_VERSION } from '../config/version';
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -66,7 +67,10 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="footer-bottom header-gradient-line w-full border-t border-base-300 py-3 text-white">
+      <div className="footer-bottom header-gradient-line w-full border-t border-base-300 py-3 text-white relative">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs opacity-60">
+          {t('footer.version', { version: APP_VERSION })}
+        </span>
         <div className="container mx-auto px-4 flex flex-wrap justify-center items-center gap-2">
           <p className="text-sm opacity-90">
             Developed by{' '}

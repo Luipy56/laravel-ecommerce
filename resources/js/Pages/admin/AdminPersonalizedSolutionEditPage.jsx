@@ -243,13 +243,14 @@ export default function AdminPersonalizedSolutionEditPage() {
                   />
                 </label>
                 <label className="form-field">
-                  <span className="form-label">{t('admin.personalized_solutions.address_postal_code')}</span>
+                  <span className="form-label">{t('admin.personalized_solutions.address_postal_code')} *</span>
                   <input
                     type="text"
                     className="input input-bordered w-full"
                     value={form.address_postal_code}
                     onChange={(e) => update('address_postal_code', e.target.value)}
                     aria-label={t('admin.personalized_solutions.address_postal_code')}
+                    required
                   />
                 </label>
                 <label className="form-field sm:col-span-2">

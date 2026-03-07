@@ -159,6 +159,7 @@
   "footer.legal_link": "Web Serralleria Solidària",
   "footer.legal_disclaimer": "Adherits a la Junta Arbitral de Consum de Catalunya.",
   "footer.copyright": "© {{year}} Serralleria Solidària. Tots els drets reservats.",
+  "footer.version": "Versió {{version}}",
   "home.hero.title": "Serralleria Solidària",
   "home.hero.tagline": "Materials i solucions de fusteria al teu abast.",
   "home.hero.cta_products": "Veure productes",

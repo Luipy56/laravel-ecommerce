@@ -58,7 +58,7 @@ class AuthController extends Controller
             'address_street' => ['nullable', 'string', 'max:255'],
             'address_city' => ['nullable', 'string', 'max:100'],
             'address_province' => ['nullable', 'string', 'max:100'],
-            'address_postal_code' => ['nullable', 'string', 'max:20'],
+            'address_postal_code' => ['required', 'string', 'max:20'],
         ]);
 
         $client = Client::create([

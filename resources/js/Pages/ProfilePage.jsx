@@ -535,13 +535,14 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className="label"><span className="label-text">{t('profile.postal_code')}</span></label>
+                <label className="label"><span className="label-text">{t('profile.postal_code')} *</span></label>
                 <input
                   type="text"
                   name="postal_code"
                   className="input input-bordered w-full"
                   value={addressForm.postal_code}
                   onChange={handleAddressFormChange}
+                  required
                 />
               </div>
             </div>

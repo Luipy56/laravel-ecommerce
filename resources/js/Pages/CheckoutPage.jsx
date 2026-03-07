@@ -114,8 +114,8 @@ export default function CheckoutPage() {
             <input name="shipping_city" className="input input-bordered w-full" value={form.shipping_city} onChange={handleChange} required />
           </label>
           <label className="form-field w-full">
-            <span className="form-label">{t('profile.postal_code')}</span>
-            <input name="shipping_postal_code" className="input input-bordered w-full" value={form.shipping_postal_code} onChange={handleChange} />
+            <span className="form-label">{t('profile.postal_code')} *</span>
+            <input name="shipping_postal_code" className="input input-bordered w-full" value={form.shipping_postal_code} onChange={handleChange} required />
           </label>
           <label className="form-field w-full">
             <span className="form-label">{t('checkout.note')}</span>

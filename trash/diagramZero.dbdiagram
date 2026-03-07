@@ -1,0 +1,432 @@
+{
+  "version": "1.0.0",
+  "darkMode": true,
+  "gridEnabling": false,
+  "detailLevel": "All",
+  "tablePositions": [
+    {
+      "name": "CLIENTS",
+      "schemaName": "public",
+      "x": 199.15709488207446,
+      "y": -156.1653910953201
+    },
+    {
+      "name": "CLIENT_CONTACTS",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 12
+    },
+    {
+      "name": "CLIENT_ADDRESSES",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 378
+    },
+    {
+      "name": "PRODUCT_CATEGORIES",
+      "schemaName": "public",
+      "x": 339.431640625,
+      "y": 282
+    },
+    {
+      "name": "PRODUCT_VARIANT_GROUPS",
+      "schemaName": "public",
+      "x": 339.431640625,
+      "y": 488
+    },
+    {
+      "name": "PRODUCTS",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 744
+    },
+    {
+      "name": "FEATURE_NAMES",
+      "schemaName": "public",
+      "x": 339.431640625,
+      "y": 598
+    },
+    {
+      "name": "FEATURES",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 1302
+    },
+    {
+      "name": "PRODUCT_FEATURES",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 378
+    },
+    {
+      "name": "PRODUCT_IMAGES",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 12
+    },
+    {
+      "name": "ORDERS",
+      "schemaName": "public",
+      "x": 933.8359375,
+      "y": 1508
+    },
+    {
+      "name": "ORDER_ADDRESSES",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 520
+    },
+    {
+      "name": "ORDER_LINES",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 854
+    },
+    {
+      "name": "PAYMENTS",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 1284
+    },
+    {
+      "name": "ADMINS",
+      "schemaName": "public",
+      "x": -282.49451416204835,
+      "y": -345.65907569541247
+    },
+    {
+      "name": "PACKS",
+      "schemaName": "public",
+      "x": 1771.434222071236,
+      "y": 2497.1202342069428
+    },
+    {
+      "name": "PACK_IMAGES",
+      "schemaName": "public",
+      "x": 995.7511291920283,
+      "y": 2303.439108944954
+    },
+    {
+      "name": "PACK_ITEMS",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 1554
+    },
+    {
+      "name": "PERSONALIZED_SOLUTIONS",
+      "schemaName": "public",
+      "x": 1567.25341796875,
+      "y": 1760
+    },
+    {
+      "name": "PERSONALIZED_SOLUTION_ATTACHMENTS",
+      "schemaName": "public",
+      "x": 2165.359375,
+      "y": 12
+    }
+  ],
+  "tableGroupCollapseStates": [],
+  "stickyNoteLayouts": [],
+  "referencePaths": [
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "CLIENTS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "client_id"
+      ],
+      "secondTableName": "CLIENT_CONTACTS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "CLIENTS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "client_id"
+      ],
+      "secondTableName": "CLIENT_ADDRESSES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PRODUCT_CATEGORIES",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "category_id"
+      ],
+      "secondTableName": "PRODUCTS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PRODUCT_VARIANT_GROUPS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "variant_group_id"
+      ],
+      "secondTableName": "PRODUCTS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "FEATURE_NAMES",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "feature_name_id"
+      ],
+      "secondTableName": "FEATURES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PRODUCTS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "product_id"
+      ],
+      "secondTableName": "PRODUCT_FEATURES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "FEATURES",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "feature_id"
+      ],
+      "secondTableName": "PRODUCT_FEATURES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PRODUCTS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "product_id"
+      ],
+      "secondTableName": "PRODUCT_IMAGES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "CLIENTS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "client_id"
+      ],
+      "secondTableName": "ORDERS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "ORDERS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "order_id"
+      ],
+      "secondTableName": "ORDER_ADDRESSES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "ORDERS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "order_id"
+      ],
+      "secondTableName": "ORDER_LINES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PRODUCTS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "product_id"
+      ],
+      "secondTableName": "ORDER_LINES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PACKS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "pack_id"
+      ],
+      "secondTableName": "ORDER_LINES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "ORDERS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "order_id"
+      ],
+      "secondTableName": "PAYMENTS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PACKS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "pack_id"
+      ],
+      "secondTableName": "PACK_IMAGES",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PACKS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "pack_id"
+      ],
+      "secondTableName": "PACK_ITEMS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PRODUCTS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "product_id"
+      ],
+      "secondTableName": "PACK_ITEMS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "CLIENTS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "client_id"
+      ],
+      "secondTableName": "PERSONALIZED_SOLUTIONS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "ORDERS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "order_id"
+      ],
+      "secondTableName": "PERSONALIZED_SOLUTIONS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    },
+    {
+      "firstFieldNames": [
+        "id"
+      ],
+      "firstTableName": "PERSONALIZED_SOLUTIONS",
+      "firstSchemaName": "public",
+      "firstRelation": "1",
+      "secondFieldNames": [
+        "personalized_solution_id"
+      ],
+      "secondTableName": "PERSONALIZED_SOLUTION_ATTACHMENTS",
+      "secondSchemaName": "public",
+      "secondRelation": "*",
+      "checkPoints": []
+    }
+  ]
+}

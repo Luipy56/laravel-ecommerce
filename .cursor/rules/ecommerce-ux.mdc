@@ -1,0 +1,77 @@
+---
+description: Ecommerce UX best practices (Baymard, Tidio, Instinctools): navigation, search, product lists, checkout, trust
+alwaysApply: false
+globs: "**/resources/views/**/*.blade.php,**/resources/js/**/*.{js,jsx,ts,tsx},**/app/Http/Controllers/**/*.php"
+---
+
+# Ecommerce UX Best Practices
+
+Apply research-backed UX patterns so users can find products, evaluate them, and complete purchase with minimal friction.
+
+**Sources:** [Baymard](https://baymard.com/learn/ecommerce-ux-best-practices), [Tidio](https://www.tidio.com/blog/ecommerce-ux-best-practices/), [Instinctools](https://www.instinctools.com/blog/ecommerce-ux-best-practices/). See also: [DesignRush ecommerce trends](https://www.designrush.com/agency/ecommerce/web-design/trends/ecommerce-website-best-practices), [FitSmallBusiness ecommerce UX](https://fitsmallbusiness.com/ecommerce-ux-best-practices/).
+
+## Homepage
+
+- **Broad product exposure**: Feature a wide range of product types (e.g. ≥40% of types) so users don’t underestimate the catalog.
+- **Search prominence**: Make the search field obvious (contrast, size, clear “Go”/submit); users fall back to search when browsing fails.
+- **Carousels on mobile**: Prefer no auto-rotation; if you use a carousel, disable auto-rotate, support touch, keep controls visible. Prefer static sections when possible.
+- **Imagery**: Use high-quality images; they improve patience and perception of the brand.
+- **Country/language**: Prefer IP-based default with an easy override (e.g. flag/link in header). Use splash only when regional rules truly require it.
+
+## Category navigation
+
+- **Chunking**: Subdivide when you have ~10+ categories; aim for at least ~10 products at the deepest level. Avoid shallow parent-only categories—parents should be selectable and part of the catalog.
+- **No overlap**: Avoid redundant or overlapping category names; keep taxonomy logical and distinct.
+- **Accessories**: Nest “Accessories” under relevant categories when it makes sense; provide filters to narrow large lists.
+- **Bestsellers**: Consider a “Best sellers” or “Bestsellers” entry point for new users.
+
+## On-site search
+
+- **Exact match on top**: When the query matches a product title or SKU, show that product at the top (or redirect with a way to see full results).
+- **Product type & synonyms**: Support product-type searches and synonyms (e.g. “maternity” ↔ “pregnant”).
+- **Feature searches**: Use attributes/specs so queries like “manual espresso machine” apply the right filters.
+- **Abbreviations and slang**: Map common abbreviations, symbols, and slang to catalog terms (e.g. “shades” → sunglasses).
+- **Symptom/problem queries**: Map problem-oriented keywords to solutions (e.g. “insomnia” → relevant products); use search logs to find these.
+
+## Product lists and filters
+
+- **Total count**: Show total number of items above and below the list, clearly but not distractingly.
+- **Load more over pagination/endless scroll**: Prefer a “Load more” button with lazy-load over classic pagination or endless scroll; keep “Back” behavior correct.
+- **Ratings on list items**: Show both average rating and number of ratings; consider a numeric value (e.g. “4.9”) plus star display.
+- **List item clarity**: Use font weight, spacing, bullets so name, type, brand, and features are visually distinct and scannable.
+- **Sale/deals filter**: Provide a dedicated “Sale” or “Deals” filter, visible in the main filter set (not buried under “Price”).
+- **Filter controls**: Use checkboxes for each filter option; keep styling consistent (e.g. link style + hover).
+- **Sort options**: Offer at least Price, User rating, Best selling, Newest; consider a diversity-based “Relevance” default.
+
+## Product page
+
+- **Images**: At least 3–5 images per product; multiple angles. Use video for complex or high-value items when useful.
+- **Sections**: Prefer vertically collapsed sections (accordion) over long uncollapsed blocks so users can scan and expand what they need.
+- **Add to cart**: Make the primary “Add to Cart” button visually dominant and unique (color/size); avoid competing CTAs. If sticky, give it space—avoid full-width bar when possible.
+- **Returns**: Make return policy easy to find and read (summary, bullets, plain language); state clearly if you cover return shipping.
+
+## Cart and checkout
+
+- **Cart visibility**: Prominent cart link in the header (upper-right), clear icon and item count, enough whitespace. Not text-only.
+- **Checkout simplicity**: Guest checkout; minimal steps (e.g. ≤4 with progress indicator); multiple payment options (cards, Apple/Google Pay, BNPL if relevant).
+- **Cart summary**: Show count after add; clear feedback on add; itemized list (name, image, quantity, price, delivery estimate, subtotal). Trust badges and payment logos near checkout.
+
+## Account and self-service
+
+- **Account placement**: “Account” (or equivalent) in the upper-right, visible and easy to open.
+- **Dashboard**: Highlight recent/open orders; show key milestones (e.g. received, refund issued). De-emphasize or hide when no open orders.
+- **Returns**: Let users print/email/save the shipping label later; show return status updates.
+- **Saving changes**: Use an explicit “Apply” or “Save” for account edits; keep it inactive until something changed; place at bottom of form or sticky.
+
+## Sitewide
+
+- **Mobile**: Responsive layout, touch-friendly targets, no horizontal scroll; test on real devices. Avoid sticky chat overlays that block content on mobile.
+- **Speed**: Optimize images (size, lazy-load), consider CDN/caching; avoid heavy auto-playing or blocking content.
+- **Live chat**: Avoid automatic pop-up chat; offer chat via header/footer/help links instead.
+- **FAQ**: Include a clear “FAQ” or “FAQs” link in the footer (and optionally header).
+- **Trust**: Security badges, clear payment methods, guarantees/returns summary where relevant; reviews/ratings as social proof.
+
+## Accessibility
+
+- **WCAG 2.1 AA**: Aim for compatibility with assistive tech, sufficient contrast, keyboard navigation, clear labels and headings. Support text resize (e.g. up to 200%) and avoid navigation that works only with a mouse.
+- **Links and focus**: Descriptive link text; visible focus states; avoid links that are indistinguishable from body text.

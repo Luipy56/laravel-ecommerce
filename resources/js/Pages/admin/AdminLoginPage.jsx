@@ -1,0 +1,77 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../api';
+
+export default function AdminLoginPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const { data } = await api.post('admin/login', { username, password });
+      if (data.success) navigate('/admin');
+      else setError(data.message || t('admin.login.error'));
+    } catch (err) {
+      setError(err.response?.data?.message || t('admin.login.error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-admin-login-animated">
+      <div className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
+        <div className="card bg-base-100 shadow-2xl w-full max-w-sm border border-base-200">
+          <div className="card-body">
+            <h1 className="card-title text-2xl justify-center text-center">
+              {t('home.hero.title')}
+            </h1>
+            <p className="text-center text-base-content/70 text-sm mb-2">Admin</p>
+            <form onSubmit={handleSubmit} className="space-y-5" aria-label={t('admin.login.title')}>
+              {error && (
+                <div role="alert" className="alert alert-error text-sm">
+                  {error}
+                </div>
+              )}
+              <label className="form-field w-full">
+                <span className="form-label">{t('admin.login.username')}</span>
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  autoComplete="username"
+                  aria-label={t('admin.login.username')}
+                />
+              </label>
+              <label className="form-field w-full">
+                <span className="form-label">{t('admin.login.password')}</span>
+                <input
+                  type="password"
+                  className="input input-bordered w-full"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  aria-label={t('admin.login.password')}
+                />
+              </label>
+              <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+                {loading ? t('common.loading') : t('admin.login.submit')}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

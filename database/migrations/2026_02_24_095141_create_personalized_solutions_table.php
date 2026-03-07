@@ -27,6 +27,7 @@ return new class extends Migration
             $table->text('resolution')->nullable()->comment('Admin resolution / quote');
             $table->string('status', 50);
             $table->boolean('is_active')->default(true)->comment('Soft delete');
+            $table->timestamps();
         });
     }
 

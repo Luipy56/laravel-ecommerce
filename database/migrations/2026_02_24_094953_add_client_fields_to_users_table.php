@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('email', 255)->nullable()->comment('Contact email (optional)');
             $table->boolean('is_primary')->default(false)->comment('Main contact for this client');
             $table->boolean('is_active')->default(true)->comment('Soft delete');
+            $table->timestamps();
         });
     }
 

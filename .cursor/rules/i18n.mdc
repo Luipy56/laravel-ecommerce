@@ -12,3 +12,4 @@ alwaysApply: false
 - **Validation**: Put validation messages in `lang/ca/validation.php` and `lang/es/validation.php`; use `lang/ca.json` and `lang/es.json` for attribute names if needed.
 - **React** (if used): Use **i18next** and **react-i18next**. Store translation files (e.g. `resources/js/locales/ca.json`, `es.json`) or load from Laravel API. Use `useTranslation()` and `t('key')` for all UI strings. Sync locale with Laravel (e.g. from shared Inertia props or API).
 - **Enums / fixed options**: Store display values in lang files (e.g. `shop.status.pending` → "Pendent" / "Pendiente") so they are translated in both locales.
+- **Catalog / admin data**: Seed data and content uploaded by admins are in **Catalan**. The storefront search (to be improved) must support queries in both **Catalan and Spanish** so clients can find products in either language; consider synonyms, aliases, or a search layer that maps both locales to the same catalog (stored in Catalan).

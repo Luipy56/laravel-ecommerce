@@ -1,0 +1,33 @@
+---
+description: Shared React UI components — when to use them, props, and placement
+alwaysApply: false
+globs: "**/resources/js/**/*.{js,jsx,ts,tsx}"
+---
+
+# Shared Components
+
+Use these components instead of duplicating markup. Keep list and behaviour consistent across pages.
+
+## PageTitle
+
+- **Path:** `resources/js/components/PageTitle.jsx`
+- **Use for:** The main page heading (h1) on every content page (Cart, Orders, Products, Checkout, Profile, Order detail, Admin dashboard, etc.).
+- **Props:** `children` — title text (e.g. `t('shop.cart')`). Optional `className` to override or extend (e.g. `className="mb-4"`).
+- **Style:** Bold, tracking-tight, with a bottom border (`border-b border-base-300`) so the title is clearly separated from the content. Same look on all pages.
+- **Do not:** Use a raw `<h1 className="text-2xl font-bold ...">` for the main page title; use `<PageTitle>{...}</PageTitle>` so titles stay consistent.
+
+## ProductCard
+
+- **Path:** `resources/js/components/ProductCard.jsx`
+- **Use for:** Any grid or list that shows a product tile (image, name, price, add-to-cart).
+- **Used in:** Home page (featured products), Product list page (`/products`, `/categories/:id/products`).
+- **Props:** `product` — object with `id`, `name`, `primaryImageUrl`, `formattedPrice` (e.g. from `Product.fromApi()`).
+- **Behaviour:** Title links to `/products/:id`; “+” button adds one unit to cart (via `useCart().addLine`); card is draggable for drop-on-navbar cart. Same styling: `card card-border`, shadow, hover (shadow-lg, slight translate). Image height `h-40`, fallback image from `Product.fallbackImageUrl`.
+- **Do not:** Inline a different card layout for products on home vs list; use `ProductCard` in both places so the look and behaviour stay the same.
+
+## ConfirmModal
+
+- **Path:** `resources/js/components/ConfirmModal.jsx`
+- **Use for:** Confirmation before submit (e.g. CustomSolution, Checkout) or destructive actions (e.g. delete address, delete contact).
+- **Props:** `open`, `onClose`, `onConfirm`, `title`, `message`, `confirmLabel` (optional), `loading` (optional), `confirmVariant` ('primary' | 'error').
+- **Do not:** Use `window.confirm()` for user confirmations; use `ConfirmModal` instead for consistent UI and accessibility.

@@ -18,6 +18,9 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->boolean('is_trending')->default(false)->comment('Trending pack');
             $table->boolean('is_active')->default(true)->comment('Disable without deleting');
+            $table->boolean('is_installable')->default(false)->comment('Pack can include installation');
+            $table->decimal('installation_price', 10, 2)->nullable()->comment('Installation price when is_installable');
+            $table->timestamps();
         });
     }
 

@@ -1,21 +1,7 @@
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
-# Projecte 2
-
 # Botiga Virtual
-
 # Serralleria Solidària
 
 
-
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
 ## Índex
 
 Índex 2
@@ -33,28 +19,9 @@ Lliurament 12
 Metodologia 13
 
 
-
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
 ## Informació bàsica del projecte
 
 ```
-Títol del cicle: Desenvolupament d’aplicacions web
-Nom del projecte: Botiga Virtual
-Versió: 1
-Professors: Olga Domene
-Montse Riu
-Marcel Garcia
-Requisits
-acadèmics:
-Es recomanable haver superat les següents mòduls:
-Programació
-Bases de Dades
-Introducció a la programació web
-Llenguatge de marques i sistemes de gestió de la informació.
 Breu presentació del
 projecte:
 L’alumnat haurà de desenvolupar una plataforma de comerç
@@ -62,24 +29,8 @@ electrònic integrada a la web existent serralleriasolidaria.cat.
 La plataforma permetrà la venda de productes de serralleria i
 serveis associats, garantint facilitat d’ús, seguretat i manteniment
 accessible per personal no tècnic.
-Hores: 180h
-Data de lliurament: 18/05/2026 fins a les 23:59h
-Data de presentacions 19/05/2026 a les 9:00h
-Nombre de sprints i
-dates:
-Sprint 1: 10/03/
-Sprint 2: 07/04/
-Sprint 3: 28/04/
-Sprint 4: 12/05/
-Nombre d’integrants: 2
-
 ```
 
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
 ## Objectius
 
 ```
@@ -123,11 +74,6 @@ front.
 
 ```
 
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
 ## Enunciat
 
 Ens han encarregat fer una botiga virtual que permet la gestió integral de les vendes d’un
@@ -171,12 +117,6 @@ Dels compradors volem guardar, el seu (DNI o CIF o NIE) email, telèfon, el nom,
 cognoms i adreça.
 
 
-
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
 ## Compres
 
 De les compres volem registrar el client que les ha realitzat, els productes i/o packs que
@@ -212,17 +152,11 @@ Sense validar-se es podrà:
 Amb un usuari validat es podrà:
 1. Tot el que es pot fer sense estar validat.
 2. Editar les dades del perfil.
-3. Accedir a la pàgina de confirmació de compra i pagar amb targeta de crèdit ,
-PayPal i Bizum
+3. Accedir a la pàgina de confirmació de compra i pagar amb targeta de crèdit, PayPal i Bizum
 4. Consultar les compres realitzades i en quin estat es troben: (pendent, enviada, data
 d’enviament o data d’instal·lació).
 5. Imprimir factures en PDF.
 
-
-
-Departament d’Educació
-**Institut La Pineda**
-2DAW ABP
 **Part administrador**
 
 1. Pàgina principal amb algunes estadístiques útils per l’administrador.
@@ -255,11 +189,6 @@ modificar i actualitzar els elements de la pàgina en temps d'execució.
 **Cercador**
 Cercador de productes dinàmic.
 
-
-
-Departament d’Educació
-**Institut La Pineda**
-2DAW ABP
 **DRAG&DROP**
 Hi ha d’haver una part de DRAG&DROP amb sentit dintre de la web (arrossegar
 productes al pack, o al cistell, etc)
@@ -288,21 +217,14 @@ etc.
 2. Les contrasenyes han d’estar encriptades a la base de dades.
 3. Heu de respectar el RGPD.
 
-
-
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
 ## Annexos
 
-## Annex 1
+## Annex 1 NO HACER CASO
 
 Desplegament de l'aplicació en un servidor Dokku.Configuració de comunicació segura a
 través de SSL/TLS y polítiques de seguritat per protegir les dades enmagatzemades.
 
-## Annex 2
+## Annex 2 NO HACER CASO
 
 Explicació de funcionament del sistemes de nom jeràrquics. Creació de subdominis per
 accedir a les diferents parts de l'aplicació web.
@@ -326,9 +248,6 @@ El vostre informe ha d'incloure:
 
 
 ```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
 ● Explicació de les solucions o intents de resolució dels problemes detectats
 ● Conclusions i reflexions finals
 ● S’haurà d’incloure qualsevol informació addicional rellevant, com captures de
@@ -360,9 +279,6 @@ En aquest sprint l’alumnat haurà de presentar:
 ○ Gestió de característiques.
 
 ```
-
-Departament d’Educació
-**Institut La Pineda**
 2DAW ABP
 **Sprint 2**
 En aquest sprint l’alumnat haurà de presentar el disseny i funcionalitats de:
@@ -389,13 +305,6 @@ En aquest sprint l’alumnat haurà de presentar:
 **Lliurament final**
 ● Annexos.
 
-
-
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
 ## Criteris d’avaluació
 
 Per poder assolir els objectius del projecte, tots els apartats de l’avaluació han de tenir
@@ -427,11 +336,6 @@ Els annexos es lliuraran en un apartat específic del Moodle.
 
 ```
 
-```
-Departament d’Educació
-Institut La Pineda
-2DAW ABP
-```
 ## Metodologia
 
 Per portar a terme aquest projecte farem servir la metodologia col·laborativa **ABP** ,

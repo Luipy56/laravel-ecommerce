@@ -2,18 +2,22 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admin;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('admins')->insert([
-            ['username' => 'admin', 'password' => Hash::make('password'), 'is_active' => true],
-            ['username' => 'manager', 'password' => Hash::make('password'), 'is_active' => true],
-            ['username' => 'support', 'password' => Hash::make('password'), 'is_active' => true],
-        ]);
+        $admins = [
+            ['username' => 'admin', 'password' => 'admin', 'is_active' => true],
+            ['username' => 'luipy', 'password' => 'admin', 'is_active' => true],
+            ['username' => 'manager', 'password' => 'admin', 'is_active' => true],
+            ['username' => 'support', 'password' => 'admin', 'is_active' => true],
+        ];
+
+        foreach ($admins as $data) {
+            Admin::create($data);
+        }
     }
 }

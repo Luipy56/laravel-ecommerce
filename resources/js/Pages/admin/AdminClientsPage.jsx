@@ -1,0 +1,144 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../api';
+import PageTitle from '../../components/PageTitle';
+
+function clientTypeLabel(type, t) {
+  if (type === 'person') return t('admin.clients.type_person');
+  if (type === 'company') return t('admin.clients.type_company');
+  return type || '';
+}
+
+export default function AdminClientsPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [searchDebounce, setSearchDebounce] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [activeFilter, setActiveFilter] = useState('1');
+
+  const fetchClients = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (searchDebounce) params.search = searchDebounce;
+      if (typeFilter) params.type = typeFilter;
+      if (activeFilter !== '') params.is_active = activeFilter === '1';
+      const { data } = await api.get('admin/clients', { params });
+      if (data.success) setClients(data.data || []);
+    } catch (err) {
+      if (err.response?.status === 401) navigate('/admin/login');
+      setClients([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate, searchDebounce, typeFilter, activeFilter]);
+
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
+
+  useEffect(() => {
+    const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
+    return () => clearTimeout(tid);
+  }, [search]);
+
+  return (
+    <div className="space-y-6">
+      <PageTitle>{t('admin.clients.title')}</PageTitle>
+
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+        <input
+          type="search"
+          className="input input-bordered input-sm sm:input-md w-full min-w-0 max-w-md"
+          placeholder={t('admin.clients.search_placeholder')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label={t('admin.clients.search_placeholder')}
+        />
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.clients.filter_type')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-40"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            aria-label={t('admin.clients.filter_type')}
+          >
+            <option value="">{t('shop.categories.all')}</option>
+            <option value="person">{t('admin.clients.type_person')}</option>
+            <option value="company">{t('admin.clients.type_company')}</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.clients.filter_active')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-40"
+            value={activeFilter}
+            onChange={(e) => setActiveFilter(e.target.value)}
+            aria-label={t('admin.clients.filter_active')}
+          >
+            <option value="">{t('shop.categories.all')}</option>
+            <option value="1">{t('common.yes')}</option>
+            <option value="0">{t('common.no')}</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <span className="loading loading-spinner loading-lg" aria-hidden="true" />
+          </div>
+        ) : clients.length === 0 ? (
+          <div className="p-8 text-center text-base-content/70">
+            {t('admin.clients.no_clients')}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
+              <thead>
+                <tr>
+                  <th>{t('admin.clients.email')}</th>
+                  <th>{t('admin.clients.filter_type')}</th>
+                  <th>{t('admin.clients.identification')}</th>
+                  <th>{t('admin.clients.primary_contact')}</th>
+                  <th className="text-center">{t('admin.clients.contacts_count')}</th>
+                  <th className="text-center">{t('admin.clients.addresses_count')}</th>
+                  <th className="text-center">{t('admin.products.is_active')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clients.map((c) => (
+                  <tr
+                    key={c.id}
+                    role="button"
+                    tabIndex={0}
+                    className="cursor-pointer hover:bg-base-200 focus:bg-base-200 focus:outline-none"
+                    onClick={() => navigate(`/admin/clients/${c.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/admin/clients/${c.id}`);
+                      }
+                    }}
+                  >
+                    <td>{c.login_email}</td>
+                    <td>{clientTypeLabel(c.type, t)}</td>
+                    <td>{c.identification}</td>
+                    <td>{c.primary_contact_name}</td>
+                    <td className="text-center tabular-nums">{c.contacts_count ?? 0}</td>
+                    <td className="text-center tabular-nums">{c.addresses_count ?? 0}</td>
+                    <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

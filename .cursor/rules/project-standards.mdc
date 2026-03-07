@@ -31,7 +31,40 @@ $table->string('status')->comment('Order status'); // values from lang: shop.sta
 ## Styling
 
 - Use **Tailwind CSS** for all styling (utility-first, mobile-first). Use **daisyUI** for ready-made components (cards, modals, navbar, etc.); see **`.cursor/rules/daisyui.mdc`** and **`.cursor/rules/tailwind.mdc`**.
+- **Form submit buttons:** Place the primary "Save" / "Guardar" button **aligned to the right**. Use `flex justify-end` for the submit row, or `modal-action` in modals (cancel left, save right).
 - Put theme tokens and overrides in a global **`styles.css`** (e.g. CSS variables, Tailwind/daisyUI theme). Add a separate CSS file per page or component only when the style does not repeat and is necessary.
+
+## Product variants
+
+- Products can optionally be grouped as **siblings** (variants) via **`product_variant_groups`**. A product belongs to at most one group (`products.variant_group_id`); products in the same group are "brothers" (e.g. same screw 30mm, 40mm, 50mm). No sort column: order variants by name or value in SQL (e.g. `ORDER BY name ASC`). See **`trash/diagramZero.dbml`** for the schema. Model: `ProductVariantGroup`, `Product::variantGroup()`, `Product::variantSiblings()`.
+
+## Shared UI components
+
+- **Page titles:** Use the shared **PageTitle** component (`resources/js/components/PageTitle.jsx`) for the main h1 on every content page (Cart, Orders, Products, Checkout, Profile, etc.). Do not use a raw `<h1 className="...">` for the page heading; keep the same style (bold, tracking-tight, border-bottom) everywhere. See **`.cursor/rules/components.mdc`**.
+- Product grids and product tiles use the shared **ProductCard** component (`resources/js/components/ProductCard.jsx`). Use it on the home page (featured) and on the product list page so layout and behaviour stay consistent. See **`.cursor/rules/components.mdc`** for details and other shared components.
+
+## Empty / missing data from the database
+
+- When a field is expected from the API/DB and **nothing is received** (null, undefined, empty), render the field **blank** in the UI.
+- **Do not** use placeholders such as em dash ("—"), "N/A", "–", or similar for missing values. Leave the cell or label content empty (e.g. `''` or nothing).
+
+## Page titles
+
+- **Do not** use em dash ("—") as a separator in page titles or in UI text. Use middle dot (" · ") if a separator is needed (e.g. "Edit · Product name").
+- **Do not duplicate** in the page title information that is already shown in the page body (e.g. on client ficha, use only "Ficha cliente", not "Ficha cliente · email@example.com", since the email is already in the ficha).
+
+## Admin area
+
+- **Layout:** Admin pages use **AdminLayout** (`resources/js/components/admin/AdminLayout.jsx`): drawer/sidebar, no top header; links to Dashboard, Productes, Característiques, Tipos de característiques, Tornar a la botiga, Logout. All admin routes live under `/admin` and are wrapped by this layout.
+- **List pages:** Every admin list (products, features, feature types, packs, admins, etc.) must include:
+  - **Page structure:** One row with **PageTitle** only; then one **toolbar row** with search, filters, and (if applicable) the primary "Add" / "Afegir" action. The toolbar must use `flex flex-wrap items-center gap-2 sm:gap-4` so the search bar, filter selects, and add button are **on the same row and vertically aligned**. Do not put the add button in a separate row above or below the search.
+  - **Toolbar controls:** Use `input-sm sm:input-md` for the search input and `select-sm sm:select-md` for selects so heights align; give the add button `btn-sm sm:btn-md shrink-0`. Use `w-full min-w-0 max-w-xs` (or `max-w-md` where needed) on the search so it doesn't overflow.
+  - **Search:** An `input type="search"` with **debounced** value (e.g. 300 ms) sent as query param to the API. Use local state for the input and a separate `searchDebounce` state updated in a `useEffect` with `setTimeout`/`clearTimeout`.
+  - **Filters:** Select dropdowns for relevant dimensions (e.g. category, type, active). Send filter values as query params; use empty string for “All” (do not send the param when “All”).
+  - **Clickable rows:** Table rows navigate to the edit page on click (and Enter/Space for a11y). Use `role="button"`, `tabIndex={0}`, `onClick` and `onKeyDown`; do not add a separate “Edit” button column unless required.
+  - **Table column alignment:** Apply consistent alignment so `th` and `td` in the same column share classes. Use `text-end` for numeric columns (price, stock, counts, totals); add `tabular-nums` on `td` for numeric cells. Use `text-center` for boolean/status columns (is_active, badges). Keep text columns (names, codes, emails) left-aligned (default).
+- **CRUD resources:** Products (`admin/products`), Features (`admin/features`), Feature names / types (`admin/feature-names`). Backend: controllers under `App\Http\Controllers\Api\Admin*`; list endpoints accept `search`, `is_active`, and resource-specific filters (e.g. `category_id`, `feature_name_id`). Response shape: `{ success: true, data: [...] }` (and `meta` for paginated lists).
+- **i18n:** All admin UI strings use keys under `admin.*` in `resources/js/locales/ca.json` and `es.json` (e.g. `admin.products.title`, `admin.features.search_placeholder`, `admin.feature_types.filter_active`). Reuse `shop.categories.all` for “All” in filters and `common.yes` / `common.no` where appropriate.
 
 ## Assets and build
 

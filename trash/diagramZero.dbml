@@ -5,6 +5,7 @@
 Enum order_kind {
   cart [note: 'User cart, not yet confirmed as order']
   order [note: 'Confirmed order (paid or being processed)']
+  like [note: 'Favorites/wishlist (product/pack likes)']
 }
 
 Enum order_status {
@@ -71,6 +72,7 @@ Table CLIENT_ADDRESSES {
   city varchar(100) [not null]
   province varchar(100) [null, note: 'Provincia']
   postal_code varchar(20) [null]
+  is_primary boolean [not null, default: false, note: 'Main address for this client']
   is_active boolean [not null, default: true, note: 'Soft delete']
 }
 
@@ -81,9 +83,15 @@ Table PRODUCT_CATEGORIES {
   is_active boolean [not null, default: true, note: 'Disable without deleting']
 }
 
+Table PRODUCT_VARIANT_GROUPS [note: 'Optional grouping of products as siblings (e.g. same screw 30mm, 40mm, 50mm). Order variants by name or value in SQL.'] {
+  id int [pk, increment]
+  name varchar(255) [null, note: 'Optional display name for the variant group']
+}
+
 Table PRODUCTS {
   id int [pk, increment]
   category_id int [not null, ref: > PRODUCT_CATEGORIES.id]
+  variant_group_id int [null, ref: > PRODUCT_VARIANT_GROUPS.id, note: 'Optional; products with same id are siblings/variants']
   code varchar(50) [null, unique, note: 'Product code']
   name varchar(255) [not null]
   description text [null]
@@ -180,6 +188,7 @@ Table ADMINS {
   username varchar(255) [not null, unique]
   password varchar(255) [not null]
   is_active boolean [not null, default: true, note: 'Soft delete']
+  last_login_at timestamp [null, note: 'Last successful login']
 }
 
 Table PACKS {

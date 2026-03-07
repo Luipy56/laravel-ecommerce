@@ -2,19 +2,76 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductImageSeeder extends Seeder
 {
+    /**
+     * Seeds product_images. Each product gets 2 images in products/{id}/ (same structure as real uploads).
+     */
     public function run(): void
     {
-        DB::table('product_images')->insert([
-            ['product_id' => 1, 'storage_path' => 'products/porta-blindada-1.jpg', 'filename' => 'porta-blindada-1.jpg', 'size_bytes' => 120000, 'checksum' => null, 'content_type' => 'image/jpeg', 'sort_order' => 1, 'is_active' => true],
-            ['product_id' => 1, 'storage_path' => 'products/porta-blindada-2.jpg', 'filename' => 'porta-blindada-2.jpg', 'size_bytes' => 98000, 'checksum' => null, 'content_type' => 'image/jpeg', 'sort_order' => 2, 'is_active' => true],
-            ['product_id' => 2, 'storage_path' => 'products/porta-fusta-1.jpg', 'filename' => 'porta-fusta-1.jpg', 'size_bytes' => 110000, 'checksum' => null, 'content_type' => 'image/jpeg', 'sort_order' => 1, 'is_active' => true],
-            ['product_id' => 3, 'storage_path' => 'products/finestra-1.jpg', 'filename' => 'finestra-1.jpg', 'size_bytes' => 95000, 'checksum' => null, 'content_type' => 'image/jpeg', 'sort_order' => 1, 'is_active' => true],
-            ['product_id' => 4, 'storage_path' => 'products/persiana-1.jpg', 'filename' => 'persiana-1.jpg', 'size_bytes' => 88000, 'checksum' => null, 'content_type' => 'image/jpeg', 'sort_order' => 1, 'is_active' => true],
-        ]);
+        $fixtures = $this->getFixturePaths();
+        if (empty($fixtures)) {
+            return;
+        }
+
+        Storage::disk('public')->deleteDirectory('products');
+
+        $rows = [];
+        foreach (Product::orderBy('id')->get() as $product) {
+            $dir = 'products/' . $product->id;
+            $sortOrder = 1;
+            foreach ($this->pickRandom($fixtures, 2) as $srcPath) {
+                $filename = 'image-' . $sortOrder . '.jpg';
+                $storagePath = $dir . '/' . $filename;
+                Storage::disk('public')->put($storagePath, file_get_contents($srcPath));
+                $rows[] = [
+                    'product_id' => $product->id,
+                    'storage_path' => $storagePath,
+                    'filename' => $filename,
+                    'size_bytes' => (int) filesize($srcPath),
+                    'checksum' => null,
+                    'content_type' => 'image/jpeg',
+                    'sort_order' => $sortOrder,
+                    'is_active' => true,
+                ];
+                $sortOrder++;
+            }
+        }
+
+        if (! empty($rows)) {
+            DB::table('product_images')->insert($rows);
+        }
+    }
+
+    /** @return array<string> */
+    private function getFixturePaths(): array
+    {
+        $dir = database_path('seeders/fixtures/images');
+        $paths = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $p = $dir . '/seeder-' . $i . '.jpg';
+            if (is_file($p)) {
+                $paths[] = $p;
+            }
+        }
+        return $paths;
+    }
+
+    /** @return array<string> */
+    private function pickRandom(array $paths, int $count): array
+    {
+        if (empty($paths)) {
+            return [];
+        }
+        $picked = [];
+        for ($i = 0; $i < $count; $i++) {
+            $picked[] = $paths[array_rand($paths)];
+        }
+        return $picked;
     }
 }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('payment_method', 50);
             $table->string('gateway_reference', 255)->nullable()->comment('External transaction id from gateway');
             $table->timestamp('paid_at')->nullable();
+            $table->timestamps();
         });
     }
 

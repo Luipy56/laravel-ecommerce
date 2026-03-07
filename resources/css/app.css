@@ -1,4 +1,39 @@
 @import 'tailwindcss';
+@plugin 'daisyui' {
+  themes: serralleria --default;
+}
+@plugin 'daisyui/theme' {
+  name: 'serralleria';
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+  --color-base-100: oklch(99% 0.005 240);
+  --color-base-200: oklch(96% 0.01 240);
+  --color-base-300: oklch(92% 0.02 240);
+  --color-base-content: oklch(22% 0.05 240);
+  --color-primary: #fb5412;
+  --color-primary-content: #fff;
+  --color-secondary: #882200;
+  --color-secondary-content: #fff;
+  --color-accent: #fb5412;
+  --color-accent-content: #fff;
+  --color-neutral: oklch(45% 0.04 240);
+  --color-neutral-content: oklch(98% 0.01 240);
+  --color-info: oklch(70% 0.2 220);
+  --color-info-content: oklch(98% 0.01 220);
+  --color-success: oklch(65% 0.25 140);
+  --color-success-content: oklch(98% 0.01 140);
+  --color-warning: oklch(80% 0.25 80);
+  --color-warning-content: oklch(20% 0.05 80);
+  --color-error: oklch(65% 0.3 30);
+  --color-error-content: oklch(98% 0.01 30);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -6,6 +41,63 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #882200 0%, #fb5412 100%);
+}
+
+/* ----- Admin login: animated gradient background ----- */
+.bg-admin-login-animated {
+  background: linear-gradient(-45deg, #882200, #fb5412, #d94a0f, #6b2a0a);
+  background-size: 400% 400%;
+  animation: gradient-admin-login 14s ease infinite;
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+@keyframes gradient-admin-login {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ----- Form fields: consistent layout and spacing ----- */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-base-content);
+}
+
+/* ----- Inputs / textarea / select: subtle hover, clear focus ----- */
+.input.input-bordered,
+input.input.input-bordered,
+textarea.textarea-bordered,
+select.select.select-bordered,
+.file-input.file-input-bordered {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input.input-bordered:hover,
+input.input.input-bordered:hover,
+textarea.textarea-bordered:hover,
+select.select.select-bordered:hover,
+.file-input.file-input-bordered:hover {
+  border-color: var(--color-base-300);
+}
+.input.input-bordered:focus,
+input.input.input-bordered:focus,
+textarea.textarea-bordered:focus,
+select.select.select-bordered:focus,
+.file-input.file-input-bordered:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgb(251 84 18 / 0.2);
 }

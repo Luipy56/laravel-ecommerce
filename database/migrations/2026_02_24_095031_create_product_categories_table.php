@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('code', 50)->nullable()->unique()->comment('Category code');
             $table->string('name', 255);
             $table->boolean('is_active')->default(true)->comment('Disable without deleting');
+            $table->timestamps();
         });
     }
 

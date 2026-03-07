@@ -1,0 +1,150 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { api } from '../../api';
+import PageTitle from '../../components/PageTitle';
+
+const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 'completed'];
+
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending_review': return 'badge-warning';
+    case 'reviewed': return 'badge-info';
+    case 'client_contacted': return 'badge-success';
+    case 'rejected': return 'badge-error';
+    case 'completed': return 'badge-success';
+    default: return 'badge-ghost';
+  }
+}
+
+export default function AdminPersonalizedSolutionsPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [solutions, setSolutions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [searchDebounce, setSearchDebounce] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [activeFilter, setActiveFilter] = useState('1');
+
+  const fetchSolutions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (searchDebounce) params.search = searchDebounce;
+      if (statusFilter) params.status = statusFilter;
+      if (activeFilter !== '') params.is_active = activeFilter === '1';
+      const { data } = await api.get('admin/personalized-solutions', { params });
+      if (data.success) setSolutions(data.data || []);
+    } catch (err) {
+      if (err.response?.status === 401) navigate('/admin/login');
+      setSolutions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate, searchDebounce, statusFilter, activeFilter]);
+
+  useEffect(() => {
+    fetchSolutions();
+  }, [fetchSolutions]);
+
+  useEffect(() => {
+    const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
+    return () => clearTimeout(tid);
+  }, [search]);
+
+  return (
+    <div className="space-y-6">
+      <PageTitle>{t('admin.personalized_solutions.title')}</PageTitle>
+
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+        <input
+          type="search"
+          className="input input-bordered input-sm sm:input-md w-full min-w-0 max-w-xs"
+          placeholder={t('admin.personalized_solutions.search_placeholder')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label={t('admin.personalized_solutions.search_placeholder')}
+        />
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.personalized_solutions.filter_status')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-44"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label={t('admin.personalized_solutions.filter_status')}
+          >
+            <option value="">{t('admin.personalized_solutions.status_all')}</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>{t(`admin.personalized_solutions.status_${s}`)}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.personalized_solutions.filter_active')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-40"
+            value={activeFilter}
+            onChange={(e) => setActiveFilter(e.target.value)}
+            aria-label={t('admin.personalized_solutions.filter_active')}
+          >
+            <option value="">{t('shop.categories.all')}</option>
+            <option value="1">{t('common.yes')}</option>
+            <option value="0">{t('common.no')}</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <span className="loading loading-spinner loading-lg" aria-hidden="true" />
+          </div>
+        ) : solutions.length === 0 ? (
+          <div className="p-8 text-center text-base-content/70">
+            {t('admin.personalized_solutions.no_solutions')}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
+              <thead>
+                <tr>
+                  <th>{t('admin.personalized_solutions.email')}</th>
+                  <th>{t('admin.personalized_solutions.phone')}</th>
+                  <th>{t('admin.personalized_solutions.problem_description')}</th>
+                  <th className="text-center">{t('admin.personalized_solutions.status')}</th>
+                  <th className="text-end">{t('admin.personalized_solutions.created_at')}</th>
+                  <th className="text-center">{t('admin.products.is_active')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {solutions.map((s) => (
+                  <tr
+                    key={s.id}
+                    role="button"
+                    tabIndex={0}
+                    className="cursor-pointer hover:bg-base-200 focus:bg-base-200 focus:outline-none"
+                    onClick={() => navigate(`/admin/personalized-solutions/${s.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/admin/personalized-solutions/${s.id}`);
+                      }
+                    }}
+                  >
+                    <td>{s.email ?? ''}</td>
+                    <td>{s.phone ?? ''}</td>
+                    <td className="max-w-[200px] truncate">{s.problem_description ?? ''}</td>
+                    <td className="text-center"><span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>{t(`admin.personalized_solutions.status_${s.status}`)}</span></td>
+                    <td className="text-end">{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</td>
+                    <td className="text-center">{s.is_active ? t('common.yes') : t('common.no')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

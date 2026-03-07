@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('pack_id')->constrained('packs');
             $table->foreignId('product_id')->constrained('products');
             $table->boolean('is_active')->default(true);
+            $table->timestamps();
         });
     }
 

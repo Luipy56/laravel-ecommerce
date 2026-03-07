@@ -117,7 +117,7 @@ class AdminProductController extends Controller
         $maxSort = (int) ProductImage::where('product_id', $product->id)->max('sort_order');
         foreach ($files as $file) {
             $maxSort++;
-            $path = $file->store('products/' . $product->id, 'public');
+            $path = $file->store('products/' . $product->id, 'uploads');
             ProductImage::create([
                 'product_id' => $product->id,
                 'storage_path' => $path,

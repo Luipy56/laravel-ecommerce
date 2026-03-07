@@ -38,6 +38,6 @@ class PackImage extends Model
         if (empty($this->storage_path)) {
             return '/images/dummy.jpg';
         }
-        return '/storage/' . ltrim($this->storage_path, '/');
+        return '/uploads/' . ltrim($this->storage_path, '/');
     }
 }

@@ -43,7 +43,7 @@ class PersonalizedSolutionController extends Controller
 
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $path = $file->store('personalized-solutions/' . $solution->id, 'public');
+                $path = $file->store('personalized-solutions/' . $solution->id, 'uploads');
                 \App\Models\PersonalizedSolutionAttachment::create([
                     'personalized_solution_id' => $solution->id,
                     'storage_path' => $path,

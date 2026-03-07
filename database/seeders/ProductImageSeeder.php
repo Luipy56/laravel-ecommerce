@@ -19,7 +19,7 @@ class ProductImageSeeder extends Seeder
             return;
         }
 
-        Storage::disk('public')->deleteDirectory('products');
+        Storage::disk('uploads')->deleteDirectory('products');
 
         $rows = [];
         foreach (Product::orderBy('id')->get() as $product) {
@@ -28,7 +28,7 @@ class ProductImageSeeder extends Seeder
             foreach ($this->pickRandom($fixtures, 2) as $srcPath) {
                 $filename = 'image-' . $sortOrder . '.jpg';
                 $storagePath = $dir . '/' . $filename;
-                Storage::disk('public')->put($storagePath, file_get_contents($srcPath));
+                Storage::disk('uploads')->put($storagePath, file_get_contents($srcPath));
                 $rows[] = [
                     'product_id' => $product->id,
                     'storage_path' => $storagePath,

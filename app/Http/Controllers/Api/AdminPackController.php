@@ -137,7 +137,7 @@ class AdminPackController extends Controller
         $maxSort = (int) PackImage::where('pack_id', $pack->id)->max('sort_order');
         foreach ($files as $file) {
             $maxSort++;
-            $path = $file->store('packs/' . $pack->id, 'public');
+            $path = $file->store('packs/' . $pack->id, 'uploads');
             PackImage::create([
                 'pack_id' => $pack->id,
                 'storage_path' => $path,

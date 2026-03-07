@@ -18,7 +18,7 @@ class PersonalizedSolutionAttachmentSeeder extends Seeder
             return;
         }
 
-        Storage::disk('public')->deleteDirectory('personalized-solutions');
+        Storage::disk('uploads')->deleteDirectory('personalized-solutions');
 
         $rows = [];
         foreach ([1, 2, 3] as $solutionId) {
@@ -27,7 +27,7 @@ class PersonalizedSolutionAttachmentSeeder extends Seeder
             foreach ($this->pickRandom($fixtures, 2) as $srcPath) {
                 $filename = 'attachment-' . $sortOrder . '.jpg';
                 $storagePath = $dir . '/' . $filename;
-                Storage::disk('public')->put($storagePath, file_get_contents($srcPath));
+                Storage::disk('uploads')->put($storagePath, file_get_contents($srcPath));
                 $rows[] = [
                     'personalized_solution_id' => $solutionId,
                     'storage_path' => $storagePath,

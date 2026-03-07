@@ -18,7 +18,7 @@ class PackImageSeeder extends Seeder
             return;
         }
 
-        Storage::disk('public')->deleteDirectory('packs');
+        Storage::disk('uploads')->deleteDirectory('packs');
 
         $rows = [];
         foreach ([1, 2, 3] as $packId) {
@@ -27,7 +27,7 @@ class PackImageSeeder extends Seeder
             foreach ($this->pickRandom($fixtures, 2) as $srcPath) {
                 $filename = 'image-' . $sortOrder . '.jpg';
                 $storagePath = $dir . '/' . $filename;
-                Storage::disk('public')->put($storagePath, file_get_contents($srcPath));
+                Storage::disk('uploads')->put($storagePath, file_get_contents($srcPath));
                 $rows[] = [
                     'pack_id' => $packId,
                     'storage_path' => $storagePath,

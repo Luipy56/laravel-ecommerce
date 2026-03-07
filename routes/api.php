@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
 Route::post('admin/login', [AdminAuthController::class, 'login']);
 Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::post('logout', [AdminAuthController::class, 'logout']);
+    Route::get('stats/postal-codes', [AdminDashboardController::class, 'postalCodes']);
     Route::get('stats/sales-by-period', [AdminDashboardController::class, 'salesByPeriod']);
     Route::get('stats/top-products', [AdminDashboardController::class, 'topProducts']);
     Route::get('stats/low-stock', [AdminDashboardController::class, 'lowStock']);

@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             OrderAddressSeeder::class,
             PaymentSeeder::class,
             OrderDetailSeeder::class,
+            HistoricalSalesSeeder::class,
             PersonalizedSolutionSeeder::class,
             PersonalizedSolutionAttachmentSeeder::class,
         ]);

@@ -11,12 +11,11 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const doLogin = async (user, pass) => {
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.post('admin/login', { username, password });
+      const { data } = await api.post('admin/login', { username: user, password: pass });
       if (data.success) navigate('/admin');
       else setError(data.message || t('admin.login.error'));
     } catch (err) {
@@ -24,6 +23,16 @@ export default function AdminLoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await doLogin(username, password);
+  };
+
+  const handleAutoLogin = (e) => {
+    e.preventDefault();
+    doLogin('admin', 'admin');
   };
 
   return (
@@ -67,6 +76,14 @@ export default function AdminLoginPage() {
               </label>
               <button type="submit" className="btn btn-primary w-full" disabled={loading}>
                 {loading ? t('common.loading') : t('admin.login.submit')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm w-full text-base-content/60"
+                onClick={handleAutoLogin}
+                disabled={loading}
+              >
+                Auto login (admin / admin)
               </button>
             </form>
           </div>

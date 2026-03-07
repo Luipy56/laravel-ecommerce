@@ -29,9 +29,10 @@ class AdminPackController extends Controller
             $query->where('is_trending', $request->boolean('is_trending'));
         }
 
-        $packs = $query->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $packs = $query->paginate($perPage);
 
-        $data = $packs->map(fn ($p) => [
+        $data = $packs->getCollection()->map(fn ($p) => [
             'id' => $p->id,
             'name' => $p->name,
             'description' => $p->description,
@@ -39,11 +40,17 @@ class AdminPackController extends Controller
             'is_trending' => (bool) $p->is_trending,
             'is_active' => (bool) $p->is_active,
             'pack_items_count' => $p->pack_items_count ?? 0,
-        ]);
+        ])->values()->all();
 
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $packs->currentPage(),
+                'last_page' => $packs->lastPage(),
+                'per_page' => $packs->perPage(),
+                'total' => $packs->total(),
+            ],
         ]);
     }
 

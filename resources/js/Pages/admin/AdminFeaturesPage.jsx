@@ -11,6 +11,8 @@ export default function AdminFeaturesPage() {
   // Feature types (tipos de características) – first list
   const [featureTypesList, setFeatureTypesList] = useState([]);
   const [loadingTypes, setLoadingTypes] = useState(true);
+  const [metaTypes, setMetaTypes] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
+  const [pageTypes, setPageTypes] = useState(1);
   const [searchTypes, setSearchTypes] = useState('');
   const [searchDebounceTypes, setSearchDebounceTypes] = useState('');
   const [activeFilterTypes, setActiveFilterTypes] = useState('');
@@ -21,6 +23,8 @@ export default function AdminFeaturesPage() {
   // Features (características) – second list
   const [features, setFeatures] = useState([]);
   const [loadingFeatures, setLoadingFeatures] = useState(true);
+  const [metaFeatures, setMetaFeatures] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
+  const [pageFeatures, setPageFeatures] = useState(1);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [typeId, setTypeId] = useState('');
@@ -28,7 +32,7 @@ export default function AdminFeaturesPage() {
 
   const fetchFeatureNamesForSelect = useCallback(async () => {
     try {
-      const { data } = await api.get('admin/feature-names');
+      const { data } = await api.get('admin/feature-names', { params: { per_page: 500 } });
       if (data.success) setFeatureNamesForSelect(data.data || []);
     } catch {
       setFeatureNamesForSelect([]);
@@ -38,35 +42,41 @@ export default function AdminFeaturesPage() {
   const fetchFeatureTypesList = useCallback(async () => {
     setLoadingTypes(true);
     try {
-      const params = {};
+      const params = { page: pageTypes, per_page: 20 };
       if (searchDebounceTypes) params.search = searchDebounceTypes;
       if (activeFilterTypes !== '') params.is_active = activeFilterTypes === '1';
       const { data } = await api.get('admin/feature-names', { params });
-      if (data.success) setFeatureTypesList(data.data || []);
+      if (data.success) {
+        setFeatureTypesList(data.data || []);
+        setMetaTypes(data.meta || metaTypes);
+      }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
       setFeatureTypesList([]);
     } finally {
       setLoadingTypes(false);
     }
-  }, [navigate, searchDebounceTypes, activeFilterTypes]);
+  }, [navigate, pageTypes, searchDebounceTypes, activeFilterTypes]);
 
   const fetchFeatures = useCallback(async () => {
     setLoadingFeatures(true);
     try {
-      const params = {};
+      const params = { page: pageFeatures, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
       if (typeId) params.feature_name_id = typeId;
       if (activeFilter !== '') params.is_active = activeFilter === '1';
       const { data } = await api.get('admin/features', { params });
-      if (data.success) setFeatures(data.data || []);
+      if (data.success) {
+        setFeatures(data.data || []);
+        setMetaFeatures(data.meta || metaFeatures);
+      }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
       setFeatures([]);
     } finally {
       setLoadingFeatures(false);
     }
-  }, [navigate, searchDebounce, typeId, activeFilter]);
+  }, [navigate, pageFeatures, searchDebounce, typeId, activeFilter]);
 
   useEffect(() => {
     fetchFeatureNamesForSelect();
@@ -79,6 +89,14 @@ export default function AdminFeaturesPage() {
   useEffect(() => {
     fetchFeatures();
   }, [fetchFeatures]);
+
+  useEffect(() => {
+    setPageTypes(1);
+  }, [searchDebounceTypes, activeFilterTypes]);
+
+  useEffect(() => {
+    setPageFeatures(1);
+  }, [searchDebounce, typeId, activeFilter]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounceTypes(searchTypes.trim()), 300);
@@ -169,6 +187,29 @@ export default function AdminFeaturesPage() {
             </div>
           )}
         </div>
+        {metaTypes.last_page > 1 && (
+          <div className="join flex justify-center">
+            <button
+              type="button"
+              className="btn join-item btn-sm bg-base-100 border-base-300"
+              disabled={pageTypes <= 1}
+              onClick={() => setPageTypes((p) => Math.max(1, p - 1))}
+            >
+              {t('shop.pagination.prev')}
+            </button>
+            <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
+              {t('shop.pagination.page')} {pageTypes} {t('shop.pagination.of')} {metaTypes.last_page}
+            </span>
+            <button
+              type="button"
+              className="btn join-item btn-sm bg-base-100 border-base-300"
+              disabled={pageTypes >= metaTypes.last_page}
+              onClick={() => setPageTypes((p) => Math.min(metaTypes.last_page, p + 1))}
+            >
+              {t('shop.pagination.next')}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Section 2: Características (valores) */}
@@ -264,6 +305,29 @@ export default function AdminFeaturesPage() {
             </div>
           )}
         </div>
+        {metaFeatures.last_page > 1 && (
+          <div className="join flex justify-center">
+            <button
+              type="button"
+              className="btn join-item btn-sm bg-base-100 border-base-300"
+              disabled={pageFeatures <= 1}
+              onClick={() => setPageFeatures((p) => Math.max(1, p - 1))}
+            >
+              {t('shop.pagination.prev')}
+            </button>
+            <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
+              {t('shop.pagination.page')} {pageFeatures} {t('shop.pagination.of')} {metaFeatures.last_page}
+            </span>
+            <button
+              type="button"
+              className="btn join-item btn-sm bg-base-100 border-base-300"
+              disabled={pageFeatures >= metaFeatures.last_page}
+              onClick={() => setPageFeatures((p) => Math.min(metaFeatures.last_page, p + 1))}
+            >
+              {t('shop.pagination.next')}
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

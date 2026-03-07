@@ -168,6 +168,7 @@ export default function Navbar() {
             </button>
           </form>
         </div>
+        <div className="header-gradient-line h-1 w-full shrink-0" aria-hidden="true" />
       </header>
     </>
   );

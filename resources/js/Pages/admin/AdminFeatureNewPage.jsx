@@ -16,7 +16,7 @@ export default function AdminFeatureNewPage() {
 
   const fetchFeatureNames = useCallback(async () => {
     try {
-      const { data } = await api.get('admin/feature-names');
+      const { data } = await api.get('admin/feature-names', { params: { per_page: 500 } });
       if (data.success) setFeatureNames(data.data || []);
     } catch {
       setFeatureNames([]);

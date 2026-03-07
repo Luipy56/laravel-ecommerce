@@ -26,9 +26,10 @@ class AdminVariantGroupController extends Controller
             });
         }
 
-        $groups = $query->orderBy('id')->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $groups = $query->orderBy('id')->paginate($perPage);
 
-        $data = $groups->map(fn ($g) => [
+        $data = $groups->getCollection()->map(fn ($g) => [
             'id' => $g->id,
             'name' => $g->name,
             'products_count' => $g->products->count(),
@@ -42,6 +43,12 @@ class AdminVariantGroupController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $groups->currentPage(),
+                'last_page' => $groups->lastPage(),
+                'per_page' => $groups->perPage(),
+                'total' => $groups->total(),
+            ],
         ]);
     }
 

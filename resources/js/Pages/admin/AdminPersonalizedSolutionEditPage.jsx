@@ -68,7 +68,7 @@ export default function AdminPersonalizedSolutionEditPage() {
 
   const fetchClients = useCallback(async () => {
     try {
-      const { data } = await api.get('admin/clients');
+      const { data } = await api.get('admin/clients', { params: { per_page: 500 } });
       if (data.success) setClients(data.data || []);
     } catch {
       setClients([]);
@@ -77,7 +77,7 @@ export default function AdminPersonalizedSolutionEditPage() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const { data } = await api.get('admin/orders', { params: { kind: 'order' } });
+      const { data } = await api.get('admin/orders', { params: { kind: 'order', per_page: 500 } });
       if (data.success) setOrders(data.data || []);
     } catch {
       setOrders([]);

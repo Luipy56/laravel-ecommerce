@@ -163,7 +163,7 @@ export default function AdminLayout() {
               <li key={to}>
                 <Link
                   to={to}
-                  className={`rounded-lg ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-base-300 -ml-px' : ''}`}
+                  className={`rounded-lg ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
                   onClick={closeDrawer}
                   aria-current={isActive(to) ? 'page' : undefined}
                 >

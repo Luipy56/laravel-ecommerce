@@ -18,7 +18,7 @@ export default function AdminProductNewPage() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const { data } = await api.get('admin/categories');
+      const { data } = await api.get('admin/categories', { params: { per_page: 500 } });
       if (data.success) setCategories(data.data || []);
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');

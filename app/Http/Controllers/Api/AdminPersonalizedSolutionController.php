@@ -35,9 +35,10 @@ class AdminPersonalizedSolutionController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $solutions = $query->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $solutions = $query->paginate($perPage);
 
-        $data = $solutions->map(fn ($s) => [
+        $data = $solutions->getCollection()->map(fn ($s) => [
             'id' => $s->id,
             'email' => $s->email,
             'phone' => $s->phone,
@@ -52,6 +53,12 @@ class AdminPersonalizedSolutionController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $solutions->currentPage(),
+                'last_page' => $solutions->lastPage(),
+                'per_page' => $solutions->perPage(),
+                'total' => $solutions->total(),
+            ],
         ]);
     }
 

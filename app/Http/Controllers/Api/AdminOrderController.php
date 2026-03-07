@@ -39,9 +39,10 @@ class AdminOrderController extends Controller
             $query->where('kind', Order::KIND_ORDER)->where('status', (string) $request->input('status'));
         }
 
-        $orders = $query->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $orders = $query->paginate($perPage);
 
-        $data = $orders->map(function (Order $o) {
+        $data = $orders->getCollection()->map(function (Order $o) {
             $total = $o->lines->sum(fn ($l) => (float) $l->line_total);
             return [
                 'id' => $o->id,
@@ -61,6 +62,12 @@ class AdminOrderController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'per_page' => $orders->perPage(),
+                'total' => $orders->total(),
+            ],
         ]);
     }
 

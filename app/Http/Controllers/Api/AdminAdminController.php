@@ -26,9 +26,10 @@ class AdminAdminController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $admins = $query->get(['id', 'username', 'is_active', 'last_login_at', 'created_at']);
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $admins = $query->paginate($perPage, ['id', 'username', 'is_active', 'last_login_at', 'created_at']);
 
-        $data = $admins->map(fn ($a) => [
+        $data = $admins->getCollection()->map(fn ($a) => [
             'id' => $a->id,
             'username' => $a->username,
             'is_active' => (bool) $a->is_active,
@@ -39,6 +40,12 @@ class AdminAdminController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $admins->currentPage(),
+                'last_page' => $admins->lastPage(),
+                'per_page' => $admins->perPage(),
+                'total' => $admins->total(),
+            ],
         ]);
     }
 

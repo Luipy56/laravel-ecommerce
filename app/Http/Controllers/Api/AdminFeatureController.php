@@ -34,9 +34,10 @@ class AdminFeatureController extends Controller
             });
         }
 
-        $features = $query->get(['id', 'feature_name_id', 'value', 'is_active']);
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $features = $query->paginate($perPage, ['id', 'feature_name_id', 'value', 'is_active']);
 
-        $data = $features->map(fn ($f) => [
+        $data = $features->getCollection()->map(fn ($f) => [
             'id' => $f->id,
             'feature_name_id' => $f->feature_name_id,
             'feature_name' => $f->featureName?->name,
@@ -47,6 +48,12 @@ class AdminFeatureController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $features->currentPage(),
+                'last_page' => $features->lastPage(),
+                'per_page' => $features->perPage(),
+                'total' => $features->total(),
+            ],
         ]);
     }
 

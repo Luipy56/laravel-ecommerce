@@ -24,9 +24,10 @@ class AdminFeatureNameController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $names = $query->get(['id', 'name', 'is_active']);
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $names = $query->paginate($perPage, ['id', 'name', 'is_active']);
 
-        $data = $names->map(fn ($n) => [
+        $data = $names->getCollection()->map(fn ($n) => [
             'id' => $n->id,
             'name' => $n->name,
             'is_active' => (bool) $n->is_active,
@@ -35,6 +36,12 @@ class AdminFeatureNameController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $names->currentPage(),
+                'last_page' => $names->lastPage(),
+                'per_page' => $names->perPage(),
+                'total' => $names->total(),
+            ],
         ]);
     }
 

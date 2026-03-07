@@ -41,9 +41,10 @@ class AdminClientController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $clients = $query->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $clients = $query->paginate($perPage);
 
-        $data = $clients->map(function ($c) {
+        $data = $clients->getCollection()->map(function ($c) {
             $primary = $c->contacts->first(fn ($x) => $x->is_primary) ?? $c->contacts->first();
 
             return [
@@ -61,6 +62,12 @@ class AdminClientController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $clients->currentPage(),
+                'last_page' => $clients->lastPage(),
+                'per_page' => $clients->perPage(),
+                'total' => $clients->total(),
+            ],
         ]);
     }
 

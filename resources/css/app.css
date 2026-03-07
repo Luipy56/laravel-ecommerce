@@ -45,6 +45,11 @@
     'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+/* Brand gradient (client area): #F75211 → #8B2400 */
+.header-gradient-line {
+  background: linear-gradient(to right, #F75211, #8B2400);
+}
+
 .hero-gradient {
   background: linear-gradient(135deg, #882200 0%, #fb5412 100%);
 }

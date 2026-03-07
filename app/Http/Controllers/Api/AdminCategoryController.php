@@ -9,10 +9,32 @@ use Illuminate\Http\Request;
 
 class AdminCategoryController extends Controller
 {
-    public function index(): JsonResponse
+    /**
+     * List categories for admin. Query params: search (optional), is_active (optional).
+     */
+    public function index(Request $request): JsonResponse
     {
-        $categories = ProductCategory::orderBy('name')->get();
-        return response()->json(['success' => true, 'data' => $categories]);
+        $query = ProductCategory::query()->orderBy('name');
+
+        if ($request->filled('search')) {
+            $term = '%' . $request->string('search')->trim() . '%';
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', $term)->orWhere('code', 'like', $term);
+            });
+        }
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
+        $categories = $query->get(['id', 'code', 'name', 'is_active']);
+        $data = $categories->map(fn (ProductCategory $c) => [
+            'id' => $c->id,
+            'code' => $c->code,
+            'name' => $c->name,
+            'is_active' => (bool) $c->is_active,
+        ])->values()->all();
+
+        return response()->json(['success' => true, 'data' => $data]);
     }
 
     public function store(Request $request): JsonResponse
@@ -20,10 +42,19 @@ class AdminCategoryController extends Controller
         $validated = $request->validate([
             'code' => ['nullable', 'string', 'max:50', 'unique:product_categories,code'],
             'name' => ['required', 'string', 'max:255'],
+            'is_active' => ['boolean'],
         ]);
-        $validated['is_active'] = true;
+        $validated['is_active'] = $validated['is_active'] ?? true;
         $cat = ProductCategory::create($validated);
-        return response()->json(['success' => true, 'data' => $cat], 201);
+        return response()->json(['success' => true, 'data' => $this->categoryToArray($cat)], 201);
+    }
+
+    public function show(ProductCategory $category): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $this->categoryToArray($category),
+        ]);
     }
 
     public function update(Request $request, ProductCategory $category): JsonResponse
@@ -34,12 +65,22 @@ class AdminCategoryController extends Controller
             'is_active' => ['boolean'],
         ]);
         $category->update($validated);
-        return response()->json(['success' => true, 'data' => $category->fresh()]);
+        return response()->json(['success' => true, 'data' => $this->categoryToArray($category->fresh())]);
     }
 
     public function destroy(ProductCategory $category): JsonResponse
     {
         $category->update(['is_active' => false]);
         return response()->json(['success' => true]);
+    }
+
+    private function categoryToArray(ProductCategory $c): array
+    {
+        return [
+            'id' => $c->id,
+            'code' => $c->code,
+            'name' => $c->name,
+            'is_active' => (bool) $c->is_active,
+        ];
     }
 }

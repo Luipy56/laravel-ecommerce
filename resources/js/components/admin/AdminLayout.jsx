@@ -91,13 +91,13 @@ export default function AdminLayout() {
     const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard' };
     const mainItems = [
       { to: '/admin/admins', labelKey: 'admin.nav.admins' },
+      { to: '/admin/categories', labelKey: 'admin.nav.categories' },
       { to: '/admin/products', labelKey: 'admin.nav.products' },
       { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups' },
       { to: '/admin/clients', labelKey: 'admin.nav.clients' },
       { to: '/admin/orders', labelKey: 'admin.nav.orders' },
       { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions' },
       { to: '/admin/features', labelKey: 'admin.nav.features' },
-      { to: '/admin/feature-names', labelKey: 'admin.nav.feature_types' },
       { to: '/admin/packs', labelKey: 'admin.nav.packs' },
     ];
     const sorted = [...mainItems].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
@@ -108,30 +108,32 @@ export default function AdminLayout() {
     <div className="drawer lg:drawer-open min-h-screen bg-base-200">
       <input id="admin-drawer" type="checkbox" className="drawer-toggle" aria-label={t('common.menu')} />
       <div className="drawer-content flex flex-col">
-        <label
-          htmlFor="admin-drawer"
-          className="btn btn-ghost btn-square drawer-button fixed left-4 top-4 z-20 lg:hidden"
-          aria-label={t('common.menu')}
-        >
-          <IconMenu className="h-6 w-6" />
-        </label>
         <header className="sticky top-0 z-10 bg-base-100 border-b border-base-200 shrink-0">
-          <div className="container mx-auto pl-14 pr-4 py-3 lg:pl-6 lg:pr-6 flex items-center justify-between gap-4">
-            <nav className="breadcrumbs text-sm min-w-0" aria-label="Breadcrumb">
-              <ul>
-                {breadcrumbs.map((crumb, i) => (
-                  <li key={i}>
-                    {crumb.path ? (
-                      <Link to={crumb.path} className="text-base-content/80 hover:text-base-content">
-                        {crumb.label}
-                      </Link>
-                    ) : (
-                      <span className="text-base-content font-medium" aria-current="page">{crumb.label}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
+          <div className="container mx-auto px-4 py-3 lg:px-6 flex items-center justify-between gap-4 w-full">
+            <div className="flex items-center gap-2 min-w-0 flex-1 lg:flex-initial">
+              <label
+                htmlFor="admin-drawer"
+                className="btn btn-ghost btn-square drawer-button shrink-0 lg:hidden"
+                aria-label={t('common.menu')}
+              >
+                <IconMenu className="h-6 w-6" />
+              </label>
+              <nav className="breadcrumbs text-sm min-w-0" aria-label="Breadcrumb">
+                <ul>
+                  {breadcrumbs.map((crumb, i) => (
+                    <li key={i}>
+                      {crumb.path ? (
+                        <Link to={crumb.path} className="text-base-content/80 hover:text-base-content">
+                          {crumb.label}
+                        </Link>
+                      ) : (
+                        <span className="text-base-content font-medium" aria-current="page">{crumb.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
             <div className="dropdown dropdown-end shrink-0">
               <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={locale === 'ca' ? 'Català' : 'Español'}>
                 {locale === 'ca' ? 'CA' : 'ES'}
@@ -149,7 +151,7 @@ export default function AdminLayout() {
           </AdminToastProvider>
         </main>
       </div>
-      <div className="drawer-side">
+      <div className="drawer-side z-30">
         <label htmlFor="admin-drawer" aria-label={t('common.close')} className="drawer-overlay" />
         <aside className="bg-base-100 w-64 min-h-full flex flex-col border-r border-base-200">
           <div className="p-4 border-b border-base-200">

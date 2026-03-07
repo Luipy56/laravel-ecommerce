@@ -16,8 +16,8 @@ class ProductVariantGroupSeeder extends Seeder
         $cil30Lengths = [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100];
         $cil40Lengths = [40, 50, 60, 70, 80];
 
-        $groupCil30 = ProductVariantGroup::create();
-        $groupCil40 = ProductVariantGroup::create();
+        $groupCil30 = ProductVariantGroup::create(['name' => 'Cilindre 30mm (longituds)']);
+        $groupCil40 = ProductVariantGroup::create(['name' => 'Cilindre 40mm (longituds)']);
 
         $codesCil30 = array_map(fn ($len) => 'CIL-30-' . $len, $cil30Lengths);
         $codesCil40 = array_map(fn ($len) => 'CIL-40-' . $len, $cil40Lengths);

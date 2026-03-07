@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
+const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
+
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending_review': return 'badge-warning';
@@ -13,6 +15,11 @@ function getStatusBadgeClass(status) {
     case 'completed': return 'badge-success';
     default: return 'badge-ghost';
   }
+}
+
+function isImageAttachment(attachment) {
+  const name = attachment.original_filename || '';
+  return IMAGE_EXTENSIONS.test(name) || (attachment.content_type && attachment.content_type.startsWith('image/'));
 }
 
 export default function AdminPersonalizedSolutionShowPage() {
@@ -121,21 +128,43 @@ export default function AdminPersonalizedSolutionShowPage() {
             </section>
           )}
 
-          {solution.attachments && solution.attachments.length > 0 && (
-            <section>
-              <h2 className="text-lg font-semibold mb-2">{t('admin.personalized_solutions.attachments')}</h2>
-              <ul className="list-disc list-inside space-y-1">
-                {solution.attachments.map((a) => (
-                  <li key={a.id}>
-                    <a href={a.url} target="_blank" rel="noopener noreferrer" className="link link-hover">
-                      {a.original_filename || String(a.id)}
-                    </a>
-                    {a.size_bytes != null && <span className="text-base-content/70 text-sm ml-1">({Math.round(a.size_bytes / 1024)} KB)</span>}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+          {solution.attachments && solution.attachments.length > 0 && (() => {
+            const imageAttachments = solution.attachments.filter(isImageAttachment);
+            const otherAttachments = solution.attachments.filter((a) => !isImageAttachment(a));
+            return (
+              <section>
+                <h2 className="text-lg font-semibold mb-2">{t('admin.personalized_solutions.attachments')}</h2>
+                {imageAttachments.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-base-content/70 mb-2">{t('admin.personalized_solutions.attachments_images')}</h3>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                      {imageAttachments.map((a) => (
+                        <a key={a.id} href={a.url} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-base-300 bg-base-200 hover:border-base-content/20 transition-colors">
+                          <img src={a.url} alt={a.original_filename || ''} className="w-full h-40 object-cover" />
+                          {a.original_filename && <p className="p-2 text-sm truncate text-base-content/80" title={a.original_filename}>{a.original_filename}</p>}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {otherAttachments.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-base-content/70 mb-2">{t('admin.personalized_solutions.attachments_files')}</h3>
+                    <ul className="list-disc list-inside space-y-1">
+                      {otherAttachments.map((a) => (
+                        <li key={a.id}>
+                          <a href={a.url} target="_blank" rel="noopener noreferrer" className="link link-hover">
+                            {a.original_filename || String(a.id)}
+                          </a>
+                          {a.size_bytes != null && <span className="text-base-content/70 text-sm ml-1">({Math.round(a.size_bytes / 1024)} KB)</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </section>
+            );
+          })()}
 
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 border-t border-base-200 pt-4">
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_active')}</dt><dd>{solution.is_active ? t('common.yes') : t('common.no')}</dd></div>

@@ -5,7 +5,7 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
-const STATUSES = ['pending', 'sent', 'installation_pending', 'installation_confirmed'];
+const STATUSES = ['pending', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
 
 function formatDateForInput(iso) {
   if (!iso) return '';

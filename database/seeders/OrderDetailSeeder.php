@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class OrderDetailSeeder extends Seeder
 {
     /**
-     * Seeds order_lines. Orders 1-5 = kind order; 6-8 = kind cart.
+     * Seeds order_lines. Orders 1-6 = kind order; 7-9 = kind cart.
      * Carts have unit_price null (price not fixed until checkout).
      */
     public function run(): void
@@ -37,10 +37,26 @@ class OrderDetailSeeder extends Seeder
             ];
         }
 
-        // Order 2 (sent)
-        if ($cil30 && $escEst) {
+        // Order 2 (in_transit)
+        if ($escEst) {
             $lines[] = [
                 'order_id' => 2,
+                'product_id' => $escEst->id,
+                'pack_id' => null,
+                'quantity' => 1,
+                'unit_price' => (float) $escEst->price,
+                'offer' => null,
+                'is_installation_requested' => false,
+                'installation_price' => null,
+                'extra_keys_qty' => 0,
+                'extra_key_unit_price' => null,
+            ];
+        }
+
+        // Order 3 (sent)
+        if ($cil30 && $escEst) {
+            $lines[] = [
+                'order_id' => 3,
                 'product_id' => $cil30->id,
                 'pack_id' => null,
                 'quantity' => 2,
@@ -52,7 +68,7 @@ class OrderDetailSeeder extends Seeder
                 'extra_key_unit_price' => $cil30->extra_key_unit_price ? (float) $cil30->extra_key_unit_price : null,
             ];
             $lines[] = [
-                'order_id' => 2,
+                'order_id' => 3,
                 'product_id' => $escEst->id,
                 'pack_id' => null,
                 'quantity' => 2,
@@ -65,10 +81,10 @@ class OrderDetailSeeder extends Seeder
             ];
         }
 
-        // Order 3 (installation_pending) - product with installation
+        // Order 4 (installation_pending) - product with installation
         if ($cilSeg) {
             $lines[] = [
-                'order_id' => 3,
+                'order_id' => 4,
                 'product_id' => $cilSeg->id,
                 'pack_id' => null,
                 'quantity' => 1,
@@ -81,10 +97,10 @@ class OrderDetailSeeder extends Seeder
             ];
         }
 
-        // Order 4 (installation_confirmed)
+        // Order 5 (installation_confirmed)
         if ($spEst) {
             $lines[] = [
-                'order_id' => 4,
+                'order_id' => 5,
                 'product_id' => $spEst->id,
                 'pack_id' => null,
                 'quantity' => 1,
@@ -97,9 +113,9 @@ class OrderDetailSeeder extends Seeder
             ];
         }
 
-        // Order 5 (installation_confirmed) - pack
+        // Order 6 (installation_confirmed) - pack
         $lines[] = [
-            'order_id' => 5,
+            'order_id' => 6,
             'product_id' => null,
             'pack_id' => 1,
             'quantity' => 1,
@@ -111,10 +127,10 @@ class OrderDetailSeeder extends Seeder
             'extra_key_unit_price' => null,
         ];
 
-        // Cart 6 (client 1) - unit_price null
+        // Cart 7 (client 1) - unit_price null
         if ($cil30 && $escEst) {
             $lines[] = [
-                'order_id' => 6,
+                'order_id' => 7,
                 'product_id' => $cil30->id,
                 'pack_id' => null,
                 'quantity' => 2,
@@ -126,7 +142,7 @@ class OrderDetailSeeder extends Seeder
                 'extra_key_unit_price' => null,
             ];
             $lines[] = [
-                'order_id' => 6,
+                'order_id' => 7,
                 'product_id' => $escEst->id,
                 'pack_id' => null,
                 'quantity' => 1,
@@ -139,9 +155,9 @@ class OrderDetailSeeder extends Seeder
             ];
         }
 
-        // Cart 7 (client 2) - pack in cart
+        // Cart 8 (client 2) - pack in cart
         $lines[] = [
-            'order_id' => 7,
+            'order_id' => 8,
             'product_id' => null,
             'pack_id' => 2,
             'quantity' => 1,
@@ -153,10 +169,10 @@ class OrderDetailSeeder extends Seeder
             'extra_key_unit_price' => null,
         ];
 
-        // Cart 8 (client 3) - single product
+        // Cart 9 (client 3) - single product
         if ($spEst) {
             $lines[] = [
-                'order_id' => 8,
+                'order_id' => 9,
                 'product_id' => $spEst->id,
                 'pack_id' => null,
                 'quantity' => 1,

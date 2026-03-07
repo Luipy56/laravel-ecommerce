@@ -43,6 +43,7 @@
     "shop.order_lines": "Líneas",
     "shop.order_product_pack": "Producto / Pack",
     "shop.status.pending": "Pendiente",
+    "shop.status.in_transit": "En tránsito",
     "shop.status.processing": "En proceso",
     "shop.status.sent": "Enviado",
     "shop.status.delivered": "Entregado",

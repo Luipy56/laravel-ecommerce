@@ -9,7 +9,7 @@ class OrderSeeder extends Seeder
 {
     /**
      * Seeds orders. kind: cart | order; status only when kind=order.
-     * Covers all kinds (cart, order) and all statuses (pending, sent, installation_pending, installation_confirmed).
+     * Covers all kinds (cart, order) and all statuses (pending, in_transit, sent, installation_pending, installation_confirmed).
      */
     public function run(): void
     {
@@ -23,6 +23,16 @@ class OrderSeeder extends Seeder
                 'order_date' => $now->copy()->subDays(5),
                 'shipping_date' => null,
                 'shipping_price' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'client_id' => 1,
+                'kind' => 'order',
+                'status' => 'in_transit',
+                'order_date' => $now->copy()->subDays(7),
+                'shipping_date' => $now->copy()->subDays(4),
+                'shipping_price' => 10.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],

@@ -71,7 +71,7 @@ export default function AdminPackShowPage() {
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_active')}</dt><dd>{pack.is_active ? t('common.yes') : t('common.no')}</dd></div>
           </dl>
           {pack.items?.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-base-300">
+            <div className="mt-4 pt-2 border-t border-base-300">
               <h2 className="font-semibold text-lg border-b border-base-300 pb-2 mb-4">
                 {t('admin.packs.products_in_pack')} ({pack.items.length})
               </h2>

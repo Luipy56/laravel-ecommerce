@@ -73,7 +73,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('stats/sales-by-period', [AdminDashboardController::class, 'salesByPeriod']);
     Route::get('stats/top-products', [AdminDashboardController::class, 'topProducts']);
     Route::get('stats/low-stock', [AdminDashboardController::class, 'lowStock']);
-    Route::apiResource('categories', AdminCategoryController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::apiResource('categories', AdminCategoryController::class);
     Route::get('feature-names', [AdminFeatureNameController::class, 'index']);
     Route::post('feature-names', [AdminFeatureNameController::class, 'store']);
     Route::get('feature-names/{featureName}', [AdminFeatureNameController::class, 'show']);

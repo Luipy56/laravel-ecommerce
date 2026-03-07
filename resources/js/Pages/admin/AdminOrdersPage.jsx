@@ -5,14 +5,15 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
 const KINDS = ['cart', 'order', 'like'];
-const STATUSES = ['pending', 'sent', 'installation_pending', 'installation_confirmed'];
+const STATUSES = ['pending', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
 
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
-    case 'sent': return 'badge-info';
+    case 'in_transit': return 'badge-success';
+    case 'sent': return 'badge-success';
     case 'installation_pending': return 'badge-warning';
-    case 'installation_confirmed': return 'badge-success';
+    case 'installation_confirmed': return 'badge-info text-base-content';
     default: return 'badge-ghost';
   }
 }
@@ -111,7 +112,7 @@ export default function AdminOrdersPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
                   <th>{t('admin.orders.id')}</th>

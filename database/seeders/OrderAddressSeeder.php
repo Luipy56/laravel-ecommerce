@@ -9,7 +9,7 @@ class OrderAddressSeeder extends Seeder
 {
     /**
      * Seeds order_addresses (one row per address type per order: shipping, installation).
-     * Orders 1-5 = kind order; 6-8 = kind cart.
+     * Orders 1-6 = kind order; 7-9 = kind cart.
      */
     public function run(): void
     {
@@ -26,6 +26,7 @@ class OrderAddressSeeder extends Seeder
             ['order_id' => 6, 'type' => 'shipping', 'street' => 'Carrer Balmes 45', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08007', 'note' => null],
             ['order_id' => 7, 'type' => 'shipping', 'street' => 'Rambla Catalunya 22', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08009', 'note' => null],
             ['order_id' => 8, 'type' => 'shipping', 'street' => 'Pg. de Gràcia 88', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08008', 'note' => 'Porta principal'],
+            ['order_id' => 9, 'type' => 'shipping', 'street' => 'Carrer Provença 50', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08029', 'note' => null],
         ]);
     }
 }

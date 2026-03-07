@@ -4,34 +4,34 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
-export default function AdminFeatureNamesPage() {
+export default function AdminCategoriesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [featureNames, setFeatureNames] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
-  const [activeFilter, setActiveFilter] = useState('1'); // '' = all, '1' = yes, '0' = no
+  const [activeFilter, setActiveFilter] = useState(''); // '' = all, '1' = yes, '0' = no
 
-  const fetchFeatureNames = useCallback(async () => {
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
       if (searchDebounce) params.search = searchDebounce;
       if (activeFilter !== '') params.is_active = activeFilter === '1';
-      const { data } = await api.get('admin/feature-names', { params });
-      if (data.success) setFeatureNames(data.data || []);
+      const { data } = await api.get('admin/categories', { params });
+      if (data.success) setCategories(data.data || []);
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      setFeatureNames([]);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
   }, [navigate, searchDebounce, activeFilter]);
 
   useEffect(() => {
-    fetchFeatureNames();
-  }, [fetchFeatureNames]);
+    fetchCategories();
+  }, [fetchCategories]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
@@ -40,25 +40,25 @@ export default function AdminFeatureNamesPage() {
 
   return (
     <div className="space-y-6">
-      <PageTitle>{t('admin.feature_types.title')}</PageTitle>
+      <PageTitle>{t('admin.categories.title')}</PageTitle>
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1 min-w-0">
           <input
             type="search"
             className="input input-bordered input-sm sm:input-md w-full min-w-0 max-w-xs"
-            placeholder={t('admin.feature_types.search_placeholder')}
+            placeholder={t('admin.categories.search_placeholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            aria-label={t('admin.feature_types.search_placeholder')}
+            aria-label={t('admin.categories.search_placeholder')}
           />
           <label className="flex items-center gap-2 shrink-0">
-            <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.feature_types.filter_active')}</span>
+            <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.categories.filter_active')}</span>
             <select
               className="select select-bordered select-sm sm:select-md w-full sm:w-40"
               value={activeFilter}
               onChange={(e) => setActiveFilter(e.target.value)}
-              aria-label={t('admin.feature_types.filter_active')}
+              aria-label={t('admin.categories.filter_active')}
             >
               <option value="">{t('shop.categories.all')}</option>
               <option value="1">{t('common.yes')}</option>
@@ -66,7 +66,7 @@ export default function AdminFeatureNamesPage() {
             </select>
           </label>
         </div>
-        <Link to="/admin/feature-names/new" className="btn btn-primary btn-circle btn-sm sm:btn-md shrink-0 ml-auto" aria-label={t('admin.feature_types.add')}>
+        <Link to="/admin/categories/new" className="btn btn-primary btn-circle btn-sm sm:btn-md shrink-0 ml-auto" aria-label={t('admin.categories.add')}>
           <span className="text-xl sm:text-2xl leading-none" aria-hidden="true">+</span>
         </Link>
       </div>
@@ -76,31 +76,38 @@ export default function AdminFeatureNamesPage() {
           <div className="flex justify-center py-12">
             <span className="loading loading-spinner loading-lg" aria-hidden="true" />
           </div>
-        ) : featureNames.length === 0 ? (
+        ) : categories.length === 0 ? (
           <div className="p-8 text-center text-base-content/70">
-            {t('admin.feature_types.no_types')}
+            {t('admin.categories.no_categories')}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.features.type')}</th>
+                  <th>{t('admin.products.code')}</th>
+                  <th>{t('admin.products.name')}</th>
                   <th className="text-center">{t('admin.products.is_active')}</th>
                 </tr>
               </thead>
               <tbody>
-                {featureNames.map((n) => (
+                {categories.map((c) => (
                   <tr
-                    key={n.id}
-                    className="cursor-pointer hover:bg-base-200"
-                    onClick={() => navigate(`/admin/feature-names/${n.id}`)}
+                    key={c.id}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && navigate(`/admin/feature-names/${n.id}`)}
+                    className="cursor-pointer hover:bg-base-200 focus:bg-base-200 focus:outline-none"
+                    onClick={() => navigate(`/admin/categories/${c.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/admin/categories/${c.id}`);
+                      }
+                    }}
                   >
-                    <td>{n.name}</td>
-                    <td className="text-center">{n.is_active ? t('common.yes') : t('common.no')}</td>
+                    <td>{c.code ?? ''}</td>
+                    <td>{c.name}</td>
+                    <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td>
                   </tr>
                 ))}
               </tbody>

@@ -11,30 +11,29 @@ class ProductFeatureSeeder extends Seeder
 {
     /**
      * Map product code => list of [feature_name, feature_value].
-     * Només productes de les categories Cilindres, Escut, Segon pany.
-     * Cilindre length/diameter go in features (Mida, Longitud), not in product title.
+     * Names and values in Catalan (Color, Tipus de clau, Mida, Mida interna, Mida externa).
      */
     private function getProductFeatureMap(): array
     {
         $map = [
-            'CIL-30' => [['Mida', '30mm'], ['Orientació', 'Interior'], ['Orientació', 'Exterior']],
-            'CIL-40' => [['Mida', '40mm']],
-            'CIL-PERFIL' => [['Seguretat', 'Multipunt']],
-            'CIL-SEG' => [['Seguretat', 'RC3']],
-            'CIL-DOBLE' => [['Mida', 'Estàndard']],
-            'ESC-EST' => [['Acabament', 'Pintat'], ['Color', 'Crom']],
-            'ESC-SEG' => [['Seguretat', 'Blindat']],
-            'ESC-DISS' => [['Color', 'Crom'], ['Color', 'Negre']],
-            'SP-EST' => [['Material', 'Fusta'], ['Material', 'Acer']],
-            'SP-SEG' => [['Seguretat', 'RC3']],
-            'SP-EMBUTIR' => [['Tipus muntatge', 'Enfonsat']],
+            'CIL-30' => [['Mida', '30mm'], ['Color', 'Negre'], ['Tipus de clau', 'General']],
+            'CIL-40' => [['Mida', '40mm'], ['Color', 'Plata'], ['Tipus de clau', 'General']],
+            'CIL-PERFIL' => [['Mida', '80x10mm'], ['Mida interna', '80mm'], ['Mida externa', '10mm'], ['Color', 'Plata'], ['Tipus de clau', 'Seguretat']],
+            'CIL-SEG' => [['Mida', '40mm'], ['Color', 'Negre'], ['Tipus de clau', 'Alta seguretat']],
+            'CIL-DOBLE' => [['Mida', '60mm'], ['Color', 'Daurat'], ['Tipus de clau', 'General']],
+            'ESC-EST' => [['Color', 'Plata'], ['Tipus de clau', 'General']],
+            'ESC-SEG' => [['Color', 'Negre'], ['Tipus de clau', 'Seguretat']],
+            'ESC-DISS' => [['Color', 'Plata'], ['Color', 'Daurat'], ['Tipus de clau', 'Seguretat']],
+            'SP-EST' => [['Color', 'Negre'], ['Tipus de clau', 'General']],
+            'SP-SEG' => [['Color', 'Plata'], ['Tipus de clau', 'Seguretat']],
+            'SP-EMBUTIR' => [['Color', 'Daurat'], ['Tipus de clau', 'Alta seguretat']],
         ];
 
         foreach ([35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100] as $len) {
-            $map['CIL-30-' . $len] = [['Mida', '30mm'], ['Longitud', $len . 'mm']];
+            $map['CIL-30-' . $len] = [['Mida', $len . 'mm'], ['Color', 'Negre'], ['Tipus de clau', 'General']];
         }
         foreach ([40, 50, 60, 70, 80] as $len) {
-            $map['CIL-40-' . $len] = [['Mida', '40mm'], ['Longitud', $len . 'mm']];
+            $map['CIL-40-' . $len] = [['Mida', $len . 'mm'], ['Color', 'Plata'], ['Tipus de clau', 'General']];
         }
 
         foreach (['EST', 'SEG', 'DISS'] as $t) {

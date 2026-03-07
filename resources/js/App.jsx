@@ -18,6 +18,10 @@ import ProfilePage from './Pages/ProfilePage';
 import CustomSolutionPage from './Pages/CustomSolutionPage';
 import AdminLoginPage from './Pages/admin/AdminLoginPage';
 import AdminDashboardPage from './Pages/admin/AdminDashboardPage';
+import AdminCategoriesPage from './Pages/admin/AdminCategoriesPage';
+import AdminCategoryNewPage from './Pages/admin/AdminCategoryNewPage';
+import AdminCategoryShowPage from './Pages/admin/AdminCategoryShowPage';
+import AdminCategoryEditPage from './Pages/admin/AdminCategoryEditPage';
 import AdminProductsPage from './Pages/admin/AdminProductsPage';
 import AdminProductNewPage from './Pages/admin/AdminProductNewPage';
 import AdminProductShowPage from './Pages/admin/AdminProductShowPage';
@@ -26,7 +30,6 @@ import AdminFeaturesPage from './Pages/admin/AdminFeaturesPage';
 import AdminFeatureNewPage from './Pages/admin/AdminFeatureNewPage';
 import AdminFeatureShowPage from './Pages/admin/AdminFeatureShowPage';
 import AdminFeatureEditPage from './Pages/admin/AdminFeatureEditPage';
-import AdminFeatureNamesPage from './Pages/admin/AdminFeatureNamesPage';
 import AdminFeatureNameNewPage from './Pages/admin/AdminFeatureNameNewPage';
 import AdminFeatureNameShowPage from './Pages/admin/AdminFeatureNameShowPage';
 import AdminFeatureNameEditPage from './Pages/admin/AdminFeatureNameEditPage';
@@ -75,6 +78,10 @@ export default function App() {
             <Route path="admin/login" element={<AdminLoginPage />} />
             <Route path="admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />
+              <Route path="categories" element={<AdminCategoriesPage />} />
+              <Route path="categories/new" element={<AdminCategoryNewPage />} />
+              <Route path="categories/:id/edit" element={<AdminCategoryEditPage />} />
+              <Route path="categories/:id" element={<AdminCategoryShowPage />} />
               <Route path="products" element={<AdminProductsPage />} />
               <Route path="products/new" element={<AdminProductNewPage />} />
               <Route path="products/:id/edit" element={<AdminProductEditPage />} />
@@ -83,7 +90,6 @@ export default function App() {
               <Route path="features/new" element={<AdminFeatureNewPage />} />
               <Route path="features/:id/edit" element={<AdminFeatureEditPage />} />
               <Route path="features/:id" element={<AdminFeatureShowPage />} />
-              <Route path="feature-names" element={<AdminFeatureNamesPage />} />
               <Route path="feature-names/new" element={<AdminFeatureNameNewPage />} />
               <Route path="feature-names/:id/edit" element={<AdminFeatureNameEditPage />} />
               <Route path="feature-names/:id" element={<AdminFeatureNameShowPage />} />

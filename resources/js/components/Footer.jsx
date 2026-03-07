@@ -14,7 +14,7 @@ export default function Footer() {
           <aside className="flex flex-col items-start gap-3 lg:col-span-1">
             <Link to="/" className="flex items-center gap-2">
               <img
-                src="/images/logoweb.png"
+                src="/images/serraller_solidaria_logo.png"
                 alt="Serralleria Solidària"
                 className="h-12 w-auto object-contain"
               />

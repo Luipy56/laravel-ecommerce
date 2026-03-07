@@ -33,6 +33,7 @@ class Order extends Model
     public const KIND_LIKE = 'like';
 
     public const STATUS_PENDING = 'pending';
+    public const STATUS_IN_TRANSIT = 'in_transit';
     public const STATUS_SENT = 'sent';
     public const STATUS_INSTALLATION_PENDING = 'installation_pending';
     public const STATUS_INSTALLATION_CONFIRMED = 'installation_confirmed';

@@ -43,6 +43,7 @@
     "shop.order_lines": "Línies",
     "shop.order_product_pack": "Producte / Pack",
     "shop.status.pending": "Pendent",
+    "shop.status.in_transit": "En trànsit",
     "shop.status.processing": "En procés",
     "shop.status.sent": "Enviat",
     "shop.status.delivered": "Lliurat",

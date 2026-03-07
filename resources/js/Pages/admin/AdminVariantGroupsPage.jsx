@@ -74,7 +74,7 @@ export default function AdminVariantGroupsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+            <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
                   <th>{t('admin.variant_groups.group_label')}</th>

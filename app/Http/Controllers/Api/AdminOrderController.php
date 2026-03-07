@@ -69,18 +69,27 @@ class AdminOrderController extends Controller
         $order->load([
             'client:id,login_email,identification',
             'lines.product:id,name,code',
+            'lines.product.images',
             'lines.pack:id,name',
+            'lines.pack.images',
             'addresses',
             'payments',
         ]);
 
         $lines = $order->lines->map(function (OrderLine $l) {
+            $imageUrl = null;
+            if ($l->product && $l->product->relationLoaded('images') && $l->product->images->isNotEmpty()) {
+                $imageUrl = $l->product->images->first()->url;
+            } elseif ($l->pack && $l->pack->relationLoaded('images') && $l->pack->images->isNotEmpty()) {
+                $imageUrl = $l->pack->images->first()->url;
+            }
             return [
                 'id' => $l->id,
                 'product_id' => $l->product_id,
                 'pack_id' => $l->pack_id,
                 'product' => $l->product ? ['id' => $l->product->id, 'name' => $l->product->name, 'code' => $l->product->code] : null,
                 'pack' => $l->pack ? ['id' => $l->pack->id, 'name' => $l->pack->name] : null,
+                'image_url' => $imageUrl,
                 'quantity' => $l->quantity,
                 'unit_price' => (float) $l->unit_price,
                 'offer' => (float) ($l->offer ?? 0),
@@ -141,6 +150,7 @@ class AdminOrderController extends Controller
         if ($order->kind === Order::KIND_ORDER) {
             $rules['status'] = ['required', 'string', 'in:' . implode(',', [
                 Order::STATUS_PENDING,
+                Order::STATUS_IN_TRANSIT,
                 Order::STATUS_SENT,
                 Order::STATUS_INSTALLATION_PENDING,
                 Order::STATUS_INSTALLATION_CONFIRMED,

@@ -24,7 +24,9 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
   const [price, setPrice] = useState(pack?.price ?? 0);
   const [isTrending, setIsTrending] = useState(pack?.is_trending ?? false);
   const [isActive, setIsActive] = useState(pack?.is_active ?? true);
+  const [containsKeys, setContainsKeys] = useState(pack?.contains_keys ?? false);
   const [productIds, setProductIds] = useState(() => pack?.product_ids ?? []);
+  const [productsSectionOpen, setProductsSectionOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
 
   const handleFileSelect = (e) => {
@@ -57,6 +59,7 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
       price: Number(price),
       is_trending: !!isTrending,
       is_active: !!isActive,
+      contains_keys: !!containsKeys,
       product_ids: productIds,
     };
     if (!pack && pendingFiles.length > 0) payload.files = pendingFiles;
@@ -174,30 +177,44 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
 
       {products.length > 0 && (
         <div className="form-field">
-          <span className="form-label">{t('admin.packs.products_in_pack')}</span>
-          <div className="space-y-4 rounded-box border border-base-300 bg-base-200/50 p-4">
-            {grouped.map(({ name: catName, list }) => (
-              <div key={catName || 'unnamed'}>
-                <p className="text-sm font-medium text-base-content/80 mb-2">{catName || ''}</p>
-                <div className="flex flex-wrap gap-2">
-                  {list.map((p) => (
-                    <label
-                      key={p.id}
-                      className="label cursor-pointer gap-2 bg-base-100 px-3 py-2 rounded-lg border border-base-300"
-                    >
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-sm"
-                        checked={productIds.includes(p.id)}
-                        onChange={() => toggleProduct(p.id)}
-                        aria-label={p.name}
-                      />
-                      <span className="label-text text-sm">{p.name}{p.code ? ` (${p.code})` : ''}</span>
-                    </label>
-                  ))}
-                </div>
+          <div className={`collapse collapse-arrow rounded-box border border-base-300 bg-base-200/50 ${productsSectionOpen ? 'collapse-open' : ''}`}>
+            <input
+              type="checkbox"
+              id="pack-products-collapse"
+              checked={productsSectionOpen}
+              onChange={(e) => setProductsSectionOpen(e.target.checked)}
+              aria-label={t('admin.packs.products_in_pack')}
+              className="sr-only"
+            />
+            <label htmlFor="pack-products-collapse" className="collapse-title min-h-0 py-3 pr-10 font-medium cursor-pointer">
+              {t('admin.packs.products_in_pack')}
+            </label>
+            <div className="collapse-content">
+              <div className="space-y-4 px-4 pb-4 pt-0">
+                {grouped.map(({ name: catName, list }) => (
+                  <div key={catName || 'unnamed'}>
+                    <p className="text-sm font-medium text-base-content/80 mb-2">{catName || ''}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {list.map((p) => (
+                        <label
+                          key={p.id}
+                          className="label cursor-pointer gap-2 bg-base-100 px-3 py-2 rounded-lg border border-base-300"
+                        >
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-sm"
+                            checked={productIds.includes(p.id)}
+                            onChange={() => toggleProduct(p.id)}
+                            aria-label={p.name}
+                          />
+                          <span className="label-text text-sm">{p.name}{p.code ? ` (${p.code})` : ''}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       )}
@@ -220,6 +237,15 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
             onChange={(e) => setIsTrending(e.target.checked)}
           />
           <span className="label-text">{t('admin.products.is_trending')}</span>
+        </label>
+        <label className="label cursor-pointer gap-2">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm"
+            checked={containsKeys}
+            onChange={(e) => setContainsKeys(e.target.checked)}
+          />
+          <span className="label-text">{t('admin.packs.contains_keys')}</span>
         </label>
       </div>
 

@@ -10,6 +10,7 @@ alwaysApply: true
 - **Do not create new migrations** to add, delete, or modify columns on existing tables.
 - **Only add migrations** for entirely new tables.
 - To change an existing table: **edit the existing migration file**, then run `php artisan migrate:fresh` (or clear cache) and verify.
+- **Whenever migrations are updated**, update **`trash/diagramZero.dbml`** so the schema diagram stays in sync with the database (tables, columns, notes).
 
 ## Language and locale
 

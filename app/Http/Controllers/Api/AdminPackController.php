@@ -62,13 +62,14 @@ class AdminPackController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'is_trending' => ['boolean'],
             'is_active' => ['boolean'],
+            'contains_keys' => ['boolean'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'images' => ['nullable', 'array'],
             'images.*' => ['file', 'image', 'max:10240'],
         ]);
 
-        $defaults = ['is_trending' => false, 'is_active' => true];
+        $defaults = ['is_trending' => false, 'is_active' => true, 'contains_keys' => false];
         $pack = Pack::create(array_merge($defaults, collect($validated)->except(['product_ids', 'images'])->all()));
 
         $this->syncPackItems($pack, $validated['product_ids'] ?? []);
@@ -101,6 +102,7 @@ class AdminPackController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'is_trending' => ['boolean'],
             'is_active' => ['boolean'],
+            'contains_keys' => ['boolean'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
         ]);

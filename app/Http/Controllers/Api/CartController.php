@@ -78,6 +78,7 @@ class CartController extends Controller
                         'line_total' => $lineTotal,
                         'is_included' => $included,
                         'is_installation_requested' => $wantsInstallation,
+                        'keys_all_same' => false,
                     ];
                 }
             } elseif ($item['pack_id'] ?? null) {
@@ -100,6 +101,7 @@ class CartController extends Controller
                         'line_total' => $lineTotal,
                         'is_included' => $included,
                         'is_installation_requested' => $wantsInstallation,
+                        'keys_all_same' => (bool) ($item['keys_all_same'] ?? false),
                     ];
                 }
             }
@@ -129,6 +131,7 @@ class CartController extends Controller
             'installation_price' => isset($pack->installation_price) && $pack->installation_price !== null
                 ? (float) $pack->installation_price
                 : null,
+            'contains_keys' => (bool) ($pack->contains_keys ?? false),
         ];
     }
 
@@ -227,6 +230,7 @@ class CartController extends Controller
             'included' => true,
             'wants_installation' => false,
             'extra_keys_qty' => 0,
+            'keys_all_same' => false,
         ];
         $current['quantity'] = ($current['quantity'] ?? 0) + (int) $validated['quantity'];
         $current['included'] = $current['included'] ?? true;
@@ -244,6 +248,7 @@ class CartController extends Controller
             'included' => ['sometimes', 'boolean'],
             'is_installation_requested' => ['sometimes', 'boolean'],
             'extra_keys_qty' => ['sometimes', 'integer', 'min:0', 'max:99'],
+            'keys_all_same' => ['sometimes', 'boolean'],
         ]);
         $quantity = (int) $validated['quantity'];
 
@@ -273,6 +278,9 @@ class CartController extends Controller
                         ? $orderLine->product->extra_key_unit_price
                         : null;
                 }
+                if (array_key_exists('keys_all_same', $validated) && $orderLine->pack_id && $orderLine->pack?->contains_keys) {
+                    $updates['keys_all_same'] = $validated['keys_all_same'];
+                }
                 $orderLine->update($updates);
             }
             return $this->showDbCart($request->user());
@@ -295,6 +303,9 @@ class CartController extends Controller
             }
             if (array_key_exists('extra_keys_qty', $validated)) {
                 $lines[$line]['extra_keys_qty'] = $validated['extra_keys_qty'];
+            }
+            if (array_key_exists('keys_all_same', $validated) && ! empty($lines[$line]['pack_id'])) {
+                $lines[$line]['keys_all_same'] = $validated['keys_all_same'];
             }
         }
         $session->put(self::SESSION_CART_KEY, $lines);
@@ -339,6 +350,9 @@ class CartController extends Controller
                         ? ($existing->product?->installation_price ?? $existing->pack?->installation_price)
                         : null;
                 }
+                if (isset($item['keys_all_same']) && $existing->pack_id && $existing->pack?->contains_keys) {
+                    $updates['keys_all_same'] = (bool) $item['keys_all_same'];
+                }
                 $existing->update($updates);
             } else {
                 $unitPrice = $productId ? Product::find($productId)?->price : Pack::find($packId)?->price;
@@ -351,6 +365,7 @@ class CartController extends Controller
                 $installationPrice = $wantsInstallation && $installable
                     ? ($product?->installation_price ?? $pack?->installation_price)
                     : null;
+                $keysAllSame = $packId && $pack?->contains_keys ? (bool) ($item['keys_all_same'] ?? false) : false;
                 $cart->lines()->create([
                     'product_id' => $productId,
                     'pack_id' => $packId,
@@ -360,6 +375,7 @@ class CartController extends Controller
                     'extra_key_unit_price' => $extraKeyUnitPrice,
                     'is_installation_requested' => $wantsInstallation,
                     'installation_price' => $installationPrice,
+                    'keys_all_same' => $keysAllSame,
                 ]);
             }
         }
@@ -389,6 +405,7 @@ class CartController extends Controller
             'line_total' => (float) $line->line_total,
             'is_included' => (bool) ($line->is_included ?? true),
             'is_installation_requested' => (bool) ($line->is_installation_requested ?? false),
+            'keys_all_same' => (bool) ($line->keys_all_same ?? false),
         ];
     }
 }

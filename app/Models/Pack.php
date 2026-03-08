@@ -17,6 +17,7 @@ class Pack extends Model
         'is_active',
         'is_installable',
         'installation_price',
+        'contains_keys',
     ];
 
     protected function casts(): array
@@ -27,6 +28,7 @@ class Pack extends Model
             'is_trending' => 'boolean',
             'is_active' => 'boolean',
             'is_installable' => 'boolean',
+            'contains_keys' => 'boolean',
         ];
     }
 

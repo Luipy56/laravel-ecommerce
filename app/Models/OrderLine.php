@@ -18,6 +18,7 @@ class OrderLine extends Model
         'offer',
         'is_installation_requested',
         'installation_price',
+        'keys_all_same',
         'extra_keys_qty',
         'extra_key_unit_price',
         'is_included',
@@ -31,6 +32,7 @@ class OrderLine extends Model
             'installation_price' => 'decimal:2',
             'extra_key_unit_price' => 'decimal:2',
             'is_installation_requested' => 'boolean',
+            'keys_all_same' => 'boolean',
             'is_included' => 'boolean',
         ];
     }

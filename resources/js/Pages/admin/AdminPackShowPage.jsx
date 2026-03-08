@@ -69,6 +69,7 @@ export default function AdminPackShowPage() {
             <div><dt className="text-sm text-base-content/70">{t('admin.products.price')} (€)</dt><dd>{pack.price != null ? Number(pack.price).toFixed(2) : ''}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_trending')}</dt><dd>{pack.is_trending ? t('common.yes') : t('common.no')}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_active')}</dt><dd>{pack.is_active ? t('common.yes') : t('common.no')}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.packs.contains_keys')}</dt><dd>{pack.contains_keys ? t('common.yes') : t('common.no')}</dd></div>
           </dl>
           {pack.items?.length > 0 && (
             <div className="mt-4 pt-2 border-t border-base-300">

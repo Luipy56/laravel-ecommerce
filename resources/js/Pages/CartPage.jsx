@@ -6,6 +6,10 @@ import PageTitle from '../components/PageTitle';
 
 function CartLine({ line, updateLine, removeLine, t }) {
   const isProduct = !!line.product;
+  const isPack = !!line.pack;
+  const packContainsKeys = !!line.pack?.contains_keys;
+  const canChooseKeysDifferent = isPack && packContainsKeys;
+  const keysAllSame = !!line.keys_all_same;
   const name = line.product?.name ?? line.pack?.name;
   const imageUrl = line.product?.image_url ?? line.pack?.image_url ?? '/images/dummy.jpg';
   const isIncluded = line.is_included !== false;
@@ -39,6 +43,11 @@ function CartLine({ line, updateLine, removeLine, t }) {
         extra_keys_qty: Math.max(0, Math.min(99, v)),
       });
     }
+  };
+
+  const handleKeysAllDifferentChange = () => {
+    if (!canChooseKeysDifferent) return;
+    updateLine(line.id, { quantity: line.quantity, keys_all_same: !keysAllSame });
   };
 
   const detailUrl = isProduct ? `/products/${line.product.id}` : `/packs/${line.pack.id}`;
@@ -121,6 +130,17 @@ function CartLine({ line, updateLine, removeLine, t }) {
           ''
         )}
       </td>
+      <td className="align-middle text-center">
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm checkbox-primary"
+          checked={keysAllSame}
+          onChange={handleKeysAllDifferentChange}
+          disabled={!canChooseKeysDifferent}
+          aria-label={t('shop.cart.keys_all_same')}
+          title={!canChooseKeysDifferent ? t('shop.cart.keys_all_same_only_packs') : undefined}
+        />
+      </td>
       <td className="text-right font-medium align-middle whitespace-nowrap">{Number(line.line_total).toFixed(2)} €</td>
       <td className="align-middle text-center">
         <button
@@ -181,6 +201,7 @@ export default function CartPage() {
                 <th className="text-center whitespace-nowrap">{t('shop.quantity')}</th>
                 <th className="text-center w-24">{t('shop.cart.install_for_me')}</th>
                 <th className="text-center whitespace-nowrap">{t('shop.cart.extra_keys')}</th>
+                <th className="text-center whitespace-nowrap" title={t('shop.cart.keys_all_same_tooltip')}>{t('shop.cart.keys_all_same')}</th>
                 <th className="text-right whitespace-nowrap">{t('shop.total')}</th>
                 <th className="w-12 text-center" />
               </tr>

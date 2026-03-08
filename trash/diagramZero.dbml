@@ -172,6 +172,7 @@ Table ORDER_LINES [note: 'Line items of an order (product or pack, quantity, pri
   offer decimal(10,2) [null, note: 'Discount amount applied']
   is_installation_requested boolean [not null, default: false]
   installation_price decimal(10,2) [null, note: 'Optional installation price for this line']
+  keys_all_same boolean [not null, default: false, note: 'When pack contains_keys: true = client chose all same key, false = all different (or N/A)']
   extra_keys_qty int [not null, default: 0, note: 'Number of extra keys requested']
   extra_key_unit_price decimal(10,2) [null, note: 'Price per extra key at order time']
   is_included boolean [not null, default: true, note: 'If false, line is excluded from total (e.g. saved for later)']
@@ -201,6 +202,9 @@ Table PACKS {
   price decimal(10,2) [not null]
   is_trending boolean [not null, default: false, note: 'Trending pack']
   is_active boolean [not null, default: true, note: 'Disable without deleting']
+  is_installable boolean [not null, default: false, note: 'Pack can include installation']
+  installation_price decimal(10,2) [null, note: 'Installation price when is_installable']
+  contains_keys boolean [not null, default: false, note: 'Pack contains keys (e.g. 3 locks); client can choose at cart: all same key or all different']
 }
 
 Table PACK_IMAGES [note: 'References files on disk (this app: public/uploads/). Primary = sort_order 1 (or min).'] {

@@ -198,6 +198,7 @@ export default function AdminOrderShowPage() {
                       <th className="text-center">{t('admin.orders.line_quantity')}</th>
                       <th className="text-end">{t('admin.orders.line_unit_price')}</th>
                       <th className="text-end">{t('admin.orders.line_extra_keys_price')}</th>
+                      <th className="text-center w-24 min-w-24">{t('admin.orders.keys_same')}</th>
                       <th className="text-end">{t('admin.orders.line_installation_price')}</th>
                       <th className="text-end">{t('admin.orders.line_total')}</th>
                     </tr>
@@ -245,6 +246,9 @@ export default function AdminOrderShowPage() {
                           <td className="text-center tabular-nums">{line.quantity}</td>
                           <td className="text-end tabular-nums">{line.unit_price != null ? `${Number(line.unit_price).toFixed(2)} €` : ''}</td>
                           <td className="text-end tabular-nums">{extraKeysTotal != null ? `${Number(extraKeysTotal).toFixed(2)} €` : ''}</td>
+                          <td className="text-center w-24 min-w-24">
+                            {line.pack?.contains_keys ? (line.keys_all_same ? t('common.yes') : t('common.no')) : ''}
+                          </td>
                           <td className="text-end tabular-nums">{line.is_installation_requested && line.installation_price != null ? `${Number(line.installation_price).toFixed(2)} €` : ''}</td>
                           <td className="text-end font-medium tabular-nums">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
                         </tr>
@@ -279,6 +283,11 @@ export default function AdminOrderShowPage() {
                             {line.is_installation_requested && <span className="badge badge-sm badge-ghost">{t('admin.orders.installation')}</span>}
                             {line.extra_keys_qty > 0 && <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>}
                           </div>
+                        )}
+                        {line.pack?.contains_keys && (
+                          <p className="text-sm text-base-content/70 mt-0.5">
+                            {t('admin.orders.keys_same')}: {line.keys_all_same ? t('common.yes') : t('common.no')}
+                          </p>
                         )}
                         <div className="flex flex-wrap items-center gap-2 mt-1 text-sm">
                           <span className="tabular-nums">{t('admin.orders.line_quantity')}: {line.quantity}</span>

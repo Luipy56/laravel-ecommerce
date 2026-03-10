@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import Layout from './components/Layout';
@@ -90,6 +90,7 @@ export default function App() {
               <Route path="features/new" element={<AdminFeatureNewPage />} />
               <Route path="features/:id/edit" element={<AdminFeatureEditPage />} />
               <Route path="features/:id" element={<AdminFeatureShowPage />} />
+              <Route path="feature-names" element={<Navigate to="/admin/features" replace />} />
               <Route path="feature-names/new" element={<AdminFeatureNameNewPage />} />
               <Route path="feature-names/:id/edit" element={<AdminFeatureNameEditPage />} />
               <Route path="feature-names/:id" element={<AdminFeatureNameShowPage />} />

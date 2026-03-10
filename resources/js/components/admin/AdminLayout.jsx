@@ -166,11 +166,6 @@ export default function AdminLayout() {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link to="/" className="rounded-lg" onClick={closeDrawer}>
-                {t('admin.back_to_shop')}
-              </Link>
-            </li>
           </ul>
           <div className="p-4 border-t border-base-200">
             <button type="button" className="btn btn-ghost btn-block justify-start" onClick={handleLogout}>

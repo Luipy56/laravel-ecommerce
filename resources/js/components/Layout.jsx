@@ -5,6 +5,7 @@ import CartWidget from './CartWidget';
 import CartAddedToast from './CartAddedToast';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
+import CookieConsentBanner from './CookieConsentBanner';
 
 export default function Layout() {
   return (
@@ -17,6 +18,7 @@ export default function Layout() {
       <CartWidget />
       <CartAddedToast />
       <ScrollToTop />
+      <CookieConsentBanner />
     </div>
   );
 }

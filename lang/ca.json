@@ -58,6 +58,7 @@
     "shop.order.cannot_pay_yet": "Encara no pots pagar: espera el pressupost d'instal·lació o contacta'ns.",
     "shop.order.waive_installation_invalid": "Només es pot cancel·lar la sol·licitud mentre esperem el pressupost.",
     "shop.payment.provider_error": "No s'ha pogut iniciar el pagament amb el proveïdor. Torna-ho a provar més tard o contacta'ns.",
+    "shop.payment.method_unavailable": "Aquest mètode de pagament no està disponible: l'administrador encara no ha configurat la passarel·la corresponent al servidor.",
 
     "validation.required": "Aquest camp és obligatori.",
     "validation.email": "El correu electrònic no és vàlid.",

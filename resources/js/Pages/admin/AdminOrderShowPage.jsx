@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminToast } from '../../contexts/AdminToastContext';
 
 const PLACEHOLDER_IMAGE = '/images/dummy.jpg';
 
@@ -33,11 +34,16 @@ function lineTargetUrl(line) {
 export default function AdminOrderShowPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { showSuccess } = useAdminToast();
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [labelModalOpen, setLabelModalOpen] = useState(false);
+  const [installationModalOpen, setInstallationModalOpen] = useState(false);
+  const [installationAmount, setInstallationAmount] = useState('');
+  const [installationSubmitting, setInstallationSubmitting] = useState(false);
+  const [installationModalError, setInstallationModalError] = useState('');
 
   const fetchOrder = useCallback(async () => {
     if (!id) return;
@@ -79,6 +85,44 @@ export default function AdminOrderShowPage() {
   const isOrder = order.kind === 'order';
   const shippingAddress = order.addresses?.find((a) => a.type === 'shipping');
   const installationAddress = order.addresses?.find((a) => a.type === 'installation');
+  const showSetInstallationPrice =
+    isOrder && order.installation_requested && order.status === 'awaiting_installation_price';
+
+  const handleInstallationModalOpen = () => {
+    setInstallationModalError('');
+    setInstallationAmount('');
+    setInstallationModalOpen(true);
+  };
+
+  const handleSetInstallationPrice = async (e) => {
+    e.preventDefault();
+    setInstallationModalError('');
+    const n = parseFloat(String(installationAmount).replace(',', '.'));
+    if (Number.isNaN(n) || n < 0) {
+      setInstallationModalError(t('common.error'));
+      return;
+    }
+    setInstallationSubmitting(true);
+    try {
+      const { data } = await api.put(`admin/orders/${id}`, {
+        status: order.status,
+        installation_price: n,
+      });
+      if (data.success) {
+        showSuccess(t('common.saved'));
+        setInstallationModalOpen(false);
+        setInstallationAmount('');
+        await fetchOrder();
+      } else setInstallationModalError(data.message || t('common.error'));
+    } catch (err) {
+      const msg = err.response?.data?.message
+        || err.response?.data?.errors?.installation_price?.[0]
+        || t('common.error');
+      setInstallationModalError(msg);
+    } finally {
+      setInstallationSubmitting(false);
+    }
+  };
 
   const handlePrintLabel = () => {
     if (!shippingAddress) return;
@@ -128,6 +172,11 @@ export default function AdminOrderShowPage() {
           {isOrder && shippingAddress && (
             <button type="button" className="btn btn-outline btn-sm shrink-0" onClick={() => setLabelModalOpen(true)} aria-label={t('admin.orders.shipping_label_button')}>
               {t('admin.orders.shipping_label_button')}
+            </button>
+          )}
+          {showSetInstallationPrice && (
+            <button type="button" className="btn btn-secondary btn-sm shrink-0" onClick={handleInstallationModalOpen}>
+              {t('admin.orders.set_installation_price')}
             </button>
           )}
           {isOrder && (
@@ -378,7 +427,52 @@ export default function AdminOrderShowPage() {
         {order.updated_at && <> · {t('admin.orders.updated_at')}: {new Date(order.updated_at).toLocaleString()}</>}
       </div>
 
-      {/* Shipping label modal */}
+      {/* Installation price (awaiting quote) */}
+      <dialog
+        className={`modal ${installationModalOpen ? 'modal-open' : ''}`}
+        aria-label={t('admin.orders.set_installation_price_modal_title')}
+      >
+        <div className="modal-box max-w-md">
+          <h3 className="font-bold text-lg">{t('admin.orders.set_installation_price_modal_title')}</h3>
+          <p className="text-sm text-base-content/70 py-2">{t('admin.orders.set_installation_price_hint')}</p>
+          <form onSubmit={handleSetInstallationPrice} className="space-y-4">
+            {installationModalError && (
+              <div role="alert" className="alert alert-error text-sm">{installationModalError}</div>
+            )}
+            <label className="form-field w-full">
+              <span className="form-label">{t('admin.orders.installation_price_amount')}</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                className="input input-bordered w-full"
+                value={installationAmount}
+                onChange={(e) => setInstallationAmount(e.target.value)}
+                required
+                autoFocus
+                aria-label={t('admin.orders.installation_price_amount')}
+              />
+            </label>
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setInstallationModalOpen(false)}
+              >
+                {t('common.close')}
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={installationSubmitting}>
+                {installationSubmitting ? t('common.loading') : t('common.save')}
+              </button>
+            </div>
+          </form>
+        </div>
+        <form method="dialog" className="modal-backdrop" onSubmit={() => setInstallationModalOpen(false)}>
+          <button type="submit" aria-label={t('common.close')}>{t('common.close')}</button>
+        </form>
+      </dialog>
+
+      {/* Shipping label */}
       <dialog className={`modal ${labelModalOpen ? 'modal-open' : ''}`} aria-label={t('admin.orders.shipping_label_title')}>
         <div className="modal-box max-w-md">
           <h3 className="font-bold text-lg">{t('admin.orders.shipping_label_title')} #{order.id}</h3>

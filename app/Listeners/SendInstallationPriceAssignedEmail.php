@@ -4,11 +4,14 @@ namespace App\Listeners;
 
 use App\Events\InstallationPriceWasAssigned;
 use App\Mail\InstallationPriceAssignedMail;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class SendInstallationPriceAssignedEmail implements ShouldQueue
+/**
+ * Sends synchronously so the client receives the email without running a queue worker.
+ * For high traffic, consider queuing again and running php artisan queue:work.
+ */
+class SendInstallationPriceAssignedEmail
 {
     public function handle(InstallationPriceWasAssigned $event): void
     {

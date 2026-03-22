@@ -8,6 +8,7 @@ import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import StripeInlinePayment from '../components/payments/StripeInlinePayment';
 import RedsysAutoPost from '../components/payments/RedsysAutoPost';
+import { emitAppToast } from '../toastEvents';
 
 const INITIAL_FORM = {
   payment_method: 'card',
@@ -32,7 +33,27 @@ export default function CheckoutPage() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [activeCheckout, setActiveCheckout] = useState(null);
   const [stripeUiError, setStripeUiError] = useState('');
+  const [payMethods, setPayMethods] = useState(null);
   const wantsInstallation = !!cart.installation_requested;
+
+  useEffect(() => {
+    api
+      .get('payments/config')
+      .then((r) => {
+        if (r.data.success && r.data.data?.methods) setPayMethods(r.data.data.methods);
+        else setPayMethods({ card: false, paypal: false, bizum: false, revolut: false });
+      })
+      .catch(() => setPayMethods({ card: true, paypal: true, bizum: true, revolut: true }));
+  }, []);
+
+  useEffect(() => {
+    if (payMethods === null || wantsInstallation) return;
+    setForm((f) => {
+      if (payMethods[f.payment_method]) return f;
+      const first = ['card', 'paypal', 'bizum', 'revolut'].find((k) => payMethods[k]);
+      return first ? { ...f, payment_method: first } : f;
+    });
+  }, [payMethods, wantsInstallation]);
 
   useEffect(() => {
     if (!user) return;
@@ -109,12 +130,17 @@ export default function CheckoutPage() {
       }
 
       navigate('/orders/' + d.id);
-    } catch {
-      // validation errors surface via global handler if configured
+    } catch (err) {
+      const d = err.response?.data;
+      const msg =
+        d?.code === 'payment_method_not_configured'
+          ? t('shop.payment.method_unavailable')
+          : d?.message || t('common.error');
+      emitAppToast(msg, 'error');
     } finally {
       setLoading(false);
     }
-  }, [form, navigate, fetchCart, wantsInstallation]);
+  }, [form, navigate, fetchCart, wantsInstallation, t]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -129,6 +155,9 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  const payMethodsReady = payMethods !== null;
+  const anyPaymentMethod = payMethodsReady && Object.values(payMethods).some(Boolean);
 
   if (!cart.lines?.length) {
     return (
@@ -207,13 +236,27 @@ export default function CheckoutPage() {
           {!wantsInstallation && (
             <>
               <h2 className="font-semibold text-base-content mt-6">{t('checkout.payment')}</h2>
+              {payMethodsReady && !anyPaymentMethod && (
+                <div role="alert" className="alert alert-warning text-sm">
+                  {t('checkout.payment.no_methods')}
+                </div>
+              )}
               <label className="form-field w-full">
                 <span className="form-label">{t('checkout.payment_method')}</span>
-                <select name="payment_method" className="select select-bordered w-full" value={form.payment_method} onChange={handleChange}>
-                  <option value="card">{t('checkout.payment.card')}</option>
-                  <option value="paypal">{t('checkout.payment.paypal')}</option>
-                  <option value="bizum">{t('checkout.payment.bizum')}</option>
-                  <option value="revolut">{t('checkout.payment.revolut')}</option>
+                <select
+                  name="payment_method"
+                  className="select select-bordered w-full"
+                  value={form.payment_method}
+                  onChange={handleChange}
+                  disabled={payMethodsReady && !anyPaymentMethod}
+                >
+                  {['card', 'paypal', 'bizum', 'revolut']
+                    .filter((value) => !payMethodsReady || payMethods[value])
+                    .map((value) => (
+                      <option key={value} value={value}>
+                        {t(`checkout.payment.${value}`)}
+                      </option>
+                    ))}
                 </select>
               </label>
             </>
@@ -234,7 +277,11 @@ export default function CheckoutPage() {
                 <span className="tabular-nums">{Number(cart.total_with_shipping ?? cart.total + 9).toFixed(2)} €</span>
               </p>
             </div>
-            <button type="submit" className="btn btn-primary shrink-0" disabled={loading || !!activeCheckout?.stripe}>
+            <button
+              type="submit"
+              className="btn btn-primary shrink-0"
+              disabled={loading || !!activeCheckout?.stripe || (!wantsInstallation && payMethodsReady && !anyPaymentMethod)}
+            >
               {loading ? t('common.loading') : t('shop.checkout')}
             </button>
           </div>

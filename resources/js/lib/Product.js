@@ -8,6 +8,8 @@ export class Product {
     name,
     description,
     price,
+    list_price = null,
+    discount_percent = null,
     stock,
     weight_kg = null,
     is_double_clutch = false,
@@ -26,6 +28,12 @@ export class Product {
     this.name = name;
     this.description = description;
     this.price = Number(price) || 0;
+    this.list_price =
+      list_price != null && list_price !== '' && Number(list_price) > 0 ? Number(list_price) : null;
+    this.discount_percent =
+      discount_percent != null && discount_percent !== '' && Number(discount_percent) > 0
+        ? Number(discount_percent)
+        : null;
     this.stock = Number(stock) || 0;
     this.weight_kg = weight_kg != null && weight_kg !== '' ? Number(weight_kg) : null;
     this.is_double_clutch = Boolean(is_double_clutch);
@@ -54,6 +62,11 @@ export class Product {
     return new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(this.price);
   }
 
+  get formattedListPrice() {
+    if (this.list_price == null) return null;
+    return new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(this.list_price);
+  }
+
   get formattedExtraKeyPrice() {
     if (this.extra_key_unit_price == null) return null;
     return new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(this.extra_key_unit_price);
@@ -72,6 +85,8 @@ export class Product {
       name: data?.name,
       description: data?.description,
       price: data?.price,
+      list_price: data?.list_price,
+      discount_percent: data?.discount_percent,
       stock: data?.stock,
       weight_kg: data?.weight_kg,
       is_double_clutch: data?.is_double_clutch,

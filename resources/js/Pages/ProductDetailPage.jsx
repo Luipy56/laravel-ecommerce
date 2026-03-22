@@ -188,7 +188,17 @@ export default function ProductDetailPage() {
                 </span>
               )}
             </div>
-            <p className="text-primary text-xl font-semibold mt-2">{product.formattedPrice}</p>
+            <div className="mt-2 space-y-0.5">
+              {product.formattedListPrice && (
+                <p className="text-lg text-base-content/60 line-through tabular-nums">{product.formattedListPrice}</p>
+              )}
+              <p className="text-primary text-xl font-semibold tabular-nums">{product.formattedPrice}</p>
+              {product.discount_percent > 0 && (
+                <p className="text-sm text-error font-medium">
+                  {t('shop.product.discount_badge')}: −{Math.round(Number(product.discount_percent))}%
+                </p>
+              )}
+            </div>
 
             {hasVariants && (
               <div className="mt-3" role="group" aria-label={t('shop.product.variant')}>

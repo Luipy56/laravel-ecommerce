@@ -6,10 +6,9 @@ use App\Models\Client;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\RequiresPhpExtension;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-#[RequiresPhpExtension('pdo_sqlite')]
 class PaymentWebhookTest extends TestCase
 {
     use RefreshDatabase;
@@ -21,6 +20,22 @@ class PaymentWebhookTest extends TestCase
         $signature = hash_hmac('sha256', $signedPayload, $secret);
 
         return 't='.$timestamp.',v1='.$signature;
+    }
+
+    /**
+     * Raw JSON body (required for Stripe/Revolut signature verification). Laravel has no TestCase::withBody().
+     */
+    private function postRawWebhook(string $uri, string $rawBody, array $headers = []): TestResponse
+    {
+        $server = [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ACCEPT' => 'application/json',
+        ];
+        foreach ($headers as $name => $value) {
+            $server['HTTP_'.strtoupper(str_replace('-', '_', $name))] = $value;
+        }
+
+        return $this->call('POST', $uri, [], [], [], $server, $rawBody);
     }
 
     public function test_stripe_webhook_returns_503_when_secret_not_configured(): void
@@ -38,10 +53,11 @@ class PaymentWebhookTest extends TestCase
 
         $payload = '{"id":"evt_1","type":"payment_intent.succeeded","data":{"object":{"id":"pi_x","object":"payment_intent"}}}';
 
-        $response = $this->withHeaders([
-            'Stripe-Signature' => 't='.time().',v1=deadbeef',
-        ])->withBody($payload, 'application/json')
-            ->post('/api/v1/payments/webhooks/stripe');
+        $response = $this->postRawWebhook(
+            '/api/v1/payments/webhooks/stripe',
+            $payload,
+            ['Stripe-Signature' => 't='.time().',v1=deadbeef']
+        );
 
         $response->assertStatus(400);
     }
@@ -101,9 +117,7 @@ class PaymentWebhookTest extends TestCase
 
         $header = $this->makeStripeSignedPayload($payload, $secret);
 
-        $this->withHeaders(['Stripe-Signature' => $header])
-            ->withBody($payload, 'application/json')
-            ->post('/api/v1/payments/webhooks/stripe')
+        $this->postRawWebhook('/api/v1/payments/webhooks/stripe', $payload, ['Stripe-Signature' => $header])
             ->assertOk();
 
         $payment->refresh();
@@ -111,9 +125,7 @@ class PaymentWebhookTest extends TestCase
         $this->assertNotNull($payment->paid_at);
         $this->assertTrue($order->fresh()->hasSuccessfulPayment());
 
-        $this->withHeaders(['Stripe-Signature' => $header])
-            ->withBody($payload, 'application/json')
-            ->post('/api/v1/payments/webhooks/stripe')
+        $this->postRawWebhook('/api/v1/payments/webhooks/stripe', $payload, ['Stripe-Signature' => $header])
             ->assertOk();
 
         $this->assertSame(1, Payment::query()->where('order_id', $order->id)->where('status', Payment::STATUS_SUCCEEDED)->count());
@@ -213,9 +225,7 @@ class PaymentWebhookTest extends TestCase
 
         $sig = hash_hmac('sha256', $payload, $whSecret);
 
-        $this->withHeaders(['Revolut-Signature' => 'v1='.$sig])
-            ->withBody($payload, 'application/json')
-            ->post('/api/v1/payments/webhooks/revolut')
+        $this->postRawWebhook('/api/v1/payments/webhooks/revolut', $payload, ['Revolut-Signature' => 'v1='.$sig])
             ->assertOk();
 
         $payment->refresh();

@@ -42,6 +42,37 @@ class PaymentCheckoutService
         return (bool) config('app.debug') && (bool) config('payments.allow_simulated');
     }
 
+    /**
+     * @return array{card: bool, paypal: bool, bizum: bool, revolut: bool, simulated: bool}
+     */
+    public static function paymentMethodsAvailability(): array
+    {
+        $simulated = self::allowSimulatedPayments();
+        $stripeOk = $simulated || (filled(config('services.stripe.secret')) && filled(config('services.stripe.key')));
+        $redsysOk = $simulated || (filled(config('services.redsys.merchant_code')) && filled(config('services.redsys.secret_key')));
+        $revolutOk = $simulated || filled(config('services.revolut.api_key'));
+
+        return [
+            'card' => $stripeOk,
+            'paypal' => $stripeOk,
+            'bizum' => $redsysOk,
+            'revolut' => $revolutOk,
+            'simulated' => $simulated,
+        ];
+    }
+
+    public static function isPaymentMethodAvailable(string $method): bool
+    {
+        $a = self::paymentMethodsAvailability();
+
+        return match ($method) {
+            Payment::METHOD_CARD, Payment::METHOD_PAYPAL => $a['card'],
+            Payment::METHOD_BIZUM => $a['bizum'],
+            Payment::METHOD_REVOLUT => $a['revolut'],
+            default => false,
+        };
+    }
+
     public function simulateSuccess(Payment $payment): void
     {
         if (! self::allowSimulatedPayments()) {

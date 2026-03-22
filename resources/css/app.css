@@ -106,3 +106,18 @@ select.select.select-bordered:focus,
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgb(251 84 18 / 0.2);
 }
+
+@keyframes slide-in-toast {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-toast {
+  animation: slide-in-toast 0.25s ease-out;
+}

@@ -40,6 +40,12 @@ export default function OrderDetailPage() {
   }, [location.state, location.pathname, navigate]);
 
   useEffect(() => {
+    if (!order?.payment_methods_available) return;
+    const m = order.payment_methods_available;
+    setPaymentMethod((pm) => (m[pm] ? pm : ['card', 'paypal', 'bizum', 'revolut'].find((k) => m[k]) || 'card'));
+  }, [order?.payment_methods_available, order?.id]);
+
+  useEffect(() => {
     if (!user || !id) return;
     const sp = new URLSearchParams(window.location.search);
     const payment = sp.get('payment');
@@ -93,7 +99,12 @@ export default function OrderDetailPage() {
       const r = await api.get(`orders/${id}`);
       if (r.data.success) setOrder(r.data.data);
     } catch (err) {
-      setPayError(err.response?.data?.message || t('common.error'));
+      const d = err.response?.data;
+      const msg =
+        d?.code === 'payment_method_not_configured'
+          ? t('shop.payment.method_unavailable')
+          : d?.message || t('common.error');
+      setPayError(msg);
     } finally {
       setPayLoading(false);
     }
@@ -143,6 +154,9 @@ export default function OrderDetailPage() {
   const showInstallationRow = order.installation_requested && order.installation_status === 'priced' && order.installation_price != null;
   const awaitingQuote = order.installation_requested && order.installation_status === 'pending' && order.status === 'awaiting_installation_price';
   const canPay = order.can_pay && !order.has_payment;
+  const payAvail = order.payment_methods_available ?? { card: true, paypal: true, bizum: true, revolut: true };
+  const paymentsSimulated = !!order.payments_simulated;
+  const anyPaymentMethod = Object.values(payAvail).some(Boolean);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -241,6 +255,13 @@ export default function OrderDetailPage() {
         </div>
       )}
 
+      {canPay && !anyPaymentMethod && !paymentsSimulated && (
+        <div role="alert" className="alert alert-warning mt-4 text-sm space-y-2">
+          <p className="m-0">{t('shop.order.payment_no_methods')}</p>
+          <p className="m-0 text-base-content/80">{t('shop.order.payment_how_it_works')}</p>
+        </div>
+      )}
+
       {canPay && (
         <form onSubmit={handlePay} className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
           <div className="card-body">
@@ -251,15 +272,22 @@ export default function OrderDetailPage() {
                 className="select select-bordered w-full"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                disabled={!!inlineCheckout?.stripe}
+                disabled={!!inlineCheckout?.stripe || (!anyPaymentMethod && !paymentsSimulated)}
               >
-                <option value="card">{t('checkout.payment.card')}</option>
-                <option value="paypal">{t('checkout.payment.paypal')}</option>
-                <option value="bizum">{t('checkout.payment.bizum')}</option>
-                <option value="revolut">{t('checkout.payment.revolut')}</option>
+                {['card', 'paypal', 'bizum', 'revolut']
+                  .filter((value) => payAvail[value])
+                  .map((value) => (
+                    <option key={value} value={value}>
+                      {t(`checkout.payment.${value}`)}
+                    </option>
+                  ))}
               </select>
             </label>
-            <button type="submit" className="btn btn-primary mt-2" disabled={payLoading || !!inlineCheckout?.stripe}>
+            <button
+              type="submit"
+              className="btn btn-primary mt-2"
+              disabled={payLoading || !!inlineCheckout?.stripe || (!anyPaymentMethod && !paymentsSimulated)}
+            >
               {payLoading ? t('common.loading') : t('shop.order.pay_now')}
             </button>
             {inlineCheckout?.stripe && (

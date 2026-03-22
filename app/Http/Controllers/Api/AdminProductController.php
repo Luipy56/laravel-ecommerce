@@ -52,6 +52,9 @@ class AdminProductController extends Controller
         if ($request->input('security_level') === '') {
             $request->merge(['security_level' => null]);
         }
+        if ($request->input('discount_percent') === '' || $request->input('discount_percent') === null) {
+            $request->merge(['discount_percent' => null]);
+        }
 
         $validated = $request->validate([
             'category_id' => ['required', 'exists:product_categories,id'],
@@ -60,6 +63,7 @@ class AdminProductController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'purchase_price' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'weight_kg' => ['nullable', 'numeric', 'min:0'],
@@ -85,8 +89,13 @@ class AdminProductController extends Controller
             'is_featured' => false,
             'is_trending' => false,
             'is_active' => true,
+            'discount_percent' => null,
         ];
-        $product = Product::create(array_merge($defaults, collect($validated)->except(['feature_ids', 'images'])->all()));
+        $row = array_merge($defaults, collect($validated)->except(['feature_ids', 'images'])->all());
+        if (! array_key_exists('discount_percent', $row) || $row['discount_percent'] === '' || $row['discount_percent'] === null) {
+            $row['discount_percent'] = null;
+        }
+        $product = Product::create($row);
         $product->features()->sync($validated['feature_ids'] ?? []);
 
         if ($request->hasFile('images')) {
@@ -161,6 +170,9 @@ class AdminProductController extends Controller
         if ($request->input('security_level') === '') {
             $request->merge(['security_level' => null]);
         }
+        if ($request->input('discount_percent') === '' || $request->input('discount_percent') === null) {
+            $request->merge(['discount_percent' => null]);
+        }
 
         $validated = $request->validate([
             'category_id' => ['required', 'exists:product_categories,id'],
@@ -169,6 +181,7 @@ class AdminProductController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'purchase_price' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
             'weight_kg' => ['nullable', 'numeric', 'min:0'],

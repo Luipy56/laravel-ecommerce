@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { ToastProvider } from './contexts/ToastContext';
+import NavigationSetter from './NavigationSetter';
 import Layout from './components/Layout';
 import AdminLayout from './components/admin/AdminLayout';
 import HomePage from './Pages/HomePage';
@@ -53,71 +56,95 @@ import AdminOrderEditPage from './Pages/admin/AdminOrderEditPage';
 import AdminPersonalizedSolutionsPage from './Pages/admin/AdminPersonalizedSolutionsPage';
 import AdminPersonalizedSolutionShowPage from './Pages/admin/AdminPersonalizedSolutionShowPage';
 import AdminPersonalizedSolutionEditPage from './Pages/admin/AdminPersonalizedSolutionEditPage';
+import NotFoundPage from './Pages/NotFoundPage';
+import SessionExpiredPage from './Pages/SessionExpiredPage';
 
 export default function App() {
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60_000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+    []
+  );
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<HomePage />} />
-              <Route path="products" element={<ProductListPage />} />
-              <Route path="products/:id" element={<ProductDetailPage />} />
-              <Route path="packs/:id" element={<PackDetailPage />} />
-              <Route path="categories/:id/products" element={<ProductListPage />} />
-              <Route path="cart" element={<CartPage />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
-              <Route path="checkout" element={<CheckoutPage />} />
-              <Route path="orders" element={<OrdersPage />} />
-              <Route path="orders/:id" element={<OrderDetailPage />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="custom-solution" element={<CustomSolutionPage />} />
-            </Route>
-            <Route path="admin/login" element={<AdminLoginPage />} />
-            <Route path="admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="categories" element={<AdminCategoriesPage />} />
-              <Route path="categories/new" element={<AdminCategoryNewPage />} />
-              <Route path="categories/:id/edit" element={<AdminCategoryEditPage />} />
-              <Route path="categories/:id" element={<AdminCategoryShowPage />} />
-              <Route path="products" element={<AdminProductsPage />} />
-              <Route path="products/new" element={<AdminProductNewPage />} />
-              <Route path="products/:id/edit" element={<AdminProductEditPage />} />
-              <Route path="products/:id" element={<AdminProductShowPage />} />
-              <Route path="features" element={<AdminFeaturesPage />} />
-              <Route path="features/new" element={<AdminFeatureNewPage />} />
-              <Route path="features/:id/edit" element={<AdminFeatureEditPage />} />
-              <Route path="features/:id" element={<AdminFeatureShowPage />} />
-              <Route path="feature-names" element={<Navigate to="/admin/features" replace />} />
-              <Route path="feature-names/new" element={<AdminFeatureNameNewPage />} />
-              <Route path="feature-names/:id/edit" element={<AdminFeatureNameEditPage />} />
-              <Route path="feature-names/:id" element={<AdminFeatureNameShowPage />} />
-              <Route path="packs" element={<AdminPacksPage />} />
-              <Route path="packs/new" element={<AdminPackNewPage />} />
-              <Route path="packs/:id/edit" element={<AdminPackEditPage />} />
-              <Route path="packs/:id" element={<AdminPackShowPage />} />
-              <Route path="variant-groups" element={<AdminVariantGroupsPage />} />
-              <Route path="variant-groups/new" element={<AdminVariantGroupNewPage />} />
-              <Route path="variant-groups/:id/edit" element={<AdminVariantGroupEditPage />} />
-              <Route path="variant-groups/:id" element={<AdminVariantGroupShowPage />} />
-              <Route path="clients" element={<AdminClientsPage />} />
-              <Route path="clients/:id" element={<AdminClientShowPage />} />
-              <Route path="orders" element={<AdminOrdersPage />} />
-              <Route path="orders/:id/edit" element={<AdminOrderEditPage />} />
-              <Route path="orders/:id" element={<AdminOrderShowPage />} />
-              <Route path="admins" element={<AdminAdminsPage />} />
-              <Route path="admins/new" element={<AdminAdminNewPage />} />
-              <Route path="admins/:id/edit" element={<AdminAdminEditPage />} />
-              <Route path="admins/:id" element={<AdminAdminShowPage />} />
-              <Route path="personalized-solutions" element={<AdminPersonalizedSolutionsPage />} />
-              <Route path="personalized-solutions/:id/edit" element={<AdminPersonalizedSolutionEditPage />} />
-              <Route path="personalized-solutions/:id" element={<AdminPersonalizedSolutionShowPage />} />
-            </Route>
-          </Routes>
-        </CartProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <NavigationSetter />
+        <ToastProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<HomePage />} />
+                  <Route path="products" element={<ProductListPage />} />
+                  <Route path="products/:id" element={<ProductDetailPage />} />
+                  <Route path="packs/:id" element={<PackDetailPage />} />
+                  <Route path="categories/:id/products" element={<ProductListPage />} />
+                  <Route path="cart" element={<CartPage />} />
+                  <Route path="login" element={<LoginPage />} />
+                  <Route path="register" element={<RegisterPage />} />
+                  <Route path="checkout" element={<CheckoutPage />} />
+                  <Route path="orders" element={<OrdersPage />} />
+                  <Route path="orders/:id" element={<OrderDetailPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                  <Route path="custom-solution" element={<CustomSolutionPage />} />
+                  <Route path="session-expired" element={<SessionExpiredPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Route>
+                <Route path="admin/login" element={<AdminLoginPage />} />
+                <Route path="admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboardPage />} />
+                  <Route path="categories" element={<AdminCategoriesPage />} />
+                  <Route path="categories/new" element={<AdminCategoryNewPage />} />
+                  <Route path="categories/:id/edit" element={<AdminCategoryEditPage />} />
+                  <Route path="categories/:id" element={<AdminCategoryShowPage />} />
+                  <Route path="products" element={<AdminProductsPage />} />
+                  <Route path="products/new" element={<AdminProductNewPage />} />
+                  <Route path="products/:id/edit" element={<AdminProductEditPage />} />
+                  <Route path="products/:id" element={<AdminProductShowPage />} />
+                  <Route path="features" element={<AdminFeaturesPage />} />
+                  <Route path="features/new" element={<AdminFeatureNewPage />} />
+                  <Route path="features/:id/edit" element={<AdminFeatureEditPage />} />
+                  <Route path="features/:id" element={<AdminFeatureShowPage />} />
+                  <Route path="feature-names" element={<Navigate to="/admin/features" replace />} />
+                  <Route path="feature-names/new" element={<AdminFeatureNameNewPage />} />
+                  <Route path="feature-names/:id/edit" element={<AdminFeatureNameEditPage />} />
+                  <Route path="feature-names/:id" element={<AdminFeatureNameShowPage />} />
+                  <Route path="packs" element={<AdminPacksPage />} />
+                  <Route path="packs/new" element={<AdminPackNewPage />} />
+                  <Route path="packs/:id/edit" element={<AdminPackEditPage />} />
+                  <Route path="packs/:id" element={<AdminPackShowPage />} />
+                  <Route path="variant-groups" element={<AdminVariantGroupsPage />} />
+                  <Route path="variant-groups/new" element={<AdminVariantGroupNewPage />} />
+                  <Route path="variant-groups/:id/edit" element={<AdminVariantGroupEditPage />} />
+                  <Route path="variant-groups/:id" element={<AdminVariantGroupShowPage />} />
+                  <Route path="clients" element={<AdminClientsPage />} />
+                  <Route path="clients/:id" element={<AdminClientShowPage />} />
+                  <Route path="orders" element={<AdminOrdersPage />} />
+                  <Route path="orders/:id/edit" element={<AdminOrderEditPage />} />
+                  <Route path="orders/:id" element={<AdminOrderShowPage />} />
+                  <Route path="admins" element={<AdminAdminsPage />} />
+                  <Route path="admins/new" element={<AdminAdminNewPage />} />
+                  <Route path="admins/:id/edit" element={<AdminAdminEditPage />} />
+                  <Route path="admins/:id" element={<AdminAdminShowPage />} />
+                  <Route path="personalized-solutions" element={<AdminPersonalizedSolutionsPage />} />
+                  <Route path="personalized-solutions/:id/edit" element={<AdminPersonalizedSolutionEditPage />} />
+                  <Route path="personalized-solutions/:id" element={<AdminPersonalizedSolutionShowPage />} />
+                  <Route path="*" element={<Navigate to="/admin" replace />} />
+                </Route>
+              </Routes>
+            </CartProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

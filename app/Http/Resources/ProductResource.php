@@ -9,12 +9,19 @@ class ProductResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $listPrice = (float) $this->price;
+        $discount = $this->discount_percent;
+        $hasDiscount = $discount !== null && (float) $discount > 0;
+        $effective = $this->effectivePrice();
+
         return [
             'id' => $this->id,
             'code' => $this->code,
             'name' => $this->name,
             'description' => $this->description,
-            'price' => (float) $this->price,
+            'price' => $effective,
+            'list_price' => $hasDiscount ? $listPrice : null,
+            'discount_percent' => $hasDiscount ? (float) $discount : null,
             'stock' => (int) $this->stock,
             'weight_kg' => $this->weight_kg !== null ? (float) $this->weight_kg : null,
             'is_double_clutch' => (bool) $this->is_double_clutch,
@@ -48,7 +55,7 @@ class ProductResource extends JsonResource
                     $variantLabel = $labelFeature
                         ? trim(($labelFeature->featureName?->name ? $labelFeature->featureName->name.': ' : '').($labelFeature->value ?? ''))
                         : ($p->name ?: $p->code ?? '');
-                    $price = (float) $p->price;
+                    $price = $p->effectivePrice();
 
                     return [
                         'id' => $p->id,

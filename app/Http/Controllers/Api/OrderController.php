@@ -49,6 +49,13 @@ class OrderController extends Controller
         $validated = $request->validate($rules);
 
         $awaitingInstallationQuote = (bool) $cart->installation_requested;
+        if (! $awaitingInstallationQuote && ! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.payment.method_unavailable'),
+                'code' => 'payment_method_not_configured',
+            ], 422);
+        }
 
         DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote) {
             $cart->update([
@@ -164,6 +171,14 @@ class OrderController extends Controller
         $validated = $request->validate([
             'payment_method' => ['required', 'string', 'in:'.self::PAYMENT_METHODS],
         ]);
+
+        if (! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.payment.method_unavailable'),
+                'code' => 'payment_method_not_configured',
+            ], 422);
+        }
 
         $order->load('lines');
         $total = $order->grand_total;
@@ -296,6 +311,8 @@ class OrderController extends Controller
         }
         $order->load(['lines.product', 'lines.pack', 'addresses', 'payments']);
 
+        $payMethods = PaymentCheckoutService::paymentMethodsAvailability();
+
         $lines = $order->lines->map(fn ($l) => [
             'id' => $l->id,
             'product_id' => $l->product_id,
@@ -324,6 +341,13 @@ class OrderController extends Controller
                 'grand_total' => $order->grand_total,
                 'has_payment' => $order->hasSuccessfulPayment(),
                 'can_pay' => $order->clientMayPay(),
+                'payment_methods_available' => [
+                    'card' => $payMethods['card'],
+                    'paypal' => $payMethods['paypal'],
+                    'bizum' => $payMethods['bizum'],
+                    'revolut' => $payMethods['revolut'],
+                ],
+                'payments_simulated' => $payMethods['simulated'],
                 'payments' => $order->payments->map(fn (Payment $p) => [
                     'id' => $p->id,
                     'status' => $p->status,

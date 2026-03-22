@@ -58,6 +58,7 @@
     "shop.order.cannot_pay_yet": "Aún no puedes pagar: espera el presupuesto de instalación o contáctanos.",
     "shop.order.waive_installation_invalid": "Solo se puede cancelar la solicitud mientras esperamos el presupuesto.",
     "shop.payment.provider_error": "No se pudo iniciar el pago con el proveedor. Inténtalo de nuevo más tarde o contáctanos.",
+    "shop.payment.method_unavailable": "Este método de pago no está disponible: el administrador aún no ha configurado la pasarela correspondiente en el servidor.",
 
     "validation.required": "Este campo es obligatorio.",
     "validation.email": "El correo electrónico no es válido.",

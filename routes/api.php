@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackController;
+use App\Http\Controllers\Api\PaymentConfigController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\PersonalizedSolutionController;
 use App\Http\Controllers\Api\ProductController;
@@ -37,6 +38,8 @@ Route::get('products/search', [ProductController::class, 'search']);
 Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('packs', [PackController::class, 'index']);
 Route::get('packs/{pack}', [PackController::class, 'show']);
+
+Route::get('payments/config', [PaymentConfigController::class, 'show']);
 
 Route::post('personalized-solutions', [PersonalizedSolutionController::class, 'store']);
 

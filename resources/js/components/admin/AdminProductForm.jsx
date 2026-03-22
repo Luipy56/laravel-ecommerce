@@ -9,6 +9,7 @@ const defaultProduct = {
   name: '',
   description: '',
   price: 0,
+  discount_percent: '',
   purchase_price: '',
   stock: 0,
   weight_kg: '',
@@ -58,6 +59,7 @@ export default function AdminProductForm({
         name: product.name ?? '',
         description: product.description ?? '',
         price: product.price ?? 0,
+        discount_percent: product.discount_percent != null && product.discount_percent !== '' ? String(product.discount_percent) : '',
         purchase_price: product.purchase_price ?? '',
         stock: product.stock ?? 0,
         weight_kg: product.weight_kg ?? '',
@@ -115,6 +117,8 @@ export default function AdminProductForm({
       name: form.name,
       description: form.description || null,
       price: Number(form.price),
+      discount_percent:
+        form.discount_percent !== '' && form.discount_percent != null ? Number(form.discount_percent) : null,
       purchase_price: form.purchase_price !== '' && form.purchase_price != null ? Number(form.purchase_price) : null,
       stock: Number(form.stock),
       weight_kg: form.weight_kg !== '' && form.weight_kg != null ? Number(form.weight_kg) : null,
@@ -225,6 +229,20 @@ export default function AdminProductForm({
             required
             aria-label={t('admin.products.sale_price')}
           />
+        </label>
+        <label className="form-field">
+          <span className="form-label">{t('admin.products.discount_percent')}</span>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="100"
+            className="input input-bordered w-full"
+            value={form.discount_percent}
+            onChange={(e) => update('discount_percent', e.target.value)}
+            aria-label={t('admin.products.discount_percent')}
+          />
+          <span className="text-xs text-base-content/70">{t('admin.products.discount_percent_help')}</span>
         </label>
         <label className="form-field">
           <span className="form-label">{t('admin.products.purchase_price')} (€)</span>

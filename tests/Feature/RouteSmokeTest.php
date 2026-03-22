@@ -4,16 +4,14 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route as RouteFacade;
-use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
 
 /**
  * Ensures every registered GET route responds without a 500 (server error).
  * Other statuses (401, 403, 404, 405, 422) are acceptable.
  *
- * Skipped entirely when pdo_sqlite is missing. For a check against your configured DB: php artisan routes:smoke
+ * Uses DB_DATABASE from phpunit.xml (ecommerce_testing). Against your main DB without migrating: php artisan routes:smoke
  */
-#[RequiresPhpExtension('pdo_sqlite')]
 class RouteSmokeTest extends TestCase
 {
     use RefreshDatabase;

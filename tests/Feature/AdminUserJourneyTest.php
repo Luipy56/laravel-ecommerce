@@ -5,31 +5,24 @@ namespace Tests\Feature;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
 
 /**
  * Simulates a typical admin (non-superuser account from seed: manager) using the API after login.
  */
-#[RequiresPhpExtension('pdo_sqlite')]
 class AdminUserJourneyTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_login_rejects_wrong_password(): void
-    {
-        $this->seed(AdminSeeder::class);
-
-        $this->postJson('/api/v1/admin/login', [
-            'username' => 'manager',
-            'password' => 'wrong-password',
-        ])->assertStatus(422);
-    }
-
-    public function test_common_admin_can_login_and_use_main_endpoints(): void
+    /**
+     * Runs before test_admin_login_rejects_wrong_password: a failed login attempt on the same
+     * PHPUnit instance leaves HTTP client state that breaks session + JSON GETs for the admin API.
+     */
+    public function test_0_manager_can_use_main_admin_get_endpoints_when_authenticated(): void
     {
         $this->seed(DatabaseSeeder::class);
 
+        $this->withCredentials();
         $this->postJson('/api/v1/admin/login', [
             'username' => 'manager',
             'password' => 'admin',
@@ -66,9 +59,22 @@ class AdminUserJourneyTest extends TestCase
         ];
 
         foreach ($endpoints as $uri) {
-            $this->getJson($uri)
-                ->assertOk()
-                ->assertJsonPath('success', true);
+            $response = $this->getJson($uri);
+            $response->assertStatus(
+                200,
+                "GET {$uri} returned {$response->status()}: ".$response->getContent()
+            );
+            $response->assertJsonPath('success', true);
         }
+    }
+
+    public function test_admin_login_rejects_wrong_password(): void
+    {
+        $this->seed(AdminSeeder::class);
+
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'wrong-password',
+        ])->assertStatus(422);
     }
 }

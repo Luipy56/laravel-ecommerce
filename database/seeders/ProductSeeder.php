@@ -27,6 +27,7 @@ class ProductSeeder extends Seeder
             'weight_kg' => null,
             'security_level' => null,
             'competitor_url' => null,
+            'discount_percent' => null,
             'created_at' => $now,
             'updated_at' => $now,
         ];

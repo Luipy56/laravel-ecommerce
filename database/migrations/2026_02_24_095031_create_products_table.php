@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('code', 50)->nullable()->unique()->comment('Product code');
             $table->string('name', 255);
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2)->comment('Sale price (storefront)');
+            $table->decimal('price', 10, 2)->comment('List/catalog price (storefront base before discount)');
+            $table->decimal('discount_percent', 5, 2)->nullable()->comment('Optional 0–100; customer pays price * (1 - discount/100)');
             $table->decimal('purchase_price', 10, 2)->nullable()->comment('Cost price; admin only');
             $table->integer('stock')->default(0);
             $table->decimal('weight_kg', 10, 3)->nullable()->comment('Product weight in kilograms');

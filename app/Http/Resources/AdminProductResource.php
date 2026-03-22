@@ -18,6 +18,7 @@ class AdminProductResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'price' => (float) $this->price,
+            'discount_percent' => $this->discount_percent !== null ? (float) $this->discount_percent : null,
             'purchase_price' => $this->purchase_price !== null ? (float) $this->purchase_price : null,
             'stock' => (int) $this->stock,
             'weight_kg' => $this->weight_kg !== null ? (float) $this->weight_kg : null,

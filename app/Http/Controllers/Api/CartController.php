@@ -68,7 +68,7 @@ class CartController extends Controller
             if ($item['product_id'] ?? null) {
                 $product = Product::with(['images', 'features.featureName'])->find($item['product_id']);
                 if ($product && $product->is_active) {
-                    $unitPrice = (float) $product->price;
+                    $unitPrice = $product->effectivePrice();
                     $extraKeysQty = (int) ($item['extra_keys_qty'] ?? 0);
                     $extraKeyPrice = $product->is_extra_keys_available && $product->extra_key_unit_price
                         ? (float) $product->extra_key_unit_price
@@ -146,7 +146,7 @@ class CartController extends Controller
         return [
             'id' => $product->id,
             'name' => $product->name,
-            'price' => (float) $product->price,
+            'price' => $product->effectivePrice(),
             'image_url' => $firstImage ? $firstImage->url : null,
             'is_extra_keys_available' => (bool) $product->is_extra_keys_available,
             'extra_key_unit_price' => $product->extra_key_unit_price ? (float) $product->extra_key_unit_price : null,
@@ -219,7 +219,7 @@ class CartController extends Controller
             $existing->update(['quantity' => $existing->quantity + $quantity]);
             $line = $existing;
         } else {
-            $unitPrice = $productId ? Product::find($productId)?->price : Pack::find($packId)?->price;
+            $unitPrice = $productId ? Product::find($productId)?->effectivePrice() : Pack::find($packId)?->price;
             $line = $cart->lines()->create([
                 'product_id' => $productId,
                 'pack_id' => $packId,
@@ -363,7 +363,7 @@ class CartController extends Controller
                 }
                 $existing->update($updates);
             } else {
-                $unitPrice = $productId ? Product::find($productId)?->price : Pack::find($packId)?->price;
+                $unitPrice = $productId ? Product::find($productId)?->effectivePrice() : Pack::find($packId)?->price;
                 $product = $productId ? Product::find($productId) : null;
                 $pack = $packId ? Pack::find($packId) : null;
                 $extraKeysQty = (int) ($item['extra_keys_qty'] ?? 0);

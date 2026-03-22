@@ -5,7 +5,8 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
-const STATUSES = ['pending', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
+const STATUSES = ['pending', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
+const INSTALL_STATUSES = ['pending', 'priced', 'rejected'];
 
 function formatDateForInput(iso) {
   if (!iso) return '';
@@ -23,7 +24,9 @@ export default function AdminOrderEditPage() {
   const { id } = useParams();
   const [status, setStatus] = useState('pending');
   const [shippingDate, setShippingDate] = useState('');
-  const [shippingPrice, setShippingPrice] = useState('');
+  const [installationRequested, setInstallationRequested] = useState(false);
+  const [installationPrice, setInstallationPrice] = useState('');
+  const [installationStatus, setInstallationStatus] = useState('pending');
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -42,7 +45,9 @@ export default function AdminOrderEditPage() {
         }
         setStatus(o.status || 'pending');
         setShippingDate(formatDateForInput(o.shipping_date));
-        setShippingPrice(o.shipping_price != null ? String(o.shipping_price) : '');
+        setInstallationRequested(!!o.installation_requested);
+        setInstallationPrice(o.installation_price != null ? String(o.installation_price) : '');
+        setInstallationStatus(o.installation_status || 'pending');
       } else setLoadError(t('common.error'));
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
@@ -64,8 +69,11 @@ export default function AdminOrderEditPage() {
       const payload = {
         status,
         shipping_date: shippingDate.trim() || null,
-        shipping_price: shippingPrice.trim() === '' ? null : parseFloat(shippingPrice),
       };
+      if (installationRequested) {
+        payload.installation_price = installationPrice.trim() === '' ? null : parseFloat(installationPrice);
+        payload.installation_status = installationStatus;
+      }
       const { data } = await api.put(`admin/orders/${id}`, payload);
       if (data.success) {
         showSuccess(t('common.saved'));
@@ -134,19 +142,40 @@ export default function AdminOrderEditPage() {
                 aria-label={t('admin.orders.shipping_date')}
               />
             </label>
-            <label className="form-field">
-              <span className="form-label">{t('admin.orders.shipping_price')}</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                className="input input-bordered w-full max-w-xs"
-                value={shippingPrice}
-                onChange={(e) => setShippingPrice(e.target.value)}
-                placeholder="0.00"
-                aria-label={t('admin.orders.shipping_price')}
-              />
-            </label>
+            <p className="text-sm text-base-content/70">{t('admin.orders.shipping_fixed_hint')}</p>
+
+            {installationRequested && (
+              <div className="space-y-4 pt-2 border-t border-base-200">
+                <p className="text-sm font-semibold text-base-content">{t('admin.orders.installation')}</p>
+                <label className="form-field">
+                  <span className="form-label">{t('admin.orders.installation_status_label')}</span>
+                  <select
+                    className="select select-bordered w-full max-w-md"
+                    value={installationStatus}
+                    onChange={(e) => setInstallationStatus(e.target.value)}
+                    aria-label={t('admin.orders.installation_status_label')}
+                  >
+                    {INSTALL_STATUSES.map((s) => (
+                      <option key={s} value={s}>{t(`admin.orders.install_status_${s}`)}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="form-field">
+                  <span className="form-label">{t('admin.orders.installation_fee_label')} (€)</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="input input-bordered w-full max-w-xs"
+                    value={installationPrice}
+                    onChange={(e) => setInstallationPrice(e.target.value)}
+                    placeholder="0.00"
+                    aria-label={t('admin.orders.installation_fee_label')}
+                  />
+                </label>
+              </div>
+            )}
+
             <div className="flex justify-between gap-2 pt-4">
               <Link to={`/admin/orders/${id}`} className="btn btn-ghost">{t('common.back')}</Link>
               <button type="submit" className="btn btn-primary" disabled={loading}>

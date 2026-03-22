@@ -14,6 +14,7 @@ class PackResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'price' => (float) $this->price,
+            'contains_keys' => (bool) $this->contains_keys,
             'items' => $this->whenLoaded('items', fn () => $this->items->map(fn ($i) => [
                 'product_id' => $i->product_id,
                 'product' => $i->product ? [

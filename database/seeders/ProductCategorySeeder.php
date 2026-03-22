@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\DB;
 class ProductCategorySeeder extends Seeder
 {
     /**
-     * Categories per enunciat: només Cilindres, Escut, Segon pany.
+     * Demo categories in Spanish (Castilian).
      */
     public function run(): void
     {
         DB::table('product_categories')->insert([
-            ['code' => 'cilindres', 'name' => 'Cilindres', 'is_active' => true],
-            ['code' => 'escut', 'name' => 'Escut', 'is_active' => true],
-            ['code' => 'segon-pany', 'name' => 'Segon pany', 'is_active' => true],
+            ['code' => 'cilindros', 'name' => 'Cilindros', 'is_active' => true],
+            ['code' => 'escudo', 'name' => 'Escudo', 'is_active' => true],
+            ['code' => 'segundo-cerrojo', 'name' => 'Segundo cerrojo', 'is_active' => true],
         ]);
     }
 }

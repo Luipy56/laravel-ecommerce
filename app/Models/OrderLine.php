@@ -16,8 +16,6 @@ class OrderLine extends Model
         'quantity',
         'unit_price',
         'offer',
-        'is_installation_requested',
-        'installation_price',
         'keys_all_same',
         'extra_keys_qty',
         'extra_key_unit_price',
@@ -29,9 +27,7 @@ class OrderLine extends Model
         return [
             'unit_price' => 'decimal:2',
             'offer' => 'decimal:2',
-            'installation_price' => 'decimal:2',
             'extra_key_unit_price' => 'decimal:2',
-            'is_installation_requested' => 'boolean',
             'keys_all_same' => 'boolean',
             'is_included' => 'boolean',
         ];
@@ -58,10 +54,11 @@ class OrderLine extends Model
         if ($this->product_id) {
             return $this->product?->name ?? '';
         }
+
         return $this->pack?->name ?? '';
     }
 
-    /** Line total (quantity * unit_price - offer + installation + extra keys). Returns 0 when line is excluded from order. */
+    /** Line total (quantity * unit_price - offer + extra keys). Installation is on the order, not the line. */
     public function getLineTotalAttribute(): float
     {
         if (isset($this->attributes['is_included']) && ! $this->is_included) {
@@ -69,7 +66,8 @@ class OrderLine extends Model
         }
         $sub = (float) $this->unit_price * (int) $this->quantity;
         $off = (float) ($this->offer ?? 0);
-        return round($sub - $off + (float) ($this->installation_price ?? 0) * (int) ($this->is_installation_requested ? $this->quantity : 0)
-            + (int) ($this->extra_keys_qty ?? 0) * (float) ($this->extra_key_unit_price ?? 0), 2);
+        $extra = (int) ($this->extra_keys_qty ?? 0) * (float) ($this->extra_key_unit_price ?? 0);
+
+        return round($sub - $off + $extra, 2);
     }
 }

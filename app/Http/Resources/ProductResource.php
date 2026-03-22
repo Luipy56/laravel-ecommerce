@@ -16,8 +16,11 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'price' => (float) $this->price,
             'stock' => (int) $this->stock,
-            'is_installable' => (bool) $this->is_installable,
-            'installation_price' => $this->installation_price ? (float) $this->installation_price : null,
+            'weight_kg' => $this->weight_kg !== null ? (float) $this->weight_kg : null,
+            'is_double_clutch' => (bool) $this->is_double_clutch,
+            'has_card' => (bool) $this->has_card,
+            'security_level' => $this->security_level,
+            'competitor_url' => $this->competitor_url,
             'is_extra_keys_available' => (bool) $this->is_extra_keys_available,
             'extra_key_unit_price' => $this->extra_key_unit_price ? (float) $this->extra_key_unit_price : null,
             'is_featured' => (bool) $this->is_featured,
@@ -37,10 +40,13 @@ class ProductResource extends JsonResource
             ])),
             'variant_options' => $this->whenLoaded('variantGroup', function () {
                 $products = $this->variantGroup?->products ?? collect();
+
                 return $products->map(function ($p) {
-                    $firstFeature = $p->features->first();
-                    $variantLabel = $firstFeature
-                        ? trim(($firstFeature->featureName?->name ? $firstFeature->featureName->name . ': ' : '') . ($firstFeature->value ?? ''))
+                    $labelFeature = $p->features->first(fn ($f) => ($f->featureName?->name ?? '') === 'Medida')
+                        ?? $p->features->first(fn ($f) => ($f->featureName?->name ?? '') === 'Medida interna')
+                        ?? $p->features->first();
+                    $variantLabel = $labelFeature
+                        ? trim(($labelFeature->featureName?->name ? $labelFeature->featureName->name.': ' : '').($labelFeature->value ?? ''))
                         : ($p->name ?: $p->code ?? '');
                     $price = (float) $p->price;
 
@@ -49,7 +55,7 @@ class ProductResource extends JsonResource
                         'name' => $p->name,
                         'code' => $p->code,
                         'price' => $price,
-                        'formatted_price' => number_format($price, 2, ',', '.') . ' €',
+                        'formatted_price' => number_format($price, 2, ',', '.').' €',
                         'image_url' => $p->images->first()?->url,
                         'variant_label' => $variantLabel,
                     ];

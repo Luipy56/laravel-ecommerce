@@ -9,17 +9,17 @@ use Illuminate\Support\Facades\DB;
 class PackDetailSeeder extends Seeder
 {
     /**
-     * Seeds pack_items. Productes segons enunciat: Cilindres, Escut, Segon pany.
+     * Seeds pack_items (demo catalog in Spanish).
      */
     public function run(): void
     {
         $items = [
-            ['pack_id' => 1, 'product_code' => 'CIL-30'],
-            ['pack_id' => 1, 'product_code' => 'ESC-EST'],
-            ['pack_id' => 2, 'product_code' => 'CIL-SEG'],
-            ['pack_id' => 2, 'product_code' => 'ESC-SEG'],
-            ['pack_id' => 3, 'product_code' => 'SP-EST'],
-            ['pack_id' => 3, 'product_code' => 'CIL-40'],
+            ['pack_id' => 1, 'product_code' => '192 evoK1C 3030 N'],
+            ['pack_id' => 1, 'product_code' => 'ESC-ABUS-PLATA'],
+            ['pack_id' => 2, 'product_code' => '192 evoK1D 3040 N'],
+            ['pack_id' => 2, 'product_code' => 'ESC-DISEC-BD280-PLATA'],
+            ['pack_id' => 3, 'product_code' => 'SP-MC-EZC-OFR'],
+            ['pack_id' => 3, 'product_code' => '192 evoK1C 3040 N'],
         ];
 
         $rows = [];

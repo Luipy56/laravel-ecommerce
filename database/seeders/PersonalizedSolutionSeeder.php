@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\DB;
 class PersonalizedSolutionSeeder extends Seeder
 {
     /**
-     * Seeds personalized_solutions. Can be independent of client and order (client_id, order_id null).
-     * status: pending_review | reviewed | client_contacted.
+     * Seeds personalized_solutions (demo copy in Spanish).
      */
     public function run(): void
     {
@@ -19,12 +18,12 @@ class PersonalizedSolutionSeeder extends Seeder
                 'order_id' => null,
                 'email' => 'maria.garcia@example.com',
                 'phone' => '612345678',
-                'address_street' => 'Carrer Major 12',
+                'address_street' => 'Calle Mayor 12',
                 'address_city' => 'Barcelona',
                 'address_province' => 'Barcelona',
                 'address_postal_code' => '08001',
                 'address_note' => null,
-                'problem_description' => 'Necessito una porta que s\'adapti a un marc irregular.',
+                'problem_description' => 'Necesito una puerta que se adapte a un marco irregular.',
                 'resolution' => null,
                 'status' => 'pending_review',
                 'is_active' => true,
@@ -34,12 +33,12 @@ class PersonalizedSolutionSeeder extends Seeder
                 'order_id' => null,
                 'email' => 'joan.martinez@example.com',
                 'phone' => '698765432',
-                'address_street' => 'Plaça Catalunya 5',
+                'address_street' => 'Plaza de Cataluña 5',
                 'address_city' => 'Barcelona',
                 'address_province' => 'Barcelona',
                 'address_postal_code' => '08002',
                 'address_note' => null,
-                'problem_description' => 'Consulta sobre finestres per a un balcó corbat.',
+                'problem_description' => 'Consulta sobre ventanas para un balcón en curva.',
                 'resolution' => null,
                 'status' => 'pending_review',
                 'is_active' => true,
@@ -54,8 +53,8 @@ class PersonalizedSolutionSeeder extends Seeder
                 'address_province' => null,
                 'address_postal_code' => null,
                 'address_note' => null,
-                'problem_description' => 'Mida especial per persiana a terrassa.',
-                'resolution' => 'S\'ha recomanat el model X amb mida a mida.',
+                'problem_description' => 'Medida especial para persiana en terraza.',
+                'resolution' => 'Se ha recomendado el modelo X a medida.',
                 'status' => 'client_contacted',
                 'is_active' => true,
             ],

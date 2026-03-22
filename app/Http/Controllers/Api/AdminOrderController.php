@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\InstallationPriceWasAssigned;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderLine;
@@ -25,7 +26,7 @@ class AdminOrderController extends Controller
             if (is_numeric($term)) {
                 $query->where('id', (int) $term);
             } else {
-                $term = '%' . $term . '%';
+                $term = '%'.$term.'%';
                 $query->whereHas('client', fn ($q) => $q->where('login_email', 'like', $term));
             }
         }
@@ -38,12 +39,19 @@ class AdminOrderController extends Controller
         if ($request->filled('status')) {
             $query->where('kind', Order::KIND_ORDER)->where('status', (string) $request->input('status'));
         }
+        if ($request->boolean('installation_pending')) {
+            $query->where('kind', Order::KIND_ORDER)
+                ->where('installation_requested', true)
+                ->where('installation_status', Order::INSTALLATION_PENDING);
+        }
 
         $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
         $orders = $query->paginate($perPage);
 
         $data = $orders->getCollection()->map(function (Order $o) {
-            $total = $o->lines->sum(fn ($l) => (float) $l->line_total);
+            $o->loadMissing('lines');
+            $total = $o->grand_total;
+
             return [
                 'id' => $o->id,
                 'kind' => $o->kind,
@@ -52,6 +60,9 @@ class AdminOrderController extends Controller
                 'client_login_email' => $o->relationLoaded('client') && $o->client ? $o->client->login_email : null,
                 'order_date' => $o->order_date?->toIso8601String(),
                 'shipping_date' => $o->shipping_date?->toIso8601String(),
+                'installation_requested' => (bool) $o->installation_requested,
+                'installation_status' => $o->installation_status,
+                'installation_price' => $o->installation_price !== null ? (float) $o->installation_price : null,
                 'total' => round($total, 2),
                 'lines_count' => $o->lines->count(),
                 'created_at' => $o->created_at?->toIso8601String(),
@@ -90,6 +101,7 @@ class AdminOrderController extends Controller
             } elseif ($l->pack && $l->pack->relationLoaded('images') && $l->pack->images->isNotEmpty()) {
                 $imageUrl = $l->pack->images->first()->url;
             }
+
             return [
                 'id' => $l->id,
                 'product_id' => $l->product_id,
@@ -101,15 +113,14 @@ class AdminOrderController extends Controller
                 'quantity' => $l->quantity,
                 'unit_price' => (float) $l->unit_price,
                 'offer' => (float) ($l->offer ?? 0),
-                'is_installation_requested' => (bool) $l->is_installation_requested,
-                'installation_price' => $l->installation_price !== null ? (float) $l->installation_price : null,
                 'extra_keys_qty' => (int) ($l->extra_keys_qty ?? 0),
                 'extra_key_unit_price' => $l->extra_key_unit_price !== null ? (float) $l->extra_key_unit_price : null,
                 'line_total' => (float) $l->line_total,
             ];
         })->values()->all();
 
-        $total = $order->lines->sum(fn ($l) => (float) $l->line_total);
+        $order->loadMissing('lines');
+        $total = $order->grand_total;
 
         return response()->json([
             'success' => true,
@@ -125,6 +136,10 @@ class AdminOrderController extends Controller
                 'order_date' => $order->order_date?->toIso8601String(),
                 'shipping_date' => $order->shipping_date?->toIso8601String(),
                 'shipping_price' => $order->shipping_price !== null ? (float) $order->shipping_price : null,
+                'installation_requested' => (bool) $order->installation_requested,
+                'installation_status' => $order->installation_status,
+                'installation_price' => $order->installation_price !== null ? (float) $order->installation_price : null,
+                'lines_subtotal' => $order->lines_subtotal,
                 'lines' => $lines,
                 'addresses' => $order->addresses->map(fn ($a) => [
                     'id' => $a->id,
@@ -138,8 +153,13 @@ class AdminOrderController extends Controller
                 'payments' => $order->payments->map(fn ($p) => [
                     'id' => $p->id,
                     'amount' => (float) $p->amount,
+                    'currency' => $p->currency,
+                    'status' => $p->status,
+                    'gateway' => $p->gateway,
                     'payment_method' => $p->payment_method,
                     'gateway_reference' => $p->gateway_reference,
+                    'failure_code' => $p->failure_code,
+                    'failure_message' => $p->failure_message,
                     'paid_at' => $p->paid_at?->toIso8601String(),
                 ])->values()->all(),
                 'total' => round($total, 2),
@@ -153,11 +173,17 @@ class AdminOrderController extends Controller
     {
         $rules = [
             'shipping_date' => ['nullable', 'date'],
-            'shipping_price' => ['nullable', 'numeric', 'min:0'],
+            'installation_price' => ['nullable', 'numeric', 'min:0'],
+            'installation_status' => ['nullable', 'string', 'in:'.implode(',', [
+                Order::INSTALLATION_PENDING,
+                Order::INSTALLATION_PRICED,
+                Order::INSTALLATION_REJECTED,
+            ])],
         ];
         if ($order->kind === Order::KIND_ORDER) {
-            $rules['status'] = ['required', 'string', 'in:' . implode(',', [
+            $rules['status'] = ['required', 'string', 'in:'.implode(',', [
                 Order::STATUS_PENDING,
+                Order::STATUS_AWAITING_INSTALLATION_PRICE,
                 Order::STATUS_IN_TRANSIT,
                 Order::STATUS_SENT,
                 Order::STATUS_INSTALLATION_PENDING,
@@ -166,16 +192,55 @@ class AdminOrderController extends Controller
         }
         $validated = $request->validate($rules);
 
+        $previousInstallationStatus = $order->installation_status;
+
         if ($order->kind === Order::KIND_ORDER && isset($validated['status'])) {
             $order->status = $validated['status'];
         }
         if (array_key_exists('shipping_date', $validated)) {
             $order->shipping_date = $validated['shipping_date'] ? \Carbon\Carbon::parse($validated['shipping_date']) : null;
         }
-        if (array_key_exists('shipping_price', $validated)) {
-            $order->shipping_price = $validated['shipping_price'] !== null && $validated['shipping_price'] !== '' ? $validated['shipping_price'] : null;
+        if ($order->kind === Order::KIND_ORDER) {
+            $order->shipping_price = Order::SHIPPING_FLAT_EUR;
         }
+
+        if ($order->installation_requested && $order->kind === Order::KIND_ORDER) {
+            if (array_key_exists('installation_price', $validated)) {
+                $order->installation_price = $validated['installation_price'] !== null && $validated['installation_price'] !== ''
+                    ? $validated['installation_price']
+                    : null;
+            }
+            if (array_key_exists('installation_status', $validated) && $validated['installation_status'] !== null) {
+                $order->installation_status = $validated['installation_status'];
+            }
+
+            if ($order->installation_status === Order::INSTALLATION_REJECTED) {
+                $order->installation_price = null;
+                if ($order->status === Order::STATUS_AWAITING_INSTALLATION_PRICE) {
+                    $order->status = Order::STATUS_PENDING;
+                }
+            } elseif ($order->installation_price !== null) {
+                $order->installation_status = Order::INSTALLATION_PRICED;
+                if ($order->status === Order::STATUS_AWAITING_INSTALLATION_PRICE) {
+                    $order->status = Order::STATUS_PENDING;
+                }
+            } elseif ($order->installation_price === null && $order->installation_status === Order::INSTALLATION_PRICED) {
+                $order->installation_status = Order::INSTALLATION_PENDING;
+            }
+        }
+
         $order->save();
+
+        $shouldDispatchInstallationMail = $order->installation_requested
+            && $order->installation_status === Order::INSTALLATION_PRICED
+            && $order->installation_price !== null
+            && $previousInstallationStatus !== Order::INSTALLATION_PRICED;
+
+        if ($shouldDispatchInstallationMail) {
+            InstallationPriceWasAssigned::dispatch($order->fresh(['client', 'lines']));
+        }
+
+        $order->loadMissing('lines');
 
         return response()->json([
             'success' => true,
@@ -186,6 +251,10 @@ class AdminOrderController extends Controller
                 'order_date' => $order->order_date?->toIso8601String(),
                 'shipping_date' => $order->shipping_date?->toIso8601String(),
                 'shipping_price' => $order->shipping_price !== null ? (float) $order->shipping_price : null,
+                'installation_requested' => (bool) $order->installation_requested,
+                'installation_status' => $order->installation_status,
+                'installation_price' => $order->installation_price !== null ? (float) $order->installation_price : null,
+                'total' => round($order->grand_total, 2),
             ],
         ]);
     }

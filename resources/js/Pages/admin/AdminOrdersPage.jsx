@@ -5,11 +5,12 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
 const KINDS = ['cart', 'order', 'like'];
-const STATUSES = ['pending', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
+const STATUSES = ['pending', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
 
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
+    case 'awaiting_installation_price': return 'badge-info text-base-content';
     case 'in_transit': return 'badge-success';
     case 'sent': return 'badge-success';
     case 'installation_pending': return 'badge-warning';
@@ -29,6 +30,7 @@ export default function AdminOrdersPage() {
   const [searchDebounce, setSearchDebounce] = useState('');
   const [kindFilter, setKindFilter] = useState('order');
   const [statusFilter, setStatusFilter] = useState('');
+  const [installationPendingOnly, setInstallationPendingOnly] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -37,6 +39,7 @@ export default function AdminOrdersPage() {
       if (searchDebounce) params.search = searchDebounce;
       if (kindFilter) params.kind = kindFilter;
       if (statusFilter) params.status = statusFilter;
+      if (installationPendingOnly) params.installation_pending = 1;
       const { data } = await api.get('admin/orders', { params });
       if (data.success) {
         setOrders(data.data || []);
@@ -48,7 +51,7 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [navigate, page, searchDebounce, kindFilter, statusFilter]);
+  }, [navigate, page, searchDebounce, kindFilter, statusFilter, installationPendingOnly]);
 
   useEffect(() => {
     fetchOrders();
@@ -56,7 +59,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [searchDebounce, kindFilter, statusFilter]);
+  }, [searchDebounce, kindFilter, statusFilter, installationPendingOnly]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
@@ -107,6 +110,17 @@ export default function AdminOrdersPage() {
               <option key={s} value={s}>{t(`admin.orders.status_${s}`)}</option>
             ))}
           </select>
+        </label>
+        <label className="flex items-center gap-2 shrink-0 cursor-pointer">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm checkbox-primary"
+            checked={installationPendingOnly}
+            onChange={(e) => setInstallationPendingOnly(e.target.checked)}
+            disabled={kindFilter !== 'order'}
+            aria-label={t('admin.orders.filter_installation_pending')}
+          />
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.orders.filter_installation_pending')}</span>
         </label>
       </div>
 

@@ -19,7 +19,10 @@ return new class extends Migration
             $table->string('status', 50)->nullable()->comment('Only when kind=order; null when cart or like');
             $table->timestamp('order_date')->nullable()->comment('Null while cart; set on checkout');
             $table->timestamp('shipping_date')->nullable();
-            $table->decimal('shipping_price', 10, 2)->nullable();
+            $table->decimal('shipping_price', 10, 2)->nullable()->comment('Stored as flat rate; app uses Order::SHIPPING_FLAT_EUR for totals');
+            $table->boolean('installation_requested')->default(false)->comment('Client wants installation for whole order; price set by admin');
+            $table->decimal('installation_price', 10, 2)->nullable()->comment('Set by admin; one fee per order');
+            $table->string('installation_status', 32)->nullable()->comment('pending, priced, rejected; null if installation not requested');
             $table->timestamps();
         });
     }

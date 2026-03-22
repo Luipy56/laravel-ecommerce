@@ -15,8 +15,6 @@ class Pack extends Model
         'price',
         'is_trending',
         'is_active',
-        'is_installable',
-        'installation_price',
         'contains_keys',
     ];
 
@@ -24,10 +22,8 @@ class Pack extends Model
     {
         return [
             'price' => 'decimal:2',
-            'installation_price' => 'decimal:2',
             'is_trending' => 'boolean',
             'is_active' => 'boolean',
-            'is_installable' => 'boolean',
             'contains_keys' => 'boolean',
         ];
     }

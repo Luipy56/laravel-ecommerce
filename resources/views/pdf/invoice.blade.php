@@ -49,6 +49,17 @@
             @endforeach
         </tbody>
     </table>
-    <p class="total text-right">{{ __('shop.total') }}: {{ number_format($order->lines->sum(fn($l) => $l->line_total), 2, ',', '.') }} €</p>
+    @php
+        $linesSubtotal = $order->lines->sum(fn ($l) => $l->line_total);
+        $grandTotal = $order->grand_total;
+    @endphp
+    <p class="text-right">{{ __('shop.subtotal_products') }}: {{ number_format($linesSubtotal, 2, ',', '.') }} €</p>
+    @if($order->kind === \App\Models\Order::KIND_ORDER)
+        <p class="text-right">{{ __('shop.invoice_shipping_line') }}: {{ number_format(\App\Models\Order::SHIPPING_FLAT_EUR, 2, ',', '.') }} €</p>
+    @endif
+    @if($order->installation_requested && $order->installation_status === \App\Models\Order::INSTALLATION_PRICED && $order->installation_price !== null)
+        <p class="text-right">{{ __('shop.invoice_installation_line') }}: {{ number_format($order->installation_price, 2, ',', '.') }} €</p>
+    @endif
+    <p class="total text-right">{{ __('shop.total') }}: {{ number_format($grandTotal, 2, ',', '.') }} €</p>
 </body>
 </html>

@@ -108,6 +108,7 @@ export default function PackDetailPage() {
                       key={i}
                       type="button"
                       onClick={() => setSelectedImageIndex(i)}
+                      aria-label={t('shop.product.select_image', { n: i + 1, m: imageUrls.length })}
                       className={`w-14 h-14 rounded-lg overflow-hidden border-2 shrink-0 transition-all ${
                         selectedImageIndex === i ? 'border-primary ring-2 ring-primary/30' : 'border-base-300 hover:border-base-content/30'
                       }`}

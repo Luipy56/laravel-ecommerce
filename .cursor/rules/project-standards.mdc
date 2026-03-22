@@ -9,8 +9,9 @@ alwaysApply: true
 
 - **Do not create new migrations** to add, delete, or modify columns on existing tables.
 - **Only add migrations** for entirely new tables.
-- To change an existing table: **edit the existing migration file**, then run `php artisan migrate:fresh` (or clear cache) and verify.
+- To change an existing table: **edit the existing migration file**, then run **`php artisan migrate:fresh --seed`** and verify **exit code 0** (see **`.cursor/rules/testing-verification.mdc`**).
 - **Whenever migrations are updated**, update **`trash/diagramZero.dbml`** so the schema diagram stays in sync with the database (tables, columns, notes).
+- **Seeder changes** (new codes, FKs, order in `DatabaseSeeder`) must be validated with the same **`migrate:fresh --seed`** run.
 
 ## Language and locale
 

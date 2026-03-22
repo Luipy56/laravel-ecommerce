@@ -20,8 +20,6 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('unit_price', 10, 2)->nullable()->comment('Set at payment time from current product/pack price; null while in cart');
             $table->decimal('offer', 10, 2)->nullable()->comment('Discount amount applied');
-            $table->boolean('is_installation_requested')->default(false);
-            $table->decimal('installation_price', 10, 2)->nullable()->comment('Optional installation price for this line');
             $table->boolean('keys_all_same')->default(false)->comment('When pack contains_keys: true = client chose all same key, false = all different (or N/A)');
             $table->integer('extra_keys_qty')->default(0)->comment('Number of extra keys requested');
             $table->decimal('extra_key_unit_price', 10, 2)->nullable()->comment('Price per extra key at order time');

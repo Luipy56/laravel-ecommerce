@@ -9,12 +9,15 @@ export class Product {
     description,
     price,
     stock,
+    weight_kg = null,
+    is_double_clutch = false,
+    has_card = false,
+    security_level = null,
+    competitor_url = null,
     category,
     images = [],
     features = [],
     variant_options = [],
-    is_installable = false,
-    installation_price = null,
     is_extra_keys_available = false,
     extra_key_unit_price = null,
   } = {}) {
@@ -24,12 +27,15 @@ export class Product {
     this.description = description;
     this.price = Number(price) || 0;
     this.stock = Number(stock) || 0;
+    this.weight_kg = weight_kg != null && weight_kg !== '' ? Number(weight_kg) : null;
+    this.is_double_clutch = Boolean(is_double_clutch);
+    this.has_card = Boolean(has_card);
+    this.security_level = security_level || null;
+    this.competitor_url = competitor_url && String(competitor_url).trim() ? String(competitor_url).trim() : null;
     this.category = category;
     this.images = Array.isArray(images) ? images : [];
     this.features = Array.isArray(features) ? features : [];
     this.variant_options = Array.isArray(variant_options) ? variant_options : [];
-    this.is_installable = Boolean(is_installable);
-    this.installation_price = installation_price != null ? Number(installation_price) : null;
     this.is_extra_keys_available = Boolean(is_extra_keys_available);
     this.extra_key_unit_price = extra_key_unit_price != null ? Number(extra_key_unit_price) : null;
   }
@@ -46,11 +52,6 @@ export class Product {
 
   get formattedPrice() {
     return new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(this.price);
-  }
-
-  get formattedInstallationPrice() {
-    if (this.installation_price == null) return null;
-    return new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(this.installation_price);
   }
 
   get formattedExtraKeyPrice() {
@@ -72,11 +73,14 @@ export class Product {
       description: data?.description,
       price: data?.price,
       stock: data?.stock,
+      weight_kg: data?.weight_kg,
+      is_double_clutch: data?.is_double_clutch,
+      has_card: data?.has_card,
+      security_level: data?.security_level,
+      competitor_url: data?.competitor_url,
       category: data?.category,
       images: data?.images ?? [],
       features: data?.features ?? [],
-      is_installable: data?.is_installable,
-      installation_price: data?.installation_price,
       is_extra_keys_available: data?.is_extra_keys_available,
       extra_key_unit_price: data?.extra_key_unit_price,
       variant_options: data?.variant_options ?? [],

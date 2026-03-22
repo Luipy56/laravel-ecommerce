@@ -8,7 +8,7 @@ import { IconCart, IconMenu } from './icons';
 const SCROLL_THRESHOLD = 10;   // px: below this, navbar is always visible
 const SCROLL_DELTA = 5;        // px: min scroll movement to consider direction
 
-function CartDropTarget({ to, className, children }) {
+function CartDropTarget({ to, className, children, ariaLabel, title }) {
   const { addLine } = useCart();
   const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; };
   const handleDrop = (e) => {
@@ -19,7 +19,14 @@ function CartDropTarget({ to, className, children }) {
     if (packId) addLine(null, parseInt(packId, 10), 1);
   };
   return (
-    <Link to={to} className={className} onDragOver={handleDragOver} onDrop={handleDrop}>
+    <Link
+      to={to}
+      className={className}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      aria-label={ariaLabel}
+      title={title}
+    >
       {children}
     </Link>
   );
@@ -100,9 +107,9 @@ export default function Navbar() {
             <Link
               to="/"
               className="btn btn-ghost text-lg sm:text-xl min-w-0 px-1 sm:px-2 truncate shrink-0"
-              title="Serralleria Solidària"
+              title={t('shop.brand_name')}
             >
-              <span className="truncate">Serralleria Solidària</span>
+              <span className="truncate">{t('shop.brand_name')}</span>
             </Link>
             <Link to="/products" className="btn btn-ghost hidden sm:inline-flex shrink-0">{t('shop.products')}</Link>
             <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex shrink-0">{t('shop.custom_solution')}</Link>
@@ -130,7 +137,12 @@ export default function Navbar() {
                 <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
               </ul>
             </div>
-            <CartDropTarget to="/cart" className="btn btn-ghost btn-circle btn-sm indicator">
+            <CartDropTarget
+              to="/cart"
+              className="btn btn-ghost btn-circle btn-sm indicator"
+              ariaLabel={t('shop.cart')}
+              title={t('shop.cart')}
+            >
               <span className="indicator-item badge badge-primary badge-sm" id="cart-count">0</span>
               <IconCart className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
             </CartDropTarget>

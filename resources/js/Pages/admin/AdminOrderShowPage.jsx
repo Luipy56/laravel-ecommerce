@@ -9,6 +9,7 @@ const PLACEHOLDER_IMAGE = '/images/dummy.jpg';
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
+    case 'awaiting_installation_price': return 'badge-info text-base-content';
     case 'in_transit': return 'badge-success';
     case 'sent': return 'badge-success';
     case 'installation_pending': return 'badge-warning';
@@ -152,6 +153,17 @@ export default function AdminOrderShowPage() {
               {order.order_date && <div><dt className="text-sm text-base-content/70">{t('admin.orders.order_date')}</dt><dd>{new Date(order.order_date).toLocaleString()}</dd></div>}
               {order.shipping_date && <div><dt className="text-sm text-base-content/70">{t('admin.orders.shipping_date')}</dt><dd>{new Date(order.shipping_date).toLocaleString()}</dd></div>}
               {order.shipping_price != null && <div><dt className="text-sm text-base-content/70">{t('admin.orders.shipping_price')}</dt><dd>{Number(order.shipping_price).toFixed(2)} €</dd></div>}
+              {isOrder && order.installation_requested && (
+                <>
+                  <div><dt className="text-sm text-base-content/70">{t('admin.orders.installation')}</dt><dd>{t('common.yes')}</dd></div>
+                  {order.installation_status && (
+                    <div><dt className="text-sm text-base-content/70">{t('admin.orders.installation_status_label')}</dt><dd>{t(`admin.orders.install_status_${order.installation_status}`)}</dd></div>
+                  )}
+                  {order.installation_price != null && (
+                    <div><dt className="text-sm text-base-content/70">{t('admin.orders.installation_fee_label')}</dt><dd>{Number(order.installation_price).toFixed(2)} €</dd></div>
+                  )}
+                </>
+              )}
             </dl>
           </div>
         </div>
@@ -199,7 +211,6 @@ export default function AdminOrderShowPage() {
                       <th className="text-end">{t('admin.orders.line_unit_price')}</th>
                       <th className="text-end">{t('admin.orders.line_extra_keys_price')}</th>
                       <th className="text-center w-24 min-w-24">{t('admin.orders.keys_same')}</th>
-                      <th className="text-end">{t('admin.orders.line_installation_price')}</th>
                       <th className="text-end">{t('admin.orders.line_total')}</th>
                     </tr>
                   </thead>
@@ -236,10 +247,9 @@ export default function AdminOrderShowPage() {
                           </td>
                           <td>
                             <span className="font-medium">{lineDisplayName(line)}</span>
-                            {(line.is_installation_requested || line.extra_keys_qty > 0) && (
+                            {line.extra_keys_qty > 0 && (
                               <div className="flex flex-wrap gap-1 mt-0.5">
-                                {line.is_installation_requested && <span className="badge badge-sm badge-ghost">{t('admin.orders.installation')}</span>}
-                                {line.extra_keys_qty > 0 && <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>}
+                                <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
                               </div>
                             )}
                           </td>
@@ -249,7 +259,6 @@ export default function AdminOrderShowPage() {
                           <td className="text-center w-24 min-w-24">
                             {line.pack?.contains_keys ? (line.keys_all_same ? t('common.yes') : t('common.no')) : ''}
                           </td>
-                          <td className="text-end tabular-nums">{line.is_installation_requested && line.installation_price != null ? `${Number(line.installation_price).toFixed(2)} €` : ''}</td>
                           <td className="text-end font-medium tabular-nums">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
                         </tr>
                       );
@@ -278,10 +287,9 @@ export default function AdminOrderShowPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium truncate">{lineDisplayName(line)}</p>
-                        {(line.is_installation_requested || line.extra_keys_qty > 0) && (
+                        {line.extra_keys_qty > 0 && (
                           <div className="flex flex-wrap gap-1 mt-0.5">
-                            {line.is_installation_requested && <span className="badge badge-sm badge-ghost">{t('admin.orders.installation')}</span>}
-                            {line.extra_keys_qty > 0 && <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>}
+                            <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
                           </div>
                         )}
                         {line.pack?.contains_keys && (
@@ -329,21 +337,35 @@ export default function AdminOrderShowPage() {
               <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
                 <thead>
                   <tr>
+                    <th>{t('admin.orders.payment_status')}</th>
+                    <th>{t('admin.orders.payment_gateway')}</th>
                     <th>{t('admin.orders.payment_method')}</th>
                     <th className="text-end">{t('admin.orders.payment_amount')}</th>
                     <th>{t('admin.orders.payment_paid_at')}</th>
                     <th>{t('admin.orders.payment_reference')}</th>
+                    <th>{t('admin.orders.payment_failure')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {order.payments.map((p) => (
-                    <tr key={p.id}>
-                      <td>{t(`admin.orders.payment_${p.payment_method}`)}</td>
-                      <td className="text-end font-medium">{Number(p.amount).toFixed(2)} €</td>
-                      <td>{p.paid_at ? new Date(p.paid_at).toLocaleString() : ''}</td>
-                      <td className="font-mono text-sm">{p.gateway_reference ?? ''}</td>
-                    </tr>
-                  ))}
+                  {order.payments.map((p) => {
+                    const methodKey = `admin.orders.payment_${p.payment_method}`;
+                    const methodLabel = t(methodKey) !== methodKey ? t(methodKey) : (p.payment_method ?? '');
+                    const statusKey = p.status ? `admin.orders.payment_status_${p.status}` : '';
+                    const statusLabel = statusKey && t(statusKey) !== statusKey ? t(statusKey) : (p.status ?? '');
+                    return (
+                      <tr key={p.id}>
+                        <td><span className="badge badge-sm badge-ghost whitespace-nowrap">{statusLabel}</span></td>
+                        <td className="font-mono text-xs">{p.gateway ?? ''}</td>
+                        <td>{methodLabel}</td>
+                        <td className="text-end font-medium tabular-nums">{Number(p.amount).toFixed(2)} {p.currency === 'EUR' ? '€' : p.currency}</td>
+                        <td>{p.paid_at ? new Date(p.paid_at).toLocaleString() : ''}</td>
+                        <td className="font-mono text-sm max-w-[12rem] truncate" title={p.gateway_reference ?? ''}>{p.gateway_reference ?? ''}</td>
+                        <td className="text-sm max-w-xs">
+                          {[p.failure_code, p.failure_message].filter(Boolean).join(' · ')}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

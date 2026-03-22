@@ -18,8 +18,6 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->boolean('is_trending')->default(false)->comment('Trending pack');
             $table->boolean('is_active')->default(true)->comment('Disable without deleting');
-            $table->boolean('is_installable')->default(false)->comment('Pack can include installation');
-            $table->decimal('installation_price', 10, 2)->nullable()->comment('Installation price when is_installable');
             $table->boolean('contains_keys')->default(false)->comment('Pack contains keys (e.g. 3 locks); client can choose at cart: all same key or all different');
             $table->timestamps();
         });

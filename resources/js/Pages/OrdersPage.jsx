@@ -50,7 +50,7 @@ export default function OrdersPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">{Number(o.total).toFixed(2)} €</span>
+                    <span className="font-semibold">{Number(o.grand_total ?? o.total ?? 0).toFixed(2)} €</span>
                     <Link to={`/orders/${o.id}`} className="btn btn-ghost btn-sm">{t('common.detail')}</Link>
                     <a href={`/api/v1/orders/${o.id}/invoice?locale=${i18n.language || 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
                       {t('shop.invoice')}

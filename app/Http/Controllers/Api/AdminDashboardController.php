@@ -22,6 +22,7 @@ class AdminDashboardController extends Controller
             ->distinct()
             ->orderBy('postal_code')
             ->pluck('postal_code');
+
         return response()->json(['success' => true, 'data' => $codes->values()->all()]);
     }
 
@@ -36,7 +37,10 @@ class AdminDashboardController extends Controller
         $query = Order::query()
             ->where('kind', Order::KIND_ORDER)
             ->whereNotNull('order_date')
-            ->whereIn(DB::raw('YEAR(order_date)'), [$currentYear, $previousYear]);
+            ->where(function ($q) use ($currentYear, $previousYear) {
+                $q->whereYear('order_date', $currentYear)
+                    ->orWhereYear('order_date', $previousYear);
+            });
 
         if ($postalCode !== '') {
             $query->whereHas('addresses', function ($q) use ($postalCode) {
@@ -105,6 +109,7 @@ class AdminDashboardController extends Controller
             'name' => $products->get($l->product_id)?->name ?? '-',
             'quantity' => (int) $l->qty,
         ]);
+
         return response()->json(['success' => true, 'data' => $data]);
     }
 
@@ -112,6 +117,7 @@ class AdminDashboardController extends Controller
     public function lowStock(): JsonResponse
     {
         $data = Product::query()->where('is_active', true)->orderBy('stock')->limit(10)->get(['id', 'name', 'stock', 'code']);
+
         return response()->json(['success' => true, 'data' => $data]);
     }
 }

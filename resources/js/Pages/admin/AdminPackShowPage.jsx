@@ -111,7 +111,7 @@ export default function AdminPackShowPage() {
                               <div className="mask mask-squircle w-10 h-10 bg-base-300">
                                 <img
                                   src={p?.image_url || PLACEHOLDER_IMAGE}
-                                  alt=""
+                                  alt={p?.name ? t('admin.packs.product_image_alt', { name: p.name }) : ''}
                                   className="object-cover w-full h-full"
                                 />
                               </div>
@@ -146,7 +146,7 @@ export default function AdminPackShowPage() {
                           <div className="mask mask-squircle w-14 h-14 bg-base-300">
                             <img
                               src={p?.image_url || PLACEHOLDER_IMAGE}
-                              alt=""
+                              alt={p?.name ? t('admin.packs.product_image_alt', { name: p.name }) : ''}
                               className="object-cover w-full h-full"
                             />
                           </div>
@@ -184,9 +184,13 @@ export default function AdminPackShowPage() {
           <div className="card-body">
             <h2 className="font-semibold text-lg border-b border-base-300 pb-2 mb-4">{t('admin.products.images')}</h2>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-              {pack.images.map((img) => (
+              {pack.images.map((img, i) => (
                 <figure key={img.id} className="rounded-lg overflow-hidden border border-base-300 bg-base-200">
-                  <img src={img.url} alt="" className="w-full h-40 object-cover" />
+                  <img
+                    src={img.url}
+                    alt={t('admin.packs.image_alt', { name: pack.name || '', index: i + 1 })}
+                    className="w-full h-40 object-cover"
+                  />
                 </figure>
               ))}
             </div>

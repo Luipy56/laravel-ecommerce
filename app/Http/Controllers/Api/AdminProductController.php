@@ -22,8 +22,8 @@ class AdminProductController extends Controller
         if ($request->filled('search')) {
             $term = $request->get('search');
             $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', '%' . $term . '%')
-                    ->orWhere('code', 'like', '%' . $term . '%');
+                $q->where('name', 'like', '%'.$term.'%')
+                    ->orWhere('code', 'like', '%'.$term.'%');
             });
         }
         if ($request->has('is_active')) {
@@ -46,6 +46,16 @@ class AdminProductController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        if ($request->input('competitor_url') === '') {
+            $request->merge(['competitor_url' => null]);
+        }
+        if ($request->input('security_level') === '') {
+            $request->merge(['security_level' => null]);
+        }
+        if ($request->input('discount_percent') === '' || $request->input('discount_percent') === null) {
+            $request->merge(['discount_percent' => null]);
+        }
+
         $validated = $request->validate([
             'category_id' => ['required', 'exists:product_categories,id'],
             'variant_group_id' => ['nullable', 'exists:product_variant_groups,id'],
@@ -53,9 +63,14 @@ class AdminProductController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'purchase_price' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
-            'is_installable' => ['boolean'],
-            'installation_price' => ['nullable', 'numeric', 'min:0'],
+            'weight_kg' => ['nullable', 'numeric', 'min:0'],
+            'is_double_clutch' => ['boolean'],
+            'has_card' => ['boolean'],
+            'security_level' => ['nullable', 'string', 'in:standard,high,very_high'],
+            'competitor_url' => ['nullable', 'string', 'max:2048', 'url'],
             'is_extra_keys_available' => ['boolean'],
             'extra_key_unit_price' => ['nullable', 'numeric', 'min:0'],
             'is_featured' => ['boolean'],
@@ -68,13 +83,19 @@ class AdminProductController extends Controller
         ]);
 
         $defaults = [
-            'is_installable' => false,
+            'is_double_clutch' => false,
+            'has_card' => false,
             'is_extra_keys_available' => false,
             'is_featured' => false,
             'is_trending' => false,
             'is_active' => true,
+            'discount_percent' => null,
         ];
-        $product = Product::create(array_merge($defaults, collect($validated)->except(['feature_ids', 'images'])->all()));
+        $row = array_merge($defaults, collect($validated)->except(['feature_ids', 'images'])->all());
+        if (! array_key_exists('discount_percent', $row) || $row['discount_percent'] === '' || $row['discount_percent'] === null) {
+            $row['discount_percent'] = null;
+        }
+        $product = Product::create($row);
         $product->features()->sync($validated['feature_ids'] ?? []);
 
         if ($request->hasFile('images')) {
@@ -117,7 +138,7 @@ class AdminProductController extends Controller
         $maxSort = (int) ProductImage::where('product_id', $product->id)->max('sort_order');
         foreach ($files as $file) {
             $maxSort++;
-            $path = $file->store('products/' . $product->id, 'uploads');
+            $path = $file->store('products/'.$product->id, 'uploads');
             ProductImage::create([
                 'product_id' => $product->id,
                 'storage_path' => $path,
@@ -143,16 +164,31 @@ class AdminProductController extends Controller
 
     public function update(Request $request, Product $product): JsonResponse
     {
+        if ($request->input('competitor_url') === '') {
+            $request->merge(['competitor_url' => null]);
+        }
+        if ($request->input('security_level') === '') {
+            $request->merge(['security_level' => null]);
+        }
+        if ($request->input('discount_percent') === '' || $request->input('discount_percent') === null) {
+            $request->merge(['discount_percent' => null]);
+        }
+
         $validated = $request->validate([
             'category_id' => ['required', 'exists:product_categories,id'],
             'variant_group_id' => ['nullable', 'exists:product_variant_groups,id'],
-            'code' => ['nullable', 'string', 'max:50', 'unique:products,code,' . $product->id],
+            'code' => ['nullable', 'string', 'max:50', 'unique:products,code,'.$product->id],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'purchase_price' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
-            'is_installable' => ['boolean'],
-            'installation_price' => ['nullable', 'numeric', 'min:0'],
+            'weight_kg' => ['nullable', 'numeric', 'min:0'],
+            'is_double_clutch' => ['boolean'],
+            'has_card' => ['boolean'],
+            'security_level' => ['nullable', 'string', 'in:standard,high,very_high'],
+            'competitor_url' => ['nullable', 'string', 'max:2048', 'url'],
             'is_extra_keys_available' => ['boolean'],
             'extra_key_unit_price' => ['nullable', 'numeric', 'min:0'],
             'is_featured' => ['boolean'],

@@ -136,7 +136,7 @@ export default function ProductDetailPage() {
                       backgroundPosition: `${100 * (0.5 - zoomPos.x * ZOOM_SCALE) / (1 - ZOOM_SCALE)}% ${100 * (0.5 - zoomPos.y * ZOOM_SCALE) / (1 - ZOOM_SCALE)}%`,
                     }}
                     role="img"
-                    aria-label=""
+                    aria-label={t('shop.product.image_zoom')}
                   />
                 )}
               </div>
@@ -148,6 +148,7 @@ export default function ProductDetailPage() {
                     key={i}
                     type="button"
                     onClick={() => setSelectedImageIndex(i)}
+                    aria-label={t('shop.product.select_image', { n: i + 1, m: imageUrls.length })}
                     className={`w-14 h-14 rounded-lg overflow-hidden border-2 shrink-0 transition-all ${
                       selectedImageIndex === i ? 'border-primary ring-2 ring-primary/30' : 'border-base-300 hover:border-base-content/30'
                     }`}
@@ -187,7 +188,17 @@ export default function ProductDetailPage() {
                 </span>
               )}
             </div>
-            <p className="text-primary text-xl font-semibold mt-2">{product.formattedPrice}</p>
+            <div className="mt-2 space-y-0.5">
+              {product.formattedListPrice && (
+                <p className="text-lg text-base-content/60 line-through tabular-nums">{product.formattedListPrice}</p>
+              )}
+              <p className="text-primary text-xl font-semibold tabular-nums">{product.formattedPrice}</p>
+              {product.discount_percent > 0 && (
+                <p className="text-sm text-error font-medium">
+                  {t('shop.product.discount_badge')}: −{Math.round(Number(product.discount_percent))}%
+                </p>
+              )}
+            </div>
 
             {hasVariants && (
               <div className="mt-3" role="group" aria-label={t('shop.product.variant')}>
@@ -269,25 +280,50 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {product.features?.length > 0 && (
+            {(product.features?.length > 0 || product.weight_kg != null || product.is_double_clutch || product.has_card || product.security_level || product.competitor_url) && (
               <div className="mt-3">
                 <h2 className="text-sm font-semibold text-base-content/80">{t('shop.product.specifications')}</h2>
-                <ul className="mt-1 space-y-0.5">
-                  {product.features.map((f, i) => (
-                    <li key={i} className="text-sm text-base-content/80">
+                <ul className="mt-1 space-y-0.5 list-none p-0 m-0">
+                  {product.features?.map((f, i) => (
+                    <li key={`f-${i}`} className="text-sm text-base-content/80">
                       <span className="font-medium">{f.type}:</span> {f.value}
                     </li>
                   ))}
+                  {product.weight_kg != null && (
+                    <li className="text-sm text-base-content/80">
+                      <span className="font-medium">{t('shop.product.weight')}:</span>{' '}
+                      {new Intl.NumberFormat('ca-ES', { maximumFractionDigits: 3 }).format(product.weight_kg)} kg
+                    </li>
+                  )}
+                  {product.is_double_clutch && (
+                    <li className="text-sm text-base-content/80">
+                      <span className="font-medium">{t('shop.product.double_clutch')}</span>
+                    </li>
+                  )}
+                  {product.has_card && (
+                    <li className="text-sm text-base-content/80">
+                      <span className="font-medium">{t('shop.product.has_card')}</span>
+                    </li>
+                  )}
+                  {product.security_level && (
+                    <li className="text-sm text-base-content/80">
+                      <span className="font-medium">{t('shop.product.security_level')}:</span>{' '}
+                      {t(`shop.product.security_level.${product.security_level}`)}
+                    </li>
+                  )}
+                  {product.competitor_url && (
+                    <li className="text-sm text-base-content/80">
+                      <a
+                        href={product.competitor_url}
+                        className="link link-primary"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t('shop.product.competitor_link')}
+                      </a>
+                    </li>
+                  )}
                 </ul>
-              </div>
-            )}
-
-            {product.is_installable && (
-              <div className="mt-3 p-3 rounded-lg bg-base-200/80">
-                <p className="text-sm font-medium text-base-content">{t('shop.product.installation_available')}</p>
-                {product.formattedInstallationPrice && (
-                  <p className="text-sm text-primary font-semibold">{t('shop.product.installation_price')}: {product.formattedInstallationPrice}</p>
-                )}
               </div>
             )}
 

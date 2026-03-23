@@ -9,20 +9,30 @@ use Illuminate\Database\Seeder;
 class ProductVariantGroupSeeder extends Seeder
 {
     /**
-     * Create variant groups and assign products (e.g. Cilindre 30mm lengths, Cilindre 40mm lengths).
+     * Variant groups: siblings by tamaño/acabado según el listado (misma referencia, distinto acabado o familia).
      */
     public function run(): void
     {
-        $cil30Lengths = [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100];
-        $cil40Lengths = [40, 50, 60, 70, 80];
+        $groups = [
+            ['name' => 'Securemme K1 30x30 mm (níquel / latón)', 'codes' => ['192 evoK1C 3030 N', '192 evoK1C 3030 L']],
+            ['name' => 'Securemme K1 30x30 mm doble embrague (níquel / latón)', 'codes' => ['192 evoK1D 3030 N', '192 evoK1D 3030 L']],
+            ['name' => 'Securemme K1 30x40 mm (níquel / latón)', 'codes' => ['192 evoK1C 3040 N', '192 evoK1C 3040 L']],
+            ['name' => 'Securemme K1 30x40 mm doble embrague (níquel / latón)', 'codes' => ['192 evoK1D 3040 N', '192 evoK1D 3040 L']],
+            ['name' => 'M&C Move 32x32 mm', 'codes' => ['MC-MOVE-3232-N', 'MC-MOVE-3232-L']],
+            ['name' => 'Keso Omega 2 MASTER 30x30 mm', 'codes' => ['KESO-O2-3030-N', 'KESO-O2-3030-L']],
+            ['name' => 'Escudo Abus', 'codes' => ['ESC-ABUS-PLATA', 'ESC-ABUS-DORADO']],
+            ['name' => 'Escudo DMC', 'codes' => ['ESC-DMC-PLATA', 'ESC-DMC-DORADO']],
+            ['name' => 'Escudo DMC Boxer', 'codes' => ['ESC-DMC-BOX-PLATA', 'ESC-DMC-BOX-DORADO']],
+            ['name' => 'Escudo Disec BD180', 'codes' => ['ESC-DISEC-BD180-PLATA', 'ESC-DISEC-BD180-DORADO']],
+            ['name' => 'Escudo Disec BD280', 'codes' => ['ESC-DISEC-BD280-PLATA', 'ESC-DISEC-BD280-DORADO']],
+            ['name' => 'Escudo Disec LG280', 'codes' => ['ESC-DISEC-LG280-PLATA', 'ESC-DISEC-LG280-DORADO']],
+            ['name' => 'Escudo Disec MG210', 'codes' => ['ESC-DISEC-MG210-PLATA', 'ESC-DISEC-MG210-DORADO']],
+            ['name' => 'Escudo Disec MRM 29', 'codes' => ['ESC-DISEC-MRM29-PLATA', 'ESC-DISEC-MRM29-DORADO']],
+        ];
 
-        $groupCil30 = ProductVariantGroup::create(['name' => 'Cilindre 30mm (longituds)']);
-        $groupCil40 = ProductVariantGroup::create(['name' => 'Cilindre 40mm (longituds)']);
-
-        $codesCil30 = array_map(fn ($len) => 'CIL-30-' . $len, $cil30Lengths);
-        $codesCil40 = array_map(fn ($len) => 'CIL-40-' . $len, $cil40Lengths);
-
-        Product::whereIn('code', $codesCil30)->update(['variant_group_id' => $groupCil30->id]);
-        Product::whereIn('code', $codesCil40)->update(['variant_group_id' => $groupCil40->id]);
+        foreach ($groups as $g) {
+            $group = ProductVariantGroup::create(['name' => $g['name']]);
+            Product::whereIn('code', $g['codes'])->update(['variant_group_id' => $group->id]);
+        }
     }
 }

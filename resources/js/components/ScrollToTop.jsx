@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconChevronUp } from './icons';
 
 export default function ScrollToTop() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export default function ScrollToTop() {
       type="button"
       onClick={scrollToTop}
       className="btn btn-circle btn-primary fixed bottom-6 right-6 z-50 shadow-lg"
-      aria-label="Pujar a dalt"
+      aria-label={t('shop.scroll_top')}
     >
       <IconChevronUp className="h-6 w-6" />
     </button>

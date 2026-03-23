@@ -49,6 +49,15 @@ export default function AdminProductShowPage() {
     );
   }
 
+  const securityLabel =
+    product.security_level === 'standard'
+      ? t('admin.products.security_level_standard')
+      : product.security_level === 'high'
+        ? t('admin.products.security_level_high')
+        : product.security_level === 'very_high'
+          ? t('admin.products.security_level_very_high')
+          : '';
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -66,13 +75,17 @@ export default function AdminProductShowPage() {
             <div><dt className="text-sm text-base-content/70">{t('admin.products.code')}</dt><dd>{product.code}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.name')}</dt><dd>{product.name}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.description')}</dt><dd>{product.description}</dd></div>
-            <div><dt className="text-sm text-base-content/70">{t('admin.products.price')} (€)</dt><dd>{product.price != null ? Number(product.price).toFixed(2) : ''}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.products.sale_price')} (€)</dt><dd>{product.price != null ? Number(product.price).toFixed(2) : ''}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.products.purchase_price')} (€)</dt><dd>{product.purchase_price != null ? Number(product.purchase_price).toFixed(2) : ''}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.stock')}</dt><dd>{product.stock}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.products.weight_kg')}</dt><dd>{product.weight_kg != null ? Number(product.weight_kg).toFixed(3) : ''}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.products.security_level')}</dt><dd>{securityLabel}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.products.competitor_url')}</dt><dd>{product.competitor_url ? <a href={product.competitor_url} className="link link-primary" target="_blank" rel="noopener noreferrer">{product.competitor_url}</a> : ''}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.products.is_double_clutch')}</dt><dd>{product.is_double_clutch ? t('common.yes') : t('common.no')}</dd></div>
+            <div><dt className="text-sm text-base-content/70">{t('admin.products.has_card')}</dt><dd>{product.has_card ? t('common.yes') : t('common.no')}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_active')}</dt><dd>{product.is_active ? t('common.yes') : t('common.no')}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_featured')}</dt><dd>{product.is_featured ? t('common.yes') : t('common.no')}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_trending')}</dt><dd>{product.is_trending ? t('common.yes') : t('common.no')}</dd></div>
-            <div><dt className="text-sm text-base-content/70">{t('admin.products.is_installable')}</dt><dd>{product.is_installable ? t('common.yes') : t('common.no')}</dd></div>
-            {product.is_installable && <div><dt className="text-sm text-base-content/70">{t('admin.products.installation_price')} (€)</dt><dd>{product.installation_price != null ? Number(product.installation_price).toFixed(2) : ''}</dd></div>}
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_extra_keys_available')}</dt><dd>{product.is_extra_keys_available ? t('common.yes') : t('common.no')}</dd></div>
             {product.is_extra_keys_available && <div><dt className="text-sm text-base-content/70">{t('admin.products.extra_key_unit_price')} (€)</dt><dd>{product.extra_key_unit_price != null ? Number(product.extra_key_unit_price).toFixed(2) : ''}</dd></div>}
           </dl>
@@ -94,9 +107,13 @@ export default function AdminProductShowPage() {
           <div className="card-body">
             <h2 className="font-semibold text-lg border-b border-base-300 pb-2 mb-4">{t('admin.products.images')}</h2>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-              {product.images.map((img) => (
+              {product.images.map((img, i) => (
                 <figure key={img.id} className="rounded-lg overflow-hidden border border-base-300 bg-base-200">
-                  <img src={img.url} alt="" className="w-full h-40 object-cover" />
+                  <img
+                    src={img.url}
+                    alt={t('admin.products.image_alt', { name: product.name || '', index: i + 1 })}
+                    className="w-full h-40 object-cover"
+                  />
                 </figure>
               ))}
             </div>

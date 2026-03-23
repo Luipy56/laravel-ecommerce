@@ -16,7 +16,7 @@ export default function Footer() {
             <Link to="/" className="flex items-center gap-2">
               <img
                 src="/images/serraller_solidaria_logo.png"
-                alt="Serralleria Solidària"
+                alt={t('shop.brand_logo_alt')}
                 className="h-12 w-auto object-contain"
               />
             </Link>

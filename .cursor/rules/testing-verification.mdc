@@ -1,0 +1,31 @@
+---
+description: Run tests, DB migrate/seed, and route smoke checks after code changes
+alwaysApply: true
+---
+
+# Testing and verification after changes
+
+After substantive edits (database, routes, middleware, controllers, API, React, locales), **verify before finishing**:
+
+## Database (migrations, seeders, schema)
+
+Whenever **migrations**, **seeders**, **Eloquent `$fillable` / casts**, or anything that affects **schema or seeded data** changes:
+
+1. **`php artisan migrate:fresh --seed`** — must finish with **exit code 0** on the development database (this **drops all tables and data**; never run against production).
+2. Fix any seeder FKs, duplicate keys, or invalid values before considering the task done.
+3. Then run **`php artisan test`** so automated checks still pass.
+
+If the environment cannot run MySQL/Postgres locally, state that explicitly; otherwise **run the command** rather than only suggesting it.
+
+## Application checks
+
+1. **`php artisan test`** — must pass (including **after** `migrate:fresh --seed` when schema or seeders changed). `RouteSmokeTest` runs only if PHP has `pdo_sqlite`; if it is skipped locally, rely on route smoke below.
+2. **`php artisan routes:smoke`** — dispatches GET for each registered route (parameters expanded). **No response may be HTTP 500** (401/403/404 are OK). Use `php artisan routes:smoke --details` to print every status.
+3. **Front-end build:** `npm run build` when `resources/js` or Vite config changed.
+4. **Local stack (optional):** `runLaravel` from the project directory (or `php artisan serve` + `npm run dev`) for manual checks; curl or browser on `/`, `/up`, and a few `api/v1/*` endpoints.
+
+See also **`.cursor/rules/project-standards.mdc`** (migrations + `diagramZero.dbml`).
+
+## Auth / API note
+
+Unauthenticated requests under `api/*` must return **401 JSON**, not redirects to a missing `login` route (see `bootstrap/app.php`: `redirectGuestsTo` + `shouldRenderJsonWhen`).

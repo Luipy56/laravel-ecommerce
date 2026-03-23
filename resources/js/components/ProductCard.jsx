@@ -63,6 +63,11 @@ export default function ProductCard({ product, pack }) {
               {t('shop.pack')}
             </span>
           )}
+          {!isPack && product.discount_percent > 0 && (
+            <span className="badge badge-error badge-sm absolute top-2 right-12 z-10">
+              −{Math.round(Number(product.discount_percent))}%
+            </span>
+          )}
           <img
             src={imageUrl}
             alt={name}
@@ -98,9 +103,11 @@ export default function ProductCard({ product, pack }) {
               </ul>
             )
           )}
-          <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-            <span className="text-primary font-semibold">{formattedPrice}</span>
-            <span className="w-10 shrink-0" aria-hidden="true" />
+          <div className="flex flex-col items-start gap-0.5 mt-auto pt-2 pr-12">
+            {!isPack && product.formattedListPrice && (
+              <span className="text-sm text-base-content/60 line-through tabular-nums">{product.formattedListPrice}</span>
+            )}
+            <span className="text-primary font-semibold tabular-nums">{formattedPrice}</span>
           </div>
         </div>
       </Link>

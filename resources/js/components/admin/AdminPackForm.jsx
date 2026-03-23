@@ -121,7 +121,7 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
                 <div key={img.id} className="relative group">
                   <img
                     src={img.url}
-                    alt=""
+                    alt={t('admin.packs.thumbnail_alt')}
                     className="size-20 object-cover rounded-lg border border-base-300"
                   />
                   {onRemoveImage && (
@@ -145,7 +145,7 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
                 <div key={i} className="relative group">
                   <img
                     src={URL.createObjectURL(file)}
-                    alt=""
+                    alt={t('admin.packs.thumbnail_pending_alt')}
                     className="size-20 object-cover rounded-lg border border-base-300"
                   />
                   <button

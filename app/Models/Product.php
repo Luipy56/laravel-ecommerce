@@ -18,23 +18,31 @@ class Product extends Model
         'name',
         'description',
         'price',
+        'purchase_price',
         'stock',
-        'is_installable',
-        'installation_price',
+        'weight_kg',
+        'is_double_clutch',
+        'has_card',
+        'security_level',
+        'competitor_url',
         'is_extra_keys_available',
         'extra_key_unit_price',
         'is_featured',
         'is_trending',
         'is_active',
+        'discount_percent',
     ];
 
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
-            'installation_price' => 'decimal:2',
+            'discount_percent' => 'decimal:2',
+            'purchase_price' => 'decimal:2',
+            'weight_kg' => 'decimal:3',
             'extra_key_unit_price' => 'decimal:2',
-            'is_installable' => 'boolean',
+            'is_double_clutch' => 'boolean',
+            'has_card' => 'boolean',
             'is_extra_keys_available' => 'boolean',
             'is_featured' => 'boolean',
             'is_trending' => 'boolean',
@@ -92,6 +100,22 @@ class Product extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /** Customer-facing unit price after optional percentage discount. */
+    public function effectivePrice(): float
+    {
+        $base = (float) $this->price;
+        $d = $this->discount_percent;
+        if ($d === null) {
+            return round($base, 2);
+        }
+        $pct = min(100.0, max(0.0, (float) $d));
+        if ($pct <= 0) {
+            return round($base, 2);
+        }
+
+        return round($base * (1 - $pct / 100), 2);
     }
 
     public function scopeFeatured($query)

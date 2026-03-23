@@ -10,39 +10,48 @@ use Illuminate\Database\Seeder;
 class ProductFeatureSeeder extends Seeder
 {
     /**
-     * Map product code => list of [feature_name, feature_value].
-     * Names and values in Catalan (Color, Tipus de clau, Mida, Mida interna, Mida externa).
+     * Map product code => list of [feature_name, feature_value] (Spanish).
+     * Medidas como características; marca, color y tipo de llave según el listado.
      */
     private function getProductFeatureMap(): array
     {
-        $map = [
-            'CIL-30' => [['Mida', '30mm'], ['Color', 'Negre'], ['Tipus de clau', 'General']],
-            'CIL-40' => [['Mida', '40mm'], ['Color', 'Plata'], ['Tipus de clau', 'General']],
-            'CIL-PERFIL' => [['Mida', '80x10mm'], ['Mida interna', '80mm'], ['Mida externa', '10mm'], ['Color', 'Plata'], ['Tipus de clau', 'Seguretat']],
-            'CIL-SEG' => [['Mida', '40mm'], ['Color', 'Negre'], ['Tipus de clau', 'Alta seguretat']],
-            'CIL-DOBLE' => [['Mida', '60mm'], ['Color', 'Daurat'], ['Tipus de clau', 'General']],
-            'ESC-EST' => [['Color', 'Plata'], ['Tipus de clau', 'General']],
-            'ESC-SEG' => [['Color', 'Negre'], ['Tipus de clau', 'Seguretat']],
-            'ESC-DISS' => [['Color', 'Plata'], ['Color', 'Daurat'], ['Tipus de clau', 'Seguretat']],
-            'SP-EST' => [['Color', 'Negre'], ['Tipus de clau', 'General']],
-            'SP-SEG' => [['Color', 'Plata'], ['Tipus de clau', 'Seguretat']],
-            'SP-EMBUTIR' => [['Color', 'Daurat'], ['Tipus de clau', 'Alta seguretat']],
+        $pCop = 'Puntos copiables';
+        $pNoCop = 'Puntos no copiables';
+        $movil = 'Elemento móvil';
+        $magn = 'Codificación magnética';
+
+        return [
+            '192 evoK1C 3030 N' => [['Marca', 'Securemme'], ['Color', 'Plata'], ['Tipo de llave', $pCop], ['Medida interna', '30mm'], ['Medida externa', '30mm']],
+            '192 evoK1C 3030 L' => [['Marca', 'Securemme'], ['Color', 'Dorado'], ['Tipo de llave', $pCop], ['Medida interna', '30mm'], ['Medida externa', '30mm']],
+            '192 evoK1D 3030 N' => [['Marca', 'Securemme'], ['Color', 'Plata'], ['Tipo de llave', $pCop], ['Medida interna', '30mm'], ['Medida externa', '30mm']],
+            '192 evoK1D 3030 L' => [['Marca', 'Securemme'], ['Color', 'Dorado'], ['Tipo de llave', $pCop], ['Medida interna', '30mm'], ['Medida externa', '30mm']],
+            '192 evoK1C 3040 N' => [['Marca', 'Securemme'], ['Color', 'Plata'], ['Tipo de llave', $pCop], ['Medida interna', '30mm'], ['Medida externa', '40mm']],
+            '192 evoK1C 3040 L' => [['Marca', 'Securemme'], ['Color', 'Dorado'], ['Tipo de llave', $pCop], ['Medida interna', '30mm'], ['Medida externa', '40mm']],
+            '192 evoK1D 3040 N' => [['Marca', 'Securemme'], ['Color', 'Plata'], ['Tipo de llave', $pCop], ['Medida interna', '30mm'], ['Medida externa', '40mm']],
+            '192 evoK1D 3040 L' => [['Marca', 'Securemme'], ['Color', 'Dorado'], ['Tipo de llave', $pCop], ['Medida interna', '30mm'], ['Medida externa', '40mm']],
+            'MC-MOVE-3232-N' => [['Marca', 'M&C'], ['Color', 'Plata'], ['Tipo de llave', $pNoCop], ['Medida interna', '32mm'], ['Medida externa', '32mm']],
+            'MC-MOVE-3232-L' => [['Marca', 'M&C'], ['Color', 'Dorado'], ['Tipo de llave', $pNoCop], ['Medida interna', '32mm'], ['Medida externa', '32mm']],
+            'KESO-O2-3030-N' => [['Marca', 'Keso'], ['Color', 'Plata'], ['Tipo de llave', $movil], ['Medida interna', '30mm'], ['Medida externa', '30mm']],
+            'KESO-O2-3030-L' => [['Marca', 'Keso'], ['Color', 'Dorado'], ['Tipo de llave', $movil], ['Medida interna', '30mm'], ['Medida externa', '30mm']],
+            'ESC-ABUS-PLATA' => [['Marca', 'Abus'], ['Color', 'Plata']],
+            'ESC-ABUS-DORADO' => [['Marca', 'Abus'], ['Color', 'Dorado']],
+            'ESC-DMC-PLATA' => [['Marca', 'DMC'], ['Color', 'Plata']],
+            'ESC-DMC-DORADO' => [['Marca', 'DMC'], ['Color', 'Dorado']],
+            'ESC-DMC-BOX-PLATA' => [['Marca', 'DMC'], ['Color', 'Plata']],
+            'ESC-DMC-BOX-DORADO' => [['Marca', 'DMC'], ['Color', 'Dorado']],
+            'ESC-DISEC-BD180-PLATA' => [['Marca', 'Disec'], ['Color', 'Plata']],
+            'ESC-DISEC-BD180-DORADO' => [['Marca', 'Disec'], ['Color', 'Dorado']],
+            'ESC-DISEC-BD280-PLATA' => [['Marca', 'Disec'], ['Color', 'Plata']],
+            'ESC-DISEC-BD280-DORADO' => [['Marca', 'Disec'], ['Color', 'Dorado']],
+            'ESC-DISEC-LG280-PLATA' => [['Marca', 'Disec'], ['Color', 'Plata']],
+            'ESC-DISEC-LG280-DORADO' => [['Marca', 'Disec'], ['Color', 'Dorado']],
+            'ESC-DISEC-MG210-PLATA' => [['Marca', 'Disec'], ['Color', 'Plata'], ['Tipo de llave', $magn]],
+            'ESC-DISEC-MG210-DORADO' => [['Marca', 'Disec'], ['Color', 'Dorado'], ['Tipo de llave', $magn]],
+            'ESC-DISEC-MRM29-PLATA' => [['Marca', 'Disec'], ['Color', 'Plata'], ['Tipo de llave', $magn]],
+            'ESC-DISEC-MRM29-DORADO' => [['Marca', 'Disec'], ['Color', 'Dorado'], ['Tipo de llave', $magn]],
+            'SP-MC-EZC-OFR' => [['Marca', 'M&C'], ['Color', 'Plata'], ['Tipo de llave', $pCop]],
+            'SP-MC-SAG' => [['Marca', 'M&C'], ['Color', 'Plata'], ['Tipo de llave', $pCop]],
         ];
-
-        foreach ([35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100] as $len) {
-            $map['CIL-30-' . $len] = [['Mida', $len . 'mm'], ['Color', 'Negre'], ['Tipus de clau', 'General']];
-        }
-        foreach ([40, 50, 60, 70, 80] as $len) {
-            $map['CIL-40-' . $len] = [['Mida', $len . 'mm'], ['Color', 'Plata'], ['Tipus de clau', 'General']];
-        }
-
-        foreach (['EST', 'SEG', 'DISS'] as $t) {
-            foreach (['A', 'B', 'C', 'D', 'E'] as $v) {
-                $map['ESC-' . $t . '-' . $v] = $map['ESC-' . $t];
-            }
-        }
-
-        return $map;
     }
 
     public function run(): void
@@ -66,7 +75,7 @@ class ProductFeatureSeeder extends Seeder
                 if (! $fn) {
                     continue;
                 }
-                $key = $fn->id . ':' . $value;
+                $key = $fn->id.':'.$value;
                 if (! isset($featureCache[$key])) {
                     $featureCache[$key] = Feature::where('feature_name_id', $fn->id)->where('value', $value)->first();
                 }

@@ -3,12 +3,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminToast } from '../../contexts/AdminToastContext';
 
 const PLACEHOLDER_IMAGE = '/images/dummy.jpg';
 
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
+    case 'awaiting_installation_price': return 'badge-info text-base-content';
     case 'in_transit': return 'badge-success';
     case 'sent': return 'badge-success';
     case 'installation_pending': return 'badge-warning';
@@ -32,11 +34,16 @@ function lineTargetUrl(line) {
 export default function AdminOrderShowPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { showSuccess } = useAdminToast();
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [labelModalOpen, setLabelModalOpen] = useState(false);
+  const [installationModalOpen, setInstallationModalOpen] = useState(false);
+  const [installationAmount, setInstallationAmount] = useState('');
+  const [installationSubmitting, setInstallationSubmitting] = useState(false);
+  const [installationModalError, setInstallationModalError] = useState('');
 
   const fetchOrder = useCallback(async () => {
     if (!id) return;
@@ -78,6 +85,44 @@ export default function AdminOrderShowPage() {
   const isOrder = order.kind === 'order';
   const shippingAddress = order.addresses?.find((a) => a.type === 'shipping');
   const installationAddress = order.addresses?.find((a) => a.type === 'installation');
+  const showSetInstallationPrice =
+    isOrder && order.installation_requested && order.status === 'awaiting_installation_price';
+
+  const handleInstallationModalOpen = () => {
+    setInstallationModalError('');
+    setInstallationAmount('');
+    setInstallationModalOpen(true);
+  };
+
+  const handleSetInstallationPrice = async (e) => {
+    e.preventDefault();
+    setInstallationModalError('');
+    const n = parseFloat(String(installationAmount).replace(',', '.'));
+    if (Number.isNaN(n) || n < 0) {
+      setInstallationModalError(t('common.error'));
+      return;
+    }
+    setInstallationSubmitting(true);
+    try {
+      const { data } = await api.put(`admin/orders/${id}`, {
+        status: order.status,
+        installation_price: n,
+      });
+      if (data.success) {
+        showSuccess(t('common.saved'));
+        setInstallationModalOpen(false);
+        setInstallationAmount('');
+        await fetchOrder();
+      } else setInstallationModalError(data.message || t('common.error'));
+    } catch (err) {
+      const msg = err.response?.data?.message
+        || err.response?.data?.errors?.installation_price?.[0]
+        || t('common.error');
+      setInstallationModalError(msg);
+    } finally {
+      setInstallationSubmitting(false);
+    }
+  };
 
   const handlePrintLabel = () => {
     if (!shippingAddress) return;
@@ -129,6 +174,11 @@ export default function AdminOrderShowPage() {
               {t('admin.orders.shipping_label_button')}
             </button>
           )}
+          {showSetInstallationPrice && (
+            <button type="button" className="btn btn-secondary btn-sm shrink-0" onClick={handleInstallationModalOpen}>
+              {t('admin.orders.set_installation_price')}
+            </button>
+          )}
           {isOrder && (
             <Link to={`/admin/orders/${id}/edit`} className="btn btn-primary btn-sm shrink-0">{t('common.edit')}</Link>
           )}
@@ -152,6 +202,17 @@ export default function AdminOrderShowPage() {
               {order.order_date && <div><dt className="text-sm text-base-content/70">{t('admin.orders.order_date')}</dt><dd>{new Date(order.order_date).toLocaleString()}</dd></div>}
               {order.shipping_date && <div><dt className="text-sm text-base-content/70">{t('admin.orders.shipping_date')}</dt><dd>{new Date(order.shipping_date).toLocaleString()}</dd></div>}
               {order.shipping_price != null && <div><dt className="text-sm text-base-content/70">{t('admin.orders.shipping_price')}</dt><dd>{Number(order.shipping_price).toFixed(2)} €</dd></div>}
+              {isOrder && order.installation_requested && (
+                <>
+                  <div><dt className="text-sm text-base-content/70">{t('admin.orders.installation')}</dt><dd>{t('common.yes')}</dd></div>
+                  {order.installation_status && (
+                    <div><dt className="text-sm text-base-content/70">{t('admin.orders.installation_status_label')}</dt><dd>{t(`admin.orders.install_status_${order.installation_status}`)}</dd></div>
+                  )}
+                  {order.installation_price != null && (
+                    <div><dt className="text-sm text-base-content/70">{t('admin.orders.installation_fee_label')}</dt><dd>{Number(order.installation_price).toFixed(2)} €</dd></div>
+                  )}
+                </>
+              )}
             </dl>
           </div>
         </div>
@@ -199,7 +260,6 @@ export default function AdminOrderShowPage() {
                       <th className="text-end">{t('admin.orders.line_unit_price')}</th>
                       <th className="text-end">{t('admin.orders.line_extra_keys_price')}</th>
                       <th className="text-center w-24 min-w-24">{t('admin.orders.keys_same')}</th>
-                      <th className="text-end">{t('admin.orders.line_installation_price')}</th>
                       <th className="text-end">{t('admin.orders.line_total')}</th>
                     </tr>
                   </thead>
@@ -236,10 +296,9 @@ export default function AdminOrderShowPage() {
                           </td>
                           <td>
                             <span className="font-medium">{lineDisplayName(line)}</span>
-                            {(line.is_installation_requested || line.extra_keys_qty > 0) && (
+                            {line.extra_keys_qty > 0 && (
                               <div className="flex flex-wrap gap-1 mt-0.5">
-                                {line.is_installation_requested && <span className="badge badge-sm badge-ghost">{t('admin.orders.installation')}</span>}
-                                {line.extra_keys_qty > 0 && <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>}
+                                <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
                               </div>
                             )}
                           </td>
@@ -249,7 +308,6 @@ export default function AdminOrderShowPage() {
                           <td className="text-center w-24 min-w-24">
                             {line.pack?.contains_keys ? (line.keys_all_same ? t('common.yes') : t('common.no')) : ''}
                           </td>
-                          <td className="text-end tabular-nums">{line.is_installation_requested && line.installation_price != null ? `${Number(line.installation_price).toFixed(2)} €` : ''}</td>
                           <td className="text-end font-medium tabular-nums">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
                         </tr>
                       );
@@ -278,10 +336,9 @@ export default function AdminOrderShowPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium truncate">{lineDisplayName(line)}</p>
-                        {(line.is_installation_requested || line.extra_keys_qty > 0) && (
+                        {line.extra_keys_qty > 0 && (
                           <div className="flex flex-wrap gap-1 mt-0.5">
-                            {line.is_installation_requested && <span className="badge badge-sm badge-ghost">{t('admin.orders.installation')}</span>}
-                            {line.extra_keys_qty > 0 && <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>}
+                            <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
                           </div>
                         )}
                         {line.pack?.contains_keys && (
@@ -329,21 +386,35 @@ export default function AdminOrderShowPage() {
               <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
                 <thead>
                   <tr>
+                    <th>{t('admin.orders.payment_status')}</th>
+                    <th>{t('admin.orders.payment_gateway')}</th>
                     <th>{t('admin.orders.payment_method')}</th>
                     <th className="text-end">{t('admin.orders.payment_amount')}</th>
                     <th>{t('admin.orders.payment_paid_at')}</th>
                     <th>{t('admin.orders.payment_reference')}</th>
+                    <th>{t('admin.orders.payment_failure')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {order.payments.map((p) => (
-                    <tr key={p.id}>
-                      <td>{t(`admin.orders.payment_${p.payment_method}`)}</td>
-                      <td className="text-end font-medium">{Number(p.amount).toFixed(2)} €</td>
-                      <td>{p.paid_at ? new Date(p.paid_at).toLocaleString() : ''}</td>
-                      <td className="font-mono text-sm">{p.gateway_reference ?? ''}</td>
-                    </tr>
-                  ))}
+                  {order.payments.map((p) => {
+                    const methodKey = `admin.orders.payment_${p.payment_method}`;
+                    const methodLabel = t(methodKey) !== methodKey ? t(methodKey) : (p.payment_method ?? '');
+                    const statusKey = p.status ? `admin.orders.payment_status_${p.status}` : '';
+                    const statusLabel = statusKey && t(statusKey) !== statusKey ? t(statusKey) : (p.status ?? '');
+                    return (
+                      <tr key={p.id}>
+                        <td><span className="badge badge-sm badge-ghost whitespace-nowrap">{statusLabel}</span></td>
+                        <td className="font-mono text-xs">{p.gateway ?? ''}</td>
+                        <td>{methodLabel}</td>
+                        <td className="text-end font-medium tabular-nums">{Number(p.amount).toFixed(2)} {p.currency === 'EUR' ? '€' : p.currency}</td>
+                        <td>{p.paid_at ? new Date(p.paid_at).toLocaleString() : ''}</td>
+                        <td className="font-mono text-sm max-w-[12rem] truncate" title={p.gateway_reference ?? ''}>{p.gateway_reference ?? ''}</td>
+                        <td className="text-sm max-w-xs">
+                          {[p.failure_code, p.failure_message].filter(Boolean).join(' · ')}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -356,7 +427,52 @@ export default function AdminOrderShowPage() {
         {order.updated_at && <> · {t('admin.orders.updated_at')}: {new Date(order.updated_at).toLocaleString()}</>}
       </div>
 
-      {/* Shipping label modal */}
+      {/* Installation price (awaiting quote) */}
+      <dialog
+        className={`modal ${installationModalOpen ? 'modal-open' : ''}`}
+        aria-label={t('admin.orders.set_installation_price_modal_title')}
+      >
+        <div className="modal-box max-w-md">
+          <h3 className="font-bold text-lg">{t('admin.orders.set_installation_price_modal_title')}</h3>
+          <p className="text-sm text-base-content/70 py-2">{t('admin.orders.set_installation_price_hint')}</p>
+          <form onSubmit={handleSetInstallationPrice} className="space-y-4">
+            {installationModalError && (
+              <div role="alert" className="alert alert-error text-sm">{installationModalError}</div>
+            )}
+            <label className="form-field w-full">
+              <span className="form-label">{t('admin.orders.installation_price_amount')}</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                className="input input-bordered w-full"
+                value={installationAmount}
+                onChange={(e) => setInstallationAmount(e.target.value)}
+                required
+                autoFocus
+                aria-label={t('admin.orders.installation_price_amount')}
+              />
+            </label>
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setInstallationModalOpen(false)}
+              >
+                {t('common.close')}
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={installationSubmitting}>
+                {installationSubmitting ? t('common.loading') : t('common.save')}
+              </button>
+            </div>
+          </form>
+        </div>
+        <form method="dialog" className="modal-backdrop" onSubmit={() => setInstallationModalOpen(false)}>
+          <button type="submit" aria-label={t('common.close')}>{t('common.close')}</button>
+        </form>
+      </dialog>
+
+      {/* Shipping label */}
       <dialog className={`modal ${labelModalOpen ? 'modal-open' : ''}`} aria-label={t('admin.orders.shipping_label_title')}>
         <div className="modal-box max-w-md">
           <h3 className="font-bold text-lg">{t('admin.orders.shipping_label_title')} #{order.id}</h3>

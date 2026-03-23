@@ -8,17 +8,17 @@ use Illuminate\Support\Facades\DB;
 class FeatureNameSeeder extends Seeder
 {
     /**
-     * Feature type names in Catalan (admin typically uploads data in Catalan).
-     * Storefront search will support both Catalan and Spanish for client-facing queries.
+     * Feature type names in Spanish (Castilian) for seeded catalog data.
      */
     public function run(): void
     {
         DB::table('feature_names')->insert([
+            ['name' => 'Marca', 'is_active' => true],
             ['name' => 'Color', 'is_active' => true],
-            ['name' => 'Tipus de clau', 'is_active' => true],
-            ['name' => 'Mida', 'is_active' => true],
-            ['name' => 'Mida interna', 'is_active' => true],
-            ['name' => 'Mida externa', 'is_active' => true],
+            ['name' => 'Tipo de llave', 'is_active' => true],
+            ['name' => 'Medida', 'is_active' => true],
+            ['name' => 'Medida interna', 'is_active' => true],
+            ['name' => 'Medida externa', 'is_active' => true],
         ]);
     }
 }

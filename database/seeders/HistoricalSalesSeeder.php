@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Payment;
 use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -25,12 +26,12 @@ class HistoricalSalesSeeder extends Seeder
         $clients = [1, 2, 3];
         $paymentMethods = ['card', 'card', 'card', 'bizum', 'paypal'];
         $addresses = [
-            ['street' => 'Carrer Major 12', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08001'],
-            ['street' => 'Plaça Catalunya 5', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08002'],
-            ['street' => 'Carrer Balmes 45', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08007'],
-            ['street' => 'Pg. de Gràcia 88', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08008'],
-            ['street' => 'Rambla Catalunya 22', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08009'],
-            ['street' => 'Avinguda Diagonal 100', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08018'],
+            ['street' => 'Calle Mayor 12', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08001'],
+            ['street' => 'Plaza de Cataluña 5', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08002'],
+            ['street' => 'Calle Balmes 45', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08007'],
+            ['street' => 'Paseo de Gracia 88', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08008'],
+            ['street' => 'Rambla de Cataluña 22', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08009'],
+            ['street' => 'Avenida Diagonal 100', 'city' => 'Barcelona', 'province' => 'Barcelona', 'postal_code' => '08018'],
         ];
 
         // 500 sales spread over the period for demo charts
@@ -46,11 +47,12 @@ class HistoricalSalesSeeder extends Seeder
 
         $now = now();
         foreach ($sales as $idx => $sale) {
-            $orderDate = $sale['order_date'];
+            // Avoid non-existent wall-clock times on DST change days (MySQL rejects them).
+            $orderDate = $sale['order_date']->copy()->setTime(mt_rand(8, 16), mt_rand(0, 59), 0);
             $amount = $sale['amount'];
             $clientId = $clients[$idx % count($clients)];
-            $shippingDate = $orderDate->copy()->addDays(mt_rand(1, 3));
-            $shippingPrice = (float) round(mt_rand(500, 1500) / 100, 2);
+            $shippingDate = $orderDate->copy()->addDays(mt_rand(1, 3))->setTime(mt_rand(8, 16), mt_rand(0, 59), 0);
+            $shippingPrice = 9.00;
 
             $orderId = DB::table('orders')->insertGetId([
                 'client_id' => $clientId,
@@ -59,6 +61,9 @@ class HistoricalSalesSeeder extends Seeder
                 'order_date' => $orderDate,
                 'shipping_date' => $shippingDate,
                 'shipping_price' => $shippingPrice,
+                'installation_requested' => false,
+                'installation_price' => null,
+                'installation_status' => null,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -70,20 +75,24 @@ class HistoricalSalesSeeder extends Seeder
                 'quantity' => 1,
                 'unit_price' => $amount,
                 'offer' => null,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 0,
                 'extra_key_unit_price' => null,
+                'is_included' => true,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
 
             $method = $paymentMethods[$idx % count($paymentMethods)];
+            $gateway = $method === 'bizum' ? Payment::GATEWAY_REDSYS : Payment::GATEWAY_STRIPE;
             DB::table('payments')->insert([
                 'order_id' => $orderId,
-                'amount' => $amount,
+                'amount' => round($amount + $shippingPrice, 2),
                 'payment_method' => $method,
-                'gateway_reference' => 'hist_' . $orderId,
+                'status' => Payment::STATUS_SUCCEEDED,
+                'gateway' => $gateway,
+                'currency' => 'EUR',
+                'gateway_reference' => 'hist_'.$orderId,
                 'paid_at' => $orderDate,
                 'created_at' => $now,
                 'updated_at' => $now,

@@ -14,30 +14,28 @@ class OrderDetailSeeder extends Seeder
      */
     public function run(): void
     {
-        $cil30 = Product::where('code', 'CIL-30')->first();
-        $cilSeg = Product::where('code', 'CIL-SEG')->first();
-        $escEst = Product::where('code', 'ESC-EST')->first();
-        $spEst = Product::where('code', 'SP-EST')->first();
+        $cilStd = Product::where('code', '192 evoK1C 3030 N')->first();
+        $cilSeg = Product::where('code', '192 evoK1D 3040 N')->first();
+        $escEst = Product::where('code', 'ESC-ABUS-PLATA')->first();
+        $spEst = Product::where('code', 'SP-MC-EZC-OFR')->first();
 
         $lines = [];
 
-        // Order 1 (pending)
-        if ($cil30) {
+        if ($cilStd) {
             $lines[] = [
                 'order_id' => 1,
-                'product_id' => $cil30->id,
+                'product_id' => $cilStd->id,
                 'pack_id' => null,
                 'quantity' => 1,
-                'unit_price' => (float) $cil30->price,
+                'unit_price' => (float) $cilStd->price,
                 'offer' => null,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 0,
                 'extra_key_unit_price' => null,
+                'is_included' => true,
             ];
         }
 
-        // Order 2 (in_transit)
         if ($escEst) {
             $lines[] = [
                 'order_id' => 2,
@@ -46,26 +44,25 @@ class OrderDetailSeeder extends Seeder
                 'quantity' => 1,
                 'unit_price' => (float) $escEst->price,
                 'offer' => null,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 0,
                 'extra_key_unit_price' => null,
+                'is_included' => true,
             ];
         }
 
-        // Order 3 (sent)
-        if ($cil30 && $escEst) {
+        if ($cilStd && $escEst) {
             $lines[] = [
                 'order_id' => 3,
-                'product_id' => $cil30->id,
+                'product_id' => $cilStd->id,
                 'pack_id' => null,
                 'quantity' => 2,
-                'unit_price' => (float) $cil30->price,
+                'unit_price' => (float) $cilStd->price,
                 'offer' => null,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 1,
-                'extra_key_unit_price' => $cil30->extra_key_unit_price ? (float) $cil30->extra_key_unit_price : null,
+                'extra_key_unit_price' => $cilStd->extra_key_unit_price ? (float) $cilStd->extra_key_unit_price : null,
+                'is_included' => true,
             ];
             $lines[] = [
                 'order_id' => 3,
@@ -74,14 +71,13 @@ class OrderDetailSeeder extends Seeder
                 'quantity' => 2,
                 'unit_price' => (float) $escEst->price,
                 'offer' => 5.00,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 0,
                 'extra_key_unit_price' => null,
+                'is_included' => true,
             ];
         }
 
-        // Order 4 (installation_pending) - product with installation
         if ($cilSeg) {
             $lines[] = [
                 'order_id' => 4,
@@ -90,14 +86,13 @@ class OrderDetailSeeder extends Seeder
                 'quantity' => 1,
                 'unit_price' => (float) $cilSeg->price,
                 'offer' => null,
-                'is_installation_requested' => true,
-                'installation_price' => (float) $cilSeg->installation_price,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 0,
                 'extra_key_unit_price' => null,
+                'is_included' => true,
             ];
         }
 
-        // Order 5 (installation_confirmed)
         if ($spEst) {
             $lines[] = [
                 'order_id' => 5,
@@ -106,14 +101,13 @@ class OrderDetailSeeder extends Seeder
                 'quantity' => 1,
                 'unit_price' => (float) $spEst->price,
                 'offer' => null,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 2,
                 'extra_key_unit_price' => $spEst->extra_key_unit_price ? (float) $spEst->extra_key_unit_price : null,
+                'is_included' => true,
             ];
         }
 
-        // Order 6 (installation_confirmed) - pack
         $lines[] = [
             'order_id' => 6,
             'product_id' => null,
@@ -121,25 +115,24 @@ class OrderDetailSeeder extends Seeder
             'quantity' => 1,
             'unit_price' => 89.00,
             'offer' => null,
-            'is_installation_requested' => false,
-            'installation_price' => null,
+            'keys_all_same' => false,
             'extra_keys_qty' => 0,
             'extra_key_unit_price' => null,
+            'is_included' => true,
         ];
 
-        // Cart 7 (client 1) - unit_price null
-        if ($cil30 && $escEst) {
+        if ($cilStd && $escEst) {
             $lines[] = [
                 'order_id' => 7,
-                'product_id' => $cil30->id,
+                'product_id' => $cilStd->id,
                 'pack_id' => null,
                 'quantity' => 2,
                 'unit_price' => null,
                 'offer' => null,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 1,
                 'extra_key_unit_price' => null,
+                'is_included' => true,
             ];
             $lines[] = [
                 'order_id' => 7,
@@ -148,14 +141,13 @@ class OrderDetailSeeder extends Seeder
                 'quantity' => 1,
                 'unit_price' => null,
                 'offer' => null,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 0,
                 'extra_key_unit_price' => null,
+                'is_included' => true,
             ];
         }
 
-        // Cart 8 (client 2) - pack in cart
         $lines[] = [
             'order_id' => 8,
             'product_id' => null,
@@ -163,13 +155,12 @@ class OrderDetailSeeder extends Seeder
             'quantity' => 1,
             'unit_price' => null,
             'offer' => null,
-            'is_installation_requested' => false,
-            'installation_price' => null,
+            'keys_all_same' => false,
             'extra_keys_qty' => 0,
             'extra_key_unit_price' => null,
+            'is_included' => true,
         ];
 
-        // Cart 9 (client 3) - single product
         if ($spEst) {
             $lines[] = [
                 'order_id' => 9,
@@ -178,10 +169,10 @@ class OrderDetailSeeder extends Seeder
                 'quantity' => 1,
                 'unit_price' => null,
                 'offer' => null,
-                'is_installation_requested' => false,
-                'installation_price' => null,
+                'keys_all_same' => false,
                 'extra_keys_qty' => 0,
                 'extra_key_unit_price' => null,
+                'is_included' => true,
             ];
         }
 

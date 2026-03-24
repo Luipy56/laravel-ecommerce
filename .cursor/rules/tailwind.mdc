@@ -11,3 +11,8 @@ alwaysApply: false
 - **Responsive:** Use Tailwind responsive prefixes consistently. Use spacing/sizing scale (e.g. `p-4`, `gap-2`, `text-sm`).
 - **Consistency:** Use the same color/size tokens across the app; extend theme in `styles.css` or Tailwind config if needed.
 - For **component classes** (buttons, cards, modals), use **daisyUI** when possible; see `.cursor/rules/daisyui.mdc`. Otherwise compose with Tailwind utilities.
+
+## Brand gradient (client area `/`)
+
+- **Gradient:** `#F75211` → `#8B2400` (orange to dark red). Use for accents in the client header and other storefront elements (e.g. line under header, decorative bars).
+- Define reusable gradient in `resources/css/app.css` (e.g. `.header-gradient-line`) and reference in components.

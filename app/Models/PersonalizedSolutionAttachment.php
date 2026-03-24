@@ -38,6 +38,6 @@ class PersonalizedSolutionAttachment extends Model
         if (empty($this->storage_path)) {
             return '';
         }
-        return '/storage/' . ltrim($this->storage_path, '/');
+        return '/uploads/' . ltrim($this->storage_path, '/');
     }
 }

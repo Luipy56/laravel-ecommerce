@@ -29,9 +29,10 @@ class AdminPackController extends Controller
             $query->where('is_trending', $request->boolean('is_trending'));
         }
 
-        $packs = $query->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $packs = $query->paginate($perPage);
 
-        $data = $packs->map(fn ($p) => [
+        $data = $packs->getCollection()->map(fn ($p) => [
             'id' => $p->id,
             'name' => $p->name,
             'description' => $p->description,
@@ -39,11 +40,17 @@ class AdminPackController extends Controller
             'is_trending' => (bool) $p->is_trending,
             'is_active' => (bool) $p->is_active,
             'pack_items_count' => $p->pack_items_count ?? 0,
-        ]);
+        ])->values()->all();
 
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $packs->currentPage(),
+                'last_page' => $packs->lastPage(),
+                'per_page' => $packs->perPage(),
+                'total' => $packs->total(),
+            ],
         ]);
     }
 
@@ -55,13 +62,14 @@ class AdminPackController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'is_trending' => ['boolean'],
             'is_active' => ['boolean'],
+            'contains_keys' => ['boolean'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
             'images' => ['nullable', 'array'],
             'images.*' => ['file', 'image', 'max:10240'],
         ]);
 
-        $defaults = ['is_trending' => false, 'is_active' => true];
+        $defaults = ['is_trending' => false, 'is_active' => true, 'contains_keys' => false];
         $pack = Pack::create(array_merge($defaults, collect($validated)->except(['product_ids', 'images'])->all()));
 
         $this->syncPackItems($pack, $validated['product_ids'] ?? []);
@@ -94,6 +102,7 @@ class AdminPackController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'is_trending' => ['boolean'],
             'is_active' => ['boolean'],
+            'contains_keys' => ['boolean'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
         ]);
@@ -137,7 +146,7 @@ class AdminPackController extends Controller
         $maxSort = (int) PackImage::where('pack_id', $pack->id)->max('sort_order');
         foreach ($files as $file) {
             $maxSort++;
-            $path = $file->store('packs/' . $pack->id, 'public');
+            $path = $file->store('packs/' . $pack->id, 'uploads');
             PackImage::create([
                 'pack_id' => $pack->id,
                 'storage_path' => $path,

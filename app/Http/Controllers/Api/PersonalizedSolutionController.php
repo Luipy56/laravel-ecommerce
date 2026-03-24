@@ -18,7 +18,7 @@ class PersonalizedSolutionController extends Controller
             'address_street' => ['nullable', 'string', 'max:255'],
             'address_city' => ['nullable', 'string', 'max:100'],
             'address_province' => ['nullable', 'string', 'max:100'],
-            'address_postal_code' => ['nullable', 'string', 'max:20'],
+            'address_postal_code' => ['required', 'string', 'max:20'],
             'address_note' => ['nullable', 'string', 'max:1000'],
             'attachments' => ['nullable', 'array'],
             'attachments.*' => ['file', 'max:10240'], // 10MB
@@ -43,7 +43,7 @@ class PersonalizedSolutionController extends Controller
 
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $path = $file->store('personalized-solutions/' . $solution->id, 'public');
+                $path = $file->store('personalized-solutions/' . $solution->id, 'uploads');
                 \App\Models\PersonalizedSolutionAttachment::create([
                     'personalized_solution_id' => $solution->id,
                     'storage_path' => $path,

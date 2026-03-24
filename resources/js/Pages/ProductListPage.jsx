@@ -1,18 +1,64 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
 import ProductCard from '../components/ProductCard';
 import PageTitle from '../components/PageTitle';
 
-function buildSearchParams({ categoryIds, featureIds, search, page }) {
+const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 0 };
+
+/**
+ * Query string for filters. When categoryInPath is true, category is only in the URL path (/categories/:id/products), not repeated here.
+ */
+function buildSearchParams({ selectedCategoryId, featureIds, search, page, categoryInPath = false }) {
   const next = new URLSearchParams();
   if (search) next.set('search', search);
-  categoryIds.forEach((id) => next.append('category_id', id));
+  if (!categoryInPath && selectedCategoryId) next.set('category_id', String(selectedCategoryId));
   featureIds.forEach((id) => next.append('feature_id', id));
   if (page > 1) next.set('page', String(page));
   return next;
+}
+
+function mapCatalogFromResponse(r) {
+  if (!r.data.success) {
+    return { items: [], pagination: { ...defaultPagination } };
+  }
+  const list = Array.isArray(r.data.data) ? r.data.data : r.data.data?.data ?? [];
+  const items = list
+    .map((entry) => {
+      if (entry.type === 'pack' && entry.data) {
+        const d = entry.data;
+        const price = Number(d.price) || 0;
+        return {
+          type: 'pack',
+          item: {
+            id: d.id,
+            name: d.name,
+            price,
+            items: d.items ?? [],
+            images: d.images ?? [],
+            primaryImageUrl: d.images?.[0]?.url ?? '/images/dummy.jpg',
+            formattedPrice: new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(price),
+          },
+        };
+      }
+      if (entry.type === 'product' && entry.data) {
+        return { type: 'product', item: Product.fromApi(entry.data) };
+      }
+      return null;
+    })
+    .filter(Boolean);
+  const pagination = r.data.meta
+    ? {
+        current_page: r.data.meta.current_page,
+        last_page: r.data.meta.last_page,
+        per_page: r.data.meta.per_page,
+        total: r.data.meta.total,
+      }
+    : { ...defaultPagination };
+  return { items, pagination };
 }
 
 export default function ProductListPage() {
@@ -21,63 +67,100 @@ export default function ProductListPage() {
   const location = useLocation();
   const { id: categoryIdFromRoute } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const isCategoryRoute = categoryIdFromRoute && location.pathname.includes('/categories/');
-  const categoryIdsFromUrl = searchParams.getAll('category_id');
-  const categoryIds = useMemo(() => {
-    if (isCategoryRoute) {
-      const withRoute = [String(categoryIdFromRoute), ...categoryIdsFromUrl];
-      return [...new Set(withRoute)];
-    }
-    return categoryIdsFromUrl;
-  }, [isCategoryRoute, categoryIdFromRoute, categoryIdsFromUrl.join(',')]);
+  const isCategoryRoute = Boolean(categoryIdFromRoute && location.pathname.includes('/categories/'));
+  const categoryIdFromQuery = searchParams.get('category_id');
+
+  const selectedCategoryId = useMemo(() => {
+    if (isCategoryRoute && categoryIdFromRoute) return String(categoryIdFromRoute);
+    if (categoryIdFromQuery) return String(categoryIdFromQuery);
+    return null;
+  }, [isCategoryRoute, categoryIdFromRoute, categoryIdFromQuery]);
+
   const featureIds = searchParams.getAll('feature_id');
   const search = searchParams.get('search');
   const pageParam = searchParams.get('page');
   const currentPage = Math.max(1, parseInt(pageParam || '1', 10) || 1);
 
-  const [catalogItems, setCatalogItems] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [featuresList, setFeaturesList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, per_page: 15, total: 0 });
+  const catalogQueryKey = useMemo(
+    () => ['products', 'catalog', selectedCategoryId ?? '', featureIds.join(','), search ?? '', currentPage],
+    [selectedCategoryId, featureIds.join(','), search, currentPage]
+  );
+
+  const categoriesQuery = useQuery({
+    queryKey: ['categories'],
+    queryFn: async ({ signal }) => {
+      const r = await api.get('categories', { signal });
+      return r.data.success ? r.data.data || [] : [];
+    },
+  });
+
+  const featuresQuery = useQuery({
+    queryKey: ['features'],
+    queryFn: async ({ signal }) => {
+      const r = await api.get('features', { signal });
+      return r.data.success ? r.data.data || [] : [];
+    },
+  });
+
+  const productsQuery = useQuery({
+    queryKey: catalogQueryKey,
+    queryFn: async ({ signal }) => {
+      const params = { page: currentPage, include_packs: true };
+      if (selectedCategoryId) params.category_id = selectedCategoryId;
+      if (featureIds.length) params.feature_ids = featureIds;
+      if (search) params.search = search;
+      const r = await api.get('products', { params, signal });
+      return mapCatalogFromResponse(r);
+    },
+  });
+
+  useEffect(() => {
+    if (!productsQuery.isSuccess || !productsQuery.data) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  }, [productsQuery.isSuccess, productsQuery.dataUpdatedAt]);
 
   const setFilters = useCallback(
     (updates) => {
       const next = buildSearchParams({
-        categoryIds: updates.categoryIds ?? categoryIds,
+        selectedCategoryId: updates.selectedCategoryId !== undefined ? updates.selectedCategoryId : selectedCategoryId,
         featureIds: updates.featureIds ?? featureIds,
         search: updates.search ?? search ?? '',
         page: updates.page ?? currentPage,
+        categoryInPath: isCategoryRoute,
       });
       setSearchParams(next);
     },
-    [categoryIds, featureIds, search, currentPage, setSearchParams]
+    [selectedCategoryId, featureIds, search, currentPage, setSearchParams, isCategoryRoute]
   );
 
   const handleAllCategories = useCallback(() => {
-    const next = buildSearchParams({ categoryIds: [], featureIds: [], search: search ?? '', page: 1 });
+    const next = buildSearchParams({
+      selectedCategoryId: null,
+      featureIds: [],
+      search: search ?? '',
+      page: 1,
+      categoryInPath: false,
+    });
     navigate('/products?' + next.toString());
   }, [search, navigate]);
 
-  const toggleCategory = useCallback(
+  const selectCategory = useCallback(
     (id) => {
       const sid = String(id);
-      const next = categoryIds.includes(sid)
-        ? categoryIds.filter((c) => c !== sid)
-        : [...categoryIds, sid];
-      const payload = { categoryIds: next, page: 1 };
-      if (isCategoryRoute && next.length > 0 && !next.includes(String(categoryIdFromRoute))) {
-        const nextParams = buildSearchParams({
-          ...payload,
-          featureIds,
-          search: search ?? '',
-        });
-        navigate('/products?' + nextParams.toString());
-      } else {
-        setFilters(payload);
-      }
+      const qs = buildSearchParams({
+        selectedCategoryId: null,
+        featureIds,
+        search: search ?? '',
+        page: 1,
+        categoryInPath: true,
+      }).toString();
+      navigate(`/categories/${sid}/products${qs ? `?${qs}` : ''}`);
     },
-    [categoryIds, isCategoryRoute, categoryIdFromRoute, featureIds, search, setFilters, navigate]
+    [featureIds, search, navigate]
   );
 
   const toggleFeature = useCallback(
@@ -91,87 +174,12 @@ export default function ProductListPage() {
     [featureIds, setFilters]
   );
 
-  useEffect(() => {
-    const ac = new AbortController();
-    const params = { page: currentPage, include_packs: true };
-    if (categoryIds.length) params.category_id = categoryIds;
-    if (featureIds.length) params.feature_ids = featureIds;
-    if (search) params.search = search;
-    api
-      .get('products', { params, signal: ac.signal })
-      .then((r) => {
-        if (r.data.success) {
-          const list = Array.isArray(r.data.data) ? r.data.data : r.data.data?.data ?? [];
-          const items = list.map((entry) => {
-            if (entry.type === 'pack' && entry.data) {
-              const d = entry.data;
-              const price = Number(d.price) || 0;
-              return {
-                type: 'pack',
-                item: {
-                  id: d.id,
-                  name: d.name,
-                  price,
-                  items: d.items ?? [],
-                  images: d.images ?? [],
-                  primaryImageUrl: d.images?.[0]?.url ?? '/images/dummy.jpg',
-                  formattedPrice: new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(price),
-                },
-              };
-            }
-            if (entry.type === 'product' && entry.data) {
-              return { type: 'product', item: Product.fromApi(entry.data) };
-            }
-            return null;
-          }).filter(Boolean);
-          setCatalogItems(items);
-          if (r.data.meta) {
-            setPagination({
-              current_page: r.data.meta.current_page,
-              last_page: r.data.meta.last_page,
-              per_page: r.data.meta.per_page,
-              total: r.data.meta.total,
-            });
-          }
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-          });
-        }
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') setCatalogItems([]);
-      })
-      .finally(() => setLoading(false));
-    return () => ac.abort();
-  }, [categoryIds.join(','), featureIds.join(','), search, currentPage]);
-
-  useEffect(() => {
-    const ac = new AbortController();
-    api
-      .get('categories', { signal: ac.signal })
-      .then((r) => {
-        if (r.data.success) setCategories(r.data.data || []);
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') setCategories([]);
-      });
-    return () => ac.abort();
-  }, []);
-
-  useEffect(() => {
-    const ac = new AbortController();
-    api
-      .get('features', { signal: ac.signal })
-      .then((r) => {
-        if (r.data.success) setFeaturesList(r.data.data || []);
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') setFeaturesList([]);
-      });
-    return () => ac.abort();
-  }, []);
+  const categories = categoriesQuery.data ?? [];
+  const featuresList = featuresQuery.data ?? [];
+  const catalogItems = productsQuery.data?.items ?? [];
+  const pagination = productsQuery.data?.pagination ?? { ...defaultPagination };
+  const loading =
+    categoriesQuery.isPending || featuresQuery.isPending || productsQuery.isPending;
 
   const featuresByGroup = useMemo(() => {
     const map = new Map();
@@ -190,7 +198,7 @@ export default function ProductListPage() {
           <h2 className="font-semibold mb-2">{t('shop.categories')}</h2>
           <ul className="menu bg-base-100 rounded-box border border-base-300">
             <li>
-              <button type="button" onClick={handleAllCategories} className={categoryIds.length === 0 ? 'active' : ''}>
+              <button type="button" onClick={handleAllCategories} className={selectedCategoryId == null ? 'active' : ''}>
                 {t('shop.categories.all')}
               </button>
             </li>
@@ -198,10 +206,11 @@ export default function ProductListPage() {
               <li key={c.id}>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
-                    type="checkbox"
-                    className="checkbox checkbox-sm"
-                    checked={categoryIds.includes(String(c.id))}
-                    onChange={() => toggleCategory(c.id)}
+                    type="radio"
+                    name="shop-catalog-category"
+                    className="radio radio-sm"
+                    checked={selectedCategoryId === String(c.id)}
+                    onChange={() => selectCategory(c.id)}
                     aria-label={c.name}
                   />
                   <span>{c.name}</span>

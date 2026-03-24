@@ -35,4 +35,24 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
+    'redsys' => [
+        'merchant_code' => env('REDSYS_MERCHANT_CODE'),
+        'terminal' => env('REDSYS_TERMINAL', '001'),
+        'secret_key' => env('REDSYS_SECRET_KEY'),
+        'environment' => env('REDSYS_ENVIRONMENT', 'test'),
+    ],
+
+    'revolut' => [
+        'api_key' => env('REVOLUT_MERCHANT_API_KEY'),
+        'api_version' => env('REVOLUT_API_VERSION', '2023-09-01'),
+        'sandbox' => env('REVOLUT_SANDBOX', true),
+        'webhook_secret' => env('REVOLUT_WEBHOOK_SECRET'),
+    ],
+
 ];

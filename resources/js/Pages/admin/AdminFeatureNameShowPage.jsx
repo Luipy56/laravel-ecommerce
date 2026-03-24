@@ -34,7 +34,7 @@ export default function AdminFeatureNameShowPage() {
     return (
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Link to="/admin/feature-names" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
+          <Link to="/admin/features" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
         </div>
         <div className="alert alert-error">{loadError}</div>
       </div>
@@ -54,7 +54,7 @@ export default function AdminFeatureNameShowPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{featureName.name}</PageTitle>
         <div className="flex gap-2">
-          <Link to="/admin/feature-names" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+          <Link to="/admin/features" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
           <Link to={`/admin/feature-names/${id}/edit`} className="btn btn-primary btn-sm shrink-0">{t('common.edit')}</Link>
         </div>
       </div>

@@ -45,6 +45,11 @@
     'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+/* Brand gradient (client area): #F75211 → #8B2400 */
+.header-gradient-line {
+  background: linear-gradient(to right, #F75211, #8B2400);
+}
+
 .hero-gradient {
   background: linear-gradient(135deg, #882200 0%, #fb5412 100%);
 }
@@ -100,4 +105,19 @@ select.select.select-bordered:focus,
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgb(251 84 18 / 0.2);
+}
+
+@keyframes slide-in-toast {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-toast {
+  animation: slide-in-toast 0.25s ease-out;
 }

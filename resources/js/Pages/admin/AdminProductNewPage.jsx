@@ -18,7 +18,7 @@ export default function AdminProductNewPage() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const { data } = await api.get('admin/categories');
+      const { data } = await api.get('admin/categories', { params: { per_page: 500 } });
       if (data.success) setCategories(data.data || []);
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
@@ -60,7 +60,7 @@ export default function AdminProductNewPage() {
       if (payload.files?.length) {
         const formData = new FormData();
         const { files, ...rest } = payload;
-        const boolKeys = ['is_installable', 'is_extra_keys_available', 'is_featured', 'is_trending', 'is_active'];
+        const boolKeys = ['is_double_clutch', 'has_card', 'is_extra_keys_available', 'is_featured', 'is_trending', 'is_active'];
         Object.entries(rest).forEach(([k, v]) => {
           if (v === null || v === undefined) return;
           if (Array.isArray(v)) v.forEach((x) => formData.append(`${k}[]`, x));

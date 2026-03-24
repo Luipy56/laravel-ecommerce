@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
+import { adminLoginSchema, parseWithZod } from '../../validation';
 
 export default function AdminLoginPage() {
   const { t } = useTranslation();
@@ -9,14 +10,15 @@ export default function AdminLoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const doLogin = async (user, pass) => {
     setError('');
+    setFieldErrors({});
     setLoading(true);
     try {
-      const { data } = await api.post('admin/login', { username, password });
+      const { data } = await api.post('admin/login', { username: user, password: pass });
       if (data.success) navigate('/admin');
       else setError(data.message || t('admin.login.error'));
     } catch (err) {
@@ -24,6 +26,22 @@ export default function AdminLoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const parsed = parseWithZod(adminLoginSchema, { username, password }, t);
+    if (!parsed.ok) {
+      setFieldErrors(parsed.fieldErrors);
+      setError(parsed.firstError);
+      return;
+    }
+    await doLogin(parsed.data.username, parsed.data.password);
+  };
+
+  const handleAutoLogin = (e) => {
+    e.preventDefault();
+    doLogin('admin', 'admin');
   };
 
   return (
@@ -45,28 +63,44 @@ export default function AdminLoginPage() {
                 <span className="form-label">{t('admin.login.username')}</span>
                 <input
                   type="text"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full${fieldErrors.username ? ' input-error' : ''}`}
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (fieldErrors.username) setFieldErrors((fe) => ({ ...fe, username: undefined }));
+                  }}
                   autoComplete="username"
                   aria-label={t('admin.login.username')}
+                  aria-invalid={!!fieldErrors.username}
                 />
+                {fieldErrors.username ? <p className="validator-hint text-error">{fieldErrors.username}</p> : null}
               </label>
               <label className="form-field w-full">
                 <span className="form-label">{t('admin.login.password')}</span>
                 <input
                   type="password"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full${fieldErrors.password ? ' input-error' : ''}`}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (fieldErrors.password) setFieldErrors((fe) => ({ ...fe, password: undefined }));
+                  }}
                   autoComplete="current-password"
                   aria-label={t('admin.login.password')}
+                  aria-invalid={!!fieldErrors.password}
                 />
+                {fieldErrors.password ? <p className="validator-hint text-error">{fieldErrors.password}</p> : null}
               </label>
               <button type="submit" className="btn btn-primary w-full" disabled={loading}>
                 {loading ? t('common.loading') : t('admin.login.submit')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm w-full text-base-content/60"
+                onClick={handleAutoLogin}
+                disabled={loading}
+              >
+                Auto login (admin / admin)
               </button>
             </form>
           </div>

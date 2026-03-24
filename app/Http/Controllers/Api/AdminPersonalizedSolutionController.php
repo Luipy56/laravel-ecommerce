@@ -35,9 +35,10 @@ class AdminPersonalizedSolutionController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $solutions = $query->get();
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $solutions = $query->paginate($perPage);
 
-        $data = $solutions->map(fn ($s) => [
+        $data = $solutions->getCollection()->map(fn ($s) => [
             'id' => $s->id,
             'email' => $s->email,
             'phone' => $s->phone,
@@ -52,6 +53,12 @@ class AdminPersonalizedSolutionController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data,
+            'meta' => [
+                'current_page' => $solutions->currentPage(),
+                'last_page' => $solutions->lastPage(),
+                'per_page' => $solutions->perPage(),
+                'total' => $solutions->total(),
+            ],
         ]);
     }
 
@@ -112,7 +119,7 @@ class AdminPersonalizedSolutionController extends Controller
             'address_street' => ['nullable', 'string', 'max:255'],
             'address_city' => ['nullable', 'string', 'max:100'],
             'address_province' => ['nullable', 'string', 'max:100'],
-            'address_postal_code' => ['nullable', 'string', 'max:20'],
+            'address_postal_code' => ['required', 'string', 'max:20'],
             'address_note' => ['nullable', 'string', 'max:1000'],
             'problem_description' => ['nullable', 'string', 'max:5000'],
             'resolution' => ['nullable', 'string', 'max:10000'],

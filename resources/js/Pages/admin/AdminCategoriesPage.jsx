@@ -9,6 +9,8 @@ export default function AdminCategoriesPage() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [activeFilter, setActiveFilter] = useState(''); // '' = all, '1' = yes, '0' = no
@@ -16,22 +18,29 @@ export default function AdminCategoriesPage() {
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { page, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
       if (activeFilter !== '') params.is_active = activeFilter === '1';
       const { data } = await api.get('admin/categories', { params });
-      if (data.success) setCategories(data.data || []);
+      if (data.success) {
+        setCategories(data.data || []);
+        setMeta(data.meta || meta);
+      }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
       setCategories([]);
     } finally {
       setLoading(false);
     }
-  }, [navigate, searchDebounce, activeFilter]);
+  }, [navigate, page, searchDebounce, activeFilter]);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchDebounce, activeFilter]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
@@ -115,6 +124,30 @@ export default function AdminCategoriesPage() {
           </div>
         )}
       </div>
+
+      {meta.last_page > 1 && (
+        <div className="join flex justify-center">
+          <button
+            type="button"
+            className="btn join-item btn-sm bg-base-100 border-base-300"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            {t('shop.pagination.prev')}
+          </button>
+          <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
+            {t('shop.pagination.page')} {page} {t('shop.pagination.of')} {meta.last_page}
+          </span>
+          <button
+            type="button"
+            className="btn join-item btn-sm bg-base-100 border-base-300"
+            disabled={page >= meta.last_page}
+            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+          >
+            {t('shop.pagination.next')}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

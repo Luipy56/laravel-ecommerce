@@ -18,10 +18,15 @@ return new class extends Migration
             $table->string('code', 50)->nullable()->unique()->comment('Product code');
             $table->string('name', 255);
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
+            $table->decimal('price', 10, 2)->comment('List/catalog price (storefront base before discount)');
+            $table->decimal('discount_percent', 5, 2)->nullable()->comment('Optional 0–100; customer pays price * (1 - discount/100)');
+            $table->decimal('purchase_price', 10, 2)->nullable()->comment('Cost price; admin only');
             $table->integer('stock')->default(0);
-            $table->boolean('is_installable')->default(false);
-            $table->decimal('installation_price', 10, 2)->nullable()->comment('When is_installable=true; may vary by postal code in app');
+            $table->decimal('weight_kg', 10, 3)->nullable()->comment('Product weight in kilograms');
+            $table->boolean('is_double_clutch')->default(false)->comment('Double clutch cylinder');
+            $table->boolean('has_card')->default(false)->comment('Includes card (credential)');
+            $table->string('security_level', 32)->nullable()->comment('standard|high|very_high');
+            $table->string('competitor_url', 2048)->nullable()->comment('Optional competitor product URL');
             $table->boolean('is_extra_keys_available')->default(false)->comment('Product can have extra physical keys');
             $table->decimal('extra_key_unit_price', 10, 2)->nullable()->comment('Price per extra key when is_extra_keys_available=true');
             $table->boolean('is_featured')->default(false)->comment('Featured on homepage');

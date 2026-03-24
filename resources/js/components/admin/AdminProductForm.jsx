@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { adminProductPayloadSchema, parseWithZod } from '../../validation';
 
 const defaultProduct = {
   category_id: '',
@@ -9,9 +10,14 @@ const defaultProduct = {
   name: '',
   description: '',
   price: 0,
+  discount_percent: '',
+  purchase_price: '',
   stock: 0,
-  is_installable: false,
-  installation_price: '',
+  weight_kg: '',
+  is_double_clutch: false,
+  has_card: false,
+  security_level: '',
+  competitor_url: '',
   is_extra_keys_available: false,
   extra_key_unit_price: '',
   is_featured: false,
@@ -54,9 +60,14 @@ export default function AdminProductForm({
         name: product.name ?? '',
         description: product.description ?? '',
         price: product.price ?? 0,
+        discount_percent: product.discount_percent != null && product.discount_percent !== '' ? String(product.discount_percent) : '',
+        purchase_price: product.purchase_price ?? '',
         stock: product.stock ?? 0,
-        is_installable: product.is_installable ?? false,
-        installation_price: product.installation_price ?? '',
+        weight_kg: product.weight_kg ?? '',
+        is_double_clutch: product.is_double_clutch ?? false,
+        has_card: product.has_card ?? false,
+        security_level: product.security_level ?? '',
+        competitor_url: product.competitor_url ?? '',
         is_extra_keys_available: product.is_extra_keys_available ?? false,
         extra_key_unit_price: product.extra_key_unit_price ?? '',
         is_featured: product.is_featured ?? false,
@@ -70,8 +81,12 @@ export default function AdminProductForm({
   const [featuresExpanded, setFeaturesExpanded] = useState({});
   const [featuresSectionOpen, setFeaturesSectionOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
+  const [clientError, setClientError] = useState('');
 
-  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const update = (key, value) => {
+    setClientError('');
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files || []).filter(
@@ -100,6 +115,7 @@ export default function AdminProductForm({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setClientError('');
     const payload = {
       category_id: Number(form.category_id),
       variant_group_id: form.variant_group_id ? Number(form.variant_group_id) : null,
@@ -107,9 +123,15 @@ export default function AdminProductForm({
       name: form.name,
       description: form.description || null,
       price: Number(form.price),
+      discount_percent:
+        form.discount_percent !== '' && form.discount_percent != null ? Number(form.discount_percent) : null,
+      purchase_price: form.purchase_price !== '' && form.purchase_price != null ? Number(form.purchase_price) : null,
       stock: Number(form.stock),
-      is_installable: !!form.is_installable,
-      installation_price: form.installation_price !== '' ? Number(form.installation_price) : null,
+      weight_kg: form.weight_kg !== '' && form.weight_kg != null ? Number(form.weight_kg) : null,
+      is_double_clutch: !!form.is_double_clutch,
+      has_card: !!form.has_card,
+      security_level: form.security_level || null,
+      competitor_url: form.competitor_url?.trim() ? form.competitor_url.trim() : null,
       is_extra_keys_available: !!form.is_extra_keys_available,
       extra_key_unit_price: form.extra_key_unit_price !== '' ? Number(form.extra_key_unit_price) : null,
       is_featured: !!form.is_featured,
@@ -117,15 +139,21 @@ export default function AdminProductForm({
       is_active: !!form.is_active,
       feature_ids: featureIds,
     };
-    if (!product && pendingFiles.length > 0) payload.files = pendingFiles;
-    onSubmit(payload);
+    const parsed = parseWithZod(adminProductPayloadSchema, payload, t);
+    if (!parsed.ok) {
+      setClientError(parsed.firstError);
+      return;
+    }
+    const toSubmit = { ...parsed.data };
+    if (!product && pendingFiles.length > 0) toSubmit.files = pendingFiles;
+    onSubmit(toSubmit);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
+      {(error || clientError) && (
         <div role="alert" className="alert alert-error text-sm">
-          {error}
+          {clientError || error}
         </div>
       )}
 
@@ -202,7 +230,7 @@ export default function AdminProductForm({
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <label className="form-field">
-          <span className="form-label">{t('admin.products.price')} (€) *</span>
+          <span className="form-label">{t('admin.products.sale_price')} (€) *</span>
           <input
             type="number"
             step="0.01"
@@ -211,7 +239,33 @@ export default function AdminProductForm({
             value={form.price}
             onChange={(e) => update('price', e.target.value)}
             required
-            aria-label={t('admin.products.price')}
+            aria-label={t('admin.products.sale_price')}
+          />
+        </label>
+        <label className="form-field">
+          <span className="form-label">{t('admin.products.discount_percent')}</span>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="100"
+            className="input input-bordered w-full"
+            value={form.discount_percent}
+            onChange={(e) => update('discount_percent', e.target.value)}
+            aria-label={t('admin.products.discount_percent')}
+          />
+          <span className="text-xs text-base-content/70">{t('admin.products.discount_percent_help')}</span>
+        </label>
+        <label className="form-field">
+          <span className="form-label">{t('admin.products.purchase_price')} (€)</span>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            className="input input-bordered w-full"
+            value={form.purchase_price}
+            onChange={(e) => update('purchase_price', e.target.value)}
+            aria-label={t('admin.products.purchase_price')}
           />
         </label>
         <label className="form-field">
@@ -226,6 +280,65 @@ export default function AdminProductForm({
             aria-label={t('admin.products.stock')}
           />
         </label>
+        <label className="form-field">
+          <span className="form-label">{t('admin.products.weight_kg')}</span>
+          <input
+            type="number"
+            step="0.001"
+            min="0"
+            className="input input-bordered w-full"
+            value={form.weight_kg}
+            onChange={(e) => update('weight_kg', e.target.value)}
+            aria-label={t('admin.products.weight_kg')}
+          />
+        </label>
+        <label className="form-field sm:col-span-2">
+          <span className="form-label">{t('admin.products.security_level')}</span>
+          <select
+            className="select select-bordered w-full max-w-md"
+            value={form.security_level}
+            onChange={(e) => update('security_level', e.target.value)}
+            aria-label={t('admin.products.security_level')}
+          >
+            <option value="">{t('admin.products.security_level_none')}</option>
+            <option value="standard">{t('admin.products.security_level_standard')}</option>
+            <option value="high">{t('admin.products.security_level_high')}</option>
+            <option value="very_high">{t('admin.products.security_level_very_high')}</option>
+          </select>
+        </label>
+        <label className="form-field sm:col-span-2">
+          <span className="form-label">{t('admin.products.competitor_url')}</span>
+          <input
+            type="text"
+            inputMode="url"
+            className="input input-bordered w-full"
+            value={form.competitor_url}
+            onChange={(e) => update('competitor_url', e.target.value)}
+            placeholder="https://"
+            aria-label={t('admin.products.competitor_url')}
+          />
+        </label>
+      </div>
+
+      <div className="flex flex-wrap gap-4">
+        <label className="label cursor-pointer gap-2">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm"
+            checked={form.is_double_clutch}
+            onChange={(e) => update('is_double_clutch', e.target.checked)}
+          />
+          <span className="label-text">{t('admin.products.is_double_clutch')}</span>
+        </label>
+        <label className="label cursor-pointer gap-2">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm"
+            checked={form.has_card}
+            onChange={(e) => update('has_card', e.target.checked)}
+          />
+          <span className="label-text">{t('admin.products.has_card')}</span>
+        </label>
       </div>
 
       <div className="form-field">
@@ -237,7 +350,7 @@ export default function AdminProductForm({
                 <div key={img.id} className="relative group">
                   <img
                     src={img.url}
-                    alt=""
+                    alt={t('admin.products.thumbnail_alt')}
                     className="size-20 object-cover rounded-lg border border-base-300"
                   />
                   {onRemoveImage && (
@@ -261,7 +374,7 @@ export default function AdminProductForm({
                 <div key={i} className="relative group">
                   <img
                     src={URL.createObjectURL(file)}
-                    alt=""
+                    alt={t('admin.products.thumbnail_pending_alt')}
                     className="size-20 object-cover rounded-lg border border-base-300"
                   />
                   <button
@@ -386,32 +499,6 @@ export default function AdminProductForm({
       </div>
 
       <div className="divider" />
-
-      <div className="flex w-full flex-col gap-2">
-        <div className="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            className="checkbox checkbox-sm"
-            checked={form.is_installable}
-            onChange={(e) => update('is_installable', e.target.checked)}
-          />
-          <span className="label-text">{t('admin.products.is_installable')}</span>
-        </div>
-        {form.is_installable && (
-          <label className="form-field max-w-xs">
-            <span className="form-label">{t('admin.products.installation_price')} (€)</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              className="input input-bordered w-full"
-              value={form.installation_price}
-              onChange={(e) => update('installation_price', e.target.value)}
-              aria-label={t('admin.products.installation_price')}
-            />
-          </label>
-        )}
-      </div>
 
       <div className="flex w-full flex-col gap-2">
         <div className="label cursor-pointer gap-2">

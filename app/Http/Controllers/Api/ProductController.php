@@ -77,9 +77,11 @@ class ProductController extends Controller
         $data = $slice->map(function ($row) use ($productsById, $packsById) {
             if ($row['type'] === 'product') {
                 $product = $productsById->get($row['id']);
+
                 return $product ? ['type' => 'product', 'data' => (new ProductResource($product))->resolve()] : null;
             }
             $pack = $packsById->get($row['id']);
+
             return $pack ? ['type' => 'pack', 'data' => (new PackResource($pack))->resolve()] : null;
         })->filter()->values()->all();
 
@@ -101,19 +103,11 @@ class ProductController extends Controller
     {
         $query = Product::query()->active();
 
-        $categoryIds = $request->get('category_id');
-        if ($categoryIds !== null && $categoryIds !== '') {
-            $ids = is_array($categoryIds) ? $categoryIds : array_filter(explode(',', (string) $categoryIds));
-            if (! empty($ids)) {
-                $query->whereIn('category_id', $ids);
-            }
+        if (($categoryId = $this->requestedCategoryId($request)) !== null) {
+            $query->where('category_id', $categoryId);
         }
-        if ($request->filled('feature_ids')) {
-            $ids = is_array($request->feature_ids) ? $request->feature_ids : explode(',', $request->feature_ids);
-            $ids = array_filter(array_map('intval', $ids));
-            if (! empty($ids)) {
-                $query->whereHas('features', fn ($q) => $q->whereIn('features.id', $ids));
-            }
+        foreach ($this->requestedFeatureIds($request) as $featureId) {
+            $query->whereHas('features', fn ($q) => $q->where('features.id', $featureId));
         }
         if ($request->filled('search')) {
             $term = $request->search;
@@ -135,19 +129,14 @@ class ProductController extends Controller
     {
         $query = Pack::query()->active();
 
-        $categoryIds = $request->get('category_id');
-        if ($categoryIds !== null && $categoryIds !== '') {
-            $ids = is_array($categoryIds) ? $categoryIds : array_filter(explode(',', (string) $categoryIds));
-            if (! empty($ids)) {
-                $query->whereHas('items.product', fn ($q) => $q->whereIn('category_id', $ids));
-            }
+        if (($categoryId = $this->requestedCategoryId($request)) !== null) {
+            $query->whereHas('items.product', fn ($q) => $q->where('category_id', $categoryId));
         }
-        if ($request->filled('feature_ids')) {
-            $ids = is_array($request->feature_ids) ? $request->feature_ids : explode(',', $request->feature_ids);
-            $ids = array_filter(array_map('intval', $ids));
-            if (! empty($ids)) {
-                $query->whereHas('items.product', fn ($q) => $q->whereHas('features', fn ($f) => $f->whereIn('features.id', $ids)));
-            }
+        foreach ($this->requestedFeatureIds($request) as $featureId) {
+            $query->whereHas(
+                'items.product',
+                fn ($q) => $q->whereHas('features', fn ($f) => $f->where('features.id', $featureId))
+            );
         }
         if ($request->filled('search')) {
             $term = $request->search;
@@ -167,6 +156,45 @@ class ProductController extends Controller
         }
 
         return $query;
+    }
+
+    /**
+     * Single category filter. Products have one category_id; only one category can be applied.
+     * If the client sends multiple values (legacy URLs), the first valid id is used.
+     */
+    private function requestedCategoryId(Request $request): ?int
+    {
+        $raw = $request->get('category_id');
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+
+        $ids = is_array($raw) ? $raw : array_filter(explode(',', (string) $raw));
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($ids === []) {
+            return null;
+        }
+
+        return $ids[0];
+    }
+
+    /**
+     * Parsed feature filter IDs. Each ID is applied as a separate constraint so products (and packs)
+     * must satisfy every selected feature (AND), combined with category and search filters.
+     *
+     * @return list<int>
+     */
+    private function requestedFeatureIds(Request $request): array
+    {
+        if (! $request->filled('feature_ids')) {
+            return [];
+        }
+
+        $raw = $request->feature_ids;
+        $ids = is_array($raw) ? $raw : explode(',', (string) $raw);
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+
+        return $ids;
     }
 
     public function featured(): JsonResponse

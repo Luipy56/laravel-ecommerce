@@ -22,7 +22,7 @@ export default function AdminFeatureNameNewPage() {
       const { data } = await api.post('admin/feature-names', { name: name.trim(), is_active: isActive });
       if (data.success) {
         showSuccess(t('common.saved'));
-        navigate('/admin/feature-names');
+        navigate('/admin/features');
       }
       else setError(data.message || t('common.error'));
     } catch (err) {
@@ -36,7 +36,7 @@ export default function AdminFeatureNameNewPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.feature_types.new')}</PageTitle>
-        <Link to="/admin/feature-names" className="btn btn-ghost btn-sm shrink-0">
+        <Link to="/admin/features" className="btn btn-ghost btn-sm shrink-0">
           {t('common.back')}
         </Link>
       </div>
@@ -69,7 +69,7 @@ export default function AdminFeatureNameNewPage() {
               <span className="label-text">{t('admin.products.is_active')}</span>
             </label>
             <div className="flex justify-between gap-2 pt-4">
-              <Link to="/admin/feature-names" className="btn btn-ghost">
+              <Link to="/admin/features" className="btn btn-ghost">
                 {t('common.back')}
               </Link>
               <button type="submit" className="btn btn-primary" disabled={loading}>

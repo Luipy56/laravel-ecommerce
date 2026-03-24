@@ -7,6 +7,7 @@ import { AdminToastProvider } from '../../contexts/AdminToastContext';
 
 const SECTION_NAV_KEYS = {
   admins: 'admin.nav.admins',
+  categories: 'admin.nav.categories',
   products: 'admin.nav.products',
   'variant-groups': 'admin.nav.variant_groups',
   clients: 'admin.nav.clients',
@@ -19,6 +20,7 @@ const SECTION_NAV_KEYS = {
 
 const SECTION_NEW_KEYS = {
   admins: 'admin.admins.new',
+  categories: 'admin.categories.new',
   products: 'admin.products.new',
   features: 'admin.features.new',
   'feature-names': 'admin.feature_types.new',
@@ -163,7 +165,7 @@ export default function AdminLayout() {
               <li key={to}>
                 <Link
                   to={to}
-                  className={`rounded-lg ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-base-300 -ml-px' : ''}`}
+                  className={`rounded-lg ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
                   onClick={closeDrawer}
                   aria-current={isActive(to) ? 'page' : undefined}
                 >

@@ -1,30 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
 import ProductCard from '../components/ProductCard';
 
 export default function HomePage() {
   const { t } = useTranslation();
-  const [categories, setCategories] = useState([]);
-  const [featured, setFeatured] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const ac = new AbortController();
-    Promise.all([
-      api.get('categories', { signal: ac.signal }),
-      api.get('products/featured', { signal: ac.signal }),
-    ])
-      .then(([catRes, featRes]) => {
-        if (catRes.data.success) setCategories(catRes.data.data || []);
-        if (featRes.data.success) setFeatured((featRes.data.data || []).map((p) => Product.fromApi(p)));
-      })
-      .catch((err) => { if (err.name !== 'AbortError') setFeatured([]); })
-      .finally(() => setLoading(false));
-    return () => ac.abort();
-  }, []);
+  const categoriesQuery = useQuery({
+    queryKey: ['categories'],
+    queryFn: async ({ signal }) => {
+      const r = await api.get('categories', { signal });
+      return r.data.success ? r.data.data || [] : [];
+    },
+  });
+
+  const featuredQuery = useQuery({
+    queryKey: ['products', 'featured'],
+    queryFn: async ({ signal }) => {
+      const r = await api.get('products/featured', { signal });
+      if (!r.data.success) return [];
+      return (r.data.data || []).map((p) => Product.fromApi(p));
+    },
+  });
+
+  const categories = categoriesQuery.data ?? [];
+  const featured = featuredQuery.data ?? [];
+  const loading = categoriesQuery.isPending || featuredQuery.isPending;
 
   return (
     <div className="space-y-10">

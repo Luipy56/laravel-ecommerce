@@ -17,6 +17,7 @@ class AdminPackResource extends JsonResource
             'price' => (float) $this->price,
             'is_trending' => (bool) $this->is_trending,
             'is_active' => (bool) $this->is_active,
+            'contains_keys' => (bool) $this->contains_keys,
             'product_ids' => $this->whenLoaded('packItems', fn () => $this->packItems->pluck('product_id')->values()->all()),
             'items' => $this->whenLoaded('packItems', fn () => $this->packItems
                 ->filter(fn ($i) => $i->product)

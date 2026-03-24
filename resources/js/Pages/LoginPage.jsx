@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { loginSchema, parseWithZod } from '../validation';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -13,14 +14,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
+    const parsed = parseWithZod(loginSchema, { login_email: loginEmail, password }, t);
+    if (!parsed.ok) {
+      setFieldErrors(parsed.fieldErrors);
+      setError(parsed.firstError);
+      return;
+    }
     setLoading(true);
     try {
-      const result = await login(loginEmail, password, remember);
+      const result = await login(parsed.data.login_email, parsed.data.password, remember);
       if (result.success) {
         await mergeCart();
         navigate('/');
@@ -47,24 +56,32 @@ export default function LoginPage() {
             <input
               id="login-email"
               type="email"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${fieldErrors.login_email ? ' input-error' : ''}`}
               value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              required
+              onChange={(e) => {
+                setLoginEmail(e.target.value);
+                if (fieldErrors.login_email) setFieldErrors((fe) => ({ ...fe, login_email: undefined }));
+              }}
               autoComplete="email"
+              aria-invalid={!!fieldErrors.login_email}
             />
+            {fieldErrors.login_email ? <p className="validator-hint text-error">{fieldErrors.login_email}</p> : null}
           </label>
           <label htmlFor="login-password" className="form-field w-full">
             <span className="form-label">{t('auth.password')}</span>
             <input
               id="login-password"
               type="password"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${fieldErrors.password ? ' input-error' : ''}`}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (fieldErrors.password) setFieldErrors((fe) => ({ ...fe, password: undefined }));
+              }}
               autoComplete="current-password"
+              aria-invalid={!!fieldErrors.password}
             />
+            {fieldErrors.password ? <p className="validator-hint text-error">{fieldErrors.password}</p> : null}
           </label>
           <label htmlFor="login-remember" className="label cursor-pointer justify-start gap-2">
             <input id="login-remember" type="checkbox" className="checkbox checkbox-sm" checked={remember} onChange={(e) => setRemember(e.target.checked)} />

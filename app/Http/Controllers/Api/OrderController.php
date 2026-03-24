@@ -5,41 +5,68 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAddress;
-use App\Models\OrderLine;
 use App\Models\Payment;
+use App\Services\Payments\PaymentCheckoutService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class OrderController extends Controller
 {
-    public function checkout(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'payment_method' => ['required', 'string', 'in:card,paypal,bizum'],
-            'shipping_street' => ['required', 'string', 'max:255'],
-            'shipping_city' => ['required', 'string', 'max:100'],
-            'shipping_province' => ['nullable', 'string', 'max:100'],
-            'shipping_postal_code' => ['nullable', 'string', 'max:20'],
-            'shipping_note' => ['nullable', 'string'],
-            'installation_street' => ['nullable', 'string', 'max:255'],
-            'installation_city' => ['nullable', 'string', 'max:100'],
-            'installation_postal_code' => ['nullable', 'string', 'max:20'],
-            'installation_note' => ['nullable', 'string'],
-        ]);
+    private const PAYMENT_METHODS = 'card,paypal,bizum,revolut';
 
+    public function checkout(Request $request, PaymentCheckoutService $paymentCheckoutService): JsonResponse
+    {
         $client = $request->user();
         $cart = Order::where('client_id', $client->id)->where('kind', Order::KIND_CART)->with('lines')->first();
         if (! $cart || $cart->lines->isEmpty()) {
             return response()->json(['success' => false, 'message' => 'Cart is empty.'], 422);
         }
 
-        DB::transaction(function () use ($cart, $validated, $client) {
+        $rules = [
+            'payment_method' => $cart->installation_requested
+                ? ['nullable', 'string', 'in:'.self::PAYMENT_METHODS]
+                : ['required', 'string', 'in:'.self::PAYMENT_METHODS],
+            'shipping_street' => ['required', 'string', 'max:255'],
+            'shipping_city' => ['required', 'string', 'max:100'],
+            'shipping_province' => ['nullable', 'string', 'max:100'],
+            'shipping_postal_code' => ['required', 'string', 'max:20'],
+            'shipping_note' => ['nullable', 'string'],
+            'installation_street' => ['nullable', 'string', 'max:255'],
+            'installation_city' => ['nullable', 'string', 'max:100'],
+            'installation_postal_code' => ['nullable', 'string', 'max:20'],
+            'installation_note' => ['nullable', 'string'],
+        ];
+
+        if ($cart->installation_requested) {
+            $rules['installation_street'] = ['required', 'string', 'max:255'];
+            $rules['installation_city'] = ['required', 'string', 'max:100'];
+            $rules['installation_postal_code'] = ['required', 'string', 'max:20'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $awaitingInstallationQuote = (bool) $cart->installation_requested;
+        if (! $awaitingInstallationQuote && ! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.payment.method_unavailable'),
+                'code' => 'payment_method_not_configured',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote) {
             $cart->update([
                 'kind' => Order::KIND_ORDER,
-                'status' => Order::STATUS_PENDING,
+                'status' => $awaitingInstallationQuote
+                    ? Order::STATUS_AWAITING_INSTALLATION_PRICE
+                    : Order::STATUS_PENDING,
                 'order_date' => now(),
+                'shipping_price' => Order::SHIPPING_FLAT_EUR,
+                'installation_status' => $awaitingInstallationQuote ? Order::INSTALLATION_PENDING : null,
+                'installation_price' => null,
             ]);
 
             $cart->addresses()->create([
@@ -51,7 +78,16 @@ class OrderController extends Controller
                 'note' => $validated['shipping_note'] ?? null,
             ]);
 
-            if (! empty($validated['installation_street']) || ! empty($validated['installation_city'])) {
+            if ($awaitingInstallationQuote) {
+                $cart->addresses()->create([
+                    'type' => OrderAddress::TYPE_INSTALLATION,
+                    'street' => $validated['installation_street'] ?? '',
+                    'city' => $validated['installation_city'] ?? '',
+                    'province' => null,
+                    'postal_code' => $validated['installation_postal_code'] ?? null,
+                    'note' => $validated['installation_note'] ?? null,
+                ]);
+            } elseif (! empty($validated['installation_street']) || ! empty($validated['installation_city'])) {
                 $cart->addresses()->create([
                     'type' => OrderAddress::TYPE_INSTALLATION,
                     'street' => $validated['installation_street'] ?? '',
@@ -62,16 +98,43 @@ class OrderController extends Controller
                 ]);
             }
 
-            $total = $cart->lines->sum(fn ($l) => $l->line_total);
-            $cart->payments()->create([
-                'amount' => $total,
-                'payment_method' => $validated['payment_method'],
-                'gateway_reference' => null,
-                'paid_at' => now(),
-            ]);
+            if (! $awaitingInstallationQuote) {
+                $cart->load('lines');
+                $total = $cart->grand_total;
+                $cart->payments()->create([
+                    'amount' => $total,
+                    'payment_method' => $validated['payment_method'],
+                    'status' => Payment::STATUS_PENDING,
+                    'currency' => 'EUR',
+                ]);
+            }
         });
 
-        $cart->load(['lines.product', 'lines.pack', 'addresses', 'payments']);
+        $cart->refresh()->load(['lines.product', 'lines.pack', 'addresses', 'payments']);
+
+        $paymentCheckout = null;
+        $paymentError = null;
+        if (! $awaitingInstallationQuote) {
+            $payment = $cart->payments()->latest()->first();
+            if ($payment && PaymentCheckoutService::allowSimulatedPayments()) {
+                try {
+                    $paymentCheckoutService->simulateSuccess($payment);
+                } catch (Throwable $e) {
+                    report($e);
+                    $paymentError = $e->getMessage();
+                }
+                $paymentCheckout = ['gateway' => 'simulated', 'simulated' => true];
+            } elseif ($payment) {
+                try {
+                    $paymentCheckout = $paymentCheckoutService->start($payment);
+                } catch (Throwable $e) {
+                    report($e);
+                    $paymentError = config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error');
+                }
+            }
+        }
+
+        $cart->refresh()->load('payments');
 
         return response()->json([
             'success' => true,
@@ -79,9 +142,128 @@ class OrderController extends Controller
                 'id' => $cart->id,
                 'status' => $cart->status,
                 'order_date' => $cart->order_date?->toIso8601String(),
-                'total' => $cart->lines->sum(fn ($l) => $l->line_total),
+                'awaiting_installation_quote' => $awaitingInstallationQuote,
+                'installation_requested' => (bool) $cart->installation_requested,
+                'installation_status' => $cart->installation_status,
+                'installation_price' => $cart->installation_price !== null ? (float) $cart->installation_price : null,
+                'lines_subtotal' => $cart->lines_subtotal,
+                'shipping_flat_eur' => Order::SHIPPING_FLAT_EUR,
+                'grand_total' => $cart->grand_total,
+                'has_payment' => $cart->hasSuccessfulPayment(),
+                'payment_checkout' => $paymentCheckout,
+                'payment_error' => $paymentError,
             ],
         ], 201);
+    }
+
+    public function pay(Request $request, Order $order, PaymentCheckoutService $paymentCheckoutService): JsonResponse
+    {
+        if ($order->client_id !== $request->user()->id || $order->kind !== Order::KIND_ORDER) {
+            abort(404);
+        }
+        if ($order->hasSuccessfulPayment()) {
+            return response()->json(['success' => false, 'message' => __('shop.order.already_paid')], 422);
+        }
+        if (! $order->clientMayPay()) {
+            return response()->json(['success' => false, 'message' => __('shop.order.cannot_pay_yet')], 422);
+        }
+
+        $validated = $request->validate([
+            'payment_method' => ['required', 'string', 'in:'.self::PAYMENT_METHODS],
+        ]);
+
+        if (! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.payment.method_unavailable'),
+                'code' => 'payment_method_not_configured',
+            ], 422);
+        }
+
+        $order->load('lines');
+        $total = $order->grand_total;
+
+        DB::transaction(function () use ($order, $validated, $total) {
+            $order->payments()->create([
+                'amount' => $total,
+                'payment_method' => $validated['payment_method'],
+                'status' => Payment::STATUS_PENDING,
+                'currency' => 'EUR',
+            ]);
+        });
+
+        $payment = $order->payments()->latest()->first();
+
+        if (PaymentCheckoutService::allowSimulatedPayments()) {
+            try {
+                $paymentCheckoutService->simulateSuccess($payment);
+            } catch (Throwable $e) {
+                report($e);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+            $paymentCheckout = ['gateway' => 'simulated', 'simulated' => true];
+        } else {
+            try {
+                $paymentCheckout = $paymentCheckoutService->start($payment);
+            } catch (Throwable $e) {
+                report($e);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error'),
+                ], 422);
+            }
+        }
+
+        $order->refresh()->load(['lines', 'payments']);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $order->id,
+                'status' => $order->status,
+                'grand_total' => $order->grand_total,
+                'has_payment' => $order->hasSuccessfulPayment(),
+                'payment_checkout' => $paymentCheckout,
+            ],
+        ]);
+    }
+
+    /** Drop installation request so the client can pay product total only (e.g. after admin rejection). */
+    public function waiveInstallation(Request $request, Order $order): JsonResponse
+    {
+        if ($order->client_id !== $request->user()->id || $order->kind !== Order::KIND_ORDER) {
+            abort(404);
+        }
+        if ($order->hasSuccessfulPayment()) {
+            return response()->json(['success' => false, 'message' => __('shop.order.already_paid')], 422);
+        }
+        if ($order->status !== Order::STATUS_AWAITING_INSTALLATION_PRICE) {
+            return response()->json(['success' => false, 'message' => __('shop.order.waive_installation_invalid')], 422);
+        }
+
+        $order->update([
+            'installation_requested' => false,
+            'installation_status' => null,
+            'installation_price' => null,
+            'status' => Order::STATUS_PENDING,
+        ]);
+
+        $order->load('lines');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $order->id,
+                'status' => $order->status,
+                'installation_requested' => false,
+                'grand_total' => $order->grand_total,
+            ],
+        ]);
     }
 
     public function index(Request $request): JsonResponse
@@ -92,13 +274,24 @@ class OrderController extends Controller
             ->orderByDesc('order_date')
             ->paginate(15);
 
-        $data = $orders->getCollection()->map(fn (Order $o) => [
-            'id' => $o->id,
-            'status' => $o->status,
-            'order_date' => $o->order_date?->toIso8601String(),
-            'shipping_date' => $o->shipping_date?->toIso8601String(),
-            'total' => $o->lines->sum(fn ($l) => $l->line_total),
-        ]);
+        $data = $orders->getCollection()->map(function (Order $o) {
+            $o->loadMissing('lines');
+
+            return [
+                'id' => $o->id,
+                'status' => $o->status,
+                'order_date' => $o->order_date?->toIso8601String(),
+                'shipping_date' => $o->shipping_date?->toIso8601String(),
+                'installation_requested' => (bool) $o->installation_requested,
+                'installation_status' => $o->installation_status,
+                'installation_price' => $o->installation_price !== null ? (float) $o->installation_price : null,
+                'lines_subtotal' => $o->lines_subtotal,
+                'shipping_flat_eur' => Order::SHIPPING_FLAT_EUR,
+                'grand_total' => $o->grand_total,
+                'has_payment' => $o->hasSuccessfulPayment(),
+                'can_pay' => $o->clientMayPay(),
+            ];
+        });
 
         return response()->json([
             'success' => true,
@@ -118,7 +311,9 @@ class OrderController extends Controller
         }
         $order->load(['lines.product', 'lines.pack', 'addresses', 'payments']);
 
-        $lines = $order->lines->map(fn (OrderLine $l) => [
+        $payMethods = PaymentCheckoutService::paymentMethodsAvailability();
+
+        $lines = $order->lines->map(fn ($l) => [
             'id' => $l->id,
             'product_id' => $l->product_id,
             'pack_id' => $l->pack_id,
@@ -136,9 +331,33 @@ class OrderController extends Controller
                 'status' => $order->status,
                 'order_date' => $order->order_date?->toIso8601String(),
                 'shipping_date' => $order->shipping_date?->toIso8601String(),
+                'installation_requested' => (bool) $order->installation_requested,
+                'installation_status' => $order->installation_status,
+                'installation_price' => $order->installation_price !== null ? (float) $order->installation_price : null,
                 'lines' => $lines,
                 'addresses' => $order->addresses,
-                'total' => $order->lines->sum(fn ($l) => $l->line_total),
+                'lines_subtotal' => $order->lines_subtotal,
+                'shipping_flat_eur' => Order::SHIPPING_FLAT_EUR,
+                'grand_total' => $order->grand_total,
+                'has_payment' => $order->hasSuccessfulPayment(),
+                'can_pay' => $order->clientMayPay(),
+                'payment_methods_available' => [
+                    'card' => $payMethods['card'],
+                    'paypal' => $payMethods['paypal'],
+                    'bizum' => $payMethods['bizum'],
+                    'revolut' => $payMethods['revolut'],
+                ],
+                'payments_simulated' => $payMethods['simulated'],
+                'payments' => $order->payments->map(fn (Payment $p) => [
+                    'id' => $p->id,
+                    'status' => $p->status,
+                    'gateway' => $p->gateway,
+                    'amount' => (float) $p->amount,
+                    'currency' => $p->currency,
+                    'payment_method' => $p->payment_method,
+                    'paid_at' => $p->paid_at?->toIso8601String(),
+                    'failure_code' => $p->failure_code,
+                ]),
             ],
         ]);
     }
@@ -156,11 +375,11 @@ class OrderController extends Controller
         app()->setLocale($locale);
         $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
 
-        // Simple PDF via HTML response; can be replaced with DomPDF or similar
         $html = view('pdf.invoice', ['order' => $order])->render();
+
         return response($html, 200, [
             'Content-Type' => 'text/html',
-            'Content-Disposition' => 'inline; filename="invoice-' . $order->id . '.html"',
+            'Content-Disposition' => 'inline; filename="invoice-'.$order->id.'.html"',
         ]);
     }
 }

@@ -9,7 +9,9 @@ Enum order_kind {
 }
 
 Enum order_status {
-  pending [note: 'Pending']
+  pending [note: 'Pending; ready to pay when no install quote needed']
+  awaiting_installation_price [note: 'Client requested installation; admin must set fee before payment']
+  in_transit [note: 'In transit']
   sent [note: 'Shipped (with shipping date)']
   installation_pending [note: 'Shipped; installation scheduled or awaiting']
   installation_confirmed [note: 'Installation completed']
@@ -19,12 +21,15 @@ Enum payment_method {
   paypal
   card [note: 'Credit card']
   bizum
+  revolut [note: 'Revolut Pay / hosted checkout']
 }
 
 Enum personalized_solution_status {
   pending_review [note: 'Pending review']
   reviewed [note: 'Reviewed']
   client_contacted [note: 'Client contacted']
+  rejected [note: 'Rejected']
+  completed [note: 'Completed']
 }
 
 Enum address_type {
@@ -71,7 +76,7 @@ Table CLIENT_ADDRESSES {
   street varchar(255) [not null]
   city varchar(100) [not null]
   province varchar(100) [null, note: 'Provincia']
-  postal_code varchar(20) [null]
+  postal_code varchar(20) [null, note: 'Required at application level (validation)']
   is_primary boolean [not null, default: false, note: 'Main address for this client']
   is_active boolean [not null, default: true, note: 'Soft delete']
 }
@@ -95,10 +100,15 @@ Table PRODUCTS {
   code varchar(50) [null, unique, note: 'Product code']
   name varchar(255) [not null]
   description text [null]
-  price decimal(10,2) [not null]
+  price decimal(10,2) [not null, note: 'List/catalog price (storefront base before discount)']
+  discount_percent decimal(5,2) [null, note: 'Optional 0–100; customer pays price * (1 - discount/100)']
+  purchase_price decimal(10,2) [null, note: 'Cost price; admin only']
   stock int [not null, default: 0]
-  is_installable boolean [not null, default: false]
-  installation_price decimal(10,2) [null, note: 'When is_installable=true; may vary by postal code in app']
+  weight_kg decimal(10,3) [null, note: 'Weight in kg']
+  is_double_clutch boolean [not null, default: false]
+  has_card boolean [not null, default: false]
+  security_level varchar(32) [null, note: 'standard | high | very_high']
+  competitor_url varchar(2048) [null]
   is_extra_keys_available boolean [not null, default: false, note: 'Product can have extra physical keys']
   extra_key_unit_price decimal(10,2) [null, note: 'Price per extra key when is_extra_keys_available=true']
   is_featured boolean [not null, default: false, note: 'Featured on homepage']
@@ -124,10 +134,10 @@ Table PRODUCT_FEATURES {
   feature_id int [not null, ref: > FEATURES.id, pk]
 }
 
-Table PRODUCT_IMAGES [note: 'References files in storage (FS/S3/MinIO); no blob in DB. Primary = sort_order 1 (or min).'] {
+Table PRODUCT_IMAGES [note: 'References files on disk (this app: public/uploads/). Primary = sort_order 1 (or min).'] {
   id int [pk, increment]
   product_id int [not null, ref: > PRODUCTS.id]
-  storage_path varchar(1024) [not null, note: 'Path or key in storage']
+  storage_path varchar(1024) [not null, note: 'Path relative to uploads disk, e.g. products/74/image-1.jpg']
   filename varchar(255) [null, note: 'Original or assigned filename']
   size_bytes int [not null]
   checksum varchar(64) [null, note: 'e.g. SHA-256 hash']
@@ -135,7 +145,6 @@ Table PRODUCT_IMAGES [note: 'References files in storage (FS/S3/MinIO); no blob 
   sort_order int [not null, default: 0, note: 'Display order; primary when 1 or min']
   is_active boolean [not null, default: true, note: 'Soft delete']
 }
-
 
 Table ORDERS {
   id int [pk, increment]
@@ -146,7 +155,10 @@ Table ORDERS {
 
   order_date timestamp [null, note: 'Null while cart; set on checkout']
   shipping_date timestamp [null]
-  shipping_price decimal(10,2) [null]
+  shipping_price decimal(10,2) [null, note: 'Flat 9 EUR shipping for confirmed orders; grand total uses constant in app']
+  installation_requested boolean [not null, default: false, note: 'Whole-order installation; fee set by admin']
+  installation_price decimal(10,2) [null, note: 'One installation fee per order when priced']
+  installation_status varchar(32) [null, note: 'pending | priced | rejected; null if installation not requested']
 }
 
 Table ORDER_ADDRESSES [note: 'One row per address type per order (shipping, installation).'] {
@@ -156,7 +168,7 @@ Table ORDER_ADDRESSES [note: 'One row per address type per order (shipping, inst
   street varchar(255) [not null]
   city varchar(100) [not null]
   province varchar(100) [null, note: 'Provincia']
-  postal_code varchar(20) [null]
+  postal_code varchar(20) [null, note: 'Required at application level (validation)']
   note text [null, note: 'e.g. If I\'m not there..., I\'ll be there at 3...']
 }
 
@@ -168,18 +180,24 @@ Table ORDER_LINES [note: 'Line items of an order (product or pack, quantity, pri
   quantity int [not null]
   unit_price decimal(10,2) [null, note: 'Set at payment time from current product/pack price; null while in cart']
   offer decimal(10,2) [null, note: 'Discount amount applied']
-  is_installation_requested boolean [not null, default: false]
-  installation_price decimal(10,2) [null, note: 'Optional installation price for this line']
+  keys_all_same boolean [not null, default: false, note: 'When pack contains_keys: true = client chose all same key, false = all different (or N/A)']
   extra_keys_qty int [not null, default: 0, note: 'Number of extra keys requested']
   extra_key_unit_price decimal(10,2) [null, note: 'Price per extra key at order time']
+  is_included boolean [not null, default: true, note: 'If false, line is excluded from total (e.g. saved for later)']
 }
 
-Table PAYMENTS [note: 'One or more payment records per order (e.g. split payments). No status/gateway_name.'] {
+Table PAYMENTS [note: 'PSP lifecycle: pending until webhook confirms succeeded.'] {
   id int [pk, increment]
   order_id int [not null, ref: > ORDERS.id]
   amount decimal(10,2) [not null]
   payment_method payment_method [not null]
-  gateway_reference varchar(255) [null, note: 'External transaction id from gateway']
+  status varchar(32) [not null, default: 'pending']
+  gateway varchar(32) [null]
+  currency char(3) [not null, default: 'EUR']
+  gateway_reference varchar(255) [null]
+  failure_code varchar(64) [null]
+  failure_message text [null]
+  metadata json [null]
   paid_at timestamp [null]
 }
 
@@ -198,12 +216,13 @@ Table PACKS {
   price decimal(10,2) [not null]
   is_trending boolean [not null, default: false, note: 'Trending pack']
   is_active boolean [not null, default: true, note: 'Disable without deleting']
+  contains_keys boolean [not null, default: false, note: 'Pack contains keys (e.g. 3 locks); client can choose at cart: all same key or all different']
 }
 
-Table PACK_IMAGES [note: 'References files in storage (FS/S3/MinIO); no blob in DB. Primary = sort_order 1 (or min).'] {
+Table PACK_IMAGES [note: 'References files on disk (this app: public/uploads/). Primary = sort_order 1 (or min).'] {
   id int [pk, increment]
   pack_id int [not null, ref: > PACKS.id]
-  storage_path varchar(1024) [not null, note: 'Path or key in storage']
+  storage_path varchar(1024) [not null, note: 'Path relative to uploads disk, e.g. packs/1/image-1.jpg']
   filename varchar(255) [null, note: 'Original or assigned filename']
   size_bytes int [not null]
   checksum varchar(64) [null, note: 'e.g. SHA-256 hash']
@@ -228,7 +247,7 @@ Table PERSONALIZED_SOLUTIONS [note: 'Can be independent of client and order (cli
   address_street varchar(255) [null, note: 'Same structure as ORDERS shipping address']
   address_city varchar(100) [null]
   address_province varchar(100) [null, note: 'Provincia']
-  address_postal_code varchar(20) [null]
+  address_postal_code varchar(20) [null, note: 'Required at application level (validation)']
   address_note text [null, note: 'e.g. If I\'m not there..., I\'ll be there at 3...']
   problem_description text [null]
   resolution text [null, note: 'Admin resolution / quote']
@@ -236,10 +255,10 @@ Table PERSONALIZED_SOLUTIONS [note: 'Can be independent of client and order (cli
   is_active boolean [not null, default: true, note: 'Soft delete']
 }
 
-Table PERSONALIZED_SOLUTION_ATTACHMENTS [note: 'References files in storage (FS/S3/MinIO); no blob in DB'] {
+Table PERSONALIZED_SOLUTION_ATTACHMENTS [note: 'References files on disk (this app: public/uploads/)'] {
   id int [pk, increment]
   personalized_solution_id int [not null, ref: > PERSONALIZED_SOLUTIONS.id]
-  storage_path varchar(1024) [not null, note: 'Path or key in storage']
+  storage_path varchar(1024) [not null, note: 'Path relative to uploads disk, e.g. personalized-solutions/1/attachment-1.jpg']
   original_filename varchar(255) [null]
   size_bytes int [not null]
   checksum varchar(64) [null, note: 'e.g. SHA-256 hash']

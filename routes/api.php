@@ -2,23 +2,25 @@
 
 use App\Http\Controllers\Api\AdminAdminController;
 use App\Http\Controllers\Api\AdminAuthController;
-use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminCategoryController;
+use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminFeatureController;
 use App\Http\Controllers\Api\AdminFeatureNameController;
-use App\Http\Controllers\Api\AdminPackController;
 use App\Http\Controllers\Api\AdminOrderController;
+use App\Http\Controllers\Api\AdminPackController;
 use App\Http\Controllers\Api\AdminPersonalizedSolutionController;
 use App\Http\Controllers\Api\AdminProductController;
 use App\Http\Controllers\Api\AdminVariantGroupController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackController;
+use App\Http\Controllers\Api\PaymentConfigController;
+use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\PersonalizedSolutionController;
-use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -37,10 +39,17 @@ Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('packs', [PackController::class, 'index']);
 Route::get('packs/{pack}', [PackController::class, 'show']);
 
+Route::get('payments/config', [PaymentConfigController::class, 'show']);
+
 Route::post('personalized-solutions', [PersonalizedSolutionController::class, 'store']);
+
+Route::post('payments/webhooks/stripe', [PaymentWebhookController::class, 'stripe']);
+Route::post('payments/redsys/notify', [PaymentWebhookController::class, 'redsysNotify'])->name('payments.redsys.notify');
+Route::post('payments/webhooks/revolut', [PaymentWebhookController::class, 'revolut']);
 
 /* Cart: guest uses session, auth uses DB; controller branches */
 Route::get('cart', [CartController::class, 'show']);
+Route::put('cart/installation', [CartController::class, 'updateInstallation']);
 Route::post('cart/lines', [CartController::class, 'addLine']);
 Route::put('cart/lines/{line}', [CartController::class, 'updateLine']);
 Route::delete('cart/lines/{line}', [CartController::class, 'removeLine']);
@@ -61,6 +70,8 @@ Route::middleware('auth')->group(function () {
     Route::post('cart/merge', [CartController::class, 'merge']); // merge session cart into DB on login
 
     Route::post('orders/checkout', [OrderController::class, 'checkout']);
+    Route::post('orders/{order}/pay', [OrderController::class, 'pay']);
+    Route::post('orders/{order}/waive-installation', [OrderController::class, 'waiveInstallation']);
     Route::get('orders', [OrderController::class, 'index']);
     Route::get('orders/{order}', [OrderController::class, 'show']);
     Route::get('orders/{order}/invoice', [OrderController::class, 'invoice']);
@@ -70,6 +81,7 @@ Route::middleware('auth')->group(function () {
 Route::post('admin/login', [AdminAuthController::class, 'login']);
 Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::post('logout', [AdminAuthController::class, 'logout']);
+    Route::get('stats/postal-codes', [AdminDashboardController::class, 'postalCodes']);
     Route::get('stats/sales-by-period', [AdminDashboardController::class, 'salesByPeriod']);
     Route::get('stats/top-products', [AdminDashboardController::class, 'topProducts']);
     Route::get('stats/low-stock', [AdminDashboardController::class, 'lowStock']);

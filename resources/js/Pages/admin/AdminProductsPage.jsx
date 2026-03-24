@@ -18,7 +18,7 @@ export default function AdminProductsPage() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const { data } = await api.get('admin/categories');
+      const { data } = await api.get('admin/categories', { params: { per_page: 500 } });
       if (data.success) setCategories(data.data || []);
     } catch {
       setCategories([]);
@@ -152,18 +152,18 @@ export default function AdminProductsPage() {
         <div className="join flex justify-center">
           <button
             type="button"
-            className="btn join-item btn-sm"
+            className="btn join-item btn-sm bg-base-100 border-base-300"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
             {t('shop.pagination.prev')}
           </button>
-          <span className="btn join-item btn-sm btn-disabled no-animation">
+          <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
             {t('shop.pagination.page')} {page} {t('shop.pagination.of')} {meta.last_page}
           </span>
           <button
             type="button"
-            className="btn join-item btn-sm"
+            className="btn join-item btn-sm bg-base-100 border-base-300"
             disabled={page >= meta.last_page}
             onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
           >

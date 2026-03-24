@@ -26,15 +26,25 @@ class AdminCategoryController extends Controller
             $query->where('is_active', $request->boolean('is_active'));
         }
 
-        $categories = $query->get(['id', 'code', 'name', 'is_active']);
-        $data = $categories->map(fn (ProductCategory $c) => [
+        $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
+        $categories = $query->paginate($perPage, ['id', 'code', 'name', 'is_active']);
+        $data = $categories->getCollection()->map(fn (ProductCategory $c) => [
             'id' => $c->id,
             'code' => $c->code,
             'name' => $c->name,
             'is_active' => (bool) $c->is_active,
         ])->values()->all();
 
-        return response()->json(['success' => true, 'data' => $data]);
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'meta' => [
+                'current_page' => $categories->currentPage(),
+                'last_page' => $categories->lastPage(),
+                'per_page' => $categories->perPage(),
+                'total' => $categories->total(),
+            ],
+        ]);
     }
 
     public function store(Request $request): JsonResponse

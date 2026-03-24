@@ -92,8 +92,13 @@ export default function AdminLayout() {
   const navItems = useMemo(() => {
     const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard' };
     const mainItems = [
+      { to: '/admin/admins', labelKey: 'admin.nav.admins' },
       { to: '/admin/categories', labelKey: 'admin.nav.categories' },
       { to: '/admin/products', labelKey: 'admin.nav.products' },
+      { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups' },
+      { to: '/admin/clients', labelKey: 'admin.nav.clients' },
+      { to: '/admin/orders', labelKey: 'admin.nav.orders' },
+      { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions' },
       { to: '/admin/features', labelKey: 'admin.nav.features' },
       { to: '/admin/packs', labelKey: 'admin.nav.packs' },
     ];
@@ -168,6 +173,11 @@ export default function AdminLayout() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link to="/" className="rounded-lg" onClick={closeDrawer}>
+                {t('admin.back_to_shop')}
+              </Link>
+            </li>
           </ul>
           <div className="p-4 border-t border-base-200">
             <button type="button" className="btn btn-ghost btn-block justify-start" onClick={handleLogout}>

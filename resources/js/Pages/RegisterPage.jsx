@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { parseWithZod, registerFormSchema } from '../validation';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -24,19 +25,34 @@ export default function RegisterPage() {
     address_postal_code: '',
   });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((fe) => {
+        const next = { ...fe };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
+    const parsed = parseWithZod(registerFormSchema, form, t);
+    if (!parsed.ok) {
+      setFieldErrors(parsed.fieldErrors);
+      setError(parsed.firstError);
+      return;
+    }
     setLoading(true);
     try {
-      const result = await register(form);
+      const result = await register(parsed.data);
       if (result.success) {
         await mergeCart();
         navigate('/');
@@ -82,15 +98,42 @@ export default function RegisterPage() {
               <h2 className="font-semibold text-base-content border-b border-base-300 pb-1">{t('register.section_access')}</h2>
               <label htmlFor="register-login_email" className="form-field w-full">
                 <span className="form-label">{t('auth.email')} *</span>
-                <input id="register-login_email" type="email" name="login_email" className="input input-bordered w-full" value={form.login_email} onChange={handleChange} required />
+                <input
+                  id="register-login_email"
+                  type="email"
+                  name="login_email"
+                  className={`input input-bordered w-full${fieldErrors.login_email ? ' input-error' : ''}`}
+                  value={form.login_email}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.login_email}
+                />
+                {fieldErrors.login_email ? <p className="validator-hint text-error">{fieldErrors.login_email}</p> : null}
               </label>
               <label htmlFor="register-password" className="form-field w-full">
                 <span className="form-label">{t('auth.password')} *</span>
-                <input id="register-password" type="password" name="password" className="input input-bordered w-full" value={form.password} onChange={handleChange} required minLength={8} />
+                <input
+                  id="register-password"
+                  type="password"
+                  name="password"
+                  className={`input input-bordered w-full${fieldErrors.password ? ' input-error' : ''}`}
+                  value={form.password}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.password}
+                />
+                {fieldErrors.password ? <p className="validator-hint text-error">{fieldErrors.password}</p> : null}
               </label>
               <label htmlFor="register-password_confirmation" className="form-field w-full">
                 <span className="form-label">{t('auth.password_confirmation')} *</span>
-                <input id="register-password_confirmation" type="password" name="password_confirmation" className="input input-bordered w-full" value={form.password_confirmation} onChange={handleChange} required />
+                <input
+                  id="register-password_confirmation"
+                  type="password"
+                  name="password_confirmation"
+                  className={`input input-bordered w-full${fieldErrors.password_confirmation ? ' input-error' : ''}`}
+                  value={form.password_confirmation}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.password_confirmation}
+                />
+                {fieldErrors.password_confirmation ? <p className="validator-hint text-error">{fieldErrors.password_confirmation}</p> : null}
               </label>
             </div>
             <div className="space-y-5">
@@ -100,7 +143,16 @@ export default function RegisterPage() {
                   {t('profile.name')} *
                   {isCompany && <span className="text-base-content/60 font-normal"> ({t('register.contact_name_hint')})</span>}
                 </span>
-                <input id="register-name" type="text" name="name" className="input input-bordered w-full" value={form.name} onChange={handleChange} required />
+                <input
+                  id="register-name"
+                  type="text"
+                  name="name"
+                  className={`input input-bordered w-full${fieldErrors.name ? ' input-error' : ''}`}
+                  value={form.name}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.name}
+                />
+                {fieldErrors.name ? <p className="validator-hint text-error">{fieldErrors.name}</p> : null}
               </label>
               <label htmlFor="register-surname" className="form-field w-full">
                 <span className="form-label">{t('profile.surname')}</span>
@@ -108,7 +160,16 @@ export default function RegisterPage() {
               </label>
               <label htmlFor="register-phone" className="form-field w-full">
                 <span className="form-label">{t('profile.phone')}</span>
-                <input id="register-phone" type="tel" name="phone" className="input input-bordered w-full" value={form.phone} onChange={handleChange} />
+                <input
+                  id="register-phone"
+                  type="tel"
+                  name="phone"
+                  className={`input input-bordered w-full${fieldErrors.phone ? ' input-error' : ''}`}
+                  value={form.phone}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.phone}
+                />
+                {fieldErrors.phone ? <p className="validator-hint text-error">{fieldErrors.phone}</p> : null}
               </label>
               <label htmlFor="register-identification" className="form-field w-full">
                 <span className="form-label">{t('register.identification')}</span>
@@ -116,12 +177,14 @@ export default function RegisterPage() {
                   id="register-identification"
                   type="text"
                   name="identification"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full${fieldErrors.identification ? ' input-error' : ''}`}
                   placeholder={t('register.identification_placeholder')}
                   value={form.identification}
                   onChange={handleChange}
                   maxLength={20}
+                  aria-invalid={!!fieldErrors.identification}
                 />
+                {fieldErrors.identification ? <p className="validator-hint text-error">{fieldErrors.identification}</p> : null}
               </label>
             </div>
           </div>
@@ -139,7 +202,15 @@ export default function RegisterPage() {
               </label>
               <label htmlFor="register-address_postal_code" className="form-field w-28">
                 <span className="form-label">{t('profile.postal_code')} *</span>
-                <input id="register-address_postal_code" name="address_postal_code" className="input input-bordered w-full" value={form.address_postal_code} onChange={handleChange} required />
+                <input
+                  id="register-address_postal_code"
+                  name="address_postal_code"
+                  className={`input input-bordered w-full${fieldErrors.address_postal_code ? ' input-error' : ''}`}
+                  value={form.address_postal_code}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.address_postal_code}
+                />
+                {fieldErrors.address_postal_code ? <p className="validator-hint text-error">{fieldErrors.address_postal_code}</p> : null}
               </label>
             </div>
             <label htmlFor="register-address_province" className="form-field w-full">

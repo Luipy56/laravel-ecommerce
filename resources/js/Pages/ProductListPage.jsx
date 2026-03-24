@@ -9,10 +9,13 @@ import PageTitle from '../components/PageTitle';
 
 const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 0 };
 
-function buildSearchParams({ categoryIds, featureIds, search, page }) {
+/**
+ * Query string for filters. When categoryInPath is true, category is only in the URL path (/categories/:id/products), not repeated here.
+ */
+function buildSearchParams({ selectedCategoryId, featureIds, search, page, categoryInPath = false }) {
   const next = new URLSearchParams();
   if (search) next.set('search', search);
-  categoryIds.forEach((id) => next.append('category_id', id));
+  if (!categoryInPath && selectedCategoryId) next.set('category_id', String(selectedCategoryId));
   featureIds.forEach((id) => next.append('feature_id', id));
   if (page > 1) next.set('page', String(page));
   return next;
@@ -64,23 +67,23 @@ export default function ProductListPage() {
   const location = useLocation();
   const { id: categoryIdFromRoute } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const isCategoryRoute = categoryIdFromRoute && location.pathname.includes('/categories/');
-  const categoryIdsFromUrl = searchParams.getAll('category_id');
-  const categoryIds = useMemo(() => {
-    if (isCategoryRoute) {
-      const withRoute = [String(categoryIdFromRoute), ...categoryIdsFromUrl];
-      return [...new Set(withRoute)];
-    }
-    return categoryIdsFromUrl;
-  }, [isCategoryRoute, categoryIdFromRoute, categoryIdsFromUrl.join(',')]);
+  const isCategoryRoute = Boolean(categoryIdFromRoute && location.pathname.includes('/categories/'));
+  const categoryIdFromQuery = searchParams.get('category_id');
+
+  const selectedCategoryId = useMemo(() => {
+    if (isCategoryRoute && categoryIdFromRoute) return String(categoryIdFromRoute);
+    if (categoryIdFromQuery) return String(categoryIdFromQuery);
+    return null;
+  }, [isCategoryRoute, categoryIdFromRoute, categoryIdFromQuery]);
+
   const featureIds = searchParams.getAll('feature_id');
   const search = searchParams.get('search');
   const pageParam = searchParams.get('page');
   const currentPage = Math.max(1, parseInt(pageParam || '1', 10) || 1);
 
   const catalogQueryKey = useMemo(
-    () => ['products', 'catalog', categoryIds.join(','), featureIds.join(','), search ?? '', currentPage],
-    [categoryIds.join(','), featureIds.join(','), search, currentPage]
+    () => ['products', 'catalog', selectedCategoryId ?? '', featureIds.join(','), search ?? '', currentPage],
+    [selectedCategoryId, featureIds.join(','), search, currentPage]
   );
 
   const categoriesQuery = useQuery({
@@ -103,7 +106,7 @@ export default function ProductListPage() {
     queryKey: catalogQueryKey,
     queryFn: async ({ signal }) => {
       const params = { page: currentPage, include_packs: true };
-      if (categoryIds.length) params.category_id = categoryIds;
+      if (selectedCategoryId) params.category_id = selectedCategoryId;
       if (featureIds.length) params.feature_ids = featureIds;
       if (search) params.search = search;
       const r = await api.get('products', { params, signal });
@@ -123,40 +126,41 @@ export default function ProductListPage() {
   const setFilters = useCallback(
     (updates) => {
       const next = buildSearchParams({
-        categoryIds: updates.categoryIds ?? categoryIds,
+        selectedCategoryId: updates.selectedCategoryId !== undefined ? updates.selectedCategoryId : selectedCategoryId,
         featureIds: updates.featureIds ?? featureIds,
         search: updates.search ?? search ?? '',
         page: updates.page ?? currentPage,
+        categoryInPath: isCategoryRoute,
       });
       setSearchParams(next);
     },
-    [categoryIds, featureIds, search, currentPage, setSearchParams]
+    [selectedCategoryId, featureIds, search, currentPage, setSearchParams, isCategoryRoute]
   );
 
   const handleAllCategories = useCallback(() => {
-    const next = buildSearchParams({ categoryIds: [], featureIds: [], search: search ?? '', page: 1 });
+    const next = buildSearchParams({
+      selectedCategoryId: null,
+      featureIds: [],
+      search: search ?? '',
+      page: 1,
+      categoryInPath: false,
+    });
     navigate('/products?' + next.toString());
   }, [search, navigate]);
 
-  const toggleCategory = useCallback(
+  const selectCategory = useCallback(
     (id) => {
       const sid = String(id);
-      const next = categoryIds.includes(sid)
-        ? categoryIds.filter((c) => c !== sid)
-        : [...categoryIds, sid];
-      const payload = { categoryIds: next, page: 1 };
-      if (isCategoryRoute && next.length > 0 && !next.includes(String(categoryIdFromRoute))) {
-        const nextParams = buildSearchParams({
-          ...payload,
-          featureIds,
-          search: search ?? '',
-        });
-        navigate('/products?' + nextParams.toString());
-      } else {
-        setFilters(payload);
-      }
+      const qs = buildSearchParams({
+        selectedCategoryId: null,
+        featureIds,
+        search: search ?? '',
+        page: 1,
+        categoryInPath: true,
+      }).toString();
+      navigate(`/categories/${sid}/products${qs ? `?${qs}` : ''}`);
     },
-    [categoryIds, isCategoryRoute, categoryIdFromRoute, featureIds, search, setFilters, navigate]
+    [featureIds, search, navigate]
   );
 
   const toggleFeature = useCallback(
@@ -194,7 +198,7 @@ export default function ProductListPage() {
           <h2 className="font-semibold mb-2">{t('shop.categories')}</h2>
           <ul className="menu bg-base-100 rounded-box border border-base-300">
             <li>
-              <button type="button" onClick={handleAllCategories} className={categoryIds.length === 0 ? 'active' : ''}>
+              <button type="button" onClick={handleAllCategories} className={selectedCategoryId == null ? 'active' : ''}>
                 {t('shop.categories.all')}
               </button>
             </li>
@@ -202,10 +206,11 @@ export default function ProductListPage() {
               <li key={c.id}>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
-                    type="checkbox"
-                    className="checkbox checkbox-sm"
-                    checked={categoryIds.includes(String(c.id))}
-                    onChange={() => toggleCategory(c.id)}
+                    type="radio"
+                    name="shop-catalog-category"
+                    className="radio radio-sm"
+                    checked={selectedCategoryId === String(c.id)}
+                    onChange={() => selectCategory(c.id)}
                     aria-label={c.name}
                   />
                   <span>{c.name}</span>

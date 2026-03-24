@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { adminProductPayloadSchema, parseWithZod } from '../../validation';
 
 const defaultProduct = {
   category_id: '',
@@ -80,8 +81,12 @@ export default function AdminProductForm({
   const [featuresExpanded, setFeaturesExpanded] = useState({});
   const [featuresSectionOpen, setFeaturesSectionOpen] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
+  const [clientError, setClientError] = useState('');
 
-  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const update = (key, value) => {
+    setClientError('');
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files || []).filter(
@@ -110,6 +115,7 @@ export default function AdminProductForm({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setClientError('');
     const payload = {
       category_id: Number(form.category_id),
       variant_group_id: form.variant_group_id ? Number(form.variant_group_id) : null,
@@ -133,15 +139,21 @@ export default function AdminProductForm({
       is_active: !!form.is_active,
       feature_ids: featureIds,
     };
-    if (!product && pendingFiles.length > 0) payload.files = pendingFiles;
-    onSubmit(payload);
+    const parsed = parseWithZod(adminProductPayloadSchema, payload, t);
+    if (!parsed.ok) {
+      setClientError(parsed.firstError);
+      return;
+    }
+    const toSubmit = { ...parsed.data };
+    if (!product && pendingFiles.length > 0) toSubmit.files = pendingFiles;
+    onSubmit(toSubmit);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
+      {(error || clientError) && (
         <div role="alert" className="alert alert-error text-sm">
-          {error}
+          {clientError || error}
         </div>
       )}
 

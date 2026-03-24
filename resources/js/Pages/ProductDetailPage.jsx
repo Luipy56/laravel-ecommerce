@@ -174,7 +174,7 @@ export default function ProductDetailPage() {
           <div className="card-body lg:w-1/2 flex flex-col p-6">
             {product.category?.name && (
               <Link
-                to={`/products?category_id=${product.category.id}`}
+                to={`/categories/${product.category.id}/products`}
                 className="text-sm text-primary hover:underline w-fit"
               >
                 {product.category.name}

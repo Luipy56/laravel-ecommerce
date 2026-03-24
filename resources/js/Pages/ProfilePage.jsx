@@ -4,6 +4,13 @@ import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
+import {
+  parseWithZod,
+  profileAccountSchema,
+  profileAddressSchema,
+  profileContactSchema,
+  profilePasswordSchema,
+} from '../validation';
 
 const ADDRESS_TYPES = ['shipping', 'installation', 'other'];
 
@@ -22,10 +29,12 @@ export default function ProfilePage() {
     phone: '',
   });
   const [accountSaving, setAccountSaving] = useState(false);
+  const [accountFieldErrors, setAccountFieldErrors] = useState({});
 
   // Password form
   const [passwordForm, setPasswordForm] = useState({ password: '', password_confirmation: '' });
   const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordFieldErrors, setPasswordFieldErrors] = useState({});
 
   // Address modal: null = closed, {} = create, { id, ... } = edit
   const [addressModal, setAddressModal] = useState(null);
@@ -39,6 +48,7 @@ export default function ProfilePage() {
     is_primary: false,
   });
   const [addressSaving, setAddressSaving] = useState(false);
+  const [addressFieldErrors, setAddressFieldErrors] = useState({});
 
   // Delete confirmation: { type: 'address'|'contact', id } or null
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -55,6 +65,7 @@ export default function ProfilePage() {
     is_primary: false,
   });
   const [contactSaving, setContactSaving] = useState(false);
+  const [contactFieldErrors, setContactFieldErrors] = useState({});
 
   const fetchProfile = useCallback(async () => {
     const r = await api.get('profile');
@@ -85,17 +96,30 @@ export default function ProfilePage() {
   const handleAccountChange = (e) => {
     const { name, value } = e.target;
     setAccountForm((f) => ({ ...f, [name]: value }));
+    if (accountFieldErrors[name]) {
+      setAccountFieldErrors((fe) => {
+        const next = { ...fe };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleAccountSubmit = async (e) => {
     e.preventDefault();
+    setAccountFieldErrors({});
+    const parsed = parseWithZod(profileAccountSchema, accountForm, t);
+    if (!parsed.ok) {
+      setAccountFieldErrors(parsed.fieldErrors);
+      return;
+    }
     setAccountSaving(true);
     try {
       await api.put('profile', {
-        identification: accountForm.identification,
-        name: accountForm.name,
-        surname: accountForm.surname,
-        phone: accountForm.phone,
+        identification: parsed.data.identification,
+        name: parsed.data.name,
+        surname: parsed.data.surname,
+        phone: parsed.data.phone,
       });
       await fetchProfile();
       setSaved(true);
@@ -105,20 +129,33 @@ export default function ProfilePage() {
   };
 
   const handlePasswordChange = (e) => {
-    setPasswordForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    const { name } = e.target;
+    setPasswordForm((f) => ({ ...f, [name]: e.target.value }));
+    if (passwordFieldErrors[name]) {
+      setPasswordFieldErrors((fe) => {
+        const next = { ...fe };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    if (!passwordForm.password) return;
+    setPasswordFieldErrors({});
+    const parsed = parseWithZod(profilePasswordSchema, passwordForm, t);
+    if (!parsed.ok) {
+      setPasswordFieldErrors(parsed.fieldErrors);
+      return;
+    }
     setPasswordSaving(true);
     try {
       await api.put('profile', {
         name: profile?.name ?? '',
         surname: profile?.surname ?? '',
         phone: profile?.phone ?? '',
-        password: passwordForm.password,
-        password_confirmation: passwordForm.password_confirmation,
+        password: parsed.data.password,
+        password_confirmation: parsed.data.password_confirmation,
       });
       setPasswordForm({ password: '', password_confirmation: '' });
       setSaved(true);
@@ -128,6 +165,7 @@ export default function ProfilePage() {
   };
 
   const openAddressModal = (addr = null) => {
+    setAddressFieldErrors({});
     if (addr) {
       setAddressModal({ id: addr.id });
       setAddressForm({
@@ -159,16 +197,29 @@ export default function ProfilePage() {
       ...f,
       [name]: type === 'checkbox' ? checked : value,
     }));
+    if (addressFieldErrors[name]) {
+      setAddressFieldErrors((fe) => {
+        const next = { ...fe };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleAddressSubmit = async (e) => {
     e.preventDefault();
+    setAddressFieldErrors({});
+    const parsed = parseWithZod(profileAddressSchema, addressForm, t);
+    if (!parsed.ok) {
+      setAddressFieldErrors(parsed.fieldErrors);
+      return;
+    }
     setAddressSaving(true);
     try {
       if (addressModal.id) {
-        await api.put(`profile/addresses/${addressModal.id}`, addressForm);
+        await api.put(`profile/addresses/${addressModal.id}`, parsed.data);
       } else {
-        await api.post('profile/addresses', addressForm);
+        await api.post('profile/addresses', parsed.data);
       }
       await fetchProfile();
       setAddressModal(null);
@@ -198,6 +249,7 @@ export default function ProfilePage() {
   };
 
   const openContactModal = (contact = null) => {
+    setContactFieldErrors({});
     if (contact) {
       setContactModal({ id: contact.id });
       setContactForm({
@@ -227,16 +279,29 @@ export default function ProfilePage() {
       ...f,
       [name]: type === 'checkbox' ? checked : value,
     }));
+    if (contactFieldErrors[name]) {
+      setContactFieldErrors((fe) => {
+        const next = { ...fe };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
+    setContactFieldErrors({});
+    const parsed = parseWithZod(profileContactSchema, contactForm, t);
+    if (!parsed.ok) {
+      setContactFieldErrors(parsed.fieldErrors);
+      return;
+    }
     setContactSaving(true);
     try {
       if (contactModal.id) {
-        await api.put(`profile/contacts/${contactModal.id}`, contactForm);
+        await api.put(`profile/contacts/${contactModal.id}`, parsed.data);
       } else {
-        await api.post('profile/contacts', contactForm);
+        await api.post('profile/contacts', parsed.data);
       }
       await fetchProfile();
       setContactModal(null);
@@ -309,37 +374,46 @@ export default function ProfilePage() {
             <input
               type="text"
               name="identification"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${accountFieldErrors.identification ? ' input-error' : ''}`}
               value={accountForm.identification}
               onChange={handleAccountChange}
               placeholder="DNI, NIE, CIF"
+              aria-invalid={!!accountFieldErrors.identification}
             />
+            {accountFieldErrors.identification ? (
+              <p className="validator-hint text-error">{accountFieldErrors.identification}</p>
+            ) : null}
             <div className="divider my-2">{t('profile.contact_data')}</div>
             <input
               type="text"
               name="name"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${accountFieldErrors.name ? ' input-error' : ''}`}
               value={accountForm.name}
               onChange={handleAccountChange}
               placeholder={t('profile.name')}
-              required
+              aria-invalid={!!accountFieldErrors.name}
             />
+            {accountFieldErrors.name ? <p className="validator-hint text-error">{accountFieldErrors.name}</p> : null}
             <input
               type="text"
               name="surname"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${accountFieldErrors.surname ? ' input-error' : ''}`}
               value={accountForm.surname}
               onChange={handleAccountChange}
               placeholder={t('profile.surname')}
+              aria-invalid={!!accountFieldErrors.surname}
             />
+            {accountFieldErrors.surname ? <p className="validator-hint text-error">{accountFieldErrors.surname}</p> : null}
             <input
               type="tel"
               name="phone"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${accountFieldErrors.phone ? ' input-error' : ''}`}
               value={accountForm.phone}
               onChange={handleAccountChange}
               placeholder={t('profile.phone')}
+              aria-invalid={!!accountFieldErrors.phone}
             />
+            {accountFieldErrors.phone ? <p className="validator-hint text-error">{accountFieldErrors.phone}</p> : null}
             <div className="flex justify-end">
               <button type="submit" className="btn btn-primary" disabled={accountSaving}>
                 {accountSaving ? t('common.loading') : t('common.save')}
@@ -458,22 +532,27 @@ export default function ProfilePage() {
             <input
               type="password"
               name="password"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${passwordFieldErrors.password ? ' input-error' : ''}`}
               value={passwordForm.password}
               onChange={handlePasswordChange}
               placeholder={t('profile.new_password')}
-              minLength={8}
+              aria-invalid={!!passwordFieldErrors.password}
             />
+            {passwordFieldErrors.password ? <p className="validator-hint text-error">{passwordFieldErrors.password}</p> : null}
             <input
               type="password"
               name="password_confirmation"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${passwordFieldErrors.password_confirmation ? ' input-error' : ''}`}
               value={passwordForm.password_confirmation}
               onChange={handlePasswordChange}
               placeholder={t('auth.password_confirmation')}
+              aria-invalid={!!passwordFieldErrors.password_confirmation}
             />
+            {passwordFieldErrors.password_confirmation ? (
+              <p className="validator-hint text-error">{passwordFieldErrors.password_confirmation}</p>
+            ) : null}
             <div className="flex justify-end">
-              <button type="submit" className="btn btn-neutral" disabled={passwordSaving || !passwordForm.password}>
+              <button type="submit" className="btn btn-neutral" disabled={passwordSaving}>
                 {passwordSaving ? t('common.loading') : t('common.save')}
               </button>
             </div>
@@ -517,33 +596,38 @@ export default function ProfilePage() {
             <input
               type="text"
               name="street"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${addressFieldErrors.street ? ' input-error' : ''}`}
               value={addressForm.street}
               onChange={handleAddressFormChange}
-              required
+              aria-invalid={!!addressFieldErrors.street}
             />
+            {addressFieldErrors.street ? <p className="validator-hint text-error">{addressFieldErrors.street}</p> : null}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="label"><span className="label-text">{t('profile.city')} *</span></label>
                 <input
                   type="text"
                   name="city"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full${addressFieldErrors.city ? ' input-error' : ''}`}
                   value={addressForm.city}
                   onChange={handleAddressFormChange}
-                  required
+                  aria-invalid={!!addressFieldErrors.city}
                 />
+                {addressFieldErrors.city ? <p className="validator-hint text-error">{addressFieldErrors.city}</p> : null}
               </div>
               <div>
                 <label className="label"><span className="label-text">{t('profile.postal_code')} *</span></label>
                 <input
                   type="text"
                   name="postal_code"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full${addressFieldErrors.postal_code ? ' input-error' : ''}`}
                   value={addressForm.postal_code}
                   onChange={handleAddressFormChange}
-                  required
+                  aria-invalid={!!addressFieldErrors.postal_code}
                 />
+                {addressFieldErrors.postal_code ? (
+                  <p className="validator-hint text-error">{addressFieldErrors.postal_code}</p>
+                ) : null}
               </div>
             </div>
             <label className="label">
@@ -591,44 +675,53 @@ export default function ProfilePage() {
             <input
               type="text"
               name="name"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${contactFieldErrors.name ? ' input-error' : ''}`}
               value={contactForm.name}
               onChange={handleContactFormChange}
               placeholder={t('profile.name')}
-              required
+              aria-invalid={!!contactFieldErrors.name}
             />
+            {contactFieldErrors.name ? <p className="validator-hint text-error">{contactFieldErrors.name}</p> : null}
             <input
               type="text"
               name="surname"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${contactFieldErrors.surname ? ' input-error' : ''}`}
               value={contactForm.surname}
               onChange={handleContactFormChange}
               placeholder={t('profile.surname')}
+              aria-invalid={!!contactFieldErrors.surname}
             />
+            {contactFieldErrors.surname ? <p className="validator-hint text-error">{contactFieldErrors.surname}</p> : null}
             <input
               type="tel"
               name="phone"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${contactFieldErrors.phone ? ' input-error' : ''}`}
               value={contactForm.phone}
               onChange={handleContactFormChange}
               placeholder={t('profile.phone')}
+              aria-invalid={!!contactFieldErrors.phone}
             />
+            {contactFieldErrors.phone ? <p className="validator-hint text-error">{contactFieldErrors.phone}</p> : null}
             <input
               type="tel"
               name="phone2"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${contactFieldErrors.phone2 ? ' input-error' : ''}`}
               value={contactForm.phone2}
               onChange={handleContactFormChange}
               placeholder={t('profile.phone2')}
+              aria-invalid={!!contactFieldErrors.phone2}
             />
+            {contactFieldErrors.phone2 ? <p className="validator-hint text-error">{contactFieldErrors.phone2}</p> : null}
             <input
               type="email"
               name="email"
-              className="input input-bordered w-full"
+              className={`input input-bordered w-full${contactFieldErrors.email ? ' input-error' : ''}`}
               value={contactForm.email}
               onChange={handleContactFormChange}
               placeholder={t('profile.email')}
+              aria-invalid={!!contactFieldErrors.email}
             />
+            {contactFieldErrors.email ? <p className="validator-hint text-error">{contactFieldErrors.email}</p> : null}
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"

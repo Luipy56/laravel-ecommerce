@@ -9,6 +9,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import StripeInlinePayment from '../components/payments/StripeInlinePayment';
 import RedsysAutoPost from '../components/payments/RedsysAutoPost';
 import { emitAppToast } from '../toastEvents';
+import { checkoutFormSchema, parseWithZod } from '../validation';
 
 const INITIAL_FORM = {
   payment_method: 'card',
@@ -34,6 +35,7 @@ export default function CheckoutPage() {
   const [activeCheckout, setActiveCheckout] = useState(null);
   const [stripeUiError, setStripeUiError] = useState('');
   const [payMethods, setPayMethods] = useState(null);
+  const [checkoutFormError, setCheckoutFormError] = useState('');
   const wantsInstallation = !!cart.installation_requested;
 
   useEffect(() => {
@@ -75,6 +77,7 @@ export default function CheckoutPage() {
   }, [user?.id]);
 
   const handleChange = (e) => {
+    setCheckoutFormError('');
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
@@ -84,7 +87,14 @@ export default function CheckoutPage() {
     setActiveCheckout(null);
     setStripeUiError('');
     try {
-      const payload = wantsInstallation ? { ...form, payment_method: null } : form;
+      const toValidate = wantsInstallation ? { ...form, payment_method: null } : form;
+      const parsed = parseWithZod(checkoutFormSchema(wantsInstallation), toValidate, t);
+      if (!parsed.ok) {
+        emitAppToast(parsed.firstError, 'error');
+        setCheckoutFormError(parsed.firstError);
+        return;
+      }
+      const payload = wantsInstallation ? { ...parsed.data, payment_method: null } : parsed.data;
       const { data } = await api.post('orders/checkout', payload);
       if (!data.success) return;
 
@@ -144,6 +154,13 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setCheckoutFormError('');
+    const toValidate = wantsInstallation ? { ...form, payment_method: null } : form;
+    const parsed = parseWithZod(checkoutFormSchema(wantsInstallation), toValidate, t);
+    if (!parsed.ok) {
+      setCheckoutFormError(parsed.firstError);
+      return;
+    }
     setConfirmOpen(true);
   };
 
@@ -190,6 +207,11 @@ export default function CheckoutPage() {
       />
       <form onSubmit={handleSubmit} className="card bg-base-100 shadow">
         <div className="card-body space-y-5">
+          {checkoutFormError ? (
+            <div role="alert" className="alert alert-error text-sm">
+              {checkoutFormError}
+            </div>
+          ) : null}
           <h2 className="font-semibold text-base-content">{t('checkout.shipping_address')}</h2>
           <label className="form-field w-full">
             <span className="form-label">{t('checkout.street')}</span>

@@ -1,0 +1,71 @@
+---
+description: Basic SCSS knowledge — variables, nesting, mixins, partials
+globs: **/*.scss
+alwaysApply: false
+---
+
+# Basic SCSS
+
+## Variables
+
+Use `$name: value;` for colours, spacing, breakpoints. Use once, change everywhere.
+
+```scss
+$primary: #3b82f6;
+$spacing-md: 1rem;
+$breakpoint-tablet: 768px;
+
+.button { background: $primary; padding: $spacing-md; }
+```
+
+## Nesting
+
+Nest selectors for clearer structure. Keep nesting shallow (max 2–3 levels) to avoid deep specificity.
+
+```scss
+.card {
+  padding: 1rem;
+  .card-title { font-weight: 600; }
+  .card-body { margin-top: 0.5rem; }
+}
+```
+
+Use `&` for pseudo-classes or parent reference:
+
+```scss
+.btn {
+  &:hover { opacity: 0.9; }
+  &.active { font-weight: bold; }
+}
+```
+
+## Partials and @use
+
+Split styles into partials (names starting with `_`). Import with `@use` (prefer over `@import`).
+
+```scss
+// _variables.scss
+$primary: #3b82f6;
+
+// main.scss
+@use 'variables' as v;
+.button { background: v.$primary; }
+```
+
+## Mixins (optional)
+
+Use for repeated patterns (e.g. breakpoints, clearfix). Don’t overuse.
+
+```scss
+@mixin respond-to($width) {
+  @media (min-width: $width) { @content; }
+}
+.sidebar { @include respond-to(768px) { width: 50%; } }
+```
+
+## Rules
+
+- Prefer variables over magic numbers and repeated colours.
+- Avoid nesting more than 3 levels.
+- Use `@use` instead of `@import` for modules.
+- Keep mixins for real repetition; otherwise plain CSS or variables are enough.

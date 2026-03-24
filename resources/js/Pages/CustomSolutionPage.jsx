@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
+import { customSolutionFormSchema, parseWithZod } from '../validation';
 
 const TOAST_DURATION_MS = 3000;
 
@@ -22,12 +23,20 @@ export default function CustomSolutionPage() {
   const [loading, setLoading] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const toastTimeoutRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((fe) => {
+        const next = { ...fe };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleFiles = (e) => {
@@ -37,16 +46,23 @@ export default function CustomSolutionPage() {
   const submitForm = useCallback(async () => {
     setConfirmModalOpen(false);
     setError('');
+    setFieldErrors({});
+    const parsed = parseWithZod(customSolutionFormSchema, form, t);
+    if (!parsed.ok) {
+      setFieldErrors(parsed.fieldErrors);
+      setError(parsed.firstError);
+      return;
+    }
     setLoading(true);
     const formData = new FormData();
-    formData.append('email', form.email);
-    formData.append('phone', form.phone);
-    formData.append('problem_description', form.problem_description);
-    formData.append('address_street', form.address_street);
-    formData.append('address_city', form.address_city);
-    formData.append('address_province', form.address_province);
-    formData.append('address_postal_code', form.address_postal_code);
-    formData.append('address_note', form.address_note);
+    formData.append('email', parsed.data.email);
+    formData.append('phone', parsed.data.phone);
+    formData.append('problem_description', parsed.data.problem_description);
+    formData.append('address_street', parsed.data.address_street);
+    formData.append('address_city', parsed.data.address_city);
+    formData.append('address_province', parsed.data.address_province);
+    formData.append('address_postal_code', parsed.data.address_postal_code);
+    formData.append('address_note', parsed.data.address_note);
     form.files.forEach((file) => formData.append('attachments[]', file));
     try {
       const r = await api.post('personalized-solutions', formData, {
@@ -80,6 +96,14 @@ export default function CustomSolutionPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError('');
+    setFieldErrors({});
+    const parsed = parseWithZod(customSolutionFormSchema, form, t);
+    if (!parsed.ok) {
+      setFieldErrors(parsed.fieldErrors);
+      setError(parsed.firstError);
+      return;
+    }
     setConfirmModalOpen(true);
   };
 
@@ -113,17 +137,41 @@ export default function CustomSolutionPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <label className="form-field w-full">
               <span className="form-label">{t('auth.email')} *</span>
-              <input type="email" name="email" className="input input-bordered w-full" value={form.email} onChange={handleChange} required />
+              <input
+                type="email"
+                name="email"
+                className={`input input-bordered w-full${fieldErrors.email ? ' input-error' : ''}`}
+                value={form.email}
+                onChange={handleChange}
+                aria-invalid={!!fieldErrors.email}
+              />
+              {fieldErrors.email ? <p className="validator-hint text-error">{fieldErrors.email}</p> : null}
             </label>
             <label className="form-field w-full">
               <span className="form-label">{t('profile.phone')}</span>
-              <input type="tel" name="phone" className="input input-bordered w-full" value={form.phone} onChange={handleChange} />
+              <input
+                type="tel"
+                name="phone"
+                className={`input input-bordered w-full${fieldErrors.phone ? ' input-error' : ''}`}
+                value={form.phone}
+                onChange={handleChange}
+                aria-invalid={!!fieldErrors.phone}
+              />
+              {fieldErrors.phone ? <p className="validator-hint text-error">{fieldErrors.phone}</p> : null}
             </label>
           </div>
 
           <label className="form-field w-full">
             <span className="form-label">{t('shop.custom_solution.description')} *</span>
-            <textarea name="problem_description" className="textarea textarea-bordered w-full" rows={5} value={form.problem_description} onChange={handleChange} required />
+            <textarea
+              name="problem_description"
+              className={`textarea textarea-bordered w-full${fieldErrors.problem_description ? ' textarea-error' : ''}`}
+              rows={5}
+              value={form.problem_description}
+              onChange={handleChange}
+              aria-invalid={!!fieldErrors.problem_description}
+            />
+            {fieldErrors.problem_description ? <p className="validator-hint text-error">{fieldErrors.problem_description}</p> : null}
           </label>
 
           <label className="form-field w-full">
@@ -144,7 +192,14 @@ export default function CustomSolutionPage() {
               </label>
               <label className="form-field w-28">
                 <span className="form-label">{t('profile.postal_code')} *</span>
-                <input name="address_postal_code" className="input input-bordered w-full" value={form.address_postal_code} onChange={handleChange} required />
+                <input
+                  name="address_postal_code"
+                  className={`input input-bordered w-full${fieldErrors.address_postal_code ? ' input-error' : ''}`}
+                  value={form.address_postal_code}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.address_postal_code}
+                />
+                {fieldErrors.address_postal_code ? <p className="validator-hint text-error">{fieldErrors.address_postal_code}</p> : null}
               </label>
             </div>
             <label className="form-field w-full">

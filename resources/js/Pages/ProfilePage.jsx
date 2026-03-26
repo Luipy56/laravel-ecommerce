@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,7 +17,7 @@ const ADDRESS_TYPES = ['shipping', 'installation', 'other'];
 
 export default function ProfilePage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -336,7 +337,20 @@ export default function ProfilePage() {
     return t('profile.address_type_other');
   };
 
-  if (!user) return null;
+  if (authLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <span className="loading loading-spinner loading-lg text-primary" />
+      </div>
+    );
+  }
+  if (!user) {
+    return (
+      <div className="text-center py-8">
+        <Link to="/login" className="btn btn-primary">{t('auth.login')}</Link>
+      </div>
+    );
+  }
   if (loading) {
     return (
       <div className="flex justify-center py-12">

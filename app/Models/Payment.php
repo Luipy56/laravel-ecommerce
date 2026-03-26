@@ -29,6 +29,8 @@ class Payment extends Model
 
     public const GATEWAY_REVOLUT = 'revolut';
 
+    public const GATEWAY_PAYPAL = 'paypal';
+
     public const METHOD_CARD = 'card';
 
     public const METHOD_PAYPAL = 'paypal';

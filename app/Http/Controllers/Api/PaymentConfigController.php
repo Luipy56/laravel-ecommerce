@@ -14,6 +14,7 @@ class PaymentConfigController extends Controller
     public function show(): JsonResponse
     {
         $m = PaymentCheckoutService::paymentMethodsAvailability();
+        $anyMethod = $m['card'] || $m['paypal'] || $m['bizum'] || $m['revolut'];
 
         return response()->json([
             'success' => true,
@@ -25,6 +26,9 @@ class PaymentConfigController extends Controller
                     'revolut' => $m['revolut'],
                 ],
                 'simulated' => $m['simulated'],
+                /** True when local env, no PSP keys, and simulated payments are off (usually APP_DEBUG=false). */
+                'local_checkout_needs_debug' => app()->environment('local') && ! $m['simulated'] && ! $anyMethod,
+                'paypal_missing_credentials' => PaymentCheckoutService::paypalMissingCredentialsForStorefront(),
             ],
         ]);
     }

@@ -115,6 +115,7 @@ export default function RegisterPage() {
                   id="register-password"
                   type="password"
                   name="password"
+                  autoComplete="new-password"
                   className={`input input-bordered w-full${fieldErrors.password ? ' input-error' : ''}`}
                   value={form.password}
                   onChange={handleChange}
@@ -128,6 +129,7 @@ export default function RegisterPage() {
                   id="register-password_confirmation"
                   type="password"
                   name="password_confirmation"
+                  autoComplete="new-password"
                   className={`input input-bordered w-full${fieldErrors.password_confirmation ? ' input-error' : ''}`}
                   value={form.password_confirmation}
                   onChange={handleChange}

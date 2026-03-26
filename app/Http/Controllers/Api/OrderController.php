@@ -15,8 +15,6 @@ use Throwable;
 
 class OrderController extends Controller
 {
-    private const PAYMENT_METHODS = 'card,paypal,bizum,revolut';
-
     public function checkout(Request $request, PaymentCheckoutService $paymentCheckoutService): JsonResponse
     {
         $client = $request->user();
@@ -25,10 +23,12 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Cart is empty.'], 422);
         }
 
+        $checkoutMethodIn = implode(',', PaymentCheckoutService::checkoutMethodKeysFromConfig());
+
         $rules = [
             'payment_method' => $cart->installation_requested
-                ? ['nullable', 'string', 'in:'.self::PAYMENT_METHODS]
-                : ['required', 'string', 'in:'.self::PAYMENT_METHODS],
+                ? ['nullable', 'string', 'in:'.$checkoutMethodIn]
+                : ['required', 'string', 'in:'.$checkoutMethodIn],
             'shipping_street' => ['required', 'string', 'max:255'],
             'shipping_city' => ['required', 'string', 'max:100'],
             'shipping_province' => ['nullable', 'string', 'max:100'],
@@ -116,7 +116,7 @@ class OrderController extends Controller
         $paymentError = null;
         if (! $awaitingInstallationQuote) {
             $payment = $cart->payments()->latest()->first();
-            if ($payment && PaymentCheckoutService::allowSimulatedPayments()) {
+            if ($payment && PaymentCheckoutService::shouldSimulateCheckoutForPayment($payment)) {
                 try {
                     $paymentCheckoutService->simulateSuccess($payment);
                 } catch (Throwable $e) {
@@ -129,7 +129,7 @@ class OrderController extends Controller
                     $paymentCheckout = $paymentCheckoutService->start($payment);
                 } catch (Throwable $e) {
                     report($e);
-                    $paymentError = config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error');
+                    $paymentError = $this->checkoutPaymentStartErrorMessage($payment, $e);
                 }
             }
         }
@@ -168,8 +168,10 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => __('shop.order.cannot_pay_yet')], 422);
         }
 
+        $checkoutMethodIn = implode(',', PaymentCheckoutService::checkoutMethodKeysFromConfig());
+
         $validated = $request->validate([
-            'payment_method' => ['required', 'string', 'in:'.self::PAYMENT_METHODS],
+            'payment_method' => ['required', 'string', 'in:'.$checkoutMethodIn],
         ]);
 
         if (! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
@@ -194,7 +196,7 @@ class OrderController extends Controller
 
         $payment = $order->payments()->latest()->first();
 
-        if (PaymentCheckoutService::allowSimulatedPayments()) {
+        if (PaymentCheckoutService::shouldSimulateCheckoutForPayment($payment)) {
             try {
                 $paymentCheckoutService->simulateSuccess($payment);
             } catch (Throwable $e) {
@@ -212,10 +214,7 @@ class OrderController extends Controller
             } catch (Throwable $e) {
                 report($e);
 
-                return response()->json([
-                    'success' => false,
-                    'message' => config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error'),
-                ], 422);
+                return $this->jsonWhenPaymentStartFailed($payment, $e);
             }
         }
 
@@ -312,6 +311,7 @@ class OrderController extends Controller
         $order->load(['lines.product', 'lines.pack', 'addresses', 'payments']);
 
         $payMethods = PaymentCheckoutService::paymentMethodsAvailability();
+        $anyPayMethod = $payMethods['card'] || $payMethods['paypal'] || $payMethods['bizum'] || $payMethods['revolut'];
 
         $lines = $order->lines->map(fn ($l) => [
             'id' => $l->id,
@@ -348,6 +348,7 @@ class OrderController extends Controller
                     'revolut' => $payMethods['revolut'],
                 ],
                 'payments_simulated' => $payMethods['simulated'],
+                'local_checkout_needs_debug' => app()->environment('local') && ! $payMethods['simulated'] && ! $anyPayMethod,
                 'payments' => $order->payments->map(fn (Payment $p) => [
                     'id' => $p->id,
                     'status' => $p->status,
@@ -381,5 +382,73 @@ class OrderController extends Controller
             'Content-Type' => 'text/html',
             'Content-Disposition' => 'inline; filename="invoice-'.$order->id.'.html"',
         ]);
+    }
+
+    private function paymentStartExceptionMatchesPayPalOAuth(Throwable $e): bool
+    {
+        $m = strtolower($e->getMessage());
+
+        return str_contains($m, 'paypal oauth')
+            || str_contains($m, 'client authentication failed')
+            || str_contains($m, 'invalid_client');
+    }
+
+    private function jsonWhenPaymentStartFailed(Payment $payment, Throwable $e): JsonResponse
+    {
+        if ($payment->payment_method === Payment::METHOD_PAYPAL) {
+            if (str_starts_with($e->getMessage(), 'PAYPAL_START_ERROR|')) {
+                $msg = __('shop.payment.paypal_credentials_format_invalid');
+                if (config('app.debug')) {
+                    $msg .= ' ('.$e->getMessage().')';
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                    'code' => 'paypal_credentials_invalid',
+                ], 422);
+            }
+            if ($this->paymentStartExceptionMatchesPayPalOAuth($e)) {
+                $msg = __('shop.payment.paypal_oauth_failed');
+                if (config('app.debug')) {
+                    $msg .= ' '.$e->getMessage();
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                    'code' => 'paypal_oauth_failed',
+                ], 422);
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error'),
+        ], 422);
+    }
+
+    private function checkoutPaymentStartErrorMessage(Payment $payment, Throwable $e): string
+    {
+        if ($payment->payment_method === Payment::METHOD_PAYPAL) {
+            if (str_starts_with($e->getMessage(), 'PAYPAL_START_ERROR|')) {
+                $msg = __('shop.payment.paypal_credentials_format_invalid');
+                if (config('app.debug')) {
+                    $msg .= ' ('.$e->getMessage().')';
+                }
+
+                return $msg;
+            }
+            if ($this->paymentStartExceptionMatchesPayPalOAuth($e)) {
+                $msg = __('shop.payment.paypal_oauth_failed');
+                if (config('app.debug')) {
+                    $msg .= ' '.$e->getMessage();
+                }
+
+                return $msg;
+            }
+        }
+
+        return config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error');
     }
 }

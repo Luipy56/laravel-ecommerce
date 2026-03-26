@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackController;
 use App\Http\Controllers\Api\PaymentConfigController;
 use App\Http\Controllers\Api\PaymentWebhookController;
+use App\Http\Controllers\Api\PayPalPaymentController;
 use App\Http\Controllers\Api\PersonalizedSolutionController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
@@ -68,6 +69,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('profile/contacts/{id}', [UserController::class, 'destroyContact']);
 
     Route::post('cart/merge', [CartController::class, 'merge']); // merge session cart into DB on login
+
+    Route::post('payments/paypal/capture', [PayPalPaymentController::class, 'capture']);
 
     Route::post('orders/checkout', [OrderController::class, 'checkout']);
     Route::post('orders/{order}/pay', [OrderController::class, 'pay']);

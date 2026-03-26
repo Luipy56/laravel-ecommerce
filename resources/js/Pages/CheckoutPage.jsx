@@ -7,12 +7,14 @@ import { useCart } from '../contexts/CartContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import StripeInlinePayment from '../components/payments/StripeInlinePayment';
+import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
+import PayPalUserEducation from '../components/payments/PayPalUserEducation';
 import RedsysAutoPost from '../components/payments/RedsysAutoPost';
 import { emitAppToast } from '../toastEvents';
 import { checkoutFormSchema, parseWithZod } from '../validation';
 
 const INITIAL_FORM = {
-  payment_method: 'card',
+  payment_method: 'paypal',
   shipping_street: '',
   shipping_city: '',
   shipping_province: '',
@@ -26,7 +28,7 @@ const INITIAL_FORM = {
 
 export default function CheckoutPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { cart, fetchCart } = useCart();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -35,6 +37,12 @@ export default function CheckoutPage() {
   const [activeCheckout, setActiveCheckout] = useState(null);
   const [stripeUiError, setStripeUiError] = useState('');
   const [payMethods, setPayMethods] = useState(null);
+  const [payConfigLoadError, setPayConfigLoadError] = useState(false);
+  const [payConfigMeta, setPayConfigMeta] = useState({
+    simulated: false,
+    local_checkout_needs_debug: false,
+    paypal_missing_credentials: false,
+  });
   const [checkoutFormError, setCheckoutFormError] = useState('');
   const wantsInstallation = !!cart.installation_requested;
 
@@ -42,17 +50,32 @@ export default function CheckoutPage() {
     api
       .get('payments/config')
       .then((r) => {
-        if (r.data.success && r.data.data?.methods) setPayMethods(r.data.data.methods);
-        else setPayMethods({ card: false, paypal: false, bizum: false, revolut: false });
+        const d = r.data.data;
+        setPayConfigLoadError(false);
+        if (r.data.success && d?.methods) {
+          setPayMethods(d.methods);
+          setPayConfigMeta({
+            simulated: !!d.simulated,
+            local_checkout_needs_debug: !!d.local_checkout_needs_debug,
+            paypal_missing_credentials: !!d.paypal_missing_credentials,
+          });
+        } else {
+          setPayMethods({ card: false, paypal: false, bizum: false, revolut: false });
+          setPayConfigMeta({ simulated: false, local_checkout_needs_debug: false, paypal_missing_credentials: false });
+        }
       })
-      .catch(() => setPayMethods({ card: true, paypal: true, bizum: true, revolut: true }));
+      .catch(() => {
+        setPayConfigLoadError(true);
+        setPayMethods({ card: false, paypal: false, bizum: false, revolut: false });
+        setPayConfigMeta({ simulated: false, local_checkout_needs_debug: false, paypal_missing_credentials: false });
+      });
   }, []);
 
   useEffect(() => {
     if (payMethods === null || wantsInstallation) return;
     setForm((f) => {
       if (payMethods[f.payment_method]) return f;
-      const first = ['card', 'paypal', 'bizum', 'revolut'].find((k) => payMethods[k]);
+      const first = ['paypal', 'card', 'bizum', 'revolut'].find((k) => payMethods[k]);
       return first ? { ...f, payment_method: first } : f;
     });
   }, [payMethods, wantsInstallation]);
@@ -127,6 +150,17 @@ export default function CheckoutPage() {
         });
         return;
       }
+      if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
+        setActiveCheckout({
+          orderId: d.id,
+          paypal: {
+            client_id: c.client_id,
+            paypal_order_id: c.paypal_order_id,
+            payment_id: c.payment_id,
+          },
+        });
+        return;
+      }
       if (c?.gateway === 'redsys' && c.action_url && c.fields) {
         setActiveCheckout({
           orderId: d.id,
@@ -164,6 +198,13 @@ export default function CheckoutPage() {
     setConfirmOpen(true);
   };
 
+  if (authLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <span className="loading loading-spinner loading-lg" />
+      </div>
+    );
+  }
   if (!user) {
     return (
       <div className="text-center py-8">
@@ -258,9 +299,27 @@ export default function CheckoutPage() {
           {!wantsInstallation && (
             <>
               <h2 className="font-semibold text-base-content mt-6">{t('checkout.payment')}</h2>
-              {payMethodsReady && !anyPaymentMethod && (
+              {payMethodsReady && payConfigMeta.simulated && anyPaymentMethod && (
+                <div role="status" className="alert alert-info text-sm">
+                  {t('checkout.payment.simulated_mode_notice')}
+                </div>
+              )}
+              {payMethodsReady && payConfigLoadError && (
                 <div role="alert" className="alert alert-warning text-sm">
-                  {t('checkout.payment.no_methods')}
+                  <p className="m-0">{t('checkout.payment.config_load_error')}</p>
+                </div>
+              )}
+              {payMethodsReady && !payConfigLoadError && !anyPaymentMethod && (
+                <div role="alert" className="alert alert-warning text-sm space-y-2">
+                  <p className="m-0">{t('checkout.payment.no_methods')}</p>
+                  {payConfigMeta.local_checkout_needs_debug ? (
+                    <p className="m-0 text-base-content/90">{t('checkout.payment.local_debug_hint')}</p>
+                  ) : null}
+                </div>
+              )}
+              {payMethodsReady && !payConfigLoadError && payConfigMeta.paypal_missing_credentials && (
+                <div role="status" className="alert alert-info text-sm">
+                  {t('checkout.payment.paypal_missing_credentials_hint')}
                 </div>
               )}
               <label className="form-field w-full">
@@ -270,7 +329,7 @@ export default function CheckoutPage() {
                   className="select select-bordered w-full"
                   value={form.payment_method}
                   onChange={handleChange}
-                  disabled={payMethodsReady && !anyPaymentMethod}
+                  disabled={(payMethodsReady && !anyPaymentMethod) || payConfigLoadError}
                 >
                   {['card', 'paypal', 'bizum', 'revolut']
                     .filter((value) => !payMethodsReady || payMethods[value])
@@ -281,6 +340,9 @@ export default function CheckoutPage() {
                     ))}
                 </select>
               </label>
+              {payMethodsReady && !payConfigLoadError && form.payment_method === 'paypal' && payMethods.paypal && (
+                <PayPalUserEducation />
+              )}
             </>
           )}
 
@@ -302,7 +364,11 @@ export default function CheckoutPage() {
             <button
               type="submit"
               className="btn btn-primary shrink-0"
-              disabled={loading || !!activeCheckout?.stripe || (!wantsInstallation && payMethodsReady && !anyPaymentMethod)}
+              disabled={
+                loading ||
+                !!(activeCheckout?.stripe || activeCheckout?.paypal) ||
+                (!wantsInstallation && payMethodsReady && (!anyPaymentMethod || payConfigLoadError))
+              }
             >
               {loading ? t('common.loading') : t('shop.checkout')}
             </button>
@@ -323,6 +389,29 @@ export default function CheckoutPage() {
               onError={(msg) => setStripeUiError(msg)}
             />
             {stripeUiError ? <div role="alert" className="alert alert-error text-sm">{stripeUiError}</div> : null}
+            <div className="flex flex-wrap gap-2 pt-2">
+              <Link to={`/orders/${activeCheckout.orderId}`} className="btn btn-ghost btn-sm">
+                {t('checkout.payment.view_order')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeCheckout?.paypal && (
+        <div className="card bg-base-100 shadow border border-base-300 mt-6">
+          <div className="card-body space-y-3">
+            <h2 className="card-title text-base">{t('checkout.payment.complete_paypal')}</h2>
+            <PayPalUserEducation variant="compact" />
+            <p className="text-sm text-base-content/70">{t('checkout.payment.paypal_help')}</p>
+            <PayPalInlineButtons
+              clientId={activeCheckout.paypal.client_id}
+              paypalOrderId={activeCheckout.paypal.paypal_order_id}
+              paymentId={activeCheckout.paypal.payment_id}
+              onSuccess={() => navigate(`/orders/${activeCheckout.orderId}`)}
+              onError={(msg) => setStripeUiError(msg)}
+            />
+            {stripeUiError ? <div role="alert" className="alert alert-error text-sm mt-2">{stripeUiError}</div> : null}
             <div className="flex flex-wrap gap-2 pt-2">
               <Link to={`/orders/${activeCheckout.orderId}`} className="btn btn-ghost btn-sm">
                 {t('checkout.payment.view_order')}

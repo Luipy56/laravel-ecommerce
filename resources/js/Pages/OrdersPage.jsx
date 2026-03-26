@@ -8,7 +8,7 @@ import PageTitle from '../components/PageTitle';
 
 export default function OrdersPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,6 +20,9 @@ export default function OrdersPage() {
       .finally(() => setLoading(false));
   }, [user]);
 
+  if (authLoading) {
+    return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
+  }
   if (!user) {
     return (
       <div className="text-center py-8">

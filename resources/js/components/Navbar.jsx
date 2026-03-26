@@ -34,7 +34,7 @@ function CartDropTarget({ to, className, children, ariaLabel, title }) {
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [locale, setLocale] = useState(i18n.language);
@@ -146,7 +146,15 @@ export default function Navbar() {
               <span className="indicator-item badge badge-primary badge-sm" id="cart-count">0</span>
               <IconCart className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
             </CartDropTarget>
-            {user ? (
+            {authLoading ? (
+              <div
+                className="btn btn-ghost btn-sm min-w-[6rem] pointer-events-none shrink-0"
+                aria-busy="true"
+                aria-label={t('common.loading')}
+              >
+                <span className="loading loading-spinner loading-sm" />
+              </div>
+            ) : user ? (
               <div className="dropdown dropdown-end">
                 <label tabIndex={0} className="btn btn-ghost btn-sm max-w-[7rem] sm:max-w-none truncate">
                   <span className="truncate">{user.name?.trim() || user.login_email}</span>

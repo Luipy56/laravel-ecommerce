@@ -6,6 +6,8 @@ import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import StripeInlinePayment from '../components/payments/StripeInlinePayment';
+import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
+import PayPalUserEducation from '../components/payments/PayPalUserEducation';
 import RedsysAutoPost from '../components/payments/RedsysAutoPost';
 
 export default function OrderDetailPage() {
@@ -13,12 +15,12 @@ export default function OrderDetailPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('paypal');
   const [inlineCheckout, setInlineCheckout] = useState(null);
   const [stripeUiError, setStripeUiError] = useState('');
 
@@ -42,7 +44,7 @@ export default function OrderDetailPage() {
   useEffect(() => {
     if (!order?.payment_methods_available) return;
     const m = order.payment_methods_available;
-    setPaymentMethod((pm) => (m[pm] ? pm : ['card', 'paypal', 'bizum', 'revolut'].find((k) => m[k]) || 'card'));
+    setPaymentMethod((pm) => (m[pm] ? pm : ['paypal', 'card', 'bizum', 'revolut'].find((k) => m[k]) || 'paypal'));
   }, [order?.payment_methods_available, order?.id]);
 
   useEffect(() => {
@@ -82,6 +84,17 @@ export default function OrderDetailPage() {
         setInlineCheckout({
           orderId: Number(id),
           stripe: { client_secret: c.client_secret, publishable_key: c.publishable_key },
+        });
+        return;
+      }
+      if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
+        setInlineCheckout({
+          orderId: Number(id),
+          paypal: {
+            client_id: c.client_id,
+            paypal_order_id: c.paypal_order_id,
+            payment_id: c.payment_id,
+          },
         });
         return;
       }
@@ -126,6 +139,9 @@ export default function OrderDetailPage() {
     }
   };
 
+  if (authLoading) {
+    return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
+  }
   if (!user) return <Link to="/login" className="btn btn-primary">{t('auth.login')}</Link>;
   if (loading) return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
   if (!order) return <p>{t('common.error')}</p>;
@@ -154,7 +170,7 @@ export default function OrderDetailPage() {
   const showInstallationRow = order.installation_requested && order.installation_status === 'priced' && order.installation_price != null;
   const awaitingQuote = order.installation_requested && order.installation_status === 'pending' && order.status === 'awaiting_installation_price';
   const canPay = order.can_pay && !order.has_payment;
-  const payAvail = order.payment_methods_available ?? { card: true, paypal: true, bizum: true, revolut: true };
+  const payAvail = order.payment_methods_available ?? { card: false, paypal: false, bizum: false, revolut: false };
   const paymentsSimulated = !!order.payments_simulated;
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
 
@@ -259,6 +275,15 @@ export default function OrderDetailPage() {
         <div role="alert" className="alert alert-warning mt-4 text-sm space-y-2">
           <p className="m-0">{t('shop.order.payment_no_methods')}</p>
           <p className="m-0 text-base-content/80">{t('shop.order.payment_how_it_works')}</p>
+          {order.local_checkout_needs_debug ? (
+            <p className="m-0 text-base-content/90">{t('checkout.payment.local_debug_hint')}</p>
+          ) : null}
+        </div>
+      )}
+
+      {canPay && anyPaymentMethod && paymentsSimulated && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('checkout.payment.simulated_mode_notice')}
         </div>
       )}
 
@@ -272,7 +297,10 @@ export default function OrderDetailPage() {
                 className="select select-bordered w-full"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                disabled={!!inlineCheckout?.stripe || (!anyPaymentMethod && !paymentsSimulated)}
+                disabled={
+                  !!(inlineCheckout?.stripe || inlineCheckout?.paypal) ||
+                  (!anyPaymentMethod && !paymentsSimulated)
+                }
               >
                 {['card', 'paypal', 'bizum', 'revolut']
                   .filter((value) => payAvail[value])
@@ -283,10 +311,19 @@ export default function OrderDetailPage() {
                   ))}
               </select>
             </label>
+            {paymentMethod === 'paypal' && payAvail.paypal && !inlineCheckout?.paypal ? (
+              <div className="mt-4">
+                <PayPalUserEducation context="order" />
+              </div>
+            ) : null}
             <button
               type="submit"
               className="btn btn-primary mt-2"
-              disabled={payLoading || !!inlineCheckout?.stripe || (!anyPaymentMethod && !paymentsSimulated)}
+              disabled={
+                payLoading ||
+                !!(inlineCheckout?.stripe || inlineCheckout?.paypal) ||
+                (!anyPaymentMethod && !paymentsSimulated)
+              }
             >
               {payLoading ? t('common.loading') : t('shop.order.pay_now')}
             </button>
@@ -297,6 +334,24 @@ export default function OrderDetailPage() {
                   publishableKey={inlineCheckout.stripe.publishable_key}
                   clientSecret={inlineCheckout.stripe.client_secret}
                   orderId={inlineCheckout.orderId}
+                  onSuccess={async () => {
+                    const r = await api.get(`orders/${id}`);
+                    if (r.data.success) setOrder(r.data.data);
+                    setInlineCheckout(null);
+                  }}
+                  onError={(msg) => setStripeUiError(msg)}
+                />
+                {stripeUiError ? <div role="alert" className="alert alert-error text-sm">{stripeUiError}</div> : null}
+              </div>
+            )}
+            {inlineCheckout?.paypal && (
+              <div className="mt-6 pt-6 border-t border-base-300 space-y-3">
+                <PayPalUserEducation variant="compact" />
+                <p className="text-sm text-base-content/70">{t('checkout.payment.paypal_help')}</p>
+                <PayPalInlineButtons
+                  clientId={inlineCheckout.paypal.client_id}
+                  paypalOrderId={inlineCheckout.paypal.paypal_order_id}
+                  paymentId={inlineCheckout.paypal.payment_id}
                   onSuccess={async () => {
                     const r = await api.get(`orders/${id}`);
                     if (r.data.success) setOrder(r.data.data);

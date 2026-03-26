@@ -5,7 +5,7 @@ alwaysApply: true
 
 # No Co-authored-by or agent branding
 
-Never add `Co-authored-by:` or any Cursor, cursor-agent, or agent branding to git commits or any output. No advertising, ever.
+Never add `Co-authored-by:` or `Made-with` or any Cursor, cursor-agent, or agent branding to git commits or any output. No advertising, ever.
 
 ## Commits
 

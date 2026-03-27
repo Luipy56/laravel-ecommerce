@@ -219,6 +219,16 @@ class PayPalPaymentTest extends TestCase
 
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertTrue($payment->fresh()->isSuccessful());
+
+        // Regression: capture must POST an empty JSON object (stdClass), not only arrays; array-only typing on the client breaks this path.
+        Http::assertSent(function ($request) {
+            if ($request->method() !== 'POST') {
+                return false;
+            }
+
+            return str_contains($request->url(), '/v2/checkout/orders/PAYPAL_ORDER_TEST/capture')
+                && $request->body() === '{}';
+        });
     }
 
     public function test_paypal_capture_returns_success_when_already_paid(): void

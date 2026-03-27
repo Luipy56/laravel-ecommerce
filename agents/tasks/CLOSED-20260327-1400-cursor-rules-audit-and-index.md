@@ -23,3 +23,31 @@ The multi-agent workflow added **`docs/agent-cursor-rules.md`** as a catalog of 
 2. Spot-check internal links: **`AGENTS.md`**, **`docs/agent-loop.md`**, **`docs/CONFIGURACION_PAGOS_CORREO.md`**, and referenced **`.mdc`** paths exist.
 3. Run **`php artisan test`** from the repo root (expect all tests passing; no application code was changed).
 4. Optionally open **`.cursor/rules/auth.mdc`** and confirm the **API guests** bullet points only to **testing-verification** (no contradictory duplicate policy).
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** 2026-03-27T17:08:21Z start; verification completed same window. No Laravel log review required (documentation-only scope).
+
+2. **Environment:** PHP 8.3.6, Node v22.21.0; branch `agentdevelop` (synced via `./scripts/git-sync-agent-branch.sh`). `APP_ENV` not required for this verification.
+
+3. **What was tested:** Per **Testing instructions** — inventory sync vs `ls -1 .cursor/rules/*.mdc`, spot-check of referenced paths, `php artisan test`, optional `auth.mdc` API guests cross-reference.
+
+4. **Results:**
+   - Inventory (20 files, alphabetical) matches filesystem — **PASS** — `diff` of sorted basenames vs **Inventory** bullets: empty diff (`inventory identical`).
+   - Referenced paths exist — **PASS** — `test -f` on `AGENTS.md`, `docs/agent-loop.md`, `docs/CONFIGURACION_PAGOS_CORREO.md`, `.cursor/rules/testing-verification.mdc`, `.cursor/rules/git-agent-branch-workflow.mdc`.
+   - `php artisan test` — **PASS** — 30 tests, 165 assertions, exit code 0.
+   - `auth.mdc` API guests defers to `testing-verification.mdc` — **PASS** — line 13: “See **`.cursor/rules/testing-verification.mdc`** (section *Auth / API note*)”.
+
+5. **Overall:** **PASS** (all criteria met).
+
+6. **Product owner feedback:** El índice de reglas en `docs/agent-cursor-rules.md` está alineado con los 20 ficheros `.mdc` reales y los enlaces comprobados existen. La suite de tests automatizados sigue en verde, así que el cambio documental no ha roto el comportamiento de la aplicación.
+
+7. **URLs tested:** N/A — no browser.
+
+8. **Relevant log excerpts:** PHPUnit summary (stdout): `Tests: 30 passed (165 assertions)`; `RouteSmokeTest` included: `all distinct get routes do not return 500`.
+
+**GitHub:** No issue number (`#NN`) on this task — labels/comments not updated.
+
+**Tester:** Renamed `UNTESTED-` → `TESTING-` → `CLOSED-` (same slug `20260327-1400-cursor-rules-audit-and-index`).

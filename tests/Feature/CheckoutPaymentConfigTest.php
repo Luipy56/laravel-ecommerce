@@ -202,4 +202,28 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.paypal_missing_credentials', false);
     }
+
+    /** Operator scenario: PayPal-only checkout, real credentials required, no simulated blanket. */
+    public function test_payments_config_paypal_only_with_credentials_and_no_simulation(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['paypal'],
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'services.paypal.client_id' => self::FAKE_PAYPAL_CLIENT_ID,
+            'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+            'services.paypal.mode' => 'sandbox',
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.methods.paypal', true);
+        $response->assertJsonPath('data.methods.card', false);
+        $response->assertJsonPath('data.methods.bizum', false);
+        $response->assertJsonPath('data.methods.revolut', false);
+        $response->assertJsonPath('data.simulated', false);
+        $response->assertJsonPath('data.paypal_missing_credentials', false);
+    }
 }

@@ -63,6 +63,56 @@ Laravel **no crea** aplicaciones en tu cuenta de desarrollador. Para ver credenc
 
 Si el panel parece vacío, comprueba que hayas creado una app y que estés en **Sandbox**, no solo en Live.
 
+### Flujo E2E PayPal sandbox (checklist operador)
+
+Objetivo: comprobar que un comprador **real** (cuenta **sandbox** de PayPal) puede pagar desde **`/checkout`** con credenciales de app REST en sandbox. La tienda **no** pide la contraseña de PayPal en un formulario propio: el login ocurre en la ventana o capa del **SDK oficial** de PayPal.
+
+1. **Base de datos de desarrollo** (solo entornos locales / de prueba):
+
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+
+2. **`.env` mínimo recomendado** para esta prueba (solo PayPal, sin simular otros métodos):
+
+   ```env
+   APP_ENV=local
+   APP_DEBUG=true
+   PAYMENTS_ALLOW_SIMULATED=false
+   PAYMENTS_CHECKOUT_METHODS=paypal
+   PAYPAL_CLIENT_ID=tu_client_id_sandbox
+   PAYPAL_SECRET=tu_secret_sandbox
+   PAYPAL_MODE=sandbox
+   ```
+
+   Tras editar, ejecuta `php artisan config:clear` (o reinicia el servidor PHP).
+
+3. **Comprobar OAuth contra PayPal** (opcional pero útil antes de abrir el navegador):
+
+   ```bash
+   php artisan paypal:test-credentials
+   ```
+
+   Debe terminar con éxito si `PAYPAL_CLIENT_ID` y `PAYPAL_SECRET` son válidos para el entorno indicado por `PAYPAL_MODE`.
+
+4. **API de métodos disponibles** (sin sesión; debe reflejar credenciales y la lista blanca):
+
+   ```bash
+   curl -sS http://127.0.0.1:8000/api/v1/payments/config
+   ```
+
+   En JSON, espera `data.methods.paypal: true`, `data.methods.card` (y el resto) en `false` por la lista blanca, `data.paypal_missing_credentials: false` y `data.simulated: false` con la configuración anterior.
+
+5. **Navegador** (con `php artisan serve` y `npm run dev`, o tu stack habitual):
+
+   - Inicia sesión como cliente de prueba del seeder, por ejemplo **`maria.garcia@example.com`** / **`password`** (véase `UserSeeder`).
+   - Asegúrate de tener **carrito no vacío** (el seeder deja un carrito para el cliente 1; si hiciste cambios manuales, añade productos desde la tienda).
+   - Abre **`/checkout`**, elige **PayPal** si el selector está visible, completa dirección de envío según valide el formulario y confirma el pedido hasta que aparezcan los **botones de PayPal**.
+   - Inicia sesión con una **cuenta compradora sandbox** (desde el [dashboard de desarrolladores](https://developer.paypal.com/dashboard) → *Sandbox* → cuentas de prueba) y completa el pago.
+   - Verifica en la aplicación que el pago queda **correcto** (pedido / pago según tu flujo) y, si aplica, en el dashboard de PayPal **Sandbox** que la orden y la captura aparecen.
+
+Si `data.methods.paypal` es `false`, revisa credenciales vacías, `PAYPAL_MODE` incorrecto o que PayPal no esté incluido en `PAYMENTS_CHECKOUT_METHODS`.
+
 ## Correo electrónico (precio de instalación y demás)
 
 Cuando un administrador guarda un **precio de instalación** y el pedido pasa a estado listo para que el cliente pague, se dispara el envío del correo `InstallationPriceAssignedMail`.

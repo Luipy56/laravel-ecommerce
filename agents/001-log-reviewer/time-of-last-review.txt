@@ -1,0 +1,5 @@
+# 001 log reviewer: append one line per run (UTC; FEAT count; NEW count).
+
+2026-03-27T15:42Z FEAT=0 NEW=2 | GitHub: 0 open issues (api.github.com + issues UI); gh CLI not installed (no issue comments/labels). Log pass: NEW PayPal TypeError + NEW sqlite :memory: sessions.
+2026-03-27T15:51Z FEAT=0 NEW=1 | GitHub: 0 open (`/issues?q=is:issue+is:open` + REST API `[]`); `gh` not on PATH (no comments/labels). Log pass: NEW `PayPalClient::envCredentialsLookValid()` undefined at `PaymentCheckoutService.php:100` (log ~2026-03-26T20:35Z).
+2026-03-27T15:55Z FEAT=0 NEW=0 | Git sync OK (`agentdevelop`). GitHub: `GET /repos/Luipy56/laravel-ecommerce/issues?state=open` → `[]` (0 issues); `gh` not installed; `GH_TOKEN` unset (no issue comments/labels). Log pass: no lines dated after prior window with new incidents; tail still 2026-03-26 PayPal `envCredentialsLookValid` (already `agents/tasks/NEW-20260327-1551-*.md` + related NEWs). No new NEW- created.

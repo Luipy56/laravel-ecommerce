@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** `PayPalClient::authorizedJson` raised a `TypeError` when the JSON body was a `stdClass` while the signature expected only an `array`, breaking PayPal capture/checkout paths.
+- **What was done:** The client now accepts `array|\stdClass` for the body (so capture can send `{}` via `stdClass`), and `tests/Feature/PayPalPaymentTest.php` gained an `Http::assertSent` guard on the capture POST body.
+- **What was tested:** Full `php artisan test` and `php artisan test --filter=PayPal` both passed; the capture request body remains exactly `{}` per the new assertion.
+- **Why closed:** All tester pass/fail criteria were met (overall **PASS**).
+- **Closed at (UTC):** 2026-03-27 16:02
+---
+
 # PayPal client: `authorizedJson` TypeError (stdClass vs array)
 
 ## Source
@@ -44,3 +54,26 @@ During PayPal API usage, a value passed as JSON body is a **`stdClass`** where t
 
 - **Pass:** All tests green; **`test_paypal_capture_marks_payment_succeeded`** passes including the new **`Http::assertSent`** assertion.
 - **Fail:** Any PayPal test failure, or capture POST body not exactly **`{}`** when using the current client implementation.
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** Started **2026-03-27T16:00:37Z**; verification completed same minute. Log window for this run: not used (automated suite only; no manual repro against `laravel.log`).
+
+2. **Environment:** PHP **8.3.6** (CLI), branch **`agentdevelop`**, repo root `/home/luipy/Repos/Luipy56/laravel-ecommerce`. **`APP_ENV`** not overridden for tests (default PHPUnit/Laravel testing env).
+
+3. **What was tested:** PayPal order capture with HTTP fakes; regression guard that capture POST body is empty JSON object **`{}`** via **`test_paypal_capture_marks_payment_succeeded`** / **`Http::assertSent`**.
+
+4. **Results:**
+   - Full suite **`php artisan test`:** **PASS** — exit code **0**, **28 passed (161 assertions)** including **`paypal capture marks payment succeeded`**.
+   - Narrow **`php artisan test --filter=PayPal`:** **PASS** — exit code **0**, **16 passed (46 assertions)** including **`paypal capture marks payment succeeded`**.
+   - Capture body **`{}`:** **PASS** — implied by passing **`Http::assertSent`** inside **`test_paypal_capture_marks_payment_succeeded`** (failure would fail that test).
+
+5. **Overall:** **PASS** (all criteria met).
+
+6. **Product owner feedback:** The PayPal capture path remains covered by fakes and the new assertion locks the empty-object JSON body contract. Sandbox manual checkout was not exercised here; optional operator QA with real credentials still applies for live PayPal behavior outside this TypeError fix.
+
+7. **URLs tested:** **N/A — no browser** (optional manual sandbox not required for pass criteria).
+
+8. **Relevant log excerpts:** PHPUnit summary (evidence): `Tests: 28 passed (161 assertions)` for full run; `Tests: 16 passed (46 assertions)` for `--filter=PayPal`. No **`PayPalClient::authorizedJson` TypeError** observed during test execution.

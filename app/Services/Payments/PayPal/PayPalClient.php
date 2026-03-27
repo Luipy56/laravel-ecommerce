@@ -34,6 +34,15 @@ class PayPalClient
         return $id !== '' && $secret !== '';
     }
 
+    /**
+     * Alias for {@see envCredentialsPresent()}. Some call sites used this name; keep it so
+     * payment config and checkout availability never fatally error on a missing method.
+     */
+    public static function envCredentialsLookValid(): bool
+    {
+        return self::envCredentialsPresent();
+    }
+
     public function getAccessToken(): string
     {
         $this->assertConfigured();

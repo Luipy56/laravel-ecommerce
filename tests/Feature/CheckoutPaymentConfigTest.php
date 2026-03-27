@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderLine;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Services\Payments\PayPal\PayPalClient;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -72,6 +73,25 @@ class CheckoutPaymentConfigTest extends TestCase
         ]);
 
         return $client;
+    }
+
+    public function test_paypal_client_env_credentials_look_valid_matches_present(): void
+    {
+        config([
+            'services.paypal.client_id' => self::FAKE_PAYPAL_CLIENT_ID,
+            'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+        ]);
+        $this->assertSame(
+            PayPalClient::envCredentialsPresent(),
+            PayPalClient::envCredentialsLookValid(),
+        );
+        $this->assertTrue(PayPalClient::envCredentialsLookValid());
+
+        config([
+            'services.paypal.client_id' => '',
+            'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+        ]);
+        $this->assertFalse(PayPalClient::envCredentialsLookValid());
     }
 
     public function test_payments_config_respects_checkout_method_whitelist(): void

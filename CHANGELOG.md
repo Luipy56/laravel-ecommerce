@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `agents/001-log-reviewer/time-of-last-review.txt` updated (log reviewer runs).
+- Agent pipeline (GitHub #2 smoke): removed queue pickup `agents/tasks/UNTESTED-20260327-1614-test.md`; updated archived `agents/tasks/done/2026/03/27/CLOSED-20260327-1614-test.md` with tester report; added `agents/tasks/done/2026/03/27/CLOSED-20260327-1614-test-hello-world-coder-artifact.md` for verification traceability.
+- `agents/001-log-reviewer/time-of-last-review.txt`: additional log reviewer run line (2026-03-27).
 
 ## [0.1.1] - 2026-03-27
 

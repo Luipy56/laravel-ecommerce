@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The `database` session driver against SQLite `:memory:` raised `QueryException` because the `sessions` table was missing during tests and some local setups.
+- **What was done:** Session driver is forced to `array` in PHPUnit bootstrap and in `AppServiceProvider` when the default connection is SQLite `:memory:`, plus a regression test and an `.env.example` note.
+- **What was tested:** `php artisan test` (29 passed, including `SqliteMemorySessionDriverTest`) and `php artisan routes:smoke` with no HTTP 500; all required acceptance checks met.
+- **Why closed:** Tester report **PASS**; all pass/fail criteria satisfied.
+- **Closed at (UTC):** 2026-03-27 16:20
+---
+
 # SQLite `:memory:`: `no such table: sessions` during requests
 
 ## Source

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/gh-bootstrap-agent-labels.sh`: idempotent `gh` helper to create GitHub labels used by the multi-agent workflow (`agent:planned`, `agent:wip`, `agent:testing`, `production-urgent`).
+
+### Changed
+
+- `agents/001-log-reviewer/time-of-last-review.txt` updated (log reviewer runs).
+
 ## [0.1.1] - 2026-03-27
 
 ### Added

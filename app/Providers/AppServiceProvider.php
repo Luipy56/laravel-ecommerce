@@ -14,7 +14,30 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->alignSessionDriverForSqliteMemory();
+    }
+
+    /**
+     * Avoid database session driver against SQLite :memory: (no stable migrated schema for sessions).
+     * PHPUnit sets SESSION_DRIVER=array, but cached config can still force "database"; local .env can
+     * pair DB_DATABASE=:memory: with SESSION_DRIVER=database.
+     */
+    private function alignSessionDriverForSqliteMemory(): void
+    {
+        if (config('session.driver') !== 'database') {
+            return;
+        }
+
+        $default = config('database.default');
+        $sessionConnection = config('session.connection') ?: $default;
+        $conn = config("database.connections.{$sessionConnection}");
+        if (($conn['driver'] ?? null) !== 'sqlite') {
+            return;
+        }
+
+        if (($conn['database'] ?? null) === ':memory:') {
+            config(['session.driver' => 'array']);
+        }
     }
 
     /**

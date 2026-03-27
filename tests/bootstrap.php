@@ -56,3 +56,14 @@ if (in_array($connection, ['mysql', 'mariadb', 'pgsql'], true)) {
 putenv('DB_DATABASE='.$testDb);
 $_ENV['DB_DATABASE'] = $testDb;
 $_SERVER['DB_DATABASE'] = $testDb;
+
+/*
+| Database sessions require a migrated `sessions` table. SQLite :memory: is a fresh schema per
+| process unless migrations run before every request; pairing it with SESSION_DRIVER=database
+| (from .env or cached config) causes "no such table: sessions". Align with phpunit.xml.
+*/
+if ($connection === 'sqlite' && $testDb === ':memory:') {
+    putenv('SESSION_DRIVER=array');
+    $_ENV['SESSION_DRIVER'] = 'array';
+    $_SERVER['SESSION_DRIVER'] = 'array';
+}

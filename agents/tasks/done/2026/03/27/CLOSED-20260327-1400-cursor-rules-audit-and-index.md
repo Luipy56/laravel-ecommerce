@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The task was to keep **`docs/agent-cursor-rules.md`** in sync with every **`.cursor/rules/*.mdc`** file and to validate cross-references against agent workflow docs.
+- **What was done:** The rules index and related documentation were updated; the tester verified inventory, internal links, and that **`php artisan test`** still passes with no application code changes.
+- **What was tested:** 20-file inventory vs the doc listing, existence of referenced paths, full PHPUnit run (30 tests, 165 assertions, exit 0), and **`auth.mdc`** API-guests deferral to **`testing-verification.mdc`**; overall **PASS**.
+- **Why closed:** All acceptance criteria and the test report checks passed; no linked GitHub issue.
+- **Closed at (UTC):** 2026-03-27 17:09
+---
+
 # Audit Cursor rules and keep docs/agent-cursor-rules.md accurate
 
 ## Problem / goal

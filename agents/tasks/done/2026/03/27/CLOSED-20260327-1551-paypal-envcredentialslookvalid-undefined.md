@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** `PaymentCheckoutService` called `PayPalClient::envCredentialsLookValid()`, which did not exist, causing a fatal error and breaking `GET /api/v1/payments/config`.
+- **What was done:** `envCredentialsLookValid()` was added as a thin alias of `envCredentialsPresent()`, and `CheckoutPaymentConfigTest` was extended to assert parity and guard regressions.
+- **What was tested:** `php artisan test` (30 passed), `php artisan routes:smoke` (no HTTP 500), and `CheckoutPaymentConfigTest` scenarios for PayPal credentials and payments config — all passed.
+- **Why closed:** Tester marked overall **PASS**; all required automated checks met pass criteria.
+- **Closed at (UTC):** 2026-03-27 16:37
+---
+
 # Payment config: undefined `PayPalClient::envCredentialsLookValid()`
 
 ## Source

@@ -46,3 +46,63 @@
 
 - **Pass:** All tests green; **`routes:smoke`** reports no HTTP 500 on checked GET routes; payments config endpoint returns valid JSON when exercised manually.
 - **Fail:** Any test failure, smoke 500, or fatal error when loading payment config.
+
+---
+
+## Test report
+
+### Date/time (UTC) and log window
+
+- **Started:** 2026-03-27T16:35Z (approx.)
+- **Finished:** 2026-03-27T16:36Z (approx.)
+- **Log window:** No `laravel.log` tail review required for this run; regression covered by automated tests (historical incident window remains **2026-03-26T20:35Z** per task Source).
+
+### Environment
+
+- **Branch:** `agentdevelop` (synced via `./scripts/git-sync-agent-branch.sh` before edits).
+- **PHP:** 8.3.6 (CLI).
+- **Node:** v22.21.0.
+- **Tests:** Default `APP_ENV=testing` / SQLite in-memory per PHPUnit config.
+
+### What was tested
+
+- Parity of **`PayPalClient::envCredentialsLookValid()`** with **`envCredentialsPresent()`**.
+- **`GET /api/v1/payments/config`** behaviour (200 JSON, `data.methods.*`) via feature tests including whitelist / simulated / credential matrix.
+- Global GET route health (**`php artisan routes:smoke`**).
+
+### Results
+
+| Criterion | Result | Evidence |
+|-----------|--------|----------|
+| `envCredentialsLookValid()` exists and matches `envCredentialsPresent()` | **PASS** | `Tests\Feature\CheckoutPaymentConfigTest::test_paypal_client_env_credentials_look_valid_matches_present` green. |
+| Payments config JSON / no fatal | **PASS** | `CheckoutPaymentConfigTest` suite: 7 tests passed; includes config endpoint scenarios. |
+| `php artisan test` | **PASS** | **30 passed** (165 assertions), exit code 0. |
+| `php artisan routes:smoke` | **PASS** | Exit code 0; message: `All checked GET routes returned a non-500 status.` |
+| Manual curl / browser checkout | **N/A** | Not run; optional per task; automated coverage satisfies pass criteria together with smoke + full suite. |
+
+### Overall
+
+**PASS** — All required automated checks green; no HTTP 500 on smoke; PayPal credential alias covered by dedicated test.
+
+### Product owner feedback
+
+The PayPal configuration API can load again without PHP fatals when code references the legacy `envCredentialsLookValid()` name. Behaviour stays aligned with “credentials present” checks, and automated tests now guard that parity so a rename cannot silently break checkout again.
+
+### URLs tested
+
+**N/A — no browser** (no `php artisan serve` + manual session in this run).
+
+### Relevant log excerpts
+
+```text
+# php artisan test (excerpt)
+PASS  Tests\Feature\CheckoutPaymentConfigTest
+✓ paypal client env credentials look valid matches present
+✓ payments config respects checkout method whitelist
+… (7 tests in file, all passed)
+
+Tests: 30 passed (165 assertions)
+
+# php artisan routes:smoke (excerpt)
+All checked GET routes returned a non-500 status.
+```

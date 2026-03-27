@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Operators reported confusion about PayPal buyer approval (popup/overlay vs new tab/redirect) during Smart Payment Buttons checkout, especially in incognito.
+- **What was done:** Operator-facing documentation was added in `docs/CONFIGURACION_PAGOS_CORREO.md`, storefront i18n (ca/es) and `PayPalUserEducation.jsx` were updated, and `PayPalInlineButtons.jsx` loads the SDK with `intent=capture` and `commit=true`; redirect-only checkout was not implemented and remains documented as optional future work.
+- **What was tested:** `php artisan test` (30 passed), `npm run build`, `php artisan routes:smoke`, plus static review of locales, JSX, and docs; interactive PayPal sandbox E2E was not run in this pass (recommended follow-up for operators/staging).
+- **Why closed:** Tester **overall PASS** on all automatable gates and static acceptance checks, with the documented caveat that live sandbox UI sign-off is still recommended.
+- **Closed at (UTC):** 2026-03-27 17:33
+---
+
 # PayPal checkout: visible buyer approval (popup vs redirect)
 
 ## Problem / goal

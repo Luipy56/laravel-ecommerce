@@ -50,3 +50,43 @@ Storefront PayPal uses the **JS SDK Smart Payment Buttons** (`resources/js/compo
 
 - **Pass:** All automated tests green; `npm run build` succeeds; manual PayPal sandbox flow completes without console errors from the SDK; copy matches locale and is understandable.
 - **Fail:** Build/test failures, PayPal buttons fail to load, or misleading copy (e.g. implying payment confirms without PayPal).
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window**
+   - Started: `2026-03-27T17:32:12Z` (approx.; sync and rename immediately before).
+   - Finished: same session (~17:33Z).
+   - Log window: `storage/logs/laravel.log` — no new lines reviewed that were specific to this verification (automated tests use in-memory SQLite; smoke uses test dispatcher).
+
+2. **Environment**
+   - PHP `8.3.6`, Node `v22.21.0`.
+   - Branch: `agentdevelop` (after `./scripts/git-sync-agent-branch.sh`).
+   - `APP_ENV`: not required for this run (PHPUnit + Vite build only).
+
+3. **What was tested** (from “What to verify” + How to test)
+   - Automated: `php artisan test`, `npm run build`, `php artisan routes:smoke`.
+   - Static: `ca.json` / `es.json` PayPal checkout strings; `PayPalInlineButtons.jsx` SDK query string; `PayPalUserEducation.jsx` uses new key; `docs/CONFIGURACION_PAGOS_CORREO.md` operator section.
+   - Manual PayPal sandbox E2E (`/checkout`, Smart Buttons, buyer login): **not executed** (no interactive browser / PayPal sandbox buyer session in this tester run).
+
+4. **Results**
+   - `php artisan test`: **PASS** — `Tests: 30 passed (165 assertions)`, exit code 0.
+   - `npm run build`: **PASS** — Vite build completed (`✓ built in 3.46s`), exit code 0.
+   - `php artisan routes:smoke`: **PASS** — `All checked GET routes returned a non-500 status.`
+   - Checkout copy (ca/es): popup/overlay vs full page + capture only after PayPal approval: **PASS** — keys `checkout.payment.paypal_help`, `checkout.payment.paypal_user_edu_popup_and_capture`, `checkout.payment.paypal_user_edu_compact` present and aligned in `resources/js/locales/ca.json` and `es.json`; `PayPalUserEducation.jsx` renders `paypal_user_edu_popup_and_capture`.
+   - SDK script URL includes `intent=capture` and `commit=true`: **PASS** — `PayPalInlineButtons.jsx` builds `scriptSrc` with `&intent=capture&commit=true` (lines 28–30).
+   - Operator doc (Spanish): **PASS** — table row + `### PayPal: qué debería ver el comprador (operadores)` + E2E checklist in `docs/CONFIGURACION_PAGOS_CORREO.md` read clearly and match the product intent.
+   - Manual sandbox E2E (Smart Buttons visible, PayPal UI, payment completes, console clean): **NOT RUN** — evidence: headless verification only; follow checklist in same doc § “Flujo E2E PayPal sandbox”.
+
+5. **Overall:** **PASS** — all automatable gates and static acceptance checks passed; manual sandbox sign-off remains recommended for operators/staging (documented in repo).
+
+6. **Product owner feedback**
+   - The storefront and docs now explain popup/overlay vs redirect and that capture implies PayPal-side approval, which should reduce operator confusion after incognito tests.
+   - Please run the documented PayPal sandbox checklist once in a real browser before treating production behaviour as signed off, since this run did not drive the live SDK UI.
+
+7. **URLs tested**
+   - **N/A — no browser** (no full URLs visited).
+
+8. **Relevant log excerpts**
+   - N/A — evidence for pass/fail taken from PHPUnit/Vite/routes:smoke CLI output above, not from `laravel.log` during this window.

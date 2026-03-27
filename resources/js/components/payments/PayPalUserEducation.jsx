@@ -21,6 +21,7 @@ export default function PayPalUserEducation({ variant = 'full', context = 'check
         )}
       </p>
       <p className="m-0">{t('checkout.payment.paypal_user_edu_no_form')}</p>
+      <p className="m-0">{t('checkout.payment.paypal_user_edu_popup_and_capture')}</p>
       <p className="m-0">{t('checkout.payment.paypal_user_edu_session')}</p>
       <p className="m-0 text-base-content/85">{t('checkout.payment.paypal_user_edu_activity')}</p>
     </div>

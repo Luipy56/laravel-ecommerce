@@ -9,7 +9,7 @@ La aplicación no muestra formularios “del banco” genéricos en vacío: cada
 | Método en la tienda | Proveedor real | Comportamiento cuando está bien configurado |
 |---------------------|----------------|---------------------------------------------|
 | Tarjeta             | **Stripe** (`STRIPE_KEY` + `STRIPE_SECRET`) | Tras iniciar el pago, aparece el bloque de Stripe (elemento embebido) en la misma página para introducir la tarjeta. |
-| PayPal              | **PayPal REST** (`PAYPAL_CLIENT_ID` + `PAYPAL_SECRET`, `PAYPAL_MODE=sandbox` o `live`) | Tras iniciar el pago, aparecen los botones de PayPal (SDK); la captura se confirma en el servidor (`POST /api/v1/payments/paypal/capture`). |
+| PayPal              | **PayPal REST** (`PAYPAL_CLIENT_ID` + `PAYPAL_SECRET`, `PAYPAL_MODE=sandbox` o `live`) | Tras iniciar el pago, aparecen los botones de PayPal (SDK JavaScript: Smart Payment Buttons). La interfaz de aprobación suele ser una **ventana emergente o capa in-context** de PayPal, no siempre una pestaña nueva; si el navegador bloquea pop-ups, el SDK puede pasar a **redirección a paypal.com**. La captura se confirma en el servidor (`POST /api/v1/payments/paypal/capture`) **después** de que el comprador complete el flujo en PayPal. |
 | Bizum               | **Redsys** (`REDSYS_MERCHANT_CODE` + `REDSYS_SECRET_KEY`, más terminal y entorno) | Redirección al TPV / pasarela del banco (formulario automático). |
 | Revolut             | **Revolut Merchant** (`REVOLUT_MERCHANT_API_KEY`) | Redirección a la URL de pago de Revolut. |
 
@@ -62,6 +62,14 @@ Laravel **no crea** aplicaciones en tu cuenta de desarrollador. Para ver credenc
 4. Las órdenes y capturas aparecen cuando el flujo de la tienda llama a la API de PayPal con esas credenciales; los pagos marcados como simulados **solo en Laravel** no generan actividad en PayPal.
 
 Si el panel parece vacío, comprueba que hayas creado una app y que estés en **Sandbox**, no solo en Live.
+
+### PayPal: qué debería ver el comprador (operadores)
+
+- **Ventana emergente, capa o pestaña:** el SDK oficial abre la experiencia de login y pago **en el dominio de PayPal**. Lo habitual es un mini-navegador o ventana emergente; no confundir “no vi otra pestaña” con “no hubo PayPal”: puede ser capa o ventana pequeña.
+- **Bloqueo de pop-ups:** con bloqueador activo, PayPal suele **redirigir toda la página** a `paypal.com` (sandbox o live). Si en incógnito “no pasó nada”, revisa iconos de “ventana bloqueada” en la barra de direcciones.
+- **Sesión ya iniciada en PayPal:** si el navegador tenía sesión sandbox/live de PayPal, el paso puede ser solo **confirmar** el pago; eso sigue siendo aprobación en el lado de PayPal.
+- **Captura y `COMPLETED`:** si `POST /api/v1/payments/paypal/capture` responde éxito con orden `COMPLETED`, la API de PayPal aceptó la captura; en transacciones reales eso implica que el flujo de aprobación de PayPal se completó. Si alguien informa cobro sin **ninguna** UI de PayPal, intenta reproducir con otro perfil, sin sesión PayPal y comprobando bloqueo de ventanas; si persiste, conviene revisar que no se esté mezclando con otro entorno o credenciales.
+- **Simulación:** con `PAYPAL_CLIENT_ID` y `PAYPAL_SECRET` configurados, **PayPal no se simula** en Laravel aunque otros métodos estén en modo desarrollo simulado; el comprador debe pasar por el flujo del SDK. Sin credenciales PayPal, el método no se ofrece (véase la tabla anterior y `PAYMENTS_ALLOW_SIMULATED`).
 
 ### Flujo E2E PayPal sandbox (checklist operador)
 

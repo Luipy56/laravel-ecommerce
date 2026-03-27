@@ -25,7 +25,9 @@ export default function PayPalInlineButtons({ clientId, paypalOrderId, paymentId
       return undefined;
     }
 
-    const scriptSrc = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=EUR`;
+    const scriptSrc = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
+      clientId,
+    )}&currency=EUR&intent=capture&commit=true`;
     const scriptDomId = 'paypal-sdk-inline-storefront';
 
     const ensureScript = () =>

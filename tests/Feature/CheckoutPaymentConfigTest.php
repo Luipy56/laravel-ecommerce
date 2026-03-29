@@ -246,4 +246,70 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertJsonPath('data.simulated', false);
         $response->assertJsonPath('data.paypal_missing_credentials', false);
     }
+
+    public function test_payments_config_stripe_missing_credentials_when_whitelisted_without_keys_and_no_simulation(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['card', 'paypal'],
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'services.paypal.client_id' => self::FAKE_PAYPAL_CLIENT_ID,
+            'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.methods.card', false);
+        $response->assertJsonPath('data.stripe_missing_credentials', true);
+    }
+
+    public function test_payments_config_stripe_missing_credentials_false_when_simulated_without_keys(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['card'],
+            'payments.allow_simulated' => true,
+            'app.debug' => true,
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.methods.card', true);
+        $response->assertJsonPath('data.stripe_missing_credentials', false);
+    }
+
+    public function test_payments_config_revolut_missing_credentials_when_whitelisted_without_key_and_no_simulation(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['revolut'],
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'services.revolut.api_key' => '',
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.methods.revolut', false);
+        $response->assertJsonPath('data.revolut_missing_credentials', true);
+    }
+
+    public function test_payments_config_stripe_missing_credentials_false_when_card_not_whitelisted(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['paypal'],
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'services.paypal.client_id' => self::FAKE_PAYPAL_CLIENT_ID,
+            'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.stripe_missing_credentials', false);
+    }
 }

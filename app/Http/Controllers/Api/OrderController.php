@@ -353,6 +353,9 @@ class OrderController extends Controller
                     'revolut' => $payMethods['revolut'],
                 ],
                 'payments_simulated' => $payMethods['simulated'],
+                'paypal_missing_credentials' => PaymentCheckoutService::paypalMissingCredentialsForStorefront(),
+                'stripe_missing_credentials' => PaymentCheckoutService::stripeMissingCredentialsForStorefront(),
+                'revolut_missing_credentials' => PaymentCheckoutService::revolutMissingCredentialsForStorefront(),
                 'local_checkout_needs_debug' => app()->environment('local') && ! $payMethods['simulated'] && ! $anyPayMethod,
                 'payments' => $order->payments->map(fn (Payment $p) => [
                     'id' => $p->id,

@@ -50,7 +50,7 @@ También puedes poner `PAYMENTS_ALLOW_SIMULATED=true` aunque no sea necesario en
 
 **No uses simulación en producción** (`APP_DEBUG=false`; en producción `APP_ENV` no debe ser `local`).
 
-El endpoint público `GET /api/v1/payments/config` expone qué métodos el storefront puede usar (ya filtrados por `PAYMENTS_CHECKOUT_METHODS` y credenciales).
+El endpoint público `GET /api/v1/payments/config` expone qué métodos el storefront puede usar (ya filtrados por `PAYMENTS_CHECKOUT_METHODS` y credenciales). Además incluye banderas informativas (operador / integración): `paypal_missing_credentials`, `stripe_missing_credentials` y `revolut_missing_credentials` son **true** cuando ese método está en `PAYMENTS_CHECKOUT_METHODS` pero faltan credenciales reales **y** la simulación de checkout no cubre el vacío (`PAYMENTS_ALLOW_SIMULATED=false` o entorno no local sin simulación). PayPal sigue sin simularse nunca: sin `PAYPAL_*`, `paypal_missing_credentials` puede ser true aunque otros métodos estén simulados. La ficha de pedido (`GET /api/v1/orders/{id}`) repite esas tres banderas junto a `payment_methods_available` para el mismo contexto al pagar desde el pedido.
 
 ### PayPal Developer Dashboard y actividad
 

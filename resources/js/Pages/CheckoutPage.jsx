@@ -42,6 +42,8 @@ export default function CheckoutPage() {
     simulated: false,
     local_checkout_needs_debug: false,
     paypal_missing_credentials: false,
+    stripe_missing_credentials: false,
+    revolut_missing_credentials: false,
   });
   const [checkoutFormError, setCheckoutFormError] = useState('');
   const wantsInstallation = !!cart.installation_requested;
@@ -58,16 +60,30 @@ export default function CheckoutPage() {
             simulated: !!d.simulated,
             local_checkout_needs_debug: !!d.local_checkout_needs_debug,
             paypal_missing_credentials: !!d.paypal_missing_credentials,
+            stripe_missing_credentials: !!d.stripe_missing_credentials,
+            revolut_missing_credentials: !!d.revolut_missing_credentials,
           });
         } else {
           setPayMethods({ card: false, paypal: false, bizum: false, revolut: false });
-          setPayConfigMeta({ simulated: false, local_checkout_needs_debug: false, paypal_missing_credentials: false });
+          setPayConfigMeta({
+            simulated: false,
+            local_checkout_needs_debug: false,
+            paypal_missing_credentials: false,
+            stripe_missing_credentials: false,
+            revolut_missing_credentials: false,
+          });
         }
       })
       .catch(() => {
         setPayConfigLoadError(true);
         setPayMethods({ card: false, paypal: false, bizum: false, revolut: false });
-        setPayConfigMeta({ simulated: false, local_checkout_needs_debug: false, paypal_missing_credentials: false });
+        setPayConfigMeta({
+          simulated: false,
+          local_checkout_needs_debug: false,
+          paypal_missing_credentials: false,
+          stripe_missing_credentials: false,
+          revolut_missing_credentials: false,
+        });
       });
   }, []);
 
@@ -320,6 +336,16 @@ export default function CheckoutPage() {
               {payMethodsReady && !payConfigLoadError && payConfigMeta.paypal_missing_credentials && (
                 <div role="status" className="alert alert-info text-sm">
                   {t('checkout.payment.paypal_missing_credentials_hint')}
+                </div>
+              )}
+              {payMethodsReady && !payConfigLoadError && payConfigMeta.stripe_missing_credentials && (
+                <div role="status" className="alert alert-info text-sm">
+                  {t('checkout.payment.stripe_missing_credentials_hint')}
+                </div>
+              )}
+              {payMethodsReady && !payConfigLoadError && payConfigMeta.revolut_missing_credentials && (
+                <div role="status" className="alert alert-info text-sm">
+                  {t('checkout.payment.revolut_missing_credentials_hint')}
                 </div>
               )}
               <label className="form-field w-full">

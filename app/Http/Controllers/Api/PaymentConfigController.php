@@ -29,6 +29,8 @@ class PaymentConfigController extends Controller
                 /** True when local env, no PSP keys, and simulated payments are off (usually APP_DEBUG=false). */
                 'local_checkout_needs_debug' => app()->environment('local') && ! $m['simulated'] && ! $anyMethod,
                 'paypal_missing_credentials' => PaymentCheckoutService::paypalMissingCredentialsForStorefront(),
+                'stripe_missing_credentials' => PaymentCheckoutService::stripeMissingCredentialsForStorefront(),
+                'revolut_missing_credentials' => PaymentCheckoutService::revolutMissingCredentialsForStorefront(),
             ],
         ]);
     }

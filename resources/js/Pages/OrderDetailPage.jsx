@@ -287,6 +287,22 @@ export default function OrderDetailPage() {
         </div>
       )}
 
+      {canPay && order.paypal_missing_credentials && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('checkout.payment.paypal_missing_credentials_hint')}
+        </div>
+      )}
+      {canPay && order.stripe_missing_credentials && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('checkout.payment.stripe_missing_credentials_hint')}
+        </div>
+      )}
+      {canPay && order.revolut_missing_credentials && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('checkout.payment.revolut_missing_credentials_hint')}
+        </div>
+      )}
+
       {canPay && (
         <form onSubmit={handlePay} className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
           <div className="card-body">

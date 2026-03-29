@@ -78,6 +78,37 @@ class PaymentCheckoutService
     }
 
     /**
+     * Card (Stripe) is whitelisted but STRIPE_KEY/STRIPE_SECRET are missing and simulated checkout is off.
+     * When simulated checkout is on, missing Stripe keys still expose "card" as simulated — no hint needed.
+     */
+    public static function stripeMissingCredentialsForStorefront(): bool
+    {
+        if (! in_array(Payment::METHOD_CARD, self::checkoutMethodKeysFromConfig(), true)) {
+            return false;
+        }
+        if (self::allowSimulatedPayments()) {
+            return false;
+        }
+
+        return ! self::methodHasRealProviderCredentials(Payment::METHOD_CARD);
+    }
+
+    /**
+     * Revolut is whitelisted but REVOLUT_MERCHANT_API_KEY is missing and simulated checkout is off.
+     */
+    public static function revolutMissingCredentialsForStorefront(): bool
+    {
+        if (! in_array(Payment::METHOD_REVOLUT, self::checkoutMethodKeysFromConfig(), true)) {
+            return false;
+        }
+        if (self::allowSimulatedPayments()) {
+            return false;
+        }
+
+        return ! self::methodHasRealProviderCredentials(Payment::METHOD_REVOLUT);
+    }
+
+    /**
      * When simulated mode is on, skip the PSP only if that method has no real credentials.
      * PayPal is never simulated: without credentials it stays unavailable; with credentials the SDK must run.
      */

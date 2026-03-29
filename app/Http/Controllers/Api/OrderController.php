@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\OrderInstallationQuoteRequested;
+use App\Exceptions\PaymentProviderNotConfiguredException;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAddress;
@@ -128,6 +129,8 @@ class OrderController extends Controller
             } elseif ($payment) {
                 try {
                     $paymentCheckout = $paymentCheckoutService->start($payment);
+                } catch (PaymentProviderNotConfiguredException $e) {
+                    $paymentError = __('shop.payment.method_unavailable');
                 } catch (Throwable $e) {
                     report($e);
                     $paymentError = $this->checkoutPaymentStartErrorMessage($payment, $e);
@@ -216,6 +219,8 @@ class OrderController extends Controller
         } else {
             try {
                 $paymentCheckout = $paymentCheckoutService->start($payment);
+            } catch (PaymentProviderNotConfiguredException $e) {
+                return $this->jsonWhenPaymentStartFailed($payment, $e);
             } catch (Throwable $e) {
                 report($e);
 
@@ -403,6 +408,14 @@ class OrderController extends Controller
 
     private function jsonWhenPaymentStartFailed(Payment $payment, Throwable $e): JsonResponse
     {
+        if ($e instanceof PaymentProviderNotConfiguredException) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.payment.method_unavailable'),
+                'code' => 'payment_method_not_configured',
+            ], 422);
+        }
+
         if ($payment->payment_method === Payment::METHOD_PAYPAL) {
             if (str_starts_with($e->getMessage(), 'PAYPAL_START_ERROR|')) {
                 $msg = __('shop.payment.paypal_credentials_format_invalid');

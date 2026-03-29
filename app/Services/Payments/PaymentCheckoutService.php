@@ -9,6 +9,7 @@ use App\Services\Payments\PayPal\PayPalClient;
 use App\Services\Payments\Redsys\RedsysCheckoutStarter;
 use App\Services\Payments\Revolut\RevolutCheckoutStarter;
 use App\Services\Payments\Stripe\StripeCheckoutStarter;
+use App\Services\Payments\Stripe\StripeCredentials;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -59,7 +60,7 @@ class PaymentCheckoutService
     public static function methodHasRealProviderCredentials(string $method): bool
     {
         return match ($method) {
-            Payment::METHOD_CARD => filled(config('services.stripe.secret')) && filled(config('services.stripe.key')),
+            Payment::METHOD_CARD => StripeCredentials::areConfigured(),
             Payment::METHOD_PAYPAL => PayPalClient::envCredentialsPresent(),
             Payment::METHOD_BIZUM => filled(config('services.redsys.merchant_code')) && filled(config('services.redsys.secret_key')),
             Payment::METHOD_REVOLUT => filled(config('services.revolut.api_key')),
@@ -128,7 +129,7 @@ class PaymentCheckoutService
     private static function paymentMethodsBaseAvailability(): array
     {
         $simulated = self::allowSimulatedPayments();
-        $stripeOk = $simulated || (filled(config('services.stripe.secret')) && filled(config('services.stripe.key')));
+        $stripeOk = $simulated || StripeCredentials::areConfigured();
         $paypalOk = PayPalClient::envCredentialsPresent();
         $redsysOk = $simulated || (filled(config('services.redsys.merchant_code')) && filled(config('services.redsys.secret_key')));
         $revolutOk = $simulated || filled(config('services.revolut.api_key'));

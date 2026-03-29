@@ -3,6 +3,7 @@
 namespace App\Services\Payments\Stripe;
 
 use App\Contracts\Payments\PaymentCheckoutStarter;
+use App\Exceptions\PaymentProviderNotConfiguredException;
 use App\Models\Payment;
 use RuntimeException;
 use Stripe\PaymentIntent as StripePaymentIntent;
@@ -17,15 +18,16 @@ class StripeCheckoutStarter implements PaymentCheckoutStarter
 
     public function start(Payment $payment): array
     {
-        $secret = config('services.stripe.secret');
-        if (! is_string($secret) || $secret === '') {
-            throw new RuntimeException('Stripe is not configured (STRIPE_SECRET).');
+        if (! StripeCredentials::areConfigured()) {
+            throw new PaymentProviderNotConfiguredException(
+                'Stripe is not configured (STRIPE_SECRET/STRIPE_KEY).',
+            );
         }
 
+        /** @var string $secret */
+        $secret = config('services.stripe.secret');
+        /** @var string $publishable */
         $publishable = config('services.stripe.key');
-        if (! is_string($publishable) || $publishable === '') {
-            throw new RuntimeException('Stripe publishable key missing (STRIPE_KEY).');
-        }
 
         $stripe = new StripeClient($secret);
 

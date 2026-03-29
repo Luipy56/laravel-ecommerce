@@ -109,10 +109,10 @@ export default function AdminLayout() {
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-base-200">
       <input id="admin-drawer" type="checkbox" className="drawer-toggle" aria-label={t('common.menu')} />
-      <div className="drawer-content flex flex-col">
+      <div className="drawer-content flex min-w-0 flex-col">
         <header className="sticky top-0 z-10 bg-base-100 border-b border-base-200 shrink-0">
           <div className="container mx-auto px-4 py-3 lg:px-6 flex items-center justify-between gap-4 w-full">
-            <div className="flex items-center gap-2 min-w-0 flex-1 lg:flex-initial">
+            <div className="flex min-w-0 flex-1 items-center gap-2 lg:flex-initial">
               <label
                 htmlFor="admin-drawer"
                 className="btn btn-ghost btn-square drawer-button shrink-0 lg:hidden"
@@ -120,8 +120,9 @@ export default function AdminLayout() {
               >
                 <IconMenu className="h-6 w-6" />
               </label>
-              <nav className="breadcrumbs text-sm min-w-0" aria-label="Breadcrumb">
-                <ul>
+              <div className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+                <nav className="breadcrumbs text-sm whitespace-nowrap" aria-label="Breadcrumb">
+                  <ul className="!flex-nowrap">
                   {breadcrumbs.map((crumb, i) => (
                     <li key={i}>
                       {crumb.path ? (
@@ -133,8 +134,9 @@ export default function AdminLayout() {
                       )}
                     </li>
                   ))}
-                </ul>
-              </nav>
+                  </ul>
+                </nav>
+              </div>
             </div>
             <div className="dropdown dropdown-end shrink-0">
               <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={locale === 'ca' ? 'Català' : 'Español'}>
@@ -147,7 +149,7 @@ export default function AdminLayout() {
             </div>
           </div>
         </header>
-        <main className="flex-1 container mx-auto px-4 pb-6 lg:px-6">
+        <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 pb-6 lg:px-6">
           <AdminToastProvider>
             <Outlet />
           </AdminToastProvider>

@@ -244,7 +244,7 @@ export default function CheckoutPage() {
 
   if (activeCheckout?.redsys) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div className="mx-auto w-full min-w-0 max-w-2xl">
         <PageTitle>{t('shop.checkout')}</PageTitle>
         <RedsysAutoPost actionUrl={activeCheckout.redsys.action_url} fields={activeCheckout.redsys.fields} />
       </div>
@@ -252,7 +252,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="mx-auto w-full min-w-0 max-w-2xl">
       <PageTitle>{t('shop.checkout')}</PageTitle>
       <ConfirmModal
         open={confirmOpen}

@@ -39,7 +39,6 @@ export default function Navbar() {
   const location = useLocation();
   const [locale, setLocale] = useState(i18n.language);
   const [searchQ, setSearchQ] = useState('');
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
 
@@ -76,7 +75,6 @@ export default function Navbar() {
   const handleLogout = async () => {
     await logout();
     navigate('/');
-    setDrawerOpen(false);
   };
 
   const handleSearch = (e) => {
@@ -87,7 +85,6 @@ export default function Navbar() {
     } else {
       navigate('/products');
     }
-    setDrawerOpen(false);
   };
 
   return (

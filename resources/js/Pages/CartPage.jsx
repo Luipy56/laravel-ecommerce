@@ -161,7 +161,7 @@ export default function CartPage() {
 
   if (!cart.lines?.length) {
     return (
-      <div className="max-w-5xl mx-auto">
+      <div className="mx-auto w-full min-w-0 max-w-5xl">
         <div className="mb-4">
           <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
         </div>
@@ -176,7 +176,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="mx-auto w-full min-w-0 max-w-5xl">
       <div className="mb-4">
         <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
       </div>

@@ -19,6 +19,7 @@ class PaymentCheckoutService
         private readonly PayPalCheckoutStarter $paypal,
         private readonly RedsysCheckoutStarter $redsys,
         private readonly RevolutCheckoutStarter $revolut,
+        private readonly PaymentCompletionService $completion,
     ) {}
 
     /** @return array{type: string}&array<string, mixed> */
@@ -154,13 +155,9 @@ class PaymentCheckoutService
         if (! self::allowSimulatedPayments()) {
             throw new RuntimeException('Simulated payments are disabled.');
         }
-        $payment->update([
+        $this->completion->markSucceeded($payment, [
             'gateway' => 'simulated',
-            'status' => Payment::STATUS_SUCCEEDED,
-            'paid_at' => now(),
             'gateway_reference' => 'sim_'.$payment->id.'_'.uniqid(),
-            'failure_code' => null,
-            'failure_message' => null,
         ]);
     }
 }

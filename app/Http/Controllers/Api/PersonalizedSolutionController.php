@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PersonalizedSolutionSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\PersonalizedSolution;
+use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -43,7 +45,7 @@ class PersonalizedSolutionController extends Controller
 
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $path = $file->store('personalized-solutions/' . $solution->id, 'uploads');
+                $path = $file->store('personalized-solutions/'.$solution->id, 'uploads');
                 \App\Models\PersonalizedSolutionAttachment::create([
                     'personalized_solution_id' => $solution->id,
                     'storage_path' => $path,
@@ -54,6 +56,11 @@ class PersonalizedSolutionController extends Controller
                 ]);
             }
         }
+
+        PersonalizedSolutionSubmitted::dispatch(
+            $solution->fresh(),
+            MailLocale::resolve($request->getPreferredLanguage(['ca', 'es'])),
+        );
 
         return response()->json([
             'success' => true,

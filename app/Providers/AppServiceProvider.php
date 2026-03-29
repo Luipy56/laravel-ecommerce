@@ -3,7 +3,15 @@
 namespace App\Providers;
 
 use App\Events\InstallationPriceWasAssigned;
+use App\Events\OrderInstallationQuoteRequested;
+use App\Events\OrderPaymentSucceeded;
+use App\Events\OrderShipped;
+use App\Events\PersonalizedSolutionSubmitted;
 use App\Listeners\SendInstallationPriceAssignedEmail;
+use App\Listeners\SendOrderInstallationQuoteRequestEmail;
+use App\Listeners\SendOrderPaymentConfirmationEmail;
+use App\Listeners\SendOrderShippedEmail;
+use App\Listeners\SendPersonalizedSolutionAcknowledgementEmail;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -46,5 +54,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(InstallationPriceWasAssigned::class, SendInstallationPriceAssignedEmail::class);
+        Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmationEmail::class);
+        Event::listen(OrderInstallationQuoteRequested::class, SendOrderInstallationQuoteRequestEmail::class);
+        Event::listen(PersonalizedSolutionSubmitted::class, SendPersonalizedSolutionAcknowledgementEmail::class);
+        Event::listen(OrderShipped::class, SendOrderShippedEmail::class);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\OrderInstallationQuoteRequested;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAddress;
@@ -135,6 +136,10 @@ class OrderController extends Controller
         }
 
         $cart->refresh()->load('payments');
+
+        if ($awaitingInstallationQuote) {
+            OrderInstallationQuoteRequested::dispatch($cart->fresh(['client', 'lines.product', 'lines.pack', 'addresses']));
+        }
 
         return response()->json([
             'success' => true,

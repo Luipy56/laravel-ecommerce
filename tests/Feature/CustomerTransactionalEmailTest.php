@@ -1,0 +1,195 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Mail\OrderInstallationQuoteRequestedMail;
+use App\Mail\OrderPaymentConfirmedMail;
+use App\Mail\OrderShippedMail;
+use App\Mail\PersonalizedSolutionReceivedMail;
+use App\Models\Client;
+use App\Models\Order;
+use App\Models\OrderLine;
+use App\Models\Product;
+use App\Models\ProductCategory;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
+use Tests\TestCase;
+
+class CustomerTransactionalEmailTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
+
+    private function makeClientWithCart(bool $installationRequested = false): Client
+    {
+        $client = Client::query()->create([
+            'type' => 'person',
+            'identification' => null,
+            'login_email' => 'buyer_'.uniqid('', true).'@example.test',
+            'password' => bcrypt('password'),
+            'is_active' => true,
+        ]);
+
+        $category = ProductCategory::query()->create([
+            'code' => 'cat_'.uniqid(),
+            'name' => 'Category',
+            'is_active' => true,
+        ]);
+
+        $product = Product::query()->create([
+            'category_id' => $category->id,
+            'code' => 'p_'.uniqid(),
+            'name' => 'Product',
+            'price' => 25.00,
+            'stock' => 10,
+            'is_active' => true,
+        ]);
+
+        $cart = Order::query()->create([
+            'client_id' => $client->id,
+            'kind' => Order::KIND_CART,
+            'status' => null,
+            'installation_requested' => $installationRequested,
+        ]);
+
+        OrderLine::query()->create([
+            'order_id' => $cart->id,
+            'product_id' => $product->id,
+            'pack_id' => null,
+            'quantity' => 1,
+            'unit_price' => 25.00,
+            'offer' => null,
+            'keys_all_same' => false,
+            'extra_keys_qty' => 0,
+            'extra_key_unit_price' => null,
+            'is_included' => true,
+        ]);
+
+        return $client;
+    }
+
+    public function test_checkout_with_simulated_bizum_sends_payment_confirmation_mail(): void
+    {
+        Mail::fake();
+
+        config([
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'services.redsys.merchant_code' => '',
+            'services.redsys.secret_key' => '',
+            'app.debug' => true,
+            'payments.allow_simulated' => true,
+        ]);
+
+        $client = $this->makeClientWithCart(false);
+
+        $payload = [
+            'payment_method' => 'bizum',
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => '',
+            'installation_city' => '',
+            'installation_postal_code' => '',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.has_payment', true);
+
+        Mail::assertSent(OrderPaymentConfirmedMail::class, function (OrderPaymentConfirmedMail $mail) use ($client) {
+            return $mail->hasTo($client->login_email);
+        });
+    }
+
+    public function test_checkout_with_installation_request_sends_quote_request_mail(): void
+    {
+        Mail::fake();
+
+        config([
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'app.debug' => true,
+            'payments.allow_simulated' => true,
+        ]);
+
+        $client = $this->makeClientWithCart(true);
+
+        $payload = [
+            'payment_method' => null,
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => 'Av. Diagonal 1',
+            'installation_city' => 'Barcelona',
+            'installation_postal_code' => '08028',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.awaiting_installation_quote', true);
+
+        Mail::assertSent(OrderInstallationQuoteRequestedMail::class, function (OrderInstallationQuoteRequestedMail $mail) use ($client) {
+            return $mail->hasTo($client->login_email);
+        });
+    }
+
+    public function test_personalized_solution_store_sends_acknowledgement_mail(): void
+    {
+        Mail::fake();
+
+        $email = 'sol_'.uniqid('', true).'@example.test';
+
+        $this->postJson('/api/v1/personalized-solutions', [
+            'email' => $email,
+            'phone' => null,
+            'problem_description' => 'Need a custom lock setup',
+            'address_street' => null,
+            'address_city' => null,
+            'address_province' => null,
+            'address_postal_code' => '08001',
+            'address_note' => null,
+        ], ['Accept-Language' => 'es'])->assertCreated();
+
+        Mail::assertSent(PersonalizedSolutionReceivedMail::class, function (PersonalizedSolutionReceivedMail $mail) use ($email) {
+            return $mail->hasTo($email);
+        });
+    }
+
+    public function test_admin_sets_order_in_transit_sends_shipped_mail(): void
+    {
+        Mail::fake();
+
+        $this->seed(DatabaseSeeder::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $this->putJson('/api/v1/admin/orders/1', [
+            'status' => 'in_transit',
+            'shipping_date' => null,
+        ])->assertOk();
+
+        Mail::assertSent(OrderShippedMail::class);
+    }
+}

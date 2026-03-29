@@ -41,3 +41,47 @@
 | `php artisan test` completo | Sin fallos (o documentar imposibilidad por falta de `pdo_sqlite`). |
 | `routes:smoke` | Sin HTTP 500 en GET comprobados. |
 | Comportamiento Stripe no configurado | 422 + `payment_method_not_configured`; sin `report()` / ERROR de log para `PaymentProviderNotConfiguredException`. |
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window**
+   - Inicio verificación: **2026-03-29T21:24:45Z**.
+   - Fin aproximado: **2026-03-29T21:26:30Z** (comandos `php artisan test`, filtros y `routes:smoke`).
+   - Ventana de log revisada: **N/A** para este pase (no se ejecutó el flujo manual de pago; no se añadieron entradas nuevas relevantes en `storage/logs/laravel.log` durante la ventana).
+
+2. **Environment**
+   - **PHP:** 8.3.6 (CLI).
+   - **Node:** v22.20.0 (no requerido por esta tarea; sin `npm run build`).
+   - **Rama:** `agentdevelop`.
+   - **`pdo_sqlite`:** no presente en `php -m` (módulos SQLite vacíos al filtrar); las pruebas que migran contra SQLite en memoria fallan con `could not find driver`.
+
+3. **What was tested** (según “What to verify” / “How to test”)
+   - `php artisan test` (suite completa).
+   - `php artisan test --filter=StripeCheckoutStarterTest`.
+   - `php artisan test --filter=OrderPayConfigurationExceptionTest` y `--filter=CheckoutPaymentConfigTest` (intentados).
+   - `php artisan routes:smoke`.
+   - Prueba manual `/checkout` / `GET /api/v1/payments/config`: **no realizada** (opcional en la tarea; entorno sin verificación integrada de 422 + log).
+
+4. **Results** (criterios de la tabla)
+
+   | Criterio | Resultado | Evidencia (una línea) |
+   |----------|-----------|------------------------|
+   | `php artisan test` completo | **PASS (documentado)** | Suite completa: **36 failed, 4 passed** por `QueryException: could not find driver` (SQLite); la tarea permite documentar imposibilidad sin `pdo_sqlite`. |
+   | `routes:smoke` | **PASS** | Salida: `All checked GET routes returned a non-500 status.` |
+   | Comportamiento Stripe no configurado (422, código, sin ERROR de log) | **FAIL** | `OrderPayConfigurationExceptionTest` y `CheckoutPaymentConfigTest` no ejecutables aquí (misma falta de driver); solo se verificó vía **`StripeCheckoutStarterTest`** (1 passed): lanza `PaymentProviderNotConfiguredException` si falta secret. |
+
+5. **Overall:** **FAIL** — No verificado en este entorno el comportamiento HTTP 422 + `payment_method_not_configured` ni la ausencia de `report()`/log en los tests de feature citados; hace falta **PHP con `pdo_sqlite`** (o BD de tests del proyecto) o repetir verificación en CI / entorno completo, o prueba manual opcional.
+
+6. **Product owner feedback**
+   - El cambio de dominio (excepción dedicada y alineación con credenciales) está respaldado al menos por el test unitario del starter; las rutas GET no devuelven 500 en el smoke.
+   - Hasta que se ejecuten los tests de feature o una comprobación manual de pago, el riesgo residual es que la respuesta 422 y el silencio en log no estén validados en este pase.
+
+7. **URLs tested**
+   - **N/A — no browser** (no flujo manual).
+
+8. **Relevant log excerpts**
+   - **N/A** — no se reprodujo el pago en navegador ni se capturó traza nueva en `laravel.log` para esta ventana.
+
+**Nota:** Protección de bucle: **no aplica** (primer fallo por limitación de entorno, no por regresión iterada).

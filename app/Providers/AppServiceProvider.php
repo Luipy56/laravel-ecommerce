@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Events\InstallationPriceWasAssigned;
 use App\Events\OrderInstallationQuoteRequested;
 use App\Events\OrderPaymentSucceeded;
@@ -12,6 +13,8 @@ use App\Listeners\SendOrderInstallationQuoteRequestEmail;
 use App\Listeners\SendOrderPaymentConfirmationEmail;
 use App\Listeners\SendOrderShippedEmail;
 use App\Listeners\SendPersonalizedSolutionAcknowledgementEmail;
+use App\Services\Payments\PaymentCheckoutService;
+use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->alignSessionDriverForSqliteMemory();
+
+        $this->app->when(PaymentCheckoutService::class)
+            ->needs(PaymentCheckoutStarter::class)
+            ->give(StripeCheckoutStarter::class);
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Exceptions\PaymentProviderNotConfiguredException;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderLine;
+use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -90,8 +91,13 @@ class OrderPayConfigurationExceptionTest extends TestCase
         ]);
 
         $this->app->bind(StripeCheckoutStarter::class, function () {
-            return new class extends StripeCheckoutStarter
+            return new class implements PaymentCheckoutStarter
             {
+                public function gateway(): string
+                {
+                    return Payment::GATEWAY_STRIPE;
+                }
+
                 public function start(Payment $payment): array
                 {
                     throw new PaymentProviderNotConfiguredException('Stripe is not configured (STRIPE_SECRET).');

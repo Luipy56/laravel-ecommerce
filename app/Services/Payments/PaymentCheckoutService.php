@@ -8,7 +8,6 @@ use App\Services\Payments\PayPal\PayPalCheckoutStarter;
 use App\Services\Payments\PayPal\PayPalClient;
 use App\Services\Payments\Redsys\RedsysCheckoutStarter;
 use App\Services\Payments\Revolut\RevolutCheckoutStarter;
-use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use App\Services\Payments\Stripe\StripeCredentials;
 use InvalidArgumentException;
 use RuntimeException;
@@ -16,7 +15,7 @@ use RuntimeException;
 class PaymentCheckoutService
 {
     public function __construct(
-        private readonly StripeCheckoutStarter $stripe,
+        private readonly PaymentCheckoutStarter $stripe,
         private readonly PayPalCheckoutStarter $paypal,
         private readonly RedsysCheckoutStarter $redsys,
         private readonly RevolutCheckoutStarter $revolut,

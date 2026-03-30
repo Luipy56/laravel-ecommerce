@@ -148,7 +148,7 @@ export default function OrderDetailPage() {
 
   if (inlineCheckout?.redsys) {
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="mx-auto w-full min-w-0 max-w-3xl">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <PageTitle className="mb-0">{t('shop.order')} #{order.id}</PageTitle>
           <Link to="/orders" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
@@ -175,7 +175,7 @@ export default function OrderDetailPage() {
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="mx-auto w-full min-w-0 max-w-3xl">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <PageTitle className="mb-0">{t('shop.order')} #{order.id}</PageTitle>
         <Link to="/orders" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>

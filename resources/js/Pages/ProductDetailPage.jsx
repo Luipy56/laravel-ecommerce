@@ -78,7 +78,7 @@ export default function ProductDetailPage() {
   if (!product) return <p className="text-error">{t('common.error')}</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-2 sm:px-4">
+    <div className="mx-auto w-full min-w-0 max-w-6xl px-2 sm:px-4">
       <div className="flex justify-end mb-4">
         <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
       </div>

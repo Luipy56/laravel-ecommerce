@@ -363,7 +363,7 @@ export default function ProfilePage() {
   const isCompany = profile.type === 'company';
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 pb-12">
+    <div className="mx-auto w-full min-w-0 max-w-2xl space-y-8 pb-12">
       <PageTitle>{t('shop.profile')}</PageTitle>
       {saved && (
         <div role="alert" className="alert alert-success">

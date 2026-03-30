@@ -262,7 +262,7 @@ export default function CheckoutPage() {
         message={t('checkout.confirm_message')}
         loading={loading}
       />
-      <form onSubmit={handleSubmit} className="card bg-base-100 shadow">
+      <form onSubmit={handleSubmit} className="card bg-base-100 shadow min-w-0">
         <div className="card-body space-y-5">
           {checkoutFormError ? (
             <div role="alert" className="alert alert-error text-sm">

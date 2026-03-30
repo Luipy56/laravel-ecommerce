@@ -157,7 +157,7 @@ export default function AdminLayout() {
       </div>
       <div className="drawer-side z-30">
         <label htmlFor="admin-drawer" aria-label={t('common.close')} className="drawer-overlay" />
-        <aside className="bg-base-100 w-64 min-h-full flex flex-col border-r border-base-200">
+        <aside className="bg-base-100 w-64 max-w-[min(100vw,16rem)] min-h-full flex flex-col border-r border-base-200">
           <div className="p-4 border-b border-base-200">
             <span className="font-bold text-lg text-base-content">{t('home.hero.title')}</span>
             <span className="block text-sm text-base-content/70">Admin</span>

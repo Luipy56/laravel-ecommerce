@@ -34,7 +34,7 @@ export default function OrdersPage() {
   if (loading) return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="mx-auto w-full min-w-0 max-w-3xl">
       <PageTitle>{t('shop.orders')}</PageTitle>
       {orders.length === 0 ? (
         <p>{t('shop.cart.empty')}</p>
@@ -45,19 +45,30 @@ export default function OrdersPage() {
             const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : o.status;
             return (
               <li key={o.id} className="card bg-base-100 shadow">
-                <div className="card-body flex-row justify-between items-center">
-                  <div>
+                <div className="card-body flex flex-col gap-4 min-w-0 sm:flex-row sm:justify-between sm:items-center">
+                  <div className="min-w-0">
                     <p className="font-semibold">{t('shop.order')} #{o.id}</p>
-                    <p className="text-sm text-base-content/70">
+                    <p className="text-sm text-base-content/70 break-words">
                       {o.order_date ? new Date(o.order_date).toLocaleDateString() : ''} · {statusLabel}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{Number(o.grand_total ?? o.total ?? 0).toFixed(2)} €</span>
-                    <Link to={`/orders/${o.id}`} className="btn btn-ghost btn-sm">{t('common.detail')}</Link>
-                    <a href={`/api/v1/orders/${o.id}/invoice?locale=${i18n.language || 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
-                      {t('shop.invoice')}
-                    </a>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-2 shrink-0">
+                    <span className="font-semibold tabular-nums sm:text-end">
+                      {Number(o.grand_total ?? o.total ?? 0).toFixed(2)} €
+                    </span>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <Link to={`/orders/${o.id}`} className="btn btn-ghost btn-sm w-full sm:w-auto">
+                        {t('common.detail')}
+                      </Link>
+                      <a
+                        href={`/api/v1/orders/${o.id}/invoice?locale=${i18n.language || 'ca'}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-ghost btn-sm w-full sm:w-auto"
+                      >
+                        {t('shop.invoice')}
+                      </a>
+                    </div>
                   </div>
                 </div>
               </li>

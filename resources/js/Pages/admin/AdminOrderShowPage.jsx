@@ -324,7 +324,7 @@ export default function AdminOrderShowPage() {
                     : null;
                   const targetUrl = lineTargetUrl(line);
                   const cardContent = (
-                    <div className="card-body p-4 flex-row items-center gap-3">
+                    <div className="card-body p-4 flex flex-row items-center gap-3 min-w-0">
                       <div className="avatar shrink-0">
                         <div className="mask mask-squircle w-14 h-14 bg-base-300">
                           <img

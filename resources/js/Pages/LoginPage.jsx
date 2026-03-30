@@ -46,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto card bg-base-100 shadow-lg">
+    <div className="mx-auto w-full min-w-0 max-w-md card bg-base-100 shadow-lg">
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.login')}</h1>
         <form onSubmit={handleSubmit} className="space-y-5">

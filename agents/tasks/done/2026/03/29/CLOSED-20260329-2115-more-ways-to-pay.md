@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** La issue #5 pedía ampliar medios de pago (Revolut y tarjeta) alineados con el stack existente; el trabajo consolidó lo ya integrado y añadió señalización explícita cuando faltan credenciales.
+- **What was done:** Se expusieron `stripe_missing_credentials` y `revolut_missing_credentials` en la API de configuración y en el pedido, con avisos en checkout y ficha de pedido (i18n ca/es), documentación en `docs/CONFIGURACION_PAGOS_CORREO.md`, tests en `CheckoutPaymentConfigTest` y etiqueta más clara para el método tarjeta.
+- **What was tested:** `php artisan test` (42 passed), `php artisan routes:smoke` y `npm run build` — todo PASS; comprobación manual en navegador y PSP reales N/A salvo cobertura API por tests.
+- **Why closed:** Criterios automatizados cumplidos; informe del tester con resultado global PASS.
+- **Closed at (UTC):** 2026-03-30 10:24
+---
+
 # More ways to pay
 
 ## GitHub

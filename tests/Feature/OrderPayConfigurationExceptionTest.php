@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Exceptions\PaymentProviderNotConfiguredException;
 use App\Models\Client;
 use App\Models\Order;
@@ -13,7 +12,8 @@ use App\Models\ProductCategory;
 use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Log\Events\MessageLogged;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class OrderPayConfigurationExceptionTest extends TestCase
@@ -90,21 +90,16 @@ class OrderPayConfigurationExceptionTest extends TestCase
         ]);
 
         $this->app->bind(StripeCheckoutStarter::class, function () {
-            return new class implements PaymentCheckoutStarter
+            return new class extends StripeCheckoutStarter
             {
-                public function gateway(): string
-                {
-                    return Payment::GATEWAY_STRIPE;
-                }
-
-                public function start(\App\Models\Payment $payment): array
+                public function start(Payment $payment): array
                 {
                     throw new PaymentProviderNotConfiguredException('Stripe is not configured (STRIPE_SECRET).');
                 }
             };
         });
 
-        Log::fake();
+        Event::fake([MessageLogged::class]);
 
         $response = $this->actingAs($client, 'web')
             ->postJson('/api/v1/orders/'.$order->id.'/pay', ['payment_method' => 'card']);
@@ -113,6 +108,8 @@ class OrderPayConfigurationExceptionTest extends TestCase
             ->assertJsonPath('success', false)
             ->assertJsonPath('code', 'payment_method_not_configured');
 
-        Log::assertNothingLogged();
+        Event::assertNotDispatched(MessageLogged::class, function (MessageLogged $e): bool {
+            return in_array($e->level, ['emergency', 'alert', 'critical', 'error'], true);
+        });
     }
 }

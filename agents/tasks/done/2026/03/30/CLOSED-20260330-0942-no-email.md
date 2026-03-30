@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The issue tracked missing customer transactional emails; implementation already existed via event listeners, while deployment typically used `MAIL_MAILER=log`, so messages only hit logs.
+- **What was done:** Coders clarified `.env.example` and `docs/email-notifications.md`, and extended `CustomerTransactionalEmailTest` (deferred pay via Bizum simulation, admin installation price assignment).
+- **What was tested:** `php artisan test` (42 passed, including six `CustomerTransactionalEmailTest` cases) and `php artisan routes:smoke` (no HTTP 500); optional SMTP staging check was not run.
+- **Why closed:** Mandatory automated verification passed; tester overall **PASS**.
+- **Closed at (UTC):** 2026-03-30 10:15
+---
+
 # NO email
 
 ## GitHub

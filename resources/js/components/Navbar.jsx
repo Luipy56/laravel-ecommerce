@@ -7,6 +7,11 @@ import { IconCart, IconMenu } from './icons';
 
 const SCROLL_THRESHOLD = 10;   // px: below this, navbar is always visible
 const SCROLL_DELTA = 5;        // px: min scroll movement to consider direction
+const SEARCH_DEBOUNCE_MS = 300;
+
+function isCatalogListPath(pathname) {
+  return pathname === '/products' || /^\/categories\/\d+\/products$/.test(pathname);
+}
 
 function CartDropTarget({ to, className, children, ariaLabel, title }) {
   const { addLine } = useCart();
@@ -42,13 +47,41 @@ export default function Navbar() {
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
 
-  // Sync search input with URL when on product list (so clearing + Enter updates list)
+  // Sync search input with URL on catalog list routes
   useEffect(() => {
-    if (location.pathname === '/products') {
+    if (isCatalogListPath(location.pathname)) {
       const q = new URLSearchParams(location.search).get('search');
       setSearchQ(q ?? '');
     }
   }, [location.pathname, location.search]);
+
+  // Debounced URL update while typing (avoids a request per keystroke)
+  useEffect(() => {
+    if (!isCatalogListPath(location.pathname)) {
+      return undefined;
+    }
+    const tid = setTimeout(() => {
+      const term = searchQ.trim();
+      if (term.length === 1) {
+        return;
+      }
+      const params = new URLSearchParams(location.search);
+      if (term.length >= 2) {
+        params.set('search', term);
+      } else {
+        params.delete('search');
+      }
+      params.delete('page');
+      const qs = params.toString();
+      const next = qs ? `?${qs}` : '';
+      const current = location.search || '';
+      if (next === current) {
+        return;
+      }
+      navigate({ pathname: location.pathname, search: next }, { replace: true });
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(tid);
+  }, [searchQ, location.pathname, location.search, navigate]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,7 +113,19 @@ export default function Navbar() {
   const handleSearch = (e) => {
     e.preventDefault();
     const term = searchQ.trim();
-    if (term) {
+    if (isCatalogListPath(location.pathname)) {
+      const params = new URLSearchParams(location.search);
+      if (term.length >= 1) {
+        params.set('search', term);
+      } else {
+        params.delete('search');
+      }
+      params.delete('page');
+      const qs = params.toString();
+      navigate({ pathname: location.pathname, search: qs ? `?${qs}` : '' });
+      return;
+    }
+    if (term.length >= 1) {
       navigate('/products?search=' + encodeURIComponent(term));
     } else {
       navigate('/products');

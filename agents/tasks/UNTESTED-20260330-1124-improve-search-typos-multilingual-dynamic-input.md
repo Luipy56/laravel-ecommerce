@@ -18,3 +18,12 @@ Product data mixes Catalan and Spanish names, but storefront search is brittle: 
 - Preserve **ranking** that feels sensible (exact and normalized matches before fuzzy hits); cap result sets and complexity.
 - Add or extend **automated tests** for typo cases, cross-language cases, and debounce/API behaviour where practical; run the project’s usual verification (`php artisan test`, route smoke, `npm run build` if front-end touched).
 - Document any new env knobs or operational limits briefly for deployers if behaviour depends on configuration.
+
+---
+
+## Testing instructions
+
+1. From repo root: `./scripts/git-sync-agent-branch.sh` (if needed), then `php artisan test`, `php artisan routes:smoke`, and `npm run build` (front-end touched).
+2. **API:** New coverage in `tests/Unit/ProductSearchTest.php` and `tests/Feature/ProductStorefrontSearchTest.php` (synonym `cargol` → product titled with “Tornillo”, fuzzy typo `SpecialGadgetWidgit` → `SpecialGadgetWidget`, `GET /api/v1/products/search?q=martillo` vs product “Kit martell groc”).
+3. **Manual storefront:** Open `/products` or `/categories/{id}/products`; type at least **two characters** in the navbar search and wait ~300ms without submitting — the URL `search` param should update (`replace: true`) and the catalog refetch. Single-character input should **not** change the URL until a second character or clear. Submit still navigates/updates immediately (including one character if submitted).
+4. **Config (optional):** `.env.example` documents `PRODUCT_SEARCH_FUZZY_FALLBACK`, `PRODUCT_SEARCH_FUZZY_CANDIDATES`, `PRODUCT_SEARCH_MAX_VARIANTS`; synonym lists live in `config/product_search.php`.

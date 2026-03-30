@@ -17,9 +17,12 @@ final class ProductSearchService
     /** @var array{limit: int, word_similarity_threshold: float, similarity_threshold: float} */
     private array $config;
 
-    public function __construct(?array $config = null)
+    private SearchSynonymDictionary $synonyms;
+
+    public function __construct(?array $config = null, ?SearchSynonymDictionary $synonyms = null)
     {
         $this->config = $config ?? config('product_search', []);
+        $this->synonyms = $synonyms ?? new SearchSynonymDictionary(config('search_synonyms', []));
     }
 
     /**
@@ -37,9 +40,11 @@ final class ProductSearchService
             return collect();
         }
 
+        $tokenSlots = $this->synonyms->expandTokenSlots($tokens);
+
         return match (DB::getDriverName()) {
-            'pgsql' => $this->searchPostgres($normalized, $tokens),
-            default => $this->searchLikeFallback($normalized, $tokens),
+            'pgsql' => $this->searchPostgres($normalized, $tokenSlots),
+            default => $this->searchLikeFallback($normalized, $tokenSlots),
         };
     }
 
@@ -59,10 +64,10 @@ final class ProductSearchService
     }
 
     /**
-     * @param  list<string>  $tokens
+     * @param  list<list<string>>  $tokenSlots  OR within each slot, AND across slots
      * @return Collection<int, Product>
      */
-    private function searchPostgres(string $normalizedFull, array $tokens): Collection
+    private function searchPostgres(string $normalizedFull, array $tokenSlots): Collection
     {
         $limit = (int) ($this->config['limit'] ?? 50);
         $wsMin = (float) ($this->config['word_similarity_threshold'] ?? 0.35);
@@ -74,16 +79,23 @@ final class ProductSearchService
         $tokenWheres = [];
         $bindings = [];
 
-        foreach ($tokens as $token) {
-            if ($token === '') {
+        foreach ($tokenSlots as $variants) {
+            $orParts = [];
+            foreach ($variants as $token) {
+                if ($token === '') {
+                    continue;
+                }
+                $orParts[] = '(search_text ILIKE ? OR word_similarity(?, search_text) >= ? OR similarity(search_text, ?) >= ?)';
+                $bindings[] = '%'.$this->escapeIlikePattern($token).'%';
+                $bindings[] = $token;
+                $bindings[] = $wsMin;
+                $bindings[] = $token;
+                $bindings[] = $simMin;
+            }
+            if ($orParts === []) {
                 continue;
             }
-            $tokenWheres[] = '(search_text ILIKE ? OR word_similarity(?, search_text) >= ? OR similarity(search_text, ?) >= ?)';
-            $bindings[] = '%'.$this->escapeIlikePattern($token).'%';
-            $bindings[] = $token;
-            $bindings[] = $wsMin;
-            $bindings[] = $token;
-            $bindings[] = $simMin;
+            $tokenWheres[] = '('.implode(' OR ', $orParts).')';
         }
 
         if ($tokenWheres === []) {
@@ -125,20 +137,25 @@ SQL;
     }
 
     /**
-     * @param  list<string>  $tokens
+     * @param  list<list<string>>  $tokenSlots
      * @return Collection<int, Product>
      */
-    private function searchLikeFallback(string $normalizedFull, array $tokens): Collection
+    private function searchLikeFallback(string $normalizedFull, array $tokenSlots): Collection
     {
         $limit = (int) ($this->config['limit'] ?? 50);
 
         $q = Product::query()->active()->whereNotNull('search_text');
 
-        foreach ($tokens as $token) {
-            if ($token === '') {
+        foreach ($tokenSlots as $variants) {
+            $variants = array_values(array_filter($variants, fn (string $t): bool => $t !== ''));
+            if ($variants === []) {
                 continue;
             }
-            $q->whereRaw('instr(search_text, ?) > 0', [$token]);
+            $q->where(function ($sub) use ($variants): void {
+                foreach ($variants as $token) {
+                    $sub->orWhereRaw('instr(search_text, ?) > 0', [$token]);
+                }
+            });
         }
 
         $esc = fn (string $s): string => $this->escapeLike($s);

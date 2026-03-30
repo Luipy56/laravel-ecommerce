@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Search synonyms:** `config/search_synonyms.php` drives token expansion in `ProductSearchService` (PostgreSQL / SQLite paths) and merges an Elasticsearch `synonym_graph` + `product_synonym` analyzer into the products index definition when groups are non-empty. **`config/search_locales.php`** documents future multilingual index strategies without schema changes.
+
 ## [0.1.3] - 2026-03-30
 
 ### Added

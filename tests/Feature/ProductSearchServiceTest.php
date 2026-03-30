@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Services\Search\ProductSearchService;
+use App\Services\Search\SearchSynonymDictionary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -121,5 +122,36 @@ class ProductSearchServiceTest extends TestCase
 
         $this->assertCount(0, $service->search(''));
         $this->assertCount(0, $service->search('   '));
+    }
+
+    public function test_synonym_group_matches_alternate_term_in_catalog(): void
+    {
+        $category = ProductCategory::create([
+            'code' => 'syn1',
+            'name' => 'Hardware',
+            'is_active' => true,
+        ]);
+
+        Product::create([
+            'category_id' => $category->id,
+            'code' => 'GIZ-1',
+            'name' => 'Super gizmo accessory',
+            'description' => null,
+            'price' => 5.00,
+            'stock' => 1,
+            'is_active' => true,
+        ]);
+
+        $dict = new SearchSynonymDictionary([
+            'enabled' => true,
+            'max_expansions_per_token' => 10,
+            'groups' => [['widget', 'gizmo']],
+        ]);
+
+        $service = new ProductSearchService(null, $dict);
+        $hits = $service->search('widget');
+
+        $this->assertGreaterThanOrEqual(1, $hits->count());
+        $this->assertTrue($hits->contains(fn (Product $p) => str_contains(mb_strtolower((string) $p->name, 'UTF-8'), 'gizmo')));
     }
 }

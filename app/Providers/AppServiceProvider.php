@@ -21,6 +21,7 @@ use App\Services\Payments\PaymentCheckoutService;
 use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use App\Services\ProductSearchTextRebuildService;
 use App\Services\Search\ScoutElasticsearchProductCatalogSearch;
+use App\Services\Search\SearchSynonymDictionary;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
@@ -71,6 +72,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $synonymOverlay = (new SearchSynonymDictionary(config('search_synonyms', [])))->elasticsearchIndexOverlay();
+        if ($synonymOverlay !== []) {
+            $current = config('scout.elasticsearch.index_definitions.products', []);
+            config(['scout.elasticsearch.index_definitions.products' => array_replace_recursive($current, $synonymOverlay)]);
+        }
+
         resolve(EngineManager::class)->extend('elasticsearch', function () {
             return new ElasticsearchEngine(
                 ElasticsearchClientFactory::make(config('scout.elasticsearch', [])),

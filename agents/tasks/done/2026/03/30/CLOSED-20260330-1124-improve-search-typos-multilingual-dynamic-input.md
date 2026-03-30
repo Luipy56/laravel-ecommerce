@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Se cerró la mejora de búsqueda de productos (tolerancia a erratas, puente ca/es y consulta mientras se escribe) vinculada al issue #7.
+- **What was done:** Se implementó normalización, fuzzy acotado, sinónimos en config, debounce en la barra de navegación y pruebas unitarias/de feature; el tester ejecutó la lista de verificación del repo.
+- **What was tested:** `php artisan test` (50 passed), `php artisan routes:smoke`, `npm run build` y revisión estática del comportamiento de `Navbar.jsx`; resultado global **PASS**.
+- **Why closed:** Cumplidos todos los criterios del informe de pruebas.
+- **Closed at (UTC):** 2026-03-30 11:32
+---
+
 # Improve search: typos, multilingual (ca/es), dynamic input (lightweight)
 
 ## GitHub

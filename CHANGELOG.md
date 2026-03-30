@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Root `README.md` replaces the default Laravel skeleton with a project-specific overview (stack, quick start, verification commands, links to `AGENTS.md` and `docs/*`); screenshot policy documented without adding binary assets (GitHub #3).
+- Agent log reviewer: latest pass appended to `agents/001-log-reviewer/time-of-last-review.txt` (2026-03-30T09:42Z).
 
 ## [0.1.2] - 2026-03-29
 

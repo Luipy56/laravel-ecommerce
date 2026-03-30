@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Checkout pay treated missing Stripe configuration as an application failure with noisy error logs instead of a clear, client-facing API outcome.
+- **What was done:** The codebase returns **422** with `code: payment_method_not_configured`, aligns `payments/config` with credential rules, suppresses reporting for the domain exception, and hardens tests (e.g. `Event::fake([MessageLogged::class])`, `StripeCheckoutStarter` subclass mock) plus a more robust `ClientContactSeeder`.
+- **What was tested:** `php artisan test` (**40 passed**) including `OrderPayConfigurationExceptionTest`, `StripeCheckoutStarterTest`, and `CheckoutPaymentConfigTest`; `php artisan routes:smoke` reported no HTTP **500** on checked GET routes — **overall PASS**.
+- **Why closed:** All tester pass/fail criteria were met.
+- **Closed at (UTC):** 2026-03-30 09:26
+---
+
 # Stripe not configured when starting checkout pay
 
 ## Source

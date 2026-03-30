@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\InstallationPriceAssignedMail;
 use App\Mail\OrderInstallationQuoteRequestedMail;
 use App\Mail\OrderPaymentConfirmedMail;
 use App\Mail\OrderShippedMail;
 use App\Mail\PersonalizedSolutionReceivedMail;
 use App\Models\Client;
 use App\Models\Order;
+use App\Models\OrderAddress;
 use App\Models\OrderLine;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -73,6 +75,65 @@ class CustomerTransactionalEmailTest extends TestCase
         ]);
 
         return $client;
+    }
+
+    /**
+     * @return array{0: Client, 1: Order}
+     */
+    private function makeClientWithPendingUnpaidOrder(): array
+    {
+        $client = $this->makeClientWithCart(false);
+        $order = Order::query()
+            ->where('client_id', $client->id)
+            ->where('kind', Order::KIND_CART)
+            ->first();
+        $this->assertNotNull($order);
+
+        $order->update([
+            'kind' => Order::KIND_ORDER,
+            'status' => Order::STATUS_PENDING,
+            'order_date' => now(),
+            'shipping_price' => Order::SHIPPING_FLAT_EUR,
+        ]);
+
+        $order->addresses()->create([
+            'type' => OrderAddress::TYPE_SHIPPING,
+            'street' => 'Carrer Prova',
+            'city' => 'Barcelona',
+            'province' => null,
+            'postal_code' => '08001',
+            'note' => null,
+        ]);
+
+        return [$client, $order->fresh()];
+    }
+
+    public function test_order_pay_with_simulated_bizum_sends_payment_confirmation_mail(): void
+    {
+        Mail::fake();
+
+        config([
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'services.redsys.merchant_code' => '',
+            'services.redsys.secret_key' => '',
+            'app.debug' => true,
+            'payments.allow_simulated' => true,
+        ]);
+
+        [$client, $order] = $this->makeClientWithPendingUnpaidOrder();
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/'.$order->id.'/pay', [
+            'payment_method' => 'bizum',
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('data.has_payment', true);
+
+        Mail::assertSent(OrderPaymentConfirmedMail::class, function (OrderPaymentConfirmedMail $mail) use ($client) {
+            return $mail->hasTo($client->login_email);
+        });
     }
 
     public function test_checkout_with_simulated_bizum_sends_payment_confirmation_mail(): void
@@ -147,6 +208,57 @@ class CustomerTransactionalEmailTest extends TestCase
         $response->assertJsonPath('data.awaiting_installation_quote', true);
 
         Mail::assertSent(OrderInstallationQuoteRequestedMail::class, function (OrderInstallationQuoteRequestedMail $mail) use ($client) {
+            return $mail->hasTo($client->login_email);
+        });
+    }
+
+    public function test_admin_assigns_installation_price_sends_installation_price_mail(): void
+    {
+        Mail::fake();
+
+        $this->seed(DatabaseSeeder::class);
+
+        config([
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'app.debug' => true,
+            'payments.allow_simulated' => true,
+        ]);
+
+        $client = $this->makeClientWithCart(true);
+
+        $checkoutPayload = [
+            'payment_method' => null,
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => 'Av. Diagonal 1',
+            'installation_city' => 'Barcelona',
+            'installation_postal_code' => '08028',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $checkoutResponse = $this->postJson('/api/v1/orders/checkout', $checkoutPayload);
+        $checkoutResponse->assertCreated();
+        $orderId = (int) $checkoutResponse->json('data.id');
+
+        Mail::assertSent(OrderInstallationQuoteRequestedMail::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $this->putJson('/api/v1/admin/orders/'.$orderId, [
+            'status' => Order::STATUS_AWAITING_INSTALLATION_PRICE,
+            'installation_price' => 55.5,
+        ])->assertOk();
+
+        Mail::assertSent(InstallationPriceAssignedMail::class, function (InstallationPriceAssignedMail $mail) use ($client) {
             return $mail->hasTo($client->login_email);
         });
     }

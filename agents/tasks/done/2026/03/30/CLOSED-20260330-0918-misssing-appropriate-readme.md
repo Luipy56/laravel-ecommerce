@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Issue #3 (root README for the ecommerce project) was implemented and verified by the tester.
+- **What was done:** Replaced the default Laravel README with project purpose, stack, quick start, verification table, doc links (payments, email, agents), and a no-binary screenshots policy.
+- **What was tested:** README structure and relative links, `composer validate`, `php artisan test` (42 passed), `npm run build`, and consistency with `AGENTS.md` — overall **PASS**.
+- **Why closed:** All test-report criteria passed; task cycle complete.
+- **Closed at (UTC):** 2026-03-30 10:06
+---
+
 # Missing appropriate README
 
 ## GitHub

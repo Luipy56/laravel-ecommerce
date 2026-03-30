@@ -7,7 +7,6 @@ use App\Http\Resources\PackResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Pack;
 use App\Models\Product;
-use App\Support\ProductSearch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -102,16 +101,6 @@ class ProductController extends Controller
 
     private function buildProductQuery(Request $request): \Illuminate\Database\Eloquent\Builder
     {
-        return $this->resolvedProductQuery($request);
-    }
-
-    private function buildPackQuery(Request $request): \Illuminate\Database\Eloquent\Builder
-    {
-        return $this->resolvedPackQuery($request);
-    }
-
-    private function baseProductQuery(Request $request): \Illuminate\Database\Eloquent\Builder
-    {
         $query = Product::query()->active();
 
         if (($categoryId = $this->requestedCategoryId($request)) !== null) {
@@ -120,11 +109,23 @@ class ProductController extends Controller
         foreach ($this->requestedFeatureIds($request) as $featureId) {
             $query->whereHas('features', fn ($q) => $q->where('features.id', $featureId));
         }
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('description', 'like', "%{$term}%")
+                    ->orWhere('code', 'like', "%{$term}%")
+                    ->orWhereHas('features', function ($f) use ($term) {
+                        $f->where('value', 'like', "%{$term}%")
+                            ->orWhereHas('featureName', fn ($n) => $n->where('name', 'like', "%{$term}%"));
+                    });
+            });
+        }
 
         return $query;
     }
 
-    private function basePackQuery(Request $request): \Illuminate\Database\Eloquent\Builder
+    private function buildPackQuery(Request $request): \Illuminate\Database\Eloquent\Builder
     {
         $query = Pack::query()->active();
 
@@ -137,54 +138,24 @@ class ProductController extends Controller
                 fn ($q) => $q->whereHas('features', fn ($f) => $f->where('features.id', $featureId))
             );
         }
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($q) use ($term) {
+                $q->where('packs.name', 'like', "%{$term}%")
+                    ->orWhere('packs.description', 'like', "%{$term}%")
+                    ->orWhereHas('items.product', function ($p) use ($term) {
+                        $p->where('name', 'like', "%{$term}%")
+                            ->orWhere('description', 'like', "%{$term}%")
+                            ->orWhere('code', 'like', "%{$term}%")
+                            ->orWhereHas('features', function ($f) use ($term) {
+                                $f->where('value', 'like', "%{$term}%")
+                                    ->orWhereHas('featureName', fn ($n) => $n->where('name', 'like', "%{$term}%"));
+                            });
+                    });
+            });
+        }
 
         return $query;
-    }
-
-    private function resolvedProductQuery(Request $request): \Illuminate\Database\Eloquent\Builder
-    {
-        $base = $this->baseProductQuery($request);
-        if (! $request->filled('search')) {
-            return $base;
-        }
-
-        $term = trim((string) $request->search);
-        $strict = clone $base;
-        ProductSearch::applyStrictProductSearch($strict, $term);
-        if ($strict->exists()) {
-            return $strict;
-        }
-        if (ProductSearch::shouldAttemptFuzzy($term)) {
-            $fuzzy = clone $base;
-            ProductSearch::applyFuzzyProductSearch($fuzzy, $term);
-
-            return $fuzzy;
-        }
-
-        return $strict;
-    }
-
-    private function resolvedPackQuery(Request $request): \Illuminate\Database\Eloquent\Builder
-    {
-        $base = $this->basePackQuery($request);
-        if (! $request->filled('search')) {
-            return $base;
-        }
-
-        $term = trim((string) $request->search);
-        $strict = clone $base;
-        ProductSearch::applyStrictPackSearch($strict, $term);
-        if ($strict->exists()) {
-            return $strict;
-        }
-        if (ProductSearch::shouldAttemptFuzzy($term)) {
-            $fuzzy = clone $base;
-            ProductSearch::applyFuzzyPackSearch($fuzzy, $term);
-
-            return $fuzzy;
-        }
-
-        return $strict;
     }
 
     /**
@@ -241,23 +212,18 @@ class ProductController extends Controller
 
     public function search(Request $request): JsonResponse
     {
-        $term = trim((string) $request->get('q', ''));
-        if (mb_strlen($term) < 2) {
+        $term = $request->get('q', '');
+        if (strlen($term) < 2) {
             return response()->json(['success' => true, 'data' => []]);
         }
 
-        $base = Product::query()->active()->with(['category', 'images']);
-        $strict = clone $base;
-        ProductSearch::applyStrictProductSearch($strict, $term);
-        if ($strict->exists()) {
-            $products = $strict->limit(20)->get();
-        } elseif (ProductSearch::shouldAttemptFuzzy($term)) {
-            $fuzzy = clone $base;
-            ProductSearch::applyFuzzyProductSearch($fuzzy, $term);
-            $products = $fuzzy->limit(20)->get();
-        } else {
-            $products = $strict->limit(20)->get();
-        }
+        $products = Product::query()->active()
+            ->with(['category', 'images'])
+            ->where(fn ($q) => $q->where('name', 'like', "%{$term}%")
+                ->orWhere('description', 'like', "%{$term}%")
+                ->orWhere('code', 'like', "%{$term}%"))
+            ->limit(20)
+            ->get();
 
         return response()->json([
             'success' => true,

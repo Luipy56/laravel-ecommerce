@@ -1,3 +1,6 @@
+// Laravel ecommerce schema (see database/migrations). Production target: PostgreSQL.
+// PHPUnit uses SQLite (:memory:); migrations branch on driver (pgsql-only extensions/indexes/citext alters are skipped on sqlite).
+//
 // =============================================================================
 // Enums
 // =============================================================================
@@ -51,7 +54,7 @@ Table CLIENTS [note: 'Account (person or company). Use CLIENT_CONTACTS for names
   id int [pk, increment]
   type client_type [not null, note: 'Person vs company']
   identification varchar(20) [null, unique, note: 'ID document (DNI, CIF or NIE); one per account']
-  login_email varchar(255) [not null, unique, note: 'Email for authentication']
+  login_email varchar(255) [not null, unique, note: 'Email for authentication; PostgreSQL type citext (case-insensitive)']
   password varchar(255) [not null]
   is_active boolean [not null, default: true, note: 'Soft delete']
 }
@@ -114,6 +117,7 @@ Table PRODUCTS {
   is_featured boolean [not null, default: false, note: 'Featured on homepage']
   is_trending boolean [not null, default: false, note: 'Trending product']
   is_active boolean [not null, default: true, note: 'Disable without deleting']
+  search_text text [null, note: 'Lowercase accent-folded name+code+description; GIN(trgm) idx on PostgreSQL']
 }
 
 Table FEATURE_NAMES {

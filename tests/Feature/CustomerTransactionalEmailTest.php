@@ -119,6 +119,7 @@ class CustomerTransactionalEmailTest extends TestCase
             'services.redsys.secret_key' => '',
             'app.debug' => true,
             'payments.allow_simulated' => true,
+            'payments.checkout_method_keys' => ['card', 'paypal', 'bizum', 'revolut'],
         ]);
 
         [$client, $order] = $this->makeClientWithPendingUnpaidOrder();
@@ -147,6 +148,7 @@ class CustomerTransactionalEmailTest extends TestCase
             'services.redsys.secret_key' => '',
             'app.debug' => true,
             'payments.allow_simulated' => true,
+            'payments.checkout_method_keys' => ['card', 'paypal', 'bizum', 'revolut'],
         ]);
 
         $client = $this->makeClientWithCart(false);

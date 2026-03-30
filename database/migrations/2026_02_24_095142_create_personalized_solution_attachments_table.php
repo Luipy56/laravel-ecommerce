@@ -14,8 +14,7 @@ return new class extends Migration
     {
         Schema::create('personalized_solution_attachments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('personalized_solution_id');
-            $table->foreign('personalized_solution_id', 'ps_att_solution_fk')->references('id')->on('personalized_solutions');
+            $table->foreignId('personalized_solution_id')->constrained('personalized_solutions', 'id', 'ps_att_solution_fk');
             $table->string('storage_path', 1024)->comment('Path or key in storage');
             $table->string('original_filename', 255)->nullable();
             $table->integer('size_bytes');

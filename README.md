@@ -11,7 +11,10 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
 
 ## Requirements
 
-- PHP **8.2+**
+- PHP **8.2+** with PDO extensions matching your database driver:
+  - **SQLite** (default in `.env.example` for local/CI): `pdo_sqlite`
+  - **MySQL / MariaDB:** `pdo_mysql`
+  - **PostgreSQL:** `pdo_pgsql` — required before setting `DB_CONNECTION=pgsql`; without it, Artisan fails with `could not find driver` (for example `php artisan db:show`).
 - [Composer](https://getcomposer.org/)
 - Node.js **18+** and npm
 - A database supported by Laravel (MySQL, PostgreSQL, or SQLite), configured in `.env`
@@ -33,7 +36,7 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
    php artisan key:generate
    ```
 
-   Edit `.env` with your `APP_URL`, database credentials, and mail/payment variables as needed.
+   Edit `.env` with your `APP_URL`, database credentials, and mail/payment variables as needed. PostgreSQL is recommended for production; see **`docs/postgresql.md`** for driver-specific options (e.g. local SSL).
 
 4. **Database**
 
@@ -48,6 +51,11 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
    ```
 
    (Development only: this drops all tables and data.)
+
+   **Connectivity:** With **SQLite**, no database server is required for migrations or `php artisan test` (default PHPUnit config). With **MySQL or PostgreSQL**, Artisan commands such as `php artisan db:show` open a real connection; fix `DB_HOST` / credentials and install the matching PDO extension first.
+
+   - Prefer **`127.0.0.1`** over **`localhost`** for MySQL/MariaDB when you need TCP (many setups use a Unix socket for `localhost`, which breaks with Docker-only TCP or some remote hosts).
+   - **`SQLSTATE[HY000] [2002] Network is unreachable`:** `DB_HOST` is unreachable (wrong hostname, database not running, firewall/VPN, or container networking). From a PHP container, use the Compose **service name** as `DB_HOST`, not `localhost`, unless the DB is in the same network namespace.
 
 5. **Frontend dependencies**
 
@@ -95,6 +103,7 @@ For checkout and payments work, see **`.cursor/rules/testing-verification.mdc`**
 | [`docs/CONFIGURACION_PAGOS_CORREO.md`](docs/CONFIGURACION_PAGOS_CORREO.md) | Payment provider environment variables (Stripe, PayPal, etc.) |
 | [`docs/email-notifications.md`](docs/email-notifications.md) | Email / notification configuration |
 | [`docs/mobile-responsive.md`](docs/mobile-responsive.md) | Responsive UI notes |
+| [`docs/postgresql.md`](docs/postgresql.md) | PostgreSQL setup, PHP `pdo_pgsql`, SSL, extensions, search |
 | [`docs/agent-loop.md`](docs/agent-loop.md) | Task pipeline and labels (for teams using `agents/tasks/`) |
 | [`docs/agent-cursor-rules.md`](docs/agent-cursor-rules.md) | Index of Cursor/project rules |
 

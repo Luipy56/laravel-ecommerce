@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,6 +13,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver === 'pgsql') {
+            // Search (pg_trgm GIN), case-insensitive login email (citext), accent folding in SQL when needed (unaccent).
+            DB::unprepared(<<<'SQL'
+                CREATE EXTENSION IF NOT EXISTS pg_trgm;
+                CREATE EXTENSION IF NOT EXISTS citext;
+                CREATE EXTENSION IF NOT EXISTS unaccent;
+            SQL);
+        }
+
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->string('type', 50)->comment('Person vs company');
@@ -22,11 +34,19 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        if ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE clients ALTER COLUMN login_email TYPE citext USING login_email::citext');
+        }
+
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
+
+        if ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE password_reset_tokens ALTER COLUMN email TYPE citext USING email::citext');
+        }
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();

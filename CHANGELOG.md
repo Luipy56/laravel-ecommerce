@@ -7,10 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-03-30
+
+### Added
+
+- Product catalog **`search_text`** (normalized name, code, description) with PostgreSQL **`pg_trgm` GIN** index on `products.search_text`; on PostgreSQL the baseline migration enables **`pg_trgm`**, **`citext`**, and **`unaccent`**, and uses **`citext`** for `clients.login_email` and `password_reset_tokens.email`.
+- **`App\Services\ProductSearchTextRebuildService`**, contract **`RebuildsProductSearchText`**, and Artisan **`products:rebuild-search-text`** to rebuild `search_text` in bulk.
+- **Catalog search** over HTTP: **`GET /api/v1/products/search`** (validated query and limit; **Elasticsearch** via Scout when configured, **PostgreSQL** `ILIKE` plus `pg_trgm` word similarity / similarity when on `pgsql`, token-wise `LIKE` on other drivers) with **`throttle:60,1`**; tuning via **`config/product_search.php`**.
+- **Laravel Scout** with optional **Elasticsearch** for `Product`: custom **`App\Scout\ElasticsearchEngine`** using **`elasticsearch/elasticsearch`** (Scout 11–compatible), completion-oriented mapping for future autocomplete, queued **`MakeSearchable`** / **`RemoveFromSearch`** when **`SCOUT_QUEUE=true`**, default **`SCOUT_DRIVER=null`** for CI and environments without a cluster. See **`docs/elasticsearch.md`**.
+- **Documentation:** **`docs/postgresql.md`** (PostgreSQL setup, `pdo_pgsql`, SSL, extensions, search); Elasticsearch notes in **`docs/elasticsearch.md`**.
+- **Tests:** product search text, catalog search API, PostgreSQL search service, Scout indexing, optional live Elasticsearch integration (**`ES_TEST_HOST`**), and Scout mapping unit coverage.
+- Agent task files under **`agents/tasks/`** for search/PostgreSQL/Elasticsearch work items and a closed **`db:show`** connectivity task archive.
+
 ### Changed
 
-- Root `README.md` replaces the default Laravel skeleton with a project-specific overview (stack, quick start, verification commands, links to `AGENTS.md` and `docs/*`); screenshot policy documented without adding binary assets (GitHub #3).
-- Agent log reviewer: latest pass appended to `agents/001-log-reviewer/time-of-last-review.txt` (2026-03-30T10:12Z).
+- **`.env.example`:** commented PostgreSQL and MySQL connectivity guidance (**`DB_SSLMODE`**, **`127.0.0.1`** vs **`localhost`**, Docker hostnames), plus Scout and Elasticsearch variables (**`ES_TEST_HOST`** for integration tests).
+- **`README.md`:** PDO extension requirements per database driver, PostgreSQL recommendation, connectivity troubleshooting, link to **`docs/postgresql.md`**.
+- **`config/database.php`:** PostgreSQL schema search path and SSL mode from environment.
+- **`AppServiceProvider`:** bindings for catalog search and product search-text rebuild abstractions.
+- **`Product` model:** `search_text` in **`$fillable`**, Scout **`Searchable`**, and search-text normalization helpers.
+- **`ProductController`:** catalog search action wired to the search service contract.
+- **`ProductSeeder`:** populates **`search_text`** for seeded products.
+- **`phpunit.xml`:** default **`ES_TEST_HOST`** for optional Elasticsearch feature tests.
+- **`routes/api.php`:** **`throttle:60,1`** on **`products/search`**.
+- **`trash/diagramZero.dbml`:** schema notes aligned with search-related columns and PostgreSQL indexes.
+- Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-03-30T10:12Z).
+
+### Fixed
+
+- **`CustomerTransactionalEmailTest`:** set **`payments.checkout_method_keys`** in simulated Bizum scenarios so checkout payment config matches test expectations.
 
 ## [0.1.2] - 2026-03-29
 

@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Contracts\Payments\PaymentCheckoutStarter;
+use App\Contracts\RebuildsProductSearchText;
+use App\Contracts\Search\ElasticsearchProductCatalogSearch;
 use App\Events\InstallationPriceWasAssigned;
 use App\Events\OrderInstallationQuoteRequested;
 use App\Events\OrderPaymentSucceeded;
@@ -13,10 +15,15 @@ use App\Listeners\SendOrderInstallationQuoteRequestEmail;
 use App\Listeners\SendOrderPaymentConfirmationEmail;
 use App\Listeners\SendOrderShippedEmail;
 use App\Listeners\SendPersonalizedSolutionAcknowledgementEmail;
+use App\Scout\ElasticsearchClientFactory;
+use App\Scout\ElasticsearchEngine;
 use App\Services\Payments\PaymentCheckoutService;
 use App\Services\Payments\Stripe\StripeCheckoutStarter;
+use App\Services\ProductSearchTextRebuildService;
+use App\Services\Search\ScoutElasticsearchProductCatalogSearch;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Scout\EngineManager;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->when(PaymentCheckoutService::class)
             ->needs(PaymentCheckoutStarter::class)
             ->give(StripeCheckoutStarter::class);
+
+        $this->app->bind(RebuildsProductSearchText::class, ProductSearchTextRebuildService::class);
+
+        $this->app->bind(ElasticsearchProductCatalogSearch::class, ScoutElasticsearchProductCatalogSearch::class);
     }
 
     /**
@@ -60,6 +71,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        resolve(EngineManager::class)->extend('elasticsearch', function () {
+            return new ElasticsearchEngine(
+                ElasticsearchClientFactory::make(config('scout.elasticsearch', [])),
+                (bool) config('scout.soft_delete', false),
+            );
+        });
+
         Event::listen(InstallationPriceWasAssigned::class, SendInstallationPriceAssignedEmail::class);
         Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmationEmail::class);
         Event::listen(OrderInstallationQuoteRequested::class, SendOrderInstallationQuoteRequestEmail::class);

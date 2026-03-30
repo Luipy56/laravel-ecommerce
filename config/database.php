@@ -14,6 +14,11 @@ return [
     | the connection which will be utilized unless another connection
     | is explicitly specified when you execute a query / statement.
     |
+    | PostgreSQL (pgsql) is recommended for production and for local dev when
+    | matching production. SQLite remains the default when DB_CONNECTION is unset
+    | so PHPUnit and quick clones work without a database server. MySQL/MariaDB
+    | remain optional during transition.
+    |
     */
 
     'default' => env('DB_CONNECTION', 'sqlite'),
@@ -94,7 +99,8 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'public',
+            'search_path' => env('DB_SCHEMA', 'public'),
+            // prefer: try TLS, fall back if server has no SSL. Use disable for local Postgres without TLS (e.g. Docker).
             'sslmode' => env('DB_SSLMODE', 'prefer'),
         ],
 

@@ -7,6 +7,7 @@ use App\Http\Resources\PackResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Pack;
 use App\Models\Product;
+use App\Services\Search\CatalogProductSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -210,24 +211,44 @@ class ProductController extends Controller
         ]);
     }
 
-    public function search(Request $request): JsonResponse
+    /**
+     * Catalog search: Elasticsearch when scout.driver is elasticsearch, otherwise ProductSearchService
+     * (PostgreSQL trigram or SQL token match). Query param suggest=1 returns autocomplete entries (text + product_id).
+     */
+    public function search(Request $request, CatalogProductSearchService $catalogSearch): JsonResponse
     {
-        $term = $request->get('q', '');
-        if (strlen($term) < 2) {
-            return response()->json(['success' => true, 'data' => []]);
+        $request->validate([
+            'q' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'search' => ['sometimes', 'nullable', 'string', 'max:500'],
+        ]);
+
+        $term = (string) ($request->input('q') ?? $request->input('search') ?? '');
+        $suggest = $request->boolean('suggest');
+        $limit = max(1, min(100, (int) config('product_search.api_limit', 20)));
+
+        $result = $catalogSearch->search($term, $suggest, $limit);
+
+        if ($suggest) {
+            return response()->json([
+                'success' => true,
+                'data' => $result['suggestions'],
+                'meta' => [
+                    'engine' => $result['engine'],
+                    'suggest' => true,
+                ],
+            ]);
         }
 
-        $products = Product::query()->active()
-            ->with(['category', 'images'])
-            ->where(fn ($q) => $q->where('name', 'like', "%{$term}%")
-                ->orWhere('description', 'like', "%{$term}%")
-                ->orWhere('code', 'like', "%{$term}%"))
-            ->limit(20)
-            ->get();
+        $products = $result['products'];
+        $products->loadMissing(['category', 'images']);
 
         return response()->json([
             'success' => true,
             'data' => ProductResource::collection($products),
+            'meta' => [
+                'engine' => $result['engine'],
+                'suggest' => false,
+            ],
         ]);
     }
 

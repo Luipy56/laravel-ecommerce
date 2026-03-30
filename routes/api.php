@@ -35,7 +35,8 @@ Route::get('categories', [CategoryController::class, 'index']);
 Route::get('features', [FeatureController::class, 'index']);
 Route::get('products', [ProductController::class, 'index']);
 Route::get('products/featured', [ProductController::class, 'featured']);
-Route::get('products/search', [ProductController::class, 'search']);
+Route::get('products/search', [ProductController::class, 'search'])
+    ->middleware('throttle:60,1');
 Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('packs', [PackController::class, 'index']);
 Route::get('packs/{pack}', [PackController::class, 'show']);

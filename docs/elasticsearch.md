@@ -26,7 +26,21 @@ This app uses **Laravel Scout** with a **custom Elasticsearch engine** (`App\Sco
    php artisan scout:import "App\Models\Product"
    ```
 
+   **Shortcut (recommended):** `php artisan products:reindex-elasticsearch` wraps Scout steps when the driver is `elasticsearch` and hosts are configured. It **no-ops** (exit **0**) if Elasticsearch is disabled, so scripts stay safe in mixed environments.
+
+   | Flag | Effect |
+   |------|--------|
+   | *(none)* | `scout:import` only (upserts all active searchable models). |
+   | `--fresh` | Clears documents then imports (sync: `scout:import --fresh`; queued: `scout:flush` then `scout:queue-import`). |
+   | `--recreate` | Deletes the index, runs `scout:index`, then imports (use after mapping / synonym config changes). |
+   | `--chunk=` | Override import chunk size (same as `scout:import --chunk`). |
+   | `--queued` | Use `scout:queue-import` instead of synchronous import. |
+
 5. For async indexing in production, set **`SCOUT_QUEUE=true`** and run a queue worker. Failed jobs surface in the `failed_jobs` table like any other queued job.
+
+### Disabling Elasticsearch
+
+Set **`SCOUT_DRIVER=null`** in `.env` and clear config cache if used. Catalog search continues via PostgreSQL (or SQLite token match). No Elasticsearch cluster is required.
 
 ## Index mapping
 
@@ -36,7 +50,7 @@ Mappings for the `products` table index are defined under **`config/scout.php`**
 
 - **Config:** `config/search_synonyms.php` — `groups` are synonym sets (each inner list is bidirectional). Terms are normalized like `search_text` (lowercase, diacritic folding when intl is available). Optional env: `SEARCH_SYNONYMS_ENABLED`, `SEARCH_SYNONYMS_MAX_EXPANSIONS` (caps variants per token on the SQL side).
 - **Elasticsearch:** On boot, non-empty groups merge a `synonym_graph` filter and a `product_synonym` analyzer into the live Scout index definition for text fields (`name`, `code`, `description`, `search_text`). The **`suggest`** completion field stays on the default analyzer.
-- **After changing synonyms:** delete/recreate the index (or run `php artisan scout:flush` + `scout:index` / `scout:import` as appropriate for your workflow) so settings apply, then re-import documents. Full reindex automation may be covered by the search tooling Artisan FEAT; until then, use the Scout commands above.
+- **After changing synonyms:** run `php artisan products:reindex-elasticsearch --recreate` (or manually `scout:flush` + delete/recreate index + `scout:import`) so analyzers apply, then verify with a sample query.
 
 Multilingual index strategy (future per-locale fields) is described in **`config/search_locales.php`** only; product rows still use a single `search_text` blob today.
 

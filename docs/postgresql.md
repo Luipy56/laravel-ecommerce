@@ -43,7 +43,14 @@ Use `php artisan test` with the default SQLite testing configuration for CI-styl
 After bulk raw SQL imports into `products`, run:
 
 ```bash
+# All rows (e.g. after a bulk SQL import that bypassed Eloquent)
 php artisan products:rebuild-search-text
+
+# Only null or out-of-date search_text (faster on large catalogs)
+php artisan products:rebuild-search-text --stale
+
+# Tune chunk size (default 100)
+php artisan products:rebuild-search-text --chunk=250
 ```
 
 ## Catalog search (`ProductSearchService`)

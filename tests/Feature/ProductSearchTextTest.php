@@ -84,6 +84,74 @@ class ProductSearchTextTest extends TestCase
         $this->assertSame(Product::normalizeSearchText('Raw Name É', 'RAW-1', null), $row->search_text);
     }
 
+    public function test_rebuild_search_text_stale_only_updates_mismatched_rows(): void
+    {
+        $category = ProductCategory::create([
+            'code' => 't3',
+            'name' => 'Cat 3',
+            'is_active' => true,
+        ]);
+
+        $ok = Product::create([
+            'category_id' => $category->id,
+            'code' => 'STALE-OK',
+            'name' => 'Already normalized',
+            'description' => null,
+            'price' => 1.00,
+            'stock' => 1,
+            'is_active' => true,
+        ]);
+
+        DB::table('products')->insert([
+            'category_id' => $category->id,
+            'variant_group_id' => null,
+            'code' => 'STALE-BAD',
+            'name' => 'Needs rebuild',
+            'description' => null,
+            'price' => 2.00,
+            'discount_percent' => null,
+            'purchase_price' => null,
+            'stock' => 1,
+            'weight_kg' => null,
+            'is_double_clutch' => false,
+            'has_card' => false,
+            'security_level' => null,
+            'competitor_url' => null,
+            'is_extra_keys_available' => false,
+            'extra_key_unit_price' => null,
+            'is_featured' => false,
+            'is_trending' => false,
+            'is_active' => true,
+            'search_text' => 'wrong',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Artisan::call('products:rebuild-search-text', ['--stale' => true]);
+
+        $ok->refresh();
+        $bad = DB::table('products')->where('code', 'STALE-BAD')->first();
+        $this->assertNotNull($bad);
+        $this->assertSame(Product::normalizeSearchText('Needs rebuild', 'STALE-BAD', null), $bad->search_text);
+        $this->assertSame(
+            Product::normalizeSearchText('Already normalized', 'STALE-OK', null),
+            $ok->search_text
+        );
+    }
+
+    public function test_postgresql_search_text_trgm_index_exists_when_using_pgsql(): void
+    {
+        if (DB::getDriverName() !== 'pgsql') {
+            $this->markTestSkipped('Requires DB_CONNECTION=pgsql.');
+        }
+
+        $row = DB::selectOne(
+            'select 1 as ok from pg_indexes where schemaname = current_schema() and tablename = ? and indexname = ?',
+            ['products', 'idx_products_search_text_trgm']
+        );
+        $this->assertNotNull($row, 'GIN(trgm) index on products.search_text should exist');
+    }
+
     public function test_postgresql_extensions_exist_when_using_pgsql(): void
     {
         if (DB::getDriverName() !== 'pgsql') {

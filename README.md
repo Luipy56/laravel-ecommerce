@@ -57,6 +57,8 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
    - Prefer **`127.0.0.1`** over **`localhost`** for MySQL/MariaDB when you need TCP (many setups use a Unix socket for `localhost`, which breaks with Docker-only TCP or some remote hosts).
    - **`SQLSTATE[HY000] [2002] Network is unreachable`:** `DB_HOST` is unreachable (wrong hostname, database not running, firewall/VPN, or container networking). From a PHP container, use the Compose **service name** as `DB_HOST`, not `localhost`, unless the DB is in the same network namespace.
 
+   **Optional catalog search:** With PostgreSQL, fuzzy search uses `pg_trgm` on `products.search_text`. Optional Elasticsearch indexing is documented in **`docs/elasticsearch.md`** (`products:reindex-elasticsearch`, `products:rebuild-search-text`).
+
 5. **Frontend dependencies**
 
    ```bash

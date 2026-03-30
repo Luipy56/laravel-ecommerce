@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** La issue #4 pedía mejorar la vista móvil y documentar convenciones responsive coherentes en tienda y admin.
+- **What was done:** Se cableó el drawer daisyUI de la tienda (`drawer-nav`, hamburguesa, enlaces móviles), se ajustaron desbordamientos en admin (`min-w-0`, breadcrumbs con scroll) y en carrito/checkout, y se añadieron `docs/mobile-responsive.md` y `viewport-fit=cover` en la shell Blade, según las notas de implementación.
+- **What was tested:** `npm run build`, `php artisan test`, `php artisan routes:smoke` y comprobaciones headless en viewport estrecho para tienda, `/cart` y `/checkout` — **PASS**; breadcrumbs admin largos quedaron sin verificar por falta de sesión admin.
+- **Why closed:** El tester dio **PASS** global con laguna documentada (smoke admin manual recomendado); sin activación de loop protection.
+- **Closed at (UTC):** 2026-03-30 09:55
+---
+
 # Mobile view
 
 ## GitHub

@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** PHPUnit hit a `TypeError` because `PaymentCheckoutService` expected `StripeCheckoutStarter` while the container/tests injected an anonymous `PaymentCheckoutStarter` implementation.
+- **What was done:** The service constructor now type-hints `PaymentCheckoutStarter`, with contextual binding to `StripeCheckoutStarter` in `AppServiceProvider`, and `OrderPayConfigurationExceptionTest` uses a compatible anonymous double bound via `StripeCheckoutStarter::class`.
+- **What was tested:** Full `php artisan test` (42 passed, including `OrderPayConfigurationExceptionTest`) and `php artisan routes:smoke` (no GET route returned 500).
+- **Why closed:** Tester reported **PASS** on every pass/fail criterion in the test report.
+- **Closed at (UTC):** 2026-03-30 09:46
+---
+
 # PaymentCheckoutService: TypeError on Stripe constructor (anonymous PaymentCheckoutStarter)
 
 ## Source

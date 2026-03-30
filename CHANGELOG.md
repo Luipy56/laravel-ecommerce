@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Tests:** `ReindexElasticsearchProductsCommandTest`, PostgreSQL **`idx_products_search_text_trgm`** presence check, and stale rebuild coverage in **`ProductSearchTextTest`** (catalog search fallback remains covered in **`ProductCatalogSearchApiTest`**).
 - **Search synonyms:** `config/search_synonyms.php` drives token expansion in `ProductSearchService` (PostgreSQL / SQLite paths) and merges an Elasticsearch `synonym_graph` + `product_synonym` analyzer into the products index definition when groups are non-empty. **`config/search_locales.php`** documents future multilingual index strategies without schema changes.
 
+### Changed
+
+- Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-03-30T16:51Z).
+
 ## [0.1.3] - 2026-03-30
 
 ### Added

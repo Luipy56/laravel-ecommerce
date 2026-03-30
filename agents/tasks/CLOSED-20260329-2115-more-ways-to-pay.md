@@ -24,3 +24,31 @@ Hoy existe pago con PayPal; se piden medios adicionales (Revolut y tarjeta de cr
 5. **Con claves reales:** Con `STRIPE_KEY`+`STRIPE_SECRET`, flujo checkout → bloque Stripe en página; con `REVOLUT_MERCHANT_API_KEY`, redirección a hosted checkout de Revolut tras `POST orders/checkout`.
 
 Comentario en GitHub **#5** publicado con el resumen técnico.
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** 2026-03-30 10:21–10:23 UTC (ejecución de comandos). Ventana de log: sin errores nuevos atribuibles a esta verificación; `storage/logs/laravel.log` contiene trazas históricas de tests (no se usó como criterio de fallo).
+
+2. **Environment:** PHP 8.3.6, Node v22.20.0, rama `agentdevelop`, commit `43ab22c`. `APP_ENV` no alterado para la suite (tests con SQLite en memoria según configuración del proyecto).
+
+3. **What was tested (from “What to verify” / Testing instructions):** `php artisan test` (incl. `CheckoutPaymentConfigTest`), `php artisan routes:smoke`, `npm run build`; equivalencia funcional del apartado manual 4 respecto a `GET /api/v1/payments/config` vía tests que fijan `config()` como en las instrucciones. No navegador. Punto 5 (claves reales / PSP) no ejecutado (N/A).
+
+4. **Results:**
+   - **1. `php artisan test`:** **PASS** — `Tests: 42 passed (201 assertions)`; incluye `test_payments_config_stripe_missing_credentials_when_whitelisted_without_keys_and_no_simulation` y `test_payments_config_revolut_missing_credentials_when_whitelisted_without_key_and_no_simulation`.
+   - **2. `php artisan routes:smoke`:** **PASS** — salida: `All checked GET routes returned a non-500 status.`
+   - **3. `npm run build`:** **PASS** — `vite build` completado (`✓ built in 3.61s`; aviso CSS `@property` no bloqueante).
+   - **4. Manual checkout / pedido (API + UI):** **PASS (API)** / **N/A (UI en navegador)** — las aserciones JSON de `data.methods.card`, `data.stripe_missing_credentials`, `data.methods.revolut`, `data.revolut_missing_credentials` están cubiertas por los tests citados; no se abrió `/checkout` en navegador para validar el aviso visual.
+   - **5. Con claves reales:** **N/A** — fuera de alcance en este entorno (sin PSP reales).
+
+5. **Overall:** **PASS** (criterios automatizados al 100 %; UI de checkout no comprobada en navegador).
+
+6. **Product owner feedback:** La API de configuración de pagos expone correctamente los flags de credenciales faltantes para tarjeta y Revolut cuando el método está permitido y no hay simulación, alineado con lo pedido para el selector y mensajes. Conviene una pasada manual breve en `/checkout` y ficha de pedido con los `.env` de staging para confirmar textos y avisos en catalán y castellano. Los flujos con Stripe y Revolut en producción siguen dependiendo de claves válidas en el despliegue.
+
+7. **URLs tested:** **N/A — no browser** (solo peticiones HTTP internas vía PHPUnit).
+
+8. **Relevant log excerpts (last section):** Evidencia principal = salida de consola, no log de aplicación:
+   - `Tests:    42 passed (201 assertions)`
+   - `All checked GET routes returned a non-500 status.`
+   - `✓ built in 3.61s`

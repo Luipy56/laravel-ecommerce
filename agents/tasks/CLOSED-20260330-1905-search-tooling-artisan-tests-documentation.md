@@ -59,4 +59,58 @@
 
 ## Test report
 
-_(Tester fills after verification.)_
+### 1. Date/time (UTC) and log window
+
+- **Started:** 2026-03-30 16:58:15 UTC  
+- **Finished:** 2026-03-30 17:01:00 UTC (approx.)  
+- **Log window:** `storage/logs/laravel.log` lines around **2026-03-30 16:41–17:00** UTC (`testing` channel entries from PHPUnit / smoke; no errors tied to this verification).
+
+### 2. Environment
+
+- **PHP:** 8.3.6  
+- **Node:** v22.21.0  
+- **Branch:** `agentdevelop`  
+- **`php artisan test`:** `APP_ENV=testing` (per `phpunit.xml`), `DB_CONNECTION=sqlite` (in-memory via `tests/bootstrap.php`).  
+- **Note:** Workspace `.env` uses a **remote** `pgsql` host; **`migrate:fresh --seed` was not run against that database** (destructive on a shared/remote instance). Equivalence check used an **isolated SQLite file** at `/tmp/le-search-test.sqlite`.
+
+### 3. What was tested (from Testing instructions)
+
+- Git sync, migrate+seed + demo SKUs, full test suite, route smoke, Artisan reindex/rebuild, optional ES reindex (skipped), docs spot-check, log sample.
+
+### 4. Results
+
+| Criterion | Result | Evidence |
+|-----------|--------|----------|
+| `./scripts/git-sync-agent-branch.sh` | **PASS** | Exit 0; `Already up to date` on `agentdevelop`. |
+| `migrate:fresh --seed` + three `SEARCH-DEMO-*` codes | **PASS** (mitigated) | `DB_CONNECTION=sqlite DB_DATABASE=/tmp/le-search-test.sqlite php artisan migrate:fresh --seed` → exit **0**. Tinker query returned all three codes: `SEARCH-DEMO-K1-PARTIAL`, `SEARCH-DEMO-MIX-3030-K1`, `SEARCH-DEMO-TYPO`. Remote PostgreSQL in `.env` not wiped by tester. |
+| `php artisan test` | **PASS** | Exit **0**; **65 passed**, **5 skipped** (expected: ES host, pgsql-only, ranking smoke per warnings). |
+| `php artisan routes:smoke` | **PASS** | Exit **0**; `All checked GET routes returned a non-500 status.` |
+| `php artisan products:reindex-elasticsearch` | **PASS** | Printed `Skipping Elasticsearch reindex: SCOUT_DRIVER is not "elasticsearch".`, exit **0**. |
+| `php artisan products:rebuild-search-text --stale` | **PASS** | On seeded SQLite file: `Updated 0 product(s).`, exit **0**. |
+| Optional live ES reindex (`--recreate` / `--fresh`) | **N/A** | No local ES / `ES_TEST_HOST` run in this step (optional per instructions). |
+| `npm run build` | **N/A** | Task states not required. |
+| Manual read `docs/elasticsearch.md`, `docs/postgresql.md` | **PASS** | Files present; cover disable ES, env, reindex command; extensions / `migrate:fresh --seed` workflow. |
+
+### 5. Overall
+
+**PASS.** All required automated checks succeeded; optional ES live reindex not exercised. PostgreSQL-specific integration is covered by PHPUnit **skip** when not on `pgsql`, consistent with task text (“pgsql/es integration tests skip unless env present”).
+
+### 6. Product owner feedback
+
+Search-related Artisan commands behave safely when Elasticsearch is off (skip message, exit 0), and seed data includes the three deterministic demo SKUs for search scenarios. Documentation in `docs/elasticsearch.md` and `docs/postgresql.md` matches the described operator workflow. Teams should run `migrate:fresh --seed` on a **dedicated** PostgreSQL dev instance (not a shared remote DB without approval) to validate extensions and GIN index tests that PHPUnit skips on SQLite.
+
+### 7. URLs tested
+
+**N/A — no browser** (no checkout/payments or manual HTTP flows required for this task).
+
+### 8. Relevant log excerpts
+
+```text
+[2026-03-30 17:00:15] testing.INFO: catalog_search.fallback_to_database {"mode":"full_text","reason":"elasticsearch_unavailable","db_driver":"sqlite"}
+```
+
+(Shows search fallback path exercised during automated tests; no application **ERROR** lines in this window for the verification run.)
+
+---
+
+**GitHub:** No issue number (`#NN`) in this task file; labels/comments not updated.

@@ -35,3 +35,37 @@
 ### Pass/fail criteria
 - **PASS:** `php artisan test` termina con código **0**; `php artisan routes:smoke` indica que ninguna ruta GET comprobada devolvió **500**.
 - **FAIL:** cualquier fallo en tests, **500** en smoke, o reaparición del `TypeError` en el constructor de `PaymentCheckoutService` para `$stripe`.
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** Inicio verificación `2026-03-30T09:45:32Z`; fin inmediatamente tras `routes:smoke` (~`09:45:35Z`). Sin revisión adicional de `storage/logs/laravel.log` para esta corrida (entorno de tests PHPUnit; criterio cubierto por tests y smoke).
+
+2. **Environment:** PHP 8.3.6 (CLI), rama `agentdevelop`, repo `/home/luipy/Repos/Luipy56/laravel-ecommerce`. No se ejecutó `npm run build` (la tarea no indica cambios en `resources/js/` ni Vite).
+
+3. **What was tested:** Lo indicado en «What to verify» / «How to test»: suite `php artisan test` (incluye `OrderPayConfigurationExceptionTest` y pruebas Feature de pagos/checkout), `php artisan routes:smoke`. Sin flujo manual opcional POST pay en navegador.
+
+4. **Results:**
+   - Sin `TypeError` al resolver `PaymentCheckoutService` con doble que implementa `PaymentCheckoutStarter`: **PASS** — `OrderPayConfigurationExceptionTest` ✓ en salida de `php artisan test`.
+   - Stripe no configurado: **422**, `payment_method_not_configured`, sin error de constructor: **PASS** — mismo test ✓ (aserciones del test + 42 tests passed).
+   - Rutas GET sin HTTP **500**: **PASS** — `php artisan routes:smoke` → «All checked GET routes returned a non-500 status.»
+
+5. **Overall:** **PASS** (todos los criterios).
+
+6. **Product owner feedback:** El arreglo queda validado: el contenedor y el test ya no chocan por el tipo del primer argumento de `PaymentCheckoutService`, y el flujo «tarjeta sin Stripe» sigue respondiendo de forma controlada al cliente. No hace falta acción del PO salvo despliegue habitual; si en producción apareciera de nuevo un 500 distinto, conviene cruzarlo con logs reales y PSP.
+
+7. **URLs tested:** **N/A — no browser** (solo CLI).
+
+8. **Relevant log excerpts (last section):**
+
+```text
+   PASS  Tests\Feature\OrderPayConfigurationExceptionTest
+  ✓ order pay does not report log when stripe reports not configured vi… 0.02s
+...
+  Tests:    42 passed (201 assertions)
+```
+
+```text
+All checked GET routes returned a non-500 status.
+```

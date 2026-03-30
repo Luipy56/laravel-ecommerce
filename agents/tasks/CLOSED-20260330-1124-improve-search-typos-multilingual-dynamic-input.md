@@ -27,3 +27,29 @@ Product data mixes Catalan and Spanish names, but storefront search is brittle: 
 2. **API:** New coverage in `tests/Unit/ProductSearchTest.php` and `tests/Feature/ProductStorefrontSearchTest.php` (synonym `cargol` → product titled with “Tornillo”, fuzzy typo `SpecialGadgetWidgit` → `SpecialGadgetWidget`, `GET /api/v1/products/search?q=martillo` vs product “Kit martell groc”).
 3. **Manual storefront:** Open `/products` or `/categories/{id}/products`; type at least **two characters** in the navbar search and wait ~300ms without submitting — the URL `search` param should update (`replace: true`) and the catalog refetch. Single-character input should **not** change the URL until a second character or clear. Submit still navigates/updates immediately (including one character if submitted).
 4. **Config (optional):** `.env.example` documents `PRODUCT_SEARCH_FUZZY_FALLBACK`, `PRODUCT_SEARCH_FUZZY_CANDIDATES`, `PRODUCT_SEARCH_MAX_VARIANTS`; synonym lists live in `config/product_search.php`.
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** Inicio verificación `2026-03-30T11:29:00Z` · fin `2026-03-30T11:31:00Z` (aprox.). Ventana para revisar `storage/logs/laravel.log`: misma; no se observó actividad relevante (la suite corre en entorno de test).
+
+2. **Environment:** PHP 8.3.6, Node v22.20.0, rama `agentdevelop`, `APP_ENV=local` (desde `.env` del workspace).
+
+3. **What was tested:** Instrucciones 1–4 de “Testing instructions” (comandos de raíz del repo, cobertura API en tests indicados, comprobación de storefront por revisión de código por ausencia de E2E, configuración documentada).
+
+4. **Results:**
+   - `php artisan test` (incl. `ProductSearchTest`, `ProductStorefrontSearchTest`): **PASS** — `Tests: 50 passed (217 assertions)`.
+   - `php artisan routes:smoke`: **PASS** — `All checked GET routes returned a non-500 status.`
+   - `npm run build`: **PASS** — `✓ built in 3.64s` (avisos de CSS/chunk size no bloquean).
+   - API (sinónimo cargol/Tornillo, fuzzy Widgit/Widget, `GET /api/v1/products/search?q=martillo` vs “Kit martell groc”): **PASS** — ejercitado por los tres métodos en `tests/Feature/ProductStorefrontSearchTest.php` y normalización/sinónimos en `tests/Unit/ProductSearchTest.php`.
+   - Manual storefront (debounce ~300 ms, `replace: true`, 1 carácter sin actualizar URL vía efecto, envío inmediato con ≥1 carácter): **PASS** — evidencia estática: `resources/js/components/Navbar.jsx` (`SEARCH_DEBOUNCE_MS = 300`, early return si `term.length === 1`, `navigate(..., { replace: true })`, `handleSearch` con `term.length >= 1` en rutas de catálogo).
+   - Config opcional: **PASS** — `.env.example` líneas comentadas `PRODUCT_SEARCH_*`; existe `config/product_search.php`.
+
+5. **Overall:** **PASS** (todos los criterios anteriores).
+
+6. **Product owner feedback:** La búsqueda queda respaldada por pruebas automáticas para casos multilingües, typo y endpoint dedicado, y el build de front pasa. El comportamiento “mientras escribes” en catálogo está implementado en la barra de navegación con debounce y reglas de longitud acordes a la especificación; conviene una pasada manual en navegador antes de release si el equipo lo exige para UX.
+
+7. **URLs tested:** **N/A — no browser** (sin herramienta E2E en el repo; criterio de UI verificado por inspección de `Navbar.jsx`).
+
+8. **Relevant log excerpts (last section):** No aplica `laravel.log` para demostrar el resultado; evidencia principal: salida de `php artisan test` (50 passed) y `routes:smoke` / `npm run build` anteriores.

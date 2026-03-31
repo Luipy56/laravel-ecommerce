@@ -78,12 +78,15 @@ class AppServiceProvider extends ServiceProvider
             config(['scout.elasticsearch.index_definitions.products' => array_replace_recursive($current, $synonymOverlay)]);
         }
 
-        resolve(EngineManager::class)->extend('elasticsearch', function () {
-            return new ElasticsearchEngine(
-                ElasticsearchClientFactory::make(config('scout.elasticsearch', [])),
-                (bool) config('scout.soft_delete', false),
-            );
-        });
+        // Skip when laravel/scout is not installed (partial vendor tree); ScoutServiceProvider registers EngineManager.
+        if (class_exists(EngineManager::class)) {
+            resolve(EngineManager::class)->extend('elasticsearch', function () {
+                return new ElasticsearchEngine(
+                    ElasticsearchClientFactory::make(config('scout.elasticsearch', [])),
+                    (bool) config('scout.soft_delete', false),
+                );
+            });
+        }
 
         Event::listen(InstallationPriceWasAssigned::class, SendInstallationPriceAssignedEmail::class);
         Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmationEmail::class);

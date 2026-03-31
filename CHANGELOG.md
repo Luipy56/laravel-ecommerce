@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Agent pipeline: PostgreSQL extensions / search-text GIN task tracking renamed from **`UNTESTED`** to **`WIP`** (`agents/tasks/WIP-20260330-1815-postgresql-extensions-search-text-gin.md`).
 - Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-03-30T17:07Z).
 
 ## [0.1.3] - 2026-03-30

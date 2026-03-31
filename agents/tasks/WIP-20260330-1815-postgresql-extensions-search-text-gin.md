@@ -79,3 +79,46 @@ Enable **pg_trgm**, **citext**, and **unaccent** on PostgreSQL, add a **normaliz
 3. **PostgreSQL (optional):** Point `.env` (or PHPUnit via `DB_CONNECTION=pgsql` and `DB_TESTING_DATABASE=…`) at a disposable test database; run `php artisan test --filter=ProductSearchTextTest` and confirm the pgsql extension test runs and passes. Run `php artisan migrate:fresh --seed` and confirm exit code **0**; in `psql`, `\dx` lists `pg_trgm`, `citext`, `unaccent`; `\d+ products` shows GIN index on `search_text`.
 4. **Smoke:** `php artisan routes:smoke` — no HTTP 500 on GET routes.
 5. **Manual:** Create/update a product via admin API; confirm `search_text` updates. After a hypothetical raw SQL product insert, run `php artisan products:rebuild-search-text`.
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** Testing started **2026-03-31 09:36:59 UTC**; commands completed by **2026-03-31 09:40 UTC** (approx.). No application errors required inspection of `storage/logs/laravel.log` for this run.
+
+2. **Environment:** PHP **8.3.6**, Node **v22.20.0**, git branch **`agentdevelop`**. PHPUnit used default **SQLite** in-memory (per project tests). **`composer install`** was run once because **`vendor/laravel/scout`** (and related lockfile packages) were missing locally; without it, `php artisan test` failed immediately with `Target class [Laravel\Scout\EngineManager] does not exist` from `AppServiceProvider`. After install, the full suite executed.
+
+3. **What was tested (from “What to verify” / Testing instructions):** Full **`php artisan test`** (SQLite CI path); **`php artisan routes:smoke`**; optional PostgreSQL checks **not** run (no disposable `pgsql` test DB configured here). Manual admin API / rebuild flow **not** executed (automated failure blocked treating verification as complete).
+
+4. **Results:**
+   - **`php artisan test` (SQLite):** **FAIL** — Evidence: `Tests\Feature\ProductSearchTextTest` → `product saving sets normalized search text`: expected `search_text` to contain **`x-ab`**; actual value contained **`x-áb`** (SKU diacritics not ASCII-folded). PHPUnit: **64 passed**, **1 failed**, **5 skipped**; exit code **1**.
+   - **`php artisan routes:smoke`:** **PASS** — Evidence: stdout ended with `All checked GET routes returned a non-500 status.` (exit **0**).
+   - **PostgreSQL `migrate:fresh --seed` / `\dx` / `\d+ products`:** **N/A** — not run (optional in task; primary SQLite path failed first).
+   - **Manual API / `products:rebuild-search-text`:** **N/A** — not performed after unit failure.
+
+5. **Overall:** **FAIL** — Failed criterion: SQLite **`php artisan test`** must be fully green per Testing instructions item 2.
+
+6. **Product owner feedback:** Automated search-text normalization does not yet match the test contract for SKUs with accented characters (`X-ÁB` should contribute **`x-ab`** to `search_text`). Until `Product::normalizeSearchText` (or the saving hook) applies the same folding to all concatenated fields as the test expects, CI will stay red. After the coder fixes this, re-run the full suite and optionally PostgreSQL checks in an environment with extensions available.
+
+7. **URLs tested:** **N/A — no browser** (no manual HTTP verification in this run).
+
+8. **Relevant log excerpts (last section):**
+
+```
+   FAIL  Tests\Feature\ProductSearchTextTest
+  ⨯ product saving sets normalized search text                           0.01s
+  ...
+  FAILED  Tests\Feature\ProductSearchTextTest > product saving sets normali…
+  Expected: cilindro café x-áb niño
+
+  To contain: x-ab
+
+  at tests/Feature/ProductSearchTextTest.php:40
+```
+
+```
+$ php artisan routes:smoke
+All checked GET routes returned a non-500 status.
+```
+
+**Loop protection:** First verification attempt for this task state; no cycle limit reached.

@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The storefront search API was implemented with Elasticsearch as the primary engine and PostgreSQL (trigram) fallback when ES is unavailable or misconfigured.
+- **What was done:** `CatalogProductSearchService` orchestrates ES and `ProductSearchService`; autocomplete via `suggest=1`, `throttle:60,1`, `meta.engine` in responses, structured fallback logging, and `ProductCatalogSearchApiTest` coverage as described in the task body.
+- **What was tested:** Tester ran `php artisan test` (including `ProductCatalogSearchApiTest` — 6 tests, all passed), `php artisan routes:smoke` (no HTTP 500), and skipped optional live ES / `npm run build` per instructions — **overall PASS.**
+- **Why closed:** All required automated verification passed; tester marked overall **PASS**.
+- **Closed at (UTC):** 2026-03-31 10:31
+---
+
 # Search API: Elasticsearch primary, PostgreSQL fallback, autocomplete
 
 ## Epic / tracking

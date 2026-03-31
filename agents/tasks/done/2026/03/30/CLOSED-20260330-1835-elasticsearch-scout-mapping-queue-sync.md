@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Production-oriented Elasticsearch indexing for products was added using Laravel Scout 11, a custom Elasticsearch engine, and queue-driven sync.
+- **What was done:** `elasticsearch/elasticsearch` v8, `App\Scout\ElasticsearchEngine`, Scout config with product mappings (text + completion suggest), `Product` as `Searchable` with `shouldBeSearchable()` / `toSearchableArray()`, Scout `MakeSearchable` / `RemoveFromSearch` when queued, plus docs as noted in the implementation section.
+- **What was tested:** Tester ran `php artisan test` (`ProductScoutIndexingTest`, `ScoutElasticsearchMappingTest` green; `ProductElasticsearchScoutIntegrationTest` skipped without `ES_TEST_HOST`), full suite exit 0, and `php artisan routes:smoke` — no HTTP 500; optional live ES / failed-jobs steps not run — **overall PASS.**
+- **Why closed:** All required automated checks passed; tester marked overall **PASS**.
+- **Closed at (UTC):** 2026-03-31 10:31
+---
+
 # Elasticsearch: Scout (or minimal client), mapping, async sync
 
 ## Epic / tracking

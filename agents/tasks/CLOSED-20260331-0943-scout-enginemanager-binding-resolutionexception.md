@@ -39,3 +39,37 @@
 
 - **Pass:** No new failures attributable to this change; `php artisan routes:smoke` reports no HTTP 500 on GET routes.
 - **Note:** `Tests\Feature\ProductSearchTextTest::product saving sets normalized search text` may fail on this branch independent of this fix (expects `x-ab` substring; observed `search_text` contains `x-áb`). Treat as pre-existing unless that test is green on the integration branch baseline.
+
+---
+
+## Test report
+
+1. **Date/time (UTC)** and log window.
+   - Verification started **2026-03-31 09:45:58 UTC**; commands completed by **~09:46:15 UTC**. Log window reviewed: **09:45:00–09:46:01** (tail of `storage/logs/laravel.log` during/after test run).
+
+2. **Environment**
+   - **PHP:** 8.3.6 · **Node:** v22.20.0 · **Branch:** `agentdevelop` · **APP_ENV:** `local` (from `.env`; PHPUnit uses `testing` for the suite).
+
+3. **What was tested** (from “What to verify”)
+   - Boot with Scout installed normally (no `EngineManager` resolution error).
+   - Elasticsearch driver registration / Scout behaviour (existing Scout/ES tests).
+   - `php artisan test`, `php artisan routes:smoke`.
+   - Optional scout-absent repro: **not run** (optional step).
+
+4. **Results**
+   - **Application boots with Scout present; no `EngineManager` failure during suite:** **PASS** — full `php artisan test` run completed application bootstrap repeatedly; 64 tests passed; Scout-related tests (`ScoutElasticsearchMappingTest`, `ProductScoutIndexingTest`, `ProductCatalogSearchApiTest`, `ReindexElasticsearchProductsCommandTest`, etc.) green.
+   - **`ProductSearchTextTest::product saving sets normalized search text`:** **PASS (per task criteria)** — fails with `x-ab` vs `x-áb` as documented in Testing instructions; treated as **pre-existing / not attributable to this Scout guard change** per pass/fail note above.
+   - **`php artisan routes:smoke`:** **PASS** — exit 0; message: “All checked GET routes returned a non-500 status.”
+   - **Elasticsearch driver / Scout integration with tests:** **PASS** — relevant feature and unit tests above passed.
+
+5. **Overall:** **PASS** (failed assertion in `ProductSearchTextTest` excluded per task baseline note; no loop protection triggered).
+
+6. **Product owner feedback**
+   - The Scout `EngineManager` bootstrap issue is covered by automated tests with the package installed: search and indexing tests pass, and route smoke shows no HTTP 500s. The remaining red test is the known search-text normalization expectation (`x-ab` vs accented form), which this task explicitly scopes out; consider fixing that assertion in a separate search-normalization task so the suite goes fully green.
+
+7. **URLs tested**
+   - **N/A — no browser** (CLI-only verification).
+
+8. **Relevant log excerpts**
+   - Historical error (before fix / earlier today): `storage/logs/laravel.log` at `[2026-03-31 09:36:24]` and `[2026-03-31 09:37:01]` — `Target class [Laravel\Scout\EngineManager] does not exist` (source incident).
+   - During this verification window, tail shows **INFO** only, e.g. `[2026-03-31 09:45:00] testing.INFO: catalog_search.fallback_to_database` and `[2026-03-31 09:46:01]` same — **no** `EngineManager` / `BindingResolutionException` lines in that window.

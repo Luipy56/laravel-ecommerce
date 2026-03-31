@@ -22,3 +22,34 @@ While typing continuously in the storefront product search bar, repeated query r
 2. Manual: Open `/products`, type quickly in the header search (debounced live navigation). Confirm **no** red “could not connect to server” toast appears while the list updates normally.
 3. Optional: DevTools Network → throttle to “Slow 3G”, trigger a **real** failed request (e.g. stop server mid-request) and confirm the network error toast **still** appears for genuine failures.
 4. Regression: Smoke another API flow (e.g. add to cart) with network disconnected to ensure error toasts still work when not cancelled.
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** 2026-03-31 10:39:33 UTC (verification run); log window for manual browsing N/A (no browser session).
+
+2. **Environment:** PHP 8.3.6, Node v22.20.0, branch `agentdevelop`. Automated tests use project test config (default `APP_ENV` for PHPUnit).
+
+3. **What was tested (from “What to verify” / Testing instructions):** Automated suite and production front-end build; `routes:smoke`; static verification that the axios response interceptor skips the network toast for request cancellation. Manual items: rapid typing on `/products`, optional Slow 3G / server stop, and offline add-to-cart regression were **not** executed in this environment (no browser / no interactive network throttle).
+
+4. **Results:**
+   - **`php artisan test`:** PASS — exit code 0; 65 passed, 5 skipped (65 passed, 272 assertions).
+   - **`npm run build`:** PASS — exit code 0; Vite build completed (`public/build/assets/*` emitted).
+   - **`php artisan routes:smoke`:** PASS — “All checked GET routes returned a non-500 status.”
+   - **Cancellation handling (code path):** PASS — `resources/js/api.js` emits `errors.network` only when `!err.response && err.request` and the error is **not** classified as canceled (`axios.isCancel`, `ERR_CANCELED`, `CanceledError`).
+   - **Manual: rapid header search, no spurious toast:** NOT VERIFIED — requires browser and human observation (see §7).
+   - **Optional: real failure still shows toast:** NOT VERIFIED — not run.
+   - **Regression: offline add to cart toast:** NOT VERIFIED — not run.
+
+5. **Overall:** **PASS** — All automated checks passed and the implemented fix matches the stated root cause (do not toast on aborted/canceled requests). Manual UX checks remain recommended for a human before release if policy requires full storefront confirmation.
+
+6. **Product owner feedback:** The change is narrow and matches the diagnosis: cancelled catalog requests no longer trigger the global “could not connect” toast. Please spot-check on `/products` with fast typing in the header search to confirm the original UX issue is gone, and optionally repeat under throttled network to ensure real failures still surface a toast.
+
+7. **URLs tested:** **N/A — no browser** (automated verification only).
+
+8. **Relevant log excerpts:** No Laravel log lines were required for this run; evidence is command success above. (Project `storage/logs/laravel.log` may contain unrelated historical entries.)
+
+**Loop protection:** N/A (first verification pass for this change).
+
+**GitHub:** Issue [#8](https://github.com/Luipy56/laravel-ecommerce/issues/8) — label updates (`agent:testing` → `agent:closed` or team equivalent) should be applied in GitHub UI or API per `docs/agent-loop.md` (not performed from this agent).

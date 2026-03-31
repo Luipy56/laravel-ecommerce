@@ -58,3 +58,34 @@ Add **production-ready** Elasticsearch indexing for products:
 3. `php artisan routes:smoke` — no HTTP 500.
 4. **With Elasticsearch (optional):** set `SCOUT_DRIVER=elasticsearch`, `ELASTICSEARCH_HOSTS`, run `php artisan scout:index "App\Models\Product"` then `php artisan scout:import "App\Models\Product"`; verify document count in ES (e.g. `_cat/indices` or Kibana).
 5. **Failed jobs:** misconfigure host or stop ES, save a product with `SCOUT_QUEUE=true` and a worker running; confirm job fails and appears in `failed_jobs` (then fix env and retry).
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** Session started **2026-03-31T10:29:57Z**; verification completed within the same minute. Log window for evidence: **2026-03-31 10:29–10:30 UTC** (approx.).
+
+2. **Environment:** PHP **8.3.6**, Node **v22.20.0**, branch **`agentdevelop`**. PHPUnit uses **`APP_ENV=testing`** (default). No browser or live Elasticsearch cluster in this run.
+
+3. **What was tested (from “What to verify” / Testing instructions):** Automated suite for Scout indexing and Elasticsearch mapping; route smoke; optional live ES index/import and failed-jobs scenarios per instructions §4–5.
+
+4. **Results:**
+   - **`./scripts/git-sync-agent-branch.sh`:** **PASS** — completed successfully (`Already up to date.`).
+   - **`php artisan test` — `ProductScoutIndexingTest`, `ScoutElasticsearchMappingTest` green; `ProductElasticsearchScoutIntegrationTest` skipped unless `ES_TEST_HOST`:** **PASS** — `ScoutElasticsearchMappingTest` (2 tests) and `ProductScoutIndexingTest` (3 tests) passed; `ProductElasticsearchScoutIntegrationTest` skipped with expected message (no `ES_TEST_HOST`). Full suite: **65 passed**, **5 skipped** (includes other skipped tests), exit code **0**.
+   - **`php artisan routes:smoke` — no HTTP 500:** **PASS** — output: `All checked GET routes returned a non-500 status.`, exit code **0**.
+   - **Optional — live ES (`scout:index` / `scout:import`, document count):** **N/A** — not executed; no Elasticsearch instance configured for this verification.
+   - **Optional — failed jobs with misconfigured ES and worker:** **N/A** — not executed; relies on optional live stack.
+
+5. **Overall:** **PASS.** All required automated checks passed; optional manual Elasticsearch steps were not exercised in this environment.
+
+6. **Product owner feedback:** Scout mapping and queue-driven indexing are covered by unit and feature tests without a live cluster, which matches the stated constraint for environments without Elasticsearch. To validate production-like indexing and failure paths end-to-end, run the optional steps against a real ES instance and a queue worker when convenient.
+
+7. **URLs tested:** **N/A — no browser** (API-only / CLI verification).
+
+8. **Relevant log excerpts (last section):**
+
+```
+[2026-03-31 10:29:43] testing.INFO: catalog_search.fallback_to_database {"mode":"full_text","reason":"elasticsearch_unavailable","db_driver":"sqlite"}
+```
+
+(From `storage/logs/laravel.log` during the test window; reflects catalog search tests, not a failure of this task’s automated checks.)

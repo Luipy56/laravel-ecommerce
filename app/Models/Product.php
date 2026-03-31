@@ -68,7 +68,18 @@ class Product extends Model
         if (extension_loaded('intl') && class_exists(\Transliterator::class)) {
             $t = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
             if ($t !== null) {
-                return $t->transliterate($text);
+                $out = $t->transliterate($text);
+                if ($out !== false && $out !== '') {
+                    return $out;
+                }
+            }
+        }
+
+        // CI and minimal PHP builds often omit intl; iconv transliteration matches search expectations.
+        if (function_exists('iconv')) {
+            $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+            if ($converted !== false && $converted !== '') {
+                return $converted;
             }
         }
 

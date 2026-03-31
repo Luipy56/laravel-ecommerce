@@ -64,7 +64,7 @@ Enable **pg_trgm**, **citext**, and **unaccent** on PostgreSQL, add a **normaliz
 
 - **`database/migrations/0001_01_01_000000_create_users_table.php`:** On `pgsql`, `CREATE EXTENSION IF NOT EXISTS` for `pg_trgm`, `citext`, `unaccent`; then `ALTER` `clients.login_email` and `password_reset_tokens.email` to `citext`.
 - **`database/migrations/2026_02_24_095031_create_products_table.php`:** `products.search_text` nullable `text` (maintained in PHP for parity across SQLite/MySQL/PostgreSQL; avoids immutable-generator issues with `unaccent`); on `pgsql`, GIN index `idx_products_search_text_trgm`.
-- **`app/Models/Product.php`:** `saving` hook sets `search_text` via `normalizeSearchText()` (whitespace normalize, optional intl diacritic fold, `mb_strtolower`).
+- **`app/Models/Product.php`:** `saving` hook sets `search_text` via `normalizeSearchText()` (whitespace normalize, intl `Transliterator` when available, else **`iconv` `ASCII//TRANSLIT//IGNORE`** so SQLite/CI without `intl` still folds accents e.g. `X-ÁB` → `x-ab`, then `mb_strtolower`).
 - **`database/seeders/ProductSeeder.php`:** Fills `search_text` before raw `insert` (same helper).
 - **`App\Contracts\RebuildsProductSearchText`**, **`App\Services\ProductSearchTextRebuildService`**, **`products:rebuild-search-text`** Artisan command; binding in **`AppServiceProvider`**.
 - **Tests:** `tests/Feature/ProductSearchTextTest.php` (SQLite + optional pgsql extension check). **Note:** Bizum mail tests now set `payments.checkout_method_keys` explicitly so a restrictive local `.env` does not break CI.
@@ -122,3 +122,27 @@ All checked GET routes returned a non-500 status.
 ```
 
 **Loop protection:** First verification attempt for this task state; no cycle limit reached.
+
+**Coder follow-up (2026-03-31 UTC):** `Product::foldDiacritics()` now falls back to `iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', …)` when `intl` is missing, fixing `ProductSearchTextTest::test_product_saving_sets_normalized_search_text` on hosts without `intl`.
+
+---
+
+### What to verify
+
+- Full PHPUnit suite passes on **SQLite** (default CI).
+- `products.search_text` is normalized (lowercase, Latin accents folded) on save and via `products:rebuild-search-text`.
+- **PostgreSQL-only:** extensions `pg_trgm`, `citext`, `unaccent` exist; GIN index `idx_products_search_text_trgm` on `products.search_text` (optional if a disposable Postgres DB is available).
+
+### How to test
+
+1. `./scripts/git-sync-agent-branch.sh`
+2. `php artisan test` — all tests green; `ProductSearchTextTest` pgsql tests skip unless `DB_CONNECTION=pgsql`.
+3. `php artisan routes:smoke` — no HTTP 500 on GET routes.
+4. **Optional (PostgreSQL):** `php artisan migrate:fresh --seed` exit code 0; in `psql`, `\dx` and `\d+ products` as in original task instructions.
+5. **Optional:** `php artisan test --filter=ProductSearchTextTest` with `pgsql` test DB to run extension/index assertions.
+
+### Pass/fail criteria
+
+- **Pass:** `php artisan test` exit code **0**; `php artisan routes:smoke` reports all non-500 GETs.
+- **Fail:** Any test failure, or route smoke reports 500.
+- PostgreSQL checks are **optional** for SQLite-only CI; they are required only when validating a real `pgsql` environment.

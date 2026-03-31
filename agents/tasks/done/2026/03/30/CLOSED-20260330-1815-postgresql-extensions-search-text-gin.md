@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The task delivered PostgreSQL-only extensions (`pg_trgm`, `citext`, `unaccent`), a `products.search_text` column with a GIN (`gin_trgm_ops`) index on PostgreSQL, application-side normalization and rebuild tooling, and tests; an initial SQLite failure on SKU diacritic folding was fixed in a coder follow-up before final verification.
+- **What was done:** Migrations, `Product` save/rebuild logic, Artisan `products:rebuild-search-text`, seeding, `ProductSearchTextTest`, and related docs/diagram updates per the implementation summary; the tester re-ran the full suite after the folding fix.
+- **What was tested:** Verification round 2 (2026-03-31 UTC): `php artisan test` on SQLite passed (65 passed, 5 skipped, 0 failed); `php artisan routes:smoke` passed; optional PostgreSQL `\dx` / migrate checks were not run in that round.
+- **Why closed:** Required pass criteria met—full test suite green and route smoke green per the second test report.
+- **Closed at (UTC):** 2026-03-31 10:06
+---
+
 # PostgreSQL search foundation: extensions, `search_text`, GIN (pg_trgm)
 
 ## Epic / tracking

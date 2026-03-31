@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Laravel Scout’s `EngineManager` was resolved during `AppServiceProvider::boot` when the package was absent from disk, causing `BindingResolutionException` and failed bootstrap (CLI/web).
+- **What was done:** `AppServiceProvider` now guards Elasticsearch engine registration with `class_exists(EngineManager::class)` so boot does not resolve Scout when the package is missing; with Scout installed, behaviour is unchanged per coder notes.
+- **What was tested:** Tester ran `php artisan test` (64 passed, Scout/ES-related tests green), `php artisan routes:smoke` (no HTTP 500); optional “rename vendor/scout” repro was not run; `ProductSearchTextTest` accent expectation treated as pre-existing per task note.
+- **Why closed:** Overall **PASS** per test report; acceptance criteria met with documented scope for the known `ProductSearchTextTest` case.
+- **Closed at (UTC):** 2026-03-31 09:47
+---
+
 # Scout EngineManager missing at boot (BindingResolutionException)
 
 ## Source

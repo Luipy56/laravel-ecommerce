@@ -146,3 +146,36 @@ All checked GET routes returned a non-500 status.
 - **Pass:** `php artisan test` exit code **0**; `php artisan routes:smoke` reports all non-500 GETs.
 - **Fail:** Any test failure, or route smoke reports 500.
 - PostgreSQL checks are **optional** for SQLite-only CI; they are required only when validating a real `pgsql` environment.
+
+---
+
+## Test report — verification round 2 (2026-03-31 UTC)
+
+1. **Date/time (UTC) and log window:** Testing **2026-03-31 10:05:25 UTC** through **2026-03-31 10:05:38 UTC** (approx.). No errors required reading `storage/logs/laravel.log`.
+
+2. **Environment:** PHP **8.3.6**, Node **v22.20.0**, branch **`agentdevelop`**. PHPUnit default **SQLite** in-memory. **`APP_ENV`** not overridden for this run.
+
+3. **What was tested:** Per **Testing instructions** — full **`php artisan test`** (SQLite CI path); **`php artisan routes:smoke`**. Optional PostgreSQL `\dx` / `\d+ products` / `migrate:fresh --seed` and manual admin API / rebuild **not** run (optional per task). No front-end or checkout changes in scope; **no** `npm run build`.
+
+4. **Results:**
+   - **`php artisan test` (SQLite):** **PASS** — Evidence: exit code **0**; **65 passed**, **5 skipped**, **0 failed**; `ProductSearchTextTest` including `product saving sets normalized search text` passed.
+   - **`php artisan routes:smoke`:** **PASS** — Evidence: stdout `All checked GET routes returned a non-500 status.`, exit **0**.
+   - **PostgreSQL extensions / GIN index / `migrate:fresh --seed`:** **N/A** — optional unless validating a disposable `pgsql` DB; not required for SQLite-only pass criteria.
+   - **Manual admin API / `products:rebuild-search-text`:** **N/A** — automated suite and smoke cover required gates; optional manual steps not executed.
+
+5. **Overall:** **PASS** — All required criteria met (`php artisan test` green; route smoke green).
+
+6. **Product owner feedback:** The earlier `search_text` diacritic folding issue is resolved in CI: product save normalization matches expectations, and the rebuild command tests pass. PostgreSQL extension and GIN index assertions remain skipped on SQLite; validate on a real **`pgsql`** database before production rollout if not already done in staging.
+
+7. **URLs tested:** **N/A — no browser** (no manual HTTP verification in this run).
+
+8. **Relevant log excerpts (last section):**
+
+```
+   Tests:    5 skipped, 65 passed (272 assertions)
+
+$ php artisan routes:smoke
+All checked GET routes returned a non-500 status.
+```
+
+**Loop protection:** Second full verification for this task (prior round failed; coder follow-up applied). Under four failures for the same change; no stop required.

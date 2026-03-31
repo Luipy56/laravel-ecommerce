@@ -61,3 +61,35 @@ Introduce a **clean architecture** search layer (service class, not fat controll
    and confirm **`test_typo_cilimdro_matches_cilindro`** and **`test_mixed_cilindro_3030_k1_returns_sensible_ranked_results`** are **not** skipped and pass.
 4. Seeds were **not** changed for this slice; no `migrate:fresh --seed` required unless you reset the DB for other reasons.
 5. `php artisan routes:smoke` — no new routes in this slice; run for regression.
+
+---
+
+## Test report
+
+**Date/time (UTC):** 2026-03-31 10:21–10:22 (verification run). **Log window (UTC):** 2026-03-31 09:45–10:21 (relevant `catalog_search` lines below).
+
+**Environment:** PHP 8.3.6, Node v22.20.0, git branch `agentdevelop`. PHPUnit runs with `APP_ENV=testing` (phpunit.xml); `php artisan env` for the shell is `local`. Default test DB: **SQLite** `:memory:` per phpunit.xml (`DB_CONNECTION=sqlite`).
+
+**What was tested (from “What to verify” / Testing instructions):** integration branch sync; full `php artisan test`; `ProductSearchServiceTest` behaviour under default SQLite; optional PostgreSQL trigram run; `php artisan routes:smoke` regression; no front-end / Vite (not in scope — **npm run build** not required).
+
+**Results:**
+
+1. `./scripts/git-sync-agent-branch.sh` — **PASS** — `Already up to date.` after fetch.
+2. `php artisan test` (full suite) — **PASS** — 65 passed, 5 skipped, 272 assertions, exit code 0. `ProductSearchServiceTest`: `partial k1…` and `empty query…` passed; `typo cilimdro…` and `mixed cilindro 3030 k1…` skipped (driver not pgsql), matching implementation notes.
+3. PostgreSQL trigram verification (`tests/Feature/ProductSearchServiceTest.php` with `DB_CONNECTION=pgsql` and `DB_TESTING_DATABASE=ecommerce_testing`) — **N/A (blocked)** — connection failed: `FATAL: database "ecommerce_testing" does not exist` on the configured host. Trigram tests were **not** executed end-to-end in this environment; a migrated Postgres test database with `pg_trgm` (per team setup) is required to satisfy instruction 3 literally.
+4. `migrate:fresh --seed` — **N/A** — task states seeds unchanged for this slice; not run.
+5. `php artisan routes:smoke` — **PASS** — `All checked GET routes returned a non-500 status.`
+
+**Overall:** **PASS** — automated suite and route smoke pass; SQLite-level `ProductSearchService` checks behave as expected. PostgreSQL-only tests remain **unverified here** due to missing `ecommerce_testing` database (environment), not a failing assertion.
+
+**Product owner feedback:** Search service tests are green on the default CI-style SQLite matrix, and route smoke is clean. Typo and mixed-query trigram cases are still only proven where PHPUnit uses PostgreSQL with extensions; stand up a dedicated Postgres test DB (or CI job) to close that gap without blocking this slice.
+
+**URLs tested:** **N/A — no browser** (no checkout/payments scope).
+
+**Relevant log excerpts (last section):**
+
+```text
+[2026-03-31 10:21:21] testing.INFO: catalog_search.fallback_to_database {"mode":"full_text","reason":"elasticsearch_unavailable","db_driver":"sqlite"}
+```
+
+(Attempted pgsql test run did not write a successful migration path; failure was at DB connect — `database "ecommerce_testing" does not exist`.)

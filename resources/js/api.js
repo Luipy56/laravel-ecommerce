@@ -49,7 +49,13 @@ api.interceptors.response.use(
     }
 
     if (!err.response && err.request) {
-      emitAppToast(i18n.t('errors.network'), 'error');
+      const canceled =
+        axios.isCancel(err) ||
+        err.code === 'ERR_CANCELED' ||
+        err.name === 'CanceledError';
+      if (!canceled) {
+        emitAppToast(i18n.t('errors.network'), 'error');
+      }
     }
 
     if (status === 401) {

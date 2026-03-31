@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Storefront:** Rapid catalog search no longer shows a misleading “could not connect” toast when React Query aborts a superseded `GET /api/v1/products` request (axios cancellation is no longer treated as a network failure in `resources/js/api.js`).
+
 ### Changed
 
 - Agent pipeline: archived closed Laravel search service PostgreSQL `pg_trgm` task (`agents/tasks/done/2026/03/30/CLOSED-20260330-1825-laravel-search-service-postgresql-trgm.md`).

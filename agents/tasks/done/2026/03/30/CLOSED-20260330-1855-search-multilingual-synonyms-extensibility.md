@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The task delivered configurable search synonym expansion and lightweight multilingual preparation (shared config, SQL/ES integration, locale placeholder docs) aligned with the PostgreSQL + Elasticsearch search platform.
+- **What was done:** Added `config/search_synonyms.php`, `SearchSynonymDictionary`, `ProductSearchService` and Scout Elasticsearch mapping overlay wiring, `config/search_locales.php`, `docs/elasticsearch.md` updates, and PHPUnit coverage noted in the implementation summary.
+- **What was tested:** `php artisan test` passed (65 passed, 5 skipped as expected) and `php artisan routes:smoke` reported no HTTP 500; optional Elasticsearch index rebuild was not run (N/A).
+- **Why closed:** All required tester criteria passed; optional ES verification was explicitly out of scope.
+- **Closed at (UTC):** 2026-03-31 10:14
+---
+
 # Search: synonyms and multilingual preparation (extendable, not over-engineered)
 
 ## Epic / tracking
@@ -48,4 +58,25 @@ Prepare **extension points** for:
 
 ## Test report
 
-- (Tester fills after running the above.)
+1. **Date/time (UTC) and log window:** 2026-03-31 10:13:52 UTC (suite start) through ~10:16 UTC (routes:smoke finished). No separate Laravel log review required for automated CLI verification.
+
+2. **Environment:** PHP 8.3.6, Node v22.20.0, branch `agentdevelop`, `APP_ENV=local`.
+
+3. **What was tested (from “What to verify” / Testing instructions):** Full PHPUnit suite per task; `routes:smoke`; optional Elasticsearch manual path not exercised (documented below).
+
+4. **Results:**
+   - **Git sync before edits:** **PASS** — `./scripts/git-sync-agent-branch.sh` exited 0; `agentdevelop` already up to date with origin.
+   - **`php artisan test` (entire suite):** **PASS** — exit code 0; 65 passed, 5 skipped (Postgres-only / ES integration skips expected on default SQLite).
+   - **`SearchSynonymDictionaryTest`:** **PASS** — all four tests passed (expand token slots, disabled/empty, ES lines/overlay, max expansions truncation).
+   - **`ScoutElasticsearchMappingTest` (synonym overlay):** **PASS** — both tests passed including synonym analyzer overlay.
+   - **`ProductSearchServiceTest` (synonym catalog case):** **PASS** — `synonym group matches alternate term in catalog` passed; Postgres trigram tests skipped as expected without `DB_CONNECTION=pgsql`.
+   - **`php artisan routes:smoke`:** **PASS** — “All checked GET routes returned a non-500 status.”
+   - **Optional Elasticsearch (index recreate + synonym pairs on ES path):** **N/A** — not run (optional per task); no failure.
+
+5. **Overall:** **PASS** (all required criteria met).
+
+6. **Product owner feedback:** Synonym dictionary, mapping overlay, and product search integration are covered by automated tests on this branch, and no route regressions (500s) were observed. Trigram-heavy search cases remain environment-dependent and are skipped under SQLite, which matches the project’s test matrix. Operators who rely on Elasticsearch synonyms should still follow `docs/elasticsearch.md` for index rebuild when changing synonym groups in production.
+
+7. **URLs tested:** **N/A — no browser** (verification was CLI-only).
+
+8. **Relevant log excerpts:** **N/A** — verification did not surface failures; PHPUnit and `routes:smoke` evidence is in command output above.

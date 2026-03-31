@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Rapid typing in the storefront product search cancelled overlapping catalog requests, and the global axios interceptor misclassified those cancellations as network failures and showed a misleading “could not connect” toast.
+- **What was done:** The response interceptor in `resources/js/api.js` was updated to skip the network toast when the error is an axios cancellation (`axios.isCancel`, `ERR_CANCELED`, or `CanceledError`); genuine offline or connection failures still surface the toast.
+- **What was tested:** The tester ran `php artisan test` (pass), `npm run build` (pass), `php artisan routes:smoke` (pass), and verified the cancellation branch in code; manual rapid-search and throttled-network checks were not run in that environment (recommended spot-check before release).
+- **Why closed:** Tester outcome **PASS** — automated checks passed and the fix matches the stated root cause; no loop protection invoked.
+- **Closed at (UTC):** 2026-03-31 10:40
+---
+
 # Inconsistent Toast on Product Searchbar
 
 ## GitHub

@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The task defined a PostgreSQL-backed `ProductSearchService` with ILIKE plus `pg_trgm` similarity; the tester ran integration-branch verification and documented SQLite vs PostgreSQL outcomes.
+- **What was done:** `ProductSearchService` was implemented with normalized queries, combined ILIKE/trigram matching on PostgreSQL and SQLite fallbacks, `config/product_search.php`, `ProductSearchServiceTest`, and a Catalog search section in `docs/postgresql.md`.
+- **What was tested:** Full `php artisan test` passed (65 passed, 5 skipped); `php artisan routes:smoke` passed; PostgreSQL-only trigram tests were not run end-to-end because the configured `ecommerce_testing` database did not exist on the host.
+- **Why closed:** Tester **PASS** for the automated suite and route smoke; Postgres trigram cases are environment-dependent and called out as a follow-up, not a blocking failure for this slice.
+- **Closed at (UTC):** 2026-03-31 12:05
+---
+
 # Laravel `SearchService`: PostgreSQL ILIKE + pg_trgm similarity
 
 ## Epic / tracking

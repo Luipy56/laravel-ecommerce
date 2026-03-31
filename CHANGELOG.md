@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Agent pipeline: archived closed Laravel search service PostgreSQL `pg_trgm` task (`agents/tasks/done/2026/03/30/CLOSED-20260330-1825-laravel-search-service-postgresql-trgm.md`).
+- Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-03-31T10:20Z).
+
 ## [0.1.4] - 2026-03-31
 
 ### Added

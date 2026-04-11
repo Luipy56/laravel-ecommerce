@@ -7,7 +7,6 @@ import { useCart } from '../contexts/CartContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
-import PayPalUserEducation from '../components/payments/PayPalUserEducation';
 import { emitAppToast } from '../toastEvents';
 import { checkoutFormSchema, parseWithZod } from '../validation';
 
@@ -327,9 +326,6 @@ export default function CheckoutPage() {
                     ))}
                 </select>
               </label>
-              {payMethodsReady && !payConfigLoadError && form.payment_method === 'paypal' && payMethods.paypal && (
-                <PayPalUserEducation />
-              )}
             </>
           )}
 
@@ -367,7 +363,6 @@ export default function CheckoutPage() {
         <div className="card bg-base-100 shadow border border-base-300 mt-6">
           <div className="card-body space-y-3">
             <h2 className="card-title text-base">{t('checkout.payment.complete_paypal')}</h2>
-            <PayPalUserEducation variant="compact" />
             <p className="text-sm text-base-content/70">{t('checkout.payment.paypal_help')}</p>
             <PayPalInlineButtons
               clientId={activeCheckout.paypal.client_id}

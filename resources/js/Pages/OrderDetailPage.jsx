@@ -6,7 +6,6 @@ import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
-import PayPalUserEducation from '../components/payments/PayPalUserEducation';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -304,11 +303,6 @@ export default function OrderDetailPage() {
                   ))}
               </select>
             </label>
-            {paymentMethod === 'paypal' && payAvail.paypal && !inlineCheckout?.paypal ? (
-              <div className="mt-4">
-                <PayPalUserEducation context="order" />
-              </div>
-            ) : null}
             <button
               type="submit"
               className="btn btn-primary mt-2"
@@ -322,7 +316,6 @@ export default function OrderDetailPage() {
             </button>
             {inlineCheckout?.paypal && (
               <div className="mt-6 pt-6 border-t border-base-300 space-y-3">
-                <PayPalUserEducation variant="compact" />
                 <p className="text-sm text-base-content/70">{t('checkout.payment.paypal_help')}</p>
                 <PayPalInlineButtons
                   clientId={inlineCheckout.paypal.client_id}

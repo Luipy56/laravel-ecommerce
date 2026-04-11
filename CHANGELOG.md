@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Storefront:** `PayPalUserEducation` (large blue `alert-info` blocks) removed from checkout and order pay; related i18n keys removed. Short `checkout.payment.paypal_help` next to PayPal buttons is unchanged.
+
 ## [0.1.6] - 2026-04-11
 
 ### Changed

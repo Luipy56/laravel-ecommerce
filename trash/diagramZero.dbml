@@ -205,6 +205,13 @@ Table PAYMENTS [note: 'PSP lifecycle: pending until webhook confirms succeeded.'
   paid_at timestamp [null]
 }
 
+Table STRIPE_WEBHOOK_EVENTS [note: 'Processed Stripe webhook event ids (idempotency).'] {
+  id int [pk, increment]
+  stripe_event_id varchar(255) [not null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
 Table ADMINS {
   id int [pk, increment]
   username varchar(255) [not null, unique]

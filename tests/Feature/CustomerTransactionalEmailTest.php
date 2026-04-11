@@ -108,25 +108,23 @@ class CustomerTransactionalEmailTest extends TestCase
         return [$client, $order->fresh()];
     }
 
-    public function test_order_pay_with_simulated_bizum_sends_payment_confirmation_mail(): void
+    public function test_order_pay_with_simulated_card_sends_payment_confirmation_mail(): void
     {
         Mail::fake();
 
         config([
             'services.stripe.key' => '',
             'services.stripe.secret' => '',
-            'services.redsys.merchant_code' => '',
-            'services.redsys.secret_key' => '',
             'app.debug' => true,
             'payments.allow_simulated' => true,
-            'payments.checkout_method_keys' => ['card', 'paypal', 'bizum', 'revolut'],
+            'payments.checkout_method_keys' => ['card', 'paypal'],
         ]);
 
         [$client, $order] = $this->makeClientWithPendingUnpaidOrder();
 
         $this->actingAs($client, 'web');
         $response = $this->postJson('/api/v1/orders/'.$order->id.'/pay', [
-            'payment_method' => 'bizum',
+            'payment_method' => 'card',
         ]);
 
         $response->assertOk();
@@ -137,24 +135,22 @@ class CustomerTransactionalEmailTest extends TestCase
         });
     }
 
-    public function test_checkout_with_simulated_bizum_sends_payment_confirmation_mail(): void
+    public function test_checkout_with_simulated_card_sends_payment_confirmation_mail(): void
     {
         Mail::fake();
 
         config([
             'services.stripe.key' => '',
             'services.stripe.secret' => '',
-            'services.redsys.merchant_code' => '',
-            'services.redsys.secret_key' => '',
             'app.debug' => true,
             'payments.allow_simulated' => true,
-            'payments.checkout_method_keys' => ['card', 'paypal', 'bizum', 'revolut'],
+            'payments.checkout_method_keys' => ['card', 'paypal'],
         ]);
 
         $client = $this->makeClientWithCart(false);
 
         $payload = [
-            'payment_method' => 'bizum',
+            'payment_method' => 'card',
             'shipping_street' => 'Carrer 1',
             'shipping_city' => 'Barcelona',
             'shipping_province' => '',

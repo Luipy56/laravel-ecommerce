@@ -5,10 +5,8 @@ import i18n from 'i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
-import StripeInlinePayment from '../components/payments/StripeInlinePayment';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import PayPalUserEducation from '../components/payments/PayPalUserEducation';
-import RedsysAutoPost from '../components/payments/RedsysAutoPost';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -20,7 +18,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('paypal');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [inlineCheckout, setInlineCheckout] = useState(null);
   const [stripeUiError, setStripeUiError] = useState('');
 
@@ -44,7 +42,7 @@ export default function OrderDetailPage() {
   useEffect(() => {
     if (!order?.payment_methods_available) return;
     const m = order.payment_methods_available;
-    setPaymentMethod((pm) => (m[pm] ? pm : ['paypal', 'card', 'bizum', 'revolut'].find((k) => m[k]) || 'paypal'));
+    setPaymentMethod((pm) => (m[pm] ? pm : ['card', 'paypal'].find((k) => m[k]) || 'card'));
   }, [order?.payment_methods_available, order?.id]);
 
   useEffect(() => {
@@ -80,11 +78,12 @@ export default function OrderDetailPage() {
         return;
       }
       const c = d.payment_checkout;
-      if (c?.gateway === 'stripe' && c.client_secret && c.publishable_key) {
-        setInlineCheckout({
-          orderId: Number(id),
-          stripe: { client_secret: c.client_secret, publishable_key: c.publishable_key },
-        });
+      if (c?.gateway === 'stripe' && c.checkout_url) {
+        window.location.href = c.checkout_url;
+        return;
+      }
+      if (c?.gateway === 'paypal' && c.approval_url) {
+        window.location.href = c.approval_url;
         return;
       }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
@@ -96,17 +95,6 @@ export default function OrderDetailPage() {
             payment_id: c.payment_id,
           },
         });
-        return;
-      }
-      if (c?.gateway === 'redsys' && c.action_url && c.fields) {
-        setInlineCheckout({
-          orderId: Number(id),
-          redsys: { action_url: c.action_url, fields: c.fields },
-        });
-        return;
-      }
-      if (c?.gateway === 'revolut' && c.checkout_url) {
-        window.location.href = c.checkout_url;
         return;
       }
       const r = await api.get(`orders/${id}`);
@@ -146,18 +134,6 @@ export default function OrderDetailPage() {
   if (loading) return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
   if (!order) return <p>{t('common.error')}</p>;
 
-  if (inlineCheckout?.redsys) {
-    return (
-      <div className="mx-auto w-full min-w-0 max-w-3xl">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <PageTitle className="mb-0">{t('shop.order')} #{order.id}</PageTitle>
-          <Link to="/orders" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
-        </div>
-        <RedsysAutoPost actionUrl={inlineCheckout.redsys.action_url} fields={inlineCheckout.redsys.fields} />
-      </div>
-    );
-  }
-
   const statusKey = `shop.status.${order.status}`;
   const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : order.status;
   const shippingAddress = order.addresses?.find((a) => a.type === 'shipping');
@@ -170,7 +146,7 @@ export default function OrderDetailPage() {
   const showInstallationRow = order.installation_requested && order.installation_status === 'priced' && order.installation_price != null;
   const awaitingQuote = order.installation_requested && order.installation_status === 'pending' && order.status === 'awaiting_installation_price';
   const canPay = order.can_pay && !order.has_payment;
-  const payAvail = order.payment_methods_available ?? { card: false, paypal: false, bizum: false, revolut: false };
+  const payAvail = order.payment_methods_available ?? { card: false, paypal: false };
   const paymentsSimulated = !!order.payments_simulated;
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
 
@@ -297,11 +273,6 @@ export default function OrderDetailPage() {
           {t('checkout.payment.stripe_missing_credentials_hint')}
         </div>
       )}
-      {canPay && order.revolut_missing_credentials && (
-        <div role="status" className="alert alert-info mt-4 text-sm">
-          {t('checkout.payment.revolut_missing_credentials_hint')}
-        </div>
-      )}
 
       {canPay && (
         <form onSubmit={handlePay} className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
@@ -314,11 +285,11 @@ export default function OrderDetailPage() {
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 disabled={
-                  !!(inlineCheckout?.stripe || inlineCheckout?.paypal) ||
+                  !!inlineCheckout?.paypal ||
                   (!anyPaymentMethod && !paymentsSimulated)
                 }
               >
-                {['card', 'paypal', 'bizum', 'revolut']
+                {['card', 'paypal']
                   .filter((value) => payAvail[value])
                   .map((value) => (
                     <option key={value} value={value}>
@@ -337,29 +308,12 @@ export default function OrderDetailPage() {
               className="btn btn-primary mt-2"
               disabled={
                 payLoading ||
-                !!(inlineCheckout?.stripe || inlineCheckout?.paypal) ||
+                !!inlineCheckout?.paypal ||
                 (!anyPaymentMethod && !paymentsSimulated)
               }
             >
               {payLoading ? t('common.loading') : t('shop.order.pay_now')}
             </button>
-            {inlineCheckout?.stripe && (
-              <div className="mt-6 pt-6 border-t border-base-300 space-y-3">
-                <p className="text-sm text-base-content/70">{t('checkout.payment.card_help')}</p>
-                <StripeInlinePayment
-                  publishableKey={inlineCheckout.stripe.publishable_key}
-                  clientSecret={inlineCheckout.stripe.client_secret}
-                  orderId={inlineCheckout.orderId}
-                  onSuccess={async () => {
-                    const r = await api.get(`orders/${id}`);
-                    if (r.data.success) setOrder(r.data.data);
-                    setInlineCheckout(null);
-                  }}
-                  onError={(msg) => setStripeUiError(msg)}
-                />
-                {stripeUiError ? <div role="alert" className="alert alert-error text-sm">{stripeUiError}</div> : null}
-              </div>
-            )}
             {inlineCheckout?.paypal && (
               <div className="mt-6 pt-6 border-t border-base-300 space-y-3">
                 <PayPalUserEducation variant="compact" />

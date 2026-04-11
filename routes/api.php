@@ -47,8 +47,6 @@ Route::get('payments/config', [PaymentConfigController::class, 'show']);
 Route::post('personalized-solutions', [PersonalizedSolutionController::class, 'store']);
 
 Route::post('payments/webhooks/stripe', [PaymentWebhookController::class, 'stripe']);
-Route::post('payments/redsys/notify', [PaymentWebhookController::class, 'redsysNotify'])->name('payments.redsys.notify');
-Route::post('payments/webhooks/revolut', [PaymentWebhookController::class, 'revolut']);
 
 /* Cart: guest uses session, auth uses DB; controller branches */
 Route::get('cart', [CartController::class, 'show']);

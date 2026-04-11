@@ -100,6 +100,7 @@ class PayPalPaymentTest extends TestCase
         $a = PaymentCheckoutService::paymentMethodsAvailability();
         $this->assertTrue($a['paypal']);
         $this->assertFalse($a['card']);
+        $this->assertArrayNotHasKey('revolut', $a);
         $this->assertTrue(PaymentCheckoutService::isPaymentMethodAvailable(Payment::METHOD_PAYPAL));
         $this->assertFalse(PaymentCheckoutService::isPaymentMethodAvailable(Payment::METHOD_CARD));
     }
@@ -114,6 +115,13 @@ class PayPalPaymentTest extends TestCase
             'api-m.sandbox.paypal.com/v2/checkout/orders' => Http::response([
                 'id' => 'NEW_ORDER_ID',
                 'status' => 'CREATED',
+                'links' => [
+                    [
+                        'href' => 'https://www.sandbox.paypal.com/checkoutnow?token=NEW_ORDER_ID',
+                        'rel' => 'approve',
+                        'method' => 'GET',
+                    ],
+                ],
             ], 201),
         ]);
 
@@ -146,6 +154,7 @@ class PayPalPaymentTest extends TestCase
         $this->assertSame('NEW_ORDER_ID', $payload['paypal_order_id']);
         $this->assertSame((int) $payment->id, $payload['payment_id']);
         $this->assertSame(self::FAKE_PAYPAL_CLIENT_ID, $payload['client_id']);
+        $this->assertSame('https://www.sandbox.paypal.com/checkoutnow?token=NEW_ORDER_ID', $payload['approval_url']);
     }
 
     public function test_paypal_checkout_starter_reuses_created_order(): void
@@ -158,6 +167,13 @@ class PayPalPaymentTest extends TestCase
             'api-m.sandbox.paypal.com/v2/checkout/orders/EXISTING_ID' => Http::response([
                 'id' => 'EXISTING_ID',
                 'status' => 'CREATED',
+                'links' => [
+                    [
+                        'href' => 'https://www.sandbox.paypal.com/checkoutnow?token=EXISTING_ID',
+                        'rel' => 'approve',
+                        'method' => 'GET',
+                    ],
+                ],
             ], 200),
         ]);
 

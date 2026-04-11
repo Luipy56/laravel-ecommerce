@@ -71,4 +71,17 @@ class PaymentCompletionService
             ]);
         });
     }
+
+    public function markRefunded(Payment $payment): void
+    {
+        DB::transaction(function () use ($payment) {
+            $payment->refresh();
+            if ($payment->status === Payment::STATUS_REFUNDED) {
+                return;
+            }
+            $payment->update([
+                'status' => Payment::STATUS_REFUNDED,
+            ]);
+        });
+    }
 }

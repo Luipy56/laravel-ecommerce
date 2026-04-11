@@ -26,7 +26,10 @@ class PayPalCheckoutStarter implements PaymentCheckoutStarter
             $order = $this->client->getOrder($payment->gateway_reference);
             $status = is_array($order) ? ($order['status'] ?? null) : null;
             if ($status === 'CREATED') {
-                return $this->checkoutPayload($payment, $clientId, $payment->gateway_reference);
+                $order = $this->client->getOrder($payment->gateway_reference);
+                $approvalUrl = is_array($order) ? PayPalClient::approvalUrlFromOrderResponse($order) : null;
+
+                return $this->checkoutPayload($payment, $clientId, $payment->gateway_reference, $approvalUrl);
             }
         }
 
@@ -55,13 +58,15 @@ class PayPalCheckoutStarter implements PaymentCheckoutStarter
             throw new RuntimeException('PayPal create order returned no id.');
         }
 
+        $approvalUrl = PayPalClient::approvalUrlFromOrderResponse($created);
+
         $payment->update([
             'gateway' => Payment::GATEWAY_PAYPAL,
             'gateway_reference' => $paypalOrderId,
             'status' => Payment::STATUS_REQUIRES_ACTION,
         ]);
 
-        return $this->checkoutPayload($payment->fresh(), $clientId, $paypalOrderId);
+        return $this->checkoutPayload($payment->fresh(), $clientId, $paypalOrderId, $approvalUrl);
     }
 
     /**
@@ -69,16 +74,18 @@ class PayPalCheckoutStarter implements PaymentCheckoutStarter
      *     gateway: string,
      *     client_id: string,
      *     paypal_order_id: string,
-     *     payment_id: int
+     *     payment_id: int,
+     *     approval_url: string|null
      * }
      */
-    private function checkoutPayload(Payment $payment, string $clientId, string $paypalOrderId): array
+    private function checkoutPayload(Payment $payment, string $clientId, string $paypalOrderId, ?string $approvalUrl = null): array
     {
         return [
             'gateway' => Payment::GATEWAY_PAYPAL,
             'client_id' => $clientId,
             'paypal_order_id' => $paypalOrderId,
             'payment_id' => (int) $payment->id,
+            'approval_url' => $approvalUrl,
         ];
     }
 }

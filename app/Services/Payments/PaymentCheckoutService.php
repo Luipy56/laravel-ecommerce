@@ -6,8 +6,6 @@ use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Models\Payment;
 use App\Services\Payments\PayPal\PayPalCheckoutStarter;
 use App\Services\Payments\PayPal\PayPalClient;
-use App\Services\Payments\Redsys\RedsysCheckoutStarter;
-use App\Services\Payments\Revolut\RevolutCheckoutStarter;
 use App\Services\Payments\Stripe\StripeCredentials;
 use InvalidArgumentException;
 use RuntimeException;
@@ -17,8 +15,6 @@ class PaymentCheckoutService
     public function __construct(
         private readonly PaymentCheckoutStarter $stripe,
         private readonly PayPalCheckoutStarter $paypal,
-        private readonly RedsysCheckoutStarter $redsys,
-        private readonly RevolutCheckoutStarter $revolut,
         private readonly PaymentCompletionService $completion,
     ) {}
 
@@ -35,8 +31,6 @@ class PaymentCheckoutService
         return match ($method) {
             Payment::METHOD_CARD => $this->stripe,
             Payment::METHOD_PAYPAL => $this->paypal,
-            Payment::METHOD_BIZUM => $this->redsys,
-            Payment::METHOD_REVOLUT => $this->revolut,
             default => throw new InvalidArgumentException('Unsupported payment_method: '.$method),
         };
     }
@@ -52,7 +46,7 @@ class PaymentCheckoutService
     {
         $keys = config('payments.checkout_method_keys');
 
-        return is_array($keys) ? $keys : ['card', 'paypal', 'bizum', 'revolut'];
+        return is_array($keys) ? $keys : ['card', 'paypal'];
     }
 
     /** True when the PSP for this method has real credentials (ignores simulated blanket availability). */
@@ -61,8 +55,6 @@ class PaymentCheckoutService
         return match ($method) {
             Payment::METHOD_CARD => StripeCredentials::areConfigured(),
             Payment::METHOD_PAYPAL => PayPalClient::envCredentialsPresent(),
-            Payment::METHOD_BIZUM => filled(config('services.redsys.merchant_code')) && filled(config('services.redsys.secret_key')),
-            Payment::METHOD_REVOLUT => filled(config('services.revolut.api_key')),
             default => false,
         };
     }
@@ -94,21 +86,6 @@ class PaymentCheckoutService
     }
 
     /**
-     * Revolut is whitelisted but REVOLUT_MERCHANT_API_KEY is missing and simulated checkout is off.
-     */
-    public static function revolutMissingCredentialsForStorefront(): bool
-    {
-        if (! in_array(Payment::METHOD_REVOLUT, self::checkoutMethodKeysFromConfig(), true)) {
-            return false;
-        }
-        if (self::allowSimulatedPayments()) {
-            return false;
-        }
-
-        return ! self::methodHasRealProviderCredentials(Payment::METHOD_REVOLUT);
-    }
-
-    /**
      * When simulated mode is on, skip the PSP only if that method has no real credentials.
      * PayPal is never simulated: without credentials it stays unavailable; with credentials the SDK must run.
      */
@@ -123,33 +100,29 @@ class PaymentCheckoutService
     }
 
     /**
-     * @return array{card: bool, paypal: bool, bizum: bool, revolut: bool, simulated: bool}
+     * @return array{card: bool, paypal: bool, simulated: bool}
      */
     private static function paymentMethodsBaseAvailability(): array
     {
         $simulated = self::allowSimulatedPayments();
         $stripeOk = $simulated || StripeCredentials::areConfigured();
         $paypalOk = PayPalClient::envCredentialsPresent();
-        $redsysOk = $simulated || (filled(config('services.redsys.merchant_code')) && filled(config('services.redsys.secret_key')));
-        $revolutOk = $simulated || filled(config('services.revolut.api_key'));
 
         return [
             'card' => $stripeOk,
             'paypal' => $paypalOk,
-            'bizum' => $redsysOk,
-            'revolut' => $revolutOk,
             'simulated' => $simulated,
         ];
     }
 
     /**
-     * @param  array{card: bool, paypal: bool, bizum: bool, revolut: bool, simulated: bool}  $base
-     * @return array{card: bool, paypal: bool, bizum: bool, revolut: bool, simulated: bool}
+     * @param  array{card: bool, paypal: bool, simulated: bool}  $base
+     * @return array{card: bool, paypal: bool, simulated: bool}
      */
     private static function applyCheckoutMethodWhitelist(array $base): array
     {
         $allowed = self::checkoutMethodKeysFromConfig();
-        foreach (['card', 'paypal', 'bizum', 'revolut'] as $k) {
+        foreach (['card', 'paypal'] as $k) {
             if (! in_array($k, $allowed, true)) {
                 $base[$k] = false;
             }
@@ -161,7 +134,7 @@ class PaymentCheckoutService
     /**
      * Storefront + API: credential/simulated availability intersected with PAYMENTS_CHECKOUT_METHODS.
      *
-     * @return array{card: bool, paypal: bool, bizum: bool, revolut: bool, simulated: bool}
+     * @return array{card: bool, paypal: bool, simulated: bool}
      */
     public static function paymentMethodsAvailability(): array
     {
@@ -175,8 +148,6 @@ class PaymentCheckoutService
         return match ($method) {
             Payment::METHOD_CARD => $a['card'],
             Payment::METHOD_PAYPAL => $a['paypal'],
-            Payment::METHOD_BIZUM => $a['bizum'],
-            Payment::METHOD_REVOLUT => $a['revolut'],
             default => false,
         };
     }

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const PAYMENT_METHODS = z.enum(['card', 'paypal', 'bizum', 'revolut']);
+const PAYMENT_METHODS = z.enum(['card', 'paypal']);
 
 /** Optional phone: empty or international-style with at least 6 digits. */
 export const optionalPhoneString = z

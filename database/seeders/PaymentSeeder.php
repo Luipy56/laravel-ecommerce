@@ -30,9 +30,8 @@ class PaymentSeeder extends Seeder
                 continue;
             }
             $gateway = match ($meta['payment_method']) {
-                'bizum' => Payment::GATEWAY_REDSYS,
                 'paypal' => Payment::GATEWAY_PAYPAL,
-                'card' => Payment::GATEWAY_STRIPE,
+                'bizum', 'card' => Payment::GATEWAY_STRIPE,
                 default => Payment::GATEWAY_STRIPE,
             };
             DB::table('payments')->insert([

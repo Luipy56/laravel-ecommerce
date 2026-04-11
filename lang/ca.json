@@ -64,6 +64,7 @@
     "shop.payment.paypal_capture_failed": "No s'ha pogut confirmar el pagament amb PayPal. Torna-ho a provar o contacta'ns.",
     "shop.payment.paypal_oauth_failed": "PayPal ha rebutjat les credencials del servidor (Client ID o Secret incorrectes, o app Live en mode Sandbox). Revisa PAYPAL_CLIENT_ID, PAYPAL_SECRET i PAYPAL_MODE al .env i torna a copiar els valors complets des del panell de desenvolupador de PayPal.",
     "shop.payment.paypal_credentials_format_invalid": "PAYPAL_CLIENT_ID sembla incomplet: a PayPal sol ser una cadena llarga (~80 caràcters). Copia el Client ID complet des d'Apps & Credentials (Sandbox o Live) i el Secret corresponent.",
+    "shop.checkout_stripe_product": "Comanda #:id",
 
     "validation.required": "Aquest camp és obligatori.",
     "validation.email": "El correu electrònic no és vàlid.",

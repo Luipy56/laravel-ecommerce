@@ -136,6 +136,23 @@ class PayPalClient
     }
 
     /**
+     * @param  array<string, mixed>  $order  PayPal checkout order JSON (v2).
+     */
+    public static function approvalUrlFromOrderResponse(array $order): ?string
+    {
+        foreach ($order['links'] ?? [] as $link) {
+            if (! is_array($link)) {
+                continue;
+            }
+            if (($link['rel'] ?? '') === 'approve' && isset($link['href']) && is_string($link['href']) && $link['href'] !== '') {
+                return $link['href'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Capture a PayPal order. On duplicate capture, fetches the order and returns it if already COMPLETED.
      *
      * @return array<string, mixed>

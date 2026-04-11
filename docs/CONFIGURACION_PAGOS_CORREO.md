@@ -8,10 +8,8 @@ La aplicación no muestra formularios “del banco” genéricos en vacío: cada
 
 | Método en la tienda | Proveedor real | Comportamiento cuando está bien configurado |
 |---------------------|----------------|---------------------------------------------|
-| Tarjeta             | **Stripe** (`STRIPE_KEY` + `STRIPE_SECRET`) | Tras iniciar el pago, aparece el bloque de Stripe (elemento embebido) en la misma página para introducir la tarjeta. |
-| PayPal              | **PayPal REST** (`PAYPAL_CLIENT_ID` + `PAYPAL_SECRET`, `PAYPAL_MODE=sandbox` o `live`) | Tras iniciar el pago, aparecen los botones de PayPal (SDK JavaScript: Smart Payment Buttons). La interfaz de aprobación suele ser una **ventana emergente o capa in-context** de PayPal, no siempre una pestaña nueva; si el navegador bloquea pop-ups, el SDK puede pasar a **redirección a paypal.com**. La captura se confirma en el servidor (`POST /api/v1/payments/paypal/capture`) **después** de que el comprador complete el flujo en PayPal. |
-| Bizum               | **Redsys** (`REDSYS_MERCHANT_CODE` + `REDSYS_SECRET_KEY`, más terminal y entorno) | Redirección al TPV / pasarela del banco (formulario automático). |
-| Revolut             | **Revolut Merchant** (`REVOLUT_MERCHANT_API_KEY`) | Redirección a la URL de pago de Revolut. |
+| Tarjeta (etiqueta amplia: incluye Bizum y monederos donde Stripe lo permita en ES) | **Stripe Checkout** (`STRIPE_KEY` + `STRIPE_SECRET`) | Tras crear el pedido, el navegador **redirige** a la página alojada de Stripe. El pedido pasa a pagado cuando el webhook `POST /api/v1/payments/webhooks/stripe` procesa `checkout.session.completed` con firma válida (`STRIPE_WEBHOOK_SECRET`). Opcional: `STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES` (p. ej. `card,bizum`). |
+| PayPal              | **PayPal REST** (`PAYPAL_CLIENT_ID` + `PAYPAL_SECRET`, `PAYPAL_MODE=sandbox` o `live`) | Tras iniciar el pago, si la API devuelve enlace de aprobación, el navegador **redirige** a PayPal; si no, se muestran los Smart Payment Buttons en la tienda. La captura se confirma en el servidor (`POST /api/v1/payments/paypal/capture`) **después** de que el comprador complete el flujo en PayPal. |
 
 Si faltan credenciales, el listado de métodos en checkout y en el pedido se acorta o queda vacío, y las peticiones `POST …/orders/.../pay` pueden responder **422** con código `payment_method_not_configured`. Los mensajes tipo “Stripe is not configured” o “PayPal is not configured” indican falta de variables en `.env`, no un fallo del navegador. Puedes comprobar OAuth de PayPal con `php artisan paypal:test-credentials` (tras configurar `PAYPAL_*`).
 
@@ -19,22 +17,20 @@ Si faltan credenciales, el listado de métodos en checkout y en el pedido se aco
 
 Copia desde `.env.example` y rellena según el proveedor que uses:
 
-- **Stripe:** `STRIPE_KEY`, `STRIPE_SECRET`, y en producción `STRIPE_WEBHOOK_SECRET` para confirmar pagos de forma fiable vía webhook.
+- **Stripe:** `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET` (obligatorio en producción para marcar pedidos como pagados de forma fiable). Opcional: `STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES` (por defecto en código: `card,bizum`; ajustar según cuenta y país).
 - **PayPal:** `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_MODE` (`sandbox` o `live`).
-- **Redsys:** `REDSYS_MERCHANT_CODE`, `REDSYS_SECRET_KEY`, `REDSYS_TERMINAL` (por defecto `001`), `REDSYS_ENVIRONMENT` (`test` o producción según contrato).
-- **Revolut:** `REVOLUT_MERCHANT_API_KEY`, `REVOLUT_SANDBOX`, `REVOLUT_API_VERSION`, y opcionalmente `REVOLUT_WEBHOOK_SECRET`.
 
 Tras cambiar `.env`, reinicia PHP-FPM / el contenedor o `php artisan config:clear` según tu despliegue.
 
 ### Limitar métodos en la tienda (`PAYMENTS_CHECKOUT_METHODS`)
 
-Por defecto el checkout ofrece **card, paypal, bizum, revolut** (según credenciales y simulación). Para mostrar y aceptar **solo algunos** (por ejemplo solo PayPal), define en `.env`:
+Por defecto el checkout ofrece **card** y **paypal** (según credenciales y simulación). Para mostrar y aceptar **solo uno** (por ejemplo solo PayPal), define en `.env`:
 
 ```env
 PAYMENTS_CHECKOUT_METHODS=paypal
 ```
 
-Valores válidos: `card`, `paypal`, `bizum`, `revolut` (separados por comas). Los tokens inválidos se ignoran; si la lista queda vacía, se usan los cuatro. Las peticiones con un método fuera de la lista reciben error de validación.
+Valores válidos: `card`, `paypal` (separados por comas). Los tokens inválidos se ignoran; si la lista queda vacía, se usan ambos. Las peticiones con un método fuera de la lista reciben error de validación.
 
 ### Desarrollo local sin PSP real
 
@@ -50,7 +46,7 @@ También puedes poner `PAYMENTS_ALLOW_SIMULATED=true` aunque no sea necesario en
 
 **No uses simulación en producción** (`APP_DEBUG=false`; en producción `APP_ENV` no debe ser `local`).
 
-El endpoint público `GET /api/v1/payments/config` expone qué métodos el storefront puede usar (ya filtrados por `PAYMENTS_CHECKOUT_METHODS` y credenciales). Además incluye banderas informativas (operador / integración): `paypal_missing_credentials`, `stripe_missing_credentials` y `revolut_missing_credentials` son **true** cuando ese método está en `PAYMENTS_CHECKOUT_METHODS` pero faltan credenciales reales **y** la simulación de checkout no cubre el vacío (`PAYMENTS_ALLOW_SIMULATED=false` o entorno no local sin simulación). PayPal sigue sin simularse nunca: sin `PAYPAL_*`, `paypal_missing_credentials` puede ser true aunque otros métodos estén simulados. La ficha de pedido (`GET /api/v1/orders/{id}`) repite esas tres banderas junto a `payment_methods_available` para el mismo contexto al pagar desde el pedido.
+El endpoint público `GET /api/v1/payments/config` expone qué métodos el storefront puede usar (ya filtrados por `PAYMENTS_CHECKOUT_METHODS` y credenciales). Incluye banderas informativas: `paypal_missing_credentials` y `stripe_missing_credentials` son **true** cuando ese método está en `PAYMENTS_CHECKOUT_METHODS` pero faltan credenciales reales **y** la simulación de checkout no cubre el vacío (`PAYMENTS_ALLOW_SIMULATED=false` o entorno no local sin simulación). PayPal no se simula nunca: sin `PAYPAL_*`, `paypal_missing_credentials` puede ser true aunque la tarjeta esté simulada. La ficha de pedido (`GET /api/v1/orders/{id}`) repite esas banderas junto a `payment_methods_available` para el mismo contexto al pagar desde el pedido.
 
 ### PayPal Developer Dashboard y actividad
 

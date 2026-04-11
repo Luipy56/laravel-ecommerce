@@ -21,11 +21,12 @@ return [
 
     /*
     | Comma-separated payment_method keys exposed on the storefront and accepted by checkout/pay.
-    | Valid: card, paypal, bizum, revolut. Example: PAYMENTS_CHECKOUT_METHODS=paypal
-    | Invalid tokens are ignored; if the list is empty after parsing, all four are allowed.
+    | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal.
+    | Example: PAYMENTS_CHECKOUT_METHODS=paypal
+    | Invalid tokens are ignored; if the list is empty after parsing, card and paypal are allowed.
     */
     'checkout_method_keys' => (function () {
-        $valid = ['card', 'paypal', 'bizum', 'revolut'];
+        $valid = ['card', 'paypal'];
         $raw = env('PAYMENTS_CHECKOUT_METHODS');
         if ($raw === null || trim((string) $raw) === '') {
             return $valid;
@@ -39,6 +40,23 @@ return [
         }
 
         return $out !== [] ? array_values(array_unique($out)) : $valid;
+    })(),
+
+    /*
+    | Stripe Checkout Session payment_method_types (e.g. card, bizum for Spain). Comma-separated in .env:
+    | STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES=card,bizum
+    */
+    'stripe_checkout_payment_method_types' => (function () {
+        $raw = env('STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES', 'card,bizum');
+        $out = [];
+        foreach (explode(',', (string) $raw) as $part) {
+            $k = trim($part);
+            if ($k !== '') {
+                $out[] = $k;
+            }
+        }
+
+        return $out !== [] ? array_values(array_unique($out)) : ['card', 'bizum'];
     })(),
 
 ];

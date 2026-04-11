@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use App\Models\StripeWebhookEvent;
 use App\Services\Payments\PaymentCompletionService;
-use App\Services\Payments\Redsys\RedsysSignature;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Stripe\Charge;
+use Stripe\Checkout\Session as StripeCheckoutSession;
 use Stripe\Event;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\PaymentIntent as StripePaymentIntent;
@@ -40,29 +44,139 @@ class PaymentWebhookController extends Controller
         }
 
         match ($event->type) {
+            'checkout.session.completed' => $this->handleCheckoutSessionCompleted($event),
             'payment_intent.succeeded' => $this->handleStripeIntentSucceeded($event),
             'payment_intent.payment_failed' => $this->handleStripeIntentFailed($event),
             'payment_intent.canceled' => $this->handleStripeIntentCanceled($event),
+            'charge.refunded' => $this->handleChargeRefunded($event),
             default => null,
         };
 
         return response('ok', 200);
     }
 
+    private function alreadyProcessedStripeEvent(string $eventId): bool
+    {
+        return $eventId !== '' && StripeWebhookEvent::query()->where('stripe_event_id', $eventId)->exists();
+    }
+
+    private function recordStripeEventProcessed(string $eventId): void
+    {
+        if ($eventId === '') {
+            return;
+        }
+        try {
+            StripeWebhookEvent::query()->create(['stripe_event_id' => $eventId]);
+        } catch (\Illuminate\Database\QueryException) {
+            // Concurrent duplicate delivery; safe to ignore.
+        }
+    }
+
+    private function handleCheckoutSessionCompleted(Event $event): void
+    {
+        if ($this->alreadyProcessedStripeEvent($event->id)) {
+            return;
+        }
+
+        $session = $event->data->object;
+        if (! $session instanceof StripeCheckoutSession) {
+            Log::info('stripe.webhook.unexpected_session_shape', ['event_id' => $event->id]);
+
+            return;
+        }
+
+        if (($session->payment_status ?? '') !== 'paid') {
+            return;
+        }
+
+        $payment = $this->findPaymentForStripeSession($session);
+        if (! $payment) {
+            Log::warning('stripe.webhook.session_payment_not_found', [
+                'event_id' => $event->id,
+                'session_id' => $session->id ?? null,
+            ]);
+
+            return;
+        }
+
+        $expectedCents = (int) round((float) $payment->amount * 100);
+        $total = (int) ($session->amount_total ?? 0);
+        if ($total > 0 && $total !== $expectedCents) {
+            Log::warning('stripe.webhook.session_amount_mismatch', [
+                'event_id' => $event->id,
+                'payment_id' => $payment->id,
+                'expected_cents' => $expectedCents,
+                'session_total_cents' => $total,
+            ]);
+
+            return;
+        }
+
+        DB::transaction(function () use ($payment, $session, $event): void {
+            $this->completion->markSucceeded($payment);
+            $this->recordStripeEventProcessed($event->id);
+
+            $payment->refresh();
+            $pi = $session->payment_intent;
+            if (is_string($pi) && $pi !== '') {
+                $meta = $payment->metadata ?? [];
+                $meta['stripe_payment_intent_id'] = $pi;
+                $payment->update(['metadata' => $meta]);
+            }
+        });
+
+        Log::info('stripe.webhook.checkout_session_completed', [
+            'event_id' => $event->id,
+            'payment_id' => $payment->id,
+            'order_id' => $payment->order_id,
+        ]);
+    }
+
+    private function findPaymentForStripeSession(StripeCheckoutSession $session): ?Payment
+    {
+        $paymentId = $session->metadata['payment_id'] ?? null;
+        if (is_string($paymentId) && $paymentId !== '') {
+            $p = Payment::query()->find((int) $paymentId);
+            if ($p && $p->gateway === Payment::GATEWAY_STRIPE && $p->gateway_reference === $session->id) {
+                return $p;
+            }
+        }
+
+        return Payment::query()
+            ->where('gateway', Payment::GATEWAY_STRIPE)
+            ->where('gateway_reference', $session->id)
+            ->first();
+    }
+
     private function handleStripeIntentSucceeded(Event $event): void
     {
+        if ($this->alreadyProcessedStripeEvent($event->id)) {
+            return;
+        }
+
         $intent = $event->data->object;
         if (! $intent instanceof StripePaymentIntent) {
             return;
         }
         $payment = $this->findStripePayment($intent);
         if ($payment) {
-            $this->completion->markSucceeded($payment);
+            DB::transaction(function () use ($payment, $event): void {
+                $this->completion->markSucceeded($payment);
+                $this->recordStripeEventProcessed($event->id);
+            });
+            Log::info('stripe.webhook.payment_intent_succeeded', [
+                'event_id' => $event->id,
+                'payment_id' => $payment->id,
+            ]);
         }
     }
 
     private function handleStripeIntentFailed(Event $event): void
     {
+        if ($this->alreadyProcessedStripeEvent($event->id)) {
+            return;
+        }
+
         $intent = $event->data->object;
         if (! $intent instanceof StripePaymentIntent) {
             return;
@@ -70,23 +184,69 @@ class PaymentWebhookController extends Controller
         $payment = $this->findStripePayment($intent);
         if ($payment) {
             $lastError = $intent->last_payment_error;
-            $this->completion->markFailed(
-                $payment,
-                is_object($lastError) ? ($lastError->code ?? 'failed') : 'failed',
-                is_object($lastError) ? ($lastError->message ?? null) : null,
-            );
+            DB::transaction(function () use ($payment, $intent, $event, $lastError): void {
+                $this->completion->markFailed(
+                    $payment,
+                    is_object($lastError) ? ($lastError->code ?? 'failed') : 'failed',
+                    is_object($lastError) ? ($lastError->message ?? null) : null,
+                );
+                $this->recordStripeEventProcessed($event->id);
+            });
         }
     }
 
     private function handleStripeIntentCanceled(Event $event): void
     {
+        if ($this->alreadyProcessedStripeEvent($event->id)) {
+            return;
+        }
+
         $intent = $event->data->object;
         if (! $intent instanceof StripePaymentIntent) {
             return;
         }
         $payment = $this->findStripePayment($intent);
         if ($payment) {
-            $this->completion->markCanceled($payment);
+            DB::transaction(function () use ($payment, $event): void {
+                $this->completion->markCanceled($payment);
+                $this->recordStripeEventProcessed($event->id);
+            });
+        }
+    }
+
+    private function handleChargeRefunded(Event $event): void
+    {
+        if ($this->alreadyProcessedStripeEvent($event->id)) {
+            return;
+        }
+
+        $charge = $event->data->object;
+        if (! $charge instanceof Charge) {
+            return;
+        }
+
+        $intentId = is_string($charge->payment_intent) ? $charge->payment_intent : null;
+        if ($intentId === null || $intentId === '') {
+            return;
+        }
+
+        $payment = Payment::query()
+            ->where('gateway', Payment::GATEWAY_STRIPE)
+            ->where(function ($q) use ($intentId) {
+                $q->where('gateway_reference', $intentId)
+                    ->orWhere('metadata->stripe_payment_intent_id', $intentId);
+            })
+            ->first();
+
+        if ($payment) {
+            DB::transaction(function () use ($payment, $event): void {
+                $this->completion->markRefunded($payment);
+                $this->recordStripeEventProcessed($event->id);
+            });
+            Log::info('stripe.webhook.charge_refunded', [
+                'event_id' => $event->id,
+                'payment_id' => $payment->id,
+            ]);
         }
     }
 
@@ -95,8 +255,13 @@ class PaymentWebhookController extends Controller
         $paymentId = $intent->metadata['payment_id'] ?? null;
         if ($paymentId !== null && $paymentId !== '') {
             $p = Payment::query()->find((int) $paymentId);
-            if ($p && $p->gateway_reference === $intent->id) {
-                return $p;
+            if ($p && $p->gateway === Payment::GATEWAY_STRIPE) {
+                if ($p->gateway_reference === $intent->id) {
+                    return $p;
+                }
+                if (is_string($p->gateway_reference) && str_starts_with($p->gateway_reference, 'cs_')) {
+                    return $p;
+                }
             }
         }
 
@@ -104,104 +269,5 @@ class PaymentWebhookController extends Controller
             ->where('gateway', Payment::GATEWAY_STRIPE)
             ->where('gateway_reference', $intent->id)
             ->first();
-    }
-
-    /**
-     * Redsys server-to-server notification (POST with Ds_* fields).
-     */
-    public function redsysNotify(Request $request): SymfonyResponse
-    {
-        $secretKey = config('services.redsys.secret_key');
-        if (! is_string($secretKey) || $secretKey === '') {
-            return response('Redsys not configured', 503);
-        }
-
-        $version = $request->input('Ds_SignatureVersion');
-        $parameters = $request->input('Ds_MerchantParameters');
-        $signature = $request->input('Ds_Signature');
-
-        if (! is_string($parameters) || ! is_string($signature)) {
-            return response('Bad request', 400);
-        }
-
-        if ($version !== 'HMAC_SHA256_V1') {
-            return response('Unsupported signature version', 400);
-        }
-
-        if (! RedsysSignature::verifyResponse($parameters, $signature, $secretKey)) {
-            return response('Invalid signature', 400);
-        }
-
-        $data = RedsysSignature::decodeMerchantParameters($parameters);
-        $responseCode = $data['Ds_Response'] ?? $data['DS_RESPONSE'] ?? $data['ds_Response'] ?? null;
-        $order = $data['Ds_Order'] ?? $data['DS_ORDER'] ?? $data['ds_Order'] ?? $data['DS_MERCHANT_ORDER'] ?? null;
-
-        if (! is_string($order)) {
-            return response('Missing order', 400);
-        }
-
-        $payment = Payment::query()
-            ->where('gateway', Payment::GATEWAY_REDSYS)
-            ->where('gateway_reference', $order)
-            ->first();
-
-        if (! $payment) {
-            return response('Payment not found', 404);
-        }
-
-        if (is_string($responseCode) && strlen($responseCode) >= 4) {
-            $codeNum = (int) substr($responseCode, 0, 4);
-            if ($codeNum <= 99) {
-                $this->completion->markSucceeded($payment);
-            } else {
-                $this->completion->markFailed($payment, $responseCode, 'Redsys declined');
-            }
-        }
-
-        return response('OK', 200);
-    }
-
-    /**
-     * Revolut Merchant webhook (simplified: JSON body with order_id and state).
-     */
-    public function revolut(Request $request): SymfonyResponse
-    {
-        $whSecret = config('services.revolut.webhook_secret');
-        if (! is_string($whSecret) || $whSecret === '') {
-            return response('Webhook not configured', 503);
-        }
-
-        $payload = $request->getContent();
-        $sigHeader = $request->header('Revolut-Signature', '');
-        $provided = null;
-        if (preg_match('/v1=([^,]+)/', $sigHeader, $m)) {
-            $provided = trim($m[1]);
-        }
-        $expected = hash_hmac('sha256', $payload, $whSecret);
-        if ($provided === null || ! hash_equals($expected, $provided)) {
-            return response('Invalid signature', 401);
-        }
-
-        $body = $request->json()->all();
-        $orderId = $body['order_id'] ?? $body['id'] ?? null;
-        $state = $body['state'] ?? $body['status'] ?? null;
-
-        if (! is_string($orderId)) {
-            return response('ok', 200);
-        }
-
-        $payment = Payment::query()
-            ->where('gateway', Payment::GATEWAY_REVOLUT)
-            ->where('gateway_reference', $orderId)
-            ->first();
-
-        if ($payment && ($state === 'completed' || $state === 'COMPLETED')) {
-            $this->completion->markSucceeded($payment);
-        }
-        if ($payment && ($state === 'failed' || $state === 'FAILED' || $state === 'cancelled')) {
-            $this->completion->markFailed($payment, (string) $state, null);
-        }
-
-        return response('ok', 200);
     }
 }

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Payments:** Checkout uses **Stripe Checkout** (hosted redirect) for card/wallets/Bizum (configurable `STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES`); PayPal exposes **`approval_url`** when the REST order includes an approve link (redirect before Smart Buttons). Stripe webhooks handle **`checkout.session.completed`** with idempotency (`stripe_webhook_events` table); Redsys/Revolut removed from storefront and public webhook routes. `PAYMENTS_CHECKOUT_METHODS` accepts only `card` and `paypal`.
 - **Storefront:** Product catalog (`/products`, `/categories/:id/products`) uses **infinite scroll** (incremental `page` loads via Intersection Observer) instead of prev/next pagination; legacy `?page=` query params are ignored/stripped.
 - Agent pipeline: archived closed Laravel search service PostgreSQL `pg_trgm` task (`agents/tasks/done/2026/03/30/CLOSED-20260330-1825-laravel-search-service-postgresql-trgm.md`).
 - Agent pipeline: archived closed Elasticsearch Scout mapping / queue sync task and catalog search API task (Elasticsearch primary, PostgreSQL fallback) (`agents/tasks/done/2026/03/30/CLOSED-20260330-1835-elasticsearch-scout-mapping-queue-sync.md`, `agents/tasks/done/2026/03/30/CLOSED-20260330-1845-search-api-elasticsearch-primary-postgresql-fallback.md`).

@@ -85,8 +85,8 @@ class HistoricalSalesSeeder extends Seeder
 
             $method = $paymentMethods[$idx % count($paymentMethods)];
             $gateway = match ($method) {
-                'bizum' => Payment::GATEWAY_REDSYS,
                 'paypal' => Payment::GATEWAY_PAYPAL,
+                'bizum', 'card' => Payment::GATEWAY_STRIPE,
                 default => Payment::GATEWAY_STRIPE,
             };
             DB::table('payments')->insert([

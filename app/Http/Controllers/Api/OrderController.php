@@ -321,7 +321,7 @@ class OrderController extends Controller
         $order->load(['lines.product', 'lines.pack', 'addresses', 'payments']);
 
         $payMethods = PaymentCheckoutService::paymentMethodsAvailability();
-        $anyPayMethod = $payMethods['card'] || $payMethods['paypal'] || $payMethods['bizum'] || $payMethods['revolut'];
+        $anyPayMethod = $payMethods['card'] || $payMethods['paypal'];
 
         $lines = $order->lines->map(fn ($l) => [
             'id' => $l->id,
@@ -354,13 +354,10 @@ class OrderController extends Controller
                 'payment_methods_available' => [
                     'card' => $payMethods['card'],
                     'paypal' => $payMethods['paypal'],
-                    'bizum' => $payMethods['bizum'],
-                    'revolut' => $payMethods['revolut'],
                 ],
                 'payments_simulated' => $payMethods['simulated'],
                 'paypal_missing_credentials' => PaymentCheckoutService::paypalMissingCredentialsForStorefront(),
                 'stripe_missing_credentials' => PaymentCheckoutService::stripeMissingCredentialsForStorefront(),
-                'revolut_missing_credentials' => PaymentCheckoutService::revolutMissingCredentialsForStorefront(),
                 'local_checkout_needs_debug' => app()->environment('local') && ! $payMethods['simulated'] && ! $anyPayMethod,
                 'payments' => $order->payments->map(fn (Payment $p) => [
                     'id' => $p->id,

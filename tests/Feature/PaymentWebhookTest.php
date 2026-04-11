@@ -23,7 +23,7 @@ class PaymentWebhookTest extends TestCase
     }
 
     /**
-     * Raw JSON body (required for Stripe/Revolut signature verification). Laravel has no TestCase::withBody().
+     * Raw JSON body (required for Stripe signature verification). Laravel has no TestCase::withBody().
      */
     private function postRawWebhook(string $uri, string $rawBody, array $headers = []): TestResponse
     {
@@ -129,18 +129,18 @@ class PaymentWebhookTest extends TestCase
             ->assertOk();
 
         $this->assertSame(1, Payment::query()->where('order_id', $order->id)->where('status', Payment::STATUS_SUCCEEDED)->count());
+        $this->assertSame(1, \App\Models\StripeWebhookEvent::query()->where('stripe_event_id', 'evt_test_webhook_1')->count());
     }
 
-    public function test_redsys_notify_marks_succeeded_with_valid_signature(): void
+    public function test_stripe_checkout_session_completed_marks_payment_succeeded(): void
     {
-        $key = random_bytes(24);
-        $secretB64 = base64_encode($key);
-        config(['services.redsys.secret_key' => $secretB64]);
+        $secret = 'test_stripe_wh_secret_cs';
+        config(['services.stripe.webhook_secret' => $secret]);
 
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'buyer2@example.test',
+            'login_email' => 'buyer_cs@example.test',
             'password' => bcrypt('password'),
             'is_active' => true,
         ]);
@@ -154,82 +154,48 @@ class PaymentWebhookTest extends TestCase
             'installation_requested' => false,
         ]);
 
-        $orderRef = '123456789012';
-
         $payment = Payment::query()->create([
             'order_id' => $order->id,
-            'amount' => 50.00,
-            'payment_method' => Payment::METHOD_BIZUM,
+            'amount' => 99.50,
+            'payment_method' => Payment::METHOD_CARD,
             'status' => Payment::STATUS_REQUIRES_ACTION,
-            'gateway' => Payment::GATEWAY_REDSYS,
+            'gateway' => Payment::GATEWAY_STRIPE,
             'currency' => 'EUR',
-            'gateway_reference' => $orderRef,
-        ]);
-
-        $params = [
-            'Ds_Order' => $orderRef,
-            'Ds_Response' => '0000',
-        ];
-        $encoded = \App\Services\Payments\Redsys\RedsysSignature::encodeMerchantParameters($params);
-        $sig = \App\Services\Payments\Redsys\RedsysSignature::signMerchantParameters($encoded, $secretB64);
-
-        $this->post('/api/v1/payments/redsys/notify', [
-            'Ds_SignatureVersion' => 'HMAC_SHA256_V1',
-            'Ds_MerchantParameters' => $encoded,
-            'Ds_Signature' => $sig,
-        ])->assertOk();
-
-        $payment->refresh();
-        $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->status);
-        $this->assertTrue($order->fresh()->hasSuccessfulPayment());
-    }
-
-    public function test_revolut_webhook_marks_succeeded_with_valid_hmac(): void
-    {
-        $whSecret = 'revolut_test_wh_32_chars_min______';
-        config(['services.revolut.webhook_secret' => $whSecret]);
-
-        $client = Client::query()->create([
-            'type' => 'person',
-            'identification' => null,
-            'login_email' => 'buyer3@example.test',
-            'password' => bcrypt('password'),
-            'is_active' => true,
-        ]);
-
-        $order = Order::query()->create([
-            'client_id' => $client->id,
-            'kind' => Order::KIND_ORDER,
-            'status' => Order::STATUS_PENDING,
-            'order_date' => now(),
-            'shipping_price' => Order::SHIPPING_FLAT_EUR,
-            'installation_requested' => false,
-        ]);
-
-        $revolutOrderId = 'ord_revolut_test_1';
-
-        $payment = Payment::query()->create([
-            'order_id' => $order->id,
-            'amount' => 20.00,
-            'payment_method' => Payment::METHOD_REVOLUT,
-            'status' => Payment::STATUS_REQUIRES_ACTION,
-            'gateway' => Payment::GATEWAY_REVOLUT,
-            'currency' => 'EUR',
-            'gateway_reference' => $revolutOrderId,
+            'gateway_reference' => 'cs_test_session_1',
         ]);
 
         $payload = json_encode([
-            'order_id' => $revolutOrderId,
-            'state' => 'completed',
+            'id' => 'evt_cs_completed_1',
+            'object' => 'event',
+            'api_version' => '2024-11-20.acacia',
+            'created' => time(),
+            'data' => [
+                'object' => [
+                    'id' => 'cs_test_session_1',
+                    'object' => 'checkout.session',
+                    'amount_total' => 9950,
+                    'currency' => 'eur',
+                    'payment_status' => 'paid',
+                    'metadata' => [
+                        'payment_id' => (string) $payment->id,
+                        'order_id' => (string) $order->id,
+                    ],
+                    'payment_intent' => 'pi_from_cs_1',
+                ],
+            ],
+            'livemode' => false,
+            'pending_webhooks' => 0,
+            'type' => 'checkout.session.completed',
         ], JSON_UNESCAPED_SLASHES);
 
-        $sig = hash_hmac('sha256', $payload, $whSecret);
+        $header = $this->makeStripeSignedPayload($payload, $secret);
 
-        $this->postRawWebhook('/api/v1/payments/webhooks/revolut', $payload, ['Revolut-Signature' => 'v1='.$sig])
+        $this->postRawWebhook('/api/v1/payments/webhooks/stripe', $payload, ['Stripe-Signature' => $header])
             ->assertOk();
 
         $payment->refresh();
         $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->status);
+        $this->assertSame('pi_from_cs_1', $payment->metadata['stripe_payment_intent_id'] ?? null);
         $this->assertTrue($order->fresh()->hasSuccessfulPayment());
     }
 

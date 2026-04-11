@@ -110,8 +110,6 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.methods.card', false);
         $response->assertJsonPath('data.methods.paypal', true);
-        $response->assertJsonPath('data.methods.bizum', false);
-        $response->assertJsonPath('data.methods.revolut', false);
     }
 
     public function test_checkout_uses_paypal_gateway_when_simulated_but_paypal_credentials_exist(): void
@@ -124,6 +122,13 @@ class CheckoutPaymentConfigTest extends TestCase
             'api-m.sandbox.paypal.com/v2/checkout/orders' => Http::response([
                 'id' => 'SANDBOX_ORDER_X',
                 'status' => 'CREATED',
+                'links' => [
+                    [
+                        'href' => 'https://www.sandbox.paypal.com/checkoutnow?token=SANDBOX_ORDER_X',
+                        'rel' => 'approve',
+                        'method' => 'GET',
+                    ],
+                ],
             ], 201),
         ]);
 
@@ -213,7 +218,7 @@ class CheckoutPaymentConfigTest extends TestCase
     public function test_payments_config_paypal_missing_credentials_false_when_paypal_not_in_checkout_methods(): void
     {
         config([
-            'payments.checkout_method_keys' => ['card', 'bizum', 'revolut'],
+            'payments.checkout_method_keys' => ['card'],
             'services.paypal.client_id' => '',
             'services.paypal.secret' => '',
         ]);
@@ -241,8 +246,6 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.methods.paypal', true);
         $response->assertJsonPath('data.methods.card', false);
-        $response->assertJsonPath('data.methods.bizum', false);
-        $response->assertJsonPath('data.methods.revolut', false);
         $response->assertJsonPath('data.simulated', false);
         $response->assertJsonPath('data.paypal_missing_credentials', false);
     }
@@ -279,21 +282,6 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.methods.card', true);
         $response->assertJsonPath('data.stripe_missing_credentials', false);
-    }
-
-    public function test_payments_config_revolut_missing_credentials_when_whitelisted_without_key_and_no_simulation(): void
-    {
-        config([
-            'payments.checkout_method_keys' => ['revolut'],
-            'payments.allow_simulated' => false,
-            'app.debug' => true,
-            'services.revolut.api_key' => '',
-        ]);
-
-        $response = $this->getJson('/api/v1/payments/config');
-        $response->assertOk();
-        $response->assertJsonPath('data.methods.revolut', false);
-        $response->assertJsonPath('data.revolut_missing_credentials', true);
     }
 
     public function test_payments_config_stripe_missing_credentials_false_when_card_not_whitelisted(): void

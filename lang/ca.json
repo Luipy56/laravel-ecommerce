@@ -55,7 +55,7 @@
     "shop.status.installation_confirmed": "Finalitzat",
     "shop.status.awaiting_installation_price": "Pendent pressupost instal·lació",
     "shop.status.awaiting_payment": "Pendent de pagament",
-    "shop.order.awaiting_payment_notice": "El pagament encara no s'ha completat. Si has tancat PayPal sense pagar, pots tornar a intentar el pagament des d'aquí.",
+    "shop.order.awaiting_payment_notice": "El pagament encara no s'ha completat. Pots tornar a intentar el pagament des d'aquí.",
     "shop.order.already_paid": "Aquesta comanda ja està pagada.",
     "shop.order.cannot_pay_yet": "Encara no pots pagar: espera el pressupost d'instal·lació o contacta'ns.",
     "shop.order.waive_installation_invalid": "Només es pot cancel·lar la sol·licitud mentre esperem el pressupost.",

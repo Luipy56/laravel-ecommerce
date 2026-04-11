@@ -210,7 +210,7 @@
   "shop.status.installation_confirmed": "Finalizado",
   "shop.status.awaiting_installation_price": "Pendiente presupuesto instalación",
   "shop.status.awaiting_payment": "Pendiente de pago",
-  "shop.order.awaiting_payment_notice": "El pago aún no se ha completado. Si cerraste PayPal sin pagar, puedes volver a intentar el pago desde aquí.",
+  "shop.order.awaiting_payment_notice": "El pago aún no se ha completado. Puedes volver a intentar el pago desde aquí.",
   "shop.categories": "Categorías",
   "shop.categories.all": "Todos",
   "shop.filters.features": "Características",

@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Incomplete or cancelled PayPal flows lacked clear messaging, and unpaid orders were easy to miss in the orders UI.
+- **What was done:** PayPal `createOrder` now sends SPA `return_url` and `cancel_url`; inline cancel shows non-silent warnings; after new-tab approval the client routes to order detail with a hint toast; the orders list badges payable unpaid rows; feature tests assert the URLs in the PayPal payload.
+- **What was tested:** `npm run build`, `php artisan test` (69 passed, 5 skipped), and `php artisan routes:smoke` succeeded; static review of `PayPalPaymentTest`, storefront strings, and list/detail handling; manual PayPal and browser checks were not run (N/A in test report).
+- **Why closed:** Tester outcome **PASS** — automated suite and code review matched the implementation summary; staging browser validation recommended but not required for closure.
+- **Closed at (UTC):** 2026-04-11 19:50
+---
+
 # PayPal abandoned / failed: keep sale in cart, clear messaging, avoid silent unpaid orders
 
 ## GitHub
@@ -71,3 +81,63 @@ If the customer **does not complete** PayPal (cancel, error, or closes tab):
 
 - **PASS:** No silent abandonment; clear unpaid signalling on list/detail; automated tests and build/smoke pass.
 - **FAIL:** Cancel is still silent; list shows no distinction for unpaid payable orders; regressions in capture or tests.
+
+---
+
+## Test report
+
+### Date/time (UTC) and log window
+
+- **Started:** 2026-04-11 19:49:04 UTC  
+- **Finished:** 2026-04-11 19:49:25 UTC (approx.)  
+- **Log window:** Same test run as automated suite; no separate PayPal UI errors reviewed beyond standard `php artisan test` logging.
+
+### Environment
+
+- **Branch:** `agentdevelop`  
+- **PHP:** 8.3.6  
+- **Node:** v22.20.0  
+- **APP_ENV:** tooling default; PHPUnit uses `testing` per framework.
+
+### What was tested
+
+Commands per **How to test**; static review of cancel/return URLs in `PayPalPaymentTest`, storefront strings, orders list badge, and `OrderDetailPage` query handling. Manual checkout, PayPal sandbox cancel/success, and `/orders` visual confirmation were **not** run (no browser).
+
+### Results
+
+| Criterion | Result | Evidence |
+|-----------|--------|----------|
+| PayPal `cancel_url` / `return_url` in create-order payload | **PASS** | `PayPalPaymentTest::test_paypal_checkout_starter_creates_order_and_updates_payment` asserts `application_context.cancel_url` → `.../orders/{id}?payment=ko` and `return_url` → `...?payment=paypal_return` (lines 169–173 in `tests/Feature/PayPalPaymentTest.php`). |
+| Inline cancel / not-completed messaging (frontend) | **PASS** | `CheckoutPage.jsx` / `OrderDetailPage.jsx` reference `shop.payment.paypal_not_completed`; locales in `ca.json` / `es.json`. |
+| New-tab flow → order detail + hint toast | **PASS** | `OrderDetailPage.jsx` emits `shop.order.paypal_window_hint` and handles `payment=paypal_return` with `shop.order.paypal_return_check` (grep + file review). |
+| Orders list unpaid badge | **PASS** | `OrdersPage.jsx`: `paymentDue = !o.has_payment && o.can_pay` renders `shop.order.list_payment_due` badge. |
+| Capture / payment regression | **PASS** | `PayPalPaymentTest` capture and related tests passed in full suite. |
+| `npm run build` | **PASS** | Exit code 0. |
+| `php artisan test` | **PASS** | Exit code 0; 69 passed, 5 skipped. |
+| `php artisan routes:smoke` | **PASS** | Exit code 0. |
+| Manual: inline cancel toast | **N/A — no browser** | |
+| Manual: new tab → `/orders/{id}` | **N/A — no browser** | |
+| Manual: sandbox success | **N/A — no browser** | |
+| Manual: `/orders` badge in UI | **N/A — no browser** | |
+
+### Overall
+
+**PASS** — Automated checks pass; backend test proves storefront URLs on PayPal order creation; UI code and i18n match the implementation summary. Manual PayPal and browser flows were not exercised here; recommend staging validation for cancel/success and badge visibility. **Loop protection:** not applicable (first verification).
+
+### Product owner feedback
+
+Automated coverage includes the hosted-flow return/cancel URLs sent to PayPal, which unblocks consistent SPA handling for cancel and return. Please confirm in a real browser that inline cancel shows the warning, that returning from PayPal shows the expected copy on order detail, and that the warning badge appears on `/orders` for payable unpaid orders in your data.
+
+### URLs tested
+
+**N/A — no browser**
+
+### Relevant log excerpts
+
+```
+Tests:    5 skipped, 69 passed (295 assertions)
+...
+All checked GET routes returned a non-500 status.
+```
+
+(Minimal; no PayPal-specific errors in test output.)

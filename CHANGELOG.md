@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-04-11
+
+### Changed
+
+- **PayPal (hosted redirect):** PayPal `approval_url` opens in a **new tab** so the storefront tab stays open; if the browser blocks the popup, a warning and a user-triggered link appear on checkout and order pay (`shop.payment.paypal_popup_blocked`, `shop.payment.paypal_open_link` in ca/es). Inline Smart Buttons are unchanged.
+- **PayPal:** REST `createOrder` sends storefront **`return_url`** and **`cancel_url`** for hosted approval; cancelled or incomplete flows show explicit warnings (inline `onCancel`, return/cancel query handling); after opening approval in a new tab the client navigates to **order detail** with a short hint toast; the **orders list** shows a payment-due badge for payable unpaid orders. `PayPalPaymentTest` asserts these URLs in the create-order payload.
+- Agent pipeline: archived closed PayPal tasks (`agents/tasks/done/2026/04/11/CLOSED-20260411-2000-checkout-paypal-open-new-tab-not-same-page.md`, `agents/tasks/done/2026/04/11/CLOSED-20260411-2015-paypal-cancel-failure-cart-retry.md`).
+- Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-11T19:43Z).
+
 ## [0.1.7] - 2026-04-11
 
 ### Changed

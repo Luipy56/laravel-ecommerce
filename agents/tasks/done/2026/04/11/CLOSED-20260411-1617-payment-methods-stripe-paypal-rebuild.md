@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The payment stack was refactored so Stripe Checkout is primary, PayPal remains as fallback, and Stripe webhooks drive paid order state with verification and idempotency.
+- **What was done:** Stripe Checkout sessions, secure webhook handling (`checkout.session.completed` and related events) with `stripe_webhook_events`, PayPal redirect/approval flow, removal of Redsys/Revolut from storefront and config, and documentation/env updates per the task.
+- **What was tested:** `migrate:fresh --seed`, `php artisan test` (68 passed), `routes:smoke`, `npm run build`, and payments config API checks all passed; live Stripe/PayPal browser sandbox flows were not run in the automated tester run (recommended for staging).
+- **Why closed:** All automatable acceptance criteria from the test report passed; tester overall outcome **PASS** with explicit note that manual PSP E2E remains for operators with keys.
+- **Closed at (UTC):** 2026-04-11 17:18
+---
+
 # Rebuild payment methods: Stripe primary, PayPal fallback, webhooks
 
 ## GitHub

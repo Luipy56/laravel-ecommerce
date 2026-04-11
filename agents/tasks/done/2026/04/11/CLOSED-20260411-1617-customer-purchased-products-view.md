@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The customer purchased-products feature for issue #9 was implemented and verified by the tester against the task criteria.
+- **What was done:** The codebase delivered `GET /api/v1/purchases`, the `/purchases` SPA page, tests, and related wiring; the tester ran the full automated suite, route smoke, production build, and API/session checks for purchases and guest auth.
+- **What was tested:** `php artisan test`, `routes:smoke`, and `npm run build` all passed; API payload, date filters, and 401 for guests passed; full graphical browser UX for the user menu and date controls was not run this cycle (documented as partial / follow-up QA).
+- **Why closed:** Tester overall outcome **PASS**; automated and API-level verification meets closure; optional browser QA noted for humans, not a failing gate.
+- **Closed at (UTC):** 2026-04-11 17:01
+---
+
 # Feature: Customer Purchased Products View
 
 ## GitHub

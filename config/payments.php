@@ -22,7 +22,11 @@ return [
     /*
     | Comma-separated payment_method keys exposed on the storefront and accepted by checkout/pay.
     | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal.
-    | Example: PAYMENTS_CHECKOUT_METHODS=paypal
+    |
+    | Omitted or empty string in .env → both card and paypal are allowed (then filtered by credentials).
+    | To expose Stripe (card) together with PayPal, use e.g. PAYMENTS_CHECKOUT_METHODS=card,paypal or leave empty.
+    | If you set PAYMENTS_CHECKOUT_METHODS=paypal only, methods.card stays false in the API even when STRIPE_* are set.
+    |
     | Invalid tokens are ignored; if the list is empty after parsing, card and paypal are allowed.
     */
     'checkout_method_keys' => (function () {

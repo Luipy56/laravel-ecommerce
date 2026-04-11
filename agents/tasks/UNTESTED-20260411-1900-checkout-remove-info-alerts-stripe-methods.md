@@ -16,15 +16,22 @@
   - Variables `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET` para entorno real.
 - **Verificación:** Con `GET /api/v1/payments/config`, cuando Stripe esté configurado y `card` esté en la whitelist, `data.methods.card` debe ser `true` y el `<select>` de método de pago debe listar la opción de tarjeta (clave de traducción `checkout.payment.card` — no hace falta mostrar la palabra “Stripe” en el label si no es requisito).
 
-## Testing instructions
-
-1. `php artisan test`
-2. `php artisan routes:smoke`
-3. `npm run build` (si toca `resources/js/` o estilos)
-4. Manual: en local o staging, abrir `/checkout` con carrito y usuario; confirmar **ausencia** de los grandes bloques azules de info en la sección de pago (salvo requisitos legales explícitos del equipo). Comprobar que con `.env` que incluya `card` en métodos y claves Stripe de prueba, el selector muestra **tarjeta** y `payments/config` devuelve `methods.card: true`.
-
 ## Acceptance criteria
 
 - No hay `alert-info` (u otros banners igual de prominentes en azul/info) en el checkout para los avisos descritos, salvo que el PO apruebe un sustituto mínimo.
 - Documentación / ejemplo de entorno reflejan cómo exponer **card (Stripe)** junto a PayPal.
 - Tests y build pasan según instrucciones anteriores.
+
+## Implementation summary
+
+- **`CheckoutPage.jsx`:** Reemplazados los `alert alert-info` de la zona de pago (modo simulado, avisos PayPal/Stripe sin credenciales) por párrafos discretos (`text-xs text-base-content/60`). Mensaje de instalación “pago tras presupuesto” pasó de `alert-info` a texto con borde lateral neutro (`text-sm text-base-content/70`, `border-l-2 border-base-300`). Claves i18n existentes reutilizadas.
+- **`config/payments.php`:** Comentarios ampliados sobre lista vacía vs `card,paypal` y efecto de whitelist solo-PayPal sobre `methods.card`.
+- **`.env.example`:** Ejemplos explícitos para ambos métodos vs solo PayPal.
+- **`docs/CONFIGURACION_PAGOS_CORREO.md`:** Sección `PAYMENTS_CHECKOUT_METHODS` ampliada con `card,paypal`, advertencia sobre `paypal`-only + claves Stripe, y omisión/vacío = ambos métodos.
+
+## Testing instructions
+
+1. `php artisan test`
+2. `php artisan routes:smoke`
+3. `npm run build` (obligatorio tras cambios en `resources/js/`)
+4. Manual: en local o staging, abrir `/checkout` con carrito y usuario; confirmar **ausencia** de bloques azules tipo `alert-info` en la sección de pago (texto discreto opcional sigue visible). Con `.env` que incluya `card` en métodos (o vacío) y claves Stripe de prueba, comprobar que el selector lista **tarjeta** y `GET /api/v1/payments/config` devuelve `methods.card: true`.

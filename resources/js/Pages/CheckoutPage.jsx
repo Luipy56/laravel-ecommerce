@@ -278,9 +278,9 @@ export default function CheckoutPage() {
                 <span className="form-label">{t('checkout.note')}</span>
                 <textarea name="installation_note" className="textarea textarea-bordered w-full" rows={2} value={form.installation_note} onChange={handleChange} />
               </label>
-              <div role="status" className="alert alert-info text-sm">
+              <p className="m-0 text-sm text-base-content/70 border-l-2 border-base-300 pl-3">
                 {t('checkout.payment_after_quote')}
-              </div>
+              </p>
             </>
           )}
 
@@ -288,9 +288,7 @@ export default function CheckoutPage() {
             <>
               <h2 className="font-semibold text-base-content mt-6">{t('checkout.payment')}</h2>
               {payMethodsReady && payConfigMeta.simulated && anyPaymentMethod && (
-                <div role="status" className="alert alert-info text-sm">
-                  {t('checkout.payment.simulated_mode_notice')}
-                </div>
+                <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.simulated_mode_notice')}</p>
               )}
               {payMethodsReady && payConfigLoadError && (
                 <div role="alert" className="alert alert-warning text-sm">
@@ -306,14 +304,10 @@ export default function CheckoutPage() {
                 </div>
               )}
               {payMethodsReady && !payConfigLoadError && payConfigMeta.paypal_missing_credentials && (
-                <div role="status" className="alert alert-info text-sm">
-                  {t('checkout.payment.paypal_missing_credentials_hint')}
-                </div>
+                <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.paypal_missing_credentials_hint')}</p>
               )}
               {payMethodsReady && !payConfigLoadError && payConfigMeta.stripe_missing_credentials && (
-                <div role="status" className="alert alert-info text-sm">
-                  {t('checkout.payment.stripe_missing_credentials_hint')}
-                </div>
+                <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.stripe_missing_credentials_hint')}</p>
               )}
               <label className="form-field w-full">
                 <span className="form-label">{t('checkout.payment_method')}</span>

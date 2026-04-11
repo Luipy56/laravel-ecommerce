@@ -24,7 +24,15 @@ Tras cambiar `.env`, reinicia PHP-FPM / el contenedor o `php artisan config:clea
 
 ### Limitar métodos en la tienda (`PAYMENTS_CHECKOUT_METHODS`)
 
-Por defecto el checkout ofrece **card** y **paypal** (según credenciales y simulación). Para mostrar y aceptar **solo uno** (por ejemplo solo PayPal), define en `.env`:
+Por defecto el checkout ofrece **card** y **paypal** (según credenciales y simulación): variable **omitida** o **cadena vacía** en `.env` equivale a permitir ambos métodos. Para incluir explícitamente tarjeta (Stripe Checkout) y PayPal:
+
+```env
+PAYMENTS_CHECKOUT_METHODS=card,paypal
+```
+
+**Importante:** si defines **solo** `PAYMENTS_CHECKOUT_METHODS=paypal` (por ejemplo para pruebas E2E de PayPal), el endpoint `GET /api/v1/payments/config` devolverá `data.methods.card: false` aunque `STRIPE_KEY` / `STRIPE_SECRET` estén configurados: la lista blanca limita qué métodos se exponen. Para mostrar tarjeta en producción junto a PayPal, deja la variable vacía o incluye `card` en la lista.
+
+Para mostrar y aceptar **solo uno** (por ejemplo solo PayPal), define en `.env`:
 
 ```env
 PAYMENTS_CHECKOUT_METHODS=paypal

@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Checkout could show only PayPal while other methods were configured, partly due to `PAYMENTS_CHECKOUT_METHODS` whitelisting and partly due to UI timing before `payments/config` loaded.
+- **What was done:** PHPUnit bootstrap clears inherited `PAYMENTS_CHECKOUT_METHODS`; `CheckoutPage.jsx` gates options and submit until config loads; `CheckoutPaymentConfigTest` covers dual-method config; README, `docs/CONFIGURACION_PAGOS_CORREO.md`, and CHANGELOG were updated (version 0.1.9).
+- **What was tested:** `php artisan test`, `routes:smoke`, and `npm run build` passed; manual browser was N/A but UI gating and docs were verified by review; overall tester outcome **PASS**.
+- **Why closed:** All pass/fail criteria met; tester signed off with **PASS**.
+- **Closed at (UTC):** 2026-04-11 20:03
+---
+
 # Checkout: expose every configured payment method (not only PayPal)
 
 ## GitHub
@@ -83,3 +93,35 @@ In checkout, **only PayPal** appears as a payment method. **Stripe / card** (and
 
 - **PASS:** Above commands exit 0; checkout does not list both card and PayPal before config loads; new test passes; docs explain whitelist vs “only PayPal”.
 - **FAIL:** Regression in payments config tests, build failure, or submit enabled before `payments/config` completes.
+
+---
+
+## Test report (tester, 2026-04-11 UTC)
+
+**Date/time (UTC) and log window:** 2026-04-11 20:02:02 UTC – 2026-04-11 20:03:00 UTC (commands completed; Laravel log lines at `20:02:06` from PHPUnit `APP_ENV=testing`).
+
+**Environment:** PHP 8.3.6, Node v22.20.0, branch `agentdevelop`, `APP_ENV=local` for non-PHPUnit context.
+
+**What was tested (from “What to verify”):** Payments config alignment, PHPUnit regression coverage, route smoke, production JS build, operator docs for `PAYMENTS_CHECKOUT_METHODS`, checkout UI gating (code review where browser not used).
+
+**Results:**
+
+1. `php artisan test` (full suite, including `CheckoutPaymentConfigTest` and `test_payments_config_exposes_card_and_paypal_when_both_configured_and_whitelisted`) — **PASS** — exit code 0; 70 passed, 5 skipped.
+2. `php artisan routes:smoke` — **PASS** — “All checked GET routes returned a non-500 status.”
+3. `npm run build` — **PASS** — exit code 0; Vite build succeeded (CSS `@property` warning only).
+4. Manual `/checkout` with logged-in user, cart, and live Stripe + PayPal — **N/A (browser not run)** — no interactive session in this run; behavior cross-checked via `CheckoutPage.jsx` (`payMethodsReady`, select shows `common.loading` until config loads, submit `disabled` until `payMethodsReady && anyPaymentMethod` unless installation flow).
+5. Docs: README + `docs/CONFIGURACION_PAGOS_CORREO.md` explain whitelist vs “only PayPal” — **PASS** — grep confirms `PAYMENTS_CHECKOUT_METHODS` troubleshooting present (e.g. README table line on `card,paypal` vs `paypal` alone).
+
+**Overall:** **PASS** — all required commands exit 0; new dual-method test passes; no manual browser regression observed in automation; UI gating verified by source review.
+
+**Product owner feedback:** Operators who see only PayPal despite Stripe keys should check `PAYMENTS_CHECKOUT_METHODS` first; documentation now states this clearly. The checkout payment selector waits for `GET /api/v1/payments/config` before listing methods and keeps submit disabled until methods are known, which avoids the previous confusing flash of options.
+
+**URLs tested:** N/A — no browser.
+
+**Relevant log excerpts:**
+
+```
+[2026-04-11 20:02:06] testing.INFO: stripe.webhook.payment_intent_succeeded {"event_id":"evt_test_webhook_1","payment_id":1}
+[2026-04-11 20:02:06] testing.INFO: stripe.webhook.checkout_session_completed {"event_id":"evt_cs_completed_1","payment_id":1,"order_id":1}
+[2026-04-11 20:02:06] testing.INFO: catalog_search.fallback_to_database {"mode":"full_text","reason":"elasticsearch_unavailable","db_driver":"sqlite"}
+```

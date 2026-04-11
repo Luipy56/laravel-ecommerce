@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-04-11
+
 ### Changed
 
 - **PayPal checkout:** New order status **`awaiting_payment`** until the server captures the payment; then the order moves to **`pending`** as before. Customer invoice download and the orders list invoice link require a successful payment. Catalan and Spanish copy on the order detail page when payment is still pending.
 - **Checkout:** Payment section no longer uses large blue `alert-info` banners; simulated mode and credential hints use muted small text. **`PAYMENTS_CHECKOUT_METHODS`** is documented in **`config/payments.php`**, **`.env.example`**, and **`docs/CONFIGURACION_PAGOS_CORREO.md`** (empty = card + PayPal; `paypal`-only hides Stripe card even when `STRIPE_*` are set).
-- Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-11T17:45Z).
+- Agent pipeline: archived closed checkout payment UI task and PayPal defer-until-captured task (`agents/tasks/done/2026/04/11/CLOSED-20260411-1900-checkout-remove-info-alerts-stripe-methods.md`, `agents/tasks/done/2026/04/11/CLOSED-20260411-1901-paypal-defer-order-until-payment-captured.md`).
+- Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-11T18:44Z).
 
 ## [0.1.5] - 2026-04-11
 

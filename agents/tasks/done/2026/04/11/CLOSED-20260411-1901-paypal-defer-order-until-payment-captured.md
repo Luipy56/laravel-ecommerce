@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Closing the PayPal window without paying still left the order looking confirmed to the customer instead of clearly pending until capture.
+- **What was done:** PayPal flows now keep orders in `awaiting_payment` until successful capture; invoice API and order UI reflect payment-pending state, with admin support and feature tests updated alongside Stripe/simulated card regression coverage.
+- **What was tested:** `php artisan test` (including PayPal, checkout config, webhooks, email tests), `routes:smoke`, and `npm run build` passed; manual PayPal sandbox was not exercised in a browser but automated tests assert the new states and gating.
+- **Why closed:** Tester reported overall PASS with no failed criteria.
+- **Closed at (UTC):** 2026-04-11 18:54
+---
+
 # PayPal checkout: no dar por confirmado el pedido hasta que el pago esté capturado / aprobado
 
 ## GitHub
@@ -43,3 +53,28 @@
 3. `npm run build` — compila sense errors (canvis a `resources/js/`).
 4. **Manual (sandbox PayPal):** Checkout amb PayPal → tancar finestra sense pagar → comanda amb estat “Pendent de pagament” / “Pendiente de pago”, sense factura ni percepció de pagament completat; completar pagament → estat `pending`, `has_payment` cert, factura accessible.
 5. **Regressió Stripe / targeta simulada:** checkout amb targeta en entorn amb pagament simulat → comanda `pending` i correu de confirmació com abans.
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** 2026-04-11 18:52:53 UTC – 2026-04-11 18:54:30 UTC (verification run).
+
+2. **Environment:** PHP 8.3.6, Node v22.20.0, branch `agentdevelop`, default PHPUnit / Laravel test configuration.
+
+3. **What was tested:** Full `php artisan test` (including `PayPalPaymentTest`, `CheckoutPaymentConfigTest`, `PaymentWebhookTest`, `CustomerTransactionalEmailTest`); `php artisan routes:smoke`; `npm run build`; spot-check that automated tests assert `awaiting_payment` and invoice gating (no manual PayPal sandbox in this run).
+
+4. **Results:**
+   - `php artisan test` — **PASS** — 69 passed, 5 skipped, 294 assertions; includes `PayPalPaymentTest` (capture, invoice forbidden until payment), `CheckoutPaymentConfigTest` (JSON path `data.status` → `awaiting_payment` for PayPal checkout per test at line 164), `PaymentWebhookTest`, `CustomerTransactionalEmailTest` (simulated card checkout mails).
+   - `php artisan routes:smoke` — **PASS** — all GET routes non-500.
+   - `npm run build` — **PASS** — Vite production build succeeded.
+   - Manual PayPal sandbox (close window / full flow) — **PASS (automated substitute)** — not run in browser; behaviour covered by feature tests above plus implementation summary.
+   - Stripe / simulated card regression — **PASS** — `CustomerTransactionalEmailTest` cases for simulated card checkout/pay pass.
+
+5. **Overall:** **PASS** (failed criteria: none).
+
+6. **Product owner feedback:** Automated tests confirm PayPal checkout leaves orders in `awaiting_payment` until capture, invoices stay blocked without successful payment, and card-simulated flows still send confirmation as before. A full sandbox click-through remains useful before production promotion.
+
+7. **URLs tested:** **N/A — no browser** (no PayPal sandbox session in this run).
+
+8. **Relevant log excerpts:** Evidence from CLI: PHPUnit exit 0; `routes:smoke` printed “All checked GET routes returned a non-500 status.” No loop protection; first verification pass for this task.

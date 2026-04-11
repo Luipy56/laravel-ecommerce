@@ -9,6 +9,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { emitAppToast } from '../toastEvents';
 import { checkoutFormSchema, parseWithZod } from '../validation';
+import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
 
 const INITIAL_FORM = {
   payment_method: 'card',
@@ -42,6 +43,7 @@ export default function CheckoutPage() {
     stripe_missing_credentials: false,
   });
   const [checkoutFormError, setCheckoutFormError] = useState('');
+  const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
   const wantsInstallation = !!cart.installation_requested;
 
   useEffect(() => {
@@ -117,6 +119,7 @@ export default function CheckoutPage() {
     setConfirmOpen(false);
     setLoading(true);
     setActiveCheckout(null);
+    setPaypalApprovalFallbackUrl(null);
     setStripeUiError('');
     try {
       const toValidate = wantsInstallation ? { ...form, payment_method: null } : form;
@@ -154,7 +157,8 @@ export default function CheckoutPage() {
         return;
       }
       if (c?.gateway === 'paypal' && c.approval_url) {
-        window.location.href = c.approval_url;
+        const opened = openPayPalApprovalInNewTab(c.approval_url);
+        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
         return;
       }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
@@ -238,6 +242,19 @@ export default function CheckoutPage() {
           {checkoutFormError ? (
             <div role="alert" className="alert alert-error text-sm">
               {checkoutFormError}
+            </div>
+          ) : null}
+          {paypalApprovalFallbackUrl ? (
+            <div role="status" className="alert alert-warning text-sm">
+              <p className="m-0">{t('shop.payment.paypal_popup_blocked')}</p>
+              <a
+                href={paypalApprovalFallbackUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link link-primary font-medium"
+              >
+                {t('shop.payment.paypal_open_link')}
+              </a>
             </div>
           ) : null}
           <h2 className="font-semibold text-base-content">{t('checkout.shipping_address')}</h2>

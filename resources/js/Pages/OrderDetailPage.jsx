@@ -6,6 +6,7 @@ import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
+import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ export default function OrderDetailPage() {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [inlineCheckout, setInlineCheckout] = useState(null);
   const [stripeUiError, setStripeUiError] = useState('');
+  const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -62,6 +64,7 @@ export default function OrderDetailPage() {
     e.preventDefault();
     setPayError('');
     setStripeUiError('');
+    setPaypalApprovalFallbackUrl(null);
     setInlineCheckout(null);
     setPayLoading(true);
     try {
@@ -82,7 +85,8 @@ export default function OrderDetailPage() {
         return;
       }
       if (c?.gateway === 'paypal' && c.approval_url) {
-        window.location.href = c.approval_url;
+        const opened = openPayPalApprovalInNewTab(c.approval_url);
+        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
         return;
       }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
@@ -242,6 +246,20 @@ export default function OrderDetailPage() {
       </div>
 
       {payError && <div role="alert" className="alert alert-error mt-4 text-sm">{payError}</div>}
+
+      {paypalApprovalFallbackUrl && (
+        <div role="status" className="alert alert-warning mt-4 text-sm space-y-2">
+          <p className="m-0">{t('shop.payment.paypal_popup_blocked')}</p>
+          <a
+            href={paypalApprovalFallbackUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link link-primary font-medium"
+          >
+            {t('shop.payment.paypal_open_link')}
+          </a>
+        </div>
+      )}
 
       {awaitingQuote && (
         <div className="mt-4">

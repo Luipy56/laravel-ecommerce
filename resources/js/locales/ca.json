@@ -116,6 +116,8 @@
   "checkout.payment.simulated_mode_notice": "Mode desenvolupament: els pagaments es marquen com a simulats només per als mètodes sense credencials de passarel·la al servidor; si has configurat PayPal (o un altre PSP), s'usarà la passarel·la real.",
   "checkout.payment.local_debug_hint": "En local, posa APP_DEBUG=true al .env i assegura't que APP_ENV=local per activar pagaments simulats sense claus de Stripe/PayPal (o defineix PAYMENTS_ALLOW_SIMULATED=true). Després executa php artisan config:clear.",
   "shop.payment.method_unavailable": "Aquest mètode de pagament no està disponible. L'administrador ha de configurar la passarel·la al servidor.",
+  "shop.payment.paypal_popup_blocked": "El navegador ha bloquejat la finestra nova. Fes clic a l'enllaç següent per obrir PayPal en una altra pestanya.",
+  "shop.payment.paypal_open_link": "Obrir PayPal",
   "shop.order.payment_no_methods": "No hi ha cap passarel·la de pagament configurada. No es pot completar el pagament en línia fins que no s'activi almenys un proveïdor (Stripe, Redsys o Revolut).",
   "shop.order.payment_how_it_works": "Quan tot estigui configurat, la targeta es demana aquí (Stripe), Bizum i Redsys redirigeixen al TPV del banc, i Revolut obre el seu pagament en una altra pàgina.",
   "shop.checkout.requires_login": "Has d'iniciar sessió per finalitzar la comanda.",

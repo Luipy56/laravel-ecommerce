@@ -116,6 +116,8 @@
   "checkout.payment.simulated_mode_notice": "Modo desarrollo: los pagos se marcan como simulados solo para los métodos sin credenciales de pasarela en el servidor; si has configurado PayPal (u otro PSP), se usará la pasarela real.",
   "checkout.payment.local_debug_hint": "En local, pon APP_DEBUG=true en .env y asegúrate de que APP_ENV=local para activar pagos simulados sin claves de Stripe/PayPal (o define PAYMENTS_ALLOW_SIMULATED=true). Luego ejecuta php artisan config:clear.",
   "shop.payment.method_unavailable": "Este método de pago no está disponible. El administrador debe configurar la pasarela en el servidor.",
+  "shop.payment.paypal_popup_blocked": "El navegador ha bloqueado la ventana nueva. Haz clic en el siguiente enlace para abrir PayPal en otra pestaña.",
+  "shop.payment.paypal_open_link": "Abrir PayPal",
   "shop.order.payment_no_methods": "No hay ninguna pasarela de pago configurada. No se puede completar el pago en línea hasta que se active al menos un proveedor (Stripe, Redsys o Revolut).",
   "shop.order.payment_how_it_works": "Cuando todo esté configurado, la tarjeta se introduce aquí (Stripe), Bizum y Redsys redirigen al TPV del banco, y Revolut abre su pago en otra página.",
   "shop.checkout.requires_login": "Debes iniciar sesión para finalizar el pedido.",

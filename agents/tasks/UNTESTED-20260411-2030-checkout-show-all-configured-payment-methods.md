@@ -51,3 +51,35 @@ In checkout, **only PayPal** appears as a payment method. **Stripe / card** (and
 
 - **PASS:** When env + config allow multiple methods, checkout shows them all; tests cover the regression; docs updated if operator setup was unclear.
 - **FAIL:** Only PayPal visible while Stripe is configured and allowed, without a documented intentional restriction.
+
+---
+
+## Coder implementation summary (2026-04-11 UTC)
+
+**Root cause (typical “only PayPal”):** `PAYMENTS_CHECKOUT_METHODS=paypal` in `.env` whitelists PayPal only, so `GET /api/v1/payments/config` correctly returns `methods.card: false` even with `STRIPE_*` set. Backend logic was already consistent; docs/README now call this out explicitly.
+
+**Code / tests:**
+
+- **`tests/bootstrap.php`:** After loading `.env`, unset `PAYMENTS_CHECKOUT_METHODS` so PHPUnit does not inherit a developer’s `paypal`-only list when resolving `config/payments.php` (tests that need a whitelist still use `config([...])`).
+- **`CheckoutPage.jsx`:** Do not render card/PayPal `<option>`s until `payments/config` has loaded; show `common.loading`; disable submit until config is ready — avoids a brief UI where both methods appeared then one disappeared, and blocks checkout before `methods.*` is known.
+- **`CheckoutPaymentConfigTest`:** `test_payments_config_exposes_card_and_paypal_when_both_configured_and_whitelisted` asserts both flags true with Stripe + PayPal credentials and `['card','paypal']` whitelist.
+- **`docs/CONFIGURACION_PAGOS_CORREO.md`**, **`README.md`**, **`CHANGELOG.md`**, version **0.1.9** (`package.json` / lock).
+
+### Testing instructions (handoff)
+
+**What to verify**
+
+- Payments config API and checkout UI stay aligned; no premature submit; dual-method regression covered by PHPUnit; operators informed about `PAYMENTS_CHECKOUT_METHODS`.
+
+**How to test**
+
+- `php artisan test` — full suite (includes new `test_payments_config_exposes_card_and_paypal_when_both_configured_and_whitelisted`).
+- `php artisan routes:smoke` — no HTTP 500 on GET routes.
+- `npm run build` — succeeds after `CheckoutPage.jsx` change.
+- **Manual:** Logged-in user, non-empty cart, `/checkout` — payment dropdown shows “Cargando…” then only methods returned by `GET /api/v1/payments/config`; submit stays disabled until loaded. With both Stripe + PayPal configured and whitelist empty or `card,paypal`, both methods appear.
+- **Manual:** If `.env` has `PAYMENTS_CHECKOUT_METHODS=paypal` only, only PayPal appears (intentional); remove or set `card,paypal` to show card.
+
+**Pass/fail criteria**
+
+- **PASS:** Above commands exit 0; checkout does not list both card and PayPal before config loads; new test passes; docs explain whitelist vs “only PayPal”.
+- **FAIL:** Regression in payments config tests, build failure, or submit enabled before `payments/config` completes.

@@ -333,17 +333,21 @@ export default function CheckoutPage() {
                 <select
                   name="payment_method"
                   className="select select-bordered w-full"
-                  value={form.payment_method}
+                  value={payMethodsReady ? form.payment_method : ''}
                   onChange={handleChange}
-                  disabled={(payMethodsReady && !anyPaymentMethod) || payConfigLoadError}
+                  disabled={!payMethodsReady || (payMethodsReady && !anyPaymentMethod) || payConfigLoadError}
                 >
-                  {['card', 'paypal']
-                    .filter((value) => !payMethodsReady || payMethods[value])
-                    .map((value) => (
-                      <option key={value} value={value}>
-                        {t(`checkout.payment.${value}`)}
-                      </option>
-                    ))}
+                  {!payMethodsReady ? (
+                    <option value="">{t('common.loading')}</option>
+                  ) : (
+                    ['card', 'paypal']
+                      .filter((value) => payMethods[value])
+                      .map((value) => (
+                        <option key={value} value={value}>
+                          {t(`checkout.payment.${value}`)}
+                        </option>
+                      ))
+                  )}
                 </select>
               </label>
             </>
@@ -370,7 +374,8 @@ export default function CheckoutPage() {
               disabled={
                 loading ||
                 !!activeCheckout?.paypal ||
-                (!wantsInstallation && payMethodsReady && (!anyPaymentMethod || payConfigLoadError))
+                (!wantsInstallation &&
+                  (!payMethodsReady || !anyPaymentMethod || payConfigLoadError))
               }
             >
               {loading ? t('common.loading') : t('shop.checkout')}

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-04-11
+
+### Fixed
+
+- **Checkout:** Payment method selector and submit wait for `GET /api/v1/payments/config` so only **enabled** methods appear (no flash of card+PayPal before config loads). PHPUnit clears `PAYMENTS_CHECKOUT_METHODS` from the developer `.env` so tests do not inherit a `paypal`-only whitelist.
+- **Docs:** README and `docs/CONFIGURACION_PAGOS_CORREO.md` troubleshooting when only PayPal shows despite Stripe keys (`PAYMENTS_CHECKOUT_METHODS` whitelist).
+
+### Added
+
+- **`CheckoutPaymentConfigTest`:** asserts `data.methods.card` and `data.methods.paypal` are both true when both providers are configured and whitelisted.
+
 ## [0.1.8] - 2026-04-11
 
 ### Changed

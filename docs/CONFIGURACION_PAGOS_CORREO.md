@@ -125,6 +125,8 @@ Objetivo: comprobar que un comprador **real** (cuenta **sandbox** de PayPal) pue
 
 Si `data.methods.paypal` es `false`, revisa credenciales vacías, `PAYPAL_MODE` incorrecto o que PayPal no esté incluido en `PAYMENTS_CHECKOUT_METHODS`.
 
+**Solo aparece PayPal en `/checkout` pero `STRIPE_KEY` y `STRIPE_SECRET` están bien:** casi siempre significa `PAYMENTS_CHECKOUT_METHODS=paypal` en `.env` (lista blanca sin `card`). Comprueba con `GET /api/v1/payments/config`: si `data.methods.card` es `false` y tienes claves Stripe, elimina esa variable, déjala vacía o usa `PAYMENTS_CHECKOUT_METHODS=card,paypal`, luego `php artisan config:clear`.
+
 ## Correo electrónico (precio de instalación y demás)
 
 Cuando un administrador guarda un **precio de instalación** y el pedido pasa a estado listo para que el cliente pague, se dispara el envío del correo `InstallationPriceAssignedMail`.

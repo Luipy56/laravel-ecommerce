@@ -102,7 +102,7 @@ For checkout and payments work, see **`.cursor/rules/testing-verification.mdc`**
 | Document | Contents |
 |----------|----------|
 | [`AGENTS.md`](AGENTS.md) | Contributor setup summary, smoke checks, optional agent orchestration |
-| [`docs/CONFIGURACION_PAGOS_CORREO.md`](docs/CONFIGURACION_PAGOS_CORREO.md) | Payment provider environment variables (Stripe, PayPal, etc.) |
+| [`docs/CONFIGURACION_PAGOS_CORREO.md`](docs/CONFIGURACION_PAGOS_CORREO.md) | Payment provider environment variables (Stripe, PayPal, etc.). To offer **card and PayPal** at checkout, leave `PAYMENTS_CHECKOUT_METHODS` unset or empty (or set `card,paypal`); `paypal` alone hides Stripe even when `STRIPE_*` are set. |
 | [`docs/email-notifications.md`](docs/email-notifications.md) | Email / notification configuration |
 | [`docs/mobile-responsive.md`](docs/mobile-responsive.md) | Responsive UI notes |
 | [`docs/postgresql.md`](docs/postgresql.md) | PostgreSQL setup, PHP `pdo_pgsql`, SSL, extensions, search |

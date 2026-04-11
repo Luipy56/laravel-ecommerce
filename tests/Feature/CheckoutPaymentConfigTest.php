@@ -94,6 +94,27 @@ class CheckoutPaymentConfigTest extends TestCase
         $this->assertFalse(PayPalClient::envCredentialsLookValid());
     }
 
+    public function test_payments_config_exposes_card_and_paypal_when_both_configured_and_whitelisted(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['card', 'paypal'],
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'services.stripe.key' => 'pk_test_xxx',
+            'services.stripe.secret' => 'sk_test_xxx',
+            'services.paypal.client_id' => self::FAKE_PAYPAL_CLIENT_ID,
+            'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.methods.card', true);
+        $response->assertJsonPath('data.methods.paypal', true);
+        $response->assertJsonPath('data.simulated', false);
+        $response->assertJsonPath('data.paypal_missing_credentials', false);
+        $response->assertJsonPath('data.stripe_missing_credentials', false);
+    }
+
     public function test_payments_config_respects_checkout_method_whitelist(): void
     {
         config([

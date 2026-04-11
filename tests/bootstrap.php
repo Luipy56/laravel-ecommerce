@@ -20,6 +20,14 @@ if (is_file($projectRoot.'/.env')) {
     Dotenv\Dotenv::createImmutable($projectRoot)->safeLoad();
 }
 
+/*
+| A developer .env may set PAYMENTS_CHECKOUT_METHODS=paypal for PayPal-only E2E. PHPUnit must not
+| inherit that: config/payments.php resolves checkout_method_keys from env() at load time. Tests
+| that need a specific whitelist call config([...]) explicitly.
+*/
+unset($_ENV['PAYMENTS_CHECKOUT_METHODS'], $_SERVER['PAYMENTS_CHECKOUT_METHODS']);
+@putenv('PAYMENTS_CHECKOUT_METHODS');
+
 $connection = $_ENV['DB_CONNECTION'] ?? getenv('DB_CONNECTION') ?? 'sqlite';
 $connection = is_string($connection) ? strtolower($connection) : 'sqlite';
 

@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** The storefront products listing was refactored from numbered pagination to infinite scroll, and the tester signed off after automated verification with documented residual browser UX follow-up for the product owner.
+- **What was done:** `ProductListPage.jsx` now uses `useInfiniteQuery` with an Intersection Observer sentinel, strips legacy `?page=` from the URL, adds `shop.catalog.scroll_for_more` in `ca`/`es` locales, and `ProductCatalogIndexPaginationTest` locks the paginated JSON contract for infinite-scroll clients.
+- **What was tested:** `php artisan test` passed (68 tests, 5 skipped, including `ProductCatalogIndexPaginationTest`), `npm run build` and `php artisan routes:smoke` passed, and catalog routes/API were checked via HTTP; full in-browser scroll UX was not exercised (surrogate/API coverage per test report).
+- **Why closed:** Tester **overall PASS** — all automated gates green; manual scroll/filter items documented as surrogate with optional PO browser confirmation.
+- **Closed at (UTC):** 2026-04-11 16:51
+---
+
 # Remove pagination and implement infinite scrolling on `/products`
 
 ## GitHub

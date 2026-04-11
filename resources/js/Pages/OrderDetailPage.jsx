@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
+import { emitAppToast } from '../toastEvents';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -22,6 +23,8 @@ export default function OrderDetailPage() {
   const [inlineCheckout, setInlineCheckout] = useState(null);
   const [stripeUiError, setStripeUiError] = useState('');
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
+  const [paypalReturnInfo, setPaypalReturnInfo] = useState('');
+  const [payWarning, setPayWarning] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -41,6 +44,12 @@ export default function OrderDetailPage() {
   }, [location.state, location.pathname, navigate]);
 
   useEffect(() => {
+    if (!location.state?.paypalHostedWindow) return;
+    emitAppToast(t('shop.order.paypal_window_hint'), 'info');
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state, location.pathname, navigate, t]);
+
+  useEffect(() => {
     if (!order?.payment_methods_available) return;
     const m = order.payment_methods_available;
     setPaymentMethod((pm) => (m[pm] ? pm : ['card', 'paypal'].find((k) => m[k]) || 'card'));
@@ -53,6 +62,9 @@ export default function OrderDetailPage() {
     const needsRefresh = payment != null || sp.has('payment_intent') || sp.has('redirect_status');
     if (!needsRefresh) return;
     if (payment === 'ko') setPayError(t('shop.order.payment_return_ko'));
+    if (payment === 'paypal_return') {
+      setPaypalReturnInfo(t('shop.order.paypal_return_check'));
+    }
     api.get(`orders/${id}`).then((r) => {
       if (r.data.success) setOrder(r.data.data);
     });
@@ -63,6 +75,7 @@ export default function OrderDetailPage() {
   const handlePay = async (e) => {
     e.preventDefault();
     setPayError('');
+    setPayWarning('');
     setStripeUiError('');
     setPaypalApprovalFallbackUrl(null);
     setInlineCheckout(null);
@@ -87,6 +100,7 @@ export default function OrderDetailPage() {
       if (c?.gateway === 'paypal' && c.approval_url) {
         const opened = openPayPalApprovalInNewTab(c.approval_url);
         if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
+        navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
         return;
       }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
@@ -245,6 +259,18 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
+      {paypalReturnInfo && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {paypalReturnInfo}
+        </div>
+      )}
+
+      {payWarning && (
+        <div role="status" className="alert alert-warning mt-4 text-sm">
+          {payWarning}
+        </div>
+      )}
+
       {payError && <div role="alert" className="alert alert-error mt-4 text-sm">{payError}</div>}
 
       {paypalApprovalFallbackUrl && (
@@ -339,6 +365,14 @@ export default function OrderDetailPage() {
                     setInlineCheckout(null);
                   }}
                   onError={(msg) => setStripeUiError(msg)}
+                  onCancel={() => {
+                    const msg = t('shop.payment.paypal_not_completed');
+                    setStripeUiError('');
+                    setPaypalReturnInfo('');
+                    setPayError('');
+                    emitAppToast(msg, 'warning');
+                    setPayWarning(msg);
+                  }}
                 />
                 {stripeUiError ? <div role="alert" className="alert alert-error text-sm">{stripeUiError}</div> : null}
               </div>

@@ -43,11 +43,17 @@ export default function OrdersPage() {
           {orders.map((o) => {
             const statusKey = `shop.status.${o.status}`;
             const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : o.status;
+            const paymentDue = !o.has_payment && o.can_pay;
             return (
               <li key={o.id} className="card bg-base-100 shadow">
                 <div className="card-body flex flex-col gap-4 min-w-0 sm:flex-row sm:justify-between sm:items-center">
                   <div className="min-w-0">
-                    <p className="font-semibold">{t('shop.order')} #{o.id}</p>
+                    <p className="font-semibold flex flex-wrap items-center gap-2">
+                      <span>{t('shop.order')} #{o.id}</span>
+                      {paymentDue ? (
+                        <span className="badge badge-warning badge-sm font-normal">{t('shop.order.list_payment_due')}</span>
+                      ) : null}
+                    </p>
                     <p className="text-sm text-base-content/70 break-words">
                       {o.order_date ? new Date(o.order_date).toLocaleDateString() : ''} · {statusLabel}
                     </p>

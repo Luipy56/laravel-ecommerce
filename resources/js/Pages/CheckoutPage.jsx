@@ -44,6 +44,7 @@ export default function CheckoutPage() {
   });
   const [checkoutFormError, setCheckoutFormError] = useState('');
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
+  const [paypalCancelWarning, setPaypalCancelWarning] = useState('');
   const wantsInstallation = !!cart.installation_requested;
 
   useEffect(() => {
@@ -120,6 +121,7 @@ export default function CheckoutPage() {
     setLoading(true);
     setActiveCheckout(null);
     setPaypalApprovalFallbackUrl(null);
+    setPaypalCancelWarning('');
     setStripeUiError('');
     try {
       const toValidate = wantsInstallation ? { ...form, payment_method: null } : form;
@@ -159,6 +161,7 @@ export default function CheckoutPage() {
       if (c?.gateway === 'paypal' && c.approval_url) {
         const opened = openPayPalApprovalInNewTab(c.approval_url);
         if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
+        navigate('/orders/' + d.id, { state: { paypalHostedWindow: true } });
         return;
       }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
@@ -387,7 +390,18 @@ export default function CheckoutPage() {
               paymentId={activeCheckout.paypal.payment_id}
               onSuccess={() => navigate(`/orders/${activeCheckout.orderId}`)}
               onError={(msg) => setStripeUiError(msg)}
+              onCancel={() => {
+                const msg = t('shop.payment.paypal_not_completed');
+                setPaypalCancelWarning(msg);
+                setStripeUiError('');
+                emitAppToast(msg, 'warning');
+              }}
             />
+            {paypalCancelWarning ? (
+              <div role="status" className="alert alert-warning text-sm mt-2">
+                {paypalCancelWarning}
+              </div>
+            ) : null}
             {stripeUiError ? <div role="alert" className="alert alert-error text-sm mt-2">{stripeUiError}</div> : null}
             <div className="flex flex-wrap gap-2 pt-2">
               <Link to={`/orders/${activeCheckout.orderId}`} className="btn btn-ghost btn-sm">

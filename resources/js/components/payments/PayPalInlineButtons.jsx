@@ -5,13 +5,22 @@ import { api } from '../../api';
 /**
  * PayPal Smart Payment Buttons: order is already created server-side; createOrder returns its id.
  */
-export default function PayPalInlineButtons({ clientId, paypalOrderId, paymentId, onSuccess, onError }) {
+export default function PayPalInlineButtons({
+  clientId,
+  paypalOrderId,
+  paymentId,
+  onSuccess,
+  onError,
+  onCancel,
+}) {
   const { t } = useTranslation();
   const containerRef = useRef(null);
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
+  const onCancelRef = useRef(onCancel);
   onSuccessRef.current = onSuccess;
   onErrorRef.current = onError;
+  onCancelRef.current = onCancel;
 
   useEffect(() => {
     if (!clientId || !paypalOrderId || !paymentId) {
@@ -81,6 +90,11 @@ export default function PayPalInlineButtons({ clientId, paypalOrderId, paymentId
           },
           onError: (err) => {
             onErrorRef.current(err?.message || t('common.error'));
+          },
+          onCancel: () => {
+            if (typeof onCancelRef.current === 'function') {
+              onCancelRef.current();
+            }
           },
         });
         return buttonsInstance.render(containerRef.current);

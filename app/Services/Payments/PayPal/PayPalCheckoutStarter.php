@@ -45,12 +45,18 @@ class PayPalCheckoutStarter implements PaymentCheckoutStarter
         $customId = (string) $payment->id;
         $invoiceId = 'ORD-'.$order->id;
 
+        $base = rtrim((string) config('app.url'), '/');
+        $cancelUrl = $base.'/orders/'.$order->id.'?payment=ko';
+        $returnUrl = $base.'/orders/'.$order->id.'?payment=paypal_return';
+
         $created = $this->client->createOrder(
             $amount,
             $currency,
             $referenceId,
             $customId,
             $invoiceId,
+            $returnUrl,
+            $cancelUrl,
         );
 
         $paypalOrderId = $created['id'] ?? null;

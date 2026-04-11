@@ -100,8 +100,26 @@ class PayPalClient
     /**
      * @return array<string, mixed>
      */
-    public function createOrder(string $value, string $currencyCode, string $referenceId, string $customId, string $invoiceId): array
-    {
+    public function createOrder(
+        string $value,
+        string $currencyCode,
+        string $referenceId,
+        string $customId,
+        string $invoiceId,
+        ?string $returnUrl = null,
+        ?string $cancelUrl = null,
+    ): array {
+        $applicationContext = [
+            'shipping_preference' => 'NO_SHIPPING',
+            'user_action' => 'PAY_NOW',
+        ];
+        if ($returnUrl !== null && $returnUrl !== '') {
+            $applicationContext['return_url'] = $returnUrl;
+        }
+        if ($cancelUrl !== null && $cancelUrl !== '') {
+            $applicationContext['cancel_url'] = $cancelUrl;
+        }
+
         $payload = [
             'intent' => 'CAPTURE',
             'purchase_units' => [
@@ -115,10 +133,7 @@ class PayPalClient
                     ],
                 ],
             ],
-            'application_context' => [
-                'shipping_preference' => 'NO_SHIPPING',
-                'user_action' => 'PAY_NOW',
-            ],
+            'application_context' => $applicationContext,
         ];
 
         $response = $this->authorizedJson('POST', '/v2/checkout/orders', $payload);

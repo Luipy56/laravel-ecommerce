@@ -107,6 +107,8 @@ class PayPalPaymentTest extends TestCase
 
     public function test_paypal_checkout_starter_creates_order_and_updates_payment(): void
     {
+        config(['app.url' => 'https://store.example.test']);
+
         Http::fake([
             'api-m.sandbox.paypal.com/v1/oauth2/token' => Http::response([
                 'access_token' => 'fake_access',
@@ -155,6 +157,21 @@ class PayPalPaymentTest extends TestCase
         $this->assertSame((int) $payment->id, $payload['payment_id']);
         $this->assertSame(self::FAKE_PAYPAL_CLIENT_ID, $payload['client_id']);
         $this->assertSame('https://www.sandbox.paypal.com/checkoutnow?token=NEW_ORDER_ID', $payload['approval_url']);
+
+        Http::assertSent(function (\Illuminate\Http\Client\Request $request) use ($order) {
+            if ($request->method() !== 'POST' || ! str_contains($request->url(), '/v2/checkout/orders')) {
+                return false;
+            }
+            $body = json_decode($request->body(), true);
+            if (! is_array($body)) {
+                return false;
+            }
+            $expectedCancel = 'https://store.example.test/orders/'.$order->id.'?payment=ko';
+            $expectedReturn = 'https://store.example.test/orders/'.$order->id.'?payment=paypal_return';
+
+            return ($body['application_context']['cancel_url'] ?? null) === $expectedCancel
+                && ($body['application_context']['return_url'] ?? null) === $expectedReturn;
+        });
     }
 
     public function test_paypal_checkout_starter_reuses_created_order(): void

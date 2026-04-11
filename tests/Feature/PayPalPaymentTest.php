@@ -39,7 +39,7 @@ class PayPalPaymentTest extends TestCase
         $order = Order::query()->create([
             'client_id' => $client->id,
             'kind' => Order::KIND_ORDER,
-            'status' => Order::STATUS_PENDING,
+            'status' => Order::STATUS_AWAITING_PAYMENT,
             'order_date' => now(),
             'shipping_price' => Order::SHIPPING_FLAT_EUR,
             'installation_requested' => false,
@@ -235,6 +235,7 @@ class PayPalPaymentTest extends TestCase
 
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertTrue($payment->fresh()->isSuccessful());
+        $this->assertSame(Order::STATUS_PENDING, $payment->fresh()->order->status);
 
         // Regression: capture must POST an empty JSON object (stdClass), not only arrays; array-only typing on the client breaks this path.
         Http::assertSent(function ($request) {
@@ -293,6 +294,16 @@ class PayPalPaymentTest extends TestCase
         ]);
 
         $response->assertStatus(422);
+    }
+
+    public function test_order_invoice_forbidden_until_payment_succeeds(): void
+    {
+        $client = $this->makeClient();
+        $payment = $this->makePayPalPaymentForClient($client);
+        $order = $payment->order;
+
+        $this->actingAs($client, 'web');
+        $this->getJson('/api/v1/orders/'.$order->id.'/invoice')->assertForbidden();
     }
 
     public function test_paypal_test_credentials_command_fails_when_unconfigured(): void

@@ -41,6 +41,9 @@ class Order extends Model
 
     public const STATUS_PENDING = 'pending';
 
+    /** Order placed; PayPal (or external) payment not captured yet — do not treat as paid/fulfilment queue. */
+    public const STATUS_AWAITING_PAYMENT = 'awaiting_payment';
+
     public const STATUS_AWAITING_INSTALLATION_PRICE = 'awaiting_installation_price';
 
     public const STATUS_IN_TRANSIT = 'in_transit';

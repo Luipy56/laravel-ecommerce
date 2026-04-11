@@ -5,11 +5,12 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
 const KINDS = ['cart', 'order', 'like'];
-const STATUSES = ['pending', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
+const STATUSES = ['pending', 'awaiting_payment', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
 
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
+    case 'awaiting_payment': return 'badge-warning';
     case 'awaiting_installation_price': return 'badge-info text-base-content';
     case 'in_transit': return 'badge-success';
     case 'sent': return 'badge-success';

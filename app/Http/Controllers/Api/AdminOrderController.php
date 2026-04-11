@@ -186,6 +186,7 @@ class AdminOrderController extends Controller
         if ($order->kind === Order::KIND_ORDER) {
             $rules['status'] = ['required', 'string', 'in:'.implode(',', [
                 Order::STATUS_PENDING,
+                Order::STATUS_AWAITING_PAYMENT,
                 Order::STATUS_AWAITING_INSTALLATION_PRICE,
                 Order::STATUS_IN_TRANSIT,
                 Order::STATUS_SENT,

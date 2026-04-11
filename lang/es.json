@@ -54,6 +54,8 @@
     "shop.status.installation_pending": "Pendiente instalación",
     "shop.status.installation_confirmed": "Finalizado",
     "shop.status.awaiting_installation_price": "Pendiente presupuesto instalación",
+    "shop.status.awaiting_payment": "Pendiente de pago",
+    "shop.order.awaiting_payment_notice": "El pago aún no se ha completado. Si cerraste PayPal sin pagar, puedes volver a intentar el pago desde aquí.",
     "shop.order.already_paid": "Este pedido ya está pagado.",
     "shop.order.cannot_pay_yet": "Aún no puedes pagar: espera el presupuesto de instalación o contáctanos.",
     "shop.order.waive_installation_invalid": "Solo se puede cancelar la solicitud mientras esperamos el presupuesto.",

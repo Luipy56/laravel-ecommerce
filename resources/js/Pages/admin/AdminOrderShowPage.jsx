@@ -10,6 +10,7 @@ const PLACEHOLDER_IMAGE = '/images/dummy.jpg';
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
+    case 'awaiting_payment': return 'badge-warning';
     case 'awaiting_installation_price': return 'badge-info text-base-content';
     case 'in_transit': return 'badge-success';
     case 'sent': return 'badge-success';

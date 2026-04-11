@@ -60,11 +60,14 @@ class OrderController extends Controller
         }
 
         DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote) {
+            $initialStatus = $awaitingInstallationQuote
+                ? Order::STATUS_AWAITING_INSTALLATION_PRICE
+                : (($validated['payment_method'] ?? null) === Payment::METHOD_PAYPAL
+                    ? Order::STATUS_AWAITING_PAYMENT
+                    : Order::STATUS_PENDING);
             $cart->update([
                 'kind' => Order::KIND_ORDER,
-                'status' => $awaitingInstallationQuote
-                    ? Order::STATUS_AWAITING_INSTALLATION_PRICE
-                    : Order::STATUS_PENDING,
+                'status' => $initialStatus,
                 'order_date' => now(),
                 'shipping_price' => Order::SHIPPING_FLAT_EUR,
                 'installation_status' => $awaitingInstallationQuote ? Order::INSTALLATION_PENDING : null,
@@ -200,6 +203,9 @@ class OrderController extends Controller
                 'status' => Payment::STATUS_PENDING,
                 'currency' => 'EUR',
             ]);
+            if ($validated['payment_method'] === Payment::METHOD_PAYPAL) {
+                $order->update(['status' => Order::STATUS_AWAITING_PAYMENT]);
+            }
         });
 
         $payment = $order->payments()->latest()->first();
@@ -377,6 +383,9 @@ class OrderController extends Controller
     {
         if ($order->client_id !== $request->user()->id || $order->kind !== Order::KIND_ORDER) {
             abort(404);
+        }
+        if (! $order->hasSuccessfulPayment()) {
+            abort(403);
         }
         $locale = $request->query('locale');
         if (! in_array($locale, ['ca', 'es'], true)) {

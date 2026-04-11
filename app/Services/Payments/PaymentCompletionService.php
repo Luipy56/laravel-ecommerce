@@ -27,6 +27,12 @@ class PaymentCompletionService
                 'failure_code' => null,
                 'failure_message' => null,
             ], $extraAttributes));
+
+            $payment->loadMissing('order');
+            $order = $payment->order;
+            if ($order && $order->kind === Order::KIND_ORDER && $order->status === Order::STATUS_AWAITING_PAYMENT) {
+                $order->update(['status' => Order::STATUS_PENDING]);
+            }
         });
 
         if ($shouldNotify) {

@@ -12,7 +12,8 @@ Enum order_kind {
 }
 
 Enum order_status {
-  pending [note: 'Pending; ready to pay when no install quote needed']
+  pending [note: 'Paid (or non-PayPal path); fulfilment queue — not yet shipped']
+  awaiting_payment [note: 'Checkout started with PayPal; capture not done — do not treat as paid']
   awaiting_installation_price [note: 'Client requested installation; admin must set fee before payment']
   in_transit [note: 'In transit']
   sent [note: 'Shipped (with shipping date)']

@@ -21,16 +21,25 @@
 - **Seguridad:** El estado pagado debe basarse en **servidor** (respuesta de capture o webhook verificado), no solo en query params del return URL.
 - **i18n:** Cualquier mensaje nuevo al usuario en **ca** y **es**.
 
-## Testing instructions
+## Implementation summary
 
-1. `php artisan migrate:fresh --seed` **solo** si el cambio toca esquema o seeders; si no, al menos `php artisan test`.
-2. `php artisan test` — actualizar o añadir tests que cubran: pedido **no** considerado pagado con solo orden PayPal CREATED; tras **capture** simulado/mocked, sí.
-3. `php artisan routes:smoke`
-4. `npm run build` si cambia el front.
-5. **Manual (sandbox PayPal):** Flujo completo: iniciar checkout PayPal → **cerrar** ventana sin pagar → verificar que el pedido **no** aparece como pagado / no genera la percepción errónea descrita. Luego flujo feliz hasta capture y verificar pedido pagado.
+- **Nuevo estado de comanda:** `Order::STATUS_AWAITING_PAYMENT` (`awaiting_payment`). Se asigna en `POST /api/v1/orders/checkout` cuando el método de pago es **PayPal**, y en `POST /api/v1/orders/{id}/pay` al iniciar un pago PayPal. Card/Stripe y checkout simulado con tarjeta siguen usando `pending` como antes.
+- **Tras cobro exitoso:** `PaymentCompletionService::markSucceeded()` pasa la comanda de `awaiting_payment` a `pending` (cola habitual). Los correos de “pago confirmado” siguen disparándose solo vía `markSucceeded` (sin cambio).
+- **Factura:** `GET /api/v1/orders/{order}/invoice` responde **403** si no hay pago con éxito (`hasSuccessfulPayment()`). La lista de comandes ya no muestra el enlace a factura sin pago.
+- **UI:** Aviso informativo en ficha de comanda cuando l’estat és `awaiting_payment` i encara no hi ha pagament; traduccions **ca/es** (també `lang/ca.json` / `lang/es.json` per PDF si aplica).
+- **Admin:** Filtre i edició de comandes inclouen `awaiting_payment`; `trash/diagramZero.dbml` actualitzat.
+- **Proves:** `CheckoutPaymentConfigTest` (estat després del checkout PayPal), `PayPalPaymentTest` (captura → `pending`, factura 403 sense pagament).
 
 ## Acceptance criteria
 
 - Cerrar PayPal sin pagar **no** deja el pedido presentado al cliente como “ya pagado” / confirmado en el sentido reportado (definir criterio exacto en copy y estado).
 - Tras pago real en sandbox, el pedido refleja cobro conforme a la implementación elegida.
 - Suite automatizada actualizada; sin regresiones en Stripe u otros métodos si comparten modelos de pedido.
+
+## Testing instructions
+
+1. `php artisan test` — ha de passar (incloent `PayPalPaymentTest`, `CheckoutPaymentConfigTest`, `PaymentWebhookTest`).
+2. `php artisan routes:smoke` — cap resposta 500 en GET.
+3. `npm run build` — compila sense errors (canvis a `resources/js/`).
+4. **Manual (sandbox PayPal):** Checkout amb PayPal → tancar finestra sense pagar → comanda amb estat “Pendent de pagament” / “Pendiente de pago”, sense factura ni percepció de pagament completat; completar pagament → estat `pending`, `has_payment` cert, factura accessible.
+5. **Regressió Stripe / targeta simulada:** checkout amb targeta en entorn amb pagament simulat → comanda `pending` i correu de confirmació com abans.

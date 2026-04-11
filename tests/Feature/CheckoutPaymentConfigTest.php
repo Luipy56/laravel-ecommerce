@@ -161,6 +161,7 @@ class CheckoutPaymentConfigTest extends TestCase
         $response = $this->postJson('/api/v1/orders/checkout', $payload);
 
         $response->assertCreated();
+        $response->assertJsonPath('data.status', 'awaiting_payment');
         $response->assertJsonPath('data.payment_checkout.gateway', 'paypal');
         $response->assertJsonPath('data.payment_checkout.paypal_order_id', 'SANDBOX_ORDER_X');
         $response->assertJsonPath('data.has_payment', false);

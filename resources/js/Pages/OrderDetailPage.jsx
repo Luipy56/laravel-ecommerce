@@ -165,6 +165,12 @@ export default function OrderDetailPage() {
         </div>
       )}
 
+      {!awaitingQuote && order.status === 'awaiting_payment' && !order.has_payment && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('shop.order.awaiting_payment_notice')}
+        </div>
+      )}
+
       {(shippingAddress || installationAddress) && (
         <div className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
           <div className="card-body">

@@ -366,7 +366,7 @@ export default function ProfilePage() {
     <div className="mx-auto w-full min-w-0 max-w-2xl space-y-8 pb-12">
       <PageTitle>{t('shop.profile')}</PageTitle>
       {saved && (
-        <div role="alert" className="alert alert-success">
+        <div role="alert" className="alert alert-app-success">
           {t('common.success')}
         </div>
       )}

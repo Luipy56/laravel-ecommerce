@@ -1,5 +1,7 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import i18n from '../i18n';
 import { api } from '../api';
+import { emitAppToast } from '../toastEvents';
 import { useAuth } from './AuthContext';
 
 /**
@@ -7,8 +9,6 @@ import { useAuth } from './AuthContext';
  * After login, front-end should call mergeCart() so session lines are merged into DB.
  */
 const CartContext = createContext(null);
-
-const ADDED_FEEDBACK_DURATION_MS = 2500;
 
 export function CartProvider({ children }) {
   const { user } = useAuth();
@@ -20,8 +20,6 @@ export function CartProvider({ children }) {
     total_with_shipping: 9,
   });
   const [loading, setLoading] = useState(false);
-  const [showAddedFeedback, setShowAddedFeedback] = useState(false);
-  const addedFeedbackTimeoutRef = useRef(null);
 
   const fetchCart = useCallback(async (signal) => {
     setLoading(true);
@@ -97,12 +95,7 @@ export function CartProvider({ children }) {
           total_with_shipping: data.data.total_with_shipping ?? (Number(data.data.total ?? 0) + (data.data.shipping_flat_eur ?? c.shipping_flat_eur)),
         }));
       } else await fetchCart();
-      if (addedFeedbackTimeoutRef.current) clearTimeout(addedFeedbackTimeoutRef.current);
-      setShowAddedFeedback(true);
-      addedFeedbackTimeoutRef.current = setTimeout(() => {
-        setShowAddedFeedback(false);
-        addedFeedbackTimeoutRef.current = null;
-      }, ADDED_FEEDBACK_DURATION_MS);
+      emitAppToast(i18n.t('shop.cart.added'), 'success');
       return { success: true };
     }
     return { success: false };
@@ -152,17 +145,10 @@ export function CartProvider({ children }) {
 
   const itemCount = cart.lines.reduce((acc, l) => acc + (l.quantity || 0), 0);
 
-  useEffect(() => {
-    return () => {
-      if (addedFeedbackTimeoutRef.current) clearTimeout(addedFeedbackTimeoutRef.current);
-    };
-  }, []);
-
   const value = {
     cart,
     itemCount,
     loading,
-    showAddedFeedback,
     fetchCart,
     mergeCart,
     addLine,

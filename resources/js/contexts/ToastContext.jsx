@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const ToastContext = createContext(null);
@@ -6,7 +7,8 @@ const ToastContext = createContext(null);
 let idSeq = 0;
 
 /**
- * Global daisyUI toasts (bottom-end). Use showToast({ message, type }) from any component under ToastProvider.
+ * Global daisyUI toast stack (top-end, below main nav). Use showToast({ message, type }) or emitAppToast from non-React code.
+ * Types: success (orange), error, warning, info.
  */
 export function ToastProvider({ children }) {
   const [items, setItems] = useState([]);
@@ -43,16 +45,30 @@ export function ToastProvider({ children }) {
   );
 }
 
+function toastPlacementClass(pathname) {
+  if (pathname === '/admin/login') {
+    return 'toast toast-end toast-top z-[100] fixed right-4 top-4 max-w-[100vw] sm:right-6';
+  }
+  const isAdminShell = pathname.startsWith('/admin');
+  if (isAdminShell) {
+    return 'toast toast-end toast-top z-[100] fixed right-4 top-[calc(3.75rem+0.25rem)] max-w-[100vw] sm:right-6';
+  }
+  return 'toast toast-end toast-top z-[100] fixed right-4 top-[calc(6rem+0.25rem)] max-w-[100vw] sm:right-6 lg:top-[calc(4rem+0.25rem)]';
+}
+
 function ToastViewport({ items, onDismiss }) {
+  const { pathname } = useLocation();
   const { t } = useTranslation();
   if (items.length === 0) return null;
 
+  const wrapClass = toastPlacementClass(pathname);
+
   return (
-    <div className="toast toast-end toast-bottom z-[100]">
+    <div className={wrapClass}>
       {items.map((item) => {
         const color =
           item.type === 'success'
-            ? 'alert-success'
+            ? 'alert-app-success'
             : item.type === 'error'
               ? 'alert-error'
               : item.type === 'warning'
@@ -63,7 +79,7 @@ function ToastViewport({ items, onDismiss }) {
             <span className="text-sm">{item.message}</span>
             <button
               type="button"
-              className="btn btn-ghost btn-xs shrink-0"
+              className="btn btn-ghost btn-xs shrink-0 text-inherit opacity-90 hover:opacity-100"
               onClick={() => onDismiss(item.id)}
               aria-label={t('common.close')}
             >

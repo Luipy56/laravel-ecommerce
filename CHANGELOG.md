@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-04-11
+
 ### Changed
 
 - **Order detail:** Removed the blue simulated-payment development notice (`checkout.payment.simulated_mode_notice`) from the pay-again section; the key remains for checkout copy where needed.
 - **Order detail:** Pending-payment notice no longer mentions PayPal explicitly (`shop.order.awaiting_payment_notice` in `ca` / `es`).
+- **Storefront / Admin:** Unified global app toasts (`ToastProvider`): fixed **top-end** placement below the main navigation (with offsets on admin routes); a single stack for cart “added”, custom-solution submit success, admin success, and `emitAppToast` from non-React code. Success styling uses brand orange (`.alert-app-success`) instead of semantic green. Removed standalone `CartAddedToast`; `AdminToastProvider` delegates to `ToastContext`; `CartContext` triggers feedback via `emitAppToast`.
+- **Profile:** Inline “saved” confirmation uses `alert-app-success` for consistency with the global success tone.
+- Agent pipeline: archived closed unified app notifications task (`agents/tasks/done/2026/04/11/CLOSED-20260411-1800-unified-app-notifications-top-right-orange-success.md`).
 
 ### Removed
 

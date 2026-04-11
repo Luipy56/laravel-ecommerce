@@ -3,7 +3,6 @@ import { Link, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
 import CartWidget from './CartWidget';
-import CartAddedToast from './CartAddedToast';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import CookieConsentBanner from './CookieConsentBanner';
@@ -35,7 +34,6 @@ export default function Layout() {
         </main>
         <Footer />
         <CartWidget />
-        <CartAddedToast />
         <ScrollToTop />
         <CookieConsentBanner />
       </div>

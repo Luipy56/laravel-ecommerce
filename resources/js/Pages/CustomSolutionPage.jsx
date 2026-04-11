@@ -1,14 +1,14 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
+import { useToast } from '../contexts/ToastContext';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
-
-const TOAST_DURATION_MS = 3000;
 
 export default function CustomSolutionPage() {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [form, setForm] = useState({
     email: '',
     phone: '',
@@ -21,11 +21,9 @@ export default function CustomSolutionPage() {
     files: [],
   });
   const [loading, setLoading] = useState(false);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const toastTimeoutRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,12 +67,7 @@ export default function CustomSolutionPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (r.data.success) {
-        if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-        setShowSuccessToast(true);
-        toastTimeoutRef.current = setTimeout(() => {
-          setShowSuccessToast(false);
-          toastTimeoutRef.current = null;
-        }, TOAST_DURATION_MS);
+        showToast({ message: t('shop.custom_solution.success'), type: 'success' });
         setForm({
           email: '',
           phone: '',
@@ -92,7 +85,7 @@ export default function CustomSolutionPage() {
     } finally {
       setLoading(false);
     }
-  }, [form, t]);
+  }, [form, t, showToast]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -112,18 +105,6 @@ export default function CustomSolutionPage() {
       <PageTitle>{t('shop.custom_solution')}</PageTitle>
       <p className="text-sm text-base-content/70 mb-4">{t('register.required_note')}</p>
       {error && <div className="alert alert-error mb-4">{error}</div>}
-      {showSuccessToast && (
-        <div
-          className="toast toast-end toast-bottom z-50 p-4"
-          role="status"
-          aria-live="polite"
-          aria-label={t('shop.custom_solution.success')}
-        >
-          <div className="alert alert-success shadow-lg">
-            <span>{t('shop.custom_solution.success')}</span>
-          </div>
-        </div>
-      )}
       <ConfirmModal
         open={confirmModalOpen}
         onClose={() => setConfirmModalOpen(false)}

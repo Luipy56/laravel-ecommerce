@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
 import ProductCard from '../components/ProductCard';
@@ -12,12 +12,11 @@ const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 
 /**
  * Query string for filters. When categoryInPath is true, category is only in the URL path (/categories/:id/products), not repeated here.
  */
-function buildSearchParams({ selectedCategoryId, featureIds, search, page, categoryInPath = false }) {
+function buildSearchParams({ selectedCategoryId, featureIds, search, categoryInPath = false }) {
   const next = new URLSearchParams();
   if (search) next.set('search', search);
   if (!categoryInPath && selectedCategoryId) next.set('category_id', String(selectedCategoryId));
   featureIds.forEach((id) => next.append('feature_id', id));
-  if (page > 1) next.set('page', String(page));
   return next;
 }
 
@@ -78,13 +77,15 @@ export default function ProductListPage() {
 
   const featureIds = searchParams.getAll('feature_id');
   const search = searchParams.get('search');
-  const pageParam = searchParams.get('page');
-  const currentPage = Math.max(1, parseInt(pageParam || '1', 10) || 1);
+
+  const featureIdsKey = featureIds.join(',');
 
   const catalogQueryKey = useMemo(
-    () => ['products', 'catalog', selectedCategoryId ?? '', featureIds.join(','), search ?? '', currentPage],
-    [selectedCategoryId, featureIds.join(','), search, currentPage]
+    () => ['products', 'catalog', selectedCategoryId ?? '', featureIdsKey, search ?? ''],
+    [selectedCategoryId, featureIdsKey, search]
   );
+
+  const loadMoreSentinelRef = useRef(null);
 
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
@@ -102,26 +103,65 @@ export default function ProductListPage() {
     },
   });
 
-  const productsQuery = useQuery({
+  const catalogInfinite = useInfiniteQuery({
     queryKey: catalogQueryKey,
-    queryFn: async ({ signal }) => {
-      const params = { page: currentPage, include_packs: true };
+    initialPageParam: 1,
+    queryFn: async ({ pageParam, signal }) => {
+      const params = { page: pageParam, include_packs: true };
       if (selectedCategoryId) params.category_id = selectedCategoryId;
       if (featureIds.length) params.feature_ids = featureIds;
       if (search) params.search = search;
       const r = await api.get('products', { params, signal });
       return mapCatalogFromResponse(r);
     },
+    getNextPageParam: (lastPage) => {
+      const { current_page: cur, last_page: last } = lastPage.pagination;
+      if (cur < last) return cur + 1;
+      return undefined;
+    },
   });
 
   useEffect(() => {
-    if (!productsQuery.isSuccess || !productsQuery.data) return;
-    requestAnimationFrame(() => {
+    if (searchParams.get('page')) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('page');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const filterKey = useMemo(
+    () => `${selectedCategoryId ?? ''}|${featureIdsKey}|${search ?? ''}`,
+    [selectedCategoryId, featureIdsKey, search]
+  );
+  const prevFilterKeyRef = useRef(null);
+  useEffect(() => {
+    if (prevFilterKeyRef.current === null) {
+      prevFilterKeyRef.current = filterKey;
+      return;
+    }
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey;
       requestAnimationFrame(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
-    });
-  }, [productsQuery.isSuccess, productsQuery.dataUpdatedAt]);
+    }
+  }, [filterKey]);
+
+  useEffect(() => {
+    const el = loadMoreSentinelRef.current;
+    if (!el) return undefined;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.some((e) => e.isIntersecting);
+        if (!hit) return;
+        if (!catalogInfinite.hasNextPage || catalogInfinite.isFetchingNextPage) return;
+        catalogInfinite.fetchNextPage();
+      },
+      { root: null, rootMargin: '120px', threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [catalogInfinite.hasNextPage, catalogInfinite.isFetchingNextPage, catalogInfinite.fetchNextPage]);
 
   const setFilters = useCallback(
     (updates) => {
@@ -129,12 +169,11 @@ export default function ProductListPage() {
         selectedCategoryId: updates.selectedCategoryId !== undefined ? updates.selectedCategoryId : selectedCategoryId,
         featureIds: updates.featureIds ?? featureIds,
         search: updates.search ?? search ?? '',
-        page: updates.page ?? currentPage,
         categoryInPath: isCategoryRoute,
       });
       setSearchParams(next);
     },
-    [selectedCategoryId, featureIds, search, currentPage, setSearchParams, isCategoryRoute]
+    [selectedCategoryId, featureIds, search, setSearchParams, isCategoryRoute]
   );
 
   const handleAllCategories = useCallback(() => {
@@ -142,7 +181,6 @@ export default function ProductListPage() {
       selectedCategoryId: null,
       featureIds: [],
       search: search ?? '',
-      page: 1,
       categoryInPath: false,
     });
     navigate('/products?' + next.toString());
@@ -155,7 +193,6 @@ export default function ProductListPage() {
         selectedCategoryId: null,
         featureIds,
         search: search ?? '',
-        page: 1,
         categoryInPath: true,
       }).toString();
       navigate(`/categories/${sid}/products${qs ? `?${qs}` : ''}`);
@@ -169,17 +206,20 @@ export default function ProductListPage() {
       const next = featureIds.includes(sid)
         ? featureIds.filter((f) => f !== sid)
         : [...featureIds, sid];
-      setFilters({ featureIds: next, page: 1 });
+      setFilters({ featureIds: next });
     },
     [featureIds, setFilters]
   );
 
-  const categories = categoriesQuery.data ?? [];
+  const catalogItems = useMemo(
+    () => catalogInfinite.data?.pages.flatMap((p) => p.items) ?? [],
+    [catalogInfinite.data?.pages]
+  );
+
+  const categoriesList = categoriesQuery.data ?? [];
   const featuresList = featuresQuery.data ?? [];
-  const catalogItems = productsQuery.data?.items ?? [];
-  const pagination = productsQuery.data?.pagination ?? { ...defaultPagination };
-  const loading =
-    categoriesQuery.isPending || featuresQuery.isPending || productsQuery.isPending;
+  const loadingInitial =
+    categoriesQuery.isPending || featuresQuery.isPending || catalogInfinite.isPending;
 
   const featuresByGroup = useMemo(() => {
     const map = new Map();
@@ -202,7 +242,7 @@ export default function ProductListPage() {
                 {t('shop.categories.all')}
               </button>
             </li>
-            {categories.map((c) => (
+            {categoriesList.map((c) => (
               <li key={c.id}>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -248,7 +288,7 @@ export default function ProductListPage() {
       </aside>
       <div className="flex-1">
         <PageTitle className="mb-4">{search ? t('common.search') + ': ' + search : t('shop.products')}</PageTitle>
-        {loading ? (
+        {loadingInitial ? (
           <div className="flex justify-center py-12">
             <span className="loading loading-spinner loading-lg" />
           </div>
@@ -267,49 +307,31 @@ export default function ProductListPage() {
             <p className="text-base-content/70">{t('shop.no_products')}</p>
           )
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {catalogItems.map(({ type, item }) => (
-              <ProductCard
-                key={type === 'product' ? `p-${item.id}` : `k-${item.id}`}
-                product={type === 'product' ? item : undefined}
-                pack={type === 'pack' ? item : undefined}
-              />
-            ))}
-          </div>
-        )}
-        {pagination.last_page > 1 && (
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
-            <button
-              type="button"
-              className="btn btn-sm btn-outline btn-square"
-              disabled={pagination.current_page <= 1}
-              onClick={() => {
-                const next = new URLSearchParams(searchParams);
-                if (pagination.current_page <= 2) next.delete('page');
-                else next.set('page', String(pagination.current_page - 1));
-                setSearchParams(next);
-              }}
-              aria-label={t('shop.pagination.prev')}
-            >
-              ‹
-            </button>
-            <span className="text-sm text-base-content/80 px-2">
-              {t('shop.pagination.page')} {pagination.current_page} {t('shop.pagination.of')} {pagination.last_page}
-            </span>
-            <button
-              type="button"
-              className="btn btn-sm btn-outline btn-square"
-              disabled={pagination.current_page >= pagination.last_page}
-              onClick={() => {
-                const next = new URLSearchParams(searchParams);
-                next.set('page', String(pagination.current_page + 1));
-                setSearchParams(next);
-              }}
-              aria-label={t('shop.pagination.next')}
-            >
-              ›
-            </button>
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {catalogItems.map(({ type, item }) => (
+                <ProductCard
+                  key={type === 'product' ? `p-${item.id}` : `k-${item.id}`}
+                  product={type === 'product' ? item : undefined}
+                  pack={type === 'pack' ? item : undefined}
+                />
+              ))}
+            </div>
+            {catalogInfinite.hasNextPage ? (
+              <div
+                ref={loadMoreSentinelRef}
+                className="flex justify-center py-8 min-h-[3rem]"
+                aria-live="polite"
+                aria-busy={catalogInfinite.isFetchingNextPage}
+              >
+                {catalogInfinite.isFetchingNextPage ? (
+                  <span className="loading loading-spinner loading-md" />
+                ) : (
+                  <span className="sr-only">{t('shop.catalog.scroll_for_more')}</span>
+                )}
+              </div>
+            ) : null}
+          </>
         )}
       </div>
     </div>

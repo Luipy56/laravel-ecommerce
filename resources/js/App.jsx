@@ -16,6 +16,7 @@ import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
 import CheckoutPage from './Pages/CheckoutPage';
 import OrdersPage from './Pages/OrdersPage';
+import PurchasesPage from './Pages/PurchasesPage';
 import OrderDetailPage from './Pages/OrderDetailPage';
 import ProfilePage from './Pages/ProfilePage';
 import CustomSolutionPage from './Pages/CustomSolutionPage';
@@ -93,6 +94,7 @@ export default function App() {
                   <Route path="register" element={<RegisterPage />} />
                   <Route path="checkout" element={<CheckoutPage />} />
                   <Route path="orders" element={<OrdersPage />} />
+                  <Route path="purchases" element={<PurchasesPage />} />
                   <Route path="orders/:id" element={<OrderDetailPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="custom-solution" element={<CustomSolutionPage />} />

@@ -205,6 +205,7 @@ export default function Navbar() {
                 <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow">
                   <li><Link to="/profile">{t('shop.profile')}</Link></li>
                   <li><Link to="/orders">{t('shop.orders')}</Link></li>
+                  <li><Link to="/purchases">{t('shop.purchases')}</Link></li>
                   <li><button type="button" onClick={handleLogout}>{t('auth.logout')}</button></li>
                 </ul>
               </div>

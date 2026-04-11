@@ -262,12 +262,6 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      {canPay && anyPaymentMethod && paymentsSimulated && (
-        <div role="status" className="alert alert-info mt-4 text-sm">
-          {t('checkout.payment.simulated_mode_notice')}
-        </div>
-      )}
-
       {canPay && order.paypal_missing_credentials && (
         <div role="status" className="alert alert-info mt-4 text-sm">
           {t('checkout.payment.paypal_missing_credentials_hint')}

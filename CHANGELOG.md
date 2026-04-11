@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Order detail:** Removed the blue simulated-payment development notice (`checkout.payment.simulated_mode_notice`) from the pay-again section; the key remains for checkout copy where needed.
 - **Order detail:** Pending-payment notice no longer mentions PayPal explicitly (`shop.order.awaiting_payment_notice` in `ca` / `es`).
 
 ### Removed

@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Sandbox PayPal checkout showed CSP/CORS console warnings and declines; the task clarified that PayPal-hosted pages enforce their own CSP and traced this app’s order/capture path for operators.
+- **What was done:** Implementation added `data.paypal_mode` on `GET /api/v1/payments/config`, PayPal CSP/CORS troubleshooting in `docs/CONFIGURACION_PAGOS_CORREO.md`, centralized mode normalization, and PHPUnit `APP_KEY` for CI; flow documentation was recorded in the task.
+- **What was tested:** Tester reported **PASS**: `php artisan test` (84 passed, 5 skipped) including `CheckoutPaymentConfigTest`; `RouteSmokeTest` passed; `php artisan routes:smoke` failed only due to missing PostgreSQL PDO on the runner while `.env` targets pgsql (environment limitation); docs subsection skim passed.
+- **Why closed:** Tester overall **PASS** with documented env caveat for CLI `routes:smoke`; loop protection satisfied (first verification cycle).
+- **Closed at (UTC):** 2026-04-19 16:47
+---
+
 # PayPal checkout failure in sandbox (CSP / CORS in browser)
 
 ## GitHub
@@ -42,3 +52,32 @@ After the PayPal order is created and the user reaches the PayPal hosted checkou
 Suggested text for issue **#14**:
 
 > Implementation: Documented that CSP/CORS warnings on PayPal-hosted pages are enforced by PayPal, not Laravel; added operator-facing **`GET /api/v1/payments/config`** field **`data.paypal_mode`** (`sandbox`|`live`) and a troubleshooting section in **`docs/CONFIGURACION_PAGOS_CORREO.md`**. Capture path unchanged: **`POST /api/v1/payments/paypal/capture`** after buyer approves. PHPUnit **`APP_KEY`** added in **`phpunit.xml`** for environments without `.env`.
+
+---
+
+## Test report (tester agent, 2026-04-19 UTC)
+
+1. **Date/time (UTC) and log window:** Verification started **2026-04-19 16:45:54 UTC** (`php artisan test`). Finished **~2026-04-19 16:47 UTC**. Log window reviewed: **`storage/logs/laravel.log`** around **16:38–16:46 UTC** for artisan `routes:smoke` failures.
+
+2. **Environment:** PHP **8.4.16**, Node **v22.22.2**. Git branch **`agentdevelop`**, commit **`fac755f`**. **`APP_ENV`**: **local** (from log context). **`extension_loaded('pdo_pgsql')`**: **false** on this host (PostgreSQL PDO not installed for CLI PHP).
+
+3. **What was tested:** Per task **Testing instructions**: (1) `php artisan test`, (2) `php artisan routes:smoke`, (3) manual `curl` / `paypal_mode` operator check, (4) skim **`docs/CONFIGURACION_PAGOS_CORREO.md`** CSP/CORS subsection.
+
+4. **Results:**
+   - **`php artisan test`:** **PASS** — exit code **0**; **84 passed**, **5 skipped** (353 assertions); includes **`CheckoutPaymentConfigTest`** cases for **`data.paypal_mode`** (live exposure + unknown → sandbox). Evidence: PHPUnit summary line `Tests: 5 skipped, 84 passed`.
+   - **`php artisan routes:smoke`:** **FAIL** (this environment only) — many GET routes returned **500**; root cause **`could not find driver`** for **`Connection: pgsql`** (session DB access). Evidence: `storage/logs/laravel.log` excerpt below.
+   - **Equivalent automated smoke:** **`Tests\Feature\RouteSmokeTest`** **PASS** (`✓ all distinct get routes do not return 500`) — satisfies the same “no HTTP 500 on GET routes” intent under PHPUnit’s configured SQLite test stack.
+   - **Manual `curl` … `/api/v1/payments/config`:** **N/A** — no app server bound here; CLI DB driver missing. **`paypal_mode` behaviour** covered by **`CheckoutPaymentConfigTest`** (`payments config exposes paypal mode live`, `payments config normalizes unknown paypal mode to sandbox`).
+   - **Docs skim (`CONFIGURACION_PAGOS_CORREO.md`):** **PASS** — subsection **“PayPal sandbox: avisos CSP / CORS…”** present; **`paypal_mode`** documented next to payments config description (clear for operators).
+
+5. **Overall:** **PASS.** Automated suite and route smoke test in PHPUnit verify the change; **`php artisan routes:smoke`** could not be used on this runner because **PDO PostgreSQL is not loaded** while **`.env`** targets PostgreSQL — an environment limitation, not a regression from this task. **Loop protection:** first verification cycle (≤3 failures).
+
+6. **Product owner feedback:** Operators can rely on **`GET /api/v1/payments/config`** → **`data.paypal_mode`** to confirm **`sandbox`** vs **`live`** alignment with REST credentials. Console CSP/CORS noise on **paypal.com** pages remains upstream; real failures should be traced via **`POST /api/v1/payments/paypal/capture`** and network responses, as documented.
+
+7. **URLs tested:** **N/A — no browser** (no manual checkout session in this step).
+
+8. **Relevant log excerpts (minimal):**
+
+```text
+[2026-04-19 16:38:42] local.ERROR: could not find driver (Connection: pgsql, Host: postgresql-abpserralleria.alwaysdata.net, ...
+```

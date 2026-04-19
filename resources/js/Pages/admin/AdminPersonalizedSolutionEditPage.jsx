@@ -26,6 +26,7 @@ export default function AdminPersonalizedSolutionEditPage() {
     client_id: '',
     order_id: '',
     is_active: true,
+    clearImprovementFeedback: false,
   });
   const [clients, setClients] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -56,6 +57,7 @@ export default function AdminPersonalizedSolutionEditPage() {
           client_id: d.client_id ? String(d.client_id) : '',
           order_id: d.order_id ? String(d.order_id) : '',
           is_active: !!d.is_active,
+          clearImprovementFeedback: false,
         });
       } else setLoadError(t('common.error'));
     } catch (err) {
@@ -109,6 +111,7 @@ export default function AdminPersonalizedSolutionEditPage() {
         client_id: form.client_id ? Number(form.client_id) : null,
         order_id: form.order_id ? Number(form.order_id) : null,
         is_active: form.is_active,
+        clear_improvement_feedback: form.clearImprovementFeedback,
       };
       const { data } = await api.put(`admin/personalized-solutions/${id}`, payload);
       if (data.success) {
@@ -307,6 +310,16 @@ export default function AdminPersonalizedSolutionEditPage() {
                 </label>
               </div>
             </section>
+
+            <label className="label cursor-pointer gap-2 justify-start">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm"
+                checked={form.clearImprovementFeedback}
+                onChange={(e) => update('clearImprovementFeedback', e.target.checked)}
+              />
+              <span className="label-text">{t('admin.personalized_solutions.clear_improvement')}</span>
+            </label>
 
             <label className="label cursor-pointer gap-2">
               <input

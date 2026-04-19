@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PersonalizedSolutionReceivedMail extends Mailable
+class PersonalizedSolutionResolvedMail extends Mailable
 {
     use Queueable;
     use SerializesModels;
@@ -22,16 +22,16 @@ class PersonalizedSolutionReceivedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('mail.personalized_solution.subject', ['id' => $this->solution->id]),
+            subject: __('mail.personalized_solution_resolved.subject', ['id' => $this->solution->id]),
         );
     }
 
     public function content(): Content
     {
-        $portalUrl = $this->solution->public_token ? $this->solution->portalUrl() : url('/custom-solution');
+        $portalUrl = $this->solution->public_token ? $this->solution->portalUrl() : url('/');
 
         return new Content(
-            html: 'emails.personalized-solution-received',
+            html: 'emails.personalized-solution-resolved',
             with: [
                 'solution' => $this->solution,
                 'portalUrl' => $portalUrl,

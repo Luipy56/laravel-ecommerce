@@ -263,6 +263,10 @@ Table PERSONALIZED_SOLUTIONS [note: 'Can be independent of client and order (cli
   address_note text [null, note: 'e.g. If I\'m not there..., I\'ll be there at 3...']
   problem_description text [null]
   resolution text [null, note: 'Admin resolution / quote']
+  public_token varchar(64) [null, unique, note: 'Random hex; client portal URL without login']
+  iterations_count int [not null, default: 0]
+  improvement_feedback text [null]
+  improvement_feedback_at datetime [null]
   status personalized_solution_status [not null]
   is_active boolean [not null, default: true, note: 'Soft delete']
 }

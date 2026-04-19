@@ -62,11 +62,15 @@ class PersonalizedSolutionController extends Controller
             MailLocale::resolve($request->getPreferredLanguage(['ca', 'es'])),
         );
 
+        $solution->refresh();
+
         return response()->json([
             'success' => true,
             'data' => [
                 'id' => $solution->id,
                 'status' => $solution->status,
+                'public_token' => $solution->public_token,
+                'client_portal_path' => '/client/personalized-solutions/'.$solution->public_token,
             ],
         ], 201);
     }

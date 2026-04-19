@@ -158,6 +158,15 @@ export default function OrderDetailPage() {
 
   const formatAddress = (addr) => [addr.street, addr.city, addr.province, addr.postal_code].filter(Boolean).join(', ');
 
+  const timelineLabel = (row) => {
+    if (row.step === 'current' && row.status_code) {
+      const sk = `shop.status.${row.status_code}`;
+      return t(sk) !== sk ? t(sk) : row.status_code;
+    }
+    const lk = `shop.order.timeline.${row.step}`;
+    return t(lk) !== lk ? t(lk) : row.step;
+  };
+
   const linesSubtotal = order.lines_subtotal ?? order.lines?.reduce((s, l) => s + Number(l.line_total), 0) ?? 0;
   const grandTotal = order.grand_total ?? order.total ?? linesSubtotal;
   const showInstallationRow = order.installation_requested && order.installation_status === 'priced' && order.installation_price != null;
@@ -175,6 +184,27 @@ export default function OrderDetailPage() {
       </div>
       <p className="text-base-content/80"><strong>{t('shop.order_status')}:</strong> {statusLabel}</p>
       <p className="text-base-content/80"><strong>{t('shop.order_date')}:</strong> {order.order_date ? new Date(order.order_date).toLocaleString() : ''}</p>
+
+      {order.status_timeline && order.status_timeline.length > 0 && (
+        <div id="order-timeline" className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
+          <div className="card-body py-4 space-y-3">
+            <h2 className="card-title text-base">{t('shop.order.status_timeline_title')}</h2>
+            <ul className="space-y-3">
+              {order.status_timeline.map((row, idx) => (
+                <li
+                  key={`${row.step}-${idx}`}
+                  className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-base-200 pb-3 last:border-0 last:pb-0"
+                >
+                  <span>{timelineLabel(row)}</span>
+                  <span className="text-sm text-base-content/70 tabular-nums">
+                    {row.at ? new Date(row.at).toLocaleString() : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {awaitingQuote && (
         <div role="status" className="alert alert-warning mt-4 text-sm">

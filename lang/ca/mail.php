@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'layout' => [
+        'footer_default' => 'Missatge automàtic; si us plau no responguis directament al correu.',
+        'manage_preferences' => 'Gestiona les teves dades amb l’enllaç segur',
+    ],
+
     'installation_price' => [
         'subject' => 'Presupost d’instal·lació per a la comanda #:id',
         'greeting' => 'Hola,',
@@ -37,6 +42,24 @@ return [
         'greeting' => 'Hola,',
         'body' => 'Hem rebut la teva sol·licitud de solució personalitzada (referència #:id). El nostre equip la revisarà i es posarà en contacte amb tu si cal més informació.',
         'footer' => 'Gràcies per contactar-nos.',
+        'portal_intro' => 'Pots fer el seguiment de la sol·licitud i actualitzar les teves dades amb aquest enllaç segur (sense iniciar sessió):',
+        'portal_button' => 'Obrir el gestor de la sol·licitud',
+    ],
+
+    'personalized_solution_resolved' => [
+        'subject' => 'Solució personalitzada · actualització #:id',
+        'greeting' => 'Hola,',
+        'body' => 'Hi ha una novetat sobre la teva sol·licitud #:id.',
+        'cta' => 'Pots revisar els detalls i respondre des del gestor.',
+        'button' => 'Veure la sol·licitud',
+    ],
+
+    'admin_personalized_improvement' => [
+        'subject' => '[Solució #:id] Millora sol·licitada pel client',
+        'intro' => 'El client ha sol·licitat millores per a la sol·licitud #:id.',
+        'email' => 'Correu:',
+        'message' => 'Missatge:',
+        'button' => 'Obrir al panell',
     ],
 
     'order_shipped' => [

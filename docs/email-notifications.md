@@ -10,13 +10,18 @@ Transactional emails use Laravel Mail with copy in **Catalan** and **Spanish** (
 | Checkout with installation quote requested | Client `login_email` |
 | Admin assigns installation price (existing) | Client `login_email` |
 | Personalized solution form submitted | Address given in the form |
+| Personalized solution marked **completed** by admin | Email on the solution record |
+| Client requests improvements on a personalized solution | `MAIL_ADMIN_NOTIFICATION_ADDRESS` (if set) |
 | Admin sets order status to **in transit** or **sent** (first time entering those states) | Client `login_email` |
+
+HTML mail uses the shared transactional layout (`resources/views/emails/layouts/transactional.blade.php`): optional logo (`MAIL_BRAND_LOGO_URL`), branded footer, optional preferences link when relevant.
 
 ## Operations checklist
 
-1. Set **`MAIL_*`** in `.env` (`MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`). For local debugging, `MAIL_MAILER=log` writes to the log instead of sending.
-2. Messages are sent **synchronously** in the same request as the triggering action (no queue worker required for delivery to be attempted). If you switch mailables to the queue later, run **`php artisan queue:work`** and ensure `QUEUE_CONNECTION` is configured.
-3. Do not commit real SMTP passwords; use the hosting provider’s recommended TLS/port settings in production.
+1. Set **`MAIL_*`** in `.env` (`MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`). For Gmail SMTP see commented examples in `.env.example`. For local debugging, `MAIL_MAILER=log` writes to the log instead of sending.
+2. Optional: **`MAIL_ADMIN_NOTIFICATION_ADDRESS`** for personalized-solution improvement requests; **`MAIL_BRAND_LOGO_URL`** / **`MAIL_FOOTER_CONTACT_LINE`** for branding.
+3. Messages are sent **synchronously** in the same request as the triggering action (no queue worker required for delivery to be attempted). If you switch mailables to the queue later, run **`php artisan queue:work`** and ensure `QUEUE_CONNECTION` is configured.
+4. Do not commit real SMTP passwords; use the hosting provider’s recommended TLS/port settings in production.
 
 ## Troubleshooting: customers see no email
 
@@ -32,4 +37,6 @@ Transactional emails use Laravel Mail with copy in **Catalan** and **Spanish** (
 - Installation quote at checkout: `OrderController::checkout()`
 - Installation price: `AdminOrderController::update()` → `InstallationPriceWasAssigned`
 - Personalized solution: `PersonalizedSolutionController::store()`
+- Personalized solution resolved email: `AdminPersonalizedSolutionController::update()` when status becomes **completed**, or **`POST`** `admin/personalized-solutions/{id}/notify-resolution`
+- Personalized solution improvements (admin alert): `PublicPersonalizedSolutionController::requestImprovements()`
 - Shipped: `AdminOrderController::update()` when status enters `in_transit` or `sent`

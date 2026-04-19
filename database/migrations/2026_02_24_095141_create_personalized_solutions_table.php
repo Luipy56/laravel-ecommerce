@@ -25,6 +25,10 @@ return new class extends Migration
             $table->text('address_note')->nullable()->comment('e.g. If I\'m not there..., I\'ll be there at 3...');
             $table->text('problem_description')->nullable();
             $table->text('resolution')->nullable()->comment('Admin resolution / quote');
+            $table->string('public_token', 64)->nullable()->unique()->comment('Secret link for client portal without login');
+            $table->unsignedInteger('iterations_count')->default(0)->comment('Improvement request rounds');
+            $table->text('improvement_feedback')->nullable()->comment('Latest client improvement message');
+            $table->timestamp('improvement_feedback_at')->nullable();
             $table->string('status', 50);
             $table->boolean('is_active')->default(true)->comment('Soft delete');
             $table->timestamps();

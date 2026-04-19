@@ -22,6 +22,9 @@ class PersonalizedSolution extends Model
         'address_note',
         'problem_description',
         'resolution',
+        'iterations_count',
+        'improvement_feedback',
+        'improvement_feedback_at',
         'status',
         'is_active',
     ];
@@ -30,7 +33,22 @@ class PersonalizedSolution extends Model
     {
         return [
             'is_active' => 'boolean',
+            'improvement_feedback_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (PersonalizedSolution $solution): void {
+            if ($solution->public_token === null || $solution->public_token === '') {
+                $solution->public_token = bin2hex(random_bytes(32));
+            }
+        });
+    }
+
+    public function portalUrl(): string
+    {
+        return url('/client/personalized-solutions/'.$this->public_token);
     }
 
     public function client(): BelongsTo

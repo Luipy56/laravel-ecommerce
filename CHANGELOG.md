@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-04-19
+
+### Added
+
+- **Personalized solution client portal (token access without login):** `public_token` on **`personalized_solutions`**; public API **`/api/v1/public/personalized-solutions/{token}`** (read, update contact/address, opt-out, request improvements); storefront route **`/client/personalized-solutions/:token`** (`ClientPersonalizedSolutionPage`); **`PublicPersonalizedSolutionController`**; feature test **`PublicPersonalizedSolutionPortalTest`**.
+- **Email:** Shared Blade layout under **`resources/views/emails/layouts/`**; customer **`PersonalizedSolutionResolvedMail`**; admin **`PersonalizedSolutionImprovementRequestedAdminMail`**; **POST** **`/api/v1/admin/personalized-solutions/{id}/notify-resolution`** to resend resolution. Order and installation-related customer templates updated to the shared layout.
+- **Admin / model:** Improvement feedback fields (`iterations_count`, `improvement_feedback`, `improvement_feedback_at`); admin personalized solution show surfaces portal URL, status, and resolution actions.
+
 ### Changed
 
-- Agent log reviewer: latest passes appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-19T16:45Z, 2026-04-19T16:46Z).
+- **Custom solution** submit flow, **order** integration, **admin** personalized-solution edit/show, **lang** (ca/es, including `mail.php`), **`docs/email-notifications.md`**, **`.env.example`**, **`config/mail.php`**, and **`trash/diagramZero.dbml`** aligned with the portal and notification behaviour; **`PersonalizedSolutionSeeder`** updates.
+- **Agent pipeline:** archived closed tasks under **`agents/tasks/done/2026/04/19/`** (replacing superseded **`agents/tasks/`** entries).
 
 ## [0.1.10] - 2026-04-19
 

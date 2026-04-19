@@ -361,6 +361,7 @@ class OrderController extends Controller
             'data' => [
                 'id' => $order->id,
                 'status' => $order->status,
+                'status_timeline' => $order->buildClientStatusTimeline(),
                 'order_date' => $order->order_date?->toIso8601String(),
                 'shipping_date' => $order->shipping_date?->toIso8601String(),
                 'installation_requested' => (bool) $order->installation_requested,

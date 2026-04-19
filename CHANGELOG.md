@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Agent log reviewer: latest passes appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-19T16:45Z, 2026-04-19T16:46Z).
+
 ## [0.1.10] - 2026-04-19
 
 ### Added

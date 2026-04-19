@@ -52,7 +52,7 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
 
    (Development only: this drops all tables and data.)
 
-   **Connectivity:** With **SQLite**, no database server is required for migrations or `php artisan test` (default PHPUnit config). With **MySQL or PostgreSQL**, Artisan commands such as `php artisan db:show` open a real connection; fix `DB_HOST` / credentials and install the matching PDO extension first.
+   **Connectivity:** With **SQLite**, no database server is required for migrations or `php artisan test` (default PHPUnit config). If `DB_DATABASE` points at an on-disk path (including under `/tmp/`) that does not exist yet, the application creates an empty database file automatically in non-production environments before connecting (equivalent to `touch` on that path). With **MySQL or PostgreSQL**, Artisan commands such as `php artisan db:show` open a real connection; fix `DB_HOST` / credentials and install the matching PDO extension first.
 
    - Prefer **`127.0.0.1`** over **`localhost`** for MySQL/MariaDB when you need TCP (many setups use a Unix socket for `localhost`, which breaks with Docker-only TCP or some remote hosts).
    - **`SQLSTATE[HY000] [2002] Network is unreachable`:** `DB_HOST` is unreachable (wrong hostname, database not running, firewall/VPN, or container networking). From a PHP container, use the Compose **service name** as `DB_HOST`, not `localhost`, unless the DB is in the same network namespace.

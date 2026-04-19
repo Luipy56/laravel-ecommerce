@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-04-19
+
+### Fixed
+
+- **SQLite / Artisan:** In non-`production` environments, the app now creates the on-disk database file (and parent directory) when `DB_DATABASE` is a file path that does not exist yet, avoiding `Database file at path […] does not exist` on first `artisan` / web boot (e.g. `DB_DATABASE=/tmp/…` overrides). Documented in **`README.md`**.
+
+### Changed
+
+- **PayPal:** Checkout/pay payloads include **`paypal_mode`** (`sandbox`/`live`) next to **`client_id`** so the SPA matches Smart Buttons loader context with **`PAYPAL_MODE`** / REST hosts; **`PayPalInlineButtons`** documents the shared SDK URL and keys script elements by mode. **`docs/CONFIGURACION_PAGOS_CORREO.md`** CSP/CORS section ties **`bootstrap/app.php`** (no app CSP), REST vs SDK behaviour, and GitHub [#14](https://github.com/Luipy56/laravel-ecommerce/issues/14) / [#19](https://github.com/Luipy56/laravel-ecommerce/issues/19).
+
+### Added
+
+- **Tests:** **`SqliteDatabaseBootstrapTest`**; **`PayPalPaymentTest`** / **`CheckoutPaymentConfigTest`** extended for **`paypal_mode`** in payment config.
+
 ## [0.1.11] - 2026-04-19
 
 ### Added

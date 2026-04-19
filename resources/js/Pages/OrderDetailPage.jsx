@@ -110,6 +110,7 @@ export default function OrderDetailPage() {
             client_id: c.client_id,
             paypal_order_id: c.paypal_order_id,
             payment_id: c.payment_id,
+            paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
           },
         });
         return;
@@ -389,6 +390,7 @@ export default function OrderDetailPage() {
                   clientId={inlineCheckout.paypal.client_id}
                   paypalOrderId={inlineCheckout.paypal.paypal_order_id}
                   paymentId={inlineCheckout.paypal.payment_id}
+                  paypalMode={inlineCheckout.paypal.paypal_mode}
                   onSuccess={async () => {
                     const r = await api.get(`orders/${id}`);
                     if (r.data.success) setOrder(r.data.data);

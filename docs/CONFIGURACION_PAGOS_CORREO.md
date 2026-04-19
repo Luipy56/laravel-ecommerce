@@ -130,7 +130,10 @@ Si `data.methods.paypal` es `false`, revisa credenciales vacías, `PAYPAL_MODE` 
 Si en **Chrome / Firefox** aparecen errores de **Content-Security-Policy** (p. ej. bloqueos relacionados con `unsafe-eval`) o **CORS** entre subdominios de PayPal (`c.paypal.com`, `www.sandbox.paypal.com`, etc.) **mientras el comprador está en la página alojada en paypal.com**:
 
 - Esas políticas las envía **el propio dominio de PayPal** sobre sus propios documentos y recursos. **Esta aplicación Laravel no puede cambiarlas** ni “relajarlas” para el checkout alojado en PayPal; tampoco el middleware de Laravel ni cabeceras de tu dominio aplican al HTML servido desde `paypal.com`.
-- La tienda solo: (1) crea la orden REST y enlaces `return_url` / `cancel_url` con **`APP_URL`** público correcto; (2) carga el **SDK JS** oficial desde `https://www.paypal.com/sdk/js` (el **client ID** sandbox vs live selecciona el entorno ante la API); (3) confirma el cobro en servidor con **`POST /api/v1/payments/paypal/capture`**.
+- Esta base de código **no** define una cabecera `Content-Security-Policy` global que afecte al checkout embebido (véase `bootstrap/app.php`): cualquier CSP que veas en la pestaña del **checkout alojado en PayPal** es del lado de PayPal.
+- La tienda solo: (1) crea la orden REST en **`api-m.sandbox.paypal.com`** o **`api-m.paypal.com`** según `PAYPAL_MODE`, con enlaces `return_url` / `cancel_url` desde **`APP_URL`** público correcto; (2) carga el **SDK JS** oficial desde `https://www.paypal.com/sdk/js` (PayPal documenta el mismo cargador para sandbox y live; el **client ID** de sandbox vs live selecciona el entorno ante la API; **`payment_checkout.paypal_mode`** y **`GET /api/v1/payments/config`** → **`data.paypal_mode`** permiten comprobar que coincide con tus credenciales); (3) confirma el cobro en servidor con **`POST /api/v1/payments/paypal/capture`**.
+
+Notas en GitHub del propio repo (contexto CSP/CORS PayPal): [#14](https://github.com/Luipy56/laravel-ecommerce/issues/14), [#19](https://github.com/Luipy56/laravel-ecommerce/issues/19).
 
 **Qué sí conviene revisar ante un “pago rechazado” o refrescos raros:**
 

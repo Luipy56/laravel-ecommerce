@@ -4,11 +4,16 @@ import { api } from '../../api';
 
 /**
  * PayPal Smart Payment Buttons: order is already created server-side; createOrder returns its id.
+ *
+ * Sandbox vs live: PayPal serves the JS SDK from `www.paypal.com/sdk/js` for both; the sandbox client ID
+ * selects the sandbox API (same pattern as server-side `api-m.sandbox.paypal.com`). Optional `paypalMode`
+ * keeps the loader in sync with `data.paypal_mode` / REST `PAYPAL_MODE`.
  */
 export default function PayPalInlineButtons({
   clientId,
   paypalOrderId,
   paymentId,
+  paypalMode,
   onSuccess,
   onError,
   onCancel,
@@ -34,10 +39,11 @@ export default function PayPalInlineButtons({
       return undefined;
     }
 
+    const modeSuffix = paypalMode === 'live' ? 'live' : 'sandbox';
     const scriptSrc = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
       clientId,
     )}&currency=EUR&intent=capture&commit=true`;
-    const scriptDomId = 'paypal-sdk-inline-storefront';
+    const scriptDomId = `paypal-sdk-inline-storefront-${modeSuffix}`;
 
     const ensureScript = () =>
       new Promise((resolve, reject) => {
@@ -116,7 +122,7 @@ export default function PayPalInlineButtons({
         containerRef.current.innerHTML = '';
       }
     };
-  }, [clientId, paypalOrderId, paymentId, t]);
+  }, [clientId, paypalOrderId, paymentId, paypalMode, t]);
 
   return <div ref={containerRef} className="min-h-[48px]" />;
 }

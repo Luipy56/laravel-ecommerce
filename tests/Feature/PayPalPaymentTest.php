@@ -157,6 +157,7 @@ class PayPalPaymentTest extends TestCase
         $this->assertSame((int) $payment->id, $payload['payment_id']);
         $this->assertSame(self::FAKE_PAYPAL_CLIENT_ID, $payload['client_id']);
         $this->assertSame('https://www.sandbox.paypal.com/checkoutnow?token=NEW_ORDER_ID', $payload['approval_url']);
+        $this->assertSame('sandbox', $payload['paypal_mode']);
 
         Http::assertSent(function (\Illuminate\Http\Client\Request $request) use ($order) {
             if ($request->method() !== 'POST' || ! str_contains($request->url(), '/v2/checkout/orders')) {
@@ -218,6 +219,7 @@ class PayPalPaymentTest extends TestCase
         $payload = $starter->start($payment);
 
         $this->assertSame('EXISTING_ID', $payload['paypal_order_id']);
+        $this->assertSame('sandbox', $payload['paypal_mode']);
         Http::assertNotSent(function ($request) {
             if ($request->method() !== 'POST') {
                 return false;
@@ -226,6 +228,55 @@ class PayPalPaymentTest extends TestCase
 
             return str_contains($url, '/v2/checkout/orders') && ! str_contains($url, '/capture');
         });
+    }
+
+    public function test_paypal_checkout_starter_payload_includes_paypal_mode_live_when_configured(): void
+    {
+        config([
+            'services.paypal.mode' => 'live',
+            'app.url' => 'https://store.example.test',
+        ]);
+
+        Http::fake([
+            'api-m.paypal.com/v1/oauth2/token' => Http::response([
+                'access_token' => 'fake_access',
+                'expires_in' => 3600,
+            ], 200),
+            'api-m.paypal.com/v2/checkout/orders' => Http::response([
+                'id' => 'LIVE_ORDER_ID',
+                'status' => 'CREATED',
+                'links' => [
+                    [
+                        'href' => 'https://www.paypal.com/checkoutnow?token=LIVE_ORDER_ID',
+                        'rel' => 'approve',
+                        'method' => 'GET',
+                    ],
+                ],
+            ], 201),
+        ]);
+
+        $client = $this->makeClient();
+        $order = Order::query()->create([
+            'client_id' => $client->id,
+            'kind' => Order::KIND_ORDER,
+            'status' => Order::STATUS_PENDING,
+            'order_date' => now(),
+            'shipping_price' => Order::SHIPPING_FLAT_EUR,
+            'installation_requested' => false,
+        ]);
+
+        $payment = Payment::query()->create([
+            'order_id' => $order->id,
+            'amount' => 25.50,
+            'payment_method' => Payment::METHOD_PAYPAL,
+            'status' => Payment::STATUS_PENDING,
+            'currency' => 'EUR',
+        ]);
+
+        $starter = new PayPalCheckoutStarter(new PayPalClient);
+        $payload = $starter->start($payment);
+
+        $this->assertSame('live', $payload['paypal_mode']);
     }
 
     public function test_paypal_capture_marks_payment_succeeded(): void

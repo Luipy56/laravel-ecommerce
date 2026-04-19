@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Tests:** **`AdminDataExplorerMysqlTimeoutTest`** locks in MySQL/MariaDB timeout `SET SESSION` resolution.
 
+### Changed
+
+- **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; log reviewer timestamp updated.
+
 ## [0.1.12] - 2026-04-19
 
 ### Fixed

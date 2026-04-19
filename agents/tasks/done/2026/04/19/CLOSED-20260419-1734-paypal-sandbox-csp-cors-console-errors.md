@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** GitHub issue #19 addressed PayPal sandbox browser console CSP/CORS noise and the need to keep sandbox vs live PayPal mode and endpoints consistent in this app’s checkout integration.
+- **What was done:** The implementation wired `paypal_mode` through checkout payloads and PayPal inline SDK usage, updated payment docs and changelog, and the tester confirmed automated PHPUnit (including PayPal/config coverage) plus the Vite production build.
+- **What was tested:** `php artisan test` passed (98 tests); `npm run build` passed; CLI `routes:smoke` failed locally due to missing PDO PostgreSQL driver while `RouteSmokeTest` passed in the suite; manual PayPal-hosted sandbox browser verification was not run here and remains for staging.
+- **Why closed:** Required automated verification gates passed per the test report; documented environment limitation for CLI smoke; residual hosted-page CSP/CORS warnings are acknowledged as upstream.
+- **Closed at (UTC):** 2026-04-19 17:51
+---
+
 # PayPal sandbox: CSP unsafe-eval and CORS console errors
 
 ## GitHub

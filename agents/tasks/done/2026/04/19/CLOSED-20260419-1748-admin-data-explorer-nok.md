@@ -1,3 +1,13 @@
+---
+## Closing summary (TOP)
+
+- **What happened:** Production `/admin/data-explorer` failed with HTTP 500 because `SET SESSION max_execution_time` is not valid on the reporter’s MySQL/MariaDB, and issue #20 also called out stronger automated detection and Catalan locale behaviour for the explorer UI.
+- **What was done:** The coder shipped engine-aware session timeout handling in `AdminDataExplorerService` (with config/docs and `AdminDataExplorerMysqlTimeoutTest`), Catalan/Spanish aggregate number formatting in `AdminDataExplorerPage.jsx`, a CHANGELOG entry, and a GitHub summary comment.
+- **What was tested:** Mandatory `php artisan test` passed (98 tests, including admin data-explorer and `RouteSmokeTest`), and `npm run build` passed; optional real MySQL/MariaDB POST and manual Catalan UI checks were not run (N/A); CLI `routes:smoke` failed locally for environment/DB reasons and was not treated as a regression.
+- **Why closed:** Tester overall **PASS** — all required automated verification and the front-end build succeeded per the test report.
+- **Closed at (UTC):** 2026-04-19 18:00
+---
+
 # admin/data-explorer NOK
 
 ## GitHub

@@ -46,6 +46,10 @@ export default function CheckoutPage() {
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
   const [paypalCancelWarning, setPaypalCancelWarning] = useState('');
   const wantsInstallation = !!cart.installation_requested;
+  const installationQuoteRequired = !!(wantsInstallation && cart.installation_quote_required);
+  /** Must choose a PSP method (not used when awaiting a manual installation quote only). */
+  const paymentRequired = !wantsInstallation || !installationQuoteRequired;
+  const checkoutSchemaOpts = { wantsInstallation, installationQuoteRequired };
 
   useEffect(() => {
     api
@@ -84,13 +88,13 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (payMethods === null || wantsInstallation) return;
+    if (payMethods === null || !paymentRequired) return;
     setForm((f) => {
       if (payMethods[f.payment_method]) return f;
       const first = ['card', 'paypal'].find((k) => payMethods[k]);
       return first ? { ...f, payment_method: first } : f;
     });
-  }, [payMethods, wantsInstallation]);
+  }, [payMethods, paymentRequired]);
 
   useEffect(() => {
     if (!user) return;
@@ -124,14 +128,14 @@ export default function CheckoutPage() {
     setPaypalCancelWarning('');
     setStripeUiError('');
     try {
-      const toValidate = wantsInstallation ? { ...form, payment_method: null } : form;
-      const parsed = parseWithZod(checkoutFormSchema(wantsInstallation), toValidate, t);
+      const toValidate = installationQuoteRequired ? { ...form, payment_method: null } : form;
+      const parsed = parseWithZod(checkoutFormSchema(checkoutSchemaOpts), toValidate, t);
       if (!parsed.ok) {
         emitAppToast(parsed.firstError, 'error');
         setCheckoutFormError(parsed.firstError);
         return;
       }
-      const payload = wantsInstallation ? { ...parsed.data, payment_method: null } : parsed.data;
+      const payload = installationQuoteRequired ? { ...parsed.data, payment_method: null } : parsed.data;
       const { data } = await api.post('orders/checkout', payload);
       if (!data.success) return;
 
@@ -187,13 +191,13 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false);
     }
-  }, [form, navigate, fetchCart, wantsInstallation, t]);
+  }, [form, navigate, fetchCart, wantsInstallation, installationQuoteRequired, t]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setCheckoutFormError('');
-    const toValidate = wantsInstallation ? { ...form, payment_method: null } : form;
-    const parsed = parseWithZod(checkoutFormSchema(wantsInstallation), toValidate, t);
+    const toValidate = installationQuoteRequired ? { ...form, payment_method: null } : form;
+    const parsed = parseWithZod(checkoutFormSchema(checkoutSchemaOpts), toValidate, t);
     if (!parsed.ok) {
       setCheckoutFormError(parsed.firstError);
       return;
@@ -219,6 +223,10 @@ export default function CheckoutPage() {
 
   const payMethodsReady = payMethods !== null;
   const anyPaymentMethod = payMethodsReady && Object.values(payMethods).some(Boolean);
+  const shipFlat = Number(cart.shipping_flat_eur ?? 9);
+  const installationFeeAmount =
+    wantsInstallation && cart.installation_fee_eur != null ? Number(cart.installation_fee_eur) : 0;
+  const grandTotalCheckout = Number(cart.total) + shipFlat + installationFeeAmount;
 
   if (!cart.lines?.length) {
     return (
@@ -297,13 +305,20 @@ export default function CheckoutPage() {
                 <span className="form-label">{t('checkout.note')}</span>
                 <textarea name="installation_note" className="textarea textarea-bordered w-full" rows={2} value={form.installation_note} onChange={handleChange} />
               </label>
-              <p className="m-0 text-sm text-base-content/70 border-l-2 border-base-300 pl-3">
-                {t('checkout.payment_after_quote')}
-              </p>
+              {installationQuoteRequired ? (
+                <div className="space-y-2 border-l-2 border-base-300 pl-3">
+                  <p className="m-0 text-sm text-base-content/70">{t('checkout.payment_after_quote')}</p>
+                  <p className="m-0 text-sm text-base-content/70">{t('checkout.installation_custom_quote_notice')}</p>
+                </div>
+              ) : (
+                <p className="m-0 text-sm text-base-content/70 border-l-2 border-base-300 pl-3">
+                  {t('checkout.installation_tier_notice')}
+                </p>
+              )}
             </>
           )}
 
-          {!wantsInstallation && (
+          {paymentRequired && (
             <>
               <h2 className="font-semibold text-base-content mt-6">{t('checkout.payment')}</h2>
               {payMethodsReady && payConfigMeta.simulated && anyPaymentMethod && (
@@ -361,11 +376,22 @@ export default function CheckoutPage() {
               </p>
               <p className="m-0 text-base-content/80">
                 <span className="font-medium text-base-content">{t('shop.shipping_flat')}:</span>{' '}
-                <span className="tabular-nums">{Number(cart.shipping_flat_eur ?? 9).toFixed(2)} €</span>
+                <span className="tabular-nums">{shipFlat.toFixed(2)} €</span>
               </p>
+              {installationFeeAmount > 0 ? (
+                <p className="m-0 text-base-content/80">
+                  <span className="font-medium text-base-content">{t('shop.order.installation_fee')}:</span>{' '}
+                  <span className="tabular-nums">{installationFeeAmount.toFixed(2)} €</span>
+                </p>
+              ) : null}
               <p className="m-0 text-lg font-bold text-primary">
-                <span className="font-semibold text-base-content">{t('shop.total_with_shipping')}:</span>{' '}
-                <span className="tabular-nums">{Number(cart.total_with_shipping ?? cart.total + 9).toFixed(2)} €</span>
+                <span className="font-semibold text-base-content">
+                  {installationFeeAmount > 0 ? t('checkout.total_due_estimate') : t('shop.total_with_shipping')}
+                  :
+                </span>{' '}
+                <span className="tabular-nums">
+                  {(installationFeeAmount > 0 ? grandTotalCheckout : Number(cart.total_with_shipping ?? cart.total + shipFlat)).toFixed(2)} €
+                </span>
               </p>
             </div>
             <button
@@ -374,8 +400,7 @@ export default function CheckoutPage() {
               disabled={
                 loading ||
                 !!activeCheckout?.paypal ||
-                (!wantsInstallation &&
-                  (!payMethodsReady || !anyPaymentMethod || payConfigLoadError))
+                (paymentRequired && (!payMethodsReady || !anyPaymentMethod || payConfigLoadError))
               }
             >
               {loading ? t('common.loading') : t('shop.checkout')}

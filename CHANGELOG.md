@@ -9,7 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-11T20:10Z).
+- Agent log reviewer: latest passes appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-19T16:45Z, 2026-04-19T16:46Z).
+
+## [0.1.10] - 2026-04-19
+
+### Added
+
+- **Admin:** Data explorer for allowlisted tables — schema, filtered query with pagination, CSV export, and aggregates (**`AdminDataExplorerService`**, **`AdminDataExplorerController`**, **`config/admin_data_explorer.php`**); routes **`/api/v1/admin/data-explorer/*`** (throttled); React **`AdminDataExplorerPage`** and admin nav link; **`AdminDataExplorerTest`**; smoke list includes **`GET /api/v1/admin/data-explorer/schema`** in **`AdminUserJourneyTest`**.
+- **Installation pricing:** Automatic tiered installation fees from merchandise subtotal when installation is requested; above **€1000** merchandise the flow awaits a **manual quote** (**`Order::INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR`**, **`Order::automaticInstallationFeeFromMerchandiseSubtotal()`**). Cart API adds **`installation_quote_required`** and **`installation_fee_eur`**; checkout sets **`installation_price`** / **`installation_status`** when priced. **`OrderInstallationPricingTest`**; **`CustomerTransactionalEmailTest`** covers automatic tier (no quote mail, payment confirmed).
+
+### Changed
+
+- **Checkout / cart:** Payment block and validation when installation is **priced** vs **awaiting a custom quote**; summary includes installation fee and estimated total; **`checkoutFormSchema`** takes installation options; Catalan/Spanish strings; **`CartContext`** and **`CartPage`** updated for installation metadata; add-line response includes cart id and **`installation_requested`**.
+- Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-19T16:22Z).
 
 ## [0.1.9] - 2026-04-11
 

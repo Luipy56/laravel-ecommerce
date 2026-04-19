@@ -29,7 +29,7 @@ class CustomerTransactionalEmailTest extends TestCase
         $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 
-    private function makeClientWithCart(bool $installationRequested = false): Client
+    private function makeClientWithCart(bool $installationRequested = false, int $lineQuantity = 1, float $unitPrice = 25.00): Client
     {
         $client = Client::query()->create([
             'type' => 'person',
@@ -65,8 +65,8 @@ class CustomerTransactionalEmailTest extends TestCase
             'order_id' => $cart->id,
             'product_id' => $product->id,
             'pack_id' => null,
-            'quantity' => 1,
-            'unit_price' => 25.00,
+            'quantity' => $lineQuantity,
+            'unit_price' => $unitPrice,
             'offer' => null,
             'keys_all_same' => false,
             'extra_keys_qty' => 0,
@@ -184,7 +184,7 @@ class CustomerTransactionalEmailTest extends TestCase
             'payments.allow_simulated' => true,
         ]);
 
-        $client = $this->makeClientWithCart(true);
+        $client = $this->makeClientWithCart(true, 41, 25.00);
 
         $payload = [
             'payment_method' => null,
@@ -210,6 +210,48 @@ class CustomerTransactionalEmailTest extends TestCase
         });
     }
 
+    public function test_checkout_with_installation_automatic_tier_skips_quote_mail_and_confirms_payment(): void
+    {
+        Mail::fake();
+
+        config([
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'app.debug' => true,
+            'payments.allow_simulated' => true,
+            'payments.checkout_method_keys' => ['card', 'paypal'],
+        ]);
+
+        $client = $this->makeClientWithCart(true, 8, 25.00);
+
+        $payload = [
+            'payment_method' => 'card',
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => 'Av. Diagonal 1',
+            'installation_city' => 'Barcelona',
+            'installation_postal_code' => '08028',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.awaiting_installation_quote', false);
+        $response->assertJsonPath('data.installation_price', 90);
+        $response->assertJsonPath('data.installation_status', Order::INSTALLATION_PRICED);
+        $response->assertJsonPath('data.has_payment', true);
+
+        Mail::assertNotSent(OrderInstallationQuoteRequestedMail::class);
+        Mail::assertSent(OrderPaymentConfirmedMail::class, function (OrderPaymentConfirmedMail $mail) use ($client) {
+            return $mail->hasTo($client->login_email);
+        });
+    }
+
     public function test_admin_assigns_installation_price_sends_installation_price_mail(): void
     {
         Mail::fake();
@@ -223,7 +265,7 @@ class CustomerTransactionalEmailTest extends TestCase
             'payments.allow_simulated' => true,
         ]);
 
-        $client = $this->makeClientWithCart(true);
+        $client = $this->makeClientWithCart(true, 41, 25.00);
 
         $checkoutPayload = [
             'payment_method' => null,

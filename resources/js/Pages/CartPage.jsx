@@ -140,6 +140,13 @@ export default function CartPage() {
   const { t } = useTranslation();
   const { cart, loading, updateLine, removeLine, setInstallationRequested } = useCart();
   const [installSaving, setInstallSaving] = useState(false);
+  const shipFlatCart = Number(cart.shipping_flat_eur ?? 9);
+  const installationFeeCart =
+    cart.installation_requested && cart.installation_fee_eur != null ? Number(cart.installation_fee_eur) : 0;
+  const cartGrandTotal = Number(cart.total) + shipFlatCart + installationFeeCart;
+  const installationTooltip = cart.installation_quote_required
+    ? t('shop.cart.installation_quote_only_hint')
+    : t('shop.cart.installation_tiers_hint');
 
   const onInstallationChange = async (e) => {
     const checked = e.target.checked;
@@ -192,11 +199,11 @@ export default function CartPage() {
             aria-label={t('shop.cart.request_installation')}
           />
           <span className="font-medium">{t('shop.cart.request_installation')}</span>
-          <span className="tooltip tooltip-bottom shrink-0" data-tip={t('shop.cart.installation_quote_hint')}>
+          <span className="tooltip tooltip-bottom shrink-0 max-w-[min(100vw-2rem,24rem)] whitespace-normal text-left inline-block" data-tip={installationTooltip}>
             <button
               type="button"
               className="btn btn-ghost btn-xs btn-circle font-serif italic"
-              aria-label={t('shop.cart.installation_quote_hint')}
+              aria-label={installationTooltip}
             >
               i
             </button>
@@ -241,11 +248,21 @@ export default function CartPage() {
             </p>
             <p className="m-0 text-base-content/80">
               <span className="font-medium text-base-content">{t('shop.shipping_flat')}:</span>{' '}
-              <span className="tabular-nums">{Number(cart.shipping_flat_eur ?? 9).toFixed(2)} €</span>
+              <span className="tabular-nums">{shipFlatCart.toFixed(2)} €</span>
             </p>
+            {installationFeeCart > 0 ? (
+              <p className="m-0 text-base-content/80">
+                <span className="font-medium text-base-content">{t('shop.order.installation_fee')}:</span>{' '}
+                <span className="tabular-nums">{installationFeeCart.toFixed(2)} €</span>
+              </p>
+            ) : null}
             <p className="m-0 text-lg font-bold text-primary">
-              <span className="font-semibold text-base-content">{t('shop.total_with_shipping')}:</span>{' '}
-              <span className="tabular-nums">{Number(cart.total_with_shipping ?? cart.total + 9).toFixed(2)} €</span>
+              <span className="font-semibold text-base-content">
+                {installationFeeCart > 0 ? t('checkout.total_due_estimate') : t('shop.total_with_shipping')}:
+              </span>{' '}
+              <span className="tabular-nums">
+                {(installationFeeCart > 0 ? cartGrandTotal : Number(cart.total_with_shipping ?? cart.total + shipFlatCart)).toFixed(2)} €
+              </span>
             </p>
           </div>
           <div className="flex gap-2 justify-center sm:justify-end sm:items-end">

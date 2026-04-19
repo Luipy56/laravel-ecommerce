@@ -25,10 +25,16 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Cart is empty.'], 422);
         }
 
+        $cart->loadMissing('lines');
+        $merchandiseSubtotal = $cart->lines_subtotal;
+        $awaitingInstallationQuote = $cart->installation_requested
+            && $merchandiseSubtotal > Order::INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR;
+        $automaticInstallationFee = Order::automaticInstallationFeeFromMerchandiseSubtotal($merchandiseSubtotal);
+
         $checkoutMethodIn = implode(',', PaymentCheckoutService::checkoutMethodKeysFromConfig());
 
         $rules = [
-            'payment_method' => $cart->installation_requested
+            'payment_method' => ($cart->installation_requested && $awaitingInstallationQuote)
                 ? ['nullable', 'string', 'in:'.$checkoutMethodIn]
                 : ['required', 'string', 'in:'.$checkoutMethodIn],
             'shipping_street' => ['required', 'string', 'max:255'],
@@ -50,7 +56,6 @@ class OrderController extends Controller
 
         $validated = $request->validate($rules);
 
-        $awaitingInstallationQuote = (bool) $cart->installation_requested;
         if (! $awaitingInstallationQuote && ! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
             return response()->json([
                 'success' => false,
@@ -59,7 +64,18 @@ class OrderController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote) {
+        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote, $automaticInstallationFee) {
+            $installationPrice = null;
+            $installationStatus = null;
+            if ($cart->installation_requested) {
+                if ($awaitingInstallationQuote) {
+                    $installationStatus = Order::INSTALLATION_PENDING;
+                } else {
+                    $installationPrice = $automaticInstallationFee;
+                    $installationStatus = Order::INSTALLATION_PRICED;
+                }
+            }
+
             $initialStatus = $awaitingInstallationQuote
                 ? Order::STATUS_AWAITING_INSTALLATION_PRICE
                 : (($validated['payment_method'] ?? null) === Payment::METHOD_PAYPAL
@@ -70,8 +86,8 @@ class OrderController extends Controller
                 'status' => $initialStatus,
                 'order_date' => now(),
                 'shipping_price' => Order::SHIPPING_FLAT_EUR,
-                'installation_status' => $awaitingInstallationQuote ? Order::INSTALLATION_PENDING : null,
-                'installation_price' => null,
+                'installation_status' => $installationStatus,
+                'installation_price' => $installationPrice,
             ]);
 
             $cart->addresses()->create([
@@ -83,7 +99,7 @@ class OrderController extends Controller
                 'note' => $validated['shipping_note'] ?? null,
             ]);
 
-            if ($awaitingInstallationQuote) {
+            if ($cart->installation_requested) {
                 $cart->addresses()->create([
                     'type' => OrderAddress::TYPE_INSTALLATION,
                     'street' => $validated['installation_street'] ?? '',

@@ -71,5 +71,13 @@
     "validation.required": "Aquest camp és obligatori.",
     "validation.email": "El correu electrònic no és vàlid.",
     "validation.min": "El valor ha de tenir com a mínim :min caràcters.",
-    "validation.max": "El valor no pot superar :max caràcters."
+    "validation.max": "El valor no pot superar :max caràcters.",
+
+    "admin.data_explorer.errors.invalid_table": "La taula seleccionada no està disponible.",
+    "admin.data_explorer.errors.invalid_column": "La columna del filtre no és vàlida.",
+    "admin.data_explorer.errors.invalid_operator": "L'operador del filtre no és vàlid.",
+    "admin.data_explorer.errors.invalid_date_column": "La columna de dates no és vàlida.",
+    "admin.data_explorer.errors.invalid_group_by": "La columna per agrupar no és vàlida.",
+    "admin.data_explorer.errors.invalid_value_column": "La columna numèrica per calcular no és vàlida.",
+    "admin.data_explorer.errors.invalid_metric": "La mètrica ha de ser count, sum o avg."
 }

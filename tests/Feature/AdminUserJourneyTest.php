@@ -56,6 +56,7 @@ class AdminUserJourneyTest extends TestCase
             '/api/v1/admin/stats/sales-by-period',
             '/api/v1/admin/stats/top-products',
             '/api/v1/admin/stats/low-stock',
+            '/api/v1/admin/data-explorer/schema',
         ];
 
         foreach ($endpoints as $uri) {

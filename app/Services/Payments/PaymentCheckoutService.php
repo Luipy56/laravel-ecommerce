@@ -70,6 +70,18 @@ class PaymentCheckoutService
     }
 
     /**
+     * Normalised PayPal REST environment for public config (`PAYPAL_MODE` / services.paypal.mode).
+     *
+     * @return 'live'|'sandbox'
+     */
+    public static function paypalModeLabelForStorefront(): string
+    {
+        $mode = strtolower(trim((string) config('services.paypal.mode', 'sandbox')));
+
+        return $mode === 'live' ? 'live' : 'sandbox';
+    }
+
+    /**
      * Card (Stripe) is whitelisted but STRIPE_KEY/STRIPE_SECRET are missing and simulated checkout is off.
      * When simulated checkout is on, missing Stripe keys still expose "card" as simulated — no hint needed.
      */

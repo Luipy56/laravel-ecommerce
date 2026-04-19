@@ -113,6 +113,7 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertJsonPath('data.simulated', false);
         $response->assertJsonPath('data.paypal_missing_credentials', false);
         $response->assertJsonPath('data.stripe_missing_credentials', false);
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
 
     public function test_payments_config_respects_checkout_method_whitelist(): void
@@ -131,6 +132,35 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.methods.card', false);
         $response->assertJsonPath('data.methods.paypal', true);
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
+    }
+
+    public function test_payments_config_exposes_paypal_mode_live(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['paypal'],
+            'services.paypal.client_id' => self::FAKE_PAYPAL_CLIENT_ID,
+            'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+            'services.paypal.mode' => 'live',
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.paypal_mode', 'live');
+    }
+
+    public function test_payments_config_normalizes_unknown_paypal_mode_to_sandbox(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['paypal'],
+            'services.paypal.client_id' => self::FAKE_PAYPAL_CLIENT_ID,
+            'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+            'services.paypal.mode' => 'staging',
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
 
     public function test_checkout_uses_paypal_gateway_when_simulated_but_paypal_credentials_exist(): void
@@ -235,6 +265,7 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.methods.paypal', false);
         $response->assertJsonPath('data.paypal_missing_credentials', true);
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
 
     public function test_payments_config_paypal_missing_credentials_false_when_paypal_not_in_checkout_methods(): void
@@ -248,6 +279,7 @@ class CheckoutPaymentConfigTest extends TestCase
         $response = $this->getJson('/api/v1/payments/config');
         $response->assertOk();
         $response->assertJsonPath('data.paypal_missing_credentials', false);
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
 
     /** Operator scenario: PayPal-only checkout, real credentials required, no simulated blanket. */
@@ -270,6 +302,7 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertJsonPath('data.methods.card', false);
         $response->assertJsonPath('data.simulated', false);
         $response->assertJsonPath('data.paypal_missing_credentials', false);
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
 
     public function test_payments_config_stripe_missing_credentials_when_whitelisted_without_keys_and_no_simulation(): void
@@ -288,6 +321,7 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.methods.card', false);
         $response->assertJsonPath('data.stripe_missing_credentials', true);
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
 
     public function test_payments_config_stripe_missing_credentials_false_when_simulated_without_keys(): void
@@ -304,6 +338,7 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.methods.card', true);
         $response->assertJsonPath('data.stripe_missing_credentials', false);
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
 
     public function test_payments_config_stripe_missing_credentials_false_when_card_not_whitelisted(): void
@@ -321,5 +356,6 @@ class CheckoutPaymentConfigTest extends TestCase
         $response = $this->getJson('/api/v1/payments/config');
         $response->assertOk();
         $response->assertJsonPath('data.stripe_missing_credentials', false);
+        $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
 }

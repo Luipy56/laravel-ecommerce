@@ -28,6 +28,8 @@ class PaymentConfigController extends Controller
                 'local_checkout_needs_debug' => app()->environment('local') && ! $m['simulated'] && ! $anyMethod,
                 'paypal_missing_credentials' => PaymentCheckoutService::paypalMissingCredentialsForStorefront(),
                 'stripe_missing_credentials' => PaymentCheckoutService::stripeMissingCredentialsForStorefront(),
+                /** Mirrors `PAYPAL_MODE`: helps operators confirm sandbox vs live matches credentials. */
+                'paypal_mode' => PaymentCheckoutService::paypalModeLabelForStorefront(),
             ],
         ]);
     }

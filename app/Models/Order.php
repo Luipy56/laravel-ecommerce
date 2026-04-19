@@ -63,6 +63,32 @@ class Order extends Model
     /** Flat shipping fee (EUR) for every confirmed order; not applied to carts/likes. */
     public const SHIPPING_FLAT_EUR = 9.0;
 
+    /**
+     * Merchandise subtotal (EUR, order lines only) above this triggers a manual installation quote when installation is requested.
+     */
+    public const INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR = 1000.0;
+
+    /**
+     * Tiered installation fee from merchandise subtotal alone (no shipping/installation); null when a manual quote is required.
+     */
+    public static function automaticInstallationFeeFromMerchandiseSubtotal(float $merchandiseSubtotal): ?float
+    {
+        if ($merchandiseSubtotal <= 0) {
+            return null;
+        }
+        if ($merchandiseSubtotal > self::INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR) {
+            return null;
+        }
+        if ($merchandiseSubtotal <= 250.0) {
+            return 90.0;
+        }
+        if ($merchandiseSubtotal <= 500.0) {
+            return 120.0;
+        }
+
+        return 180.0;
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

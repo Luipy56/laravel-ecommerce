@@ -54,7 +54,7 @@ También puedes poner `PAYMENTS_ALLOW_SIMULATED=true` aunque no sea necesario en
 
 **No uses simulación en producción** (`APP_DEBUG=false`; en producción `APP_ENV` no debe ser `local`).
 
-El endpoint público `GET /api/v1/payments/config` expone qué métodos el storefront puede usar (ya filtrados por `PAYMENTS_CHECKOUT_METHODS` y credenciales). Incluye banderas informativas: `paypal_missing_credentials` y `stripe_missing_credentials` son **true** cuando ese método está en `PAYMENTS_CHECKOUT_METHODS` pero faltan credenciales reales **y** la simulación de checkout no cubre el vacío (`PAYMENTS_ALLOW_SIMULATED=false` o entorno no local sin simulación). PayPal no se simula nunca: sin `PAYPAL_*`, `paypal_missing_credentials` puede ser true aunque la tarjeta esté simulada. La ficha de pedido (`GET /api/v1/orders/{id}`) repite esas banderas junto a `payment_methods_available` para el mismo contexto al pagar desde el pedido.
+El endpoint público `GET /api/v1/payments/config` expone qué métodos el storefront puede usar (ya filtrados por `PAYMENTS_CHECKOUT_METHODS` y credenciales). Incluye banderas informativas: `paypal_missing_credentials` y `stripe_missing_credentials` son **true** cuando ese método está en `PAYMENTS_CHECKOUT_METHODS` pero faltan credenciales reales **y** la simulación de checkout no cubre el vacío (`PAYMENTS_ALLOW_SIMULATED=false` o entorno no local sin simulación). PayPal no se simula nunca: sin `PAYPAL_*`, `paypal_missing_credentials` puede ser true aunque la tarjeta esté simulada. También devuelve **`paypal_mode`**: `sandbox` o `live`, según `PAYPAL_MODE` normalizado (útil para comprobar que coincide con credenciales de la app REST en el panel de desarrolladores). La ficha de pedido (`GET /api/v1/orders/{id}`) repite las banderas de credenciales junto a `payment_methods_available` para el mismo contexto al pagar desde el pedido.
 
 ### PayPal Developer Dashboard y actividad
 
@@ -124,6 +124,19 @@ Objetivo: comprobar que un comprador **real** (cuenta **sandbox** de PayPal) pue
    - Verifica en la aplicación que el pago queda **correcto** (pedido / pago según tu flujo) y, si aplica, en el dashboard de PayPal **Sandbox** que la orden y la captura aparecen.
 
 Si `data.methods.paypal` es `false`, revisa credenciales vacías, `PAYPAL_MODE` incorrecto o que PayPal no esté incluido en `PAYMENTS_CHECKOUT_METHODS`.
+
+### PayPal sandbox: avisos CSP / CORS en la consola del navegador
+
+Si en **Chrome / Firefox** aparecen errores de **Content-Security-Policy** (p. ej. bloqueos relacionados con `unsafe-eval`) o **CORS** entre subdominios de PayPal (`c.paypal.com`, `www.sandbox.paypal.com`, etc.) **mientras el comprador está en la página alojada en paypal.com**:
+
+- Esas políticas las envía **el propio dominio de PayPal** sobre sus propios documentos y recursos. **Esta aplicación Laravel no puede cambiarlas** ni “relajarlas” para el checkout alojado en PayPal; tampoco el middleware de Laravel ni cabeceras de tu dominio aplican al HTML servido desde `paypal.com`.
+- La tienda solo: (1) crea la orden REST y enlaces `return_url` / `cancel_url` con **`APP_URL`** público correcto; (2) carga el **SDK JS** oficial desde `https://www.paypal.com/sdk/js` (el **client ID** sandbox vs live selecciona el entorno ante la API); (3) confirma el cobro en servidor con **`POST /api/v1/payments/paypal/capture`**.
+
+**Qué sí conviene revisar ante un “pago rechazado” o refrescos raros:**
+
+1. **`GET /api/v1/payments/config`:** `data.paypal_mode` debe ser **`sandbox`** si usas credenciales de la sección Sandbox del dashboard (`PAYPAL_MODE=sandbox`). Mezclar modo live con credenciales sandbox (o al revés) produce fallos que **no** se solucian tocando CSP.
+2. **`APP_URL`** debe ser la URL HTTPS pública que el navegador usa para volver desde PayPal (`return_url` / `cancel_url`). Un `APP_URL` incorrecto puede romper el retorno aunque el rechazo parezca “solo consola”.
+3. **Separar ruido de causa real:** abre las herramientas de red y mira si **`POST /api/v1/payments/paypal/capture`** devuelve **422** o error de PayPal; muchos avisos de consola en páginas de PayPal son telemetría o scripts internos y **no** implican que vuestra captura haya fallado por CSP.
 
 **Solo aparece PayPal en `/checkout` pero `STRIPE_KEY` y `STRIPE_SECRET` están bien:** casi siempre significa `PAYMENTS_CHECKOUT_METHODS=paypal` en `.env` (lista blanca sin `card`). Comprueba con `GET /api/v1/payments/config`: si `data.methods.card` es `false` y tienes claves Stripe, elimina esa variable, déjala vacía o usa `PAYMENTS_CHECKOUT_METHODS=card,paypal`, luego `php artisan config:clear`.
 

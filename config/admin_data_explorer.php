@@ -13,6 +13,14 @@ return [
 
     'max_aggregate_groups' => (int) env('ADMIN_DATA_EXPLORER_MAX_AGGREGATE_GROUPS', 200),
 
+    /*
+    | Session statement timeout for explorer queries (best effort):
+    | - PostgreSQL: SET LOCAL statement_timeout
+    | - MariaDB / mariadb driver: SET SESSION max_statement_time (seconds)
+    | - MySQL 8.0.3+ (mysql driver): SET SESSION max_execution_time (milliseconds)
+    | - Older MySQL: no session-level SELECT timeout; queries still run without this guard.
+    */
+
     'query_timeout_seconds' => (int) env('ADMIN_DATA_EXPLORER_QUERY_TIMEOUT', 25),
 
     /*

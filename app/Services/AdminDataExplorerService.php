@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -227,11 +228,82 @@ class AdminDataExplorerService
         $driver = Schema::getConnection()->getDriverName();
         $seconds = max(1, (int) config('admin_data_explorer.query_timeout_seconds', 25));
 
-        if ($driver === 'mysql') {
-            DB::statement('SET SESSION max_execution_time = '.($seconds * 1000));
-        } elseif ($driver === 'pgsql') {
+        if ($driver === 'pgsql') {
             DB::statement("SET LOCAL statement_timeout = '{$seconds}s'");
+
+            return;
         }
+
+        if ($driver === 'mariadb') {
+            $this->trySetSessionStatement('SET SESSION max_statement_time = '.(int) $seconds);
+
+            return;
+        }
+
+        if ($driver !== 'mysql') {
+            return;
+        }
+
+        $versionRow = DB::selectOne('SELECT VERSION() as v');
+        $sql = $this->mysqlFamilyTimeoutStatement((string) ($versionRow->v ?? ''), $seconds);
+        if ($sql !== null) {
+            $this->trySetSessionStatement($sql);
+        }
+    }
+
+    /**
+     * Resolve a MySQL-protocol SET SESSION statement for statement timeouts.
+     * MariaDB uses max_statement_time (seconds); MySQL 8.0.3+ uses max_execution_time (milliseconds).
+     * Older MySQL releases have no equivalent session guard — returns null (caller skips SET).
+     */
+    protected function mysqlFamilyTimeoutStatement(string $versionString, int $seconds): ?string
+    {
+        $seconds = max(1, $seconds);
+        $lower = strtolower($versionString);
+
+        if (str_contains($lower, 'mariadb')) {
+            return 'SET SESSION max_statement_time = '.(int) $seconds;
+        }
+
+        if (! preg_match('/^(\d+)\.(\d+)\.(\d+)/', $versionString, $m)) {
+            return null;
+        }
+
+        $major = (int) $m[1];
+        $minor = (int) $m[2];
+        $patch = (int) $m[3];
+
+        $mysql803Plus = $major > 8
+            || ($major === 8 && $minor > 0)
+            || ($major === 8 && $minor === 0 && $patch >= 3);
+
+        if ($mysql803Plus) {
+            return 'SET SESSION max_execution_time = '.($seconds * 1000);
+        }
+
+        return null;
+    }
+
+    protected function trySetSessionStatement(string $sql): void
+    {
+        try {
+            DB::statement($sql);
+        } catch (QueryException $e) {
+            if ($this->isUnsupportedSessionTimeoutVariableError($e)) {
+                return;
+            }
+
+            throw $e;
+        }
+    }
+
+    protected function isUnsupportedSessionTimeoutVariableError(QueryException $e): bool
+    {
+        $msg = strtolower($e->getMessage());
+
+        return str_contains($msg, 'unknown system variable')
+            || str_contains($msg, 'unsupported')
+            || str_contains($msg, '1193'); // ER_BAD_SYSTEM_VARIABLE in MySQL
     }
 
     /**

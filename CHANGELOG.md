@@ -7,9 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Admin data explorer:** Session statement timeout is applied with MariaDB `max_statement_time`, MySQL 8.0.3+ `max_execution_time`, or skipped on older MySQL, so `POST /api/v1/admin/data-explorer/query` no longer fails with unknown system variable on MariaDB / legacy MySQL. Unsupported-variable errors from `SET SESSION` are ignored as a last resort. Aggregate values on the explorer page use `ca-ES` / `es-ES` number formatting for Catalan vs Spanish UI.
+
+### Added
+
+- **Tests:** **`AdminDataExplorerMysqlTimeoutTest`** locks in MySQL/MariaDB timeout `SET SESSION` resolution.
+
 ### Changed
 
-- Agent log reviewer: latest passes appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-19T16:45Z, 2026-04-19T16:46Z).
+- **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
+
+## [0.1.12] - 2026-04-19
+
+### Fixed
+
+- **SQLite / Artisan:** In non-`production` environments, the app now creates the on-disk database file (and parent directory) when `DB_DATABASE` is a file path that does not exist yet, avoiding `Database file at path […] does not exist` on first `artisan` / web boot (e.g. `DB_DATABASE=/tmp/…` overrides). Documented in **`README.md`**.
+
+### Changed
+
+- **PayPal:** Checkout/pay payloads include **`paypal_mode`** (`sandbox`/`live`) next to **`client_id`** so the SPA matches Smart Buttons loader context with **`PAYPAL_MODE`** / REST hosts; **`PayPalInlineButtons`** documents the shared SDK URL and keys script elements by mode. **`docs/CONFIGURACION_PAGOS_CORREO.md`** CSP/CORS section ties **`bootstrap/app.php`** (no app CSP), REST vs SDK behaviour, and GitHub [#14](https://github.com/Luipy56/laravel-ecommerce/issues/14) / [#19](https://github.com/Luipy56/laravel-ecommerce/issues/19).
+
+### Added
+
+- **Tests:** **`SqliteDatabaseBootstrapTest`**; **`PayPalPaymentTest`** / **`CheckoutPaymentConfigTest`** extended for **`paypal_mode`** in payment config.
+
+## [0.1.11] - 2026-04-19
+
+### Added
+
+- **Personalized solution client portal (token access without login):** `public_token` on **`personalized_solutions`**; public API **`/api/v1/public/personalized-solutions/{token}`** (read, update contact/address, opt-out, request improvements); storefront route **`/client/personalized-solutions/:token`** (`ClientPersonalizedSolutionPage`); **`PublicPersonalizedSolutionController`**; feature test **`PublicPersonalizedSolutionPortalTest`**.
+- **Email:** Shared Blade layout under **`resources/views/emails/layouts/`**; customer **`PersonalizedSolutionResolvedMail`**; admin **`PersonalizedSolutionImprovementRequestedAdminMail`**; **POST** **`/api/v1/admin/personalized-solutions/{id}/notify-resolution`** to resend resolution. Order and installation-related customer templates updated to the shared layout.
+- **Admin / model:** Improvement feedback fields (`iterations_count`, `improvement_feedback`, `improvement_feedback_at`); admin personalized solution show surfaces portal URL, status, and resolution actions.
+
+### Changed
+
+- **Custom solution** submit flow, **order** integration, **admin** personalized-solution edit/show, **lang** (ca/es, including `mail.php`), **`docs/email-notifications.md`**, **`.env.example`**, **`config/mail.php`**, and **`trash/diagramZero.dbml`** aligned with the portal and notification behaviour; **`PersonalizedSolutionSeeder`** updates.
+- **Agent pipeline:** archived closed tasks under **`agents/tasks/done/2026/04/19/`** (replacing superseded **`agents/tasks/`** entries).
 
 ## [0.1.10] - 2026-04-19
 

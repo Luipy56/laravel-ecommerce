@@ -184,4 +184,65 @@ class Order extends Model
     {
         return $query->where('kind', self::KIND_LIKE);
     }
+
+    /**
+     * Ordered milestones for the storefront order detail timeline (derived from current fields).
+     *
+     * @return list<array{step: string, at: ?string, status_code?: string, installation_status_code?: ?string}>
+     */
+    public function buildClientStatusTimeline(): array
+    {
+        if ($this->kind !== self::KIND_ORDER) {
+            return [];
+        }
+
+        $items = [];
+
+        $items[] = [
+            'step' => 'placed',
+            'at' => $this->order_date?->toIso8601String(),
+        ];
+
+        $successfulPayment = $this->relationLoaded('payments')
+            ? $this->payments->filter(fn (Payment $p) => $p->isSuccessful())->sortBy(fn (Payment $p) => $p->paid_at ?? $p->created_at)->first()
+            : $this->payments()->successful()->orderBy('paid_at')->orderBy('id')->first();
+
+        if ($successfulPayment && $successfulPayment->paid_at) {
+            $items[] = [
+                'step' => 'payment_received',
+                'at' => $successfulPayment->paid_at->toIso8601String(),
+            ];
+        }
+
+        if ($this->installation_requested) {
+            if ($this->status === self::STATUS_AWAITING_INSTALLATION_PRICE
+                || $this->installation_status === self::INSTALLATION_PENDING) {
+                $items[] = [
+                    'step' => 'installation_quote_pending',
+                    'at' => null,
+                ];
+            } elseif ($this->installation_status === self::INSTALLATION_PRICED && $this->installation_price !== null) {
+                $items[] = [
+                    'step' => 'installation_price_set',
+                    'at' => null,
+                ];
+            }
+        }
+
+        $items[] = [
+            'step' => 'current',
+            'status_code' => $this->status,
+            'installation_status_code' => $this->installation_requested ? $this->installation_status : null,
+            'at' => null,
+        ];
+
+        if ($this->shipping_date !== null) {
+            $items[] = [
+                'step' => 'shipping_scheduled',
+                'at' => $this->shipping_date->toIso8601String(),
+            ];
+        }
+
+        return $items;
+    }
 }

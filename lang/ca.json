@@ -68,6 +68,17 @@
     "shop.payment.paypal_credentials_format_invalid": "PAYPAL_CLIENT_ID sembla incomplet: a PayPal sol ser una cadena llarga (~80 caràcters). Copia el Client ID complet des d'Apps & Credentials (Sandbox o Live) i el Secret corresponent.",
     "shop.checkout_stripe_product": "Comanda #:id",
 
+    "shop.order.timeline.placed": "Comanda registrada",
+    "shop.order.timeline.payment_received": "Pagament registrat",
+    "shop.order.timeline.installation_quote_pending": "Esperant pressupost d’instal·lació",
+    "shop.order.timeline.installation_price_set": "Preu d’instal·lació definit",
+    "shop.order.timeline.current": "Estat actual",
+    "shop.order.timeline.shipping_scheduled": "Enviament programat",
+    "shop.order.status_timeline_title": "Historial de l’estat",
+
+    "client_portal.solution_not_found": "No s’ha trobat aquesta sol·licitud o ja no és vàlida.",
+    "client_portal.admin_notify_no_email": "No hi ha un correu vàlid per enviar la notificació.",
+
     "validation.required": "Aquest camp és obligatori.",
     "validation.email": "El correu electrònic no és vàlid.",
     "validation.min": "El valor ha de tenir com a mínim :min caràcters.",

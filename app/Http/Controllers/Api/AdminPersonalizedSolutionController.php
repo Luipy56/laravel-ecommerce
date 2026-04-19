@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PersonalizedSolutionResolvedMail;
 use App\Models\PersonalizedSolution;
+use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Admin CRUD for personalized solutions (client requests).
@@ -99,6 +102,10 @@ class AdminPersonalizedSolutionController extends Controller
                 'problem_description' => $personalized_solution->problem_description,
                 'resolution' => $personalized_solution->resolution,
                 'status' => $personalized_solution->status,
+                'iterations_count' => (int) $personalized_solution->iterations_count,
+                'improvement_feedback' => $personalized_solution->improvement_feedback,
+                'improvement_feedback_at' => $personalized_solution->improvement_feedback_at?->toIso8601String(),
+                'portal_url' => $personalized_solution->public_token ? $personalized_solution->portalUrl() : null,
                 'is_active' => (bool) $personalized_solution->is_active,
                 'created_at' => $personalized_solution->created_at?->toIso8601String(),
                 'updated_at' => $personalized_solution->updated_at?->toIso8601String(),
@@ -107,8 +114,26 @@ class AdminPersonalizedSolutionController extends Controller
         ]);
     }
 
+    public function notifyResolution(Request $request, PersonalizedSolution $personalized_solution): JsonResponse
+    {
+        $email = $personalized_solution->email;
+        if (! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('client_portal.admin_notify_no_email'),
+            ], 422);
+        }
+
+        $locale = MailLocale::resolve($request->getPreferredLanguage(['ca', 'es']));
+        Mail::to($email)->locale($locale)->send(new PersonalizedSolutionResolvedMail($personalized_solution->fresh()));
+
+        return response()->json(['success' => true]);
+    }
+
     public function update(Request $request, PersonalizedSolution $personalized_solution): JsonResponse
     {
+        $previousStatus = $personalized_solution->status;
+
         $request->merge([
             'client_id' => $request->client_id === '' ? null : $request->client_id,
             'order_id' => $request->order_id === '' ? null : $request->order_id,
@@ -133,6 +158,7 @@ class AdminPersonalizedSolutionController extends Controller
             'client_id' => ['nullable', 'integer', 'exists:clients,id'],
             'order_id' => ['nullable', 'integer', 'exists:orders,id'],
             'is_active' => ['boolean'],
+            'clear_improvement_feedback' => ['boolean'],
         ]);
 
         $personalized_solution->email = $validated['email'] ?? null;
@@ -150,7 +176,21 @@ class AdminPersonalizedSolutionController extends Controller
         if (array_key_exists('is_active', $validated)) {
             $personalized_solution->is_active = $validated['is_active'];
         }
+        if ($request->boolean('clear_improvement_feedback')) {
+            $personalized_solution->improvement_feedback = null;
+            $personalized_solution->improvement_feedback_at = null;
+        }
         $personalized_solution->save();
+
+        $fresh = $personalized_solution->fresh();
+        if ($fresh
+            && $previousStatus !== PersonalizedSolution::STATUS_COMPLETED
+            && $fresh->status === PersonalizedSolution::STATUS_COMPLETED
+            && $fresh->email
+            && filter_var($fresh->email, FILTER_VALIDATE_EMAIL)) {
+            $locale = MailLocale::resolve($request->getPreferredLanguage(['ca', 'es']));
+            Mail::to($fresh->email)->locale($locale)->send(new PersonalizedSolutionResolvedMail($fresh));
+        }
 
         return response()->json([
             'success' => true,

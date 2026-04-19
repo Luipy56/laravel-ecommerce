@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
@@ -10,6 +10,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const { mergeCart } = useCart();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loginEmail, setLoginEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -32,7 +33,12 @@ export default function LoginPage() {
       const result = await login(parsed.data.login_email, parsed.data.password, remember);
       if (result.success) {
         await mergeCart();
-        navigate('/');
+        const next = searchParams.get('next');
+        const safeNext =
+          next && next.startsWith('/') && !next.startsWith('//')
+            ? next
+            : '/';
+        navigate(safeNext);
       } else {
         const msg = result.errors?.login_email?.[0] || result.message || t('auth.failed');
         setError(msg);

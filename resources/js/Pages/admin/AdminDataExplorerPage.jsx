@@ -12,7 +12,8 @@ function formatCell(value) {
 }
 
 export default function AdminDataExplorerPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const numberLocale = i18n.language === 'es' ? 'es-ES' : 'ca-ES';
   const navigate = useNavigate();
 
   const [schema, setSchema] = useState(null);
@@ -399,7 +400,9 @@ export default function AdminDataExplorerPage() {
                   <tr key={i}>
                     <td>{formatCell(r.group_value)}</td>
                     <td className="text-end tabular-nums">
-                      {r.aggregate_value != null ? Number(r.aggregate_value).toLocaleString() : ''}
+                      {r.aggregate_value != null
+                        ? Number(r.aggregate_value).toLocaleString(numberLocale)
+                        : ''}
                     </td>
                   </tr>
                 ))}

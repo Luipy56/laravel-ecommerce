@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'layout' => [
+        'footer_default' => 'Mensaje automático; por favor no respondas directamente.',
+        'manage_preferences' => 'Gestiona tus datos con el enlace seguro',
+    ],
+
     'installation_price' => [
         'subject' => 'Presupuesto de instalación para el pedido #:id',
         'greeting' => 'Hola,',
@@ -37,6 +42,24 @@ return [
         'greeting' => 'Hola,',
         'body' => 'Hemos recibido tu solicitud de solución personalizada (referencia #:id). Nuestro equipo la revisará y se pondrá en contacto contigo si necesita más información.',
         'footer' => 'Gracias por contactarnos.',
+        'portal_intro' => 'Puedes hacer seguimiento de la solicitud y actualizar tus datos con este enlace seguro (sin iniciar sesión):',
+        'portal_button' => 'Abrir el gestor de la solicitud',
+    ],
+
+    'personalized_solution_resolved' => [
+        'subject' => 'Solución personalizada · actualización #:id',
+        'greeting' => 'Hola,',
+        'body' => 'Hay una novedad sobre tu solicitud #:id.',
+        'cta' => 'Puedes revisar los detalles y responder desde el gestor.',
+        'button' => 'Ver la solicitud',
+    ],
+
+    'admin_personalized_improvement' => [
+        'subject' => '[Solución #:id] Mejora solicitada por el cliente',
+        'intro' => 'El cliente ha solicitado mejoras para la solicitud #:id.',
+        'email' => 'Correo:',
+        'message' => 'Mensaje:',
+        'button' => 'Abrir en el panel',
     ],
 
     'order_shipped' => [

@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\PaymentConfigController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\PayPalPaymentController;
 use App\Http\Controllers\Api\PersonalizedSolutionController;
+use App\Http\Controllers\Api\PublicPersonalizedSolutionController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PurchasedProductsController;
 use App\Http\Controllers\Api\UserController;
@@ -46,6 +47,15 @@ Route::get('packs/{pack}', [PackController::class, 'show']);
 Route::get('payments/config', [PaymentConfigController::class, 'show']);
 
 Route::post('personalized-solutions', [PersonalizedSolutionController::class, 'store']);
+
+Route::get('public/personalized-solutions/{token}', [PublicPersonalizedSolutionController::class, 'show'])
+    ->where('token', '[a-f0-9]{64}');
+Route::patch('public/personalized-solutions/{token}', [PublicPersonalizedSolutionController::class, 'update'])
+    ->where('token', '[a-f0-9]{64}');
+Route::delete('public/personalized-solutions/{token}', [PublicPersonalizedSolutionController::class, 'destroy'])
+    ->where('token', '[a-f0-9]{64}');
+Route::post('public/personalized-solutions/{token}/request-improvements', [PublicPersonalizedSolutionController::class, 'requestImprovements'])
+    ->where('token', '[a-f0-9]{64}');
 
 Route::post('payments/webhooks/stripe', [PaymentWebhookController::class, 'stripe']);
 
@@ -115,6 +125,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::apiResource('admins', AdminAdminController::class);
     Route::get('personalized-solutions', [AdminPersonalizedSolutionController::class, 'index']);
     Route::get('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'show']);
+    Route::post('personalized-solutions/{personalized_solution}/notify-resolution', [AdminPersonalizedSolutionController::class, 'notifyResolution']);
     Route::put('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'update']);
     Route::delete('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'destroy']);
 });

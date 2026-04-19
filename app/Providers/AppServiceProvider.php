@@ -22,6 +22,7 @@ use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use App\Services\ProductSearchTextRebuildService;
 use App\Services\Search\ScoutElasticsearchProductCatalogSearch;
 use App\Services\Search\SearchSynonymDictionary;
+use App\Support\SqliteDatabaseBootstrap;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
@@ -34,6 +35,13 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->alignSessionDriverForSqliteMemory();
+
+        $defaultName = config('database.default');
+        $defaultKey = is_string($defaultName) && $defaultName !== '' ? $defaultName : 'sqlite';
+        SqliteDatabaseBootstrap::touchDatabaseFileIfMissing(
+            $this->app->environment(),
+            config("database.connections.{$defaultKey}", []),
+        );
 
         $this->app->when(PaymentCheckoutService::class)
             ->needs(PaymentCheckoutStarter::class)

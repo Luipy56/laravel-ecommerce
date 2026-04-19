@@ -4,6 +4,7 @@ namespace App\Services\Payments\PayPal;
 
 use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Models\Payment;
+use App\Services\Payments\PaymentCheckoutService;
 use RuntimeException;
 
 class PayPalCheckoutStarter implements PaymentCheckoutStarter
@@ -81,7 +82,8 @@ class PayPalCheckoutStarter implements PaymentCheckoutStarter
      *     client_id: string,
      *     paypal_order_id: string,
      *     payment_id: int,
-     *     approval_url: string|null
+     *     approval_url: string|null,
+     *     paypal_mode: 'live'|'sandbox'
      * }
      */
     private function checkoutPayload(Payment $payment, string $clientId, string $paypalOrderId, ?string $approvalUrl = null): array
@@ -92,6 +94,7 @@ class PayPalCheckoutStarter implements PaymentCheckoutStarter
             'paypal_order_id' => $paypalOrderId,
             'payment_id' => (int) $payment->id,
             'approval_url' => $approvalUrl,
+            'paypal_mode' => PaymentCheckoutService::paypalModeLabelForStorefront(),
         ];
     }
 }

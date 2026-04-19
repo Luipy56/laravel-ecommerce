@@ -20,6 +20,7 @@ import PurchasesPage from './Pages/PurchasesPage';
 import OrderDetailPage from './Pages/OrderDetailPage';
 import ProfilePage from './Pages/ProfilePage';
 import CustomSolutionPage from './Pages/CustomSolutionPage';
+import ClientPersonalizedSolutionPage from './Pages/ClientPersonalizedSolutionPage';
 import AdminLoginPage from './Pages/admin/AdminLoginPage';
 import AdminDashboardPage from './Pages/admin/AdminDashboardPage';
 import AdminCategoriesPage from './Pages/admin/AdminCategoriesPage';
@@ -99,6 +100,7 @@ export default function App() {
                   <Route path="orders/:id" element={<OrderDetailPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="custom-solution" element={<CustomSolutionPage />} />
+                  <Route path="client/personalized-solutions/:token" element={<ClientPersonalizedSolutionPage />} />
                   <Route path="session-expired" element={<SessionExpiredPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>

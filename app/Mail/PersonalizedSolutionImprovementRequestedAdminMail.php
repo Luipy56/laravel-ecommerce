@@ -9,33 +9,33 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PersonalizedSolutionReceivedMail extends Mailable
+class PersonalizedSolutionImprovementRequestedAdminMail extends Mailable
 {
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public PersonalizedSolution $solution)
-    {
+    public function __construct(
+        public PersonalizedSolution $solution,
+        public string $clientMessage,
+    ) {
         //
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('mail.personalized_solution.subject', ['id' => $this->solution->id]),
+            subject: __('mail.admin_personalized_improvement.subject', ['id' => $this->solution->id]),
         );
     }
 
     public function content(): Content
     {
-        $portalUrl = $this->solution->public_token ? $this->solution->portalUrl() : url('/custom-solution');
-
         return new Content(
-            html: 'emails.personalized-solution-received',
+            html: 'emails.personalized-solution-improvement-admin',
             with: [
                 'solution' => $this->solution,
-                'portalUrl' => $portalUrl,
-                'managePreferencesUrl' => $portalUrl,
+                'message' => $this->clientMessage,
+                'adminUrl' => url('/admin/personalized-solutions/'.$this->solution->id),
             ],
         );
     }

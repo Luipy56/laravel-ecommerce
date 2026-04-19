@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import PageTitle from '../components/PageTitle';
@@ -8,6 +9,7 @@ import { customSolutionFormSchema, parseWithZod } from '../validation';
 
 export default function CustomSolutionPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [form, setForm] = useState({
     email: '',
@@ -68,6 +70,10 @@ export default function CustomSolutionPage() {
       });
       if (r.data.success) {
         showToast({ message: t('shop.custom_solution.success'), type: 'success' });
+        const portalPath = r.data.data?.client_portal_path;
+        if (portalPath) {
+          navigate(portalPath);
+        }
         setForm({
           email: '',
           phone: '',
@@ -85,7 +91,7 @@ export default function CustomSolutionPage() {
     } finally {
       setLoading(false);
     }
-  }, [form, t, showToast]);
+  }, [form, t, showToast, navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

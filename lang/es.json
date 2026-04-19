@@ -68,6 +68,17 @@
     "shop.payment.paypal_credentials_format_invalid": "PAYPAL_CLIENT_ID parece incompleto: en PayPal suele ser una cadena larga (~80 caracteres). Copia el Client ID completo desde Apps & Credentials (Sandbox o Live) y el Secret correspondiente.",
     "shop.checkout_stripe_product": "Pedido #:id",
 
+    "shop.order.timeline.placed": "Pedido registrado",
+    "shop.order.timeline.payment_received": "Pago registrado",
+    "shop.order.timeline.installation_quote_pending": "Esperando presupuesto de instalación",
+    "shop.order.timeline.installation_price_set": "Precio de instalación definido",
+    "shop.order.timeline.current": "Estado actual",
+    "shop.order.timeline.shipping_scheduled": "Envío programado",
+    "shop.order.status_timeline_title": "Historial del estado",
+
+    "client_portal.solution_not_found": "No se encontró esta solicitud o ya no es válida.",
+    "client_portal.admin_notify_no_email": "No hay un correo válido para enviar la notificación.",
+
     "validation.required": "Este campo es obligatorio.",
     "validation.email": "El correo electrónico no es válido.",
     "validation.min": "El valor debe tener al menos :min caracteres.",

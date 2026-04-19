@@ -41,6 +41,7 @@ export default function CheckoutPage() {
     local_checkout_needs_debug: false,
     paypal_missing_credentials: false,
     stripe_missing_credentials: false,
+    paypal_mode: undefined,
   });
   const [checkoutFormError, setCheckoutFormError] = useState('');
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
@@ -64,6 +65,7 @@ export default function CheckoutPage() {
             local_checkout_needs_debug: !!d.local_checkout_needs_debug,
             paypal_missing_credentials: !!d.paypal_missing_credentials,
             stripe_missing_credentials: !!d.stripe_missing_credentials,
+            paypal_mode: d.paypal_mode === 'live' ? 'live' : d.paypal_mode === 'sandbox' ? 'sandbox' : undefined,
           });
         } else {
           setPayMethods({ card: false, paypal: false });
@@ -72,6 +74,7 @@ export default function CheckoutPage() {
             local_checkout_needs_debug: false,
             paypal_missing_credentials: false,
             stripe_missing_credentials: false,
+            paypal_mode: undefined,
           });
         }
       })
@@ -83,6 +86,7 @@ export default function CheckoutPage() {
           local_checkout_needs_debug: false,
           paypal_missing_credentials: false,
           stripe_missing_credentials: false,
+          paypal_mode: undefined,
         });
       });
   }, []);
@@ -175,6 +179,7 @@ export default function CheckoutPage() {
             client_id: c.client_id,
             paypal_order_id: c.paypal_order_id,
             payment_id: c.payment_id,
+            paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
           },
         });
         return;
@@ -418,6 +423,7 @@ export default function CheckoutPage() {
               clientId={activeCheckout.paypal.client_id}
               paypalOrderId={activeCheckout.paypal.paypal_order_id}
               paymentId={activeCheckout.paypal.payment_id}
+              paypalMode={activeCheckout.paypal.paypal_mode ?? payConfigMeta.paypal_mode}
               onSuccess={() => navigate(`/orders/${activeCheckout.orderId}`)}
               onError={(msg) => setStripeUiError(msg)}
               onCancel={() => {

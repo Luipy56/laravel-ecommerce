@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminToast } from '../../contexts/AdminToastContext';
+import { useToast } from '../../contexts/ToastContext';
 
 const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
 
@@ -25,10 +27,13 @@ function isImageAttachment(attachment) {
 export default function AdminPersonalizedSolutionShowPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { showSuccess } = useAdminToast();
+  const { showToast } = useToast();
   const { id } = useParams();
   const [solution, setSolution] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
+  const [notifyLoading, setNotifyLoading] = useState(false);
 
   const fetchSolution = useCallback(async () => {
     if (!id) return;
@@ -47,6 +52,21 @@ export default function AdminPersonalizedSolutionShowPage() {
   useEffect(() => {
     fetchSolution();
   }, [fetchSolution]);
+
+  const handleNotifyResolution = async () => {
+    if (!id) return;
+    setNotifyLoading(true);
+    try {
+      const { data } = await api.post(`admin/personalized-solutions/${id}/notify-resolution`);
+      if (data.success) {
+        showSuccess(t('admin.personalized_solutions.resend_resolution_done'));
+      } else showToast({ message: data.message || t('common.error'), type: 'error' });
+    } catch (err) {
+      showToast({ message: err.response?.data?.message || t('common.error'), type: 'error' });
+    } finally {
+      setNotifyLoading(false);
+    }
+  };
 
   if (loadError) {
     return (
@@ -75,8 +95,16 @@ export default function AdminPersonalizedSolutionShowPage() {
         <PageTitle className="mb-0">
           {t('admin.personalized_solutions.title')} #{solution.id}
         </PageTitle>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link to="/admin/personalized-solutions" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm shrink-0"
+            disabled={notifyLoading || !solution.email}
+            onClick={handleNotifyResolution}
+          >
+            {notifyLoading ? t('common.loading') : t('admin.personalized_solutions.resend_resolution')}
+          </button>
           <Link to={`/admin/personalized-solutions/${id}/edit`} className="btn btn-primary btn-sm shrink-0">{t('common.edit')}</Link>
         </div>
       </div>
@@ -96,6 +124,12 @@ export default function AdminPersonalizedSolutionShowPage() {
               )}
               {solution.order && (
                 <div><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.order')}</dt><dd>{solution.order.reference}</dd></div>
+              )}
+              {solution.portal_url && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.portal_url')}</dt>
+                  <dd><a href={solution.portal_url} className="link link-hover break-all" target="_blank" rel="noopener noreferrer">{solution.portal_url}</a></dd>
+                </div>
               )}
             </dl>
           </section>
@@ -117,6 +151,21 @@ export default function AdminPersonalizedSolutionShowPage() {
             <h2 className="text-lg font-semibold mb-2">{t('admin.personalized_solutions.problem_description')}</h2>
             <p className="whitespace-pre-wrap">{solution.problem_description ?? ''}</p>
           </section>
+
+          {(solution.iterations_count > 0 || solution.improvement_feedback) && (
+            <section>
+              <h2 className="text-lg font-semibold mb-2">{t('admin.personalized_solutions.improvement_feedback')}</h2>
+              <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.iterations')}</dt><dd>{solution.iterations_count ?? 0}</dd></div>
+                {solution.improvement_feedback_at && (
+                  <div><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.improvement_at')}</dt><dd>{new Date(solution.improvement_feedback_at).toLocaleString()}</dd></div>
+                )}
+                {solution.improvement_feedback && (
+                  <div className="sm:col-span-2"><dt className="text-sm text-base-content/70 sr-only">{t('admin.personalized_solutions.improvement_feedback')}</dt><dd className="whitespace-pre-wrap">{solution.improvement_feedback}</dd></div>
+                )}
+              </dl>
+            </section>
+          )}
 
           {(solution.resolution || solution.status) && (
             <section>

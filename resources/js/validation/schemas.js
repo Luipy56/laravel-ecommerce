@@ -70,7 +70,10 @@ export const customSolutionFormSchema = z.object({
   address_note: z.string().trim().max(1000),
 });
 
-export function checkoutFormSchema(wantsInstallation) {
+/**
+ * @param {{ wantsInstallation: boolean, installationQuoteRequired: boolean }} opts
+ */
+export function checkoutFormSchema({ wantsInstallation, installationQuoteRequired }) {
   const shipping = {
     shipping_street: z.string().trim().min(1, { message: 'validation.required' }).max(255),
     shipping_city: z.string().trim().min(1, { message: 'validation.required' }).max(100),
@@ -79,14 +82,26 @@ export function checkoutFormSchema(wantsInstallation) {
     shipping_note: z.string().max(5000),
   };
 
-  if (wantsInstallation) {
+  const installationFields = {
+    installation_street: z.string().trim().min(1, { message: 'validation.required' }).max(255),
+    installation_city: z.string().trim().min(1, { message: 'validation.required' }).max(100),
+    installation_postal_code: postalCodeLoose,
+    installation_note: z.string().max(5000),
+  };
+
+  if (wantsInstallation && installationQuoteRequired) {
     return z.object({
       ...shipping,
       payment_method: z.string().optional().nullable(),
-      installation_street: z.string().trim().min(1, { message: 'validation.required' }).max(255),
-      installation_city: z.string().trim().min(1, { message: 'validation.required' }).max(100),
-      installation_postal_code: postalCodeLoose,
-      installation_note: z.string().max(5000),
+      ...installationFields,
+    });
+  }
+
+  if (wantsInstallation) {
+    return z.object({
+      ...shipping,
+      payment_method: PAYMENT_METHODS,
+      ...installationFields,
     });
   }
 

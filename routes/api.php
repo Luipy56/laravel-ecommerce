@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminDashboardController;
+use App\Http\Controllers\Api\AdminDataExplorerController;
 use App\Http\Controllers\Api\AdminFeatureController;
 use App\Http\Controllers\Api\AdminFeatureNameController;
 use App\Http\Controllers\Api\AdminOrderController;
@@ -89,6 +90,10 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('stats/sales-by-period', [AdminDashboardController::class, 'salesByPeriod']);
     Route::get('stats/top-products', [AdminDashboardController::class, 'topProducts']);
     Route::get('stats/low-stock', [AdminDashboardController::class, 'lowStock']);
+    Route::get('data-explorer/schema', [AdminDataExplorerController::class, 'schema']);
+    Route::post('data-explorer/query', [AdminDataExplorerController::class, 'query'])->middleware('throttle:30,1');
+    Route::post('data-explorer/export', [AdminDataExplorerController::class, 'export'])->middleware('throttle:10,1');
+    Route::post('data-explorer/aggregate', [AdminDataExplorerController::class, 'aggregate'])->middleware('throttle:20,1');
     Route::apiResource('categories', AdminCategoryController::class);
     Route::get('feature-names', [AdminFeatureNameController::class, 'index']);
     Route::post('feature-names', [AdminFeatureNameController::class, 'store']);

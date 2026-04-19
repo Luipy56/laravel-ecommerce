@@ -18,6 +18,8 @@
         </include>
     </source>
     <php>
+        <!-- Fixed key for CI / environments without .env (never use in production). -->
+        <env name="APP_KEY" value="base64:aNMx3xQ9KrBB3wkrgY2O3sTsnVkwZ5L98K1F34tFt1M="/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

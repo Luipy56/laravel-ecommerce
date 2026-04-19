@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`GET /api/v1/payments/config`:** `data.paypal_mode` (`sandbox` or `live`) mirrors `PAYPAL_MODE` for operators.
+- **Docs:** `docs/CONFIGURACION_PAGOS_CORREO.md` — PayPal sandbox console CSP/CORS noise vs. integration checks (`APP_URL`, capture API).
+
+### Fixed
+
+- **`phpunit.xml`:** `APP_KEY` set for PHPUnit when no `.env` is present (CI / fresh clones).
+
 ### Changed
 
 - Agent log reviewer: latest pass appended to **`agents/001-log-reviewer/time-of-last-review.txt`** (2026-04-11T20:10Z).

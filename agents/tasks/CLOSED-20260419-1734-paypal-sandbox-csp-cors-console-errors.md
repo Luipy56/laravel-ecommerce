@@ -25,3 +25,32 @@ Browser console on PayPal-hosted sandbox checkout reports two separate classes o
 1. **`php artisan test`** — full suite must pass (includes **`PayPalPaymentTest`**, **`CheckoutPaymentConfigTest`** assertions on **`paypal_mode`**).
 2. **`npm run build`** — storefront bundle builds after JSX changes.
 3. **Manual (sandbox):** With **`PAYPAL_MODE=sandbox`** and sandbox REST credentials, **`GET /api/v1/payments/config`** shows **`data.paypal_mode":"sandbox"`**. Complete checkout with PayPal Smart Buttons (no **`approval_url`** path): **`POST /api/v1/orders/checkout`** JSON **`data.payment_checkout`** must include **`paypal_mode":"sandbox"`**. In DevTools Network, SDK request stays **`https://www.paypal.com/sdk/js?...`** (expected); hosted PayPal tab may still show upstream CSP/CORS noise — confirm **`POST /api/v1/payments/paypal/capture`** succeeds when the buyer completes approval.
+
+---
+
+## Test report
+
+1. **Date/time (UTC) and log window:** Started **2026-04-19 17:50:01 UTC**; finished **~2026-04-19 17:52 UTC**. Log window reviewed: **`storage/logs/laravel.log`** entries immediately after **`php artisan routes:smoke`** (same UTC window).
+
+2. **Environment:** PHP **8.4.16**, Node **v22.22.2**, branch **`agentdevelop`**, **`APP_ENV=local`**. **`php artisan routes:smoke`** failed because **`.env`** uses **`DB_CONNECTION=pgsql`** while PHP CLI has **no PDO PostgreSQL driver** (`PDOException: could not find driver`).
+
+3. **What was tested (from Testing instructions):** Full PHPUnit suite; Vite production build; optional **`routes:smoke`**; review of Laravel log for smoke failures; **`CheckoutPaymentConfigTest`** coverage for **`paypal_mode`** assertions (per instruction 1). Manual PayPal-hosted sandbox browser flow not executed in this environment.
+
+4. **Results:**
+   - **`php artisan test`:** **PASS** — Exit code **0**; **98 passed**, 5 skipped; **`PayPalPaymentTest`** and **`CheckoutPaymentConfigTest`** (includes **`data.paypal_mode`** sandbox/live/normalization and checkout payload **`payment_checkout.paypal_mode`**) all green.
+   - **`npm run build`:** **PASS** — Vite **built in ~5.2s**, exit code **0**.
+   - **`php artisan routes:smoke`:** **FAIL (environment)** — Many routes returned **500**; log shows **`could not find driver`** for Postgres session/DB on CLI. Mitigation: **`Tests\Feature\RouteSmokeTest`** (**all distinct get routes do not return 500**) **PASS** in the same **`php artisan test`** run (test harness DB/session differs from broken CLI `.env`).
+   - **Manual (sandbox):** **NOT RUN** — No PayPal sandbox browser session or live **`www.sandbox.paypal.com`** approval in this tester run; capture/SDK DevTools checks are operator/staging verification per issue #19.
+
+5. **Overall:** **PASS** — Required automated gates (**`php artisan test`** including PayPal/config tests, **`npm run build`**) succeeded. **`routes:smoke`** CLI outcome is recorded as failed due to missing PDO driver for the configured DB, not as a regression signal; **`RouteSmokeTest`** passed. Manual sandbox E2E remains for staging with credentials.
+
+6. **Product owner feedback:** Automated tests now assert **`paypal_mode`** through **`payments/config`** and checkout payloads, which reduces risk of mixing REST hosts with the wrong labelled mode. Hosted PayPal pages may still print CSP/CORS warnings that the merchant cannot fix; confirming capture in sandbox with real buttons remains the definitive check before relying on console cleanliness.
+
+7. **URLs tested:** **N/A — no browser**
+
+8. **Relevant log excerpts:**
+   ```
+   PDOException(code: 0): could not find driver
+   ...
+   PostgresConnector.php ... Session/DatabaseSessionHandler.php ... RouteSmokeCommand.php
+   ```

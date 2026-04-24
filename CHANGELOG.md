@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
 
+## [0.1.13] - 2026-04-24
+
+### Fixed
+
+- **App version:** Storefront and admin now use the same version as root **`package.json`**: Laravel **`config('app.version')`** reads that file at bootstrap (with optional **`APP_VERSION`** override); Vite injects **`__APP_VERSION__`** so **`resources/js/config/version.js`** no longer drifts from releases. Documented in **`.env.example`**.
+
+### Changed
+
+- **Agent pipeline:** closed GitHub [#22](https://github.com/Luipy56/laravel-ecommerce/issues/22) task archived as **`agents/tasks/done/2026/04/24/CLOSED-20260424-1602-version-not-displayed-correctly.md`**; removed **`agents/tasks/FEAT-20260424-1602-version-not-displayed-correctly.md`**.
+
 ## [0.1.12] - 2026-04-19
 
 ### Fixed

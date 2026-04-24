@@ -1,2 +1,3 @@
-/** Application version (keep in sync with package.json and config/app.php when releasing). */
-export const APP_VERSION = '0.1.0';
+/* global __APP_VERSION__ */
+/** Application version from root `package.json` (injected by Vite `define` in vite.config.js). */
+export const APP_VERSION = __APP_VERSION__;

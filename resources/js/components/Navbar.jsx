@@ -159,13 +159,6 @@ export default function Navbar() {
             <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex shrink-0">
               {t('shop.custom_solution')}
             </Link>
-            <Link
-              to="/client/personalized-solutions"
-              className="btn btn-ghost hidden sm:inline-flex shrink-0"
-              title={t('shop.personalized_solution_access.title')}
-            >
-              {t('shop.personalized_solution_access.nav')}
-            </Link>
             <form onSubmit={handleSearch} className="join hidden lg:flex shrink-0 min-w-0">
               <input
                 type="search"

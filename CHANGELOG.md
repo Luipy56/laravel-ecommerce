@@ -19,11 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
 
+## [0.1.18] - 2026-04-25
+
+### Changed
+
+- **Storefront / custom solution:** The standalone **“Acceder con código”** page is removed. **`/custom-solution`** has a **discreet** optional block (border, no `alert-info`) to enter the **64‑hex access code** only; copy does not push URLs. Navigation uses [`resources/js/lib/personalizedSolutionCode.js`](resources/js/lib/personalizedSolutionCode.js). **Navbar / drawer / footer** links to the removed page are gone. **`/client/personalized-solutions`**, **`/mi-solucion`**, and **`/my-solution`** **redirect** to **`/custom-solution#custom-solution-followup`**; **`/client/personalized-solutions/:token`** (portal) is unchanged.
+
 ## [0.1.17] - 2026-04-25
 
 ### Added
 
-- **Storefront / personalized solution access:** Page **`/client/personalized-solutions`** to paste a **64‑character code** or full portal URL (normalization in [`ClientPersonalizedSolutionAccessPage.jsx`](resources/js/Pages/ClientPersonalizedSolutionAccessPage.jsx)). Links from **navbar**, **drawer**, **footer**, and a callout on **`/custom-solution`**. Short redirects **`/mi-solucion`** and **`/my-solution`** to the same page. Copy explains **`/custom-solution`** = new request vs **client portal** = return with code.
+- **Storefront / personalized solution access:** Page **`/client/personalized-solutions`** to paste a **64‑character code** or full portal URL (access page, later folded into 0.1.18). Links from **navbar**, **drawer**, **footer**, and a callout on **`/custom-solution`**. Short redirects **`/mi-solucion`** and **`/my-solution`**.
 
 ## [0.1.16] - 2026-04-25
 

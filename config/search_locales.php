@@ -9,7 +9,7 @@ return [
     | Search / indexing locale strategy (extension only)
     |--------------------------------------------------------------------------
     |
-    | Storefront UI locales are ca and es (see .cursor/rules/i18n.mdc). Product
+    | Storefront UI locales are ca, es, and en (see .cursor/rules/i18n.mdc). Product
     | data today uses a single name/description; search_text merges them into
     | one normalized blob (see Product::normalizeSearchText).
     |
@@ -27,5 +27,5 @@ return [
     /*
     | Locales the storefront is expected to expose; used for future index fields.
     */
-    'supported_ui_locales' => ['ca', 'es'],
+    'supported_ui_locales' => ['ca', 'es', 'en'],
 ];

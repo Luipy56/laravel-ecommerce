@@ -13,7 +13,8 @@ function formatCell(value) {
 
 export default function AdminDataExplorerPage() {
   const { t, i18n } = useTranslation();
-  const numberLocale = i18n.language === 'es' ? 'es-ES' : 'ca-ES';
+  const numberLocale =
+    i18n.language === 'es' ? 'es-ES' : i18n.language === 'en' ? 'en-GB' : 'ca-ES';
   const navigate = useNavigate();
 
   const [schema, setSchema] = useState(null);

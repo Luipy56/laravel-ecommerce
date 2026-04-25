@@ -15,7 +15,7 @@ Rules focus on **what to do when editing** a given area. Do not duplicate long b
 | **Git / branches** | `.cursor/rules/git-agent-branch-workflow.mdc` | Always — integration branch (**`agentdevelop`** default, override **`AGENT_GIT_BRANCH`**), sync **`./scripts/git-sync-agent-branch.sh`**, when to promote **`master`** |
 | **Commits / changelog** | `.cursor/rules/commit-changelog-version.mdc` | User asks to commit; **`CHANGELOG.md`**, **`README.md`**, **`docs/`** scan; version bump; commits stay on integration branch (promotion per git rule above) |
 | **Testing / verification** | `.cursor/rules/testing-verification.mdc` | Always — **`php artisan test`**, **`migrate:fresh --seed`** when schema/seeders change, **`routes:smoke`**, **`npm run build`** when front-end changes; **checkout / payments** manual checks and **`GET /api/v1/payments/config`**; env reference **`docs/CONFIGURACION_PAGOS_CORREO.md`** |
-| **Project standards** | `.cursor/rules/project-standards.mdc` | Migrations (edit existing, not new columns), i18n ca/es, **storefront + admin** (AdminLayout, list/toolbar patterns), shared components |
+| **Project standards** | `.cursor/rules/project-standards.mdc` | Migrations (edit existing, not new columns), i18n ca/es/en, **storefront + admin** (AdminLayout, list/toolbar patterns), shared components |
 | **API** | `.cursor/rules/api.mdc` | REST API shape and conventions |
 | **Auth** | `.cursor/rules/auth.mdc` | Custom session auth, login routes, SPA cookies; **API guest behaviour** — see **testing-verification** (*Auth / API note*) |
 | **Security** | `.cursor/rules/security.mdc` | CSRF, validation, mass assignment, secrets, rate limits |
@@ -25,7 +25,7 @@ Rules focus on **what to do when editing** a given area. Do not duplicate long b
 | **Vite** | `.cursor/rules/vite.mdc` | Build and asset entry |
 | **Tailwind** | `.cursor/rules/tailwind.mdc` | Utility styling |
 | **daisyUI** | `.cursor/rules/daisyui.mdc` | Component classes and themes |
-| **i18n** | `.cursor/rules/i18n.mdc` | Catalan / Spanish UI strings |
+| **i18n** | `.cursor/rules/i18n.mdc` | Catalan / Spanish / English UI strings |
 | **Shared components** | `.cursor/rules/components.mdc` | PageTitle, ProductCard, admin layout details |
 | **Ecommerce UX** | `.cursor/rules/ecommerce-ux.mdc` | Shop UX conventions |
 | **Ecommerce SEO** | `.cursor/rules/ecommerce-seo.mdc` | SEO-related front patterns |

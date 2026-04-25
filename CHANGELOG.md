@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
 
+## [0.1.15] - 2026-04-25
+
+### Added
+
+- **i18n (English):** Third language **`en`** for the React storefront and admin: `resources/js/locales/en.json`, `lang/en.json`, and `lang/en/mail.php` for server-side strings and emails. `config('app.available_locales')` is `['ca', 'es', 'en']`; the navbar and admin header add **English**; `MailLocale`, `GET` invoice HTML (`locale` query and `Accept-Language`), and Stripe Checkout `locale` accept English. `scripts/build_react_en_locale.py` can rebuild `en.json` from `es.json` (optional `deep-translator` in a venv). Developer note: `docs/email-notifications.md` and **`.cursor/rules/i18n.mdc`** list all three UI locales.
+
 ## [0.1.14] - 2026-04-25
 
 ### Fixed

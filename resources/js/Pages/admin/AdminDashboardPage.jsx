@@ -50,7 +50,8 @@ export default function AdminDashboardPage() {
   const [postalCode, setPostalCode] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const locale = i18n.language || 'es';
+  const chartLocale = i18n.language === 'es' ? 'es-ES' : i18n.language === 'en' ? 'en-GB' : 'ca-ES';
+  const locale = chartLocale;
 
   const fetchPostalCodes = useCallback(async (signal) => {
     try {

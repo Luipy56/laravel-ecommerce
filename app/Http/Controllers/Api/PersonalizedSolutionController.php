@@ -59,7 +59,7 @@ class PersonalizedSolutionController extends Controller
 
         PersonalizedSolutionSubmitted::dispatch(
             $solution->fresh(),
-            MailLocale::resolve($request->getPreferredLanguage(['ca', 'es'])),
+            MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en']))),
         );
 
         $solution->refresh();

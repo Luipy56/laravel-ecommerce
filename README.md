@@ -7,7 +7,7 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
 - **Storefront:** React SPA (`resources/js/`) consuming the Laravel API.
 - **Admin:** Protected admin area under `/admin` (same SPA stack).
 - **API:** Versioned REST routes under `routes/api.php` (e.g. `api/v1/...`).
-- **i18n:** User-facing UI targets **Catalan** and **Spanish** via Laravel lang and React i18n.
+- **i18n:** User-facing UI is available in **Catalan**, **Spanish**, and **English** via Laravel `lang/*` and React i18n (`ca`, `es`, `en`).
 
 ## Requirements
 

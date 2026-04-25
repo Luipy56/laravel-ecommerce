@@ -404,10 +404,14 @@ class OrderController extends Controller
         if (! $order->hasSuccessfulPayment()) {
             abort(403);
         }
+        $allowed = config('app.available_locales', ['ca', 'es', 'en']);
         $locale = $request->query('locale');
-        if (! in_array($locale, ['ca', 'es'], true)) {
+        if (! in_array($locale, $allowed, true)) {
             $pref = $request->header('Accept-Language', '');
-            $locale = (preg_match('/^(ca|es)([-_]|$)/i', $pref, $m) ? $m[1] : null) ?? config('app.locale');
+            $locale = (preg_match('/^(ca|es|en)([-_]|$)/i', $pref, $m) ? strtolower($m[1]) : null) ?? config('app.locale');
+        }
+        if (! in_array($locale, $allowed, true)) {
+            $locale = config('app.locale');
         }
         app()->setLocale($locale);
         $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);

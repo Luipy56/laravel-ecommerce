@@ -97,7 +97,11 @@ class StripeCheckoutStarter implements PaymentCheckoutStarter
                 ],
             ],
             'payment_method_types' => $pmTypes,
-            'locale' => in_array(app()->getLocale(), ['ca', 'es'], true) ? 'es' : 'auto',
+            'locale' => match (app()->getLocale()) {
+                'ca', 'es' => 'es',
+                'en' => 'en',
+                default => 'auto',
+            },
         ];
 
         $email = $order->client?->login_email;

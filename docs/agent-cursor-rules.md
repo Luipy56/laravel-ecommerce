@@ -16,6 +16,7 @@ Rules focus on **what to do when editing** a given area. Do not duplicate long b
 | **Commits / changelog** | `.cursor/rules/commit-changelog-version.mdc` | User asks to commit; **`CHANGELOG.md`**, **`README.md`**, **`docs/`** scan; version bump; commits stay on integration branch (promotion per git rule above) |
 | **Testing / verification** | `.cursor/rules/testing-verification.mdc` | Always — **`php artisan test`**, **`migrate:fresh --seed`** when schema/seeders change, **`routes:smoke`**, **`npm run build`** when front-end changes; **checkout / payments** manual checks and **`GET /api/v1/payments/config`**; env reference **`docs/CONFIGURACION_PAGOS_CORREO.md`** |
 | **Project standards** | `.cursor/rules/project-standards.mdc` | Migrations (edit existing, not new columns), i18n ca/es/en, **storefront + admin** (AdminLayout, list/toolbar patterns), shared components |
+| **Admin shop settings** | `.cursor/rules/admin-shop-settings.mdc` | `shop_settings`, automatic **`is_trending`**, admin settings page, public **`shop/public-settings`**, featured OR query |
 | **API** | `.cursor/rules/api.mdc` | REST API shape and conventions |
 | **Auth** | `.cursor/rules/auth.mdc` | Custom session auth, login routes, SPA cookies; **API guest behaviour** — see **testing-verification** (*Auth / API note*) |
 | **Security** | `.cursor/rules/security.mdc` | CSRF, validation, mass assignment, secrets, rate limits |
@@ -35,8 +36,9 @@ Rules focus on **what to do when editing** a given area. Do not duplicate long b
 
 ## Inventory (sync check)
 
-Alphabetical — must match **`ls .cursor/rules/*.mdc`** (20 files):
+Alphabetical — must match **`ls .cursor/rules/*.mdc`** (21 files):
 
+- `admin-shop-settings.mdc`
 - `api.mdc`
 - `auth.mdc`
 - `blade-views.mdc`

@@ -63,6 +63,12 @@ export default function AdminLayout() {
   const location = useLocation();
   const pathname = location.pathname;
   const [locale, setLocale] = useState(i18n.language);
+  const localeCode = (lng) => (lng === 'ca' ? 'CA' : lng === 'es' ? 'ES' : 'EN');
+  const languageAria = () => {
+    if (locale === 'en') return 'English';
+    if (locale === 'es') return 'Español';
+    return 'Català';
+  };
 
   useEffect(() => {
     setLocale(i18n.language);
@@ -141,12 +147,13 @@ export default function AdminLayout() {
               </div>
             </div>
             <div className="dropdown dropdown-end shrink-0">
-              <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={locale === 'ca' ? 'Català' : 'Español'}>
-                {locale === 'ca' ? 'CA' : 'ES'}
+              <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={languageAria()}>
+                {localeCode(locale)}
               </label>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-32 p-2 shadow border border-base-200">
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-36 p-2 shadow border border-base-200">
                 <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
                 <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
+                <li><button type="button" onClick={() => handleLocale('en')}>English</button></li>
               </ul>
             </div>
           </div>

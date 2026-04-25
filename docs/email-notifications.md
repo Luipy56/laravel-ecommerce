@@ -1,6 +1,6 @@
 # Customer email notifications
 
-Transactional emails use Laravel Mail with copy in **Catalan** and **Spanish** (`lang/ca/mail.php`, `lang/es/mail.php`). Locale is chosen from `Accept-Language` when the request provides `ca` or `es`; otherwise it defaults to **Catalan**.
+Transactional emails use Laravel Mail with copy in **Catalan**, **Spanish**, and **English** (`lang/ca/mail.php`, `lang/es/mail.php`, `lang/en/mail.php`). Locale is chosen from `Accept-Language` when the request provides `ca`, `es`, or `en`; otherwise it defaults to **Catalan** (or the app locale from `config('app.locale')` when resolving via `MailLocale`).
 
 ## When messages are sent
 

@@ -38,6 +38,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [locale, setLocale] = useState(i18n.language);
+  const localeCode = (lng) => (lng === 'ca' ? 'CA' : lng === 'es' ? 'ES' : 'EN');
   const [searchQ, setSearchQ] = useState('');
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -173,11 +174,12 @@ export default function Navbar() {
           <div className="navbar-end gap-1 sm:gap-2 shrink-0">
             <div className="dropdown dropdown-end">
               <label tabIndex={0} className="btn btn-ghost btn-sm btn-square sm:btn-sm">
-                {locale === 'ca' ? 'CA' : 'ES'}
+                {localeCode(locale)}
               </label>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-32 p-2 shadow">
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-36 p-2 shadow">
                 <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
                 <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
+                <li><button type="button" onClick={() => handleLocale('en')}>English</button></li>
               </ul>
             </div>
             <CartDropTarget

@@ -616,7 +616,6 @@
   "admin.settings.accept_personalized_solutions": "Acceptar noves sol·licituds de solució personalitzada des de la botiga",
   "admin.settings.recalculate_trending": "Tornar a calcular destacats automàtics segons la configuració",
   "admin.settings.recalculate_done": "S’han actualitzat els destacats automàtics per a {{count}} productes.",
-  "admin.settings.future_placeholder": "Aquí hi haurà més opcions quan la botiga creixi.",
   "admin.products.is_trending_managed_by_settings": "Aquest indicador s’actualitza des de Configuració amb les regles d’estoc i «Tornar a calcular destacats automàtics».",
   "shop.custom_solution.disabled_public": "Ara mateix no acceptem noves sol·licituds de solució personalitzada."
 }

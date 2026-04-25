@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
 
+## [0.1.20] - 2026-04-25
+
+### Changed
+
+- **Storefront / client personalized solution portal:** Removed the **“Solución personalizada”** link to `/custom-solution` from the bottom action row; only the delete request action remains.
+
 ## [0.1.19] - 2026-04-25
 
 ### Changed

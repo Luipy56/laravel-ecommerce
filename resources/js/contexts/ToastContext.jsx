@@ -76,7 +76,7 @@ function ToastViewport({ items, onDismiss }) {
                 : 'alert-info';
         return (
           <div key={item.id} role="alert" className={`alert ${color} shadow-lg max-w-sm animate-slide-in-toast`}>
-            <span className="text-sm">{item.message}</span>
+            <span className="text-sm font-bold">{item.message}</span>
             <button
               type="button"
               className="btn btn-ghost btn-xs shrink-0 text-inherit opacity-90 hover:opacity-100"

@@ -138,7 +138,7 @@
   "shop.custom_solution.saved_portal": "Recibirás un enlace seguro para gestionar la solicitud junto al mensaje de confirmación.",
   "shop.custom_solution.followup_lead": "Si ya tienes un caso abierto, introduce el código que te enviamos por correo para continuar.",
   "shop.custom_solution.followup_code_label": "Código de acceso",
-  "shop.custom_solution.followup_placeholder": "Código de 64 caracteres",
+  "shop.custom_solution.followup_placeholder": "abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234abcd1234",
   "shop.custom_solution.followup_submit": "Continuar",
   "shop.custom_solution.followup_invalid": "Código no válido. Revisa o envía la solicitud con el formulario de abajo.",
   "shop.client_portal.title": "Tu solicitud",

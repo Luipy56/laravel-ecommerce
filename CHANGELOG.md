@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
 
+## [0.1.16] - 2026-04-25
+
+### Fixed
+
+- **Storefront / product detail (`/products/:id`):** The product page uses **`@tanstack/react-query`** (same as the catalog) for fetch state, so a **generic error** no longer flashes while `GET /api/v1/products/{id}` is still in flight (e.g. first paint, remount, or **React Strict Mode** when the aborted request’s `finally` had cleared loading). While pending: spinner and **Back** link; error text only on real failure or missing product.
+
 ## [0.1.15] - 2026-04-25
 
 ### Added

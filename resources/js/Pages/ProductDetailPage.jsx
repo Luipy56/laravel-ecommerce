@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
@@ -13,8 +14,6 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [zoomVisible, setZoomVisible] = useState(false);
@@ -24,16 +23,19 @@ export default function ProductDetailPage() {
   const galleryRef = useRef(null);
   const { addLine } = useCart();
 
-  useEffect(() => {
-    const ac = new AbortController();
-    api.get(`products/${id}`, { signal: ac.signal })
-      .then((r) => {
-        if (r.data.success) setProduct(Product.fromApi(r.data.data));
-      })
-      .catch((err) => { if (err.name !== 'AbortError') setProduct(null); })
-      .finally(() => setLoading(false));
-    return () => ac.abort();
-  }, [id]);
+  const productQuery = useQuery({
+    queryKey: ['product', 'detail', id],
+    queryFn: async ({ signal }) => {
+      const r = await api.get(`products/${id}`, { signal });
+      if (!r.data?.success) {
+        throw new Error('Product response not successful');
+      }
+      return Product.fromApi(r.data.data);
+    },
+    enabled: id != null && id !== '',
+    staleTime: 60_000,
+  });
+  const product = productQuery.data;
 
   const handleAdd = () => {
     addLine(product.id, null, qty);
@@ -74,8 +76,34 @@ export default function ProductDetailPage() {
 
   const hasVariants = product?.variant_options?.length > 1;
 
-  if (loading) return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
-  if (!product) return <p className="text-error">{t('common.error')}</p>;
+  if (productQuery.isPending) {
+    return (
+      <div className="mx-auto w-full min-w-0 max-w-6xl px-2 sm:px-4">
+        <div className="flex justify-end mb-4">
+          <Link to="/products" className="btn btn-ghost btn-sm">
+            {t('common.back')}
+          </Link>
+        </div>
+        <div className="flex justify-center py-12" aria-live="polite" aria-busy="true">
+          <span className="loading loading-spinner loading-lg" />
+        </div>
+      </div>
+    );
+  }
+  if (productQuery.isError || !product) {
+    return (
+      <div className="mx-auto w-full min-w-0 max-w-6xl px-2 sm:px-4">
+        <div className="flex justify-end mb-4">
+          <Link to="/products" className="btn btn-ghost btn-sm">
+            {t('common.back')}
+          </Link>
+        </div>
+        <p className="text-error" role="alert">
+          {t('common.error')}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-6xl px-2 sm:px-4">

@@ -171,7 +171,6 @@ export default function CustomSolutionPage() {
           </button>
         </form>
       </div>
-      <p className="text-sm text-base-content/70 mb-4">{t('register.required_note')}</p>
       {error && <div className="alert alert-error mb-4">{error}</div>}
       <ConfirmModal
         open={confirmModalOpen}

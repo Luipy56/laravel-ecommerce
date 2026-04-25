@@ -84,5 +84,6 @@
     "admin.data_explorer.errors.invalid_date_column": "The date column is not valid.",
     "admin.data_explorer.errors.invalid_group_by": "The grouping column is invalid.",
     "admin.data_explorer.errors.invalid_value_column": "The numeric column to calculate is not valid.",
-    "admin.data_explorer.errors.invalid_metric": "The metric must be count, sum, or avg."
+    "admin.data_explorer.errors.invalid_metric": "The metric must be count, sum, or avg.",
+    "shop.personalized_solutions_disabled": "We are not accepting new custom solution requests at the moment."
 }

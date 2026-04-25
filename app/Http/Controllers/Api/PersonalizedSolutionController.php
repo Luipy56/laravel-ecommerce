@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Events\PersonalizedSolutionSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\PersonalizedSolution;
+use App\Models\ShopSetting;
 use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,13 @@ class PersonalizedSolutionController extends Controller
 {
     public function store(Request $request): JsonResponse
     {
+        if (! ShopSetting::get(ShopSetting::KEY_ACCEPT_PERSONALIZED_SOLUTIONS, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.personalized_solutions_disabled'),
+            ], 422);
+        }
+
         $validated = $request->validate([
             'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],

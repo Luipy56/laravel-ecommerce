@@ -29,6 +29,8 @@ export default function CustomSolutionPage() {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [followUpCode, setFollowUpCode] = useState('');
   const [followUpError, setFollowUpError] = useState('');
+  const [publicSettingsLoaded, setPublicSettingsLoaded] = useState(false);
+  const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
 
   const goToFollowUpSolution = useCallback(
     (e) => {
@@ -54,6 +56,27 @@ export default function CustomSolutionPage() {
     return () => window.clearTimeout(id);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await api.get('shop/public-settings');
+        if (!cancelled && r.data?.success && r.data?.data) {
+          setAcceptPersonalizedSolutions(r.data.data.accept_personalized_solutions !== false);
+        }
+      } catch {
+        if (!cancelled) setAcceptPersonalizedSolutions(true);
+      } finally {
+        if (!cancelled) setPublicSettingsLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const newRequestsDisabled = publicSettingsLoaded && !acceptPersonalizedSolutions;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
@@ -71,6 +94,7 @@ export default function CustomSolutionPage() {
   };
 
   const submitForm = useCallback(async () => {
+    if (newRequestsDisabled) return;
     setConfirmModalOpen(false);
     setError('');
     setFieldErrors({});
@@ -118,10 +142,11 @@ export default function CustomSolutionPage() {
     } finally {
       setLoading(false);
     }
-  }, [form, t, showToast, navigate]);
+  }, [form, t, showToast, navigate, newRequestsDisabled]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (newRequestsDisabled) return;
     setError('');
     setFieldErrors({});
     const parsed = parseWithZod(customSolutionFormSchema, form, t);
@@ -180,6 +205,11 @@ export default function CustomSolutionPage() {
         message={t('shop.custom_solution.confirm_message')}
         loading={loading}
       />
+      {newRequestsDisabled ? (
+        <div role="alert" className="alert alert-warning mb-4">
+          {t('shop.custom_solution.disabled_public')}
+        </div>
+      ) : null}
       <form onSubmit={handleSubmit} className="card bg-base-100 shadow">
         <div className="card-body space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -192,6 +222,7 @@ export default function CustomSolutionPage() {
                 value={form.email}
                 onChange={handleChange}
                 aria-invalid={!!fieldErrors.email}
+                disabled={newRequestsDisabled}
               />
               {fieldErrors.email ? <p className="validator-hint text-error">{fieldErrors.email}</p> : null}
             </label>
@@ -204,6 +235,7 @@ export default function CustomSolutionPage() {
                 value={form.phone}
                 onChange={handleChange}
                 aria-invalid={!!fieldErrors.phone}
+                disabled={newRequestsDisabled}
               />
               {fieldErrors.phone ? <p className="validator-hint text-error">{fieldErrors.phone}</p> : null}
             </label>
@@ -218,25 +250,45 @@ export default function CustomSolutionPage() {
               value={form.problem_description}
               onChange={handleChange}
               aria-invalid={!!fieldErrors.problem_description}
+              disabled={newRequestsDisabled}
             />
             {fieldErrors.problem_description ? <p className="validator-hint text-error">{fieldErrors.problem_description}</p> : null}
           </label>
 
           <label className="form-field w-full">
             <span className="form-label">{t('shop.custom_solution.attachments')}</span>
-            <input type="file" className="file-input file-input-bordered w-full" multiple accept="image/*,.pdf" onChange={handleFiles} />
+            <input
+              type="file"
+              className="file-input file-input-bordered w-full"
+              multiple
+              accept="image/*,.pdf"
+              onChange={handleFiles}
+              disabled={newRequestsDisabled}
+            />
           </label>
 
           <fieldset className="form-field space-y-5 border border-base-300 rounded-lg p-4">
             <legend className="form-label px-1">{t('shop.custom_solution.address_optional')}</legend>
             <label className="form-field w-full">
               <span className="form-label">{t('checkout.street')}</span>
-              <input name="address_street" className="input input-bordered w-full" value={form.address_street} onChange={handleChange} />
+              <input
+                name="address_street"
+                className="input input-bordered w-full"
+                value={form.address_street}
+                onChange={handleChange}
+                disabled={newRequestsDisabled}
+              />
             </label>
             <div className="flex gap-2">
               <label className="form-field flex-1">
                 <span className="form-label">{t('profile.city')}</span>
-                <input name="address_city" className="input input-bordered w-full" value={form.address_city} onChange={handleChange} />
+                <input
+                  name="address_city"
+                  className="input input-bordered w-full"
+                  value={form.address_city}
+                  onChange={handleChange}
+                  disabled={newRequestsDisabled}
+                />
               </label>
               <label className="form-field w-28">
                 <span className="form-label">{t('profile.postal_code')} *</span>
@@ -246,22 +298,37 @@ export default function CustomSolutionPage() {
                   value={form.address_postal_code}
                   onChange={handleChange}
                   aria-invalid={!!fieldErrors.address_postal_code}
+                  disabled={newRequestsDisabled}
                 />
                 {fieldErrors.address_postal_code ? <p className="validator-hint text-error">{fieldErrors.address_postal_code}</p> : null}
               </label>
             </div>
             <label className="form-field w-full">
               <span className="form-label">{t('profile.province')}</span>
-              <input name="address_province" className="input input-bordered w-full" value={form.address_province} onChange={handleChange} />
+              <input
+                name="address_province"
+                className="input input-bordered w-full"
+                value={form.address_province}
+                onChange={handleChange}
+                disabled={newRequestsDisabled}
+              />
             </label>
             <label className="form-field w-full">
               <span className="form-label">{t('shop.custom_solution.address_note')}</span>
-              <textarea name="address_note" className="textarea textarea-bordered w-full" rows={2} placeholder="" value={form.address_note} onChange={handleChange} />
+              <textarea
+                name="address_note"
+                className="textarea textarea-bordered w-full"
+                rows={2}
+                placeholder=""
+                value={form.address_note}
+                onChange={handleChange}
+                disabled={newRequestsDisabled}
+              />
             </label>
           </fieldset>
 
           <div className="flex justify-end">
-            <button type="submit" className="btn btn-primary md:max-w-xs" disabled={loading}>
+            <button type="submit" className="btn btn-primary md:max-w-xs" disabled={loading || newRequestsDisabled}>
               {loading ? t('common.loading') : t('shop.custom_solution.submit')}
             </button>
           </div>

@@ -7,6 +7,7 @@ import { AdminToastProvider } from '../../contexts/AdminToastContext';
 
 const SECTION_NAV_KEYS = {
   'data-explorer': 'admin.nav.data_explorer',
+  settings: 'admin.nav.settings',
   admins: 'admin.nav.admins',
   categories: 'admin.nav.categories',
   products: 'admin.nav.products',
@@ -100,6 +101,7 @@ export default function AdminLayout() {
     const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard' };
     const mainItems = [
       { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer' },
+      { to: '/admin/settings', labelKey: 'admin.nav.settings' },
       { to: '/admin/admins', labelKey: 'admin.nav.admins' },
       { to: '/admin/categories', labelKey: 'admin.nav.categories' },
       { to: '/admin/products', labelKey: 'admin.nav.products' },

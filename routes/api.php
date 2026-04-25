@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\AdminPackController;
 use App\Http\Controllers\Api\AdminPersonalizedSolutionController;
 use App\Http\Controllers\Api\AdminProductController;
+use App\Http\Controllers\Api\AdminShopSettingsController;
 use App\Http\Controllers\Api\AdminVariantGroupController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
@@ -23,9 +24,10 @@ use App\Http\Controllers\Api\PaymentConfigController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\PayPalPaymentController;
 use App\Http\Controllers\Api\PersonalizedSolutionController;
-use App\Http\Controllers\Api\PublicPersonalizedSolutionController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\PublicPersonalizedSolutionController;
 use App\Http\Controllers\Api\PurchasedProductsController;
+use App\Http\Controllers\Api\ShopPublicSettingsController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +47,8 @@ Route::get('packs', [PackController::class, 'index']);
 Route::get('packs/{pack}', [PackController::class, 'show']);
 
 Route::get('payments/config', [PaymentConfigController::class, 'show']);
+
+Route::get('shop/public-settings', [ShopPublicSettingsController::class, 'show']);
 
 Route::post('personalized-solutions', [PersonalizedSolutionController::class, 'store']);
 
@@ -96,6 +100,10 @@ Route::middleware('auth')->group(function () {
 Route::post('admin/login', [AdminAuthController::class, 'login']);
 Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::post('logout', [AdminAuthController::class, 'logout']);
+    Route::get('settings', [AdminShopSettingsController::class, 'show']);
+    Route::put('settings', [AdminShopSettingsController::class, 'update']);
+    Route::post('settings/recalculate-trending', [AdminShopSettingsController::class, 'recalculateTrending'])
+        ->middleware('throttle:6,1');
     Route::get('stats/postal-codes', [AdminDashboardController::class, 'postalCodes']);
     Route::get('stats/sales-by-period', [AdminDashboardController::class, 'salesByPeriod']);
     Route::get('stats/top-products', [AdminDashboardController::class, 'topProducts']);

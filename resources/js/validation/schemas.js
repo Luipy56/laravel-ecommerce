@@ -172,7 +172,6 @@ export const adminProductPayloadSchema = z.object({
   is_extra_keys_available: z.boolean(),
   extra_key_unit_price: z.number().finite().min(0).nullable(),
   is_featured: z.boolean(),
-  is_trending: z.boolean(),
   is_active: z.boolean(),
   feature_ids: z.array(z.number().int()),
 });

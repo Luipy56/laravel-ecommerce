@@ -60,6 +60,11 @@ export default function Layout() {
               </Link>
             </li>
             <li>
+              <Link to="/client/personalized-solutions" onClick={closeStorefrontDrawer}>
+                {t('shop.personalized_solution_access.nav')}
+              </Link>
+            </li>
+            <li>
               <Link to="/cart" onClick={closeStorefrontDrawer}>
                 {t('shop.cart')}
               </Link>

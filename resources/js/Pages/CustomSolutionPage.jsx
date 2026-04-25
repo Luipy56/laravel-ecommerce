@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import PageTitle from '../components/PageTitle';
@@ -109,6 +109,14 @@ export default function CustomSolutionPage() {
   return (
     <div className="mx-auto w-full min-w-0 max-w-4xl">
       <PageTitle>{t('shop.custom_solution')}</PageTitle>
+      <div className="alert alert-info mb-4 text-sm" role="region" aria-label={t('shop.personalized_solution_access.title')}>
+        <span>
+          {t('shop.custom_solution.already_have_code')}{' '}
+          <Link to="/client/personalized-solutions" className="link link-primary font-medium whitespace-nowrap">
+            {t('shop.personalized_solution_access.nav')}
+          </Link>
+        </span>
+      </div>
       <p className="text-sm text-base-content/70 mb-4">{t('register.required_note')}</p>
       {error && <div className="alert alert-error mb-4">{error}</div>}
       <ConfirmModal

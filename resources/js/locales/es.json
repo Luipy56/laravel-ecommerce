@@ -610,7 +610,7 @@
   "admin.settings.blacklist_ids_hint": "IDs de producto, separados por comas o espacios",
   "admin.settings.overstock": "Sobrestock",
   "admin.settings.overstock_enabled": "Destacar productos con stock igual o superior al umbral",
-  "admin.settings.overstock_threshold": "Umbral de sobrestock",
+  "admin.settings.overstock_threshold": "Umbral del Stock",
   "admin.settings.overstock_blacklist_enabled": "Excluir los IDs de producto de esta regla",
   "admin.settings.section_personalized": "Soluciones personalizadas",
   "admin.settings.accept_personalized_solutions": "Aceptar nuevas solicitudes de solución personalizada desde la tienda",

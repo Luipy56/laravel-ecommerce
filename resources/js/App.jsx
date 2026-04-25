@@ -57,6 +57,7 @@ import AdminOrderShowPage from './Pages/admin/AdminOrderShowPage';
 import AdminOrderEditPage from './Pages/admin/AdminOrderEditPage';
 import AdminPersonalizedSolutionsPage from './Pages/admin/AdminPersonalizedSolutionsPage';
 import AdminDataExplorerPage from './Pages/admin/AdminDataExplorerPage';
+import AdminShopSettingsPage from './Pages/admin/AdminShopSettingsPage';
 import AdminPersonalizedSolutionShowPage from './Pages/admin/AdminPersonalizedSolutionShowPage';
 import AdminPersonalizedSolutionEditPage from './Pages/admin/AdminPersonalizedSolutionEditPage';
 import NotFoundPage from './Pages/NotFoundPage';
@@ -114,6 +115,7 @@ export default function App() {
                 <Route path="admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="data-explorer" element={<AdminDataExplorerPage />} />
+                  <Route path="settings" element={<AdminShopSettingsPage />} />
                   <Route path="categories" element={<AdminCategoriesPage />} />
                   <Route path="categories/new" element={<AdminCategoryNewPage />} />
                   <Route path="categories/:id/edit" element={<AdminCategoryEditPage />} />

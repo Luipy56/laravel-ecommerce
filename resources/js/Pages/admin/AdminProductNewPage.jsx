@@ -60,7 +60,7 @@ export default function AdminProductNewPage() {
       if (payload.files?.length) {
         const formData = new FormData();
         const { files, ...rest } = payload;
-        const boolKeys = ['is_double_clutch', 'has_card', 'is_extra_keys_available', 'is_featured', 'is_trending', 'is_active'];
+        const boolKeys = ['is_double_clutch', 'has_card', 'is_extra_keys_available', 'is_featured', 'is_active'];
         Object.entries(rest).forEach(([k, v]) => {
           if (v === null || v === undefined) return;
           if (Array.isArray(v)) v.forEach((x) => formData.append(`${k}[]`, x));

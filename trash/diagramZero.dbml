@@ -92,6 +92,14 @@ Table PRODUCT_CATEGORIES {
   is_active boolean [not null, default: true, note: 'Disable without deleting']
 }
 
+Table SHOP_SETTINGS [note: 'Key-value JSON settings for storefront and admin configuration panel'] {
+  id int [pk, increment]
+  key varchar(128) [not null, unique, note: 'Setting identifier']
+  value json [not null, note: 'Scalar or array encoded as JSON']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
 Table PRODUCT_VARIANT_GROUPS [note: 'Optional grouping of products as siblings (e.g. same screw 30mm, 40mm, 50mm). Order variants by name or value in SQL.'] {
   id int [pk, increment]
   name varchar(255) [null, note: 'Optional display name for the variant group']
@@ -116,7 +124,7 @@ Table PRODUCTS {
   is_extra_keys_available boolean [not null, default: false, note: 'Product can have extra physical keys']
   extra_key_unit_price decimal(10,2) [null, note: 'Price per extra key when is_extra_keys_available=true']
   is_featured boolean [not null, default: false, note: 'Featured on homepage']
-  is_trending boolean [not null, default: false, note: 'Trending product']
+  is_trending boolean [not null, default: false, note: 'Homepage automatic highlight; set by admin recalculate from shop_settings rules, not product form']
   is_active boolean [not null, default: true, note: 'Disable without deleting']
   search_text text [null, note: 'Lowercase accent-folded name+code+description; GIN(trgm) idx on PostgreSQL']
 }

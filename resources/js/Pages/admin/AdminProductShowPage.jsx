@@ -85,7 +85,13 @@ export default function AdminProductShowPage() {
             <div><dt className="text-sm text-base-content/70">{t('admin.products.has_card')}</dt><dd>{product.has_card ? t('common.yes') : t('common.no')}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_active')}</dt><dd>{product.is_active ? t('common.yes') : t('common.no')}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_featured')}</dt><dd>{product.is_featured ? t('common.yes') : t('common.no')}</dd></div>
-            <div><dt className="text-sm text-base-content/70">{t('admin.products.is_trending')}</dt><dd>{product.is_trending ? t('common.yes') : t('common.no')}</dd></div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm text-base-content/70">{t('admin.products.is_trending')}</dt>
+              <dd>
+                {product.is_trending ? t('common.yes') : t('common.no')}
+                <p className="text-sm text-base-content/60 mt-1">{t('admin.products.is_trending_managed_by_settings')}</p>
+              </dd>
+            </div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_extra_keys_available')}</dt><dd>{product.is_extra_keys_available ? t('common.yes') : t('common.no')}</dd></div>
             {product.is_extra_keys_available && <div><dt className="text-sm text-base-content/70">{t('admin.products.extra_key_unit_price')} (€)</dt><dd>{product.extra_key_unit_price != null ? Number(product.extra_key_unit_price).toFixed(2) : ''}</dd></div>}
           </dl>

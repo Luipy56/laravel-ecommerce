@@ -241,7 +241,10 @@ class ProductController extends Controller
 
     public function featured(): JsonResponse
     {
-        $products = Product::query()->active()->featured()
+        $products = Product::query()->active()
+            ->where(function ($q) {
+                $q->where('is_featured', true)->orWhere('is_trending', true);
+            })
             ->with(['category', 'features.featureName', 'images'])
             ->orderBy('name')
             ->get();

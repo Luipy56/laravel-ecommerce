@@ -21,7 +21,6 @@ const defaultProduct = {
   is_extra_keys_available: false,
   extra_key_unit_price: '',
   is_featured: false,
-  is_trending: false,
   is_active: true,
 };
 
@@ -71,7 +70,6 @@ export default function AdminProductForm({
         is_extra_keys_available: product.is_extra_keys_available ?? false,
         extra_key_unit_price: product.extra_key_unit_price ?? '',
         is_featured: product.is_featured ?? false,
-        is_trending: product.is_trending ?? false,
         is_active: product.is_active ?? true,
       };
     }
@@ -135,7 +133,6 @@ export default function AdminProductForm({
       is_extra_keys_available: !!form.is_extra_keys_available,
       extra_key_unit_price: form.extra_key_unit_price !== '' ? Number(form.extra_key_unit_price) : null,
       is_featured: !!form.is_featured,
-      is_trending: !!form.is_trending,
       is_active: !!form.is_active,
       feature_ids: featureIds,
     };
@@ -486,15 +483,6 @@ export default function AdminProductForm({
             onChange={(e) => update('is_featured', e.target.checked)}
           />
           <span className="label-text">{t('admin.products.is_featured')}</span>
-        </label>
-        <label className="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            className="checkbox checkbox-sm"
-            checked={form.is_trending}
-            onChange={(e) => update('is_trending', e.target.checked)}
-          />
-          <span className="label-text">{t('admin.products.is_trending')}</span>
         </label>
       </div>
 

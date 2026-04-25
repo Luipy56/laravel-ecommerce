@@ -90,5 +90,6 @@
     "admin.data_explorer.errors.invalid_date_column": "La columna de dates no és vàlida.",
     "admin.data_explorer.errors.invalid_group_by": "La columna per agrupar no és vàlida.",
     "admin.data_explorer.errors.invalid_value_column": "La columna numèrica per calcular no és vàlida.",
-    "admin.data_explorer.errors.invalid_metric": "La mètrica ha de ser count, sum o avg."
+    "admin.data_explorer.errors.invalid_metric": "La mètrica ha de ser count, sum o avg.",
+    "shop.personalized_solutions_disabled": "En aquests moments no acceptem noves sol·licituds de solució personalitzada."
 }

@@ -1,0 +1,46 @@
+---
+description: Shop settings key-value, automatic is_trending recalc, admin settings UI, public storefront flags
+globs: app/Models/ShopSetting.php,app/Services/RecalculateTrendingProducts.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx
+alwaysApply: false
+---
+
+# Admin shop configuration (`shop_settings`)
+
+## Product flags
+
+- **`is_featured`**: manual only (admin product form). Never cleared or overwritten by trending recalc.
+- **`is_trending`**: automatic only via **`RecalculateTrendingProducts`**. Do not validate or mass-assign `is_trending` from admin product **store**/**update**; remove it from the React product form and from **`adminProductPayloadSchema`**.
+
+## Storage and schema
+
+- Persist keys in **`shop_settings`** using **`ShopSetting::get` / `set` / `allMerged()`** and **`ShopSetting::DEFAULTS`** for missing rows.
+- A **new table** uses a **new migration**; update **`trash/diagramZero.dbml`** when `shop_settings` or related behaviour changes.
+
+## Recalc rules (`RecalculateTrendingProducts`)
+
+- Use column **`stock`** on **`products`** (not `stock_quantity`).
+- **Low stock** (when enabled): active products with `stock <= threshold`.
+- **Overstock** (when enabled): active products with `stock >= threshold`.
+- Merge candidate IDs with **`array_unique`** before `whereIn` update.
+- **Blacklist** (when enabled for that rule): **`whereNotIn('id', …)`** on that rule’s query only; blacklisted products can still appear on the home if **`is_featured`** is manual.
+- Recalc flow: set **`is_trending = false`** on **active** products, then set **`true`** for merged matches.
+
+## Storefront API (when touching related controllers)
+
+- **Featured / home**: one query on active products — **`where(fn ($q) { $q->where('is_featured', true)->orWhere('is_trending', true); })`** so each product appears **once**.
+- **`GET shop/public-settings`**: only safe booleans (e.g. **`accept_personalized_solutions`**).
+- **`PersonalizedSolutionController@store`**: if disabled, **422** JSON with **`__('shop.personalized_solutions_disabled')`** (add keys to **`lang/ca.json`**, **`lang/es.json`**, **`lang/en.json`**).
+
+## Admin settings page (React)
+
+- **`PageTitle`** + toolbar row; primary **Recalculate** action; form sections as **`card`** blocks; submit row **`flex justify-end`** for **Save**.
+- All UI copy: **`admin.settings.*`** in **`resources/js/locales/ca.json`**, **`es.json`**, **`en.json`** (no hardcoded strings).
+- Do not add placeholder “more options later” cards unless explicitly requested.
+
+## Routes
+
+- Register under **`routes/api.php`** (same prefix as existing API): admin **`GET`/`PUT admin/settings`**, **`POST admin/settings/recalculate-trending`** with **throttle** on the POST; public **`GET shop/public-settings`** outside `auth:admin`.
+
+## Tests
+
+- After behaviour changes: extend or add **`tests/Feature/*ShopSettings*`** (admin auth, recalc, featured union without duplicate ids, personalized store 422 when disabled) and keep **`AdminUserJourneyTest`** in sync for new admin **GET** routes.

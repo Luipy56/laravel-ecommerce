@@ -271,11 +271,10 @@ export default function ClientPersonalizedSolutionPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 justify-between items-center">
+      <div className="flex flex-wrap gap-2">
         <button type="button" className="btn btn-error btn-outline btn-sm sm:btn-md" onClick={() => setDeleteOpen(true)}>
           {t('shop.client_portal.delete_title')}
         </button>
-        <Link to="/custom-solution" className="btn btn-ghost btn-sm sm:btn-md">{t('shop.custom_solution')}</Link>
       </div>
 
       <ConfirmModal

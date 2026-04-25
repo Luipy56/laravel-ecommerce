@@ -251,12 +251,6 @@ export default function AdminShopSettingsPage() {
           </div>
         </section>
 
-        <section className="card bg-base-100 shadow border border-base-200 border-dashed">
-          <div className="card-body py-6">
-            <p className="text-sm text-base-content/60">{t('admin.settings.future_placeholder')}</p>
-          </div>
-        </section>
-
         <div className="flex justify-end">
           <button type="submit" className="btn btn-primary btn-sm sm:btn-md" disabled={saving || recalculating}>
             {saving ? t('common.loading') : t('common.save')}

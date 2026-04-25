@@ -76,6 +76,16 @@ export default function AdminProductShowPage() {
             <div><dt className="text-sm text-base-content/70">{t('admin.products.name')}</dt><dd>{product.name}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.description')}</dt><dd>{product.description}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.sale_price')} (€)</dt><dd>{product.price != null ? Number(product.price).toFixed(2) : ''}</dd></div>
+            <div>
+              <dt className="text-sm text-base-content/70">{t('admin.products.discount_percent')}</dt>
+              <dd>
+                {product.discount_percent != null &&
+                product.discount_percent !== '' &&
+                Number(product.discount_percent) > 0
+                  ? `${Number(product.discount_percent)}%`
+                  : ''}
+              </dd>
+            </div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.purchase_price')} (€)</dt><dd>{product.purchase_price != null ? Number(product.purchase_price).toFixed(2) : ''}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.stock')}</dt><dd>{product.stock}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.weight_kg')}</dt><dd>{product.weight_kg != null ? Number(product.weight_kg).toFixed(3) : ''}</dd></div>

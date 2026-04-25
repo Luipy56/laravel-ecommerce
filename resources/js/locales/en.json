@@ -610,7 +610,7 @@
   "admin.settings.blacklist_ids_hint": "Product IDs, separated by commas or spaces",
   "admin.settings.overstock": "Overstock",
   "admin.settings.overstock_enabled": "Highlight products at or above the stock threshold",
-  "admin.settings.overstock_threshold": "Overstock threshold",
+  "admin.settings.overstock_threshold": "Stock threshold",
   "admin.settings.overstock_blacklist_enabled": "Exclude listed product IDs from this rule",
   "admin.settings.section_personalized": "Custom solutions",
   "admin.settings.accept_personalized_solutions": "Accept new custom solution requests from the storefront",

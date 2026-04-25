@@ -131,11 +131,11 @@ export default function AdminShopSettingsPage() {
   }
 
   if (loadError) {
-    return <div className="alert alert-error">{loadError}</div>;
+    return <div className="alert alert-error pt-4 sm:pt-6">{loadError}</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-4 sm:pt-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageTitle>{t('admin.settings.title')}</PageTitle>
         <button

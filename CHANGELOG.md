@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
 
+## [0.1.19] - 2026-04-25
+
+### Changed
+
+- **Storefront / custom solution (follow-up code):** Lighter block surface (`bg-base-100`, `rounded-box`, `shadow`); lead text shortened; removed secondary hint and optional disclaimer under the code field (ca / es / en).
+
 ## [0.1.18] - 2026-04-25
 
 ### Changed

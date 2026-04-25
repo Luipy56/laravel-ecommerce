@@ -138,7 +138,7 @@ export default function CustomSolutionPage() {
       <PageTitle>{t('shop.custom_solution')}</PageTitle>
       <div
         id="custom-solution-followup"
-        className="mb-5 rounded-lg border border-base-300 bg-base-200/50 p-4"
+        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow"
       >
         <p className="text-sm text-base-content/80 mb-3">
           {t('shop.custom_solution.followup_lead')}
@@ -162,12 +162,9 @@ export default function CustomSolutionPage() {
               }}
               placeholder={t('shop.custom_solution.followup_placeholder')}
               aria-invalid={!!followUpError}
-              aria-describedby="followup-hint"
+              aria-describedby={followUpError ? 'followup-err' : undefined}
             />
-            <p id="followup-hint" className="text-xs text-base-content/50">
-              {t('shop.custom_solution.followup_hint')}
-            </p>
-            {followUpError ? <p className="validator-hint text-error text-sm">{followUpError}</p> : null}
+            {followUpError ? <p id="followup-err" className="validator-hint text-error text-sm" role="alert">{followUpError}</p> : null}
           </label>
           <button type="submit" className="btn btn-outline btn-sm w-full sm:w-auto shrink-0">
             {t('shop.custom_solution.followup_submit')}

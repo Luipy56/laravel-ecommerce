@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
 
+## [0.1.14] - 2026-04-25
+
+### Fixed
+
+- **Catalog / `GET /api/v1/products`:** Multiple `feature_ids` for the same characteristic (e.g. two brands) now use **OR**; different characteristics still combine with **AND**. Packs in mixed catalog use the same grouping.
+
+### Added
+
+- **Tests:** **`ProductCatalogFeatureFilterTest`** for same-characteristic OR and cross-characteristic AND on the product list API.
+
 ## [0.1.13] - 2026-04-24
 
 ### Fixed

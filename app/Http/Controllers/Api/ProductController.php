@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PackResource;
 use App\Http\Resources\ProductResource;
+use App\Models\Feature;
 use App\Models\Pack;
 use App\Models\Product;
 use App\Services\Search\CatalogProductSearchService;
@@ -107,9 +108,7 @@ class ProductController extends Controller
         if (($categoryId = $this->requestedCategoryId($request)) !== null) {
             $query->where('category_id', $categoryId);
         }
-        foreach ($this->requestedFeatureIds($request) as $featureId) {
-            $query->whereHas('features', fn ($q) => $q->where('features.id', $featureId));
-        }
+        $this->applyFeatureGroupFiltersToProductQuery($query, $request);
         if ($request->filled('search')) {
             $term = $request->search;
             $query->where(function ($q) use ($term) {
@@ -133,12 +132,7 @@ class ProductController extends Controller
         if (($categoryId = $this->requestedCategoryId($request)) !== null) {
             $query->whereHas('items.product', fn ($q) => $q->where('category_id', $categoryId));
         }
-        foreach ($this->requestedFeatureIds($request) as $featureId) {
-            $query->whereHas(
-                'items.product',
-                fn ($q) => $q->whereHas('features', fn ($f) => $f->where('features.id', $featureId))
-            );
-        }
+        $this->applyFeatureGroupFiltersToPackQuery($query, $request);
         if ($request->filled('search')) {
             $term = $request->search;
             $query->where(function ($q) use ($term) {
@@ -180,8 +174,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Parsed feature filter IDs. Each ID is applied as a separate constraint so products (and packs)
-     * must satisfy every selected feature (AND), combined with category and search filters.
+     * Parsed feature filter IDs from the request.
      *
      * @return list<int>
      */
@@ -196,6 +189,54 @@ class ProductController extends Controller
         $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
 
         return $ids;
+    }
+
+    /**
+     * Group selected feature IDs by characteristic (feature_name_id).
+     * Multiple values of the same characteristic are OR; different characteristics are AND.
+     *
+     * @return array<int, list<int>> feature_name_id => feature ids
+     */
+    private function featureGroupsByNameId(Request $request): array
+    {
+        $ids = $this->requestedFeatureIds($request);
+        if ($ids === []) {
+            return [];
+        }
+
+        $features = Feature::query()
+            ->whereIn('id', $ids)
+            ->get(['id', 'feature_name_id']);
+
+        $groups = [];
+        foreach ($features as $feature) {
+            $nameId = (int) $feature->feature_name_id;
+            if (! isset($groups[$nameId])) {
+                $groups[$nameId] = [];
+            }
+            if (! in_array($feature->id, $groups[$nameId], true)) {
+                $groups[$nameId][] = (int) $feature->id;
+            }
+        }
+
+        return $groups;
+    }
+
+    private function applyFeatureGroupFiltersToProductQuery(\Illuminate\Database\Eloquent\Builder $query, Request $request): void
+    {
+        foreach ($this->featureGroupsByNameId($request) as $groupFeatureIds) {
+            $query->whereHas('features', fn ($q) => $q->whereIn('features.id', $groupFeatureIds));
+        }
+    }
+
+    private function applyFeatureGroupFiltersToPackQuery(\Illuminate\Database\Eloquent\Builder $query, Request $request): void
+    {
+        foreach ($this->featureGroupsByNameId($request) as $groupFeatureIds) {
+            $query->whereHas(
+                'items.product',
+                fn ($p) => $p->whereHas('features', fn ($f) => $f->whereIn('features.id', $groupFeatureIds))
+            );
+        }
     }
 
     public function featured(): JsonResponse

@@ -115,6 +115,7 @@ export default function AdminProductsPage() {
                   <th>{t('admin.products.name')}</th>
                   <th>{t('admin.products.category')}</th>
                   <th className="text-end">{t('admin.products.price')}</th>
+                  <th className="text-end">{t('admin.products.discount_percent')}</th>
                   <th className="text-center">{t('admin.products.stock')}</th>
                   <th className="text-center">{t('admin.products.is_active')}</th>
                 </tr>
@@ -138,6 +139,13 @@ export default function AdminProductsPage() {
                     <td>{p.name}</td>
                     <td>{p.category?.name}</td>
                     <td className="text-end tabular-nums">{p.price != null ? Number(p.price).toFixed(2) + ' €' : ''}</td>
+                    <td className="text-end tabular-nums">
+                      {p.discount_percent != null &&
+                      p.discount_percent !== '' &&
+                      Number(p.discount_percent) > 0
+                        ? `${Number(p.discount_percent)}%`
+                        : ''}
+                    </td>
                     <td className="text-center tabular-nums">{p.stock}</td>
                     <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td>
                   </tr>

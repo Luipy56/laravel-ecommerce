@@ -126,6 +126,8 @@ return [
     'brand' => [
         'display_name' => env('MAIL_BRAND_DISPLAY_NAME', 'Serralleria Solidària'),
         'logo_url' => env('MAIL_BRAND_LOGO_URL'),
+        /** Path under public/ when logo_url is empty (see public/images/…). */
+        'default_logo' => env('MAIL_BRAND_DEFAULT_LOGO', 'images/serraller_solidaria_logo_key.png'),
         'footer_contact' => env('MAIL_FOOTER_CONTACT_LINE'),
     ],
 

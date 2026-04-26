@@ -28,6 +28,33 @@ return [
         'footer' => 'Thank you for your purchase.',
     ],
 
+    'order_payment_pending' => [
+        'subject' => 'Order #:id placed · payment still pending',
+        'greeting' => 'Hello,',
+        'body' => 'We have received your order #:id. It is still pending: we have not yet received the payment.',
+        'total_due' => 'Amount due',
+        'cta' => 'Please complete the payment in the store using the link below (e.g. after PayPal, Stripe redirect, or other hosted checkout).',
+        'button' => 'Go to order',
+        'footer' => 'If you already paid, you will get the payment confirmation once the bank or payment provider finalises the charge.',
+    ],
+
+    'admin_order_installation_quote' => [
+        'subject' => '[Order #:id] Installation quote requested',
+        'intro' => 'A new order with installation above the automatic tier was created (quote required). Order #:id.',
+        'client_email' => 'Customer:',
+        'grand_total' => 'Total (incl. shipping)',
+        'button' => 'Open in admin',
+    ],
+
+    'admin_order_payment_pending' => [
+        'subject' => '[Order #:id] Payment pending',
+        'intro' => 'An order was created without a confirmed payment yet (redirect or gateway still pending). Order #:id.',
+        'client_email' => 'Customer:',
+        'grand_total' => 'Total',
+        'order_status' => 'Status',
+        'button' => 'Open in admin',
+    ],
+
     'order_installation_quote' => [
         'subject' => 'We received your installation request · order #:id',
         'greeting' => 'Hello,',

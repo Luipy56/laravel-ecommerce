@@ -4,7 +4,6 @@ namespace App\Listeners;
 
 use App\Events\OrderInstallationQuoteRequested;
 use App\Mail\OrderInstallationQuoteRequestedMail;
-use App\Support\MailLocale;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -20,8 +19,7 @@ class SendOrderInstallationQuoteRequestEmail
             return;
         }
 
-        $locale = MailLocale::resolve();
-        Mail::to($client->login_email)->locale($locale)->send(new OrderInstallationQuoteRequestedMail($order));
+        Mail::to($client->login_email)->locale($event->mailLocale)->send(new OrderInstallationQuoteRequestedMail($order));
     }
 
     public function failed(OrderInstallationQuoteRequested $event, \Throwable $e): void

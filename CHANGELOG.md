@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Transactional email:** If checkout finishes **without** a successful payment in the same request (Stripe redirect, PayPal, etc.), the client receives **`OrderPaymentPendingMail`**. When **`MAIL_ADMIN_NOTIFICATION_ADDRESS`** is set, ops also get **`OrderPaymentPendingAdminMail`**. New installation-quote checkouts also notify that address with **`OrderInstallationQuoteRequestedAdminMail`**. `OrderInstallationQuoteRequested` now carries the resolved mail locale from `Accept-Language`.
+
 ### Fixed
 
 - **Events:** `Application::configure()->withEvents()` was scanning `app/Listeners` while the same classes were also registered in `AppServiceProvider`, so each `handle()` ran **twice** (duplicate transactional emails, etc.). Event discovery is disabled in `bootstrap/app.php`; listeners remain the explicit `Event::listen` registrations only.

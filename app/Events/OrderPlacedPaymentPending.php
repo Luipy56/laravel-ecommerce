@@ -6,7 +6,10 @@ use App\Models\Order;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class OrderInstallationQuoteRequested
+/**
+ * Checkout completed but no successful payment in this request (card redirect, PayPal, or start error).
+ */
+class OrderPlacedPaymentPending
 {
     use Dispatchable;
     use SerializesModels;

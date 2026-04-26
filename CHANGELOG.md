@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`.env.example`:** Clarified Gmail SMTP variables (do not leave `MAIL_MAILER` empty) and `MAIL_ADMIN_NOTIFICATION_ADDRESS` for personalized-solution admin alerts.
+
 ### Fixed
 
 - **Admin data explorer:** Session statement timeout is applied with MariaDB `max_statement_time`, MySQL 8.0.3+ `max_execution_time`, or skipped on older MySQL, so `POST /api/v1/admin/data-explorer/query` no longer fails with unknown system variable on MariaDB / legacy MySQL. Unsupported-variable errors from `SET SESSION` are ignored as a last resort. Aggregate values on the explorer page use `ca-ES` / `es-ES` number formatting for Catalan vs Spanish UI.

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Storefront (confirmation modal):** A double click on "Confirm" could run the action twice (e.g. two personalized-solution submissions and two acknowledgement emails). The modal now blocks repeated confirms until the session completes or the dialog reopens.
 - **Admin data explorer:** Session statement timeout is applied with MariaDB `max_statement_time`, MySQL 8.0.3+ `max_execution_time`, or skipped on older MySQL, so `POST /api/v1/admin/data-explorer/query` no longer fails with unknown system variable on MariaDB / legacy MySQL. Unsupported-variable errors from `SET SESSION` are ignored as a last resort. Aggregate values on the explorer page use `ca-ES` / `es-ES` number formatting for Catalan vs Spanish UI.
 
 ### Added

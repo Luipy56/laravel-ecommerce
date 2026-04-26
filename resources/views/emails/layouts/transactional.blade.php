@@ -16,14 +16,11 @@
                 <tr>
                     <td style="padding: 28px 24px 16px;">
                         @php
-                            $logoUrl = config('mail.brand.logo_url');
                             $fromName = config('mail.from.name');
+                            $envLogo = config('mail.brand.logo_url');
+                            $logoUrl = !empty($envLogo) ? $envLogo : url('images/favicon.ico');
                         @endphp
-                        @if(!empty($logoUrl))
-                            <img src="{{ $logoUrl }}" alt="{{ $fromName }}" style="max-height: 48px; width: auto; display: block; margin: 0 auto 16px;">
-                        @else
-                            <p style="margin: 0 0 16px; font-size: 18px; font-weight: 700; text-align: center; color: #18181b;">{{ $fromName }}</p>
-                        @endif
+                        <img src="{{ $logoUrl }}" alt="{{ $fromName }}" style="max-height: 48px; width: auto; display: block; margin: 0 auto 16px;">
                         <div style="font-size: 16px; color: #18181b;">
                             @yield('content')
                         </div>
@@ -39,8 +36,11 @@
                             {{ __('mail.layout.footer_default') }}
                         </p>
                         @if(!empty($managePreferencesUrl ?? null))
-                            <p style="margin: 16px 0 0; font-size: 12px;">
-                                <a href="{{ $managePreferencesUrl }}" style="color: #F75211;">{{ __('mail.layout.manage_preferences') }}</a>
+                            <p style="margin: 16px 0 0; font-size: 12px; color: #52525b;">
+                                {{ __('mail.layout.fallback_url_intro') }}
+                            </p>
+                            <p style="margin: 8px 0 0; font-size: 12px; font-family: ui-monospace, Consolas, monospace; color: #3f3f46; word-break: break-all;">
+                                {{ $managePreferencesUrl }}
                             </p>
                         @endif
                     </td>

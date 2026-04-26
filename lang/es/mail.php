@@ -4,6 +4,7 @@ return [
     'layout' => [
         'footer_default' => 'Mensaje automático; por favor no respondas directamente.',
         'manage_preferences' => 'Gestiona tus datos con el enlace seguro',
+        'fallback_url_intro' => 'Si el botón no funciona, pega esta dirección en el navegador:',
     ],
 
     'installation_price' => [
@@ -42,6 +43,7 @@ return [
         'greeting' => 'Hola,',
         'body' => 'Hemos recibido tu solicitud de solución personalizada (referencia #:id). Nuestro equipo la revisará y se pondrá en contacto contigo si necesita más información.',
         'footer' => 'Gracias por contactarnos.',
+        'reference_code_label' => 'Código de acceso (64 caracteres) para seguimiento sin la tienda:',
         'portal_intro' => 'Puedes hacer seguimiento de la solicitud y actualizar tus datos con este enlace seguro (sin iniciar sesión):',
         'portal_button' => 'Abrir el gestor de la solicitud',
     ],
@@ -50,6 +52,7 @@ return [
         'subject' => 'Solución personalizada · actualización #:id',
         'greeting' => 'Hola,',
         'body' => 'Hay una novedad sobre tu solicitud #:id.',
+        'reference_code_label' => 'Código de acceso (64 caracteres) para seguimiento sin la tienda:',
         'cta' => 'Puedes revisar los detalles y responder desde el gestor.',
         'button' => 'Ver la solicitud',
     ],

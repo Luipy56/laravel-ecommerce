@@ -14,7 +14,7 @@ Transactional emails use Laravel Mail with copy in **Catalan**, **Spanish**, and
 | Client requests improvements on a personalized solution | `MAIL_ADMIN_NOTIFICATION_ADDRESS` (if set) |
 | Admin sets order status to **in transit** or **sent** (first time entering those states) | Client `login_email` |
 
-HTML mail uses the shared transactional layout (`resources/views/emails/layouts/transactional.blade.php`): optional logo (`MAIL_BRAND_LOGO_URL`), branded footer, optional preferences link when relevant.
+HTML mail uses the shared transactional layout (`resources/views/emails/layouts/transactional.blade.php`): logo from **`MAIL_BRAND_LOGO_URL`**, or the site favicon at `{APP_URL}/images/favicon.ico` if unset; branded footer; and when a portal URL is provided, the same URL in **plain text** for copy-paste (in addition to the CTA in the body).
 
 ## Operations checklist
 

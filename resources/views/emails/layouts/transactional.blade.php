@@ -16,11 +16,14 @@
                 <tr>
                     <td style="padding: 28px 24px 16px;">
                         @php
-                            $fromName = config('mail.from.name');
+                            $brandName = (string) config('mail.brand.display_name', 'Serralleria Solidària');
                             $envLogo = config('mail.brand.logo_url');
-                            $logoUrl = !empty($envLogo) ? $envLogo : url('images/favicon.ico');
+                            $logoUrl = $envLogo !== null && $envLogo !== '' ? (string) $envLogo : url('images/favicon.ico');
                         @endphp
-                        <img src="{{ $logoUrl }}" alt="{{ $fromName }}" style="max-height: 48px; width: auto; display: block; margin: 0 auto 16px;">
+                        <div style="text-align: center; margin: 0 0 8px;">
+                            <img src="{{ $logoUrl }}" alt="" width="48" height="48" style="max-height: 48px; width: auto; height: auto; display: block; margin: 0 auto;">
+                            <p style="margin: 10px 0 0; font-size: 18px; font-weight: 700; color: #18181b;">{{ $brandName }}</p>
+                        </div>
                         <div style="font-size: 16px; color: #18181b;">
                             @yield('content')
                         </div>
@@ -33,16 +36,8 @@
                             <p style="margin: 16px 0 8px; font-size: 13px; color: #52525b;">{{ $footerContact }}</p>
                         @endif
                         <p style="margin: 12px 0 0; font-size: 12px; color: #71717a;">
-                            {{ __('mail.layout.footer_default') }}
+                            {{ __('mail.layout.footer_default', [], $mailLocale ?? null) }}
                         </p>
-                        @if(!empty($managePreferencesUrl ?? null))
-                            <p style="margin: 16px 0 0; font-size: 12px; color: #52525b;">
-                                {{ __('mail.layout.fallback_url_intro') }}
-                            </p>
-                            <p style="margin: 8px 0 0; font-size: 12px; font-family: ui-monospace, Consolas, monospace; color: #3f3f46; word-break: break-all;">
-                                {{ $managePreferencesUrl }}
-                            </p>
-                        @endif
                     </td>
                 </tr>
             </table>

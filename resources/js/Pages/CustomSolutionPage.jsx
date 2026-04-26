@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
@@ -31,6 +31,7 @@ export default function CustomSolutionPage() {
   const [followUpError, setFollowUpError] = useState('');
   const [publicSettingsLoaded, setPublicSettingsLoaded] = useState(false);
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
+  const submitInFlightRef = useRef(false);
 
   const goToFollowUpSolution = useCallback(
     (e) => {
@@ -95,6 +96,10 @@ export default function CustomSolutionPage() {
 
   const submitForm = useCallback(async () => {
     if (newRequestsDisabled) return;
+    if (submitInFlightRef.current) {
+      return;
+    }
+    submitInFlightRef.current = true;
     setConfirmModalOpen(false);
     setError('');
     setFieldErrors({});
@@ -102,6 +107,7 @@ export default function CustomSolutionPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
+      submitInFlightRef.current = false;
       return;
     }
     setLoading(true);
@@ -141,6 +147,7 @@ export default function CustomSolutionPage() {
       setError(err.response?.data?.message || t('common.error'));
     } finally {
       setLoading(false);
+      submitInFlightRef.current = false;
     }
   }, [form, t, showToast, navigate, newRequestsDisabled]);
 

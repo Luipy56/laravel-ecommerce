@@ -21,7 +21,7 @@ class SendPersonalizedSolutionAcknowledgementEmail
         }
 
         $locale = MailLocale::resolve($event->locale);
-        Mail::to($email)->locale($locale)->send(new PersonalizedSolutionReceivedMail($solution));
+        Mail::to($email)->locale($locale)->send(new PersonalizedSolutionReceivedMail($solution, $locale));
     }
 
     public function failed(PersonalizedSolutionSubmitted $event, \Throwable $e): void

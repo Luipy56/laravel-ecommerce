@@ -124,6 +124,7 @@ return [
     */
 
     'brand' => [
+        'display_name' => env('MAIL_BRAND_DISPLAY_NAME', 'Serralleria Solidària'),
         'logo_url' => env('MAIL_BRAND_LOGO_URL'),
         'footer_contact' => env('MAIL_FOOTER_CONTACT_LINE'),
     ],

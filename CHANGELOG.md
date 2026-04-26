@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Events:** `Application::configure()->withEvents()` was scanning `app/Listeners` while the same classes were also registered in `AppServiceProvider`, so each `handle()` ran **twice** (duplicate transactional emails, etc.). Event discovery is disabled in `bootstrap/app.php`; listeners remain the explicit `Event::listen` registrations only.
+
 ### Changed
 
 - **Storefront / custom solution:** Removed the optional **“open case / access code”** block and hash scroll on **`/custom-solution`**. Short paths **`/client/personalized-solutions`**, **`/mi-solucion`**, and **`/my-solution`** now redirect to **`/custom-solution`** without a hash. Direct portal access remains **`/client/personalized-solutions/:token`**; removed dead **`resources/js/lib/personalizedSolutionCode.js`**.

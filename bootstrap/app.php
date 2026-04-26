@@ -7,6 +7,9 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
+    // Explicit listeners live in AppServiceProvider; automatic discovery from app/Listeners
+    // would register the same class again and run each handle() twice.
+    ->withEvents(discover: false)
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',

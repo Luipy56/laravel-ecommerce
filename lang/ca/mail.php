@@ -28,6 +28,33 @@ return [
         'footer' => 'Gràcies per la teva compra.',
     ],
 
+    'order_payment_pending' => [
+        'subject' => 'Comanda #:id registrada · pendent de pagament',
+        'greeting' => 'Hola,',
+        'body' => 'Hem rebut la teva comanda #:id. La comanda queda pendent: encara no hem rebut el pagament.',
+        'total_due' => 'Total a pagar',
+        'cta' => 'Completa el pagament des de la botiga amb l’enllaç següent (necessari si s’ha obert PayPal, Stripe o un altre pagament a part).',
+        'button' => 'Anar a la comanda',
+        'footer' => 'Si ja has completat el pagament, en breu rebràs la confirmació quan el banc o la passarel·la l’hagin registrat.',
+    ],
+
+    'admin_order_installation_quote' => [
+        'subject' => '[Comanda #:id] Sol·licitud de pressupost d’instal·lació',
+        'intro' => 'S’ha creat una comanda amb instal·lació al damunt del màxim autòmat (cal pressupost). Comanda #:id.',
+        'client_email' => 'Client:',
+        'grand_total' => 'Total (amb enviament)',
+        'button' => 'Obrir al panell',
+    ],
+
+    'admin_order_payment_pending' => [
+        'subject' => '[Comanda #:id] Pendent de pagament',
+        'intro' => 'S’ha registrat una comanda sense confirmació de pagament (redirecció o pendent a la passarel·la). Comanda #:id.',
+        'client_email' => 'Client:',
+        'grand_total' => 'Total',
+        'order_status' => 'Estat',
+        'button' => 'Obrir al panell',
+    ],
+
     'order_installation_quote' => [
         'subject' => 'Hem rebut la teva sol·licitud d’instal·lació · comanda #:id',
         'greeting' => 'Hola,',

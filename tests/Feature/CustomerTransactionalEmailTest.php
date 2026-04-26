@@ -2,17 +2,23 @@
 
 namespace Tests\Feature;
 
+use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Mail\InstallationPriceAssignedMail;
+use App\Mail\OrderInstallationQuoteRequestedAdminMail;
 use App\Mail\OrderInstallationQuoteRequestedMail;
 use App\Mail\OrderPaymentConfirmedMail;
+use App\Mail\OrderPaymentPendingAdminMail;
+use App\Mail\OrderPaymentPendingMail;
 use App\Mail\OrderShippedMail;
 use App\Mail\PersonalizedSolutionReceivedMail;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\OrderLine;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -135,6 +141,70 @@ class CustomerTransactionalEmailTest extends TestCase
         });
     }
 
+    public function test_checkout_with_stripe_not_simulated_sends_payment_pending_mails(): void
+    {
+        Mail::fake();
+
+        $this->app->bind(StripeCheckoutStarter::class, function () {
+            return new class implements PaymentCheckoutStarter
+            {
+                public function gateway(): string
+                {
+                    return Payment::GATEWAY_STRIPE;
+                }
+
+                public function start(Payment $payment): array
+                {
+                    return [
+                        'gateway' => Payment::GATEWAY_STRIPE,
+                        'checkout_url' => 'https://checkout.stripe.test/c',
+                        'publishable_key' => 'pk_test_fake',
+                        'session_id' => 'cs_test_fake',
+                    ];
+                }
+            };
+        });
+
+        $admin = 'ops_'.uniqid('', true).'@example.test';
+        config([
+            'services.stripe.key' => 'pk_test_valid_length_fake',
+            'services.stripe.secret' => 'sk_test_valid_length_fake',
+            'app.debug' => true,
+            'payments.allow_simulated' => false,
+            'payments.checkout_method_keys' => ['card', 'paypal'],
+            'mail.admin_notification_address' => $admin,
+        ]);
+
+        $client = $this->makeClientWithCart(false);
+
+        $payload = [
+            'payment_method' => 'card',
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => '',
+            'installation_city' => '',
+            'installation_postal_code' => '',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.has_payment', false);
+
+        Mail::assertSent(OrderPaymentPendingMail::class, function (OrderPaymentPendingMail $mail) use ($client) {
+            return $mail->hasTo($client->login_email);
+        });
+        Mail::assertNotSent(OrderPaymentConfirmedMail::class);
+        Mail::assertSent(OrderPaymentPendingAdminMail::class, function (OrderPaymentPendingAdminMail $mail) use ($admin) {
+            return $mail->hasTo($admin);
+        });
+    }
+
     public function test_checkout_with_simulated_card_sends_payment_confirmation_mail(): void
     {
         Mail::fake();
@@ -182,6 +252,7 @@ class CustomerTransactionalEmailTest extends TestCase
             'services.stripe.secret' => '',
             'app.debug' => true,
             'payments.allow_simulated' => true,
+            'mail.admin_notification_address' => null,
         ]);
 
         $client = $this->makeClientWithCart(true, 41, 25.00);
@@ -207,6 +278,49 @@ class CustomerTransactionalEmailTest extends TestCase
 
         Mail::assertSent(OrderInstallationQuoteRequestedMail::class, function (OrderInstallationQuoteRequestedMail $mail) use ($client) {
             return $mail->hasTo($client->login_email);
+        });
+        Mail::assertNotSent(OrderInstallationQuoteRequestedAdminMail::class);
+    }
+
+    public function test_checkout_with_installation_request_sends_quote_mails_to_admin_when_configured(): void
+    {
+        Mail::fake();
+
+        $admin = 'ops_'.uniqid('', true).'@example.test';
+        config([
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'app.debug' => true,
+            'payments.allow_simulated' => true,
+            'mail.admin_notification_address' => $admin,
+        ]);
+
+        $client = $this->makeClientWithCart(true, 41, 25.00);
+
+        $payload = [
+            'payment_method' => null,
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => 'Av. Diagonal 1',
+            'installation_city' => 'Barcelona',
+            'installation_postal_code' => '08028',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload, ['Accept-Language' => 'es']);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.awaiting_installation_quote', true);
+
+        Mail::assertSent(OrderInstallationQuoteRequestedMail::class, function (OrderInstallationQuoteRequestedMail $mail) use ($client) {
+            return $mail->hasTo($client->login_email);
+        });
+        Mail::assertSent(OrderInstallationQuoteRequestedAdminMail::class, function (OrderInstallationQuoteRequestedAdminMail $mail) use ($admin) {
+            return $mail->hasTo($admin);
         });
     }
 

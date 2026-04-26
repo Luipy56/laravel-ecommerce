@@ -28,6 +28,33 @@ return [
         'footer' => 'Gracias por tu compra.',
     ],
 
+    'order_payment_pending' => [
+        'subject' => 'Pedido #:id registrado · pago pendiente',
+        'greeting' => 'Hola,',
+        'body' => 'Hemos recibido tu pedido #:id. Sigue pendiente: aún no hemos recibido el pago.',
+        'total_due' => 'Total a pagar',
+        'cta' => 'Completa el pago desde la tienda con el siguiente enlace (necesario si usas PayPal, tarjeta con redirección u otro método externo).',
+        'button' => 'Ir al pedido',
+        'footer' => 'Si ya has pagado, recibirás pronto la confirmación cuando el banco o la pasarela la registre.',
+    ],
+
+    'admin_order_installation_quote' => [
+        'subject' => '[Pedido #:id] Solicitud de presupuesto de instalación',
+        'intro' => 'Se ha creado un pedido con instalación por encima del tope automático (hace falta presupuesto). Pedido #:id.',
+        'client_email' => 'Cliente:',
+        'grand_total' => 'Total (con envío)',
+        'button' => 'Abrir en el panel',
+    ],
+
+    'admin_order_payment_pending' => [
+        'subject' => '[Pedido #:id] Pago pendiente',
+        'intro' => 'Se ha registrado un pedido sin pago confirmado aún (redirección o pendiente en la pasarela). Pedido #:id.',
+        'client_email' => 'Cliente:',
+        'grand_total' => 'Total',
+        'order_status' => 'Estado',
+        'button' => 'Abrir en el panel',
+    ],
+
     'order_installation_quote' => [
         'subject' => 'Hemos recibido tu solicitud de instalación · pedido #:id',
         'greeting' => 'Hola,',

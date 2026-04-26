@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\OrderInstallationQuoteRequested;
+use App\Events\OrderPlacedPaymentPending;
 use App\Exceptions\PaymentProviderNotConfiguredException;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\Payment;
 use App\Services\Payments\PaymentCheckoutService;
+use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -159,8 +161,17 @@ class OrderController extends Controller
 
         $cart->refresh()->load('payments');
 
+        $mailLocale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
         if ($awaitingInstallationQuote) {
-            OrderInstallationQuoteRequested::dispatch($cart->fresh(['client', 'lines.product', 'lines.pack', 'addresses']));
+            OrderInstallationQuoteRequested::dispatch(
+                $cart->fresh(['client', 'lines.product', 'lines.pack', 'addresses']),
+                $mailLocale
+            );
+        } elseif (! $cart->hasSuccessfulPayment()) {
+            OrderPlacedPaymentPending::dispatch(
+                $cart->fresh(['client', 'lines.product', 'lines.pack', 'addresses', 'payments']),
+                $mailLocale
+            );
         }
 
         return response()->json([

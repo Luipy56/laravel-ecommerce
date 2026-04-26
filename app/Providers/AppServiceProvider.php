@@ -8,11 +8,15 @@ use App\Contracts\Search\ElasticsearchProductCatalogSearch;
 use App\Events\InstallationPriceWasAssigned;
 use App\Events\OrderInstallationQuoteRequested;
 use App\Events\OrderPaymentSucceeded;
+use App\Events\OrderPlacedPaymentPending;
 use App\Events\OrderShipped;
 use App\Events\PersonalizedSolutionSubmitted;
 use App\Listeners\SendInstallationPriceAssignedEmail;
+use App\Listeners\SendOrderInstallationQuoteRequestAdminEmail;
 use App\Listeners\SendOrderInstallationQuoteRequestEmail;
 use App\Listeners\SendOrderPaymentConfirmationEmail;
+use App\Listeners\SendOrderPaymentPendingAdminEmail;
+use App\Listeners\SendOrderPaymentPendingEmail;
 use App\Listeners\SendOrderShippedEmail;
 use App\Listeners\SendPersonalizedSolutionAcknowledgementEmail;
 use App\Scout\ElasticsearchClientFactory;
@@ -99,6 +103,9 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(InstallationPriceWasAssigned::class, SendInstallationPriceAssignedEmail::class);
         Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmationEmail::class);
         Event::listen(OrderInstallationQuoteRequested::class, SendOrderInstallationQuoteRequestEmail::class);
+        Event::listen(OrderInstallationQuoteRequested::class, SendOrderInstallationQuoteRequestAdminEmail::class);
+        Event::listen(OrderPlacedPaymentPending::class, SendOrderPaymentPendingEmail::class);
+        Event::listen(OrderPlacedPaymentPending::class, SendOrderPaymentPendingAdminEmail::class);
         Event::listen(PersonalizedSolutionSubmitted::class, SendPersonalizedSolutionAcknowledgementEmail::class);
         Event::listen(OrderShipped::class, SendOrderShippedEmail::class);
     }

@@ -103,11 +103,11 @@ export default function App() {
                   <Route path="custom-solution" element={<CustomSolutionPage />} />
                   <Route
                     path="client/personalized-solutions"
-                    element={<Navigate to="/custom-solution#custom-solution-followup" replace />}
+                    element={<Navigate to="/custom-solution" replace />}
                   />
                   <Route path="client/personalized-solutions/:token" element={<ClientPersonalizedSolutionPage />} />
-                  <Route path="mi-solucion" element={<Navigate to="/custom-solution#custom-solution-followup" replace />} />
-                  <Route path="my-solution" element={<Navigate to="/custom-solution#custom-solution-followup" replace />} />
+                  <Route path="mi-solucion" element={<Navigate to="/custom-solution" replace />} />
+                  <Route path="my-solution" element={<Navigate to="/custom-solution" replace />} />
                   <Route path="session-expired" element={<SessionExpiredPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>

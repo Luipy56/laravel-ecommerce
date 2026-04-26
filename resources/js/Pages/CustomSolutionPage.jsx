@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
-import { normalizePersonalizedSolutionToken, isValidPersonalizedSolutionToken } from '../lib/personalizedSolutionCode';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../contexts/ToastContext';
@@ -27,35 +26,9 @@ export default function CustomSolutionPage() {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [followUpCode, setFollowUpCode] = useState('');
-  const [followUpError, setFollowUpError] = useState('');
   const [publicSettingsLoaded, setPublicSettingsLoaded] = useState(false);
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
   const submitInFlightRef = useRef(false);
-
-  const goToFollowUpSolution = useCallback(
-    (e) => {
-      e?.preventDefault?.();
-      setFollowUpError('');
-      const token = normalizePersonalizedSolutionToken(followUpCode);
-      if (!isValidPersonalizedSolutionToken(token)) {
-        setFollowUpError(t('shop.custom_solution.followup_invalid'));
-        return;
-      }
-      navigate(`/client/personalized-solutions/${token}`, { replace: false });
-    },
-    [followUpCode, navigate, t]
-  );
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || window.location.hash !== '#custom-solution-followup') {
-      return;
-    }
-    const id = window.setTimeout(() => {
-      document.getElementById('custom-solution-followup')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -168,41 +141,6 @@ export default function CustomSolutionPage() {
   return (
     <div className="mx-auto w-full min-w-0 max-w-4xl">
       <PageTitle>{t('shop.custom_solution')}</PageTitle>
-      <div
-        id="custom-solution-followup"
-        className="mb-5 rounded-box border border-base-300 bg-base-100 p-4 shadow"
-      >
-        <p className="text-sm text-base-content/80 mb-3">
-          {t('shop.custom_solution.followup_lead')}
-        </p>
-        <form
-          onSubmit={goToFollowUpSolution}
-          className="flex flex-col sm:flex-row sm:items-end gap-2"
-        >
-          <label className="form-field w-full min-w-0 sm:flex-1">
-            <span className="form-label text-sm">{t('shop.custom_solution.followup_code_label')}</span>
-            <input
-              type="text"
-              inputMode="text"
-              autoComplete="off"
-              spellCheck="false"
-              className="input input-bordered input-sm w-full font-mono"
-              value={followUpCode}
-              onChange={(e) => {
-                setFollowUpCode(e.target.value);
-                if (followUpError) setFollowUpError('');
-              }}
-              placeholder={t('shop.custom_solution.followup_placeholder')}
-              aria-invalid={!!followUpError}
-              aria-describedby={followUpError ? 'followup-err' : undefined}
-            />
-            {followUpError ? <p id="followup-err" className="validator-hint text-error text-sm" role="alert">{followUpError}</p> : null}
-          </label>
-          <button type="submit" className="btn btn-outline btn-sm w-full sm:w-auto shrink-0">
-            {t('shop.custom_solution.followup_submit')}
-          </button>
-        </form>
-      </div>
       {error && <div className="alert alert-error mb-4">{error}</div>}
       <ConfirmModal
         open={confirmModalOpen}

@@ -9,6 +9,7 @@ use App\Models\ShopSetting;
 use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PersonalizedSolutionController extends Controller
 {
@@ -33,6 +34,16 @@ class PersonalizedSolutionController extends Controller
             'attachments' => ['nullable', 'array'],
             'attachments.*' => ['file', 'max:10240'], // 10MB
         ]);
+
+        $dedupKey = 'ps-store:'.hash('sha256', (string) $request->ip().'|'
+            .strtolower($validated['email']).'|'
+            .substr($validated['problem_description'], 0, 200));
+        if (! Cache::add($dedupKey, 1, 8)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.personalized_solution_too_soon'),
+            ], 429);
+        }
 
         $solution = new PersonalizedSolution([
             'email' => $validated['email'],

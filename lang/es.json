@@ -91,5 +91,6 @@
     "admin.data_explorer.errors.invalid_group_by": "La columna de agrupación no es válida.",
     "admin.data_explorer.errors.invalid_value_column": "La columna numérica para calcular no es válida.",
     "admin.data_explorer.errors.invalid_metric": "La métrica debe ser count, sum o avg.",
-    "shop.personalized_solutions_disabled": "En este momento no aceptamos nuevas solicitudes de solución personalizada."
+    "shop.personalized_solutions_disabled": "En este momento no aceptamos nuevas solicitudes de solución personalizada.",
+    "shop.personalized_solution_too_soon": "Hemos recibido la misma solicitud hace un momento. Espera unos segundos antes de volver a enviar."
 }

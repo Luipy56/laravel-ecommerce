@@ -4,7 +4,6 @@ return [
     'layout' => [
         'footer_default' => 'This is an automated message; please do not reply directly.',
         'manage_preferences' => 'Manage your data using the secure link',
-        'fallback_url_intro' => 'If the button does not work, paste this address into the browser:',
     ],
 
     'installation_price' => [
@@ -39,20 +38,18 @@ return [
     ],
 
     'personalized_solution' => [
-        'subject' => 'We received your request #:id',
+        'subject' => 'Custom solution request received · no. :id',
         'greeting' => 'Hello,',
         'body' => 'We have received your custom solution request (reference #:id). Our team will review it and contact you if more information is needed.',
         'footer' => 'Thank you for contacting us.',
-        'reference_code_label' => 'Access code (64 characters) to follow up without signing in to the store:',
         'portal_intro' => 'You can track the request and update your details with this secure link (no sign-in required):',
         'portal_button' => 'Open request manager',
     ],
 
     'personalized_solution_resolved' => [
-        'subject' => 'Custom solution · update #:id',
+        'subject' => 'Custom solution request · update for case #:id',
         'greeting' => 'Hello,',
         'body' => 'There is an update on your request #:id.',
-        'reference_code_label' => 'Access code (64 characters) to follow up without signing in to the store:',
         'cta' => 'You can review the details and reply from the manager.',
         'button' => 'View request',
     ],

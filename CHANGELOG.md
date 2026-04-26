@@ -9,12 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Transactional email layout:** When `MAIL_BRAND_LOGO_URL` is unset, HTML messages use the site favicon; footer link under portal URLs is replaced with the same URL as copy-pasteable plain text. **Personalized-solution** acknowledgements/updates: centered CTA, 64-char access code in the body; default sender display name **Serralleria Solidària** in `config/mail.php` and `APP_NAME` in `.env.example`.
+- **Transactional email layout:** Favicon (or `MAIL_BRAND_LOGO_URL`) with **visible** brand from `mail.brand.display_name` (`MAIL_BRAND_DISPLAY_NAME`, default Serralleria Solidària), not `MAIL_FROM_NAME`. Personalized-solution subjects and body use the request mail locale via `trans(..., $locale)`.
+- **Personalized solution API:** 8s idempotency for duplicate POST (same IP, email, start of description) to cut double emails; storefront submit uses an in-flight ref on top of the confirmation modal.
 - **`.env.example`:** Clarified Gmail SMTP variables (do not leave `MAIL_MAILER` empty) and `MAIL_ADMIN_NOTIFICATION_ADDRESS` for personalized-solution admin alerts.
 
 ### Fixed
 
-- **Storefront (confirmation modal):** A double click on "Confirm" could run the action twice (e.g. two personalized-solution submissions and two acknowledgement emails). The modal now blocks repeated confirms until the session completes or the dialog reopens.
+- **Storefront (custom solution):** Duplicate acknowledgements are mitigated with an in-flight ref on submit, the confirmation modal single-confirm guard, and a short **POST** idempotency window; personalized-solution mail templates no longer add the footer URL or access-code block; subjects are explicitly translation-based for the mail locale.
 - **Admin data explorer:** Session statement timeout is applied with MariaDB `max_statement_time`, MySQL 8.0.3+ `max_execution_time`, or skipped on older MySQL, so `POST /api/v1/admin/data-explorer/query` no longer fails with unknown system variable on MariaDB / legacy MySQL. Unsupported-variable errors from `SET SESSION` are ignored as a last resort. Aggregate values on the explorer page use `ca-ES` / `es-ES` number formatting for Catalan vs Spanish UI.
 
 ### Added

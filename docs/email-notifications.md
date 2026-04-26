@@ -14,7 +14,9 @@ Transactional emails use Laravel Mail with copy in **Catalan**, **Spanish**, and
 | Client requests improvements on a personalized solution | `MAIL_ADMIN_NOTIFICATION_ADDRESS` (if set) |
 | Admin sets order status to **in transit** or **sent** (first time entering those states) | Client `login_email` |
 
-HTML mail uses the shared transactional layout (`resources/views/emails/layouts/transactional.blade.php`): logo from **`MAIL_BRAND_LOGO_URL`**, or the site favicon at `{APP_URL}/images/favicon.ico` if unset; branded footer; and when a portal URL is provided, the same URL in **plain text** for copy-paste (in addition to the CTA in the body).
+HTML mail uses the shared transactional layout (`resources/views/emails/layouts/transactional.blade.php`): favicon or **`MAIL_BRAND_LOGO_URL`**, plus a **visible** brand name from **`MAIL_BRAND_DISPLAY_NAME`** (config `mail.brand.display_name`); the footer is the standard automated-message line. Subjects and body copy for personalized-solution emails use the resolved mail locale, not the framework default.
+
+**`POST /api/v1/personalized-solutions`** also applies a short idempotency window (same client + email + start of text) to reduce duplicate messages from a double submit.
 
 ## Operations checklist
 

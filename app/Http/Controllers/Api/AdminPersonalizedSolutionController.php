@@ -125,7 +125,7 @@ class AdminPersonalizedSolutionController extends Controller
         }
 
         $locale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
-        Mail::to($email)->locale($locale)->send(new PersonalizedSolutionResolvedMail($personalized_solution->fresh()));
+        Mail::to($email)->locale($locale)->send(new PersonalizedSolutionResolvedMail($personalized_solution->fresh(), $locale));
 
         return response()->json(['success' => true]);
     }
@@ -189,7 +189,7 @@ class AdminPersonalizedSolutionController extends Controller
             && $fresh->email
             && filter_var($fresh->email, FILTER_VALIDATE_EMAIL)) {
             $locale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
-            Mail::to($fresh->email)->locale($locale)->send(new PersonalizedSolutionResolvedMail($fresh));
+            Mail::to($fresh->email)->locale($locale)->send(new PersonalizedSolutionResolvedMail($fresh, $locale));
         }
 
         return response()->json([

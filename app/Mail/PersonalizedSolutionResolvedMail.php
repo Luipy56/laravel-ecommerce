@@ -14,28 +14,38 @@ class PersonalizedSolutionResolvedMail extends Mailable
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public PersonalizedSolution $solution)
-    {
+    public function __construct(
+        public PersonalizedSolution $solution,
+        public string $mailLocale = 'ca',
+    ) {
         //
     }
 
     public function envelope(): Envelope
     {
+        $subject = (string) trans('mail.personalized_solution_resolved.subject', [
+            'id' => $this->solution->id,
+        ], $this->mailLocale);
+
         return new Envelope(
-            subject: __('mail.personalized_solution_resolved.subject', ['id' => $this->solution->id]),
+            subject: $subject,
         );
     }
 
     public function content(): Content
     {
         $portalUrl = $this->solution->public_token ? $this->solution->portalUrl() : url('/');
+        $emailTitle = (string) trans('mail.personalized_solution_resolved.subject', [
+            'id' => $this->solution->id,
+        ], $this->mailLocale);
 
         return new Content(
             html: 'emails.personalized-solution-resolved',
             with: [
                 'solution' => $this->solution,
                 'portalUrl' => $portalUrl,
-                'managePreferencesUrl' => $portalUrl,
+                'emailTitle' => $emailTitle,
+                'mailLocale' => $this->mailLocale,
             ],
         );
     }

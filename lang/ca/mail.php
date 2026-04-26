@@ -4,7 +4,6 @@ return [
     'layout' => [
         'footer_default' => 'Missatge automàtic; si us plau no responguis directament al correu.',
         'manage_preferences' => 'Gestiona les teves dades amb l’enllaç segur',
-        'fallback_url_intro' => 'Si el botó no funciona, enganxa aquesta adreça al navegador:',
     ],
 
     'installation_price' => [
@@ -39,20 +38,18 @@ return [
     ],
 
     'personalized_solution' => [
-        'subject' => 'Hem rebut la teva sol·licitud #:id',
+        'subject' => 'Sol·licitud personalitzada rebuta · n. :id',
         'greeting' => 'Hola,',
         'body' => 'Hem rebut la teva sol·licitud de solució personalitzada (referència #:id). El nostre equip la revisarà i es posarà en contacte amb tu si cal més informació.',
         'footer' => 'Gràcies per contactar-nos.',
-        'reference_code_label' => 'Codi d’accés (64 caràcters) per a seguiment sense la botiga:',
         'portal_intro' => 'Pots fer el seguiment de la sol·licitud i actualitzar les teves dades amb aquest enllaç segur (sense iniciar sessió):',
         'portal_button' => 'Obrir el gestor de la sol·licitud',
     ],
 
     'personalized_solution_resolved' => [
-        'subject' => 'Solució personalitzada · actualització #:id',
+        'subject' => 'Solució personalitzada · notícies sobre el teu tràmit #:id',
         'greeting' => 'Hola,',
         'body' => 'Hi ha una novetat sobre la teva sol·licitud #:id.',
-        'reference_code_label' => 'Codi d’accés (64 caràcters) per a seguiment sense la botiga:',
         'cta' => 'Pots revisar els detalls i respondre des del gestor.',
         'button' => 'Veure la sol·licitud',
     ],

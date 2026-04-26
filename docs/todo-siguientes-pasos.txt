@@ -1,0 +1,46 @@
+================================================================================
+TODO — Siguientes pasos (notas de sesión)
+================================================================================
+
+--- Dónde íbamos / qué quedó hecho recientemente ---
+
+- Panel admin de configuración de tienda (/admin/settings): shop_settings, reglas
+  stock bajo / sobrestock, blacklists por ID, recalcular is_trending, soluciones
+  personalizadas on/off, GET público shop/public-settings, home featured =
+  is_featured OR is_trending.
+- Regla Cursor: .cursor/rules/admin-shop-settings.mdc + catálogo en
+  docs/agent-cursor-rules.md
+- Admin productos: descuento (%) visible en listado y en ficha.
+- ProductCard: badge de descuento pegado a la esquina (right-2) y texto en bold.
+- Toasts: mensaje en bold (ToastContext).
+- Ajustes UI copy (umbrales "Umbral del Stock", quitar bloque placeholder settings).
+- Rama de integración: agentdevelop (commits recientes allí).
+
+--- TODO sugerido (marcar cuando avances) ---
+
+[ ] Revisar en staging/local: /admin/settings guardar + recalcular + home destacados.
+[ ] Si hace falta: más reglas de trending (p. ej. por categoría, top ventas).
+[ ] Si hace falta: documentar en README las variables shop_settings para el equipo.
+[ ] Promoción a master: solo si toca ventana de release / urgencia (ver reglas git).
+
+================================================================================
+PREGUNTAS PARA TI (respóndelas cuando quieras seguir; no hace falta rellenar el TXT)
+================================================================================
+
+1) Prioridad inmediata: ¿qué quieres después — más reglas en settings, mejoras de
+   UI admin/tienda, pagos, otra feature?
+
+2) Trending / destacados: ¿is_featured + is_trending te sirven así o quieres
+   renombrar textos en admin (p. ej. "Destacado manual" vs "Destacado auto")?
+
+3) Listado admin /admin/products: ¿la columna de descuento te basta o quieres
+   también precio tachado / precio final en la tabla?
+
+4) ¿Hay que preparar release (CHANGELOG + versión) para subir a producción o
+   seguimos solo en agentdevelop?
+
+5) ¿Algún bug o pantalla concreta que siga fallando aparte de lo ya corregido?
+
+================================================================================
+Fin del archivo — puedes borrarlo o moverlo cuando ya no lo necesites.
+================================================================================

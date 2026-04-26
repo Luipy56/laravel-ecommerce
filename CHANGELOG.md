@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Transactional email layout:** When `MAIL_BRAND_LOGO_URL` is unset, HTML messages use the site favicon; footer link under portal URLs is replaced with the same URL as copy-pasteable plain text. **Personalized-solution** acknowledgements/updates: centered CTA, 64-char access code in the body; default sender display name **Serralleria Solidària** in `config/mail.php` and `APP_NAME` in `.env.example`.
 - **`.env.example`:** Clarified Gmail SMTP variables (do not leave `MAIL_MAILER` empty) and `MAIL_ADMIN_NOTIFICATION_ADDRESS` for personalized-solution admin alerts.
 
 ### Fixed

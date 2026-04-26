@@ -18,10 +18,11 @@
                         @php
                             $brandName = (string) config('mail.brand.display_name', 'Serralleria Solidària');
                             $envLogo = config('mail.brand.logo_url');
-                            $logoUrl = $envLogo !== null && $envLogo !== '' ? (string) $envLogo : url('images/favicon.ico');
+                            $defaultPublic = (string) config('mail.brand.default_logo', 'images/serraller_solidaria_logo_key.png');
+                            $logoUrl = $envLogo !== null && $envLogo !== '' ? (string) $envLogo : url($defaultPublic);
                         @endphp
                         <div style="text-align: center; margin: 0 0 8px;">
-                            <img src="{{ $logoUrl }}" alt="" width="48" height="48" style="max-height: 48px; width: auto; height: auto; display: block; margin: 0 auto;">
+                            <img src="{{ $logoUrl }}" alt="" style="max-height: 56px; max-width: 240px; width: auto; height: auto; display: block; margin: 0 auto;">
                             <p style="margin: 10px 0 0; font-size: 18px; font-weight: 700; color: #18181b;">{{ $brandName }}</p>
                         </div>
                         <div style="font-size: 16px; color: #18181b;">

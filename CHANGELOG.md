@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Transactional email layout:** Favicon (or `MAIL_BRAND_LOGO_URL`) with **visible** brand from `mail.brand.display_name` (`MAIL_BRAND_DISPLAY_NAME`, default Serralleria Solidària), not `MAIL_FROM_NAME`. Personalized-solution subjects and body use the request mail locale via `trans(..., $locale)`.
+- **Transactional email layout:** Default logo is **`public/images/serraller_solidaria_logo_key.png`** (config `mail.brand.default_logo` / `MAIL_BRAND_DEFAULT_LOGO`); optional `MAIL_BRAND_LOGO_URL` still overrides. **Visible** brand from `mail.brand.display_name` (`MAIL_BRAND_DISPLAY_NAME`, default Serralleria Solidària), not `MAIL_FROM_NAME`. Personalized-solution subjects and body use the request mail locale via `trans(..., $locale)`.
 - **Personalized solution API:** 8s idempotency for duplicate POST (same IP, email, start of description) to cut double emails; storefront submit uses an in-flight ref on top of the confirmation modal.
 - **`.env.example`:** Clarified Gmail SMTP variables (do not leave `MAIL_MAILER` empty) and `MAIL_ADMIN_NOTIFICATION_ADDRESS` for personalized-solution admin alerts.
 

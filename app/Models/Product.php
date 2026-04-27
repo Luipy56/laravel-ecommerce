@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Scout\Searchable;
 
+/**
+ * Sellable catalog item: pricing, stock, merchandising flags, and Scout indexing for search.
+ *
+ * Search text is denormalised on save for consistent catalog and Elasticsearch matching.
+ */
 class Product extends Model
 {
     use Searchable;
@@ -48,7 +53,12 @@ class Product extends Model
     }
 
     /**
-     * Single blob for catalog search: lowercase, whitespace-normalized, diacritics removed when intl Transliterator is available.
+     * Builds a single normalised string used for catalog and full-text search.
+     *
+     * @param  string|null  $name  Product display name.
+     * @param  string|null  $code  Internal or supplier code.
+     * @param  string|null  $description  Long description text.
+     * @return string Lowercase, whitespace-collapsed text; diacritics folded when intl or iconv is available.
      */
     public static function normalizeSearchText(?string $name, ?string $code, ?string $description): string
     {

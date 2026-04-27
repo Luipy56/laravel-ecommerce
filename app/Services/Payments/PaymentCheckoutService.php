@@ -10,6 +10,12 @@ use App\Services\Payments\Stripe\StripeCredentials;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * Orchestrates starting a checkout session for a {@see Payment} using the configured gateway (Stripe or PayPal).
+ *
+ * Also exposes helpers for storefront configuration: which methods are available, simulated checkout in debug,
+ * and credential hints for the UI.
+ */
 class PaymentCheckoutService
 {
     public function __construct(
@@ -18,7 +24,14 @@ class PaymentCheckoutService
         private readonly PaymentCompletionService $completion,
     ) {}
 
-    /** @return array{type: string}&array<string, mixed> */
+    /**
+     * Starts the remote checkout flow for the given payment and returns gateway-specific payload for the client.
+     *
+     * @param  Payment  $payment  Persisted payment row including payment_method (e.g. card, paypal).
+     * @return array{type: string}&array<string, mixed> Gateway type plus fields from the selected starter (e.g. client_secret, approval URL).
+     *
+     * @throws InvalidArgumentException When payment_method is not supported by a registered starter.
+     */
     public function start(Payment $payment): array
     {
         $starter = $this->starterForPaymentMethod($payment->payment_method);
@@ -164,6 +177,13 @@ class PaymentCheckoutService
         };
     }
 
+    /**
+     * Marks a payment as succeeded without calling an external PSP (local/debug only).
+     *
+     * @param  Payment  $payment  Payment to complete in simulated mode.
+     *
+     * @throws RuntimeException When simulated payments are not allowed by configuration.
+     */
     public function simulateSuccess(Payment $payment): void
     {
         if (! self::allowSimulatedPayments()) {

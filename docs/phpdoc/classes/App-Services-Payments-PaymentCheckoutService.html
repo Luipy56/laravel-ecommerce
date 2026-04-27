@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en" id="top-of-site">
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<meta charset="utf-8"/>
+		<title>
+							Laravel E-commerce — Application code
+					</title>
+		<meta name="author" content=""/>
+		<meta name="description" content=""/>
+		<base href="../">
+
+		<link href="resources/css/bootstrap.min.css" rel="stylesheet" media="all"/>
+		<link href="resources/css/bootstrap-responsive.min.css" rel="stylesheet" media="all"/>
+		<link href="resources/css/style.css" rel="stylesheet" media="all"/>
+		<link href="resources/css/prism.min.css" rel="stylesheet" media="all"/>
+		<link href="resources/font/css/all.min.css" rel="stylesheet" media="all"/>
+		
+		<link rel="shortcut icon" href="resources/images/favicon.ico"/>
+		<link rel="apple-touch-icon" href="resources/images/apple-touch-icon.png"/>
+		<link rel="apple-touch-icon" sizes="72x72" href="resources/images/apple-touch-icon-72x72.png"/>
+		<link rel="apple-touch-icon" sizes="114x114" href="resources/images/apple-touch-icon-114x114.png"/>
+	</head>
+	<body>
+
+		<nav class="navbar navbar-fixed-top navbar-inverse">
+			<div class="navbar-inner">
+				<div class="container">
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<i class="fa-solid fa-bars"></i>
+					</a>
+					<a class="brand" href="index.html">Laravel E-commerce — Application code</a>
+
+					<div class="nav-collapse navbar-responsive-collapse collapse">
+						<ul class="nav pull-right">
+															<li class="dropdown" id="api-menu">
+									<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-labelledby="api-menu">
+										API Documentation
+										<b class="caret"></b>
+									</a>
+									<ul class="dropdown-menu" role="menu" aria-labelledby="api-menu">
+																					<li><a href="namespaces/app.html"><abbr title="\App">App</abbr></a></li>
+																			</ul>
+								</li>
+																					<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+									Reports
+									<b class="caret"></b>
+								</a>
+								<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+									<li>
+										<a href="reports/errors.html">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															<i class="fa-solid fa-bug"></i>&#160;Errors
+											<span class="label label-important pull-right">0</span>
+										</a>
+									</li>
+									<li>
+										<a href="reports/markers.html">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															<i class="fa-solid fa-location-dot"></i>&#160;&#160;Markers
+											<span class="label label-warning pull-right">0</span>
+										</a>
+									</li>
+									<li>
+										<a href="reports/deprecated.html">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													<i class="fa-solid fa-file-circle-xmark"></i>&#160;Deprecated
+											<span class="label label-info pull-right">0</span>
+										</a>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="go_to_top">
+				<a href="#top-of-site" style="color: inherit">Back To Top&#160;&#160;<i class="fa-solid fa-chevron-up"></i></a>
+			</div>
+		</nav>
+
+		<div id="___" class="container-fluid"> 	<section class="row-fluid">
+		<div class="span2 sidebar">
+								<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-95772464"></a>
+								<a href="namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
+			</div>
+			<div id="namespace-95772464" class="accordion-body collapse in">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1813684902"></a>
+								<a href="namespaces/app.html" style="margin-left: 30px; padding-left: 0">App</a>
+			</div>
+			<div id="namespace-1813684902" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1254844939"></a>
+								<a href="namespaces/app-console.html" style="margin-left: 30px; padding-left: 0">Console</a>
+			</div>
+			<div id="namespace-1254844939" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-288910388"></a>
+								<a href="namespaces/app-console-commands.html" style="margin-left: 30px; padding-left: 0">Commands</a>
+			</div>
+			<div id="namespace-288910388" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Console-Commands-PayPalTestCredentialsCommand.html"><abbr title="\App\Console\Commands\PayPalTestCredentialsCommand">PayPalTestCredentialsCommand</abbr></a></li>
+													<li class="class"><a href="classes/App-Console-Commands-RebuildProductSearchTextCommand.html"><abbr title="\App\Console\Commands\RebuildProductSearchTextCommand">RebuildProductSearchTextCommand</abbr></a></li>
+													<li class="class"><a href="classes/App-Console-Commands-ReindexElasticsearchProductsCommand.html"><abbr title="\App\Console\Commands\ReindexElasticsearchProductsCommand">ReindexElasticsearchProductsCommand</abbr></a></li>
+													<li class="class"><a href="classes/App-Console-Commands-RouteSmokeCommand.html"><abbr title="\App\Console\Commands\RouteSmokeCommand">RouteSmokeCommand</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-160748435"></a>
+								<a href="namespaces/app-contracts.html" style="margin-left: 30px; padding-left: 0">Contracts</a>
+			</div>
+			<div id="namespace-160748435" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1213399523"></a>
+								<a href="namespaces/app-contracts-payments.html" style="margin-left: 30px; padding-left: 0">Payments</a>
+			</div>
+			<div id="namespace-1213399523" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+													<li class="interface"><a href="classes/App-Contracts-Payments-PaymentCheckoutStarter.html"><abbr title="\App\Contracts\Payments\PaymentCheckoutStarter">PaymentCheckoutStarter</abbr></a></li>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-540557301"></a>
+								<a href="namespaces/app-contracts-search.html" style="margin-left: 30px; padding-left: 0">Search</a>
+			</div>
+			<div id="namespace-540557301" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+													<li class="interface"><a href="classes/App-Contracts-Search-ElasticsearchProductCatalogSearch.html"><abbr title="\App\Contracts\Search\ElasticsearchProductCatalogSearch">ElasticsearchProductCatalogSearch</abbr></a></li>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+													<li class="interface"><a href="classes/App-Contracts-RebuildsProductSearchText.html"><abbr title="\App\Contracts\RebuildsProductSearchText">RebuildsProductSearchText</abbr></a></li>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1215525908"></a>
+								<a href="namespaces/app-events.html" style="margin-left: 30px; padding-left: 0">Events</a>
+			</div>
+			<div id="namespace-1215525908" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Events-InstallationPriceWasAssigned.html"><abbr title="\App\Events\InstallationPriceWasAssigned">InstallationPriceWasAssigned</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-OrderInstallationQuoteRequested.html"><abbr title="\App\Events\OrderInstallationQuoteRequested">OrderInstallationQuoteRequested</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-OrderPaymentSucceeded.html"><abbr title="\App\Events\OrderPaymentSucceeded">OrderPaymentSucceeded</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-OrderPlacedPaymentPending.html"><abbr title="\App\Events\OrderPlacedPaymentPending">OrderPlacedPaymentPending</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-OrderShipped.html"><abbr title="\App\Events\OrderShipped">OrderShipped</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-PersonalizedSolutionSubmitted.html"><abbr title="\App\Events\PersonalizedSolutionSubmitted">PersonalizedSolutionSubmitted</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-814491958"></a>
+								<a href="namespaces/app-exceptions.html" style="margin-left: 30px; padding-left: 0">Exceptions</a>
+			</div>
+			<div id="namespace-814491958" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Exceptions-PaymentProviderNotConfiguredException.html"><abbr title="\App\Exceptions\PaymentProviderNotConfiguredException">PaymentProviderNotConfiguredException</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-2090730712"></a>
+								<a href="namespaces/app-http.html" style="margin-left: 30px; padding-left: 0">Http</a>
+			</div>
+			<div id="namespace-2090730712" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-674397669"></a>
+								<a href="namespaces/app-http-controllers.html" style="margin-left: 30px; padding-left: 0">Controllers</a>
+			</div>
+			<div id="namespace-674397669" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1840633539"></a>
+								<a href="namespaces/app-http-controllers-api.html" style="margin-left: 30px; padding-left: 0">Api</a>
+			</div>
+			<div id="namespace-1840633539" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Http-Controllers-Api-AdminAdminController.html"><abbr title="\App\Http\Controllers\Api\AdminAdminController">AdminAdminController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminAuthController.html"><abbr title="\App\Http\Controllers\Api\AdminAuthController">AdminAuthController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminCategoryController.html"><abbr title="\App\Http\Controllers\Api\AdminCategoryController">AdminCategoryController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminClientController.html"><abbr title="\App\Http\Controllers\Api\AdminClientController">AdminClientController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminDashboardController.html"><abbr title="\App\Http\Controllers\Api\AdminDashboardController">AdminDashboardController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminDataExplorerController.html"><abbr title="\App\Http\Controllers\Api\AdminDataExplorerController">AdminDataExplorerController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminFeatureController.html"><abbr title="\App\Http\Controllers\Api\AdminFeatureController">AdminFeatureController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminFeatureNameController.html"><abbr title="\App\Http\Controllers\Api\AdminFeatureNameController">AdminFeatureNameController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminOrderController.html"><abbr title="\App\Http\Controllers\Api\AdminOrderController">AdminOrderController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminPackController.html"><abbr title="\App\Http\Controllers\Api\AdminPackController">AdminPackController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminPersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\AdminPersonalizedSolutionController">AdminPersonalizedSolutionController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminProductController.html"><abbr title="\App\Http\Controllers\Api\AdminProductController">AdminProductController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminShopSettingsController.html"><abbr title="\App\Http\Controllers\Api\AdminShopSettingsController">AdminShopSettingsController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminVariantGroupController.html"><abbr title="\App\Http\Controllers\Api\AdminVariantGroupController">AdminVariantGroupController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AuthController.html"><abbr title="\App\Http\Controllers\Api\AuthController">AuthController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-CartController.html"><abbr title="\App\Http\Controllers\Api\CartController">CartController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-CategoryController.html"><abbr title="\App\Http\Controllers\Api\CategoryController">CategoryController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-FeatureController.html"><abbr title="\App\Http\Controllers\Api\FeatureController">FeatureController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-OrderController.html"><abbr title="\App\Http\Controllers\Api\OrderController">OrderController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PackController.html"><abbr title="\App\Http\Controllers\Api\PackController">PackController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PaymentConfigController.html"><abbr title="\App\Http\Controllers\Api\PaymentConfigController">PaymentConfigController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PaymentWebhookController.html"><abbr title="\App\Http\Controllers\Api\PaymentWebhookController">PaymentWebhookController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PayPalPaymentController.html"><abbr title="\App\Http\Controllers\Api\PayPalPaymentController">PayPalPaymentController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\PersonalizedSolutionController">PersonalizedSolutionController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-ProductController.html"><abbr title="\App\Http\Controllers\Api\ProductController">ProductController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PublicPersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\PublicPersonalizedSolutionController">PublicPersonalizedSolutionController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PurchasedProductsController.html"><abbr title="\App\Http\Controllers\Api\PurchasedProductsController">PurchasedProductsController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-ShopPublicSettingsController.html"><abbr title="\App\Http\Controllers\Api\ShopPublicSettingsController">ShopPublicSettingsController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-UserController.html"><abbr title="\App\Http\Controllers\Api\UserController">UserController</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Http-Controllers-Controller.html"><abbr title="\App\Http\Controllers\Controller">Controller</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-953301861"></a>
+								<a href="namespaces/app-http-middleware.html" style="margin-left: 30px; padding-left: 0">Middleware</a>
+			</div>
+			<div id="namespace-953301861" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Http-Middleware-EnsureAdmin.html"><abbr title="\App\Http\Middleware\EnsureAdmin">EnsureAdmin</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-154355757"></a>
+								<a href="namespaces/app-http-resources.html" style="margin-left: 30px; padding-left: 0">Resources</a>
+			</div>
+			<div id="namespace-154355757" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Http-Resources-AdminPackResource.html"><abbr title="\App\Http\Resources\AdminPackResource">AdminPackResource</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Resources-AdminProductResource.html"><abbr title="\App\Http\Resources\AdminProductResource">AdminProductResource</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Resources-CategoryResource.html"><abbr title="\App\Http\Resources\CategoryResource">CategoryResource</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Resources-PackResource.html"><abbr title="\App\Http\Resources\PackResource">PackResource</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Resources-ProductResource.html"><abbr title="\App\Http\Resources\ProductResource">ProductResource</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1265356820"></a>
+								<a href="namespaces/app-listeners.html" style="margin-left: 30px; padding-left: 0">Listeners</a>
+			</div>
+			<div id="namespace-1265356820" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Listeners-SendInstallationPriceAssignedEmail.html"><abbr title="\App\Listeners\SendInstallationPriceAssignedEmail">SendInstallationPriceAssignedEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderInstallationQuoteRequestAdminEmail.html"><abbr title="\App\Listeners\SendOrderInstallationQuoteRequestAdminEmail">SendOrderInstallationQuoteRequestAdminEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderInstallationQuoteRequestEmail.html"><abbr title="\App\Listeners\SendOrderInstallationQuoteRequestEmail">SendOrderInstallationQuoteRequestEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentConfirmationEmail.html"><abbr title="\App\Listeners\SendOrderPaymentConfirmationEmail">SendOrderPaymentConfirmationEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentPendingAdminEmail.html"><abbr title="\App\Listeners\SendOrderPaymentPendingAdminEmail">SendOrderPaymentPendingAdminEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentPendingEmail.html"><abbr title="\App\Listeners\SendOrderPaymentPendingEmail">SendOrderPaymentPendingEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderShippedEmail.html"><abbr title="\App\Listeners\SendOrderShippedEmail">SendOrderShippedEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendPersonalizedSolutionAcknowledgementEmail.html"><abbr title="\App\Listeners\SendPersonalizedSolutionAcknowledgementEmail">SendPersonalizedSolutionAcknowledgementEmail</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1252877085"></a>
+								<a href="namespaces/app-mail.html" style="margin-left: 30px; padding-left: 0">Mail</a>
+			</div>
+			<div id="namespace-1252877085" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Mail-InstallationPriceAssignedMail.html"><abbr title="\App\Mail\InstallationPriceAssignedMail">InstallationPriceAssignedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderInstallationQuoteRequestedAdminMail.html"><abbr title="\App\Mail\OrderInstallationQuoteRequestedAdminMail">OrderInstallationQuoteRequestedAdminMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderInstallationQuoteRequestedMail.html"><abbr title="\App\Mail\OrderInstallationQuoteRequestedMail">OrderInstallationQuoteRequestedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderPaymentConfirmedMail.html"><abbr title="\App\Mail\OrderPaymentConfirmedMail">OrderPaymentConfirmedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderPaymentPendingAdminMail.html"><abbr title="\App\Mail\OrderPaymentPendingAdminMail">OrderPaymentPendingAdminMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderPaymentPendingMail.html"><abbr title="\App\Mail\OrderPaymentPendingMail">OrderPaymentPendingMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderShippedMail.html"><abbr title="\App\Mail\OrderShippedMail">OrderShippedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionImprovementRequestedAdminMail.html"><abbr title="\App\Mail\PersonalizedSolutionImprovementRequestedAdminMail">PersonalizedSolutionImprovementRequestedAdminMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionReceivedMail.html"><abbr title="\App\Mail\PersonalizedSolutionReceivedMail">PersonalizedSolutionReceivedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionResolvedMail.html"><abbr title="\App\Mail\PersonalizedSolutionResolvedMail">PersonalizedSolutionResolvedMail</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-967782680"></a>
+								<a href="namespaces/app-models.html" style="margin-left: 30px; padding-left: 0">Models</a>
+			</div>
+			<div id="namespace-967782680" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Models-Admin.html"><abbr title="\App\Models\Admin">Admin</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Client.html"><abbr title="\App\Models\Client">Client</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ClientAddress.html"><abbr title="\App\Models\ClientAddress">ClientAddress</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ClientContact.html"><abbr title="\App\Models\ClientContact">ClientContact</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Feature.html"><abbr title="\App\Models\Feature">Feature</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-FeatureName.html"><abbr title="\App\Models\FeatureName">FeatureName</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Order.html"><abbr title="\App\Models\Order">Order</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-OrderAddress.html"><abbr title="\App\Models\OrderAddress">OrderAddress</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-OrderLine.html"><abbr title="\App\Models\OrderLine">OrderLine</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Pack.html"><abbr title="\App\Models\Pack">Pack</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-PackImage.html"><abbr title="\App\Models\PackImage">PackImage</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-PackItem.html"><abbr title="\App\Models\PackItem">PackItem</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Payment.html"><abbr title="\App\Models\Payment">Payment</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-PersonalizedSolution.html"><abbr title="\App\Models\PersonalizedSolution">PersonalizedSolution</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-PersonalizedSolutionAttachment.html"><abbr title="\App\Models\PersonalizedSolutionAttachment">PersonalizedSolutionAttachment</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Product.html"><abbr title="\App\Models\Product">Product</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ProductCategory.html"><abbr title="\App\Models\ProductCategory">ProductCategory</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ProductImage.html"><abbr title="\App\Models\ProductImage">ProductImage</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ProductVariantGroup.html"><abbr title="\App\Models\ProductVariantGroup">ProductVariantGroup</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ShopSetting.html"><abbr title="\App\Models\ShopSetting">ShopSetting</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-StripeWebhookEvent.html"><abbr title="\App\Models\StripeWebhookEvent">StripeWebhookEvent</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-User.html"><abbr title="\App\Models\User">User</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-814237505"></a>
+								<a href="namespaces/app-providers.html" style="margin-left: 30px; padding-left: 0">Providers</a>
+			</div>
+			<div id="namespace-814237505" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Providers-AppServiceProvider.html"><abbr title="\App\Providers\AppServiceProvider">AppServiceProvider</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1714362912"></a>
+								<a href="namespaces/app-scout.html" style="margin-left: 30px; padding-left: 0">Scout</a>
+			</div>
+			<div id="namespace-1714362912" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Scout-ElasticsearchClientFactory.html"><abbr title="\App\Scout\ElasticsearchClientFactory">ElasticsearchClientFactory</abbr></a></li>
+													<li class="class"><a href="classes/App-Scout-ElasticsearchEngine.html"><abbr title="\App\Scout\ElasticsearchEngine">ElasticsearchEngine</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-415123866"></a>
+								<a href="namespaces/app-services.html" style="margin-left: 30px; padding-left: 0">Services</a>
+			</div>
+			<div id="namespace-415123866" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1784896085"></a>
+								<a href="namespaces/app-services-payments.html" style="margin-left: 30px; padding-left: 0">Payments</a>
+			</div>
+			<div id="namespace-1784896085" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1989898264"></a>
+								<a href="namespaces/app-services-payments-paypal.html" style="margin-left: 30px; padding-left: 0">PayPal</a>
+			</div>
+			<div id="namespace-1989898264" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-PayPal-PayPalCheckoutStarter.html"><abbr title="\App\Services\Payments\PayPal\PayPalCheckoutStarter">PayPalCheckoutStarter</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Payments-PayPal-PayPalClient.html"><abbr title="\App\Services\Payments\PayPal\PayPalClient">PayPalClient</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-266367577"></a>
+								<a href="namespaces/app-services-payments-redsys.html" style="margin-left: 30px; padding-left: 0">Redsys</a>
+			</div>
+			<div id="namespace-266367577" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-Redsys-RedsysCheckoutStarter.html"><abbr title="\App\Services\Payments\Redsys\RedsysCheckoutStarter">RedsysCheckoutStarter</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Payments-Redsys-RedsysSignature.html"><abbr title="\App\Services\Payments\Redsys\RedsysSignature">RedsysSignature</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1196896211"></a>
+								<a href="namespaces/app-services-payments-revolut.html" style="margin-left: 30px; padding-left: 0">Revolut</a>
+			</div>
+			<div id="namespace-1196896211" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-Revolut-RevolutCheckoutStarter.html"><abbr title="\App\Services\Payments\Revolut\RevolutCheckoutStarter">RevolutCheckoutStarter</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1472938600"></a>
+								<a href="namespaces/app-services-payments-stripe.html" style="margin-left: 30px; padding-left: 0">Stripe</a>
+			</div>
+			<div id="namespace-1472938600" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-Stripe-StripeCheckoutStarter.html"><abbr title="\App\Services\Payments\Stripe\StripeCheckoutStarter">StripeCheckoutStarter</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Payments-Stripe-StripeCredentials.html"><abbr title="\App\Services\Payments\Stripe\StripeCredentials">StripeCredentials</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><abbr title="\App\Services\Payments\PaymentCheckoutService">PaymentCheckoutService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Payments-PaymentCompletionService.html"><abbr title="\App\Services\Payments\PaymentCompletionService">PaymentCompletionService</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1738785357"></a>
+								<a href="namespaces/app-services-search.html" style="margin-left: 30px; padding-left: 0">Search</a>
+			</div>
+			<div id="namespace-1738785357" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Search-CatalogProductSearchService.html"><abbr title="\App\Services\Search\CatalogProductSearchService">CatalogProductSearchService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Search-ProductSearchService.html"><abbr title="\App\Services\Search\ProductSearchService">ProductSearchService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Search-ScoutElasticsearchProductCatalogSearch.html"><abbr title="\App\Services\Search\ScoutElasticsearchProductCatalogSearch">ScoutElasticsearchProductCatalogSearch</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Search-SearchSynonymDictionary.html"><abbr title="\App\Services\Search\SearchSynonymDictionary">SearchSynonymDictionary</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-AdminDataExplorerService.html"><abbr title="\App\Services\AdminDataExplorerService">AdminDataExplorerService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-ProductSearchTextRebuildService.html"><abbr title="\App\Services\ProductSearchTextRebuildService">ProductSearchTextRebuildService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-RecalculateTrendingProducts.html"><abbr title="\App\Services\RecalculateTrendingProducts">RecalculateTrendingProducts</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-2037850750"></a>
+								<a href="namespaces/app-support.html" style="margin-left: 30px; padding-left: 0">Support</a>
+			</div>
+			<div id="namespace-2037850750" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Support-MailLocale.html"><abbr title="\App\Support\MailLocale">MailLocale</abbr></a></li>
+													<li class="class"><a href="classes/App-Support-SqliteDatabaseBootstrap.html"><abbr title="\App\Support\SqliteDatabaseBootstrap">SqliteDatabaseBootstrap</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		</div>
+	</section>
+	<section class="row-fluid">
+		<div class="span10 offset2">
+			<div class="row-fluid">
+				<div class="span8 content class">
+					<nav>
+												<a href="namespaces/app-services-payments.html"><abbr title="\App\Services\Payments">Payments</abbr></a>
+						<i class="fa-solid fa-turn-up"></i>
+											</nav>
+					
+					<h1>
+						<small>\App\Services\Payments</small>
+						PaymentCheckoutService</h1>
+					<p>
+						<em>Orchestrates starting a checkout session for a {@see Payment} using the configured gateway (Stripe or PayPal).</em>
+					</p>
+					<p>Also exposes helpers for storefront configuration: which methods are available, simulated checkout in debug,
+and credential hints for the UI.</p>
+
+																																<section id="summary">
+						<h2>Summary</h2>
+						<section class="row-fluid heading">
+							<section class="span4">
+								<a href="#methods">Methods</a>
+							</section>
+							<section class="span4">
+								<a href="#properties">Properties</a>
+							</section>
+							<section class="span4">
+								<a href="#constants">Constants</a>
+							</section>
+						</section>
+						<section class="row-fluid public">
+							<section class="span4">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			
+																											<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method___construct" class="">__construct</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_start" class="">start</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_allowSimulatedPayments" class="">allowSimulatedPayments</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_checkoutMethodKeysFromConfig" class="">checkoutMethodKeysFromConfig</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_methodHasRealProviderCredentials" class="">methodHasRealProviderCredentials</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_paypalMissingCredentialsForStorefront" class="">paypalMissingCredentialsForStorefront</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_paypalModeLabelForStorefront" class="">paypalModeLabelForStorefront</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_stripeMissingCredentialsForStorefront" class="">stripeMissingCredentialsForStorefront</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_shouldSimulateCheckoutForPayment" class="">shouldSimulateCheckoutForPayment</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_paymentMethodsAvailability" class="">paymentMethodsAvailability</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_isPaymentMethodAvailable" class="">isPaymentMethodAvailable</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_simulateSuccess" class="">simulateSuccess</a><br/>
+																								</section>
+							<section class="span4">
+																																																																			
+																	<em>No public properties found</em>
+															</section>
+							<section class="span4">
+																
+																	<em>No public constants found</em>
+															</section>
+						</section>
+						<section class="row-fluid protected">
+							<section class="span4">
+																																																																																																																																																																																																																																																																															
+																	<em>No protected methods found</em>
+															</section>
+							<section class="span4">
+																																																																			
+																	<em>No protected properties found</em>
+															</section>
+							<section class="span4">
+																
+																	<em>No protected constants found</em>
+															</section>
+						</section>
+						<section class="row-fluid private">
+							<section class="span4">
+																																																																																																																																																																																																																																																																																																																																								
+																											<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_starterForPaymentMethod" class="">starterForPaymentMethod</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_paymentMethodsBaseAvailability" class="">paymentMethodsBaseAvailability</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#method_applyCheckoutMethodWhitelist" class="">applyCheckoutMethodWhitelist</a><br/>
+																								</section>
+							<section class="span4">
+																																																																																																																												
+																											<a href="classes/App-Services-Payments-PaymentCheckoutService.html#property_stripe" class="">stripe</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#property_paypal" class="">paypal</a><br/>
+																			<a href="classes/App-Services-Payments-PaymentCheckoutService.html#property_completion" class="">completion</a><br/>
+																								</section>
+							<section class="span4">
+																
+																	<em>No private constants found</em>
+															</section>
+						</section>
+					</section>
+				</div>
+				<aside class="span4 detailsbar">
+										
+					
+					<dl>
+						<dt>File</dt>
+						<dd>
+							<a href="files/app-services-payments-paymentcheckoutservice.html">
+								<div class="path-wrapper">app/Services/Payments/PaymentCheckoutService.php</div>
+							</a>
+						</dd>
+													<dt>Package</dt>
+							<dd>
+								<div class="namespace-wrapper">App</div>
+							</dd>
+												<dt>Class hierarchy</dt>
+						<dd class="hierarchy">
+																																				<div class="namespace-wrapper">\App\Services\Payments\PaymentCheckoutService</div>
+						</dd>
+
+						
+						
+												
+																																																																																																																																																																																															
+																	</dl>
+					<h2>Tags</h2>
+					<table class="table table-condensed">
+																											<tr>
+									<th>
+										package
+									</th>
+									<td>
+																																<p>App</p>
+
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										uses
+									</th>
+									<td>
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										method
+									</th>
+									<td>
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										property
+									</th>
+									<td>
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										property-read
+									</th>
+									<td>
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										property-write
+									</th>
+									<td>
+																			</td>
+								</tr>
+																		</table>
+				</aside>
+			</div>
+
+						
+										<a id="properties" name="properties"></a>
+				<div class="row-fluid">
+					<div class="span8 content class">
+						<h2>Properties</h2>
+					</div>
+					<aside class="span4 detailsbar"></aside>
+				</div>
+
+																																																																													    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_stripe" name="property_stripe" class="anchor"></a>
+            <article class="property">
+                <h3 class="private ">$stripe</h3>
+                <pre class="signature">$stripe : \App\Contracts\Payments\PaymentCheckoutStarter</pre>
+                <p><em></em></p>
+                
+
+                                <h4>Type</h4>
+                <a href="classes/App-Contracts-Payments-PaymentCheckoutStarter.html"><abbr title="\App\Contracts\Payments\PaymentCheckoutStarter">PaymentCheckoutStarter</abbr></a>
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_paypal" name="property_paypal" class="anchor"></a>
+            <article class="property">
+                <h3 class="private ">$paypal</h3>
+                <pre class="signature">$paypal : \App\Services\Payments\PayPal\PayPalCheckoutStarter</pre>
+                <p><em></em></p>
+                
+
+                                <h4>Type</h4>
+                <a href="classes/App-Services-Payments-PayPal-PayPalCheckoutStarter.html"><abbr title="\App\Services\Payments\PayPal\PayPalCheckoutStarter">PayPalCheckoutStarter</abbr></a>
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_completion" name="property_completion" class="anchor"></a>
+            <article class="property">
+                <h3 class="private ">$completion</h3>
+                <pre class="signature">$completion : \App\Services\Payments\PaymentCompletionService</pre>
+                <p><em></em></p>
+                
+
+                                <h4>Type</h4>
+                <a href="classes/App-Services-Payments-PaymentCompletionService.html"><abbr title="\App\Services\Payments\PaymentCompletionService">PaymentCompletionService</abbr></a>
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+												
+										<a id="methods" name="methods"></a>
+				<div class="row-fluid">
+					<div class="span8 content class">
+						<h2>Methods</h2>
+					</div>
+					<aside class="span4 detailsbar"></aside>
+				</div>
+
+															    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method___construct" name="method___construct" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">__construct()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">__construct(\App\Contracts\Payments\PaymentCheckoutStarter  <span class="argument">$stripe</span>, \App\Services\Payments\PayPal\PayPalCheckoutStarter  <span class="argument">$paypal</span>, \App\Services\Payments\PaymentCompletionService  <span class="argument">$completion</span>) : mixed</pre>
+                <p><em></em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>\App\Contracts\Payments\PaymentCheckoutStarter</td>
+                                <td>$stripe </td>
+                                <td></td>
+                            </tr>
+                                                    <tr>
+                                <td>\App\Services\Payments\PayPal\PayPalCheckoutStarter</td>
+                                <td>$paypal </td>
+                                <td></td>
+                            </tr>
+                                                    <tr>
+                                <td>\App\Services\Payments\PaymentCompletionService</td>
+                                <td>$completion </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    mixed
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_start" name="method_start" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">start()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">start(\App\Models\Payment  <span class="argument">$payment</span>) : array{type: string}&amp;array&lt;string,mixed&gt;</pre>
+                <p><em>Starts the remote checkout flow for the given payment and returns gateway-specific payload for the client.</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>\App\Models\Payment</td>
+                                <td>$payment </td>
+                                <td><p>Persisted payment row including payment_method (e.g. card, paypal).</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                                    <h4>Throws</h4>
+                    <dl>
+                                                    <dt>\InvalidArgumentException</dt>
+                            <dd><p>When payment_method is not supported by a registered starter.</p>
+</dd>
+                                                                    </dl>
+                
+                                    <h4>Returns</h4>
+                    array{type: string}&array<string,mixed>
+                                            &mdash; <p>Gateway type plus fields from the selected starter (e.g. client_secret, approval URL).</p>
+
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																													    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_allowSimulatedPayments" name="method_allowSimulatedPayments" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">allowSimulatedPayments()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">allowSimulatedPayments() : bool</pre>
+                <p><em>Used when STRIPE_* is missing in local dev: complete payment without PSP (never use in production).</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_checkoutMethodKeysFromConfig" name="method_checkoutMethodKeysFromConfig" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">checkoutMethodKeysFromConfig()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">checkoutMethodKeysFromConfig() : list&lt;string&gt;</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    list<string>
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_methodHasRealProviderCredentials" name="method_methodHasRealProviderCredentials" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">methodHasRealProviderCredentials()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">methodHasRealProviderCredentials(string  <span class="argument">$method</span>) : bool</pre>
+                <p><em>True when the PSP for this method has real credentials (ignores simulated blanket availability).</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$method </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_paypalMissingCredentialsForStorefront" name="method_paypalMissingCredentialsForStorefront" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">paypalMissingCredentialsForStorefront()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">paypalMissingCredentialsForStorefront() : bool</pre>
+                <p><em>PayPal is allowed by PAYMENTS_CHECKOUT_METHODS but .env has no client id/secret (so it is hidden from the select).</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_paypalModeLabelForStorefront" name="method_paypalModeLabelForStorefront" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">paypalModeLabelForStorefront()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">paypalModeLabelForStorefront() : &quot;live&quot;|&quot;sandbox&quot;</pre>
+                <p><em>Normalised PayPal REST environment for public config (`PAYPAL_MODE` / services.paypal.mode).</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    "live"|"sandbox"
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_stripeMissingCredentialsForStorefront" name="method_stripeMissingCredentialsForStorefront" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">stripeMissingCredentialsForStorefront()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">stripeMissingCredentialsForStorefront() : bool</pre>
+                <p><em>Card (Stripe) is whitelisted but STRIPE_KEY/STRIPE_SECRET are missing and simulated checkout is off.</em></p>
+                <p>When simulated checkout is on, missing Stripe keys still expose &quot;card&quot; as simulated — no hint needed.</p>
+
+
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_shouldSimulateCheckoutForPayment" name="method_shouldSimulateCheckoutForPayment" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">shouldSimulateCheckoutForPayment()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">shouldSimulateCheckoutForPayment(\App\Models\Payment  <span class="argument">$payment</span>) : bool</pre>
+                <p><em>When simulated mode is on, skip the PSP only if that method has no real credentials.</em></p>
+                <p>PayPal is never simulated: without credentials it stays unavailable; with credentials the SDK must run.</p>
+
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>\App\Models\Payment</td>
+                                <td>$payment </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																																						    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_paymentMethodsAvailability" name="method_paymentMethodsAvailability" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">paymentMethodsAvailability()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">paymentMethodsAvailability() : array{card: bool, paypal: bool, simulated: bool}</pre>
+                <p><em>Storefront + API: credential/simulated availability intersected with PAYMENTS_CHECKOUT_METHODS.</em></p>
+                
+
+                
+                
+                
+Warning: Array to string conversion in /home/luipy/Repos/Luipy56/laravel-ecommerce/tools/phpdocumentor/vendor/twig/twig/src/Extension/CoreExtension.php on line 847
+                    <h4>Returns</h4>
+                    array{card: bool, paypal: bool, simulated: bool}
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_isPaymentMethodAvailable" name="method_isPaymentMethodAvailable" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">isPaymentMethodAvailable()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">isPaymentMethodAvailable(string  <span class="argument">$method</span>) : bool</pre>
+                <p><em></em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$method </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_simulateSuccess" name="method_simulateSuccess" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">simulateSuccess()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">simulateSuccess(\App\Models\Payment  <span class="argument">$payment</span>) : void</pre>
+                <p><em>Marks a payment as succeeded without calling an external PSP (local/debug only).</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>\App\Models\Payment</td>
+                                <td>$payment </td>
+                                <td><p>Payment to complete in simulated mode.</p>
+</td>
+                            </tr>
+                                            </table>
+                
+                                    <h4>Throws</h4>
+                    <dl>
+                                                    <dt>\RuntimeException</dt>
+                            <dd><p>When simulated payments are not allowed by configuration.</p>
+</dd>
+                                                                    </dl>
+                
+                                    <h4>Returns</h4>
+                    void
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																																																																																																																																																																																					    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_starterForPaymentMethod" name="method_starterForPaymentMethod" class="anchor"></a>
+            <article class="method">
+                <h3 class="private ">starterForPaymentMethod()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">starterForPaymentMethod(string  <span class="argument">$method</span>) : \App\Contracts\Payments\PaymentCheckoutStarter</pre>
+                <p><em></em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$method </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    \App\Contracts\Payments\PaymentCheckoutStarter
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																																																																																			    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_paymentMethodsBaseAvailability" name="method_paymentMethodsBaseAvailability" class="anchor"></a>
+            <article class="method">
+                <h3 class="private ">paymentMethodsBaseAvailability()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">paymentMethodsBaseAvailability() : array{card: bool, paypal: bool, simulated: bool}</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                
+Warning: Array to string conversion in /home/luipy/Repos/Luipy56/laravel-ecommerce/tools/phpdocumentor/vendor/twig/twig/src/Extension/CoreExtension.php on line 847
+                    <h4>Returns</h4>
+                    array{card: bool, paypal: bool, simulated: bool}
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_applyCheckoutMethodWhitelist" name="method_applyCheckoutMethodWhitelist" class="anchor"></a>
+            <article class="method">
+                <h3 class="private ">applyCheckoutMethodWhitelist()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">applyCheckoutMethodWhitelist(array{card: bool, paypal: bool, simulated: bool}  <span class="argument">$base</span>) : array{card: bool, paypal: bool, simulated: bool}</pre>
+                <p><em></em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>array{card: bool, paypal: bool, simulated: bool}</td>
+                                <td>$base </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                
+Warning: Array to string conversion in /home/luipy/Repos/Luipy56/laravel-ecommerce/tools/phpdocumentor/vendor/twig/twig/src/Extension/CoreExtension.php on line 847
+                    <h4>Returns</h4>
+                    array{card: bool, paypal: bool, simulated: bool}
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><div class="path-wrapper">\App\Services\Payments\PaymentCheckoutService</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																																									</div>
+	</section>
+
+	<div id="source-view" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="source-view-label" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 id="source-view-label">PaymentCheckoutService.php</h3>
+		</div>
+		<div class="modal-body">
+			<pre data-src="files/app/Services/Payments/PaymentCheckoutService.php.txt" class="language-php line-numbers"></pre>
+		</div>
+	</div>
+
+			<footer class="row-fluid">
+				<section class="span10 offset2">
+					<section class="row-fluid">
+						<section class="span10 offset1">
+							<section class="row-fluid footer-sections">
+								<section
+									class="span4">
+																		<h1>
+										<i class="fa-solid fa-code"></i>
+									</h1>
+									<div>
+										<ul>
+																							<li><a href="namespaces/app.html"><abbr title="\App">App</abbr></a></li>
+																					</ul>
+									</div>
+								</section>
+								<section
+									class="span4">
+																		<h1>
+										<i class="fa-solid fa-project-diagram"></i>
+									</h1>
+									<div>
+										<ul>
+											<li><a href="graphs/class.html">Class Hierarchy Diagram</a></li>
+										</ul>
+									</div>
+								</section>
+								<section
+									class="span4">
+																		<h1>
+										<i class="fa-solid fa-thumbtack"></i>
+									</h1>
+									<div>
+										<ul>
+											<li><a href="reports/errors.html">Errors</a></li>
+											<li><a href="reports/markers.html">Markers</a></li>
+										</ul>
+									</div>
+								</section>
+							</section>
+						</section>
+					</section>
+					<section class="row-fluid">
+						<section class="span10 offset1">
+							<hr/>
+							Documentation is powered by
+							<a href="https://www.phpdoc.org/">phpDocumentor
+							</a>
+							and authored
+							                    on
+							April 27th, 2026 at 14:52.
+						</section>
+					</section>
+				</section>
+			</footer>
+		</div>
+		<script src="resources/js/jquery-1.11.0.min.js"></script>
+		<script src="resources/js/ui/1.10.4/jquery-ui.min.js"></script>
+		<script src="resources/js/jquery.smooth-scroll.js"></script>
+		<script src="resources/js/prism.min.js"></script>
+		<script src="resources/js/bootstrap.js"></script>
+		<script src="resources/js/custom.js"></script>
+			</body>
+</html>

@@ -12,8 +12,20 @@ use App\Services\Search\CatalogProductSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * REST API for storefront product discovery: listing, search, featured items, and product detail.
+ *
+ * Supports optional inclusion of packs in the catalog index and applies category and feature filters
+ * consistently across products and packs.
+ */
 class ProductController extends Controller
 {
+    /**
+     * Paginated product catalog (optionally merged with packs when include_packs=1).
+     *
+     * @param  Request  $request  Query string: per_page (1–50), page, category_id, feature_ids, search, include_packs.
+     * @return JsonResponse JSON envelope with success, data (ProductResource collection or mixed catalog rows), and meta pagination.
+     */
     public function index(Request $request): JsonResponse
     {
         $perPage = max(1, min(50, (int) $request->get('per_page', 15)));
@@ -239,6 +251,11 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Active products marked as featured or trending for home or promotional sections.
+     *
+     * @return JsonResponse JSON envelope with success and data as a ProductResource collection.
+     */
     public function featured(): JsonResponse
     {
         $products = Product::query()->active()
@@ -296,6 +313,14 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * Single active product with category, features, images, and sibling variants in the same group.
+     *
+     * @param  Product  $product  Route-model-bound product; inactive products yield 404.
+     * @return JsonResponse JSON envelope with success and data as ProductResource.
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the product is not active (404).
+     */
     public function show(Product $product): JsonResponse
     {
         if (! $product->is_active) {

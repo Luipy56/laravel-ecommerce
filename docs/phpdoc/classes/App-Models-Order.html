@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en" id="top-of-site">
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<meta charset="utf-8"/>
+		<title>
+							Laravel E-commerce — Application code
+					</title>
+		<meta name="author" content=""/>
+		<meta name="description" content=""/>
+		<base href="../">
+
+		<link href="resources/css/bootstrap.min.css" rel="stylesheet" media="all"/>
+		<link href="resources/css/bootstrap-responsive.min.css" rel="stylesheet" media="all"/>
+		<link href="resources/css/style.css" rel="stylesheet" media="all"/>
+		<link href="resources/css/prism.min.css" rel="stylesheet" media="all"/>
+		<link href="resources/font/css/all.min.css" rel="stylesheet" media="all"/>
+		
+		<link rel="shortcut icon" href="resources/images/favicon.ico"/>
+		<link rel="apple-touch-icon" href="resources/images/apple-touch-icon.png"/>
+		<link rel="apple-touch-icon" sizes="72x72" href="resources/images/apple-touch-icon-72x72.png"/>
+		<link rel="apple-touch-icon" sizes="114x114" href="resources/images/apple-touch-icon-114x114.png"/>
+	</head>
+	<body>
+
+		<nav class="navbar navbar-fixed-top navbar-inverse">
+			<div class="navbar-inner">
+				<div class="container">
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<i class="fa-solid fa-bars"></i>
+					</a>
+					<a class="brand" href="index.html">Laravel E-commerce — Application code</a>
+
+					<div class="nav-collapse navbar-responsive-collapse collapse">
+						<ul class="nav pull-right">
+															<li class="dropdown" id="api-menu">
+									<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-labelledby="api-menu">
+										API Documentation
+										<b class="caret"></b>
+									</a>
+									<ul class="dropdown-menu" role="menu" aria-labelledby="api-menu">
+																					<li><a href="namespaces/app.html"><abbr title="\App">App</abbr></a></li>
+																			</ul>
+								</li>
+																					<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+									Reports
+									<b class="caret"></b>
+								</a>
+								<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+									<li>
+										<a href="reports/errors.html">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															<i class="fa-solid fa-bug"></i>&#160;Errors
+											<span class="label label-important pull-right">0</span>
+										</a>
+									</li>
+									<li>
+										<a href="reports/markers.html">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															<i class="fa-solid fa-location-dot"></i>&#160;&#160;Markers
+											<span class="label label-warning pull-right">0</span>
+										</a>
+									</li>
+									<li>
+										<a href="reports/deprecated.html">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													<i class="fa-solid fa-file-circle-xmark"></i>&#160;Deprecated
+											<span class="label label-info pull-right">0</span>
+										</a>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="go_to_top">
+				<a href="#top-of-site" style="color: inherit">Back To Top&#160;&#160;<i class="fa-solid fa-chevron-up"></i></a>
+			</div>
+		</nav>
+
+		<div id="___" class="container-fluid"> 	<section class="row-fluid">
+		<div class="span2 sidebar">
+								<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-1231887892"></a>
+								<a href="namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
+			</div>
+			<div id="namespace-1231887892" class="accordion-body collapse in">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-740175066"></a>
+								<a href="namespaces/app.html" style="margin-left: 30px; padding-left: 0">App</a>
+			</div>
+			<div id="namespace-740175066" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-784012307"></a>
+								<a href="namespaces/app-console.html" style="margin-left: 30px; padding-left: 0">Console</a>
+			</div>
+			<div id="namespace-784012307" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-23126465"></a>
+								<a href="namespaces/app-console-commands.html" style="margin-left: 30px; padding-left: 0">Commands</a>
+			</div>
+			<div id="namespace-23126465" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Console-Commands-PayPalTestCredentialsCommand.html"><abbr title="\App\Console\Commands\PayPalTestCredentialsCommand">PayPalTestCredentialsCommand</abbr></a></li>
+													<li class="class"><a href="classes/App-Console-Commands-RebuildProductSearchTextCommand.html"><abbr title="\App\Console\Commands\RebuildProductSearchTextCommand">RebuildProductSearchTextCommand</abbr></a></li>
+													<li class="class"><a href="classes/App-Console-Commands-ReindexElasticsearchProductsCommand.html"><abbr title="\App\Console\Commands\ReindexElasticsearchProductsCommand">ReindexElasticsearchProductsCommand</abbr></a></li>
+													<li class="class"><a href="classes/App-Console-Commands-RouteSmokeCommand.html"><abbr title="\App\Console\Commands\RouteSmokeCommand">RouteSmokeCommand</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1533632162"></a>
+								<a href="namespaces/app-contracts.html" style="margin-left: 30px; padding-left: 0">Contracts</a>
+			</div>
+			<div id="namespace-1533632162" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1601258660"></a>
+								<a href="namespaces/app-contracts-payments.html" style="margin-left: 30px; padding-left: 0">Payments</a>
+			</div>
+			<div id="namespace-1601258660" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+													<li class="interface"><a href="classes/App-Contracts-Payments-PaymentCheckoutStarter.html"><abbr title="\App\Contracts\Payments\PaymentCheckoutStarter">PaymentCheckoutStarter</abbr></a></li>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1114050910"></a>
+								<a href="namespaces/app-contracts-search.html" style="margin-left: 30px; padding-left: 0">Search</a>
+			</div>
+			<div id="namespace-1114050910" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+													<li class="interface"><a href="classes/App-Contracts-Search-ElasticsearchProductCatalogSearch.html"><abbr title="\App\Contracts\Search\ElasticsearchProductCatalogSearch">ElasticsearchProductCatalogSearch</abbr></a></li>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+													<li class="interface"><a href="classes/App-Contracts-RebuildsProductSearchText.html"><abbr title="\App\Contracts\RebuildsProductSearchText">RebuildsProductSearchText</abbr></a></li>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-979169694"></a>
+								<a href="namespaces/app-events.html" style="margin-left: 30px; padding-left: 0">Events</a>
+			</div>
+			<div id="namespace-979169694" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Events-InstallationPriceWasAssigned.html"><abbr title="\App\Events\InstallationPriceWasAssigned">InstallationPriceWasAssigned</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-OrderInstallationQuoteRequested.html"><abbr title="\App\Events\OrderInstallationQuoteRequested">OrderInstallationQuoteRequested</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-OrderPaymentSucceeded.html"><abbr title="\App\Events\OrderPaymentSucceeded">OrderPaymentSucceeded</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-OrderPlacedPaymentPending.html"><abbr title="\App\Events\OrderPlacedPaymentPending">OrderPlacedPaymentPending</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-OrderShipped.html"><abbr title="\App\Events\OrderShipped">OrderShipped</abbr></a></li>
+													<li class="class"><a href="classes/App-Events-PersonalizedSolutionSubmitted.html"><abbr title="\App\Events\PersonalizedSolutionSubmitted">PersonalizedSolutionSubmitted</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-2014147139"></a>
+								<a href="namespaces/app-exceptions.html" style="margin-left: 30px; padding-left: 0">Exceptions</a>
+			</div>
+			<div id="namespace-2014147139" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Exceptions-PaymentProviderNotConfiguredException.html"><abbr title="\App\Exceptions\PaymentProviderNotConfiguredException">PaymentProviderNotConfiguredException</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-562468838"></a>
+								<a href="namespaces/app-http.html" style="margin-left: 30px; padding-left: 0">Http</a>
+			</div>
+			<div id="namespace-562468838" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1205923906"></a>
+								<a href="namespaces/app-http-controllers.html" style="margin-left: 30px; padding-left: 0">Controllers</a>
+			</div>
+			<div id="namespace-1205923906" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1457887250"></a>
+								<a href="namespaces/app-http-controllers-api.html" style="margin-left: 30px; padding-left: 0">Api</a>
+			</div>
+			<div id="namespace-1457887250" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Http-Controllers-Api-AdminAdminController.html"><abbr title="\App\Http\Controllers\Api\AdminAdminController">AdminAdminController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminAuthController.html"><abbr title="\App\Http\Controllers\Api\AdminAuthController">AdminAuthController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminCategoryController.html"><abbr title="\App\Http\Controllers\Api\AdminCategoryController">AdminCategoryController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminClientController.html"><abbr title="\App\Http\Controllers\Api\AdminClientController">AdminClientController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminDashboardController.html"><abbr title="\App\Http\Controllers\Api\AdminDashboardController">AdminDashboardController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminDataExplorerController.html"><abbr title="\App\Http\Controllers\Api\AdminDataExplorerController">AdminDataExplorerController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminFeatureController.html"><abbr title="\App\Http\Controllers\Api\AdminFeatureController">AdminFeatureController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminFeatureNameController.html"><abbr title="\App\Http\Controllers\Api\AdminFeatureNameController">AdminFeatureNameController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminOrderController.html"><abbr title="\App\Http\Controllers\Api\AdminOrderController">AdminOrderController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminPackController.html"><abbr title="\App\Http\Controllers\Api\AdminPackController">AdminPackController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminPersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\AdminPersonalizedSolutionController">AdminPersonalizedSolutionController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminProductController.html"><abbr title="\App\Http\Controllers\Api\AdminProductController">AdminProductController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminShopSettingsController.html"><abbr title="\App\Http\Controllers\Api\AdminShopSettingsController">AdminShopSettingsController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminVariantGroupController.html"><abbr title="\App\Http\Controllers\Api\AdminVariantGroupController">AdminVariantGroupController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-AuthController.html"><abbr title="\App\Http\Controllers\Api\AuthController">AuthController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-CartController.html"><abbr title="\App\Http\Controllers\Api\CartController">CartController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-CategoryController.html"><abbr title="\App\Http\Controllers\Api\CategoryController">CategoryController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-FeatureController.html"><abbr title="\App\Http\Controllers\Api\FeatureController">FeatureController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-OrderController.html"><abbr title="\App\Http\Controllers\Api\OrderController">OrderController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PackController.html"><abbr title="\App\Http\Controllers\Api\PackController">PackController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PaymentConfigController.html"><abbr title="\App\Http\Controllers\Api\PaymentConfigController">PaymentConfigController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PaymentWebhookController.html"><abbr title="\App\Http\Controllers\Api\PaymentWebhookController">PaymentWebhookController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PayPalPaymentController.html"><abbr title="\App\Http\Controllers\Api\PayPalPaymentController">PayPalPaymentController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\PersonalizedSolutionController">PersonalizedSolutionController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-ProductController.html"><abbr title="\App\Http\Controllers\Api\ProductController">ProductController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PublicPersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\PublicPersonalizedSolutionController">PublicPersonalizedSolutionController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-PurchasedProductsController.html"><abbr title="\App\Http\Controllers\Api\PurchasedProductsController">PurchasedProductsController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-ShopPublicSettingsController.html"><abbr title="\App\Http\Controllers\Api\ShopPublicSettingsController">ShopPublicSettingsController</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Controllers-Api-UserController.html"><abbr title="\App\Http\Controllers\Api\UserController">UserController</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Http-Controllers-Controller.html"><abbr title="\App\Http\Controllers\Controller">Controller</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1732562585"></a>
+								<a href="namespaces/app-http-middleware.html" style="margin-left: 30px; padding-left: 0">Middleware</a>
+			</div>
+			<div id="namespace-1732562585" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Http-Middleware-EnsureAdmin.html"><abbr title="\App\Http\Middleware\EnsureAdmin">EnsureAdmin</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1722246364"></a>
+								<a href="namespaces/app-http-resources.html" style="margin-left: 30px; padding-left: 0">Resources</a>
+			</div>
+			<div id="namespace-1722246364" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Http-Resources-AdminPackResource.html"><abbr title="\App\Http\Resources\AdminPackResource">AdminPackResource</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Resources-AdminProductResource.html"><abbr title="\App\Http\Resources\AdminProductResource">AdminProductResource</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Resources-CategoryResource.html"><abbr title="\App\Http\Resources\CategoryResource">CategoryResource</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Resources-PackResource.html"><abbr title="\App\Http\Resources\PackResource">PackResource</abbr></a></li>
+													<li class="class"><a href="classes/App-Http-Resources-ProductResource.html"><abbr title="\App\Http\Resources\ProductResource">ProductResource</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-812697456"></a>
+								<a href="namespaces/app-listeners.html" style="margin-left: 30px; padding-left: 0">Listeners</a>
+			</div>
+			<div id="namespace-812697456" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Listeners-SendInstallationPriceAssignedEmail.html"><abbr title="\App\Listeners\SendInstallationPriceAssignedEmail">SendInstallationPriceAssignedEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderInstallationQuoteRequestAdminEmail.html"><abbr title="\App\Listeners\SendOrderInstallationQuoteRequestAdminEmail">SendOrderInstallationQuoteRequestAdminEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderInstallationQuoteRequestEmail.html"><abbr title="\App\Listeners\SendOrderInstallationQuoteRequestEmail">SendOrderInstallationQuoteRequestEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentConfirmationEmail.html"><abbr title="\App\Listeners\SendOrderPaymentConfirmationEmail">SendOrderPaymentConfirmationEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentPendingAdminEmail.html"><abbr title="\App\Listeners\SendOrderPaymentPendingAdminEmail">SendOrderPaymentPendingAdminEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentPendingEmail.html"><abbr title="\App\Listeners\SendOrderPaymentPendingEmail">SendOrderPaymentPendingEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendOrderShippedEmail.html"><abbr title="\App\Listeners\SendOrderShippedEmail">SendOrderShippedEmail</abbr></a></li>
+													<li class="class"><a href="classes/App-Listeners-SendPersonalizedSolutionAcknowledgementEmail.html"><abbr title="\App\Listeners\SendPersonalizedSolutionAcknowledgementEmail">SendPersonalizedSolutionAcknowledgementEmail</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1608242317"></a>
+								<a href="namespaces/app-mail.html" style="margin-left: 30px; padding-left: 0">Mail</a>
+			</div>
+			<div id="namespace-1608242317" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Mail-InstallationPriceAssignedMail.html"><abbr title="\App\Mail\InstallationPriceAssignedMail">InstallationPriceAssignedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderInstallationQuoteRequestedAdminMail.html"><abbr title="\App\Mail\OrderInstallationQuoteRequestedAdminMail">OrderInstallationQuoteRequestedAdminMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderInstallationQuoteRequestedMail.html"><abbr title="\App\Mail\OrderInstallationQuoteRequestedMail">OrderInstallationQuoteRequestedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderPaymentConfirmedMail.html"><abbr title="\App\Mail\OrderPaymentConfirmedMail">OrderPaymentConfirmedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderPaymentPendingAdminMail.html"><abbr title="\App\Mail\OrderPaymentPendingAdminMail">OrderPaymentPendingAdminMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderPaymentPendingMail.html"><abbr title="\App\Mail\OrderPaymentPendingMail">OrderPaymentPendingMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-OrderShippedMail.html"><abbr title="\App\Mail\OrderShippedMail">OrderShippedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionImprovementRequestedAdminMail.html"><abbr title="\App\Mail\PersonalizedSolutionImprovementRequestedAdminMail">PersonalizedSolutionImprovementRequestedAdminMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionReceivedMail.html"><abbr title="\App\Mail\PersonalizedSolutionReceivedMail">PersonalizedSolutionReceivedMail</abbr></a></li>
+													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionResolvedMail.html"><abbr title="\App\Mail\PersonalizedSolutionResolvedMail">PersonalizedSolutionResolvedMail</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-165672252"></a>
+								<a href="namespaces/app-models.html" style="margin-left: 30px; padding-left: 0">Models</a>
+			</div>
+			<div id="namespace-165672252" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Models-Admin.html"><abbr title="\App\Models\Admin">Admin</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Client.html"><abbr title="\App\Models\Client">Client</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ClientAddress.html"><abbr title="\App\Models\ClientAddress">ClientAddress</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ClientContact.html"><abbr title="\App\Models\ClientContact">ClientContact</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Feature.html"><abbr title="\App\Models\Feature">Feature</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-FeatureName.html"><abbr title="\App\Models\FeatureName">FeatureName</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Order.html"><abbr title="\App\Models\Order">Order</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-OrderAddress.html"><abbr title="\App\Models\OrderAddress">OrderAddress</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-OrderLine.html"><abbr title="\App\Models\OrderLine">OrderLine</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Pack.html"><abbr title="\App\Models\Pack">Pack</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-PackImage.html"><abbr title="\App\Models\PackImage">PackImage</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-PackItem.html"><abbr title="\App\Models\PackItem">PackItem</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Payment.html"><abbr title="\App\Models\Payment">Payment</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-PersonalizedSolution.html"><abbr title="\App\Models\PersonalizedSolution">PersonalizedSolution</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-PersonalizedSolutionAttachment.html"><abbr title="\App\Models\PersonalizedSolutionAttachment">PersonalizedSolutionAttachment</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-Product.html"><abbr title="\App\Models\Product">Product</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ProductCategory.html"><abbr title="\App\Models\ProductCategory">ProductCategory</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ProductImage.html"><abbr title="\App\Models\ProductImage">ProductImage</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ProductVariantGroup.html"><abbr title="\App\Models\ProductVariantGroup">ProductVariantGroup</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-ShopSetting.html"><abbr title="\App\Models\ShopSetting">ShopSetting</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-StripeWebhookEvent.html"><abbr title="\App\Models\StripeWebhookEvent">StripeWebhookEvent</abbr></a></li>
+													<li class="class"><a href="classes/App-Models-User.html"><abbr title="\App\Models\User">User</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-600518581"></a>
+								<a href="namespaces/app-providers.html" style="margin-left: 30px; padding-left: 0">Providers</a>
+			</div>
+			<div id="namespace-600518581" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Providers-AppServiceProvider.html"><abbr title="\App\Providers\AppServiceProvider">AppServiceProvider</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1255966011"></a>
+								<a href="namespaces/app-scout.html" style="margin-left: 30px; padding-left: 0">Scout</a>
+			</div>
+			<div id="namespace-1255966011" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Scout-ElasticsearchClientFactory.html"><abbr title="\App\Scout\ElasticsearchClientFactory">ElasticsearchClientFactory</abbr></a></li>
+													<li class="class"><a href="classes/App-Scout-ElasticsearchEngine.html"><abbr title="\App\Scout\ElasticsearchEngine">ElasticsearchEngine</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1805609789"></a>
+								<a href="namespaces/app-services.html" style="margin-left: 30px; padding-left: 0">Services</a>
+			</div>
+			<div id="namespace-1805609789" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1609535617"></a>
+								<a href="namespaces/app-services-payments.html" style="margin-left: 30px; padding-left: 0">Payments</a>
+			</div>
+			<div id="namespace-1609535617" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-165799662"></a>
+								<a href="namespaces/app-services-payments-paypal.html" style="margin-left: 30px; padding-left: 0">PayPal</a>
+			</div>
+			<div id="namespace-165799662" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-PayPal-PayPalCheckoutStarter.html"><abbr title="\App\Services\Payments\PayPal\PayPalCheckoutStarter">PayPalCheckoutStarter</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Payments-PayPal-PayPalClient.html"><abbr title="\App\Services\Payments\PayPal\PayPalClient">PayPalClient</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1426358131"></a>
+								<a href="namespaces/app-services-payments-redsys.html" style="margin-left: 30px; padding-left: 0">Redsys</a>
+			</div>
+			<div id="namespace-1426358131" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-Redsys-RedsysCheckoutStarter.html"><abbr title="\App\Services\Payments\Redsys\RedsysCheckoutStarter">RedsysCheckoutStarter</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Payments-Redsys-RedsysSignature.html"><abbr title="\App\Services\Payments\Redsys\RedsysSignature">RedsysSignature</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1554038921"></a>
+								<a href="namespaces/app-services-payments-revolut.html" style="margin-left: 30px; padding-left: 0">Revolut</a>
+			</div>
+			<div id="namespace-1554038921" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-Revolut-RevolutCheckoutStarter.html"><abbr title="\App\Services\Payments\Revolut\RevolutCheckoutStarter">RevolutCheckoutStarter</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-76571647"></a>
+								<a href="namespaces/app-services-payments-stripe.html" style="margin-left: 30px; padding-left: 0">Stripe</a>
+			</div>
+			<div id="namespace-76571647" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-Stripe-StripeCheckoutStarter.html"><abbr title="\App\Services\Payments\Stripe\StripeCheckoutStarter">StripeCheckoutStarter</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Payments-Stripe-StripeCredentials.html"><abbr title="\App\Services\Payments\Stripe\StripeCredentials">StripeCredentials</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><abbr title="\App\Services\Payments\PaymentCheckoutService">PaymentCheckoutService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Payments-PaymentCompletionService.html"><abbr title="\App\Services\Payments\PaymentCompletionService">PaymentCompletionService</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-603222308"></a>
+								<a href="namespaces/app-services-search.html" style="margin-left: 30px; padding-left: 0">Search</a>
+			</div>
+			<div id="namespace-603222308" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-Search-CatalogProductSearchService.html"><abbr title="\App\Services\Search\CatalogProductSearchService">CatalogProductSearchService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Search-ProductSearchService.html"><abbr title="\App\Services\Search\ProductSearchService">ProductSearchService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Search-ScoutElasticsearchProductCatalogSearch.html"><abbr title="\App\Services\Search\ScoutElasticsearchProductCatalogSearch">ScoutElasticsearchProductCatalogSearch</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-Search-SearchSynonymDictionary.html"><abbr title="\App\Services\Search\SearchSynonymDictionary">SearchSynonymDictionary</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Services-AdminDataExplorerService.html"><abbr title="\App\Services\AdminDataExplorerService">AdminDataExplorerService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-ProductSearchTextRebuildService.html"><abbr title="\App\Services\ProductSearchTextRebuildService">ProductSearchTextRebuildService</abbr></a></li>
+													<li class="class"><a href="classes/App-Services-RecalculateTrendingProducts.html"><abbr title="\App\Services\RecalculateTrendingProducts">RecalculateTrendingProducts</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+													<div class="accordion" style="margin-bottom: 0">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-192484931"></a>
+								<a href="namespaces/app-support.html" style="margin-left: 30px; padding-left: 0">Support</a>
+			</div>
+			<div id="namespace-192484931" class="accordion-body collapse ">
+				<div class="accordion-inner">
+
+					
+					<ul>
+																									<li class="class"><a href="classes/App-Support-MailLocale.html"><abbr title="\App\Support\MailLocale">MailLocale</abbr></a></li>
+													<li class="class"><a href="classes/App-Support-SqliteDatabaseBootstrap.html"><abbr title="\App\Support\SqliteDatabaseBootstrap">SqliteDatabaseBootstrap</abbr></a></li>
+											</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+					
+					<ul>
+																							</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		</div>
+	</section>
+	<section class="row-fluid">
+		<div class="span10 offset2">
+			<div class="row-fluid">
+				<div class="span8 content class">
+					<nav>
+												<a href="namespaces/app-models.html"><abbr title="\App\Models">Models</abbr></a>
+						<i class="fa-solid fa-turn-up"></i>
+											</nav>
+					
+					<h1>
+						<small>\App\Models</small>
+						Order</h1>
+					<p>
+						<em></em>
+					</p>
+					
+																																<section id="summary">
+						<h2>Summary</h2>
+						<section class="row-fluid heading">
+							<section class="span4">
+								<a href="#methods">Methods</a>
+							</section>
+							<section class="span4">
+								<a href="#properties">Properties</a>
+							</section>
+							<section class="span4">
+								<a href="#constants">Constants</a>
+							</section>
+						</section>
+						<section class="row-fluid public">
+							<section class="span4">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													
+																											<a href="classes/App-Models-Order.html#method_automaticInstallationFeeFromMerchandiseSubtotal" class="">automaticInstallationFeeFromMerchandiseSubtotal</a><br/>
+																			<a href="classes/App-Models-Order.html#method_client" class="">client</a><br/>
+																			<a href="classes/App-Models-Order.html#method_lines" class="">lines</a><br/>
+																			<a href="classes/App-Models-Order.html#method_addresses" class="">addresses</a><br/>
+																			<a href="classes/App-Models-Order.html#method_payments" class="">payments</a><br/>
+																			<a href="classes/App-Models-Order.html#method_getReferenceAttribute" class="">getReferenceAttribute</a><br/>
+																			<a href="classes/App-Models-Order.html#method_isCart" class="">isCart</a><br/>
+																			<a href="classes/App-Models-Order.html#method_getLinesSubtotalAttribute" class="">getLinesSubtotalAttribute</a><br/>
+																			<a href="classes/App-Models-Order.html#method_getGrandTotalAttribute" class="">getGrandTotalAttribute</a><br/>
+																			<a href="classes/App-Models-Order.html#method_hasSuccessfulPayment" class="">hasSuccessfulPayment</a><br/>
+																			<a href="classes/App-Models-Order.html#method_clientMayPay" class="">clientMayPay</a><br/>
+																			<a href="classes/App-Models-Order.html#method_scopeCarts" class="">scopeCarts</a><br/>
+																			<a href="classes/App-Models-Order.html#method_scopeOrders" class="">scopeOrders</a><br/>
+																			<a href="classes/App-Models-Order.html#method_scopeLikes" class="">scopeLikes</a><br/>
+																			<a href="classes/App-Models-Order.html#method_buildClientStatusTimeline" class="">buildClientStatusTimeline</a><br/>
+																								</section>
+							<section class="span4">
+																																																		
+																	<em>No public properties found</em>
+															</section>
+							<section class="span4">
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																												
+																											<a href="classes/App-Models-Order.html#constant_KIND_CART" class="">KIND_CART</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_KIND_ORDER" class="">KIND_ORDER</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_KIND_LIKE" class="">KIND_LIKE</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_STATUS_PENDING" class="">STATUS_PENDING</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_STATUS_AWAITING_PAYMENT" class="">STATUS_AWAITING_PAYMENT</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_STATUS_AWAITING_INSTALLATION_PRICE" class="">STATUS_AWAITING_INSTALLATION_PRICE</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_STATUS_IN_TRANSIT" class="">STATUS_IN_TRANSIT</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_STATUS_SENT" class="">STATUS_SENT</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_STATUS_INSTALLATION_PENDING" class="">STATUS_INSTALLATION_PENDING</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_STATUS_INSTALLATION_CONFIRMED" class="">STATUS_INSTALLATION_CONFIRMED</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_INSTALLATION_PENDING" class="">INSTALLATION_PENDING</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_INSTALLATION_PRICED" class="">INSTALLATION_PRICED</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_INSTALLATION_REJECTED" class="">INSTALLATION_REJECTED</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_SHIPPING_FLAT_EUR" class="">SHIPPING_FLAT_EUR</a><br/>
+																			<a href="classes/App-Models-Order.html#constant_INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR" class="">INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR</a><br/>
+																								</section>
+						</section>
+						<section class="row-fluid protected">
+							<section class="span4">
+																																																																																																																																																																																																																																																																																																																			
+																											<a href="classes/App-Models-Order.html#method_casts" class="">casts</a><br/>
+																								</section>
+							<section class="span4">
+																																																																																								
+																											<a href="classes/App-Models-Order.html#property_table" class="">table</a><br/>
+																			<a href="classes/App-Models-Order.html#property_fillable" class="">fillable</a><br/>
+																								</section>
+							<section class="span4">
+																																																																																																																																																																																																																																																																															
+																	<em>No protected constants found</em>
+															</section>
+						</section>
+						<section class="row-fluid private">
+							<section class="span4">
+																																																																																																																																																																																																																																																																																																
+																	<em>No private methods found</em>
+															</section>
+							<section class="span4">
+																																																		
+																	<em>No private properties found</em>
+															</section>
+							<section class="span4">
+																																																																																																																																																																																																																																																																															
+																	<em>No private constants found</em>
+															</section>
+						</section>
+					</section>
+				</div>
+				<aside class="span4 detailsbar">
+										
+					
+					<dl>
+						<dt>File</dt>
+						<dd>
+							<a href="files/app-models-order.html">
+								<div class="path-wrapper">app/Models/Order.php</div>
+							</a>
+						</dd>
+													<dt>Package</dt>
+							<dd>
+								<div class="namespace-wrapper">App</div>
+							</dd>
+												<dt>Class hierarchy</dt>
+						<dd class="hierarchy">
+																																																																
+									<div class="namespace-wrapper"><abbr title="\Illuminate\Database\Eloquent\Model">Model</abbr></div>
+																						<div class="namespace-wrapper">\App\Models\Order</div>
+						</dd>
+
+						
+						
+												
+																																																																																																																																																																																															
+																	</dl>
+					<h2>Tags</h2>
+					<table class="table table-condensed">
+																											<tr>
+									<th>
+										package
+									</th>
+									<td>
+																																<p>App</p>
+
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										uses
+									</th>
+									<td>
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										method
+									</th>
+									<td>
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										property
+									</th>
+									<td>
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										property-read
+									</th>
+									<td>
+																			</td>
+								</tr>
+															<tr>
+									<th>
+										property-write
+									</th>
+									<td>
+																			</td>
+								</tr>
+																		</table>
+				</aside>
+			</div>
+
+										<a id="constants" name="constants"></a>
+				<div class="row-fluid">
+					<div class="span8 content class">
+						<h2>Constant</h2>
+					</div>
+					<aside class="span4 detailsbar"></aside>
+				</div>
+
+															    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_KIND_CART" name="constant_KIND_CART" class="anchor"></a>
+            <article id="constant_KIND_CART" class="constant">
+                <h3 class="public ">KIND_CART</h3>
+                <pre class="signature">KIND_CART = &#039;cart&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_KIND_ORDER" name="constant_KIND_ORDER" class="anchor"></a>
+            <article id="constant_KIND_ORDER" class="constant">
+                <h3 class="public ">KIND_ORDER</h3>
+                <pre class="signature">KIND_ORDER = &#039;order&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_KIND_LIKE" name="constant_KIND_LIKE" class="anchor"></a>
+            <article id="constant_KIND_LIKE" class="constant">
+                <h3 class="public ">KIND_LIKE</h3>
+                <pre class="signature">KIND_LIKE = &#039;like&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_STATUS_PENDING" name="constant_STATUS_PENDING" class="anchor"></a>
+            <article id="constant_STATUS_PENDING" class="constant">
+                <h3 class="public ">STATUS_PENDING</h3>
+                <pre class="signature">STATUS_PENDING = &#039;pending&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_STATUS_AWAITING_PAYMENT" name="constant_STATUS_AWAITING_PAYMENT" class="anchor"></a>
+            <article id="constant_STATUS_AWAITING_PAYMENT" class="constant">
+                <h3 class="public ">STATUS_AWAITING_PAYMENT</h3>
+                <pre class="signature">STATUS_AWAITING_PAYMENT = &#039;awaiting_payment&#039;</pre>
+                <p><em>Order placed; PayPal (or external) payment not captured yet — do not treat as paid/fulfilment queue.</em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_STATUS_AWAITING_INSTALLATION_PRICE" name="constant_STATUS_AWAITING_INSTALLATION_PRICE" class="anchor"></a>
+            <article id="constant_STATUS_AWAITING_INSTALLATION_PRICE" class="constant">
+                <h3 class="public ">STATUS_AWAITING_INSTALLATION_PRICE</h3>
+                <pre class="signature">STATUS_AWAITING_INSTALLATION_PRICE = &#039;awaiting_installation_price&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_STATUS_IN_TRANSIT" name="constant_STATUS_IN_TRANSIT" class="anchor"></a>
+            <article id="constant_STATUS_IN_TRANSIT" class="constant">
+                <h3 class="public ">STATUS_IN_TRANSIT</h3>
+                <pre class="signature">STATUS_IN_TRANSIT = &#039;in_transit&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_STATUS_SENT" name="constant_STATUS_SENT" class="anchor"></a>
+            <article id="constant_STATUS_SENT" class="constant">
+                <h3 class="public ">STATUS_SENT</h3>
+                <pre class="signature">STATUS_SENT = &#039;sent&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_STATUS_INSTALLATION_PENDING" name="constant_STATUS_INSTALLATION_PENDING" class="anchor"></a>
+            <article id="constant_STATUS_INSTALLATION_PENDING" class="constant">
+                <h3 class="public ">STATUS_INSTALLATION_PENDING</h3>
+                <pre class="signature">STATUS_INSTALLATION_PENDING = &#039;installation_pending&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_STATUS_INSTALLATION_CONFIRMED" name="constant_STATUS_INSTALLATION_CONFIRMED" class="anchor"></a>
+            <article id="constant_STATUS_INSTALLATION_CONFIRMED" class="constant">
+                <h3 class="public ">STATUS_INSTALLATION_CONFIRMED</h3>
+                <pre class="signature">STATUS_INSTALLATION_CONFIRMED = &#039;installation_confirmed&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_INSTALLATION_PENDING" name="constant_INSTALLATION_PENDING" class="anchor"></a>
+            <article id="constant_INSTALLATION_PENDING" class="constant">
+                <h3 class="public ">INSTALLATION_PENDING</h3>
+                <pre class="signature">INSTALLATION_PENDING = &#039;pending&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_INSTALLATION_PRICED" name="constant_INSTALLATION_PRICED" class="anchor"></a>
+            <article id="constant_INSTALLATION_PRICED" class="constant">
+                <h3 class="public ">INSTALLATION_PRICED</h3>
+                <pre class="signature">INSTALLATION_PRICED = &#039;priced&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_INSTALLATION_REJECTED" name="constant_INSTALLATION_REJECTED" class="anchor"></a>
+            <article id="constant_INSTALLATION_REJECTED" class="constant">
+                <h3 class="public ">INSTALLATION_REJECTED</h3>
+                <pre class="signature">INSTALLATION_REJECTED = &#039;rejected&#039;</pre>
+                <p><em></em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_SHIPPING_FLAT_EUR" name="constant_SHIPPING_FLAT_EUR" class="anchor"></a>
+            <article id="constant_SHIPPING_FLAT_EUR" class="constant">
+                <h3 class="public ">SHIPPING_FLAT_EUR</h3>
+                <pre class="signature">SHIPPING_FLAT_EUR = 9.0</pre>
+                <p><em>Flat shipping fee (EUR) for every confirmed order; not applied to carts/likes.</em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="constant_INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR" name="constant_INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR" class="anchor"></a>
+            <article id="constant_INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR" class="constant">
+                <h3 class="public ">INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR</h3>
+                <pre class="signature">INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR = 1000.0</pre>
+                <p><em>Merchandise subtotal (EUR, order lines only) above this triggers a manual installation quote when installation is requested.</em></p>
+                
+            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                
+                                                                                
+                                                            </dl>
+
+                        <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+									
+																																																																																																																																											
+																																																																																																																																														
+										<a id="properties" name="properties"></a>
+				<div class="row-fluid">
+					<div class="span8 content class">
+						<h2>Properties</h2>
+					</div>
+					<aside class="span4 detailsbar"></aside>
+				</div>
+
+																																					    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_table" name="property_table" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$table</h3>
+                <pre class="signature">$table</pre>
+                <p><em></em></p>
+                
+
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_fillable" name="property_fillable" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$fillable</h3>
+                <pre class="signature">$fillable</pre>
+                <p><em></em></p>
+                
+
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas-solid fa-arrow-down"></i></h1>
+                        <dl>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																																		
+										<a id="methods" name="methods"></a>
+				<div class="row-fluid">
+					<div class="span8 content class">
+						<h2>Methods</h2>
+					</div>
+					<aside class="span4 detailsbar"></aside>
+				</div>
+
+																								    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_automaticInstallationFeeFromMerchandiseSubtotal" name="method_automaticInstallationFeeFromMerchandiseSubtotal" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">automaticInstallationFeeFromMerchandiseSubtotal()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">automaticInstallationFeeFromMerchandiseSubtotal(float  <span class="argument">$merchandiseSubtotal</span>) : ?float</pre>
+                <p><em>Tiered installation fee from merchandise subtotal alone (no shipping/installation); null when a manual quote is required.</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>float</td>
+                                <td>$merchandiseSubtotal </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    ?float
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                            <span class="label label-info">static</span>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_client" name="method_client" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">client()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">client() : \Illuminate\Database\Eloquent\Relations\BelongsTo</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    \Illuminate\Database\Eloquent\Relations\BelongsTo
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_lines" name="method_lines" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">lines()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">lines() : \Illuminate\Database\Eloquent\Relations\HasMany</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    \Illuminate\Database\Eloquent\Relations\HasMany
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_addresses" name="method_addresses" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">addresses()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">addresses() : \Illuminate\Database\Eloquent\Relations\HasMany</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    \Illuminate\Database\Eloquent\Relations\HasMany
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_payments" name="method_payments" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">payments()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">payments() : \Illuminate\Database\Eloquent\Relations\HasMany</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    \Illuminate\Database\Eloquent\Relations\HasMany
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getReferenceAttribute" name="method_getReferenceAttribute" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getReferenceAttribute()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getReferenceAttribute() : string</pre>
+                <p><em>Display reference for admin (e.g. invoices, links).</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    string
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_isCart" name="method_isCart" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">isCart()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">isCart() : bool</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getLinesSubtotalAttribute" name="method_getLinesSubtotalAttribute" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getLinesSubtotalAttribute()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getLinesSubtotalAttribute() : float</pre>
+                <p><em>Sum of line totals (products/packs only; no order-level installation).</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    float
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getGrandTotalAttribute" name="method_getGrandTotalAttribute" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getGrandTotalAttribute()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getGrandTotalAttribute() : float</pre>
+                <p><em>Full amount due including installation (when priced) and shipping.</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    float
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_hasSuccessfulPayment" name="method_hasSuccessfulPayment" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">hasSuccessfulPayment()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">hasSuccessfulPayment() : bool</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_clientMayPay" name="method_clientMayPay" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">clientMayPay()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">clientMayPay() : bool</pre>
+                <p><em>Client may complete payment (POST pay) when order is confirmed, no payment yet, and
+installation quote is not required or already priced.</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    bool
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_scopeCarts" name="method_scopeCarts" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">scopeCarts()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">scopeCarts(mixed  <span class="argument">$query</span>) : mixed</pre>
+                <p><em></em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>mixed</td>
+                                <td>$query </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    mixed
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_scopeOrders" name="method_scopeOrders" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">scopeOrders()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">scopeOrders(mixed  <span class="argument">$query</span>) : mixed</pre>
+                <p><em></em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>mixed</td>
+                                <td>$query </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    mixed
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_scopeLikes" name="method_scopeLikes" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">scopeLikes()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">scopeLikes(mixed  <span class="argument">$query</span>) : mixed</pre>
+                <p><em></em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>mixed</td>
+                                <td>$query </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    mixed
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																				    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_buildClientStatusTimeline" name="method_buildClientStatusTimeline" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">buildClientStatusTimeline()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">buildClientStatusTimeline() : list&lt;array{step: string, at: ?string, status_code?: string, installation_status_code?: ?string}&gt;</pre>
+                <p><em>Ordered milestones for the storefront order detail timeline (derived from current fields).</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    list<array{step: string, at: ?string, status_code?: string, installation_status_code?: ?string}>
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																								    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_casts" name="method_casts" class="anchor"></a>
+            <article class="method">
+                <h3 class="protected ">casts()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="fa-solid fa-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">casts() : array</pre>
+                <p><em></em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    array
+                                            &mdash; 
+                                                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="fas fa-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="classes/App-Models-Order.html"><div class="path-wrapper">\App\Models\Order</div></a></dd>
+                                                                                                
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+																																																																																																																																																																																																																																																																																																									</div>
+	</section>
+
+	<div id="source-view" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="source-view-label" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 id="source-view-label">Order.php</h3>
+		</div>
+		<div class="modal-body">
+			<pre data-src="files/app/Models/Order.php.txt" class="language-php line-numbers"></pre>
+		</div>
+	</div>
+
+			<footer class="row-fluid">
+				<section class="span10 offset2">
+					<section class="row-fluid">
+						<section class="span10 offset1">
+							<section class="row-fluid footer-sections">
+								<section
+									class="span4">
+																		<h1>
+										<i class="fa-solid fa-code"></i>
+									</h1>
+									<div>
+										<ul>
+																							<li><a href="namespaces/app.html"><abbr title="\App">App</abbr></a></li>
+																					</ul>
+									</div>
+								</section>
+								<section
+									class="span4">
+																		<h1>
+										<i class="fa-solid fa-project-diagram"></i>
+									</h1>
+									<div>
+										<ul>
+											<li><a href="graphs/class.html">Class Hierarchy Diagram</a></li>
+										</ul>
+									</div>
+								</section>
+								<section
+									class="span4">
+																		<h1>
+										<i class="fa-solid fa-thumbtack"></i>
+									</h1>
+									<div>
+										<ul>
+											<li><a href="reports/errors.html">Errors</a></li>
+											<li><a href="reports/markers.html">Markers</a></li>
+										</ul>
+									</div>
+								</section>
+							</section>
+						</section>
+					</section>
+					<section class="row-fluid">
+						<section class="span10 offset1">
+							<hr/>
+							Documentation is powered by
+							<a href="https://www.phpdoc.org/">phpDocumentor
+							</a>
+							and authored
+							                    on
+							April 27th, 2026 at 14:52.
+						</section>
+					</section>
+				</section>
+			</footer>
+		</div>
+		<script src="resources/js/jquery-1.11.0.min.js"></script>
+		<script src="resources/js/ui/1.10.4/jquery-ui.min.js"></script>
+		<script src="resources/js/jquery.smooth-scroll.js"></script>
+		<script src="resources/js/prism.min.js"></script>
+		<script src="resources/js/bootstrap.js"></script>
+		<script src="resources/js/custom.js"></script>
+			</body>
+</html>

@@ -51,6 +51,8 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "phpdoc-install": "composer install --working-dir=tools/phpdocumentor --no-interaction",
+        "phpdoc": "bash scripts/phpdoc.sh",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

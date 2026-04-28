@@ -27,8 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Verify email page:** Removed the **Home / Inicio** ghost button from **`EmailVerifyPage`**; navigation to **`next`** after verification is unchanged.
 
-- **Admin / storefront · destacados en portada:** Ajustes **`featured_max_manual`**, **`featured_max_low_stock`**, **`featured_max_overstock`** (0 = sin límite); **`GET /api/v1/products/featured`** usa **`HomeFeaturedProductIds`** con muestreo aleatorio por grupo y reglas compartidas con **`TrendingStockRuleQueries`** / **`RecalculateTrendingProducts`**. Botón de recálculo acortado a **«Recalcular Destacados»** (i18n).
-
 - **Storefront navbar · language menu:** Replaced the plain **dropdown** with a **card** panel (title, **close** control, **gradient** highlight for the active locale, checkmark), **click-outside** and **Escape** to dismiss; trigger shows **CA/ES/EN** with clearer styling. New **`IconX`**, i18n **`common.language`**.
 
 - **Email verification UX:** Removed **`EmailVerificationBanner`**. Dedicated **`/verify-email`** page (copy, **resend** with cooldown, **poll** **`GET user`**, **`navigate`** to **`next`** when verified); **register** → **`/verify-email?next=/`**, unverified **login** → **`/verify-email?next=…`**; **`AuthContext`** **`login`** / **`register`** now return **`user`** for redirects.

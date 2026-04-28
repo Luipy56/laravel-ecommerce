@@ -682,7 +682,7 @@
   "admin.settings.featured_limits_title": "Límits a la portada (Destacats)",
   "admin.settings.featured_max_hint": "0 sense límit per a cada grup. Es mostren primer els destacats manuals, després tendència per estoc baix i després sobrestoc; ordre aleatori dins de cada grup quan hi ha límit.",
   "admin.settings.featured_max_manual": "Màx. destacats manuals",
-  "admin.settings.featured_max_low_stock": "Màx. tendència (estoc baix)",
+  "admin.settings.featured_max_low_stock": "Màx. tendència",
   "admin.settings.featured_max_overstock": "Màx. tendència",
   "admin.settings.low_stock": "Estoc baix",
   "admin.settings.low_stock_enabled": "Destacar productes amb estoc igual o inferior al llindar",

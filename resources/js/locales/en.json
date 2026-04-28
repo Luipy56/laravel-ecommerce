@@ -682,7 +682,7 @@
   "admin.settings.featured_limits_title": "Home listing limits (Featured)",
   "admin.settings.featured_max_hint": "0 means no limit per group. Manual featured first, then low-stock trending, then overstock trending; random order within each group when limited.",
   "admin.settings.featured_max_manual": "Max manual featured",
-  "admin.settings.featured_max_low_stock": "Max low-stock trending",
+  "admin.settings.featured_max_low_stock": "Max trending",
   "admin.settings.featured_max_overstock": "Max trending",
   "admin.settings.low_stock": "Low stock",
   "admin.settings.low_stock_enabled": "Highlight products at or below the stock threshold",

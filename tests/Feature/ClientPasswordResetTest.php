@@ -27,7 +27,7 @@ class ClientPasswordResetTest extends TestCase
         $client = Client::query()->first();
         $this->assertNotNull($client);
 
-        // Seeded @example.com emails fail validateMxRecord(); broker token must match stored login_email.
+        // Seeded @example.com addresses use null-MX; broker token must match stored login_email.
         $client->forceFill(['login_email' => 'pw-reset-test@gmail.com'])->save();
 
         $token = Password::broker('clients')->createToken($client);

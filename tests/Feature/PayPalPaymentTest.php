@@ -61,7 +61,7 @@ class PayPalPaymentTest extends TestCase
         return Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'paypal_buyer_'.uniqid('', true).'@example.test',
+            'login_email' => 'paypal_buyer_'.uniqid('', true).'@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => now(),

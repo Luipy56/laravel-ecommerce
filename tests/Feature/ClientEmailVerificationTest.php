@@ -27,7 +27,7 @@ class ClientEmailVerificationTest extends TestCase
         $response = $this->postJson('/api/v1/register', [
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'newuser_'.uniqid('', true).'@example.test',
+            'login_email' => 'newuser_'.uniqid('', true).'@ietf.org',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
             'name' => 'Test',
@@ -50,7 +50,7 @@ class ClientEmailVerificationTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'pending_'.uniqid('', true).'@example.test',
+            'login_email' => 'pending_'.uniqid('', true).'@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => null,
@@ -67,7 +67,7 @@ class ClientEmailVerificationTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'verifyme_'.uniqid('', true).'@example.test',
+            'login_email' => 'verifyme_'.uniqid('', true).'@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => null,

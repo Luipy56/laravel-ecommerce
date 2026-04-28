@@ -46,7 +46,7 @@ class ReportSummaryTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'reports.client@example.test',
+            'login_email' => 'reports.client@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => now(),
@@ -67,7 +67,7 @@ class ReportSummaryTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'unverified.reports@example.test',
+            'login_email' => 'unverified.reports@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => null,

@@ -70,7 +70,7 @@ class PaymentWebhookTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'buyer@example.test',
+            'login_email' => 'buyer@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => now(),
@@ -141,7 +141,7 @@ class PaymentWebhookTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'buyer_cs@example.test',
+            'login_email' => 'buyer_cs@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => now(),
@@ -206,7 +206,7 @@ class PaymentWebhookTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'buyer4@example.test',
+            'login_email' => 'buyer4@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => now(),

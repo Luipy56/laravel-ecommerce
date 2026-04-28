@@ -32,7 +32,7 @@ class ShopSettingsTest extends TestCase
         ShopSetting::set(ShopSetting::KEY_ACCEPT_PERSONALIZED_SOLUTIONS, false);
 
         $this->postJson('/api/v1/personalized-solutions', [
-            'email' => 'test@example.com',
+            'email' => 'test@ietf.org',
             'phone' => null,
             'problem_description' => 'Need help',
             'address_street' => null,

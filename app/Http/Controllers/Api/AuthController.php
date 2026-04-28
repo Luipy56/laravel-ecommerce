@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Support\MailLocale;
+use App\Support\ValidationRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,7 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'login_email' => ['required', 'string', 'email'],
+            'login_email' => ['required', 'string', ValidationRules::emailDns()],
             'password' => ['required', 'string'],
         ]);
 
@@ -52,7 +53,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'type' => ['required', 'string', 'in:person,company'],
             'identification' => ['nullable', 'string', 'max:20', 'unique:clients,identification'],
-            'login_email' => ['required', 'string', 'email', 'max:255', 'unique:clients,login_email'],
+            'login_email' => ['required', 'string', 'max:255', ValidationRules::emailDns(), 'unique:clients,login_email'],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'name' => ['required', 'string', 'max:255'],
             'surname' => ['nullable', 'string', 'max:255'],

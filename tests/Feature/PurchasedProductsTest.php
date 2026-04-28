@@ -61,7 +61,7 @@ class PurchasedProductsTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'u_'.uniqid('', true).'@example.test',
+            'login_email' => 'u_'.uniqid('', true).'@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => now(),
@@ -80,7 +80,7 @@ class PurchasedProductsTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'buyer_'.uniqid('', true).'@example.test',
+            'login_email' => 'buyer_'.uniqid('', true).'@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
             'email_verified_at' => now(),

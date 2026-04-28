@@ -92,19 +92,24 @@ function CartLine({ line, updateLine, removeLine, t }) {
       </td>
       <td className="relative align-middle text-center">
         {isExtraKeysAvailable ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-1 py-1">
-            <input
-              type="number"
-              min={0}
-              max={99}
-              value={extraKeysQty}
-              onChange={handleExtraKeysChange}
-              className="input input-bordered input-sm w-16 text-center"
-              aria-label={t('shop.cart.extra_keys')}
-            />
-            {extraKeyUnitPrice != null && (
-              <span className="text-xs text-base-content/70">{Number(extraKeyUnitPrice).toFixed(2)} €/u</span>
-            )}
+          <div className="absolute inset-0 flex items-center justify-center px-1 py-1">
+            {/* Inner box height = input only (price is position:absolute) so vertical centering anchors on the input */}
+            <div className="relative inline-block shrink-0">
+              <input
+                type="number"
+                min={0}
+                max={99}
+                value={extraKeysQty}
+                onChange={handleExtraKeysChange}
+                className="input input-bordered input-sm w-16 text-center block"
+                aria-label={t('shop.cart.extra_keys')}
+              />
+              {extraKeyUnitPrice != null && (
+                <span className="absolute left-1/2 top-full z-10 mt-0.5 -translate-x-1/2 whitespace-nowrap text-xs text-base-content/70">
+                  {Number(extraKeyUnitPrice).toFixed(2)} €/u
+                </span>
+              )}
+            </div>
           </div>
         ) : null}
       </td>

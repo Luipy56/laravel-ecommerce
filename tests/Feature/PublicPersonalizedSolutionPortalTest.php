@@ -21,6 +21,30 @@ class PublicPersonalizedSolutionPortalTest extends TestCase
         $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 
+    public function test_store_invalid_postal_validation_message_respects_accept_language(): void
+    {
+        $response = $this->postJson(
+            '/api/v1/personalized-solutions',
+            [
+                'email' => 'local_'.uniqid('', true).'@example.test',
+                'phone' => null,
+                'problem_description' => 'Test',
+                'address_street' => null,
+                'address_city' => null,
+                'address_province' => null,
+                'address_postal_code' => 'X1',
+                'address_note' => null,
+            ],
+            ['Accept-Language' => 'ca'],
+        );
+
+        $response->assertUnprocessable();
+        $response->assertJsonPath(
+            'message',
+            'El codi postal ha de tenir només xifres (fins a 20).',
+        );
+    }
+
     public function test_store_returns_public_token_and_public_api_allows_manage(): void
     {
         Mail::fake();

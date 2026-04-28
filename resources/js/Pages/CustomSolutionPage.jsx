@@ -5,6 +5,7 @@ import { api } from '../api';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../contexts/ToastContext';
+import { messageFromApiValidationError } from '../lib/apiValidationMessage';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
 
@@ -30,13 +31,16 @@ export default function CustomSolutionPage() {
   const [publicSettingsLoaded, setPublicSettingsLoaded] = useState(false);
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
   const submitInFlightRef = useRef(false);
-  const errorBannerRef = useRef(null);
+  /** Title + alert: scroll-margin offsets fixed navbar so the block is fully visible. */
+  const pageFeedbackRef = useRef(null);
 
-  /** Defer so the error `<div>` is mounted after setState; user often stays scrolled to the bottom submit. */
-  const scrollErrorBannerIntoView = useCallback(() => {
+  /** Defer until DOM reflects error state; user often stays scrolled to the submit button. */
+  const scrollFeedbackIntoView = useCallback(() => {
     queueMicrotask(() => {
       requestAnimationFrame(() => {
-        errorBannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        requestAnimationFrame(() => {
+          pageFeedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        });
       });
     });
   }, []);
@@ -92,7 +96,7 @@ export default function CustomSolutionPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
-      scrollErrorBannerIntoView();
+      scrollFeedbackIntoView();
       submitInFlightRef.current = false;
       return;
     }
@@ -130,13 +134,13 @@ export default function CustomSolutionPage() {
         });
       }
     } catch (err) {
-      setError(err.response?.data?.message || t('common.error'));
-      scrollErrorBannerIntoView();
+      setError(messageFromApiValidationError(err, t));
+      scrollFeedbackIntoView();
     } finally {
       setLoading(false);
       submitInFlightRef.current = false;
     }
-  }, [form, t, showToast, navigate, newRequestsDisabled, scrollErrorBannerIntoView]);
+  }, [form, t, showToast, navigate, newRequestsDisabled, scrollFeedbackIntoView]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -147,7 +151,7 @@ export default function CustomSolutionPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
-      scrollErrorBannerIntoView();
+      scrollFeedbackIntoView();
       return;
     }
     setConfirmModalOpen(true);
@@ -155,12 +159,14 @@ export default function CustomSolutionPage() {
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-4xl">
-      <PageTitle>{t('shop.custom_solution')}</PageTitle>
-      {error ? (
-        <div ref={errorBannerRef} className="alert alert-error mb-4" role="alert">
-          {error}
-        </div>
-      ) : null}
+      <div ref={pageFeedbackRef} className="scroll-mt-24 lg:scroll-mt-16 space-y-4">
+        <PageTitle>{t('shop.custom_solution')}</PageTitle>
+        {error ? (
+          <div className="alert alert-error mb-4" role="alert">
+            {error}
+          </div>
+        ) : null}
+      </div>
       <ConfirmModal
         open={confirmModalOpen}
         onClose={() => setConfirmModalOpen(false)}

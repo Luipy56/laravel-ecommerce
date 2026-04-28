@@ -14,7 +14,7 @@ Laravel ecommerce: REST API + React storefront and admin UI.
 
 - **Backend:** Laravel (`app/`, `routes/`, `database/`).
 - **Frontend:** React + Vite (`resources/js/`).
-- **Assets:** Vite (`npm run dev`, `npm run build`).
+- **Assets:** Vite (`npm run dev` without HMR by default, `npm run dev:hmr` for hot reload, `npm run build`).
 
 ## Setup and development
 

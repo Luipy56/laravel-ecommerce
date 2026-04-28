@@ -1,19 +1,21 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
   "name": "e-commerce",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite",
-    "dev:stable": "LARAVEL_VITE_NO_AUTO_RELOAD=1 vite"
+    "dev": "cross-env LARAVEL_VITE_NO_AUTO_RELOAD=1 vite",
+    "dev:hmr": "vite",
+    "dev:stable": "cross-env LARAVEL_VITE_NO_AUTO_RELOAD=1 vite"
   },
   "devDependencies": {
     "@tailwindcss/vite": "~4.1.11",
     "@vitejs/plugin-react": "^5.2.0",
     "axios": "^1.11.0",
     "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
     "daisyui": "^5.1.27",
     "laravel-vite-plugin": "^1.3.0",
     "tailwindcss": "~4.1.11",

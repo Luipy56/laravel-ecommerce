@@ -77,7 +77,7 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
    npm run dev
    ```
 
-   Open the app URL (e.g. `http://127.0.0.1:8000`). Vite serves and hot-reloads the React bundle.
+   Open the app URL (e.g. `http://127.0.0.1:8000`). By default **`npm run dev`** runs Vite **without** WebSocket HMR / React Fast Refresh and **without** Laravel’s dev full-page refresh on PHP/Blade saves (`LARAVEL_VITE_NO_AUTO_RELOAD=1` via **cross-env**, so it works on Windows too). After editing front-end files, refresh the browser manually. For classic hot reload, use **`npm run dev:hmr`** instead.
 
 7. **Production assets**
 

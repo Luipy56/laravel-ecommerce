@@ -42,15 +42,23 @@ export default function CheckoutPage() {
     paypal_missing_credentials: false,
     stripe_missing_credentials: false,
     paypal_mode: undefined,
+    checkout_demo_skip_payment_allowed: false,
   });
   const [checkoutFormError, setCheckoutFormError] = useState('');
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
   const [paypalCancelWarning, setPaypalCancelWarning] = useState('');
+  /** Temporary workaround for demo: complete order without PSP when server allows (CHECKOUT_DEMO_SKIP_PAYMENT). */
+  const [checkoutDemoSkipPayment, setCheckoutDemoSkipPayment] = useState(false);
   const wantsInstallation = !!cart.installation_requested;
   const installationQuoteRequired = !!(wantsInstallation && cart.installation_quote_required);
   /** Must choose a PSP method (not used when awaiting a manual installation quote only). */
   const paymentRequired = !wantsInstallation || !installationQuoteRequired;
-  const checkoutSchemaOpts = { wantsInstallation, installationQuoteRequired };
+  const checkoutSchemaOpts = {
+    wantsInstallation,
+    installationQuoteRequired,
+    checkoutDemoSkipPayment:
+      !!payConfigMeta.checkout_demo_skip_payment_allowed && checkoutDemoSkipPayment,
+  };
 
   useEffect(() => {
     api
@@ -66,6 +74,7 @@ export default function CheckoutPage() {
             paypal_missing_credentials: !!d.paypal_missing_credentials,
             stripe_missing_credentials: !!d.stripe_missing_credentials,
             paypal_mode: d.paypal_mode === 'live' ? 'live' : d.paypal_mode === 'sandbox' ? 'sandbox' : undefined,
+            checkout_demo_skip_payment_allowed: !!d.checkout_demo_skip_payment_allowed,
           });
         } else {
           setPayMethods({ card: false, paypal: false });
@@ -75,6 +84,7 @@ export default function CheckoutPage() {
             paypal_missing_credentials: false,
             stripe_missing_credentials: false,
             paypal_mode: undefined,
+            checkout_demo_skip_payment_allowed: false,
           });
         }
       })
@@ -87,6 +97,7 @@ export default function CheckoutPage() {
           paypal_missing_credentials: false,
           stripe_missing_credentials: false,
           paypal_mode: undefined,
+          checkout_demo_skip_payment_allowed: false,
         });
       });
   }, []);
@@ -99,6 +110,12 @@ export default function CheckoutPage() {
       return first ? { ...f, payment_method: first } : f;
     });
   }, [payMethods, paymentRequired]);
+
+  useEffect(() => {
+    if (!payConfigMeta.checkout_demo_skip_payment_allowed) {
+      setCheckoutDemoSkipPayment(false);
+    }
+  }, [payConfigMeta.checkout_demo_skip_payment_allowed]);
 
   useEffect(() => {
     if (!user) return;
@@ -139,7 +156,15 @@ export default function CheckoutPage() {
         setCheckoutFormError(parsed.firstError);
         return;
       }
-      const payload = installationQuoteRequired ? { ...parsed.data, payment_method: null } : parsed.data;
+      const payload = installationQuoteRequired ? { ...parsed.data, payment_method: null } : { ...parsed.data };
+      if (
+        paymentRequired &&
+        checkoutDemoSkipPayment &&
+        payConfigMeta.checkout_demo_skip_payment_allowed
+      ) {
+        payload.checkout_demo_skip_payment = true;
+        delete payload.payment_method;
+      }
       const { data } = await api.post('orders/checkout', payload);
       if (!data.success) return;
 
@@ -196,7 +221,17 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false);
     }
-  }, [form, navigate, fetchCart, wantsInstallation, installationQuoteRequired, t]);
+  }, [
+    form,
+    navigate,
+    fetchCart,
+    wantsInstallation,
+    installationQuoteRequired,
+    paymentRequired,
+    checkoutDemoSkipPayment,
+    payConfigMeta.checkout_demo_skip_payment_allowed,
+    t,
+  ]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -326,50 +361,70 @@ export default function CheckoutPage() {
           {paymentRequired && (
             <>
               <h2 className="font-semibold text-base-content mt-6">{t('checkout.payment')}</h2>
-              {payMethodsReady && payConfigMeta.simulated && anyPaymentMethod && (
-                <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.simulated_mode_notice')}</p>
-              )}
-              {payMethodsReady && payConfigLoadError && (
-                <div role="alert" className="alert alert-warning text-sm">
-                  <p className="m-0">{t('checkout.payment.config_load_error')}</p>
-                </div>
-              )}
-              {payMethodsReady && !payConfigLoadError && !anyPaymentMethod && (
-                <div role="alert" className="alert alert-warning text-sm space-y-2">
-                  <p className="m-0">{t('checkout.payment.no_methods')}</p>
-                  {payConfigMeta.local_checkout_needs_debug ? (
-                    <p className="m-0 text-base-content/90">{t('checkout.payment.local_debug_hint')}</p>
-                  ) : null}
-                </div>
-              )}
-              {payMethodsReady && !payConfigLoadError && payConfigMeta.paypal_missing_credentials && (
-                <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.paypal_missing_credentials_hint')}</p>
-              )}
-              {payMethodsReady && !payConfigLoadError && payConfigMeta.stripe_missing_credentials && (
-                <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.stripe_missing_credentials_hint')}</p>
-              )}
-              <label className="form-field w-full">
-                <span className="form-label">{t('checkout.payment_method')}</span>
-                <select
-                  name="payment_method"
-                  className="select select-bordered w-full"
-                  value={payMethodsReady ? form.payment_method : ''}
-                  onChange={handleChange}
-                  disabled={!payMethodsReady || (payMethodsReady && !anyPaymentMethod) || payConfigLoadError}
-                >
-                  {!payMethodsReady ? (
-                    <option value="">{t('common.loading')}</option>
-                  ) : (
-                    ['card', 'paypal']
-                      .filter((value) => payMethods[value])
-                      .map((value) => (
-                        <option key={value} value={value}>
-                          {t(`checkout.payment.${value}`)}
-                        </option>
-                      ))
+              {payConfigMeta.checkout_demo_skip_payment_allowed ? (
+                <label className="label cursor-pointer justify-start gap-3 w-fit max-w-full py-0">
+                  {/* Temporary workaround for demo environments — gated by CHECKOUT_DEMO_SKIP_PAYMENT on the server. */}
+                  <input
+                    type="checkbox"
+                    name="checkout_demo_skip_payment"
+                    className="checkbox checkbox-sm shrink-0"
+                    checked={checkoutDemoSkipPayment}
+                    onChange={(e) => {
+                      setCheckoutFormError('');
+                      setCheckoutDemoSkipPayment(e.target.checked);
+                    }}
+                  />
+                  <span className="label-text text-start">{t('checkout.checkout_demo_skip_payment')}</span>
+                </label>
+              ) : null}
+              {!checkoutDemoSkipPayment && (
+                <>
+                  {payMethodsReady && payConfigMeta.simulated && anyPaymentMethod && (
+                    <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.simulated_mode_notice')}</p>
                   )}
-                </select>
-              </label>
+                  {payMethodsReady && payConfigLoadError && (
+                    <div role="alert" className="alert alert-warning text-sm">
+                      <p className="m-0">{t('checkout.payment.config_load_error')}</p>
+                    </div>
+                  )}
+                  {payMethodsReady && !payConfigLoadError && !anyPaymentMethod && (
+                    <div role="alert" className="alert alert-warning text-sm space-y-2">
+                      <p className="m-0">{t('checkout.payment.no_methods')}</p>
+                      {payConfigMeta.local_checkout_needs_debug ? (
+                        <p className="m-0 text-base-content/90">{t('checkout.payment.local_debug_hint')}</p>
+                      ) : null}
+                    </div>
+                  )}
+                  {payMethodsReady && !payConfigLoadError && payConfigMeta.paypal_missing_credentials && (
+                    <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.paypal_missing_credentials_hint')}</p>
+                  )}
+                  {payMethodsReady && !payConfigLoadError && payConfigMeta.stripe_missing_credentials && (
+                    <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.stripe_missing_credentials_hint')}</p>
+                  )}
+                  <label className="form-field w-full">
+                    <span className="form-label">{t('checkout.payment_method')}</span>
+                    <select
+                      name="payment_method"
+                      className="select select-bordered w-full"
+                      value={payMethodsReady ? form.payment_method : ''}
+                      onChange={handleChange}
+                      disabled={!payMethodsReady || (payMethodsReady && !anyPaymentMethod) || payConfigLoadError}
+                    >
+                      {!payMethodsReady ? (
+                        <option value="">{t('common.loading')}</option>
+                      ) : (
+                        ['card', 'paypal']
+                          .filter((value) => payMethods[value])
+                          .map((value) => (
+                            <option key={value} value={value}>
+                              {t(`checkout.payment.${value}`)}
+                            </option>
+                          ))
+                      )}
+                    </select>
+                  </label>
+                </>
+              )}
             </>
           )}
 
@@ -405,7 +460,9 @@ export default function CheckoutPage() {
               disabled={
                 loading ||
                 !!activeCheckout?.paypal ||
-                (paymentRequired && (!payMethodsReady || !anyPaymentMethod || payConfigLoadError))
+                (paymentRequired &&
+                  !(checkoutDemoSkipPayment && payConfigMeta.checkout_demo_skip_payment_allowed) &&
+                  (!payMethodsReady || !anyPaymentMethod || payConfigLoadError))
               }
             >
               {loading ? t('common.loading') : t('shop.checkout')}

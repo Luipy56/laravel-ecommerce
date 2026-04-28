@@ -71,9 +71,14 @@ export const customSolutionFormSchema = z.object({
 });
 
 /**
- * @param {{ wantsInstallation: boolean, installationQuoteRequired: boolean }} opts
+ * @param {{ wantsInstallation: boolean, installationQuoteRequired: boolean, checkoutDemoSkipPayment?: boolean }} opts
  */
-export function checkoutFormSchema({ wantsInstallation, installationQuoteRequired }) {
+export function checkoutFormSchema({
+  wantsInstallation,
+  installationQuoteRequired,
+  checkoutDemoSkipPayment = false,
+}) {
+  const paymentMethodField = checkoutDemoSkipPayment ? z.enum(['card', 'paypal']).optional() : PAYMENT_METHODS;
   const shipping = {
     shipping_street: z.string().trim().min(1, { message: 'validation.required' }).max(255),
     shipping_city: z.string().trim().min(1, { message: 'validation.required' }).max(100),
@@ -100,14 +105,14 @@ export function checkoutFormSchema({ wantsInstallation, installationQuoteRequire
   if (wantsInstallation) {
     return z.object({
       ...shipping,
-      payment_method: PAYMENT_METHODS,
+      payment_method: paymentMethodField,
       ...installationFields,
     });
   }
 
   return z.object({
     ...shipping,
-    payment_method: PAYMENT_METHODS,
+    payment_method: paymentMethodField,
     installation_street: z.string().max(255),
     installation_city: z.string().max(100),
     installation_postal_code: z.string().max(20),

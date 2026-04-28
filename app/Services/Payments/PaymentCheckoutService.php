@@ -54,6 +54,12 @@ class PaymentCheckoutService
         return (bool) config('app.debug') && (bool) config('payments.allow_simulated');
     }
 
+    /** True when .env allows the storefront demo checkbox to bypass PSP checkout (see OrderController::checkout). */
+    public static function checkoutDemoSkipPaymentAllowed(): bool
+    {
+        return (bool) config('payments.checkout_demo_skip_payment');
+    }
+
     /** @return list<string> */
     public static function checkoutMethodKeysFromConfig(): array
     {
@@ -117,6 +123,9 @@ class PaymentCheckoutService
     public static function shouldSimulateCheckoutForPayment(Payment $payment): bool
     {
         if ($payment->payment_method === Payment::METHOD_PAYPAL) {
+            return false;
+        }
+        if ($payment->payment_method === Payment::METHOD_CHECKOUT_DEMO_SKIP) {
             return false;
         }
 
@@ -192,6 +201,24 @@ class PaymentCheckoutService
         $this->completion->markSucceeded($payment, [
             'gateway' => 'simulated',
             'gateway_reference' => 'sim_'.$payment->id.'_'.uniqid(),
+        ]);
+    }
+
+    /**
+     * Completes checkout without calling a PSP when CHECKOUT_DEMO_SKIP_PAYMENT is enabled.
+     * Temporary workaround for demo environments — not a real payment.
+     */
+    public function markCheckoutDemoSkipSuccess(Payment $payment): void
+    {
+        if (! self::checkoutDemoSkipPaymentAllowed()) {
+            throw new RuntimeException('Checkout demo skip payment is disabled.');
+        }
+        if ($payment->payment_method !== Payment::METHOD_CHECKOUT_DEMO_SKIP) {
+            throw new InvalidArgumentException('Payment is not a demo-skip checkout.');
+        }
+        $this->completion->markSucceeded($payment, [
+            'gateway' => 'checkout_demo_skip',
+            'gateway_reference' => 'demo_skip_'.$payment->id.'_'.uniqid(),
         ]);
     }
 }

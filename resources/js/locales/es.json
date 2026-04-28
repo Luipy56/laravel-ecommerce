@@ -94,6 +94,8 @@
   "checkout.note": "Nota",
   "checkout.payment": "Pago",
   "checkout.payment_method": "Método de pago",
+  "checkout.checkout_demo_skip_payment": "Omitir el pago (demo)",
+  "checkout.payment.checkout_demo_skip": "Demo · sin PSP",
   "checkout.payment.card": "Tarjeta, Bizum y monederos (Stripe)",
   "checkout.payment.paypal": "PayPal",
   "checkout.payment.bizum": "Bizum",

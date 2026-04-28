@@ -35,10 +35,18 @@ class OrderController extends Controller
 
         $checkoutMethodIn = implode(',', PaymentCheckoutService::checkoutMethodKeysFromConfig());
 
+        // Temporary workaround for demo stacks: CHECKOUT_DEMO_SKIP_PAYMENT + checkout_demo_skip_payment on the request.
+        $demoSkipActive = ! $awaitingInstallationQuote
+            && $request->boolean('checkout_demo_skip_payment')
+            && PaymentCheckoutService::checkoutDemoSkipPaymentAllowed();
+
         $rules = [
+            'checkout_demo_skip_payment' => ['sometimes', 'boolean'],
             'payment_method' => ($cart->installation_requested && $awaitingInstallationQuote)
                 ? ['nullable', 'string', 'in:'.$checkoutMethodIn]
-                : ['required', 'string', 'in:'.$checkoutMethodIn],
+                : ($demoSkipActive
+                    ? ['prohibited']
+                    : ['required', 'string', 'in:'.$checkoutMethodIn]),
             'shipping_street' => ['required', 'string', 'max:255'],
             'shipping_city' => ['required', 'string', 'max:100'],
             'shipping_province' => ['nullable', 'string', 'max:100'],
@@ -58,7 +66,13 @@ class OrderController extends Controller
 
         $validated = $request->validate($rules);
 
-        if (! $awaitingInstallationQuote && ! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
+        $resolvedPaymentMethod = ($cart->installation_requested && $awaitingInstallationQuote)
+            ? ($validated['payment_method'] ?? null)
+            : ($demoSkipActive
+                ? Payment::METHOD_CHECKOUT_DEMO_SKIP
+                : $validated['payment_method']);
+
+        if (! $awaitingInstallationQuote && ! $demoSkipActive && ! PaymentCheckoutService::isPaymentMethodAvailable($resolvedPaymentMethod)) {
             return response()->json([
                 'success' => false,
                 'message' => __('shop.payment.method_unavailable'),
@@ -66,7 +80,7 @@ class OrderController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote, $automaticInstallationFee) {
+        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote, $automaticInstallationFee, $resolvedPaymentMethod) {
             $installationPrice = null;
             $installationStatus = null;
             if ($cart->installation_requested) {
@@ -80,7 +94,7 @@ class OrderController extends Controller
 
             $initialStatus = $awaitingInstallationQuote
                 ? Order::STATUS_AWAITING_INSTALLATION_PRICE
-                : (($validated['payment_method'] ?? null) === Payment::METHOD_PAYPAL
+                : ($resolvedPaymentMethod === Payment::METHOD_PAYPAL
                     ? Order::STATUS_AWAITING_PAYMENT
                     : Order::STATUS_PENDING);
             $cart->update([
@@ -126,7 +140,7 @@ class OrderController extends Controller
                 $total = $cart->grand_total;
                 $cart->payments()->create([
                     'amount' => $total,
-                    'payment_method' => $validated['payment_method'],
+                    'payment_method' => $resolvedPaymentMethod,
                     'status' => Payment::STATUS_PENDING,
                     'currency' => 'EUR',
                 ]);
@@ -139,7 +153,15 @@ class OrderController extends Controller
         $paymentError = null;
         if (! $awaitingInstallationQuote) {
             $payment = $cart->payments()->latest()->first();
-            if ($payment && PaymentCheckoutService::shouldSimulateCheckoutForPayment($payment)) {
+            if ($demoSkipActive && $payment) {
+                try {
+                    $paymentCheckoutService->markCheckoutDemoSkipSuccess($payment);
+                } catch (Throwable $e) {
+                    report($e);
+                    $paymentError = $e->getMessage();
+                }
+                $paymentCheckout = ['gateway' => 'checkout_demo_skip', 'demo_skip' => true];
+            } elseif ($payment && PaymentCheckoutService::shouldSimulateCheckoutForPayment($payment)) {
                 try {
                     $paymentCheckoutService->simulateSuccess($payment);
                 } catch (Throwable $e) {

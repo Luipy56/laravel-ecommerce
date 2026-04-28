@@ -32,6 +32,14 @@ function lineTargetUrl(line) {
   return null;
 }
 
+/** “Llaves iguales”: Yes/No for packs with keys; otherwise No (never blank). */
+function keysSameLabel(line, t) {
+  if (line.pack?.contains_keys) {
+    return line.keys_all_same ? t('common.yes') : t('common.no');
+  }
+  return t('common.no');
+}
+
 /** Pack lines have `pack_id` or nested `pack`; everything else is treated as product lines. */
 function partitionOrderLines(lines) {
   const list = lines || [];
@@ -40,71 +48,86 @@ function partitionOrderLines(lines) {
   return { products, packs };
 }
 
-function OrderLinesDesktopTable({ lines, navigate, t }) {
-  if (lines.length === 0) return null;
+/** Single desktop table so Productos and Packs share identical column widths. */
+function OrderLinesDesktopTable({ productLines, packLines, navigate, t }) {
+  const sections = [];
+  if (productLines.length > 0) {
+    sections.push({ id: 'products', titleKey: 'admin.orders.lines_products', lines: productLines });
+  }
+  if (packLines.length > 0) {
+    sections.push({ id: 'packs', titleKey: 'admin.orders.lines_packs', lines: packLines });
+  }
+  if (sections.length === 0) return null;
   return (
-    <div className="overflow-x-auto hidden sm:block">
-      <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+    <div className="overflow-x-auto hidden sm:block min-w-0">
+      <table className="table table-zebra table-sm w-full min-w-[720px] [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
         <thead>
           <tr>
             <th className="w-14" aria-label={t('admin.products.images')} />
-            <th>{t('admin.orders.line_product')}</th>
+            <th>{t('admin.orders.line_name')}</th>
             <th className="text-center">{t('admin.orders.line_quantity')}</th>
             <th className="text-end">{t('admin.orders.line_unit_price')}</th>
             <th className="text-end">{t('admin.orders.line_extra_keys_price')}</th>
-            <th className="text-center w-24 min-w-24">{t('admin.orders.keys_same')}</th>
+            <th className="text-center w-24 min-w-[6rem]">{t('admin.orders.keys_same')}</th>
             <th className="text-end">{t('admin.orders.line_total')}</th>
           </tr>
         </thead>
         <tbody>
-          {lines.map((line) => {
-            const extraKeysTotal = line.extra_keys_qty > 0 && line.extra_key_unit_price != null
-              ? line.extra_keys_qty * line.extra_key_unit_price
-              : null;
-            const targetUrl = lineTargetUrl(line);
-            return (
-              <tr
-                key={line.id}
-                role={targetUrl ? 'button' : undefined}
-                tabIndex={targetUrl ? 0 : undefined}
-                onClick={targetUrl ? () => navigate(targetUrl) : undefined}
-                onKeyDown={targetUrl ? (e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(targetUrl);
-                  }
-                } : undefined}
-                className={targetUrl ? 'cursor-pointer hover:bg-base-200/50' : ''}
-              >
-                <td>
-                  <div className="avatar">
-                    <div className="mask mask-squircle w-10 h-10 bg-base-300">
-                      <img
-                        src={line.image_url || PLACEHOLDER_IMAGE}
-                        alt=""
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  </div>
+          {sections.map((section) => (
+            <React.Fragment key={section.id}>
+              <tr className="bg-base-200/90 hover:bg-base-200/90">
+                <td colSpan={7} className="font-semibold text-sm py-2.5">
+                  {t(section.titleKey)}
                 </td>
-                <td>
-                  <span className="font-medium">{lineDisplayName(line)}</span>
-                  {line.extra_keys_qty > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-0.5">
-                      <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
-                    </div>
-                  )}
-                </td>
-                <td className="text-center tabular-nums">{line.quantity}</td>
-                <td className="text-end tabular-nums">{line.unit_price != null ? `${Number(line.unit_price).toFixed(2)} €` : ''}</td>
-                <td className="text-end tabular-nums">{extraKeysTotal != null ? `${Number(extraKeysTotal).toFixed(2)} €` : ''}</td>
-                <td className="text-center w-24 min-w-24">
-                  {line.pack?.contains_keys ? (line.keys_all_same ? t('common.yes') : t('common.no')) : ''}
-                </td>
-                <td className="text-end font-medium tabular-nums">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
               </tr>
-            );
-          })}
+              {section.lines.map((line) => {
+                const extraKeysTotal = line.extra_keys_qty > 0 && line.extra_key_unit_price != null
+                  ? line.extra_keys_qty * line.extra_key_unit_price
+                  : null;
+                const targetUrl = lineTargetUrl(line);
+                return (
+                  <tr
+                    key={line.id}
+                    role={targetUrl ? 'button' : undefined}
+                    tabIndex={targetUrl ? 0 : undefined}
+                    onClick={targetUrl ? () => navigate(targetUrl) : undefined}
+                    onKeyDown={targetUrl ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(targetUrl);
+                      }
+                    } : undefined}
+                    className={targetUrl ? 'cursor-pointer hover:bg-base-200/50' : ''}
+                  >
+                    <td>
+                      <div className="avatar">
+                        <div className="mask mask-squircle w-10 h-10 bg-base-300">
+                          <img
+                            src={line.image_url || PLACEHOLDER_IMAGE}
+                            alt=""
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="font-medium">{lineDisplayName(line)}</span>
+                      {line.extra_keys_qty > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="text-center tabular-nums">{line.quantity}</td>
+                    <td className="text-end tabular-nums">{line.unit_price != null ? `${Number(line.unit_price).toFixed(2)} €` : ''}</td>
+                    <td className="text-end tabular-nums">{extraKeysTotal != null ? `${Number(extraKeysTotal).toFixed(2)} €` : ''}</td>
+                    <td className="text-center w-24 min-w-[6rem]">{keysSameLabel(line, t)}</td>
+                    <td className="text-end font-medium tabular-nums">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
+                  </tr>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </tbody>
       </table>
     </div>
@@ -135,11 +158,9 @@ function OrderLinesMobileCards({ lines, t }) {
                   <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
                 </div>
               )}
-              {line.pack?.contains_keys && (
-                <p className="text-sm text-base-content/70 mt-0.5">
-                  {t('admin.orders.keys_same')}: {line.keys_all_same ? t('common.yes') : t('common.no')}
-                </p>
-              )}
+              <p className="text-sm text-base-content/70 mt-0.5">
+                {t('admin.orders.keys_same')}: {keysSameLabel(line, t)}
+              </p>
               <div className="flex flex-wrap items-center gap-2 mt-1 text-sm">
                 <span className="tabular-nums">{t('admin.orders.line_quantity')}: {line.quantity}</span>
                 <span className="tabular-nums font-medium">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</span>
@@ -383,29 +404,35 @@ export default function AdminOrderShowPage() {
           {productLines.length === 0 && packLines.length === 0 ? (
             <p className="text-base-content/70 py-4">{t('admin.orders.no_lines')}</p>
           ) : (
-            <div className="space-y-8">
-              {productLines.length > 0 && (
-                <section className="space-y-3" aria-labelledby="admin-order-lines-products-heading">
-                  <h3 id="admin-order-lines-products-heading" className="text-base font-semibold text-base-content">
-                    {t('admin.orders.lines_products')}
-                  </h3>
-                  <OrderLinesDesktopTable lines={productLines} navigate={navigate} t={t} />
-                  <OrderLinesMobileCards lines={productLines} t={t} />
-                </section>
-              )}
-              {packLines.length > 0 && (
-                <section className="space-y-3" aria-labelledby="admin-order-lines-packs-heading">
-                  <h3 id="admin-order-lines-packs-heading" className="text-base font-semibold text-base-content">
-                    {t('admin.orders.lines_packs')}
-                  </h3>
-                  <OrderLinesDesktopTable lines={packLines} navigate={navigate} t={t} />
-                  <OrderLinesMobileCards lines={packLines} t={t} />
-                </section>
-              )}
+            <div className="space-y-6">
+              <OrderLinesDesktopTable
+                productLines={productLines}
+                packLines={packLines}
+                navigate={navigate}
+                t={t}
+              />
+              <div className="flex flex-col gap-6 sm:hidden">
+                {productLines.length > 0 && (
+                  <section className="space-y-3" aria-labelledby="admin-order-lines-products-heading">
+                    <h3 id="admin-order-lines-products-heading" className="text-base font-semibold text-base-content">
+                      {t('admin.orders.lines_products')}
+                    </h3>
+                    <OrderLinesMobileCards lines={productLines} t={t} />
+                  </section>
+                )}
+                {packLines.length > 0 && (
+                  <section className="space-y-3" aria-labelledby="admin-order-lines-packs-heading">
+                    <h3 id="admin-order-lines-packs-heading" className="text-base font-semibold text-base-content">
+                      {t('admin.orders.lines_packs')}
+                    </h3>
+                    <OrderLinesMobileCards lines={packLines} t={t} />
+                  </section>
+                )}
+              </div>
             </div>
           )}
-          <div className="flex justify-end pt-4 mt-4 border-t border-base-200">
-            <p className="text-lg font-semibold tabular-nums">
+          <div className="pt-4 mt-4 border-t border-base-200 w-full">
+            <p className="text-lg font-semibold tabular-nums text-end">
               {t('admin.orders.total')}: {order.total != null ? Number(order.total).toFixed(2) : '0.00'} €
             </p>
           </div>

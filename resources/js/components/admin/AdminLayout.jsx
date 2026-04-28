@@ -7,6 +7,7 @@ import { AdminToastProvider } from '../../contexts/AdminToastContext';
 import { APP_VERSION } from '../../config/version';
 
 const SECTION_NAV_KEYS = {
+  about: 'admin.nav.about',
   'data-explorer': 'admin.nav.data_explorer',
   settings: 'admin.nav.settings',
   admins: 'admin.nav.admins',
@@ -114,7 +115,8 @@ export default function AdminLayout() {
       { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
     ];
     const sorted = [...mainItems].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
-    return [dashboard, ...sorted];
+    const about = { to: '/admin/about', labelKey: 'admin.nav.about', alertKey: null };
+    return [dashboard, ...sorted, about];
   }, [t]);
 
   const [navAlerts, setNavAlerts] = useState({

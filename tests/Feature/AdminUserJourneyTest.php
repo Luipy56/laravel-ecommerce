@@ -53,6 +53,7 @@ class AdminUserJourneyTest extends TestCase
             '/api/v1/admin/personalized-solutions',
             '/api/v1/admin/personalized-solutions/1',
             '/api/v1/admin/nav-alerts',
+            '/api/v1/admin/changelog',
             '/api/v1/admin/settings',
             '/api/v1/shop/public-settings',
             '/api/v1/admin/stats/postal-codes',

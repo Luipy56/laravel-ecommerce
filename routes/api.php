@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminAboutController;
 use App\Http\Controllers\Api\AdminAdminController;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminCategoryController;
@@ -100,6 +101,7 @@ Route::middleware('auth')->group(function () {
 /* ------------------------ Admin ------------------------ */
 Route::post('admin/login', [AdminAuthController::class, 'login']);
 Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
+    Route::get('changelog', [AdminAboutController::class, 'changelog']);
     Route::get('nav-alerts', [AdminNavAlertsController::class, 'show']);
     Route::post('logout', [AdminAuthController::class, 'logout']);
     Route::get('settings', [AdminShopSettingsController::class, 'show']);

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
   "name": "e-commerce",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "private": true,
   "type": "module",
   "scripts": {
@@ -29,6 +29,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-i18next": "^15.1.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.0.0",
     "recharts": "^2.15.0",
     "zod": "^3.25.76"

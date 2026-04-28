@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.30] - 2026-04-30
+
+### Added
+
+- **Admin · About (`/admin/about`):** Sidebar entry **About / Quant a / Acerca de** with application version (**`APP_VERSION`**), development team (Luipy56, Laia Martín de la Fuente), technical stack summary (ca / es / en), and the **full repository changelog** loaded dynamically from **`CHANGELOG.md`** via **`GET /api/v1/admin/changelog`** (**`AdminAboutController`**). Markdown rendered in the SPA with **react-markdown**.
+
 ### Changed
+
+- **Admin order detail (`AdminOrderShowPage`):** One desktop **table** for both Products and Packs so column widths align; header **`admin.orders.line_name`** (Nom / Nombre / Name); order total uses **`text-end`**; **Llaves iguales** shows **No** when the field does not apply (no blank cells).
 
 - **Vite dev:** `npm run dev` now sets **`LARAVEL_VITE_NO_AUTO_RELOAD=1`** with **cross-env** (Windows-safe), disabling WebSocket HMR, React Fast Refresh, and Laravel plugin full-page refresh; use **`npm run dev:hmr`** for the previous default. Added devDependency **cross-env**; **`vite.config.js`** uses explicit **`hmr: true`** when hot reload is enabled.
 

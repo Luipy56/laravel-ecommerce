@@ -14,6 +14,7 @@ import PackDetailPage from './Pages/PackDetailPage';
 import CartPage from './Pages/CartPage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
+import EmailVerifyPage from './Pages/EmailVerifyPage';
 import CheckoutPage from './Pages/CheckoutPage';
 import OrdersPage from './Pages/OrdersPage';
 import PurchasesPage from './Pages/PurchasesPage';
@@ -102,6 +103,7 @@ export default function App() {
                   <Route path="cart" element={<CartPage />} />
                   <Route path="login" element={<LoginPage />} />
                   <Route path="register" element={<RegisterPage />} />
+                  <Route path="verify-email" element={<EmailVerifyPage />} />
                   <Route path="faq" element={<FaqPage />} />
                   <Route path="forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="reset-password" element={<ResetPasswordPage />} />

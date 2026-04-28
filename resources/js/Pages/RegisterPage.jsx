@@ -59,7 +59,7 @@ export default function RegisterPage() {
       const result = await register(parsed.data);
       if (result.success) {
         await mergeCart();
-        navigate('/');
+        navigate('/verify-email?next=/');
       } else {
         const firstError = result.errors && Object.values(result.errors).flat()[0];
         setError(firstError || result.message || t('common.error'));

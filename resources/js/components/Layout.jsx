@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
-import EmailVerificationBanner from './EmailVerificationBanner';
 import CartWidget from './CartWidget';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
@@ -31,7 +30,6 @@ export default function Layout() {
       <div className="drawer-content flex min-h-screen flex-col bg-base-200">
         <Navbar />
         <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
-          <EmailVerificationBanner />
           <Outlet />
         </main>
         <Footer />

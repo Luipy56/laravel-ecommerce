@@ -19,9 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FAQ:** `faqs` table, public **`GET /faqs`**, admin **`apiResource`**, storefront FAQ page and admin CRUD (ca / es / en).
 - **Delivery note (albarán):** **`GET /orders/{order}/delivery-note`** (same rules as invoice), Blade **`pdf/delivery_note`**, links on order detail and orders list.
 
-- **Storefront / admin navigation:** React routes **`/faq`**, **`/forgot-password`**, **`/reset-password`**, admin **`/admin/faqs`** (and new/edit); **FAQ** and **forgot password** links in navbar, footer, and login; **email verification** banner on layout; **register** hint about confirmation email; **login** success line when opening **`/login?verified=1`** after email verification.
+- **Storefront / admin navigation:** React routes **`/faq`**, **`/forgot-password`**, **`/reset-password`**, **`/verify-email`**, admin **`/admin/faqs`** (and new/edit); **FAQ** and **forgot password** links in navbar, footer, and login; **register** hint about the verification screen; **login** success line when opening **`/login?verified=1`** after email verification.
 
 ### Changed
+
+- **Email verification UX:** Removed **`EmailVerificationBanner`**. Dedicated **`/verify-email`** page (copy, **resend** with cooldown, **poll** **`GET user`**, **`navigate`** to **`next`** when verified); **register** → **`/verify-email?next=/`**, unverified **login** → **`/verify-email?next=…`**; **`AuthContext`** **`login`** / **`register`** now return **`user`** for redirects.
 
 - **Storefront / admin forms:** On failed submit (Zod or API error), the UI scrolls so feedback is visible: **`scrollWindowToTopOnFormError()`** for full-page and drawer forms, **`scrollOpenModalBoxToTop()`** for daisyUI modals (profile address/contact). Shared helpers in **`resources/js/lib/formScroll.js`**; pattern documented in **`.cursor/rules/react-use.mdc`**.
 

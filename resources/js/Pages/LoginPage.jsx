@@ -41,6 +41,10 @@ export default function LoginPage() {
           next && next.startsWith('/') && !next.startsWith('//')
             ? next
             : '/';
+        if (result.user && !result.user.email_verified) {
+          navigate(`/verify-email?next=${encodeURIComponent(safeNext)}`);
+          return;
+        }
         navigate(safeNext);
       } else {
         const msg = result.errors?.login_email?.[0] || result.message || t('auth.failed');

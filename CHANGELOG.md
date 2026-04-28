@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Verify email page:** Removed the **Home / Inicio** ghost button from **`EmailVerifyPage`**; navigation to **`next`** after verification is unchanged.
+- **Verify email page:** Removed the **Home / Inicio** ghost button from **`EmailVerifyPage`**; navigation to **`next`** after verification is unchanged. Primary **resend** control is **centered** in the card.
 
 - **Storefront navbar · language menu:** Replaced the plain **dropdown** with a **card** panel (title, **close** control, **gradient** highlight for the active locale, checkmark), **click-outside** and **Escape** to dismiss; trigger shows **CA/ES/EN** with clearer styling. New **`IconX`**, i18n **`common.language`**.
 

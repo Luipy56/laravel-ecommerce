@@ -18,6 +18,7 @@ const SECTION_NAV_KEYS = {
   orders: 'admin.nav.orders',
   'personalized-solutions': 'admin.nav.personalized_solutions',
   features: 'admin.nav.features',
+  faqs: 'admin.nav.faqs',
   'feature-names': 'admin.nav.feature_types',
   packs: 'admin.nav.packs',
 };
@@ -27,6 +28,7 @@ const SECTION_NEW_KEYS = {
   categories: 'admin.categories.new',
   products: 'admin.products.new',
   features: 'admin.features.new',
+  faqs: 'admin.faqs.new',
   'feature-names': 'admin.feature_types.new',
   packs: 'admin.packs.new',
   'variant-groups': 'admin.variant_groups.new',
@@ -110,6 +112,7 @@ export default function AdminLayout() {
       { to: '/admin/orders', labelKey: 'admin.nav.orders', alertKey: 'orders' },
       { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions', alertKey: 'personalized_solutions' },
       { to: '/admin/features', labelKey: 'admin.nav.features', alertKey: null },
+      { to: '/admin/faqs', labelKey: 'admin.nav.faqs', alertKey: null },
       { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
     ];
     const primarySorted = [...primarySource].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));

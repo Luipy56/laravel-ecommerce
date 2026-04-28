@@ -78,6 +78,7 @@ export default function RegisterPage() {
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.register')}</h1>
         <p className="text-sm text-base-content/70">{t('register.required_note')}</p>
+        <p className="text-sm text-base-content/70">{t('register.verify_email_hint')}</p>
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && <div className="alert alert-error text-sm">{error}</div>}
 

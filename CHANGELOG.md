@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FAQ:** `faqs` table, public **`GET /faqs`**, admin **`apiResource`**, storefront FAQ page and admin CRUD (ca / es / en).
 - **Delivery note (albarán):** **`GET /orders/{order}/delivery-note`** (same rules as invoice), Blade **`pdf/delivery_note`**, links on order detail and orders list.
 
+- **Storefront / admin navigation:** React routes **`/faq`**, **`/forgot-password`**, **`/reset-password`**, admin **`/admin/faqs`** (and new/edit); **FAQ** and **forgot password** links in navbar, footer, and login; **email verification** banner on layout; **register** hint about confirmation email; **login** success line when opening **`/login?verified=1`** after email verification.
+
 ### Changed
 
 - **App version in SPA:** **`welcome.blade.php`** sets **`window.__LARAVEL_APP_VERSION__`** from **`config('app.version')`**; **`resources/js/config/version.js`** prefers it over Vite **`define`** so admin sidebar / footer match **`package.json`** without restarting the dev server.

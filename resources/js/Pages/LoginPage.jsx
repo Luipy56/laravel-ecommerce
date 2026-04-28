@@ -11,6 +11,7 @@ export default function LoginPage() {
   const { mergeCart } = useCart();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const verifiedFromEmail = searchParams.get('verified') === '1';
   const [loginEmail, setLoginEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -56,6 +57,11 @@ export default function LoginPage() {
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.login')}</h1>
         <form onSubmit={handleSubmit} className="space-y-5">
+          {verifiedFromEmail ? (
+            <div className="alert alert-success text-sm" role="status">
+              {t('auth.verify_success_banner')}
+            </div>
+          ) : null}
           {error && <div className="alert alert-error text-sm">{error}</div>}
           <label htmlFor="login-email" className="form-field w-full">
             <span className="form-label">{t('auth.email')}</span>
@@ -89,6 +95,11 @@ export default function LoginPage() {
             />
             {fieldErrors.password ? <p className="validator-hint text-error">{fieldErrors.password}</p> : null}
           </label>
+          <div className="text-end -mt-2">
+            <Link to="/forgot-password" className="link link-primary text-sm">
+              {t('auth.forgot_link')}
+            </Link>
+          </div>
           <label htmlFor="login-remember" className="label cursor-pointer justify-start gap-2">
             <input id="login-remember" type="checkbox" className="checkbox checkbox-sm" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
             <span className="label-text">{t('auth.remember')}</span>

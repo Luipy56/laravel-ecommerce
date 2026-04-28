@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Admin layout:** Sidebar **`menu`** split into **catalog / ops** links (Panel + sorted resources) and a **second block** (**Settings**, **Data explorer**, **About**, **Back to shop**) separated by a **horizontal rule**.
+
 - **API + storefront locale:** `Accept-Language` (ca / es / en) is sent on all **`api`** requests and middleware **`SetApiLocaleFromAcceptLanguage`** sets the app locale so **validation** messages (e.g. postal **regex**) match the UI language. Custom **`lang/*/validation.php`** entries for postal fields; **`CustomSolutionPage`** shows API errors via **`messageFromApiValidationError`** and scrolls the **title + alert** block with **`scroll-mt-24` / `lg:scroll-mt-16`** so content sits below the fixed navbar.
 
 - **Admin / personalized solution resolution modal:** Title is a single word (**`resolution_modal_title`**); status field uses **`select-md`**, **`text-base`**, **`max-w-md`**, and **`gap-8`** before the textarea; textarea label **`resolution_modal_text_label`** (*Texto de la resolución* / …).

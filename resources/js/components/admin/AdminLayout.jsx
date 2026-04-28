@@ -208,43 +208,11 @@ export default function AdminLayout() {
             </span>
           </div>
           <ul className="menu p-4 flex-1">
-            {navItems.map(({ to, labelKey, alertKey }) => {
-              const showAttentionDot =
-                alertKey === 'orders'
-                  ? navAlerts.orders
-                  : alertKey === 'personalized_solutions'
-                    ? navAlerts.personalized_solutions
-                    : false;
-              const linkAria =
-                showAttentionDot && alertKey
-                  ? `${t(labelKey)} · ${t(`admin.nav.alert_link_suffix_${alertKey}`)}`
-                  : undefined;
-              return (
-                <li key={to}>
-                  <Link
-                    to={to}
-                    className={`rounded-lg flex items-center justify-between gap-2 ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
-                    onClick={closeDrawer}
-                    aria-current={isActive(to) ? 'page' : undefined}
-                    aria-label={linkAria}
-                  >
-                    <span className="min-w-0 flex-1">{t(labelKey)}</span>
-                    {showAttentionDot ? (
-                      <span
-                        className="size-2 shrink-0 rounded-full bg-warning"
-                        aria-hidden="true"
-                        title={t(`admin.nav.alert_link_suffix_${alertKey}`)}
-                      />
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            })}
-            <li>
-              <Link to="/" className="rounded-lg" onClick={closeDrawer}>
-                {t('admin.back_to_shop')}
-              </Link>
+            {primaryNavItems.map(renderNavMenuItem)}
+            <li className="pointer-events-none px-1 py-2" aria-hidden="true">
+              <div className="h-px w-full bg-base-300" role="separator" />
             </li>
+            {secondaryNavItems.map(renderNavMenuItem)}
           </ul>
           <div className="p-4 border-t border-base-200">
             <button type="button" className="btn btn-ghost btn-block justify-start" onClick={handleLogout}>

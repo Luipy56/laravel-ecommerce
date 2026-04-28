@@ -4,10 +4,16 @@ import { useTranslation } from 'react-i18next';
 import useApiPendingCount from '../hooks/useApiPendingCount';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { IconCart, IconMenu } from './icons';
+import { IconCart, IconMenu, IconX } from './icons';
 
 const SCROLL_THRESHOLD = 10;   // px: below this, navbar is always visible
 const SCROLL_DELTA = 5;        // px: min scroll movement to consider direction
+
+const LANGUAGE_OPTIONS = [
+  { code: 'ca', label: 'Català' },
+  { code: 'es', label: 'Español' },
+  { code: 'en', label: 'English' },
+];
 
 function CartDropTarget({ to, className, children, ariaLabel, title }) {
   const { addLine } = useCart();
@@ -46,6 +52,8 @@ export default function Navbar() {
   const lastScrollY = useRef(0);
   const debounceTimerRef = useRef(null);
   const hasUserEditedSearchRef = useRef(false);
+  const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
+  const localeMenuRef = useRef(null);
 
   // Sync search input with URL when on product list (so clearing + Enter updates list)
   useEffect(() => {
@@ -76,7 +84,26 @@ export default function Navbar() {
     i18n.changeLanguage(lng);
     setLocale(lng);
     localStorage.setItem('locale', lng);
+    setLocaleMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!localeMenuOpen) return;
+    const onDocMouseDown = (e) => {
+      if (localeMenuRef.current && !localeMenuRef.current.contains(e.target)) {
+        setLocaleMenuOpen(false);
+      }
+    };
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setLocaleMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [localeMenuOpen]);
 
   const handleLogout = async () => {
     await logout();
@@ -179,15 +206,62 @@ export default function Navbar() {
             </form>
           </div>
           <div className="navbar-end gap-1 sm:gap-2 shrink-0">
-            <div className="dropdown dropdown-end">
-              <label tabIndex={0} className="btn btn-ghost btn-sm btn-square sm:btn-sm">
-                {localeCode(locale)}
-              </label>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-36 p-2 shadow">
-                <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
-                <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
-                <li><button type="button" onClick={() => handleLocale('en')}>English</button></li>
-              </ul>
+            <div
+              ref={localeMenuRef}
+              className={`dropdown dropdown-end ${localeMenuOpen ? 'dropdown-open' : ''}`}
+            >
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm btn-square sm:btn-sm border border-transparent hover:border-base-300"
+                aria-expanded={localeMenuOpen}
+                aria-haspopup="listbox"
+                aria-label={t('common.language')}
+                onClick={() => setLocaleMenuOpen((o) => !o)}
+              >
+                <span className="font-semibold tracking-wide text-xs sm:text-sm">{localeCode(locale)}</span>
+              </button>
+              <div className="dropdown-content z-[60] mt-2 max-sm:right-0 max-sm:left-auto sm:right-0">
+                <div className="card card-border w-[min(18rem,calc(100vw-1.5rem))] sm:w-52 border border-base-300 bg-base-100 shadow-xl">
+                  <div className="flex items-center justify-between gap-3 border-b border-base-200 px-3 py-2.5">
+                    <span className="text-sm font-semibold text-base-content">{t('common.language')}</span>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm btn-square shrink-0"
+                      aria-label={t('common.close')}
+                      onClick={() => setLocaleMenuOpen(false)}
+                    >
+                      <IconX className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <ul className="menu menu-sm p-2 gap-0.5" role="listbox" aria-label={t('common.language')}>
+                    {LANGUAGE_OPTIONS.map(({ code, label }) => {
+                      const selected = locale === code;
+                      return (
+                        <li key={code} role="none">
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
+                            className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left active:bg-base-200 ${
+                              selected
+                                ? 'bg-gradient-to-r from-primary/15 to-secondary/10 font-medium text-primary'
+                                : 'hover:bg-base-200'
+                            }`}
+                            onClick={() => handleLocale(code)}
+                          >
+                            <span>{label}</span>
+                            {selected ? (
+                              <span className="text-primary text-xs font-bold tabular-nums" aria-hidden>
+                                ✓
+                              </span>
+                            ) : null}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
             </div>
             <CartDropTarget
               to="/cart"

@@ -13,6 +13,7 @@
   "common.error": "An error has occurred.",
   "common.confirm": "Confirm",
   "common.close": "Close",
+  "common.language": "Language",
   "common.yes": "Yes",
   "common.no": "No",
   "common.menu": "Menu",
@@ -690,7 +691,7 @@
   "admin.settings.overstock_blacklist_enabled": "Exclude listed product IDs from this rule",
   "admin.settings.section_personalized": "Custom solutions",
   "admin.settings.accept_personalized_solutions": "Accept new custom solution requests from the storefront",
-  "admin.settings.recalculate_trending": "Recalculate automatic highlights from configuration",
+  "admin.settings.recalculate_trending": "Recalculate featured",
   "admin.settings.recalculate_done": "Automatic highlights updated for {{count}} products.",
   "admin.products.is_trending_managed_by_settings": "This flag is updated from Configuration using stock rules and “Recalculate automatic highlights”.",
   "shop.custom_solution.disabled_public": "We are not accepting new custom solution requests at the moment."

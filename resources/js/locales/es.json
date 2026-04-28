@@ -13,6 +13,7 @@
   "common.error": "Se ha producido un error.",
   "common.confirm": "Confirmar",
   "common.close": "Cerrar",
+  "common.language": "Idioma",
   "common.yes": "Sí",
   "common.no": "No",
   "common.menu": "Menú",
@@ -690,7 +691,7 @@
   "admin.settings.overstock_blacklist_enabled": "Excluir los IDs de producto de esta regla",
   "admin.settings.section_personalized": "Soluciones personalizadas",
   "admin.settings.accept_personalized_solutions": "Aceptar nuevas solicitudes de solución personalizada desde la tienda",
-  "admin.settings.recalculate_trending": "Recalcular destacados automáticos según la configuración",
+  "admin.settings.recalculate_trending": "Recalcular Destacados",
   "admin.settings.recalculate_done": "Se han actualizado los destacados automáticos para {{count}} productos.",
   "admin.products.is_trending_managed_by_settings": "Este indicador se actualiza desde Configuración con las reglas de stock y «Recalcular destacados automáticos».",
   "shop.custom_solution.disabled_public": "En este momento no aceptamos nuevas solicitudes de solución personalizada."

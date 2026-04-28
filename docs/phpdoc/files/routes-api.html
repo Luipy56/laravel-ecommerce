@@ -1,771 +1,309 @@
 <!DOCTYPE html>
-<html lang="en" id="top-of-site">
-	<head>
-		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<meta charset="utf-8"/>
-		<title>
-							Laravel E-commerce — Application code
-					</title>
-		<meta name="author" content=""/>
-		<meta name="description" content=""/>
-		<base href="../">
-
-		<link href="resources/css/bootstrap.min.css" rel="stylesheet" media="all"/>
-		<link href="resources/css/bootstrap-responsive.min.css" rel="stylesheet" media="all"/>
-		<link href="resources/css/style.css" rel="stylesheet" media="all"/>
-		<link href="resources/css/prism.min.css" rel="stylesheet" media="all"/>
-		<link href="resources/font/css/all.min.css" rel="stylesheet" media="all"/>
-		
-		<link rel="shortcut icon" href="resources/images/favicon.ico"/>
-		<link rel="apple-touch-icon" href="resources/images/apple-touch-icon.png"/>
-		<link rel="apple-touch-icon" sizes="72x72" href="resources/images/apple-touch-icon-72x72.png"/>
-		<link rel="apple-touch-icon" sizes="114x114" href="resources/images/apple-touch-icon-114x114.png"/>
-	</head>
-	<body>
-
-		<nav class="navbar navbar-fixed-top navbar-inverse">
-			<div class="navbar-inner">
-				<div class="container">
-					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-						<i class="fa-solid fa-bars"></i>
-					</a>
-					<a class="brand" href="index.html">Laravel E-commerce — Application code</a>
-
-					<div class="nav-collapse navbar-responsive-collapse collapse">
-						<ul class="nav pull-right">
-															<li class="dropdown" id="api-menu">
-									<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-labelledby="api-menu">
-										API Documentation
-										<b class="caret"></b>
-									</a>
-									<ul class="dropdown-menu" role="menu" aria-labelledby="api-menu">
-																					<li><a href="namespaces/app.html"><abbr title="\App">App</abbr></a></li>
-																			</ul>
-								</li>
-																					<li class="dropdown">
-								<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-									Reports
-									<b class="caret"></b>
-								</a>
-								<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-									<li>
-										<a href="reports/errors.html">
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															<i class="fa-solid fa-bug"></i>&#160;Errors
-											<span class="label label-important pull-right">0</span>
-										</a>
-									</li>
-									<li>
-										<a href="reports/markers.html">
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																															<i class="fa-solid fa-location-dot"></i>&#160;&#160;Markers
-											<span class="label label-warning pull-right">0</span>
-										</a>
-									</li>
-									<li>
-										<a href="reports/deprecated.html">
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																													<i class="fa-solid fa-file-circle-xmark"></i>&#160;Deprecated
-											<span class="label label-info pull-right">0</span>
-										</a>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-			<div class="go_to_top">
-				<a href="#top-of-site" style="color: inherit">Back To Top&#160;&#160;<i class="fa-solid fa-chevron-up"></i></a>
-			</div>
-		</nav>
-
-		<div id="___" class="container-fluid"> 	<section class="row-fluid">
-		<div class="span2 sidebar">
-								<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-900172667"></a>
-								<a href="namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
-			</div>
-			<div id="namespace-900172667" class="accordion-body collapse in">
-				<div class="accordion-inner">
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-597775450"></a>
-								<a href="namespaces/app.html" style="margin-left: 30px; padding-left: 0">App</a>
-			</div>
-			<div id="namespace-597775450" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1649971949"></a>
-								<a href="namespaces/app-console.html" style="margin-left: 30px; padding-left: 0">Console</a>
-			</div>
-			<div id="namespace-1649971949" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-782334094"></a>
-								<a href="namespaces/app-console-commands.html" style="margin-left: 30px; padding-left: 0">Commands</a>
-			</div>
-			<div id="namespace-782334094" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Console-Commands-PayPalTestCredentialsCommand.html"><abbr title="\App\Console\Commands\PayPalTestCredentialsCommand">PayPalTestCredentialsCommand</abbr></a></li>
-													<li class="class"><a href="classes/App-Console-Commands-RebuildProductSearchTextCommand.html"><abbr title="\App\Console\Commands\RebuildProductSearchTextCommand">RebuildProductSearchTextCommand</abbr></a></li>
-													<li class="class"><a href="classes/App-Console-Commands-ReindexElasticsearchProductsCommand.html"><abbr title="\App\Console\Commands\ReindexElasticsearchProductsCommand">ReindexElasticsearchProductsCommand</abbr></a></li>
-													<li class="class"><a href="classes/App-Console-Commands-RouteSmokeCommand.html"><abbr title="\App\Console\Commands\RouteSmokeCommand">RouteSmokeCommand</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-					
-					<ul>
-																							</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-274459719"></a>
-								<a href="namespaces/app-contracts.html" style="margin-left: 30px; padding-left: 0">Contracts</a>
-			</div>
-			<div id="namespace-274459719" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-309290236"></a>
-								<a href="namespaces/app-contracts-payments.html" style="margin-left: 30px; padding-left: 0">Payments</a>
-			</div>
-			<div id="namespace-309290236" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-													<li class="interface"><a href="classes/App-Contracts-Payments-PaymentCheckoutStarter.html"><abbr title="\App\Contracts\Payments\PaymentCheckoutStarter">PaymentCheckoutStarter</abbr></a></li>
-																							</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1812875511"></a>
-								<a href="namespaces/app-contracts-search.html" style="margin-left: 30px; padding-left: 0">Search</a>
-			</div>
-			<div id="namespace-1812875511" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-													<li class="interface"><a href="classes/App-Contracts-Search-ElasticsearchProductCatalogSearch.html"><abbr title="\App\Contracts\Search\ElasticsearchProductCatalogSearch">ElasticsearchProductCatalogSearch</abbr></a></li>
-																							</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-					
-					<ul>
-													<li class="interface"><a href="classes/App-Contracts-RebuildsProductSearchText.html"><abbr title="\App\Contracts\RebuildsProductSearchText">RebuildsProductSearchText</abbr></a></li>
-																							</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-113153380"></a>
-								<a href="namespaces/app-events.html" style="margin-left: 30px; padding-left: 0">Events</a>
-			</div>
-			<div id="namespace-113153380" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Events-InstallationPriceWasAssigned.html"><abbr title="\App\Events\InstallationPriceWasAssigned">InstallationPriceWasAssigned</abbr></a></li>
-													<li class="class"><a href="classes/App-Events-OrderInstallationQuoteRequested.html"><abbr title="\App\Events\OrderInstallationQuoteRequested">OrderInstallationQuoteRequested</abbr></a></li>
-													<li class="class"><a href="classes/App-Events-OrderPaymentSucceeded.html"><abbr title="\App\Events\OrderPaymentSucceeded">OrderPaymentSucceeded</abbr></a></li>
-													<li class="class"><a href="classes/App-Events-OrderPlacedPaymentPending.html"><abbr title="\App\Events\OrderPlacedPaymentPending">OrderPlacedPaymentPending</abbr></a></li>
-													<li class="class"><a href="classes/App-Events-OrderShipped.html"><abbr title="\App\Events\OrderShipped">OrderShipped</abbr></a></li>
-													<li class="class"><a href="classes/App-Events-PersonalizedSolutionSubmitted.html"><abbr title="\App\Events\PersonalizedSolutionSubmitted">PersonalizedSolutionSubmitted</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1898850617"></a>
-								<a href="namespaces/app-exceptions.html" style="margin-left: 30px; padding-left: 0">Exceptions</a>
-			</div>
-			<div id="namespace-1898850617" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Exceptions-PaymentProviderNotConfiguredException.html"><abbr title="\App\Exceptions\PaymentProviderNotConfiguredException">PaymentProviderNotConfiguredException</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-807698609"></a>
-								<a href="namespaces/app-http.html" style="margin-left: 30px; padding-left: 0">Http</a>
-			</div>
-			<div id="namespace-807698609" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-756443401"></a>
-								<a href="namespaces/app-http-controllers.html" style="margin-left: 30px; padding-left: 0">Controllers</a>
-			</div>
-			<div id="namespace-756443401" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1083007517"></a>
-								<a href="namespaces/app-http-controllers-api.html" style="margin-left: 30px; padding-left: 0">Api</a>
-			</div>
-			<div id="namespace-1083007517" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Http-Controllers-Api-AdminAdminController.html"><abbr title="\App\Http\Controllers\Api\AdminAdminController">AdminAdminController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminAuthController.html"><abbr title="\App\Http\Controllers\Api\AdminAuthController">AdminAuthController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminCategoryController.html"><abbr title="\App\Http\Controllers\Api\AdminCategoryController">AdminCategoryController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminClientController.html"><abbr title="\App\Http\Controllers\Api\AdminClientController">AdminClientController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminDashboardController.html"><abbr title="\App\Http\Controllers\Api\AdminDashboardController">AdminDashboardController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminDataExplorerController.html"><abbr title="\App\Http\Controllers\Api\AdminDataExplorerController">AdminDataExplorerController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminFeatureController.html"><abbr title="\App\Http\Controllers\Api\AdminFeatureController">AdminFeatureController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminFeatureNameController.html"><abbr title="\App\Http\Controllers\Api\AdminFeatureNameController">AdminFeatureNameController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminOrderController.html"><abbr title="\App\Http\Controllers\Api\AdminOrderController">AdminOrderController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminPackController.html"><abbr title="\App\Http\Controllers\Api\AdminPackController">AdminPackController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminPersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\AdminPersonalizedSolutionController">AdminPersonalizedSolutionController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminProductController.html"><abbr title="\App\Http\Controllers\Api\AdminProductController">AdminProductController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminShopSettingsController.html"><abbr title="\App\Http\Controllers\Api\AdminShopSettingsController">AdminShopSettingsController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AdminVariantGroupController.html"><abbr title="\App\Http\Controllers\Api\AdminVariantGroupController">AdminVariantGroupController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-AuthController.html"><abbr title="\App\Http\Controllers\Api\AuthController">AuthController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-CartController.html"><abbr title="\App\Http\Controllers\Api\CartController">CartController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-CategoryController.html"><abbr title="\App\Http\Controllers\Api\CategoryController">CategoryController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-FeatureController.html"><abbr title="\App\Http\Controllers\Api\FeatureController">FeatureController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-OrderController.html"><abbr title="\App\Http\Controllers\Api\OrderController">OrderController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-PackController.html"><abbr title="\App\Http\Controllers\Api\PackController">PackController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-PaymentConfigController.html"><abbr title="\App\Http\Controllers\Api\PaymentConfigController">PaymentConfigController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-PaymentWebhookController.html"><abbr title="\App\Http\Controllers\Api\PaymentWebhookController">PaymentWebhookController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-PayPalPaymentController.html"><abbr title="\App\Http\Controllers\Api\PayPalPaymentController">PayPalPaymentController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-PersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\PersonalizedSolutionController">PersonalizedSolutionController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-ProductController.html"><abbr title="\App\Http\Controllers\Api\ProductController">ProductController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-PublicPersonalizedSolutionController.html"><abbr title="\App\Http\Controllers\Api\PublicPersonalizedSolutionController">PublicPersonalizedSolutionController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-PurchasedProductsController.html"><abbr title="\App\Http\Controllers\Api\PurchasedProductsController">PurchasedProductsController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-ShopPublicSettingsController.html"><abbr title="\App\Http\Controllers\Api\ShopPublicSettingsController">ShopPublicSettingsController</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Controllers-Api-UserController.html"><abbr title="\App\Http\Controllers\Api\UserController">UserController</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Http-Controllers-Controller.html"><abbr title="\App\Http\Controllers\Controller">Controller</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1914284538"></a>
-								<a href="namespaces/app-http-middleware.html" style="margin-left: 30px; padding-left: 0">Middleware</a>
-			</div>
-			<div id="namespace-1914284538" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Http-Middleware-EnsureAdmin.html"><abbr title="\App\Http\Middleware\EnsureAdmin">EnsureAdmin</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1099624275"></a>
-								<a href="namespaces/app-http-resources.html" style="margin-left: 30px; padding-left: 0">Resources</a>
-			</div>
-			<div id="namespace-1099624275" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Http-Resources-AdminPackResource.html"><abbr title="\App\Http\Resources\AdminPackResource">AdminPackResource</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Resources-AdminProductResource.html"><abbr title="\App\Http\Resources\AdminProductResource">AdminProductResource</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Resources-CategoryResource.html"><abbr title="\App\Http\Resources\CategoryResource">CategoryResource</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Resources-PackResource.html"><abbr title="\App\Http\Resources\PackResource">PackResource</abbr></a></li>
-													<li class="class"><a href="classes/App-Http-Resources-ProductResource.html"><abbr title="\App\Http\Resources\ProductResource">ProductResource</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-					
-					<ul>
-																							</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-248804195"></a>
-								<a href="namespaces/app-listeners.html" style="margin-left: 30px; padding-left: 0">Listeners</a>
-			</div>
-			<div id="namespace-248804195" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Listeners-SendInstallationPriceAssignedEmail.html"><abbr title="\App\Listeners\SendInstallationPriceAssignedEmail">SendInstallationPriceAssignedEmail</abbr></a></li>
-													<li class="class"><a href="classes/App-Listeners-SendOrderInstallationQuoteRequestAdminEmail.html"><abbr title="\App\Listeners\SendOrderInstallationQuoteRequestAdminEmail">SendOrderInstallationQuoteRequestAdminEmail</abbr></a></li>
-													<li class="class"><a href="classes/App-Listeners-SendOrderInstallationQuoteRequestEmail.html"><abbr title="\App\Listeners\SendOrderInstallationQuoteRequestEmail">SendOrderInstallationQuoteRequestEmail</abbr></a></li>
-													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentConfirmationEmail.html"><abbr title="\App\Listeners\SendOrderPaymentConfirmationEmail">SendOrderPaymentConfirmationEmail</abbr></a></li>
-													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentPendingAdminEmail.html"><abbr title="\App\Listeners\SendOrderPaymentPendingAdminEmail">SendOrderPaymentPendingAdminEmail</abbr></a></li>
-													<li class="class"><a href="classes/App-Listeners-SendOrderPaymentPendingEmail.html"><abbr title="\App\Listeners\SendOrderPaymentPendingEmail">SendOrderPaymentPendingEmail</abbr></a></li>
-													<li class="class"><a href="classes/App-Listeners-SendOrderShippedEmail.html"><abbr title="\App\Listeners\SendOrderShippedEmail">SendOrderShippedEmail</abbr></a></li>
-													<li class="class"><a href="classes/App-Listeners-SendPersonalizedSolutionAcknowledgementEmail.html"><abbr title="\App\Listeners\SendPersonalizedSolutionAcknowledgementEmail">SendPersonalizedSolutionAcknowledgementEmail</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1252841985"></a>
-								<a href="namespaces/app-mail.html" style="margin-left: 30px; padding-left: 0">Mail</a>
-			</div>
-			<div id="namespace-1252841985" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Mail-InstallationPriceAssignedMail.html"><abbr title="\App\Mail\InstallationPriceAssignedMail">InstallationPriceAssignedMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-OrderInstallationQuoteRequestedAdminMail.html"><abbr title="\App\Mail\OrderInstallationQuoteRequestedAdminMail">OrderInstallationQuoteRequestedAdminMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-OrderInstallationQuoteRequestedMail.html"><abbr title="\App\Mail\OrderInstallationQuoteRequestedMail">OrderInstallationQuoteRequestedMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-OrderPaymentConfirmedMail.html"><abbr title="\App\Mail\OrderPaymentConfirmedMail">OrderPaymentConfirmedMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-OrderPaymentPendingAdminMail.html"><abbr title="\App\Mail\OrderPaymentPendingAdminMail">OrderPaymentPendingAdminMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-OrderPaymentPendingMail.html"><abbr title="\App\Mail\OrderPaymentPendingMail">OrderPaymentPendingMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-OrderShippedMail.html"><abbr title="\App\Mail\OrderShippedMail">OrderShippedMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionImprovementRequestedAdminMail.html"><abbr title="\App\Mail\PersonalizedSolutionImprovementRequestedAdminMail">PersonalizedSolutionImprovementRequestedAdminMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionReceivedMail.html"><abbr title="\App\Mail\PersonalizedSolutionReceivedMail">PersonalizedSolutionReceivedMail</abbr></a></li>
-													<li class="class"><a href="classes/App-Mail-PersonalizedSolutionResolvedMail.html"><abbr title="\App\Mail\PersonalizedSolutionResolvedMail">PersonalizedSolutionResolvedMail</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1195396425"></a>
-								<a href="namespaces/app-models.html" style="margin-left: 30px; padding-left: 0">Models</a>
-			</div>
-			<div id="namespace-1195396425" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Models-Admin.html"><abbr title="\App\Models\Admin">Admin</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-Client.html"><abbr title="\App\Models\Client">Client</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-ClientAddress.html"><abbr title="\App\Models\ClientAddress">ClientAddress</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-ClientContact.html"><abbr title="\App\Models\ClientContact">ClientContact</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-Feature.html"><abbr title="\App\Models\Feature">Feature</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-FeatureName.html"><abbr title="\App\Models\FeatureName">FeatureName</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-Order.html"><abbr title="\App\Models\Order">Order</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-OrderAddress.html"><abbr title="\App\Models\OrderAddress">OrderAddress</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-OrderLine.html"><abbr title="\App\Models\OrderLine">OrderLine</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-Pack.html"><abbr title="\App\Models\Pack">Pack</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-PackImage.html"><abbr title="\App\Models\PackImage">PackImage</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-PackItem.html"><abbr title="\App\Models\PackItem">PackItem</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-Payment.html"><abbr title="\App\Models\Payment">Payment</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-PersonalizedSolution.html"><abbr title="\App\Models\PersonalizedSolution">PersonalizedSolution</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-PersonalizedSolutionAttachment.html"><abbr title="\App\Models\PersonalizedSolutionAttachment">PersonalizedSolutionAttachment</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-Product.html"><abbr title="\App\Models\Product">Product</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-ProductCategory.html"><abbr title="\App\Models\ProductCategory">ProductCategory</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-ProductImage.html"><abbr title="\App\Models\ProductImage">ProductImage</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-ProductVariantGroup.html"><abbr title="\App\Models\ProductVariantGroup">ProductVariantGroup</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-ShopSetting.html"><abbr title="\App\Models\ShopSetting">ShopSetting</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-StripeWebhookEvent.html"><abbr title="\App\Models\StripeWebhookEvent">StripeWebhookEvent</abbr></a></li>
-													<li class="class"><a href="classes/App-Models-User.html"><abbr title="\App\Models\User">User</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-370658573"></a>
-								<a href="namespaces/app-providers.html" style="margin-left: 30px; padding-left: 0">Providers</a>
-			</div>
-			<div id="namespace-370658573" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Providers-AppServiceProvider.html"><abbr title="\App\Providers\AppServiceProvider">AppServiceProvider</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1494934331"></a>
-								<a href="namespaces/app-scout.html" style="margin-left: 30px; padding-left: 0">Scout</a>
-			</div>
-			<div id="namespace-1494934331" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Scout-ElasticsearchClientFactory.html"><abbr title="\App\Scout\ElasticsearchClientFactory">ElasticsearchClientFactory</abbr></a></li>
-													<li class="class"><a href="classes/App-Scout-ElasticsearchEngine.html"><abbr title="\App\Scout\ElasticsearchEngine">ElasticsearchEngine</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-192881891"></a>
-								<a href="namespaces/app-services.html" style="margin-left: 30px; padding-left: 0">Services</a>
-			</div>
-			<div id="namespace-192881891" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1093201024"></a>
-								<a href="namespaces/app-services-payments.html" style="margin-left: 30px; padding-left: 0">Payments</a>
-			</div>
-			<div id="namespace-1093201024" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-2011119812"></a>
-								<a href="namespaces/app-services-payments-paypal.html" style="margin-left: 30px; padding-left: 0">PayPal</a>
-			</div>
-			<div id="namespace-2011119812" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Services-Payments-PayPal-PayPalCheckoutStarter.html"><abbr title="\App\Services\Payments\PayPal\PayPalCheckoutStarter">PayPalCheckoutStarter</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-Payments-PayPal-PayPalClient.html"><abbr title="\App\Services\Payments\PayPal\PayPalClient">PayPalClient</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-839204201"></a>
-								<a href="namespaces/app-services-payments-redsys.html" style="margin-left: 30px; padding-left: 0">Redsys</a>
-			</div>
-			<div id="namespace-839204201" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Services-Payments-Redsys-RedsysCheckoutStarter.html"><abbr title="\App\Services\Payments\Redsys\RedsysCheckoutStarter">RedsysCheckoutStarter</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-Payments-Redsys-RedsysSignature.html"><abbr title="\App\Services\Payments\Redsys\RedsysSignature">RedsysSignature</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1505112312"></a>
-								<a href="namespaces/app-services-payments-revolut.html" style="margin-left: 30px; padding-left: 0">Revolut</a>
-			</div>
-			<div id="namespace-1505112312" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Services-Payments-Revolut-RevolutCheckoutStarter.html"><abbr title="\App\Services\Payments\Revolut\RevolutCheckoutStarter">RevolutCheckoutStarter</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-187471017"></a>
-								<a href="namespaces/app-services-payments-stripe.html" style="margin-left: 30px; padding-left: 0">Stripe</a>
-			</div>
-			<div id="namespace-187471017" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Services-Payments-Stripe-StripeCheckoutStarter.html"><abbr title="\App\Services\Payments\Stripe\StripeCheckoutStarter">StripeCheckoutStarter</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-Payments-Stripe-StripeCredentials.html"><abbr title="\App\Services\Payments\Stripe\StripeCredentials">StripeCredentials</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Services-Payments-PaymentCheckoutService.html"><abbr title="\App\Services\Payments\PaymentCheckoutService">PaymentCheckoutService</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-Payments-PaymentCompletionService.html"><abbr title="\App\Services\Payments\PaymentCompletionService">PaymentCompletionService</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-85866904"></a>
-								<a href="namespaces/app-services-search.html" style="margin-left: 30px; padding-left: 0">Search</a>
-			</div>
-			<div id="namespace-85866904" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Services-Search-CatalogProductSearchService.html"><abbr title="\App\Services\Search\CatalogProductSearchService">CatalogProductSearchService</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-Search-ProductSearchService.html"><abbr title="\App\Services\Search\ProductSearchService">ProductSearchService</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-Search-ScoutElasticsearchProductCatalogSearch.html"><abbr title="\App\Services\Search\ScoutElasticsearchProductCatalogSearch">ScoutElasticsearchProductCatalogSearch</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-Search-SearchSynonymDictionary.html"><abbr title="\App\Services\Search\SearchSynonymDictionary">SearchSynonymDictionary</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Services-AdminDataExplorerService.html"><abbr title="\App\Services\AdminDataExplorerService">AdminDataExplorerService</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-ProductSearchTextRebuildService.html"><abbr title="\App\Services\ProductSearchTextRebuildService">ProductSearchTextRebuildService</abbr></a></li>
-													<li class="class"><a href="classes/App-Services-RecalculateTrendingProducts.html"><abbr title="\App\Services\RecalculateTrendingProducts">RecalculateTrendingProducts</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-													<div class="accordion" style="margin-bottom: 0">
-		<div class="accordion-group">
-			<div class="accordion-heading">
-									<a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-918123655"></a>
-								<a href="namespaces/app-support.html" style="margin-left: 30px; padding-left: 0">Support</a>
-			</div>
-			<div id="namespace-918123655" class="accordion-body collapse ">
-				<div class="accordion-inner">
-
-					
-					<ul>
-																									<li class="class"><a href="classes/App-Support-MailLocale.html"><abbr title="\App\Support\MailLocale">MailLocale</abbr></a></li>
-													<li class="class"><a href="classes/App-Support-SqliteDatabaseBootstrap.html"><abbr title="\App\Support\SqliteDatabaseBootstrap">SqliteDatabaseBootstrap</abbr></a></li>
-											</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-					
-					<ul>
-																							</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-					
-					<ul>
-																							</ul>
-				</div>
-			</div>
-		</div>
-	</div>
-
-		</div>
-	</section>
-	<section class="row-fluid">
-		<div class="span10 offset2">
-			<div class="row-fluid">
-				<div class="span8 content file">
-					<nav>											</nav>
-
-										<h1>
-						<small>routes</small>
-						api.php</h1>
-					<p>
-						<em></em>
-					</p>
-					
-
-					
-					
-									</div>
-
-				<aside class="span4 detailsbar">
-					<dl>
-													<dt>Package</dt>
-							<dd>
-								<div class="namespace-wrapper">\App</div>
-							</dd>
-						
-																			
-					</dl>
-					<h2>Tags</h2>
-					<table class="table table-condensed">
-																					<tr>
-									<td colspan="2">
-										<em>None found</em>
-									</td>
-								</tr>
-																		</table>
-
-				</aside>
-			</div>
-
-			
-			
-		</div>
-	</section>
-
-	<div id="source-view" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="source-view-label" aria-hidden="true">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-			<h3 id="source-view-label"></h3>
-		</div>
-		<div class="modal-body">
-			<pre data-src="files/routes/api.php.txt" class="language-php line-numbers"></pre>
-		</div>
-	</div>
-
-			<footer class="row-fluid">
-				<section class="span10 offset2">
-					<section class="row-fluid">
-						<section class="span10 offset1">
-							<section class="row-fluid footer-sections">
-								<section
-									class="span4">
-																		<h1>
-										<i class="fa-solid fa-code"></i>
-									</h1>
-									<div>
-										<ul>
-																							<li><a href="namespaces/app.html"><abbr title="\App">App</abbr></a></li>
-																					</ul>
-									</div>
-								</section>
-								<section
-									class="span4">
-																		<h1>
-										<i class="fa-solid fa-project-diagram"></i>
-									</h1>
-									<div>
-										<ul>
-											<li><a href="graphs/class.html">Class Hierarchy Diagram</a></li>
-										</ul>
-									</div>
-								</section>
-								<section
-									class="span4">
-																		<h1>
-										<i class="fa-solid fa-thumbtack"></i>
-									</h1>
-									<div>
-										<ul>
-											<li><a href="reports/errors.html">Errors</a></li>
-											<li><a href="reports/markers.html">Markers</a></li>
-										</ul>
-									</div>
-								</section>
-							</section>
-						</section>
-					</section>
-					<section class="row-fluid">
-						<section class="span10 offset1">
-							<hr/>
-							Documentation is powered by
-							<a href="https://www.phpdoc.org/">phpDocumentor
-							</a>
-							and authored
-							                    on
-							April 27th, 2026 at 14:52.
-						</section>
-					</section>
-				</section>
-			</footer>
-		</div>
-		<script src="resources/js/jquery-1.11.0.min.js"></script>
-		<script src="resources/js/ui/1.10.4/jquery-ui.min.js"></script>
-		<script src="resources/js/jquery.smooth-scroll.js"></script>
-		<script src="resources/js/prism.min.js"></script>
-		<script src="resources/js/bootstrap.js"></script>
-		<script src="resources/js/custom.js"></script>
-			</body>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+            <title>Laravel E-commerce — Application code</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../">
+    <link rel="icon" href="images/favicon.ico"/>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/base.css">
+            <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/template.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" integrity="sha256-ybRkN9dBjhcS2qrW1z+hfCxq+1aBdwyQM5wlQoQVt/0=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/themes/prism-okaidia.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.css">
+                <script src="https://cdn.jsdelivr.net/npm/fuse.js@3.4.6"></script>
+        <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2"></script>
+        <script src="js/template.js"></script>
+        <script src="js/search.js"></script>
+        <script defer src="js/searchIndex.js"></script>
+    </head>
+<body id="top">
+    <header class="phpdocumentor-header phpdocumentor-section">
+    <h1 class="phpdocumentor-title"><a href="" class="phpdocumentor-title__link">Laravel E-commerce — Application code</a></h1>
+    <input class="phpdocumentor-header__menu-button" type="checkbox" id="menu-button" name="menu-button" />
+    <label class="phpdocumentor-header__menu-icon" for="menu-button">
+        <i class="fas fa-bars"></i>
+    </label>
+    <section data-search-form class="phpdocumentor-search">
+    <label>
+        <span class="visually-hidden">Search for</span>
+        <svg class="phpdocumentor-search__icon" width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+            <line x1="12.4892" y1="12.2727" x2="19.1559" y2="18.9393" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <input type="search" class="phpdocumentor-field phpdocumentor-search__field" placeholder="Loading .." disabled />
+    </label>
+</section>
+
+    <nav class="phpdocumentor-topnav">
+    <ul class="phpdocumentor-topnav__menu">
+        </ul>
+</nav>
+</header>
+
+    <main class="phpdocumentor">
+        <div class="phpdocumentor-section">
+            <input class="phpdocumentor-sidebar__menu-button" type="checkbox" id="sidebar-button" name="sidebar-button" />
+<label class="phpdocumentor-sidebar__menu-icon" for="sidebar-button">
+    Menu
+</label>
+<aside class="phpdocumentor-column -three phpdocumentor-sidebar">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
+            <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/app.html" class="">App</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/app-console.html" class="">Console</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-contracts.html" class="">Contracts</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-events.html" class="">Events</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-exceptions.html" class="">Exceptions</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-http.html" class="">Http</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-listeners.html" class="">Listeners</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-mail.html" class="">Mail</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-models.html" class="">Models</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-providers.html" class="">Providers</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-scout.html" class="">Scout</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-services.html" class="">Services</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-support.html" class="">Support</a>
+                
+            </li>
+            </ul>
+
+                        </section>
+                <section class="phpdocumentor-sidebar__category -packages">
+            <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/App.html" class="">App</a>
+</h4>
+
+                        </section>
+            
+    <section class="phpdocumentor-sidebar__category -reports">
+        <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
+                <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
+    </section>
+
+    <section class="phpdocumentor-sidebar__category -indices">
+        <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
+    </section>
+</aside>
+
+            <div class="phpdocumentor-column -nine phpdocumentor-content">
+                                <section>
+                                        <ul class="phpdocumentor-breadcrumbs">
+    </ul>
+
+    <article class="phpdocumentor-element -file">
+        <h2 class="phpdocumentor-content__title">api.php</h2>
+
+        
+        
+        
+        
+
+
+        
+<h3 id="toc">
+    Table of Contents
+    <a href="files/routes-api.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+        
+        <div class="phpdocumentor-modal" id="source-view">
+    <div class="phpdocumentor-modal-bg" data-exit-button></div>
+    <div class="phpdocumentor-modal-container">
+        <div class="phpdocumentor-modal-content">
+            <pre style="max-height: 500px; overflow-y: scroll" data-src="files/routes/api.php.txt" class="language-php line-numbers linkable-line-numbers"></pre>
+        </div>
+        <button data-exit-button class="phpdocumentor-modal__close">&times;</button>
+    </div>
+</div>
+
+    <script type="text/javascript">
+        (function () {
+            function loadExternalCodeSnippet(el, url, line) {
+                Array.prototype.slice.call(el.querySelectorAll('pre[data-src]')).forEach((pre) => {
+                    const src = url || pre.getAttribute('data-src').replace(/\\/g, '/');
+                    const language = 'php';
+
+                    const code = document.createElement('code');
+                    code.className = 'language-' + language;
+                    pre.textContent = '';
+                    pre.setAttribute('data-line', line)
+                    code.textContent = 'Loading…';
+                    pre.appendChild(code);
+
+                    var xhr = new XMLHttpRequest();
+
+                    xhr.open('GET', src, true);
+
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState !== 4) {
+                            return;
+                        }
+
+                        if (xhr.status < 400 && xhr.responseText) {
+                            code.textContent = xhr.responseText;
+                            Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
+                            return;
+                        }
+
+                        if (xhr.status === 404) {
+                            code.textContent = '✖ Error: File could not be found';
+                            return;
+                        }
+
+                        if (xhr.status >= 400) {
+                            code.textContent = '✖ Error ' + xhr.status + ' while fetching file: ' + xhr.statusText;
+                            return;
+                        }
+
+                        code.textContent = '✖ Error: An unknown error occurred';
+                    };
+
+                    xhr.send(null);
+                });
+            }
+
+            const modalButtons = document.querySelectorAll("[data-modal]");
+            const openedAsLocalFile = window.location.protocol === 'file:';
+            if (modalButtons.length > 0 && openedAsLocalFile) {
+                console.warn(
+                    'Viewing the source code is unavailable because you are opening this page from the file:// scheme; ' +
+                    'browsers block XHR requests when a page is opened this way'
+                );
+            }
+
+            modalButtons.forEach(function (trigger) {
+                if (openedAsLocalFile) {
+                    trigger.setAttribute("hidden", "hidden");
+                }
+
+                trigger.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const modal = document.getElementById(trigger.dataset.modal);
+                    if (!modal) {
+                        console.error(`Modal with id "${trigger.dataset.modal}" could not be found`);
+                        return;
+                    }
+                    modal.classList.add("phpdocumentor-modal__open");
+
+                    loadExternalCodeSnippet(modal, trigger.dataset.src || null, trigger.dataset.line)
+                    const exits = modal.querySelectorAll("[data-exit-button]");
+                    exits.forEach(function (exit) {
+                        exit.addEventListener("click", function (event) {
+                            event.preventDefault();
+                            modal.classList.remove("phpdocumentor-modal__open");
+                        });
+                    });
+                });
+            });
+        })();
+    </script>
+
+    </article>
+                                </section>
+                <section class="phpdocumentor-on-this-page__sidebar">
+                            
+    <section class="phpdocumentor-on-this-page__content">
+        <strong class="phpdocumentor-on-this-page__title">On this page</strong>
+
+        <ul class="phpdocumentor-list -clean">
+            <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                                                                                                                                                                </ul>
+            </li>
+
+            
+                    </ul>
+    </section>
+
+                </section>
+                            </div>
+            <section data-search-results class="phpdocumentor-search-results phpdocumentor-search-results--hidden">
+    <section class="phpdocumentor-search-results__dialog">
+        <header class="phpdocumentor-search-results__header">
+            <h2 class="phpdocumentor-search-results__title">Search results</h2>
+            <button class="phpdocumentor-search-results__close"><i class="fas fa-times"></i></button>
+        </header>
+        <section class="phpdocumentor-search-results__body">
+            <ul class="phpdocumentor-search-results__entries"></ul>
+        </section>
+    </section>
+</section>
+        </div>
+        <a href="files/routes-api.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+
+    </main>
+
+    <script>
+        cssVars({});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+</body>
 </html>

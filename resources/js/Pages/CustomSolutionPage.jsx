@@ -5,7 +5,7 @@ import { api } from '../api';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../contexts/ToastContext';
-import { messageFromApiValidationError } from '../lib/apiValidationMessage';
+import { fieldErrorsFromApiValidation, messageFromApiValidationError } from '../lib/apiValidationMessage';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
 
@@ -81,6 +81,13 @@ export default function CustomSolutionPage() {
 
   const handleFiles = (e) => {
     setForm((f) => ({ ...f, files: Array.from(e.target.files || []) }));
+    if (fieldErrors.attachments) {
+      setFieldErrors((fe) => {
+        const next = { ...fe };
+        delete next.attachments;
+        return next;
+      });
+    }
   };
 
   const submitForm = useCallback(async () => {
@@ -134,6 +141,7 @@ export default function CustomSolutionPage() {
         });
       }
     } catch (err) {
+      setFieldErrors(fieldErrorsFromApiValidation(err, t));
       setError(messageFromApiValidationError(err, t));
       scrollFeedbackIntoView();
     } finally {
@@ -229,12 +237,14 @@ export default function CustomSolutionPage() {
             <span className="form-label">{t('shop.custom_solution.attachments')}</span>
             <input
               type="file"
-              className="file-input file-input-bordered w-full"
+              className={`file-input file-input-bordered w-full${fieldErrors.attachments ? ' file-input-error' : ''}`}
               multiple
               accept="image/*,.pdf"
               onChange={handleFiles}
               disabled={newRequestsDisabled}
+              aria-invalid={!!fieldErrors.attachments}
             />
+            {fieldErrors.attachments ? <p className="validator-hint text-error">{fieldErrors.attachments}</p> : null}
           </label>
 
           <fieldset className="form-field space-y-5 border border-base-300 rounded-lg p-4">
@@ -243,22 +253,26 @@ export default function CustomSolutionPage() {
               <span className="form-label">{t('checkout.street')}</span>
               <input
                 name="address_street"
-                className="input input-bordered w-full"
+                className={`input input-bordered w-full${fieldErrors.address_street ? ' input-error' : ''}`}
                 value={form.address_street}
                 onChange={handleChange}
+                aria-invalid={!!fieldErrors.address_street}
                 disabled={newRequestsDisabled}
               />
+              {fieldErrors.address_street ? <p className="validator-hint text-error">{fieldErrors.address_street}</p> : null}
             </label>
             <div className="flex gap-2">
               <label className="form-field flex-1">
                 <span className="form-label">{t('profile.city')}</span>
                 <input
                   name="address_city"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full${fieldErrors.address_city ? ' input-error' : ''}`}
                   value={form.address_city}
                   onChange={handleChange}
+                  aria-invalid={!!fieldErrors.address_city}
                   disabled={newRequestsDisabled}
                 />
+                {fieldErrors.address_city ? <p className="validator-hint text-error">{fieldErrors.address_city}</p> : null}
               </label>
               <label className="form-field w-28">
                 <span className="form-label">{t('profile.postal_code')} *</span>
@@ -280,23 +294,27 @@ export default function CustomSolutionPage() {
               <span className="form-label">{t('profile.province')}</span>
               <input
                 name="address_province"
-                className="input input-bordered w-full"
+                className={`input input-bordered w-full${fieldErrors.address_province ? ' input-error' : ''}`}
                 value={form.address_province}
                 onChange={handleChange}
+                aria-invalid={!!fieldErrors.address_province}
                 disabled={newRequestsDisabled}
               />
+              {fieldErrors.address_province ? <p className="validator-hint text-error">{fieldErrors.address_province}</p> : null}
             </label>
             <label className="form-field w-full">
               <span className="form-label">{t('shop.custom_solution.address_note')}</span>
               <textarea
                 name="address_note"
-                className="textarea textarea-bordered w-full"
+                className={`textarea textarea-bordered w-full${fieldErrors.address_note ? ' textarea-error' : ''}`}
                 rows={2}
                 placeholder=""
                 value={form.address_note}
                 onChange={handleChange}
+                aria-invalid={!!fieldErrors.address_note}
                 disabled={newRequestsDisabled}
               />
+              {fieldErrors.address_note ? <p className="validator-hint text-error">{fieldErrors.address_note}</p> : null}
             </label>
           </fieldset>
 

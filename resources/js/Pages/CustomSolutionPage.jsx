@@ -4,14 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { fieldErrorsFromApiValidation, messageFromApiValidationError } from '../lib/apiValidationMessage';
-import { coercePostalCodeFieldValue } from '../lib/postalInput';
+import { coercePostalCodeFieldValue, sanitizePostalCodeDigits } from '../lib/postalInput';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
 
 export default function CustomSolutionPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const [form, setForm] = useState({
     email: '',
@@ -31,6 +33,8 @@ export default function CustomSolutionPage() {
   const [publicSettingsLoaded, setPublicSettingsLoaded] = useState(false);
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
   const submitInFlightRef = useRef(false);
+  /** Fill email / phone / address from session once per login visit (avoid clobbering edits). */
+  const prefilledFromSessionRef = useRef(false);
   /** Title + alert: scroll-margin offsets fixed navbar so the block is fully visible. */
   const pageFeedbackRef = useRef(null);
 
@@ -63,6 +67,32 @@ export default function CustomSolutionPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      prefilledFromSessionRef.current = false;
+      return;
+    }
+    if (authLoading || prefilledFromSessionRef.current) {
+      return;
+    }
+    prefilledFromSessionRef.current = true;
+    const addr = user.address;
+    const empty = (v) => (v == null ? true : String(v).trim() === '');
+    setForm((prev) => ({
+      ...prev,
+      email: empty(prev.email) ? (user.login_email ?? '') : prev.email,
+      phone: empty(prev.phone) ? (user.phone ?? '') : prev.phone,
+      address_street: empty(prev.address_street) ? (addr?.street ?? '') : prev.address_street,
+      address_city: empty(prev.address_city) ? (addr?.city ?? '') : prev.address_city,
+      address_province: empty(prev.address_province) ? (addr?.province ?? '') : prev.address_province,
+      address_postal_code: empty(prev.address_postal_code)
+        ? (addr?.postal_code != null && String(addr.postal_code).trim() !== ''
+          ? sanitizePostalCodeDigits(addr.postal_code)
+          : '')
+        : prev.address_postal_code,
+    }));
+  }, [authLoading, user]);
 
   const newRequestsDisabled = publicSettingsLoaded && !acceptPersonalizedSolutions;
 

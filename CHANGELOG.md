@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Admin · shop settings:** Toggle and checkbox labels use **`w-full min-w-0`**, **`items-start`**, **`shrink-0`** on controls, and **`min-w-0 flex-1`** on **`label-text`** so long strings wrap on narrow viewports instead of overflowing the card.
+
 - **Admin · About · team:** Simplified to two lines (Yoel Berjaga as link to **ldeluipy.es**, Laia Martín); removed intro and bios; i18n names updated in **ca** / **es** / **en**.
 
 ## [0.1.30] - 2026-04-30

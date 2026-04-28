@@ -152,7 +152,7 @@ export default function AdminShopSettingsPage() {
   }
 
   return (
-    <div className="space-y-6 pt-4 sm:pt-6">
+    <div className="space-y-6 pt-4 sm:pt-6 min-w-0">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageTitle>{t('admin.settings.title')}</PageTitle>
         <button
@@ -167,21 +167,21 @@ export default function AdminShopSettingsPage() {
 
       {saveError ? <div className="alert alert-error text-sm">{saveError}</div> : null}
 
-      <form onSubmit={handleSave} className="space-y-6">
+      <form onSubmit={handleSave} className="space-y-6 min-w-0">
         <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-4">
+          <div className="card-body space-y-4 min-w-0">
             <h2 className="card-title text-lg">{t('admin.settings.section_home')}</h2>
             <p className="text-sm text-base-content/70">{t('admin.settings.section_home_help')}</p>
 
             <div className="divider my-1">{t('admin.settings.low_stock')}</div>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={lowStockEnabled}
                 onChange={(e) => setLowStockEnabled(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.low_stock_enabled')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.low_stock_enabled')}</span>
             </label>
             <label className="form-field max-w-xs">
               <span className="label-text">{t('admin.settings.low_stock_threshold')}</span>
@@ -193,14 +193,14 @@ export default function AdminShopSettingsPage() {
                 onChange={(e) => setLowStockThreshold(e.target.value)}
               />
             </label>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={lowStockBlacklistEnabled}
                 onChange={(e) => setLowStockBlacklistEnabled(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.blacklist_enabled')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.blacklist_enabled')}</span>
             </label>
             <label className="form-field w-full max-w-xl">
               <span className="label-text">{t('admin.settings.blacklist_ids_hint')}</span>
@@ -213,14 +213,14 @@ export default function AdminShopSettingsPage() {
             </label>
 
             <div className="divider my-1">{t('admin.settings.overstock')}</div>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={overstockEnabled}
                 onChange={(e) => setOverstockEnabled(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.overstock_enabled')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.overstock_enabled')}</span>
             </label>
             <label className="form-field max-w-xs">
               <span className="label-text">{t('admin.settings.overstock_threshold')}</span>
@@ -232,14 +232,14 @@ export default function AdminShopSettingsPage() {
                 onChange={(e) => setOverstockThreshold(e.target.value)}
               />
             </label>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={overstockBlacklistEnabled}
                 onChange={(e) => setOverstockBlacklistEnabled(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.overstock_blacklist_enabled')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.overstock_blacklist_enabled')}</span>
             </label>
             <label className="form-field w-full max-w-xl">
               <span className="label-text">{t('admin.settings.blacklist_ids_hint')}</span>
@@ -254,23 +254,23 @@ export default function AdminShopSettingsPage() {
         </section>
 
         <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-4">
+          <div className="card-body space-y-4 min-w-0">
             <h2 className="card-title text-lg">{t('admin.settings.section_personalized')}</h2>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={acceptPersonalizedSolutions}
                 onChange={(e) => setAcceptPersonalizedSolutions(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.accept_personalized_solutions')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.accept_personalized_solutions')}</span>
             </label>
           </div>
         </section>
 
         <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-6">
-            <div>
+          <div className="card-body space-y-6 min-w-0">
+            <div className="min-w-0">
               <h2 className="card-title text-lg">{t('admin.settings.index_columns_title')}</h2>
               <p className="text-sm text-base-content/70 mt-1">{t('admin.settings.index_columns_help')}</p>
             </div>
@@ -279,14 +279,17 @@ export default function AdminShopSettingsPage() {
               const titleKey = ADMIN_INDEX_TABLE_META[tableId]?.titleKey;
               if (!titleKey || cols.length === 0) return null;
               return (
-                <fieldset key={tableId} className="fieldset border border-base-200 rounded-box p-4 space-y-3">
+                <fieldset key={tableId} className="fieldset border border-base-200 rounded-box p-4 space-y-3 min-w-0">
                   <legend className="fieldset-legend text-base font-semibold">{t(titleKey)}</legend>
                   <div className="flex flex-wrap gap-x-4 gap-y-2">
                     {cols.map((col) => (
-                      <label key={col.id} className="label cursor-pointer justify-start gap-2 py-1">
+                      <label
+                        key={col.id}
+                        className="label w-full min-w-0 cursor-pointer items-start justify-start gap-2 py-1 sm:w-[calc(50%-0.5rem)] sm:max-w-[calc(50%-0.5rem)]"
+                      >
                         <input
                           type="checkbox"
-                          className="checkbox checkbox-sm checkbox-primary"
+                          className="checkbox checkbox-sm checkbox-primary shrink-0 mt-0.5"
                           checked={columnPrefs[tableId]?.[col.id] !== false}
                           onChange={(e) => {
                             const checked = e.target.checked;
@@ -296,7 +299,7 @@ export default function AdminShopSettingsPage() {
                             }));
                           }}
                         />
-                        <span className="label-text text-sm">{t(col.labelKey)}</span>
+                        <span className="label-text text-sm min-w-0 flex-1">{t(col.labelKey)}</span>
                       </label>
                     ))}
                   </div>

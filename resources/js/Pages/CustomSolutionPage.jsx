@@ -5,6 +5,7 @@ import { api } from '../api';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../contexts/ToastContext';
+import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
 
 export default function CustomSolutionPage() {
@@ -63,7 +64,8 @@ export default function CustomSolutionPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    const next = coercePostalCodeFieldValue(name, value);
+    setForm((f) => ({ ...f, [name]: next }));
     if (fieldErrors[name]) {
       setFieldErrors((fe) => {
         const next = { ...fe };
@@ -256,6 +258,9 @@ export default function CustomSolutionPage() {
                 <span className="form-label">{t('profile.postal_code')} *</span>
                 <input
                   name="address_postal_code"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  pattern="[0-9]*"
                   className={`input input-bordered w-full${fieldErrors.address_postal_code ? ' input-error' : ''}`}
                   value={form.address_postal_code}
                   onChange={handleChange}

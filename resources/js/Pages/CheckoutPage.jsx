@@ -8,6 +8,7 @@ import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { emitAppToast } from '../toastEvents';
+import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { checkoutFormSchema, parseWithZod } from '../validation';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
 
@@ -137,8 +138,9 @@ export default function CheckoutPage() {
   }, [user?.id]);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setCheckoutFormError('');
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    setForm((f) => ({ ...f, [name]: coercePostalCodeFieldValue(name, value) }));
   };
 
   const doCheckout = useCallback(async () => {
@@ -319,7 +321,7 @@ export default function CheckoutPage() {
           </label>
           <label className="form-field w-full">
             <span className="form-label">{t('profile.postal_code')} *</span>
-            <input name="shipping_postal_code" className="input input-bordered w-full" value={form.shipping_postal_code} onChange={handleChange} required />
+            <input name="shipping_postal_code" inputMode="numeric" autoComplete="postal-code" pattern="[0-9]*" className="input input-bordered w-full" value={form.shipping_postal_code} onChange={handleChange} required />
           </label>
           <label className="form-field w-full">
             <span className="form-label">{t('checkout.note')}</span>
@@ -339,7 +341,7 @@ export default function CheckoutPage() {
               </label>
               <label className="form-field w-full">
                 <span className="form-label">{t('profile.postal_code')} *</span>
-                <input name="installation_postal_code" className="input input-bordered w-full" value={form.installation_postal_code} onChange={handleChange} required />
+                <input name="installation_postal_code" inputMode="numeric" autoComplete="postal-code" pattern="[0-9]*" className="input input-bordered w-full" value={form.installation_postal_code} onChange={handleChange} required />
               </label>
               <label className="form-field w-full">
                 <span className="form-label">{t('checkout.note')}</span>

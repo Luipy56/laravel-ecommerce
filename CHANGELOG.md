@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Admin · About · team:** Simplified to two lines (Yoel Berjaga as link to **ldeluipy.es**, Laia Martín); removed intro and bios; i18n names updated in **ca** / **es** / **en**.
 
+## [0.1.33] - 2026-04-30
+
+### Changed
+
+- **Postal codes (digits only):** Shared **`resources/js/lib/postalInput.js`** (`sanitizePostalCodeDigits`, `coercePostalCodeFieldValue`) used on **CustomSolution**, **Register**, **Checkout**, **Profile** addresses, **client personalized-solution** portal, and **admin personalized-solution edit**. Inputs use **`inputMode="numeric"`**, **`pattern="[0-9]*"`**, and **`autoComplete="postal-code"`** where appropriate.
+- **Zod:** **`postalCodeRequired`** / **`postalCodeLoose`** and checkout’s optional installation postal require **1–20 digits**; new i18n **`validation.postal_digits`** (ca / es / en).
+- **API:** Laravel validation uses **`regex:/^\d{1,20}$/`** (or **`^\d{0,20}$`** for nullable installation postal when installation is off) on register, personalized solutions, profile addresses, and order checkout.
+
 ## [0.1.30] - 2026-04-30
 
 ### Added

@@ -5,6 +5,7 @@ import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
+import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import {
   parseWithZod,
   profileAccountSchema,
@@ -194,9 +195,11 @@ export default function ProfilePage() {
 
   const handleAddressFormChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const nextVal =
+      type === 'checkbox' ? checked : coercePostalCodeFieldValue(name, value);
     setAddressForm((f) => ({
       ...f,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: nextVal,
     }));
     if (addressFieldErrors[name]) {
       setAddressFieldErrors((fe) => {
@@ -634,6 +637,9 @@ export default function ProfilePage() {
                 <input
                   type="text"
                   name="postal_code"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  pattern="[0-9]*"
                   className={`input input-bordered w-full${addressFieldErrors.postal_code ? ' input-error' : ''}`}
                   value={addressForm.postal_code}
                   onChange={handleAddressFormChange}

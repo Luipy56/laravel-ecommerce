@@ -110,7 +110,7 @@ class UserController extends Controller
             'street' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],
-            'postal_code' => ['required', 'string', 'max:20'],
+            'postal_code' => ['required', 'string', 'regex:/^\d{1,20}$/'],
             'is_primary' => ['boolean'],
         ]);
 
@@ -141,7 +141,7 @@ class UserController extends Controller
             'street' => ['sometimes', 'string', 'max:255'],
             'city' => ['sometimes', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],
-            'postal_code' => ['required', 'string', 'max:20'],
+            'postal_code' => ['required', 'string', 'regex:/^\d{1,20}$/'],
             'is_primary' => ['boolean'],
         ]);
 

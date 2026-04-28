@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { parseWithZod, registerFormSchema } from '../validation';
 
 export default function RegisterPage() {
@@ -30,7 +31,8 @@ export default function RegisterPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    const next = coercePostalCodeFieldValue(name, value);
+    setForm((f) => ({ ...f, [name]: next }));
     if (fieldErrors[name]) {
       setFieldErrors((fe) => {
         const next = { ...fe };
@@ -207,6 +209,9 @@ export default function RegisterPage() {
                 <input
                   id="register-address_postal_code"
                   name="address_postal_code"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  pattern="[0-9]*"
                   className={`input input-bordered w-full${fieldErrors.address_postal_code ? ' input-error' : ''}`}
                   value={form.address_postal_code}
                   onChange={handleChange}

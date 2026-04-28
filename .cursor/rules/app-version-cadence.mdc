@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## Why the version does not change “by itself”
 
-- The footer and **`footer.version`** use **`resources/js/config/version.js`** → **`__APP_VERSION__`**, which Vite sets from **root `package.json`** at **`vite.config.js`** (see `define`). Nothing reads git tags, task IDs, or “prompt count”.
+- The footer and **`footer.version`** use **`resources/js/config/version.js`**. In the browser, **`window.__LARAVEL_APP_VERSION__`** is set from **`config('app.version')`** (reads root **`package.json`** each request) in **`welcome.blade.php`**, so the UI tracks bumps **without restarting `npm run dev`**. Vite’s **`define`** **`__APP_VERSION__`** is the fallback (build / SSR / tests).
 - If **`package.json`** is not edited, **`npm run build`** and the dev server keep embedding the **same** string. There is no automatic increment. **Every agent that commits work must bump patch** per **`.cursor/rules/agent-task-version-bump.mdc`**.
 
 ## When to bump (patch)

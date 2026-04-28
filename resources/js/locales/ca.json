@@ -69,7 +69,6 @@
   "register.identification_placeholder": "DNI, NIE o CIF",
   "register.contact_name_hint": "Persona de contacte",
   "register.address_optional": "Adreça",
-  "register.required_note": "* Camp obligatori",
   "register.verify_email_hint": "Després del registre et portem a una pantalla per confirmar el correu abans de poder comprar.",
   "register.section_access": "Accés",
   "register.section_contact": "Dades de contacte",

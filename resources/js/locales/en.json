@@ -69,7 +69,6 @@
   "register.identification_placeholder": "DNI, NIE or CIF",
   "register.contact_name_hint": "Contact person",
   "register.address_optional": "Address",
-  "register.required_note": "* Mandatory field",
   "register.verify_email_hint": "After signing up we take you to a short screen to confirm your email before checkout.",
   "register.section_access": "Access",
   "register.section_contact": "Contact details",

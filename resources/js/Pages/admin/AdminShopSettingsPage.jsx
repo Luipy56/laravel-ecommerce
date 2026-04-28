@@ -252,16 +252,6 @@ export default function AdminShopSettingsPage() {
             </label>
 
             <div className="divider my-1">{t('admin.settings.overstock')}</div>
-            <label className="form-field max-w-xs">
-              <span className="label-text">{t('admin.settings.featured_max_overstock')}</span>
-              <input
-                type="number"
-                min={0}
-                className="input input-bordered input-sm sm:input-md w-full"
-                value={featuredMaxOverstock}
-                onChange={(e) => setFeaturedMaxOverstock(e.target.value)}
-              />
-            </label>
             <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
@@ -297,6 +287,16 @@ export default function AdminShopSettingsPage() {
                 value={overstockBlacklistText}
                 onChange={(e) => setOverstockBlacklistText(e.target.value)}
                 placeholder="1, 2, 3"
+              />
+            </label>
+            <label className="form-field max-w-xs">
+              <span className="label-text">{t('admin.settings.featured_max_overstock')}</span>
+              <input
+                type="number"
+                min={0}
+                className="input input-bordered input-sm sm:input-md w-full"
+                value={featuredMaxOverstock}
+                onChange={(e) => setFeaturedMaxOverstock(e.target.value)}
               />
             </label>
           </div>

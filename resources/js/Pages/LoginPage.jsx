@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { loginSchema, parseWithZod } from '../validation';
 
 export default function LoginPage() {
@@ -27,6 +28,7 @@ export default function LoginPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
+      scrollWindowToTopOnFormError();
       return;
     }
     setLoading(true);
@@ -43,10 +45,12 @@ export default function LoginPage() {
       } else {
         const msg = result.errors?.login_email?.[0] || result.message || t('auth.failed');
         setError(msg);
+        scrollWindowToTopOnFormError();
       }
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.errors?.login_email?.[0] || t('common.error');
       setError(msg);
+      scrollWindowToTopOnFormError();
     } finally {
       setLoading(false);
     }

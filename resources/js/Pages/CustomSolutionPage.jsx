@@ -7,6 +7,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { fieldErrorsFromApiValidation, messageFromApiValidationError } from '../lib/apiValidationMessage';
+import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue, sanitizePostalCodeDigits } from '../lib/postalInput';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
 
@@ -35,20 +36,6 @@ export default function CustomSolutionPage() {
   const submitInFlightRef = useRef(false);
   /** Fill email / phone / address from session once per login visit (avoid clobbering edits). */
   const prefilledFromSessionRef = useRef(false);
-  /** Title + alert: scroll-margin offsets fixed navbar so the block is fully visible. */
-  const pageFeedbackRef = useRef(null);
-
-  /** Defer until DOM reflects error state; user often stays scrolled to the submit button. */
-  const scrollFeedbackIntoView = useCallback(() => {
-    queueMicrotask(() => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          pageFeedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-        });
-      });
-    });
-  }, []);
-
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -133,7 +120,7 @@ export default function CustomSolutionPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
-      scrollFeedbackIntoView();
+      scrollWindowToTopOnFormError();
       submitInFlightRef.current = false;
       return;
     }
@@ -173,12 +160,12 @@ export default function CustomSolutionPage() {
     } catch (err) {
       setFieldErrors(fieldErrorsFromApiValidation(err, t));
       setError(messageFromApiValidationError(err, t));
-      scrollFeedbackIntoView();
+      scrollWindowToTopOnFormError();
     } finally {
       setLoading(false);
       submitInFlightRef.current = false;
     }
-  }, [form, t, showToast, navigate, newRequestsDisabled, scrollFeedbackIntoView]);
+  }, [form, t, showToast, navigate, newRequestsDisabled]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -189,7 +176,7 @@ export default function CustomSolutionPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
-      scrollFeedbackIntoView();
+      scrollWindowToTopOnFormError();
       return;
     }
     setConfirmModalOpen(true);
@@ -197,7 +184,7 @@ export default function CustomSolutionPage() {
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-4xl">
-      <div ref={pageFeedbackRef} className="scroll-mt-24 lg:scroll-mt-16 space-y-4">
+      <div className="space-y-4">
         <PageTitle>{t('shop.custom_solution')}</PageTitle>
         {error ? (
           <div className="alert alert-error mb-4" role="alert">

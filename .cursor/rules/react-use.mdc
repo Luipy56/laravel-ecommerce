@@ -24,11 +24,25 @@ alwaysApply: false
 - **useEffect + async**: Use **AbortController** for any fetch/async in `useEffect`. Pass `signal` to the request and call `controller.abort()` in the cleanup. Check `err.name !== 'AbortError'` before setting error state.
 - **Cleanup**: Every `useEffect` that starts timers, subscriptions, or async work must return a cleanup function (clear timeout, abort controller, unsubscribe).
 
-## Forms (React Hook Form)
+## Forms
+
+Many storefront and admin screens use **controlled fields + Zod** (`parseWithZod` from `resources/js/validation`) rather than React Hook Form; match the existing pattern on each page.
+
+### Submit validation errors: scroll into view
+
+After **failed submit** (client-side Zod validation **or** API error where you set a summary alert / field errors), the user is often still scrolled to the **submit button** at the bottom. **Scroll** so the feedback is visible:
+
+- **Full-page and drawer forms** (auth, register, checkout, long admin forms, custom solution, etc.): call **`scrollWindowToTopOnFormError()`** from `resources/js/lib/formScroll.js` **immediately after** setting error state (same tick as `setError` / `setFieldErrors`). The helper defers with `queueMicrotask` + double `requestAnimationFrame` so React can paint the alert first, then runs `window.scrollTo({ top: 0, behavior: 'smooth' })`.
+- **DaisyUI `<dialog class="modal modal-open">` forms** (e.g. profile address/contact modals): call **`scrollOpenModalBoxToTop()`** from the same module so the **open** `.modal-box` scrolls to the top and inline field errors are visible.
+- **Checkout** `doCheckout` / `handleSubmit`: on validation or catch failure, also scroll to top so the card alert and toasts align with visible context.
+
+Do **not** rely on the user noticing errors below the fold without scrolling.
+
+### React Hook Form (when used)
 
 - **useWatch over watch()**: Use `useWatch({ name: 'fieldName', control })` for reactive field values; avoid `watch()` or `methods.watch()` as they re-render on every form change.
 - **Memoize validation schemas**: Define Yup (or Zod) schema with `useMemo(() => schema, [])` or outside the component so it is not recreated every render.
-- **Structure**: Wrap form with `FormProvider` and spread `{...methods}`; use `methods.handleSubmit(handleSubmit)` on the form. Display errors via `formState.errors` and associate with inputs (e.g. `helperText={errors.email?.message}`).
+- **Structure**: Wrap form with `FormProvider` and spread `{...methods}`; use `methods.handleSubmit(handleSubmit)` on the form. Display errors via `formState.errors` and associate with inputs (e.g. `helperText={errors.email?.message}`). On submit validation failure, still call **`scrollWindowToTopOnFormError()`** (or **`scrollOpenModalBoxToTop()`** inside a modal) unless the UX intentionally focuses a single field.
 
 ## Accessibility
 

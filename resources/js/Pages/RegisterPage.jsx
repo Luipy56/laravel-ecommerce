@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { parseWithZod, registerFormSchema } from '../validation';
 
@@ -50,6 +51,7 @@ export default function RegisterPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
+      scrollWindowToTopOnFormError();
       return;
     }
     setLoading(true);
@@ -61,11 +63,13 @@ export default function RegisterPage() {
       } else {
         const firstError = result.errors && Object.values(result.errors).flat()[0];
         setError(firstError || result.message || t('common.error'));
+        scrollWindowToTopOnFormError();
       }
     } catch (err) {
       const data = err.response?.data;
       const firstError = data?.errors && Object.values(data.errors).flat()[0];
       setError(firstError || data?.message || t('common.error'));
+      scrollWindowToTopOnFormError();
     } finally {
       setLoading(false);
     }

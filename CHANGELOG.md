@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Storefront / admin forms:** On failed submit (Zod or API error), the UI scrolls so feedback is visible: **`scrollWindowToTopOnFormError()`** for full-page and drawer forms, **`scrollOpenModalBoxToTop()`** for daisyUI modals (profile address/contact). Shared helpers in **`resources/js/lib/formScroll.js`**; pattern documented in **`.cursor/rules/react-use.mdc`**.
+
 - **Admin · shop settings · index columns:** Visible columns and **column order** are configurable per table (drag-and-drop in settings); list pages render columns in **`orderedVisibleColumnIds`** order. **`AdminIndexColumns::normalize()`** preserves stored order.
 
 - **Scroll to top:** FAB uses **brand gradient** (**`from-primary` → `to-secondary`**), subtle **inset ring**, stronger shadow on hover, and **motion-safe** press feedback (still **`btn-circle`**).
@@ -29,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Custom solution (`/custom-solution`):** With an active session, **email**, **phone**, and **address** fields pre-fill from **`GET /api/v1/user`** (primary contact + first saved address); empty fields only so late auth load does not overwrite user typing.
 
-- **API + storefront locale:** `Accept-Language` (ca / es / en) is sent on all **`api`** requests and middleware **`SetApiLocaleFromAcceptLanguage`** sets the app locale so **validation** messages (e.g. postal **regex**) match the UI language. Custom **`lang/*/validation.php`** entries for postal fields; **`CustomSolutionPage`** shows API errors via **`messageFromApiValidationError`**, maps **`fieldErrorsFromApiValidation`** onto inputs (red borders / hints), and scrolls the **title + alert** block with **`scroll-mt-24` / `lg:scroll-mt-16`** so content sits below the fixed navbar.
+- **API + storefront locale:** `Accept-Language` (ca / es / en) is sent on all **`api`** requests and middleware **`SetApiLocaleFromAcceptLanguage`** sets the app locale so **validation** messages (e.g. postal **regex**) match the UI language. Custom **`lang/*/validation.php`** entries for postal fields; **`CustomSolutionPage`** shows API errors via **`messageFromApiValidationError`** and maps **`fieldErrorsFromApiValidation`** onto inputs (red borders / hints).
 
 - **Admin / personalized solution resolution modal:** Title is a single word (**`resolution_modal_title`**); status field uses **`select-md`**, **`text-base`**, **`max-w-md`**, and **`gap-8`** before the textarea; textarea label **`resolution_modal_text_label`** (*Texto de la resolución* / …).
 

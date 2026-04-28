@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import PageTitle from '../components/PageTitle';
+import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation();
@@ -21,6 +22,7 @@ export default function ForgotPasswordPage() {
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.errors?.login_email?.[0] || t('common.error');
       setError(msg);
+      scrollWindowToTopOnFormError();
     } finally {
       setLoading(false);
     }

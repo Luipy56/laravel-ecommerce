@@ -8,6 +8,7 @@ import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { emitAppToast } from '../toastEvents';
+import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { checkoutFormSchema, parseWithZod } from '../validation';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
@@ -156,6 +157,7 @@ export default function CheckoutPage() {
       if (!parsed.ok) {
         emitAppToast(parsed.firstError, 'error');
         setCheckoutFormError(parsed.firstError);
+        scrollWindowToTopOnFormError();
         return;
       }
       const payload = installationQuoteRequired ? { ...parsed.data, payment_method: null } : { ...parsed.data };
@@ -220,6 +222,7 @@ export default function CheckoutPage() {
           ? t('shop.payment.method_unavailable')
           : d?.message || t('common.error');
       emitAppToast(msg, 'error');
+      scrollWindowToTopOnFormError();
     } finally {
       setLoading(false);
     }
@@ -242,6 +245,7 @@ export default function CheckoutPage() {
     const parsed = parseWithZod(checkoutFormSchema(checkoutSchemaOpts), toValidate, t);
     if (!parsed.ok) {
       setCheckoutFormError(parsed.firstError);
+      scrollWindowToTopOnFormError();
       return;
     }
     setConfirmOpen(true);

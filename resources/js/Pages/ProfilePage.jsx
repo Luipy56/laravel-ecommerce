@@ -5,6 +5,7 @@ import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
+import { scrollOpenModalBoxToTop, scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import {
   parseWithZod,
@@ -113,6 +114,7 @@ export default function ProfilePage() {
     const parsed = parseWithZod(profileAccountSchema, accountForm, t);
     if (!parsed.ok) {
       setAccountFieldErrors(parsed.fieldErrors);
+      scrollWindowToTopOnFormError();
       return;
     }
     setAccountSaving(true);
@@ -148,6 +150,7 @@ export default function ProfilePage() {
     const parsed = parseWithZod(profilePasswordSchema, passwordForm, t);
     if (!parsed.ok) {
       setPasswordFieldErrors(parsed.fieldErrors);
+      scrollWindowToTopOnFormError();
       return;
     }
     setPasswordSaving(true);
@@ -216,6 +219,7 @@ export default function ProfilePage() {
     const parsed = parseWithZod(profileAddressSchema, addressForm, t);
     if (!parsed.ok) {
       setAddressFieldErrors(parsed.fieldErrors);
+      scrollOpenModalBoxToTop();
       return;
     }
     setAddressSaving(true);
@@ -298,6 +302,7 @@ export default function ProfilePage() {
     const parsed = parseWithZod(profileContactSchema, contactForm, t);
     if (!parsed.ok) {
       setContactFieldErrors(parsed.fieldErrors);
+      scrollOpenModalBoxToTop();
       return;
     }
     setContactSaving(true);

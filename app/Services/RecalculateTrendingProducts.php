@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Product;
-use App\Models\ShopSetting;
 use Illuminate\Support\Facades\DB;
 
 class RecalculateTrendingProducts
@@ -31,18 +30,14 @@ class RecalculateTrendingProducts
     {
         $merged = [];
 
-        if (ShopSetting::get(ShopSetting::KEY_LOW_STOCK_ENABLED, false)) {
-            $threshold = (int) ShopSetting::get(ShopSetting::KEY_LOW_STOCK_THRESHOLD, 0);
-            $q = Product::query()->active()->where('stock', '<=', $threshold);
-            $this->applyBlacklist($q, ShopSetting::KEY_LOW_STOCK_BLACKLIST_ENABLED, ShopSetting::KEY_LOW_STOCK_BLACKLIST_PRODUCT_IDS);
-            $merged = array_merge($merged, $q->pluck('id')->all());
+        $low = TrendingStockRuleQueries::activeLowStockRuleQuery();
+        if ($low !== null) {
+            $merged = array_merge($merged, $low->pluck('id')->all());
         }
 
-        if (ShopSetting::get(ShopSetting::KEY_OVERSTOCK_ENABLED, false)) {
-            $threshold = (int) ShopSetting::get(ShopSetting::KEY_OVERSTOCK_THRESHOLD, 0);
-            $q = Product::query()->active()->where('stock', '>=', $threshold);
-            $this->applyBlacklist($q, ShopSetting::KEY_OVERSTOCK_BLACKLIST_ENABLED, ShopSetting::KEY_OVERSTOCK_BLACKLIST_PRODUCT_IDS);
-            $merged = array_merge($merged, $q->pluck('id')->all());
+        $over = TrendingStockRuleQueries::activeOverstockRuleQuery();
+        if ($over !== null) {
+            $merged = array_merge($merged, $over->pluck('id')->all());
         }
 
         $merged = array_values(array_unique(array_map('intval', $merged)));
@@ -50,21 +45,5 @@ class RecalculateTrendingProducts
         sort($merged);
 
         return $merged;
-    }
-
-    private function applyBlacklist(\Illuminate\Database\Eloquent\Builder $query, string $enabledKey, string $idsKey): void
-    {
-        if (! ShopSetting::get($enabledKey, false)) {
-            return;
-        }
-        $ids = ShopSetting::get($idsKey, []);
-        if (! is_array($ids) || $ids === []) {
-            return;
-        }
-        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), fn (int $id) => $id > 0)));
-        if ($ids === []) {
-            return;
-        }
-        $query->whereNotIn('id', $ids);
     }
 }

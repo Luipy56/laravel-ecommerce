@@ -54,6 +54,10 @@ export default function AdminShopSettingsPage() {
 
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
 
+  const [featuredMaxManual, setFeaturedMaxManual] = useState(0);
+  const [featuredMaxLowStock, setFeaturedMaxLowStock] = useState(0);
+  const [featuredMaxOverstock, setFeaturedMaxOverstock] = useState(0);
+
   const [columnPrefs, setColumnPrefs] = useState({});
   const [columnOrder, setColumnOrder] = useState({});
 
@@ -67,6 +71,9 @@ export default function AdminShopSettingsPage() {
     setOverstockBlacklistEnabled(!!d.overstock_blacklist_enabled);
     setOverstockBlacklistText(idsToText(d.overstock_blacklist_product_ids));
     setAcceptPersonalizedSolutions(d.accept_personalized_solutions !== false);
+    setFeaturedMaxManual(Number(d.featured_max_manual) || 0);
+    setFeaturedMaxLowStock(Number(d.featured_max_low_stock) || 0);
+    setFeaturedMaxOverstock(Number(d.featured_max_overstock) || 0);
     const { columnPrefs: cp, columnOrder: co } = columnOrderAndPrefsFromServer(d.admin_index_columns);
     setColumnPrefs(cp);
     setColumnOrder(co);
@@ -101,6 +108,9 @@ export default function AdminShopSettingsPage() {
     overstock_blacklist_enabled: overstockBlacklistEnabled,
     overstock_blacklist_product_ids: parseIdList(overstockBlacklistText),
     accept_personalized_solutions: acceptPersonalizedSolutions,
+    featured_max_manual: Math.max(0, parseInt(String(featuredMaxManual), 10) || 0),
+    featured_max_low_stock: Math.max(0, parseInt(String(featuredMaxLowStock), 10) || 0),
+    featured_max_overstock: Math.max(0, parseInt(String(featuredMaxOverstock), 10) || 0),
     admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs, columnOrder),
   });
 
@@ -176,6 +186,41 @@ export default function AdminShopSettingsPage() {
           <div className="card-body space-y-4 min-w-0">
             <h2 className="card-title text-lg">{t('admin.settings.section_home')}</h2>
             <p className="text-sm text-base-content/70">{t('admin.settings.section_home_help')}</p>
+
+            <p className="text-sm font-medium">{t('admin.settings.featured_limits_title')}</p>
+            <p className="text-xs text-base-content/60">{t('admin.settings.featured_max_hint')}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+              <label className="form-field">
+                <span className="label-text">{t('admin.settings.featured_max_manual')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  className="input input-bordered input-sm sm:input-md w-full"
+                  value={featuredMaxManual}
+                  onChange={(e) => setFeaturedMaxManual(e.target.value)}
+                />
+              </label>
+              <label className="form-field">
+                <span className="label-text">{t('admin.settings.featured_max_low_stock')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  className="input input-bordered input-sm sm:input-md w-full"
+                  value={featuredMaxLowStock}
+                  onChange={(e) => setFeaturedMaxLowStock(e.target.value)}
+                />
+              </label>
+              <label className="form-field">
+                <span className="label-text">{t('admin.settings.featured_max_overstock')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  className="input input-bordered input-sm sm:input-md w-full"
+                  value={featuredMaxOverstock}
+                  onChange={(e) => setFeaturedMaxOverstock(e.target.value)}
+                />
+              </label>
+            </div>
 
             <div className="divider my-1">{t('admin.settings.low_stock')}</div>
             <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">

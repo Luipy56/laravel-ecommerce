@@ -34,6 +34,13 @@ class ShopSetting extends Model
     /** JSON object: table_id => list of visible column ids (see config/admin_index_columns.php). */
     public const KEY_ADMIN_INDEX_COLUMNS = 'admin_index_columns';
 
+    /** Home featured section: max products per group; 0 = unlimited. */
+    public const KEY_FEATURED_MAX_MANUAL = 'featured_max_manual';
+
+    public const KEY_FEATURED_MAX_LOW_STOCK = 'featured_max_low_stock';
+
+    public const KEY_FEATURED_MAX_OVERSTOCK = 'featured_max_overstock';
+
     /**
      * @var array<string, mixed>
      */
@@ -47,6 +54,9 @@ class ShopSetting extends Model
         self::KEY_OVERSTOCK_BLACKLIST_ENABLED => false,
         self::KEY_OVERSTOCK_BLACKLIST_PRODUCT_IDS => [],
         self::KEY_ACCEPT_PERSONALIZED_SOLUTIONS => true,
+        self::KEY_FEATURED_MAX_MANUAL => 0,
+        self::KEY_FEATURED_MAX_LOW_STOCK => 0,
+        self::KEY_FEATURED_MAX_OVERSTOCK => 0,
     ];
 
     protected function casts(): array

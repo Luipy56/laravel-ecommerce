@@ -1,6 +1,6 @@
 ---
 description: Shop settings key-value, automatic is_trending recalc, admin settings UI, public storefront flags
-globs: app/Models/ShopSetting.php,app/Services/RecalculateTrendingProducts.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,app/Support/AdminIndexColumns.php,config/admin_index_columns.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx,resources/js/config/adminIndexColumnsRegistry.js,resources/js/hooks/useAdminShopSettingsQuery.js
+globs: app/Models/ShopSetting.php,app/Services/RecalculateTrendingProducts.php,app/Services/TrendingStockRuleQueries.php,app/Services/HomeFeaturedProductIds.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,app/Http/Controllers/Api/ProductController.php,app/Support/AdminIndexColumns.php,config/admin_index_columns.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx,resources/js/config/adminIndexColumnsRegistry.js,resources/js/hooks/useAdminShopSettingsQuery.js
 alwaysApply: false
 ---
 
@@ -25,9 +25,15 @@ alwaysApply: false
 - **Blacklist** (when enabled for that rule): **`whereNotIn('id', …)`** on that rule’s query only; blacklisted products can still appear on the home if **`is_featured`** is manual.
 - Recalc flow: set **`is_trending = false`** on **active** products, then set **`true`** for merged matches.
 
+## Home featured listing limits (`featured_max_*`)
+
+- Keys: **`ShopSetting::KEY_FEATURED_MAX_MANUAL`**, **`KEY_FEATURED_MAX_LOW_STOCK`**, **`KEY_FEATURED_MAX_OVERSTOCK`** (integers, **`0` = no limit**). Exposed in **`GET`/`PUT admin/settings`** as **`featured_max_manual`**, **`featured_max_low_stock`**, **`featured_max_overstock`**.
+- **`GET products/featured`** is built by **`HomeFeaturedProductIds`**: (1) manual **`is_featured`** (random subset when capped); (2) low-stock **rule** + **`is_trending`**; (3) overstock **rule** + **`is_trending`**, excluding IDs that match the low-stock rule so each product counts once. Order returned: manual, then low, then over; **`TrendingStockRuleQueries`** shares rule logic with **`RecalculateTrendingProducts`**.
+- These caps affect **only** the storefront featured JSON response, not how many rows **`RecalculateTrendingProducts`** marks **`is_trending`**.
+
 ## Storefront API (when touching related controllers)
 
-- **Featured / home**: one query on active products — **`where(fn ($q) { $q->where('is_featured', true)->orWhere('is_trending', true); })`** so each product appears **once**.
+- **Featured / home**: implemented via **`HomeFeaturedProductIds`** + **`ProductController@featured`** (not a single `orWhere` query).
 - **`GET shop/public-settings`**: only safe booleans (e.g. **`accept_personalized_solutions`**).
 - **`PersonalizedSolutionController@store`**: if disabled, **422** JSON with **`__('shop.personalized_solutions_disabled')`** (add keys to **`lang/ca.json`**, **`lang/es.json`**, **`lang/en.json`**).
 

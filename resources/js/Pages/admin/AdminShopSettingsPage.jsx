@@ -191,38 +191,16 @@ export default function AdminShopSettingsPage() {
 
             <p className="text-sm font-medium">{t('admin.settings.featured_limits_title')}</p>
             <p className="text-xs text-base-content/60">{t('admin.settings.featured_max_hint')}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
-              <label className="form-field">
-                <span className="label-text">{t('admin.settings.featured_max_manual')}</span>
-                <input
-                  type="number"
-                  min={0}
-                  className="input input-bordered input-sm sm:input-md w-full"
-                  value={featuredMaxManual}
-                  onChange={(e) => setFeaturedMaxManual(e.target.value)}
-                />
-              </label>
-              <label className="form-field">
-                <span className="label-text">{t('admin.settings.featured_max_low_stock')}</span>
-                <input
-                  type="number"
-                  min={0}
-                  className="input input-bordered input-sm sm:input-md w-full"
-                  value={featuredMaxLowStock}
-                  onChange={(e) => setFeaturedMaxLowStock(e.target.value)}
-                />
-              </label>
-              <label className="form-field">
-                <span className="label-text">{t('admin.settings.featured_max_overstock')}</span>
-                <input
-                  type="number"
-                  min={0}
-                  className="input input-bordered input-sm sm:input-md w-full"
-                  value={featuredMaxOverstock}
-                  onChange={(e) => setFeaturedMaxOverstock(e.target.value)}
-                />
-              </label>
-            </div>
+            <label className="form-field max-w-xs">
+              <span className="label-text">{t('admin.settings.featured_max_manual')}</span>
+              <input
+                type="number"
+                min={0}
+                className="input input-bordered input-sm sm:input-md w-full"
+                value={featuredMaxManual}
+                onChange={(e) => setFeaturedMaxManual(e.target.value)}
+              />
+            </label>
 
             <div className="divider my-1">{t('admin.settings.low_stock')}</div>
             <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
@@ -262,8 +240,28 @@ export default function AdminShopSettingsPage() {
                 placeholder="1, 2, 3"
               />
             </label>
+            <label className="form-field max-w-xs">
+              <span className="label-text">{t('admin.settings.featured_max_low_stock')}</span>
+              <input
+                type="number"
+                min={0}
+                className="input input-bordered input-sm sm:input-md w-full"
+                value={featuredMaxLowStock}
+                onChange={(e) => setFeaturedMaxLowStock(e.target.value)}
+              />
+            </label>
 
             <div className="divider my-1">{t('admin.settings.overstock')}</div>
+            <label className="form-field max-w-xs">
+              <span className="label-text">{t('admin.settings.featured_max_overstock')}</span>
+              <input
+                type="number"
+                min={0}
+                className="input input-bordered input-sm sm:input-md w-full"
+                value={featuredMaxOverstock}
+                onChange={(e) => setFeaturedMaxOverstock(e.target.value)}
+              />
+            </label>
             <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"

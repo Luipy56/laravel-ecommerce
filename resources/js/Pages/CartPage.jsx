@@ -90,9 +90,9 @@ function CartLine({ line, updateLine, removeLine, t }) {
           />
         </div>
       </td>
-      <td className="align-middle text-center">
+      <td className="relative align-middle text-center">
         {isExtraKeysAvailable ? (
-          <div className="flex flex-col items-center gap-0.5">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-1 py-1">
             <input
               type="number"
               min={0}
@@ -106,9 +106,7 @@ function CartLine({ line, updateLine, removeLine, t }) {
               <span className="text-xs text-base-content/70">{Number(extraKeyUnitPrice).toFixed(2)} €/u</span>
             )}
           </div>
-        ) : (
-          ''
-        )}
+        ) : null}
       </td>
       <td className="align-middle text-center">
         <input

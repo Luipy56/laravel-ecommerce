@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Transactional email addresses:** Registration, login, password reset, and personalized-solution **`POST`** validate **`login_email` / `email`** with **RFC + DNS (MX-capable domain)** via **`ValidationRules::emailDns()`**; clearer validation messages in **ca / es / en**. Does not prove a mailbox exists on third-party hosts. Feature tests use **`@ietf.org`** sample addresses because **`example.com`** / **`example.org`** publish null MX (RFC 7505).
 
+- **Cart line · extra keys column:** The quantity + **€/u** block is **vertically centered** in the cell (`relative` **`td`**, `absolute inset-0` + **`flex flex-col items-center justify-center`**) so it aligns with tall product rows.
+
 - **Admin · shop settings (Inici):** **General** only has **max manual** featured; **max tendència** sits in **Stock baix** / **Sobrestock** blocks without redundant «(stock bajo)» / «(sobrestock)» in labels. New i18n **`admin.settings.section_general`**.
 
 - **Login page:** Primary **Iniciar sesión** / **Log in** submit uses the **brand gradient** (**`from-primary` → `to-secondary`**) and shadow like **verify-email** and the scroll FAB.

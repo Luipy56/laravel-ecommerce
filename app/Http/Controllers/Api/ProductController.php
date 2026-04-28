@@ -23,12 +23,17 @@ class ProductController extends Controller
     /**
      * Paginated product catalog (optionally merged with packs when include_packs=1).
      *
-     * @param  Request  $request  Query string: per_page (1–50), page, category_id, feature_ids, search, include_packs.
+     * @param  Request  $request  Query string: per_page (1–50), page, category_id, feature_ids, search, include_packs, packs_only.
      * @return JsonResponse JSON envelope with success, data (ProductResource collection or mixed catalog rows), and meta pagination.
      */
     public function index(Request $request): JsonResponse
     {
         $perPage = max(1, min(50, (int) $request->get('per_page', 15)));
+
+        if ($request->boolean('packs_only')) {
+            return $this->indexPacksOnly($request, $perPage);
+        }
+
         $includePacks = $request->boolean('include_packs');
 
         if (! $includePacks) {
@@ -36,6 +41,31 @@ class ProductController extends Controller
         }
 
         return $this->indexCatalog($request, $perPage);
+    }
+
+    /**
+     * Packs only: same filters as mixed catalog (category, features, search) but only pack rows, SQL-paginated.
+     */
+    private function indexPacksOnly(Request $request, int $perPage): JsonResponse
+    {
+        $query = $this->buildPackQuery($request);
+        $packs = $query->with(['items.product', 'images'])->orderBy('name')->paginate($perPage);
+
+        $data = $packs->getCollection()->map(fn (Pack $pack) => [
+            'type' => 'pack',
+            'data' => (new PackResource($pack))->resolve(),
+        ])->values()->all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'meta' => [
+                'current_page' => $packs->currentPage(),
+                'last_page' => $packs->lastPage(),
+                'per_page' => $packs->perPage(),
+                'total' => $packs->total(),
+            ],
+        ]);
     }
 
     /**

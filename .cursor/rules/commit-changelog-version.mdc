@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Commit: Changelog, docs, and version bump
 
-See **`.cursor/rules/app-version-cadence.mdc`** for **why** the footer version does not auto-increment per prompt (it comes from **`package.json`**, injected at Vite build).
+See **`.cursor/rules/app-version-cadence.mdc`** for **why** the footer version does not auto-increment, and **`.cursor/rules/agent-task-version-bump.mdc`** for the **mandatory patch bump after every agent task** that commits.
 
 When the user says **"commit"** (or asks to commit changes), or when finishing **any shippable task** before **`git push`**:
 
@@ -15,6 +15,7 @@ When the user says **"commit"** (or asks to commit changes), or when finishing *
    - **docs/** — Scan relevant `.md` files (e.g. deployment, payments, troubleshooting) and update any that are affected.
 
 2. **Version bump (patch) — default for real work:**
+   - **Agents:** follow **`.cursor/rules/agent-task-version-bump.mdc`** — bump on **every** committed task.
    - For **every user-visible or behavior-changing** contribution (API, React, mail, payments, migrations affecting runtime, etc.), bump **`package.json`** and **`package-lock.json`** at the **repository root** in the **same commit series** as the change (or the immediate follow-up commit before push). Use e.g. **`npm version patch --no-git-tag-version`**.
    - If you add **any** bullet under **`[Unreleased]`** for that task, treat a **patch bump as mandatory** unless the entry is explicitly docs-only noise.
    - **Cutting a release section:** When moving **`[Unreleased]`** into **`## [X.Y.Z] - date`**, the **`X.Y.Z`** must match the bumped **`package.json`** version you are shipping.

@@ -8,7 +8,7 @@ alwaysApply: true
 ## Why the version does not change “by itself”
 
 - The footer and **`footer.version`** use **`resources/js/config/version.js`** → **`__APP_VERSION__`**, which Vite sets from **root `package.json`** at **`vite.config.js`** (see `define`). Nothing reads git tags, task IDs, or “prompt count”.
-- If **`package.json`** is not edited, **`npm run build`** and the dev server keep embedding the **same** string. **Each completed shippable task must include a manual semver bump** (or a committer step that does it) — there is no automatic increment.
+- If **`package.json`** is not edited, **`npm run build`** and the dev server keep embedding the **same** string. There is no automatic increment. **Every agent that commits work must bump patch** per **`.cursor/rules/agent-task-version-bump.mdc`**.
 
 ## When to bump (patch)
 
@@ -19,9 +19,10 @@ Bump **`package.json`** and **`package-lock.json`** together (e.g. `npm version 
 
 **Coders** should not hand off “done” without a version bump for shippable work; **committer** (or the same agent) applies it in the final commit if the feature commit did not.
 
-## When a bump is optional
+## When a bump is optional (non-agent or no commit)
 
-- **Docs-only**, **`.mdc` / task markdown only**, or comments-only changes that **do not** add a changelog entry and do not change runtime behavior.
+- **Local-only** experiments not pushed, or **human** docs-only commits by team policy.
+- **Agent** runs that **commit** are covered by **`agent-task-version-bump.mdc`** — default is **always bump** with the task.
 
 ## Deploy / `prod`
 

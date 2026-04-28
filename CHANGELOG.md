@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Cursor rules:** **`agent-task-version-bump.mdc`** — mandatory root **`package.json`** patch bump after **each agent-completed task** that commits; **`app-version-cadence.mdc`** / **`commit-changelog-version.mdc`** aligned; **`docs/agent-cursor-rules.md`** inventory updated.
+
 - **Storefront auth:** `clients.email_verified_at` and `remember_token`; `Client` implements email verification and password reset; JSON routes **forgot-password**, **reset-password**, **email/resend**, signed **email/verify/{id}/{hash}**; middleware **`client.verified`** on sensitive storefront APIs; **`GET reports/summary`** with **`auth.client_or_admin`** (shop metrics for admins, scoped metrics for verified clients).
 - **FAQ:** `faqs` table, public **`GET /faqs`**, admin **`apiResource`**, storefront FAQ page and admin CRUD (ca / es / en).
 - **Delivery note (albarán):** **`GET /orders/{order}/delivery-note`** (same rules as invoice), Blade **`pdf/delivery_note`**, links on order detail and orders list.

@@ -249,8 +249,8 @@ export default function AdminLayout() {
           </div>
           <ul className="menu p-4 flex-1">
             {primaryNavItems.map(renderNavMenuItem)}
-            <li className="pointer-events-none px-1 py-2" aria-hidden="true">
-              <div className="h-px w-full bg-base-300" role="separator" />
+            <li className="!min-h-0 !p-0 !py-0 list-none pointer-events-none my-2" aria-hidden="true">
+              <hr className="m-0 w-full border-0 border-t border-base-300" />
             </li>
             {secondaryNavItems.map(renderNavMenuItem)}
           </ul>

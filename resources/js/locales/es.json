@@ -616,7 +616,7 @@
   "admin.personalized_solutions.resend_resolution_done": "Correo enviado.",
   "admin.personalized_solutions.resolution_modal_open": "Resolución",
   "admin.personalized_solutions.resolution_modal_title": "Resolución o presupuesto",
-  "admin.personalized_solutions.email_client_short": "Correo al cliente",
+  "admin.personalized_solutions.email_client_short": "Enviar al cliente",
   "admin.personalized_solutions.email_client_title": "Envía al cliente el correo con la resolución guardada en la base de datos. Guarda antes si has editado el texto.",
   "admin.personalized_solutions.resolution_saved": "Guardado.",
   "admin.nav.settings": "Configuración",

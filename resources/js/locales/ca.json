@@ -133,7 +133,7 @@
   "shop.custom_solution.description": "Descripció del problema",
   "shop.custom_solution.attachments": "Fotos o documents",
   "shop.custom_solution.submit": "Enviar",
-  "shop.custom_solution.success": "Sol·licitud enviada. Us contactarem aviat.",
+  "shop.custom_solution.success": "Sol·licitud enviada. Us contactarem aviat. Reviseu el correu.",
   "shop.custom_solution.address_optional": "Adreça",
   "shop.custom_solution.address_note": "Indicacions per la visita",
   "shop.custom_solution.confirm_message": "Vols enviar la sol·licitud de solució personalitzada?",

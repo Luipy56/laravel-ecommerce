@@ -133,7 +133,7 @@
   "shop.custom_solution.description": "Problem description",
   "shop.custom_solution.attachments": "Photos or documents",
   "shop.custom_solution.submit": "Send",
-  "shop.custom_solution.success": "Request sent. We will be in touch soon.",
+  "shop.custom_solution.success": "Request sent. We will be in touch soon. Please check your email.",
   "shop.custom_solution.address_optional": "Address",
   "shop.custom_solution.address_note": "Indications for the visit",
   "shop.custom_solution.confirm_message": "Submit custom solution request?",

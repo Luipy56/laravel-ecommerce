@@ -133,7 +133,7 @@
   "shop.custom_solution.description": "Descripción del problema",
   "shop.custom_solution.attachments": "Fotos o documentos",
   "shop.custom_solution.submit": "Enviar",
-  "shop.custom_solution.success": "Solicitud enviada. Nos pondremos en contacto pronto.",
+  "shop.custom_solution.success": "Solicitud enviada. Nos pondremos en contacto pronto. Revise su correo.",
   "shop.custom_solution.address_optional": "Dirección",
   "shop.custom_solution.address_note": "Indicaciones para la visita",
   "shop.custom_solution.confirm_message": "¿Enviar la solicitud de solución personalizada?",

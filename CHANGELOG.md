@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Order invoice (HTML):** `GET /api/v1/orders/{order}/invoice` now uses the same **logo and brand** sources as transactional mail (`MAIL_BRAND_LOGO_URL` / `MAIL_BRAND_DEFAULT_LOGO`, `MAIL_BRAND_DISPLAY_NAME`, optional `MAIL_FOOTER_CONTACT_LINE`), a clearer **header** (reference `ORD-*`, date, status), **bill-to** panel with shipping and optional installation address, line columns for **unit price** and **line amount**, a right-aligned **summary** block, and neutral typography suitable for print.
+
 ### Added
 
 - **Admin sidebar:** `GET /api/v1/admin/nav-alerts` exposes whether any **orders** or **custom solutions** need attention (English status codes in DB: e.g. `pending`, `awaiting_payment`, `awaiting_installation_price`, `installation_pending`, installation quote `pending`; solutions `pending_review` or non-empty `improvement_feedback`). The admin layout shows a small **warning** dot on **Orders** and **Custom solutions** when applicable.

@@ -502,7 +502,10 @@ export default function OrderDetailPage() {
       )}
 
       {!canPay && order.has_payment && (
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex flex-wrap justify-end gap-2">
+          <a href={`/api/v1/orders/${order.id}/delivery-note?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-primary btn-sm">
+            {t('shop.delivery_note')}
+          </a>
           <a href={`/api/v1/orders/${order.id}/invoice?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
             {t('shop.invoice')}
           </a>

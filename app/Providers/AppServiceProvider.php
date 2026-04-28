@@ -26,7 +26,11 @@ use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use App\Services\ProductSearchTextRebuildService;
 use App\Services\Search\ScoutElasticsearchProductCatalogSearch;
 use App\Services\Search\SearchSynonymDictionary;
+use App\Support\MailLocale;
 use App\Support\SqliteDatabaseBootstrap;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
@@ -108,5 +112,23 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(OrderPlacedPaymentPending::class, SendOrderPaymentPendingAdminEmail::class);
         Event::listen(PersonalizedSolutionSubmitted::class, SendPersonalizedSolutionAcknowledgementEmail::class);
         Event::listen(OrderShipped::class, SendOrderShippedEmail::class);
+
+        VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
+            app()->setLocale(MailLocale::resolve());
+
+            return (new MailMessage)
+                ->subject(__('auth.verify_email_subject'))
+                ->line(__('auth.verify_email_line1'))
+                ->action(__('auth.verify_email_action'), $url)
+                ->line(__('auth.verify_email_line2'));
+        });
+
+        ResetPassword::createUrlUsing(function ($user, string $token): string {
+            $base = rtrim((string) config('app.url'), '/');
+            $path = config('app.frontend_reset_password_path', '/reset-password');
+            $email = urlencode($user->getEmailForPasswordReset());
+
+            return $base.$path.'?token='.urlencode($token).'&login_email='.$email;
+        });
     }
 }

@@ -73,6 +73,7 @@ class PaymentWebhookTest extends TestCase
             'login_email' => 'buyer@example.test',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $order = Order::query()->create([
@@ -143,6 +144,7 @@ class PaymentWebhookTest extends TestCase
             'login_email' => 'buyer_cs@example.test',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $order = Order::query()->create([
@@ -207,6 +209,7 @@ class PaymentWebhookTest extends TestCase
             'login_email' => 'buyer4@example.test',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $order = Order::query()->create([

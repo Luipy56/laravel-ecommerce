@@ -20,7 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/v1/payments/webhooks/*',
         ]);
-        $middleware->alias(['admin' => \App\Http\Middleware\EnsureAdmin::class]);
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'client.verified' => \App\Http\Middleware\EnsureClientEmailVerified::class,
+            'auth.client_or_admin' => \App\Http\Middleware\AuthenticateClientOrAdmin::class,
+        ]);
         $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->is('api/*')) {
                 return null;

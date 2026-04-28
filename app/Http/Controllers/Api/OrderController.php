@@ -457,6 +457,34 @@ class OrderController extends Controller
         ]);
     }
 
+    public function deliveryNote(Request $request, Order $order): Response
+    {
+        if ($order->client_id !== $request->user()->id || $order->kind !== Order::KIND_ORDER) {
+            abort(404);
+        }
+        if (! $order->hasSuccessfulPayment()) {
+            abort(403);
+        }
+        $allowed = config('app.available_locales', ['ca', 'es', 'en']);
+        $locale = $request->query('locale');
+        if (! in_array($locale, $allowed, true)) {
+            $pref = $request->header('Accept-Language', '');
+            $locale = (preg_match('/^(ca|es|en)([-_]|$)/i', $pref, $m) ? strtolower($m[1]) : null) ?? config('app.locale');
+        }
+        if (! in_array($locale, $allowed, true)) {
+            $locale = config('app.locale');
+        }
+        app()->setLocale($locale);
+        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
+
+        $html = view('pdf.delivery_note', ['order' => $order])->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html',
+            'Content-Disposition' => 'inline; filename="delivery-note-'.$order->id.'.html"',
+        ]);
+    }
+
     private function paymentStartExceptionMatchesPayPalOAuth(Throwable $e): bool
     {
         $m = strtolower($e->getMessage());

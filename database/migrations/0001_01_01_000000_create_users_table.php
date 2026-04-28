@@ -30,6 +30,8 @@ return new class extends Migration
             $table->string('identification', 20)->nullable()->unique()->comment('ID document (DNI, CIF or NIE); one per account');
             $table->string('login_email', 255)->unique()->comment('Email for authentication');
             $table->string('password', 255);
+            $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
+            $table->rememberToken();
             $table->boolean('is_active')->default(true)->comment('Soft delete');
             $table->timestamps();
         });

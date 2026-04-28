@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminDataExplorerController;
+use App\Http\Controllers\Api\AdminFaqController;
 use App\Http\Controllers\Api\AdminFeatureController;
 use App\Http\Controllers\Api\AdminFeatureNameController;
 use App\Http\Controllers\Api\AdminNavAlertsController;
@@ -19,7 +20,10 @@ use App\Http\Controllers\Api\AdminVariantGroupController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ClientPasswordResetController;
+use App\Http\Controllers\Api\ClientVerificationController;
 use App\Http\Controllers\Api\FeatureController;
+use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackController;
 use App\Http\Controllers\Api\PaymentConfigController;
@@ -29,6 +33,7 @@ use App\Http\Controllers\Api\PersonalizedSolutionController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PublicPersonalizedSolutionController;
 use App\Http\Controllers\Api\PurchasedProductsController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ShopPublicSettingsController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +42,15 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 Route::get('user', [AuthController::class, 'user']);
+
+Route::post('forgot-password', [ClientPasswordResetController::class, 'forgot'])
+    ->middleware('throttle:6,1');
+Route::post('reset-password', [ClientPasswordResetController::class, 'reset'])
+    ->middleware('throttle:6,1');
+
+Route::get('email/verify/{id}/{hash}', [ClientVerificationController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
 
 Route::get('categories', [CategoryController::class, 'index']);
 Route::get('features', [FeatureController::class, 'index']);
@@ -51,6 +65,8 @@ Route::get('packs/{pack}', [PackController::class, 'show']);
 Route::get('payments/config', [PaymentConfigController::class, 'show']);
 
 Route::get('shop/public-settings', [ShopPublicSettingsController::class, 'show']);
+
+Route::get('faqs', [FaqController::class, 'index']);
 
 Route::post('personalized-solutions', [PersonalizedSolutionController::class, 'store']);
 
@@ -72,11 +88,17 @@ Route::post('cart/lines', [CartController::class, 'addLine']);
 Route::put('cart/lines/{line}', [CartController::class, 'updateLine']);
 Route::delete('cart/lines/{line}', [CartController::class, 'removeLine']);
 
-/* ------------------------ Client auth required ------------------------ */
+/* ------------------------ Client auth (unverified may logout / resend / read profile) ------------------------ */
 Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('email/resend', [ClientVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1');
 
     Route::get('profile', [UserController::class, 'show']);
+});
+
+/* ------------------------ Client auth + verified email ------------------------ */
+Route::middleware(['auth', 'client.verified'])->group(function () {
     Route::put('profile', [UserController::class, 'update']);
     Route::post('profile/addresses', [UserController::class, 'storeAddress']);
     Route::put('profile/addresses/{id}', [UserController::class, 'updateAddress']);
@@ -96,6 +118,11 @@ Route::middleware('auth')->group(function () {
     Route::get('purchases', [PurchasedProductsController::class, 'index']);
     Route::get('orders/{order}', [OrderController::class, 'show']);
     Route::get('orders/{order}/invoice', [OrderController::class, 'invoice']);
+    Route::get('orders/{order}/delivery-note', [OrderController::class, 'deliveryNote']);
+});
+
+Route::middleware(['auth.client_or_admin'])->group(function () {
+    Route::get('reports/summary', [ReportController::class, 'summary']);
 });
 
 /* ------------------------ Admin ------------------------ */
@@ -116,6 +143,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::post('data-explorer/query', [AdminDataExplorerController::class, 'query'])->middleware('throttle:30,1');
     Route::post('data-explorer/export', [AdminDataExplorerController::class, 'export'])->middleware('throttle:10,1');
     Route::post('data-explorer/aggregate', [AdminDataExplorerController::class, 'aggregate'])->middleware('throttle:20,1');
+    Route::apiResource('faqs', AdminFaqController::class);
     Route::apiResource('categories', AdminCategoryController::class);
     Route::get('feature-names', [AdminFeatureNameController::class, 'index']);
     Route::post('feature-names', [AdminFeatureNameController::class, 'store']);

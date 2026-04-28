@@ -57,7 +57,23 @@ Table CLIENTS [note: 'Account (person or company). Use CLIENT_CONTACTS for names
   identification varchar(20) [null, unique, note: 'ID document (DNI, CIF or NIE); one per account']
   login_email varchar(255) [not null, unique, note: 'Email for authentication; PostgreSQL type citext (case-insensitive)']
   password varchar(255) [not null]
+  email_verified_at timestamp [null, note: 'Email verification']
+  remember_token varchar(100) [null]
   is_active boolean [not null, default: true, note: 'Soft delete']
+}
+
+Table FAQS [note: 'Public FAQ entries (multilingual); admin CRUD'] {
+  id int [pk, increment]
+  sort_order int [not null, default: 0]
+  is_active boolean [not null, default: true]
+  question_ca text [not null]
+  question_es text [not null]
+  question_en text [not null]
+  answer_ca text [not null]
+  answer_es text [not null]
+  answer_en text [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }
 
 Table CLIENT_CONTACTS {

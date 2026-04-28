@@ -2,13 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Notifications\Notifiable;
 
-class Client extends Authenticatable
+class Client extends Authenticatable implements CanResetPasswordContract, MustVerifyEmailContract
 {
+    use CanResetPassword;
+    use MustVerifyEmail;
     use Notifiable;
 
     protected $table = 'clients';
@@ -19,10 +25,12 @@ class Client extends Authenticatable
         'login_email',
         'password',
         'is_active',
+        'email_verified_at',
     ];
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
     protected function casts(): array
@@ -30,6 +38,7 @@ class Client extends Authenticatable
         return [
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'email_verified_at' => 'datetime',
         ];
     }
 
@@ -38,10 +47,16 @@ class Client extends Authenticatable
         return 'id';
     }
 
+    /** Email used for verification (we use login_email). */
+    public function getEmailForVerification(): string
+    {
+        return (string) $this->login_email;
+    }
+
     /** Email used for password reset (we use login_email). */
     public function getEmailForPasswordReset(): string
     {
-        return $this->login_email;
+        return (string) $this->login_email;
     }
 
     public function contacts(): HasMany

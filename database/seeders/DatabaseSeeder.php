@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ClientContactSeeder::class,
             AdminSeeder::class,
+            FaqSeeder::class,
             ProductCategorySeeder::class,
             FeatureNameSeeder::class,
             ProductSeeder::class,

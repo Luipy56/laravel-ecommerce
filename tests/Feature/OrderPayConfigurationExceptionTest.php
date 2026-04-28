@@ -36,6 +36,7 @@ class OrderPayConfigurationExceptionTest extends TestCase
             'login_email' => 'buyer_'.uniqid('', true).'@example.test',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $category = ProductCategory::query()->create([

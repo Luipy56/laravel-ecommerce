@@ -64,6 +64,7 @@ class PayPalPaymentTest extends TestCase
             'login_email' => 'paypal_buyer_'.uniqid('', true).'@example.test',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
     }
 

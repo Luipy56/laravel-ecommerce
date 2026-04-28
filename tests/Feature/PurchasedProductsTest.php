@@ -64,6 +64,7 @@ class PurchasedProductsTest extends TestCase
             'login_email' => 'u_'.uniqid('', true).'@example.test',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $response = $this->actingAs($client, 'web')->getJson('/api/v1/purchases?date_from=2025-06-01&date_to=2025-01-01');
@@ -82,6 +83,7 @@ class PurchasedProductsTest extends TestCase
             'login_email' => 'buyer_'.uniqid('', true).'@example.test',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $category = ProductCategory::query()->create([

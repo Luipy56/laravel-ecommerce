@@ -41,6 +41,8 @@ class AuthController extends Controller
                 'identification' => $client->identification,
                 'name' => $primary?->name,
                 'surname' => $primary?->surname,
+                'email_verified' => $client->hasVerifiedEmail(),
+                'email_verified_at' => $client->email_verified_at?->toIso8601String(),
             ],
         ]);
     }
@@ -92,6 +94,8 @@ class AuthController extends Controller
         Auth::login($client);
         $request->session()->regenerate();
 
+        $client->sendEmailVerificationNotification();
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -101,6 +105,8 @@ class AuthController extends Controller
                 'identification' => $client->identification,
                 'name' => $validated['name'],
                 'surname' => $validated['surname'] ?? null,
+                'email_verified' => false,
+                'email_verified_at' => null,
             ],
         ], 201);
     }
@@ -141,6 +147,8 @@ class AuthController extends Controller
                     'province' => $client->addresses->first()->province,
                     'postal_code' => $client->addresses->first()->postal_code,
                 ] : null,
+                'email_verified' => $client->hasVerifiedEmail(),
+                'email_verified_at' => $client->email_verified_at?->toIso8601String(),
             ],
         ]);
     }

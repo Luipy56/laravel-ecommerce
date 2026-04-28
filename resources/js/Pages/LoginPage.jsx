@@ -112,7 +112,11 @@ export default function LoginPage() {
             <input id="login-remember" type="checkbox" className="checkbox checkbox-sm" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
             <span className="label-text">{t('auth.remember')}</span>
           </label>
-          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-primary border-0 bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg shadow-primary/20 w-full min-h-12 disabled:opacity-60"
+            disabled={loading}
+          >
             {loading ? t('common.loading') : t('auth.login')}
           </button>
         </form>

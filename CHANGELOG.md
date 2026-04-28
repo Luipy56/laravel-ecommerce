@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Transactional email addresses:** Registration, login, password reset, and personalized-solution **`POST`** validate **`login_email` / `email`** with **RFC + DNS (MX-capable domain)** via **`ValidationRules::emailDns()`**; clearer validation messages in **ca / es / en**. Does not prove a mailbox exists on third-party hosts. Feature tests use **`@ietf.org`** sample addresses because **`example.com`** / **`example.org`** publish null MX (RFC 7505).
 
+- **Login page:** Primary **Iniciar sesión** / **Log in** submit uses the **brand gradient** (**`from-primary` → `to-secondary`**) and shadow like **verify-email** and the scroll FAB.
+
 - **Auth notification HTML (verify + reset):** **Verify email** and **reset password** mails use the same **branded** **`emails.layouts.transactional`** layout as other shop mail (logo, orange gradient, CTA), with copy in **`lang/*/mail.php`**; **`App\Support\FrontendPasswordResetUrl`** builds the SPA reset link.
 
 - **Forgot password:** **`auth.forgot_sent`** (ca / es / en) is now a short confirmation that a **recovery email was sent**, instead of the conditional “if the email exists…” wording.

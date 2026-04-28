@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
-use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class Client extends Authenticatable implements CanResetPasswordContract, MustVerifyEmailContract
@@ -45,6 +44,18 @@ class Client extends Authenticatable implements CanResetPasswordContract, MustVe
     public function getAuthIdentifierName(): string
     {
         return 'id';
+    }
+
+    /**
+     * Notifications default to an {@see $email} column; storefront accounts use login_email.
+     *
+     * @param  \Illuminate\Notifications\Notification|null  $notification
+     */
+    public function routeNotificationForMail($notification = null): ?string
+    {
+        $email = $this->login_email;
+
+        return ($email !== null && $email !== '') ? $email : null;
     }
 
     /** Email used for verification (we use login_email). */

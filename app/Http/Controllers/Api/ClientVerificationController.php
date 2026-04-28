@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Support\MailLocale;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,9 @@ class ClientVerificationController extends Controller
                 'message' => __('auth.email_already_verified'),
             ]);
         }
+
+        $locale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
+        app()->setLocale($locale);
 
         $client->sendEmailVerificationNotification();
 

@@ -232,6 +232,8 @@ export default function OrderDetailPage() {
   const paymentsSimulated = !!order.payments_simulated;
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
 
+  const displayTimeline = (order.status_timeline || []).filter((row) => row.step !== 'current');
+
   return (
     <div className="mx-auto w-full min-w-0 max-w-3xl">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -263,12 +265,12 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {order.status_timeline && order.status_timeline.length > 0 && (
+      {displayTimeline.length > 0 && (
         <div id="order-timeline" className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
           <div className="card-body py-4 space-y-3">
             <h2 className="card-title text-base">{t('shop.order.status_timeline_title')}</h2>
             <ul className="space-y-3">
-              {order.status_timeline.map((row, idx) => (
+              {displayTimeline.map((row, idx) => (
                 <li
                   key={`${row.step}-${idx}`}
                   className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-base-200 pb-3 last:border-0 last:pb-0"

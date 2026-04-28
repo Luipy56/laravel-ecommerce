@@ -29,6 +29,16 @@ export default function CustomSolutionPage() {
   const [publicSettingsLoaded, setPublicSettingsLoaded] = useState(false);
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
   const submitInFlightRef = useRef(false);
+  const errorBannerRef = useRef(null);
+
+  /** Defer so the error `<div>` is mounted after setState; user often stays scrolled to the bottom submit. */
+  const scrollErrorBannerIntoView = useCallback(() => {
+    queueMicrotask(() => {
+      requestAnimationFrame(() => {
+        errorBannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,6 +90,7 @@ export default function CustomSolutionPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
+      scrollErrorBannerIntoView();
       submitInFlightRef.current = false;
       return;
     }
@@ -118,11 +129,12 @@ export default function CustomSolutionPage() {
       }
     } catch (err) {
       setError(err.response?.data?.message || t('common.error'));
+      scrollErrorBannerIntoView();
     } finally {
       setLoading(false);
       submitInFlightRef.current = false;
     }
-  }, [form, t, showToast, navigate, newRequestsDisabled]);
+  }, [form, t, showToast, navigate, newRequestsDisabled, scrollErrorBannerIntoView]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -133,6 +145,7 @@ export default function CustomSolutionPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
+      scrollErrorBannerIntoView();
       return;
     }
     setConfirmModalOpen(true);
@@ -141,7 +154,11 @@ export default function CustomSolutionPage() {
   return (
     <div className="mx-auto w-full min-w-0 max-w-4xl">
       <PageTitle>{t('shop.custom_solution')}</PageTitle>
-      {error && <div className="alert alert-error mb-4">{error}</div>}
+      {error ? (
+        <div ref={errorBannerRef} className="alert alert-error mb-4" role="alert">
+          {error}
+        </div>
+      ) : null}
       <ConfirmModal
         open={confirmModalOpen}
         onClose={() => setConfirmModalOpen(false)}

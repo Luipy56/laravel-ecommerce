@@ -635,7 +635,7 @@
   "admin.personalized_solutions.email_client_short": "Enviar al client",
   "admin.personalized_solutions.email_client_title": "Envia al client el correu amb la resolució desada a la base de dades. Desa abans si has editat el text.",
   "admin.personalized_solutions.email_client_confirm_title": "Enviar el correu de resolució?",
-  "admin.personalized_solutions.email_client_confirm_body": "El client rebrà un correu amb la resolució desada a la base de dades. Desa abans a Resolució si has fet canvis.",
+  "admin.personalized_solutions.email_client_confirm_body": "El client rebrà un correu amb la resolució actual.",
   "admin.personalized_solutions.resolution_saved": "Desat.",
   "admin.nav.settings": "Configuració",
   "admin.settings.title": "Configuració de la botiga",

@@ -678,6 +678,7 @@
   "admin.settings.column_drag_handle": "Mover columna",
   "admin.settings.section_home": "Inicio · destacados automáticos",
   "admin.settings.section_home_help": "Las reglas de stock bajo y sobrestock marcan qué productos activos se consideran en tendencia. Usa «Recalcular» tras cambiar los umbrales. El destacado manual se edita en cada producto.",
+  "admin.settings.section_general": "General",
   "admin.settings.featured_limits_title": "Límites en la portada (Destacados)",
   "admin.settings.featured_max_hint": "0 sin límite para cada grupo. Se muestran primero los destacados manuales, luego tendencia por stock bajo y luego sobrestock; orden aleatorio dentro de cada grupo cuando hay límite.",
   "admin.settings.featured_max_manual": "Máx. destacados manuales",

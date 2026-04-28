@@ -678,6 +678,7 @@
   "admin.settings.column_drag_handle": "Moure columna",
   "admin.settings.section_home": "Inici · destacats automàtics",
   "admin.settings.section_home_help": "Les regles d’estoc baix i sobrestoc marquen quins productes actius es consideren en tendència. Useu «Tornar a calcular» després de canviar llindars. El destacat manual s’edita a cada producte.",
+  "admin.settings.section_general": "General",
   "admin.settings.featured_limits_title": "Límits a la portada (Destacats)",
   "admin.settings.featured_max_hint": "0 sense límit per a cada grup. Es mostren primer els destacats manuals, després tendència per estoc baix i després sobrestoc; ordre aleatori dins de cada grup quan hi ha límit.",
   "admin.settings.featured_max_manual": "Màx. destacats manuals",

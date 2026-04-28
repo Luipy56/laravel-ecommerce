@@ -187,52 +187,41 @@ export default function AdminShopSettingsPage() {
             <h2 className="card-title text-lg">{t('admin.settings.section_home')}</h2>
             <p className="text-sm text-base-content/70">{t('admin.settings.section_home_help')}</p>
 
+            <div className="divider my-1">{t('admin.settings.section_general')}</div>
+
             <p className="text-sm font-medium">{t('admin.settings.featured_limits_title')}</p>
             <p className="text-xs text-base-content/60">{t('admin.settings.featured_max_hint')}</p>
-
-            <div className="space-y-4 max-w-2xl">
-              <div className="rounded-xl border border-base-300 bg-base-200/50 p-4 sm:p-5 space-y-3">
-                <h3 id="admin-settings-featured-max-manual" className="font-semibold text-base">
-                  {t('admin.settings.featured_max_manual')}
-                </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+              <label className="form-field">
+                <span className="label-text">{t('admin.settings.featured_max_manual')}</span>
                 <input
-                  id="featured-max-manual-input"
                   type="number"
                   min={0}
-                  className="input input-bordered input-sm sm:input-md w-full max-w-xs"
+                  className="input input-bordered input-sm sm:input-md w-full"
                   value={featuredMaxManual}
                   onChange={(e) => setFeaturedMaxManual(e.target.value)}
-                  aria-labelledby="admin-settings-featured-max-manual"
                 />
-              </div>
-              <div className="rounded-xl border border-base-300 bg-base-200/50 p-4 sm:p-5 space-y-3">
-                <h3 id="admin-settings-featured-max-low" className="font-semibold text-base">
-                  {t('admin.settings.featured_max_low_stock')}
-                </h3>
+              </label>
+              <label className="form-field">
+                <span className="label-text">{t('admin.settings.featured_max_low_stock')}</span>
                 <input
-                  id="featured-max-low-stock-input"
                   type="number"
                   min={0}
-                  className="input input-bordered input-sm sm:input-md w-full max-w-xs"
+                  className="input input-bordered input-sm sm:input-md w-full"
                   value={featuredMaxLowStock}
                   onChange={(e) => setFeaturedMaxLowStock(e.target.value)}
-                  aria-labelledby="admin-settings-featured-max-low"
                 />
-              </div>
-              <div className="rounded-xl border border-base-300 bg-base-200/50 p-4 sm:p-5 space-y-3">
-                <h3 id="admin-settings-featured-max-over" className="font-semibold text-base">
-                  {t('admin.settings.featured_max_overstock')}
-                </h3>
+              </label>
+              <label className="form-field">
+                <span className="label-text">{t('admin.settings.featured_max_overstock')}</span>
                 <input
-                  id="featured-max-overstock-input"
                   type="number"
                   min={0}
-                  className="input input-bordered input-sm sm:input-md w-full max-w-xs"
+                  className="input input-bordered input-sm sm:input-md w-full"
                   value={featuredMaxOverstock}
                   onChange={(e) => setFeaturedMaxOverstock(e.target.value)}
-                  aria-labelledby="admin-settings-featured-max-over"
                 />
-              </div>
+              </label>
             </div>
 
             <div className="divider my-1">{t('admin.settings.low_stock')}</div>

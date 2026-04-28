@@ -99,11 +99,9 @@ export default function AdminLayout() {
     }
   };
 
-  const navItems = useMemo(() => {
+  const { primaryNavItems, secondaryNavItems } = useMemo(() => {
     const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard', alertKey: null };
-    const mainItems = [
-      { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
-      { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
+    const primarySource = [
       { to: '/admin/admins', labelKey: 'admin.nav.admins', alertKey: null },
       { to: '/admin/categories', labelKey: 'admin.nav.categories', alertKey: null },
       { to: '/admin/products', labelKey: 'admin.nav.products', alertKey: null },
@@ -114,9 +112,17 @@ export default function AdminLayout() {
       { to: '/admin/features', labelKey: 'admin.nav.features', alertKey: null },
       { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
     ];
-    const sorted = [...mainItems].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
-    const about = { to: '/admin/about', labelKey: 'admin.nav.about', alertKey: null };
-    return [dashboard, ...sorted, about];
+    const primarySorted = [...primarySource].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
+    const secondarySource = [
+      { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
+      { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
+      { to: '/admin/about', labelKey: 'admin.nav.about', alertKey: null },
+      { to: '/', labelKey: 'admin.back_to_shop', alertKey: null },
+    ];
+    return {
+      primaryNavItems: [dashboard, ...primarySorted],
+      secondaryNavItems: secondarySource,
+    };
   }, [t]);
 
   const [navAlerts, setNavAlerts] = useState({
@@ -147,6 +153,40 @@ export default function AdminLayout() {
       cancelled = true;
     };
   }, [pathname]);
+
+  const renderNavMenuItem = (item) => {
+    const { to, labelKey, alertKey } = item;
+    const showAttentionDot =
+      alertKey === 'orders'
+        ? navAlerts.orders
+        : alertKey === 'personalized_solutions'
+          ? navAlerts.personalized_solutions
+          : false;
+    const linkAria =
+      showAttentionDot && alertKey
+        ? `${t(labelKey)} · ${t(`admin.nav.alert_link_suffix_${alertKey}`)}`
+        : undefined;
+    return (
+      <li key={to === '/' ? 'back-to-shop' : to}>
+        <Link
+          to={to}
+          className={`rounded-lg flex items-center justify-between gap-2 ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
+          onClick={closeDrawer}
+          aria-current={isActive(to) ? 'page' : undefined}
+          aria-label={linkAria}
+        >
+          <span className="min-w-0 flex-1">{t(labelKey)}</span>
+          {showAttentionDot ? (
+            <span
+              className="size-2 shrink-0 rounded-full bg-warning"
+              aria-hidden="true"
+              title={t(`admin.nav.alert_link_suffix_${alertKey}`)}
+            />
+          ) : null}
+        </Link>
+      </li>
+    );
+  };
 
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-base-200">

@@ -190,25 +190,14 @@ export default function AdminPersonalizedSolutionShowPage() {
             <form method="dialog">
               <button type="submit" className="btn btn-ghost">{t('common.close')}</button>
             </form>
-            <div className="flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                disabled={notifyLoading || !solution.email}
-                onClick={handleNotifyResolution}
-                title={t('admin.personalized_solutions.email_client_title')}
-              >
-                {notifyLoading ? t('common.loading') : t('admin.personalized_solutions.email_client_short')}
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                disabled={resolutionSaveLoading}
-                onClick={handleSaveResolutionModal}
-              >
-                {resolutionSaveLoading ? t('common.loading') : t('common.save')}
-              </button>
-            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={resolutionSaveLoading}
+              onClick={handleSaveResolutionModal}
+            >
+              {resolutionSaveLoading ? t('common.loading') : t('common.save')}
+            </button>
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">

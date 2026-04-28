@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Admin / personalized solution modal:** Removed the duplicate **Send to client** button from the modal footer; it remains on the detail toolbar.
+
 ## [0.1.28] - 2026-04-29
 
 ### Added

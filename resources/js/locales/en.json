@@ -49,7 +49,7 @@
   "auth.forgot_link": "Forgot password?",
   "auth.forgot_title": "Reset password",
   "auth.forgot_intro": "Enter your account email and we will send you a link to set a new password.",
-  "auth.forgot_sent": "If that email exists in our system, you will receive reset instructions.",
+  "auth.forgot_sent": "We've sent you a password recovery email.",
   "auth.forgot_submit": "Send reset link",
   "auth.reset_title": "New password",
   "auth.reset_missing_link": "Invalid or incomplete link. Request a new reset email.",

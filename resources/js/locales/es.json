@@ -49,7 +49,7 @@
   "auth.forgot_link": "¿Has olvidado la contraseña?",
   "auth.forgot_title": "Recuperar contraseña",
   "auth.forgot_intro": "Introduce el correo de tu cuenta y te enviaremos un enlace para restablecerla.",
-  "auth.forgot_sent": "Si el correo existe en el sistema, recibirás instrucciones para restablecer la contraseña.",
+  "auth.forgot_sent": "Te hemos enviado un correo de recuperación.",
   "auth.forgot_submit": "Enviar enlace",
   "auth.reset_title": "Nueva contraseña",
   "auth.reset_missing_link": "Enlace no válido o incompleto. Solicita un nuevo correo de restablecimiento.",

@@ -49,7 +49,7 @@
   "auth.forgot_link": "Has oblidat la contrasenya?",
   "auth.forgot_title": "Recuperar contrasenya",
   "auth.forgot_intro": "Introdueix el correu del teu compte i t’enviarem un enllaç per restablir-la.",
-  "auth.forgot_sent": "Si el correu existeix al sistema, rebràs instruccions per restablir la contrasenya.",
+  "auth.forgot_sent": "T’hem enviat un correu de recuperació.",
   "auth.forgot_submit": "Enviar enllaç",
   "auth.reset_title": "Nova contrasenya",
   "auth.reset_missing_link": "Enllaç invàlid o incomplet. Sol·licita un nou correu de restabliment.",

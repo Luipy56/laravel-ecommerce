@@ -98,23 +98,52 @@ export default function AdminLayout() {
   };
 
   const navItems = useMemo(() => {
-    const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard' };
+    const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard', alertKey: null };
     const mainItems = [
-      { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer' },
-      { to: '/admin/settings', labelKey: 'admin.nav.settings' },
-      { to: '/admin/admins', labelKey: 'admin.nav.admins' },
-      { to: '/admin/categories', labelKey: 'admin.nav.categories' },
-      { to: '/admin/products', labelKey: 'admin.nav.products' },
-      { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups' },
-      { to: '/admin/clients', labelKey: 'admin.nav.clients' },
-      { to: '/admin/orders', labelKey: 'admin.nav.orders' },
-      { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions' },
-      { to: '/admin/features', labelKey: 'admin.nav.features' },
-      { to: '/admin/packs', labelKey: 'admin.nav.packs' },
+      { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
+      { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
+      { to: '/admin/admins', labelKey: 'admin.nav.admins', alertKey: null },
+      { to: '/admin/categories', labelKey: 'admin.nav.categories', alertKey: null },
+      { to: '/admin/products', labelKey: 'admin.nav.products', alertKey: null },
+      { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups', alertKey: null },
+      { to: '/admin/clients', labelKey: 'admin.nav.clients', alertKey: null },
+      { to: '/admin/orders', labelKey: 'admin.nav.orders', alertKey: 'orders' },
+      { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions', alertKey: 'personalized_solutions' },
+      { to: '/admin/features', labelKey: 'admin.nav.features', alertKey: null },
+      { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
     ];
     const sorted = [...mainItems].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
     return [dashboard, ...sorted];
   }, [t]);
+
+  const [navAlerts, setNavAlerts] = useState({
+    orders: false,
+    personalized_solutions: false,
+  });
+
+  useEffect(() => {
+    if (!pathname.startsWith('/admin') || pathname.startsWith('/admin/login')) {
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: body } = await api.get('admin/nav-alerts');
+        if (cancelled || !body?.success || !body?.data) return;
+        setNavAlerts({
+          orders: Boolean(body.data.orders_need_attention),
+          personalized_solutions: Boolean(body.data.personalized_solutions_need_attention),
+        });
+      } catch {
+        if (!cancelled) {
+          setNavAlerts({ orders: false, personalized_solutions: false });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-base-200">
@@ -174,18 +203,38 @@ export default function AdminLayout() {
             <span className="block text-sm text-base-content/70">Admin</span>
           </div>
           <ul className="menu p-4 flex-1">
-            {navItems.map(({ to, labelKey }) => (
-              <li key={to}>
-                <Link
-                  to={to}
-                  className={`rounded-lg ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
-                  onClick={closeDrawer}
-                  aria-current={isActive(to) ? 'page' : undefined}
-                >
-                  {t(labelKey)}
-                </Link>
-              </li>
-            ))}
+            {navItems.map(({ to, labelKey, alertKey }) => {
+              const showAttentionDot =
+                alertKey === 'orders'
+                  ? navAlerts.orders
+                  : alertKey === 'personalized_solutions'
+                    ? navAlerts.personalized_solutions
+                    : false;
+              const linkAria =
+                showAttentionDot && alertKey
+                  ? `${t(labelKey)} · ${t(`admin.nav.alert_link_suffix_${alertKey}`)}`
+                  : undefined;
+              return (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    className={`rounded-lg flex items-center justify-between gap-2 ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
+                    onClick={closeDrawer}
+                    aria-current={isActive(to) ? 'page' : undefined}
+                    aria-label={linkAria}
+                  >
+                    <span className="min-w-0 flex-1">{t(labelKey)}</span>
+                    {showAttentionDot ? (
+                      <span
+                        className="size-2 shrink-0 rounded-full bg-warning"
+                        aria-hidden="true"
+                        title={t(`admin.nav.alert_link_suffix_${alertKey}`)}
+                      />
+                    ) : null}
+                  </Link>
+                </li>
+              );
+            })}
             <li>
               <Link to="/" className="rounded-lg" onClick={closeDrawer}>
                 {t('admin.back_to_shop')}

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminDataExplorerController;
 use App\Http\Controllers\Api\AdminFeatureController;
 use App\Http\Controllers\Api\AdminFeatureNameController;
+use App\Http\Controllers\Api\AdminNavAlertsController;
 use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\AdminPackController;
 use App\Http\Controllers\Api\AdminPersonalizedSolutionController;
@@ -99,6 +100,7 @@ Route::middleware('auth')->group(function () {
 /* ------------------------ Admin ------------------------ */
 Route::post('admin/login', [AdminAuthController::class, 'login']);
 Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
+    Route::get('nav-alerts', [AdminNavAlertsController::class, 'show']);
     Route::post('logout', [AdminAuthController::class, 'logout']);
     Route::get('settings', [AdminShopSettingsController::class, 'show']);
     Route::put('settings', [AdminShopSettingsController::class, 'update']);

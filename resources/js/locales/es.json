@@ -328,6 +328,8 @@
   "admin.data_explorer.tables.admins": "Administradores",
   "admin.data_explorer.tables.generic": "Tabla",
   "admin.nav.logout": "Cerrar sesión",
+  "admin.nav.alert_link_suffix_orders": "Hay pedidos que requieren atención",
+  "admin.nav.alert_link_suffix_personalized_solutions": "Hay soluciones personalizadas que requieren atención",
   "admin.nav.admins": "Administradores",
   "admin.admins.title": "Administradores",
   "admin.admins.add": "Añadir administrador",

@@ -1,0 +1,28 @@
+---
+description: Why APP_VERSION is static and when to bump root package.json semver per task
+alwaysApply: true
+---
+
+# App version cadence (footer / `__APP_VERSION__`)
+
+## Why the version does not change “by itself”
+
+- The footer and **`footer.version`** use **`resources/js/config/version.js`** → **`__APP_VERSION__`**, which Vite sets from **root `package.json`** at **`vite.config.js`** (see `define`). Nothing reads git tags, task IDs, or “prompt count”.
+- If **`package.json`** is not edited, **`npm run build`** and the dev server keep embedding the **same** string. **Each completed shippable task must include a manual semver bump** (or a committer step that does it) — there is no automatic increment.
+
+## When to bump (patch)
+
+Bump **`package.json`** and **`package-lock.json`** together (e.g. `npm version patch --no-git-tag-version`) in the **same push series** as the work, **before** `git push` to the integration branch, when the change:
+
+- touches **storefront, admin, API, mail, payments, or database** in a way that matters to users or operators; **or**
+- adds or updates a bullet under **`CHANGELOG.md`** `[Unreleased]` for that work.
+
+**Coders** should not hand off “done” without a version bump for shippable work; **committer** (or the same agent) applies it in the final commit if the feature commit did not.
+
+## When a bump is optional
+
+- **Docs-only**, **`.mdc` / task markdown only**, or comments-only changes that **do not** add a changelog entry and do not change runtime behavior.
+
+## Deploy / `prod`
+
+Before merging into **`prod`** or deploying production assets, confirm the branch being promoted includes a **semver bump** after the last user-visible change so rebuilt bundles match the footer (**`.cursor/rules/commit-changelog-version.mdc`**).

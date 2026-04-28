@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cursor rules:** Clarify that **`footer.version`** / **`__APP_VERSION__`** come from root **`package.json`** (nothing auto-bumps per prompt); document **patch semver** on each shippable task before push and **`prod`** merge (**`app-version-cadence.mdc`**, **`commit-changelog-version.mdc`**, **`testing-verification.mdc`**).
+
 - **Admin / personalized solution detail:** Toolbar **`admin.personalized_solutions.email_client_short`** label is **Enviar al cliente / Enviar al client / Send to client**; **`resolution_modal_open`** remains **Resolución / Resolució / Resolution**.
 - **Storefront / order detail:** Status timeline no longer lists the synthetic **`current`** step (same label as the **Estado** badge above).
 - **Storefront i18n:** **`shop.shipping_flat`** is shortened to **Envío / Enviament / Shipping** (removed flat-rate parenthetical); used on cart, checkout, and order detail totals.

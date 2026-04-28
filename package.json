@@ -1,12 +1,13 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
   "name": "e-commerce",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "dev:stable": "LARAVEL_VITE_NO_AUTO_RELOAD=1 vite"
   },
   "devDependencies": {
     "@tailwindcss/vite": "~4.1.11",

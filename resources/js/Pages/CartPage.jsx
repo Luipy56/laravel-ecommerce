@@ -86,7 +86,7 @@ function CartLine({ line, updateLine, removeLine, t }) {
             max={99}
             value={line.quantity}
             onChange={handleQuantityChange}
-            className="input input-bordered input-sm w-20 text-center"
+            className="input input-bordered input-sm w-16 text-center"
           />
         </div>
       </td>

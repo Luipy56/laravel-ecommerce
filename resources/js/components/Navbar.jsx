@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useIsFetching } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { IconCart, IconMenu } from './icons';
@@ -35,6 +36,7 @@ function CartDropTarget({ to, className, children, ariaLabel, title }) {
 export default function Navbar() {
   const { t, i18n } = useTranslation();
   const { user, logout, loading: authLoading } = useAuth();
+  const fetchingCount = useIsFetching();
   const navigate = useNavigate();
   const location = useLocation();
   const [locale, setLocale] = useState(i18n.language);
@@ -236,7 +238,10 @@ export default function Navbar() {
             </button>
           </form>
         </div>
-        <div className="header-gradient-line h-1 w-full shrink-0" aria-hidden="true" />
+        <div
+          className={`header-gradient-line h-1 w-full shrink-0${fetchingCount > 0 ? ' header-gradient-line--loading' : ''}`}
+          aria-hidden="true"
+        />
       </header>
     </>
   );

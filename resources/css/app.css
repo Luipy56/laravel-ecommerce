@@ -50,6 +50,37 @@
   background: linear-gradient(to right, #F75211, #8B2400);
 }
 
+/* Indeterminate “top bar” motion while React Query fetches (Navbar only) */
+.header-gradient-line--loading {
+  background-image: linear-gradient(
+    90deg,
+    #8b2400 0%,
+    #f75211 28%,
+    #ff9a55 50%,
+    #f75211 72%,
+    #8b2400 100%
+  );
+  background-size: 200% 100%;
+  animation: header-gradient-line-flow 1.05s linear infinite;
+}
+
+@keyframes header-gradient-line-flow {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-gradient-line--loading {
+    animation: none;
+    background-image: linear-gradient(to right, #f75211, #8b2400);
+    background-size: 100% 100%;
+  }
+}
+
 .hero-gradient {
   background: linear-gradient(135deg, #882200 0%, #fb5412 100%);
 }

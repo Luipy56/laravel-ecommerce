@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Storefront / navbar:** While **React Query** has in-flight fetches (catalog, home, product detail, etc.), the brand **`header-gradient-line`** runs a horizontal **indeterminate gradient** animation (respects **`prefers-reduced-motion`**).
+
 ## [0.1.25] - 2026-04-28
 
 ### Changed

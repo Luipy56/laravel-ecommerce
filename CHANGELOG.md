@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.25] - 2026-04-28
+
 ### Changed
 
 - **Admin order detail:** Order lines are split into **Products** and **Packs** (each block omitted when empty); desktop table and mobile cards reuse the same row layout as before.
@@ -27,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Admin sidebar:** `GET /api/v1/admin/nav-alerts` exposes whether any **orders** or **custom solutions** need attention (English status codes in DB: e.g. `pending`, `awaiting_payment`, `awaiting_installation_price`, `installation_pending`, installation quote `pending`; solutions `pending_review` or non-empty `improvement_feedback`). The admin layout shows a small **warning** dot on **Orders** and **Custom solutions** when applicable.
 
 - **Transactional email:** If checkout finishes **without** a successful payment in the same request (Stripe redirect, PayPal, etc.), the client receives **`OrderPaymentPendingMail`**. When **`MAIL_ADMIN_NOTIFICATION_ADDRESS`** is set, ops also get **`OrderPaymentPendingAdminMail`**. New installation-quote checkouts also notify that address with **`OrderInstallationQuoteRequestedAdminMail`**. `OrderInstallationQuoteRequested` now carries the resolved mail locale from `Accept-Language`.
+
+- **Checkout (demo / stacks):** Optional **`CHECKOUT_DEMO_SKIP_PAYMENT`** skips payment when set (demo environments without a configured PSP).
 
 ### Fixed
 

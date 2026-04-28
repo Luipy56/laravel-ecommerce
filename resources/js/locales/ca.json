@@ -355,6 +355,7 @@
   "admin.admins.created_at": "Data de creació",
   "admin.dashboard.title": "Tauler",
   "admin.breadcrumb.admin": "Admin",
+  "admin.sidebar.subtitle": "Admin · Versió {{version}}",
   "admin.breadcrumb.detail": "Detall",
   "admin.dashboard.sales_by_period": "Vendes per període",
   "admin.dashboard.sales_by_period_linear": "Vendes per període (lineal)",

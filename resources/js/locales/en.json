@@ -355,6 +355,7 @@
   "admin.admins.created_at": "Creation date",
   "admin.dashboard.title": "Panel",
   "admin.breadcrumb.admin": "Admin",
+  "admin.sidebar.subtitle": "Admin · Version {{version}}",
   "admin.breadcrumb.detail": "Details",
   "admin.dashboard.sales_by_period": "Sales per period",
   "admin.dashboard.sales_by_period_linear": "Sales per period (linear)",

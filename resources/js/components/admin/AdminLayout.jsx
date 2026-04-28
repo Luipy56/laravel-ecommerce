@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import { IconMenu } from '../icons';
 import { AdminToastProvider } from '../../contexts/AdminToastContext';
+import { APP_VERSION } from '../../config/version';
 
 const SECTION_NAV_KEYS = {
   'data-explorer': 'admin.nav.data_explorer',
@@ -200,7 +201,9 @@ export default function AdminLayout() {
         <aside className="bg-base-100 w-64 max-w-[min(100vw,16rem)] min-h-full flex flex-col border-r border-base-200">
           <div className="p-4 border-b border-base-200">
             <span className="font-bold text-lg text-base-content">{t('home.hero.title')}</span>
-            <span className="block text-sm text-base-content/70">Admin</span>
+            <span className="block text-sm text-base-content/70">
+              {t('admin.sidebar.subtitle', { version: APP_VERSION })}
+            </span>
           </div>
           <ul className="menu p-4 flex-1">
             {navItems.map(({ to, labelKey, alertKey }) => {

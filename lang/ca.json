@@ -102,5 +102,6 @@
     "admin.data_explorer.errors.invalid_value_column": "La columna numèrica per calcular no és vàlida.",
     "admin.data_explorer.errors.invalid_metric": "La mètrica ha de ser count, sum o avg.",
     "shop.personalized_solutions_disabled": "En aquests moments no acceptem noves sol·licituds de solució personalitzada.",
-    "shop.personalized_solution_too_soon": "Hem rebut la mateixa sol·licitud fa un moment. Espera uns segons abans de tornar a enviar."
+    "shop.personalized_solution_too_soon": "Hem rebut la mateixa sol·licitud fa un moment. Espera uns segons abans de tornar a enviar.",
+    "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat."
 }

@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Admin custom solution detail:** A **modal** (primary **Resolution / quote**) edits **resolution or budget** and **status** without opening the full edit screen; **`PATCH /api/v1/admin/personalized-solutions/{id}/resolution`** saves those fields. A short **Email client** action (toolbar and modal) calls the existing **notify-resolution** endpoint so the mail uses the **currently saved** resolution (tooltip reminds to save first after edits).
+
 - **Admin sidebar:** `GET /api/v1/admin/nav-alerts` exposes whether any **orders** or **custom solutions** need attention (English status codes in DB: e.g. `pending`, `awaiting_payment`, `awaiting_installation_price`, `installation_pending`, installation quote `pending`; solutions `pending_review` or non-empty `improvement_feedback`). The admin layout shows a small **warning** dot on **Orders** and **Custom solutions** when applicable.
 
 - **Transactional email:** If checkout finishes **without** a successful payment in the same request (Stripe redirect, PayPal, etc.), the client receives **`OrderPaymentPendingMail`**. When **`MAIL_ADMIN_NOTIFICATION_ADDRESS`** is set, ops also get **`OrderPaymentPendingAdminMail`**. New installation-quote checkouts also notify that address with **`OrderInstallationQuoteRequestedAdminMail`**. `OrderInstallationQuoteRequested` now carries the resolved mail locale from `Accept-Language`.

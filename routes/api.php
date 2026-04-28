@@ -136,6 +136,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('personalized-solutions', [AdminPersonalizedSolutionController::class, 'index']);
     Route::get('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'show']);
     Route::post('personalized-solutions/{personalized_solution}/notify-resolution', [AdminPersonalizedSolutionController::class, 'notifyResolution']);
+    Route::patch('personalized-solutions/{personalized_solution}/resolution', [AdminPersonalizedSolutionController::class, 'patchResolution']);
     Route::put('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'update']);
     Route::delete('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'destroy']);
 });

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api';
@@ -106,7 +106,7 @@ export default function EmailVerifyPage() {
             {t('auth.verify_email_page_intro')}
           </p>
           <p className="text-sm text-base-content/70">{user.login_email}</p>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
+          <div className="flex justify-center pt-2">
             <button
               type="button"
               className="btn btn-primary border-0 bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg shadow-primary/20 min-h-12 px-8 disabled:opacity-60"
@@ -115,9 +115,6 @@ export default function EmailVerifyPage() {
             >
               {resendLabel}
             </button>
-            <Link to="/" className="btn btn-ghost btn-sm sm:ml-auto">
-              {t('auth.verify_email_back_home')}
-            </Link>
           </div>
           <p className="text-xs text-base-content/60">{t('auth.verify_email_auto_notice')}</p>
         </div>

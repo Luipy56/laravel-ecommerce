@@ -1,39 +1,24 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
-
-const TOAST_DURATION_MS = 3000;
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import { useToast } from './ToastContext';
 
 const AdminToastContext = createContext(null);
 
+/**
+ * Admin success helper: delegates to the global ToastProvider (single toast stack).
+ */
 export function AdminToastProvider({ children }) {
-  const [message, setMessage] = useState(null);
-  const timeoutRef = useRef(null);
+  const { showToast } = useToast();
 
-  const showSuccess = useCallback((msg) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setMessage(msg);
-    timeoutRef.current = setTimeout(() => {
-      setMessage(null);
-      timeoutRef.current = null;
-    }, TOAST_DURATION_MS);
-  }, []);
-
-  return (
-    <AdminToastContext.Provider value={{ showSuccess }}>
-      {children}
-      {message != null && (
-        <div
-          className="toast toast-end toast-bottom z-50 p-4"
-          role="status"
-          aria-live="polite"
-          aria-label={message}
-        >
-          <div className="alert alert-success shadow-lg">
-            <span>{message}</span>
-          </div>
-        </div>
-      )}
-    </AdminToastContext.Provider>
+  const showSuccess = useCallback(
+    (msg) => {
+      showToast({ message: String(msg), type: 'success' });
+    },
+    [showToast]
   );
+
+  const value = useMemo(() => ({ showSuccess }), [showSuccess]);
+
+  return <AdminToastContext.Provider value={value}>{children}</AdminToastContext.Provider>;
 }
 
 export function useAdminToast() {

@@ -17,7 +17,7 @@ alwaysApply: true
 
 - **Comments**: English only.
 - **Code/DB**: Field and variable names in English.
-- **User-facing strings** (HTML, labels, messages): **Translatable**; supported locales are **Catalan (ca)** and **Spanish / Castellano (es)**. No hardcoded UI strings; use Laravel lang keys or React i18n. See **`.cursor/rules/i18n.mdc`**.
+- **User-facing strings** (HTML, labels, messages): **Translatable**; supported locales are **Catalan (ca)**, **Spanish / Castellano (es)**, and **English (en)**. No hardcoded UI strings; use Laravel lang keys or React i18n. See **`.cursor/rules/i18n.mdc`**.
 - **Enums** (values shown to users): Store labels in lang files so they translate (e.g. `shop.status.pending` → "Pendent" / "Pendiente").
 
 ```php

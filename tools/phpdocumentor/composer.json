@@ -1,0 +1,11 @@
+{
+    "name": "laravel-ecommerce/phpdocumentor-tool",
+    "description": "Isolated phpDocumentor install (avoids Flysystem v1/v3 conflict with Laravel root).",
+    "require": {
+        "php": "^8.2",
+        "phpdocumentor/phpdocumentor": "^3.9"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

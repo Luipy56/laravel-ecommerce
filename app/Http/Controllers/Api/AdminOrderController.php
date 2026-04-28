@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\InstallationPriceWasAssigned;
+use App\Events\OrderShipped;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderLine;
@@ -171,6 +172,8 @@ class AdminOrderController extends Controller
 
     public function update(Request $request, Order $order): JsonResponse
     {
+        $previousStatus = $order->status;
+
         $rules = [
             'shipping_date' => ['nullable', 'date'],
             'installation_price' => ['nullable', 'numeric', 'min:0'],
@@ -183,6 +186,7 @@ class AdminOrderController extends Controller
         if ($order->kind === Order::KIND_ORDER) {
             $rules['status'] = ['required', 'string', 'in:'.implode(',', [
                 Order::STATUS_PENDING,
+                Order::STATUS_AWAITING_PAYMENT,
                 Order::STATUS_AWAITING_INSTALLATION_PRICE,
                 Order::STATUS_IN_TRANSIT,
                 Order::STATUS_SENT,
@@ -238,6 +242,13 @@ class AdminOrderController extends Controller
 
         if ($shouldDispatchInstallationMail) {
             InstallationPriceWasAssigned::dispatch($order->fresh(['client', 'lines']));
+        }
+
+        $shippedStates = [Order::STATUS_IN_TRANSIT, Order::STATUS_SENT];
+        if ($order->kind === Order::KIND_ORDER
+            && in_array($order->status, $shippedStates, true)
+            && ! in_array($previousStatus, $shippedStates, true)) {
+            OrderShipped::dispatch($order->fresh(['client', 'lines', 'addresses']));
         }
 
         $order->loadMissing('lines');

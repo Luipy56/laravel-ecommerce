@@ -10,6 +10,7 @@ const PLACEHOLDER_IMAGE = '/images/dummy.jpg';
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
+    case 'awaiting_payment': return 'badge-warning';
     case 'awaiting_installation_price': return 'badge-info text-base-content';
     case 'in_transit': return 'badge-success';
     case 'sent': return 'badge-success';
@@ -29,6 +30,139 @@ function lineTargetUrl(line) {
   if (line.product_id) return `/admin/products/${line.product_id}`;
   if (line.pack_id) return `/admin/packs/${line.pack_id}`;
   return null;
+}
+
+/** Pack lines have `pack_id` or nested `pack`; everything else is treated as product lines. */
+function partitionOrderLines(lines) {
+  const list = lines || [];
+  const packs = list.filter((l) => l.pack_id || l.pack);
+  const products = list.filter((l) => !(l.pack_id || l.pack));
+  return { products, packs };
+}
+
+function OrderLinesDesktopTable({ lines, navigate, t }) {
+  if (lines.length === 0) return null;
+  return (
+    <div className="overflow-x-auto hidden sm:block">
+      <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
+        <thead>
+          <tr>
+            <th className="w-14" aria-label={t('admin.products.images')} />
+            <th>{t('admin.orders.line_product')}</th>
+            <th className="text-center">{t('admin.orders.line_quantity')}</th>
+            <th className="text-end">{t('admin.orders.line_unit_price')}</th>
+            <th className="text-end">{t('admin.orders.line_extra_keys_price')}</th>
+            <th className="text-center w-24 min-w-24">{t('admin.orders.keys_same')}</th>
+            <th className="text-end">{t('admin.orders.line_total')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lines.map((line) => {
+            const extraKeysTotal = line.extra_keys_qty > 0 && line.extra_key_unit_price != null
+              ? line.extra_keys_qty * line.extra_key_unit_price
+              : null;
+            const targetUrl = lineTargetUrl(line);
+            return (
+              <tr
+                key={line.id}
+                role={targetUrl ? 'button' : undefined}
+                tabIndex={targetUrl ? 0 : undefined}
+                onClick={targetUrl ? () => navigate(targetUrl) : undefined}
+                onKeyDown={targetUrl ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(targetUrl);
+                  }
+                } : undefined}
+                className={targetUrl ? 'cursor-pointer hover:bg-base-200/50' : ''}
+              >
+                <td>
+                  <div className="avatar">
+                    <div className="mask mask-squircle w-10 h-10 bg-base-300">
+                      <img
+                        src={line.image_url || PLACEHOLDER_IMAGE}
+                        alt=""
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span className="font-medium">{lineDisplayName(line)}</span>
+                  {line.extra_keys_qty > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-0.5">
+                      <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
+                    </div>
+                  )}
+                </td>
+                <td className="text-center tabular-nums">{line.quantity}</td>
+                <td className="text-end tabular-nums">{line.unit_price != null ? `${Number(line.unit_price).toFixed(2)} €` : ''}</td>
+                <td className="text-end tabular-nums">{extraKeysTotal != null ? `${Number(extraKeysTotal).toFixed(2)} €` : ''}</td>
+                <td className="text-center w-24 min-w-24">
+                  {line.pack?.contains_keys ? (line.keys_all_same ? t('common.yes') : t('common.no')) : ''}
+                </td>
+                <td className="text-end font-medium tabular-nums">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function OrderLinesMobileCards({ lines, t }) {
+  if (lines.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-3 sm:hidden">
+      {lines.map((line) => {
+        const targetUrl = lineTargetUrl(line);
+        const cardContent = (
+          <div className="card-body p-4 flex flex-row items-center gap-3 min-w-0">
+            <div className="avatar shrink-0">
+              <div className="mask mask-squircle w-14 h-14 bg-base-300">
+                <img
+                  src={line.image_url || PLACEHOLDER_IMAGE}
+                  alt=""
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium truncate">{lineDisplayName(line)}</p>
+              {line.extra_keys_qty > 0 && (
+                <div className="flex flex-wrap gap-1 mt-0.5">
+                  <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
+                </div>
+              )}
+              {line.pack?.contains_keys && (
+                <p className="text-sm text-base-content/70 mt-0.5">
+                  {t('admin.orders.keys_same')}: {line.keys_all_same ? t('common.yes') : t('common.no')}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-2 mt-1 text-sm">
+                <span className="tabular-nums">{t('admin.orders.line_quantity')}: {line.quantity}</span>
+                <span className="tabular-nums font-medium">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</span>
+              </div>
+            </div>
+          </div>
+        );
+        return targetUrl ? (
+          <Link
+            key={line.id}
+            to={targetUrl}
+            className="card card-border bg-base-200/50 hover:bg-base-200 border-base-300"
+          >
+            {cardContent}
+          </Link>
+        ) : (
+          <div key={line.id} className="card card-border bg-base-200/50 border-base-300">
+            {cardContent}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function AdminOrderShowPage() {
@@ -87,6 +221,7 @@ export default function AdminOrderShowPage() {
   const installationAddress = order.addresses?.find((a) => a.type === 'installation');
   const showSetInstallationPrice =
     isOrder && order.installation_requested && order.status === 'awaiting_installation_price';
+  const { products: productLines, packs: packLines } = partitionOrderLines(order.lines);
 
   const handleInstallationModalOpen = () => {
     setInstallationModalError('');
@@ -245,130 +380,29 @@ export default function AdminOrderShowPage() {
       <div className="card bg-base-100 shadow border border-base-200">
         <div className="card-body">
           <h2 className="font-semibold text-lg border-b border-base-300 pb-2 mb-4">{t('admin.orders.lines')}</h2>
-          {(order.lines || []).length === 0 ? (
+          {productLines.length === 0 && packLines.length === 0 ? (
             <p className="text-base-content/70 py-4">{t('admin.orders.no_lines')}</p>
           ) : (
-            <>
-              {/* Desktop: table (same structure as "Productes del pack" in AdminPackShowPage) */}
-              <div className="overflow-x-auto hidden sm:block">
-                <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
-                  <thead>
-                    <tr>
-                      <th className="w-14" aria-label={t('admin.products.images')} />
-                      <th>{t('admin.orders.line_product')}</th>
-                      <th className="text-center">{t('admin.orders.line_quantity')}</th>
-                      <th className="text-end">{t('admin.orders.line_unit_price')}</th>
-                      <th className="text-end">{t('admin.orders.line_extra_keys_price')}</th>
-                      <th className="text-center w-24 min-w-24">{t('admin.orders.keys_same')}</th>
-                      <th className="text-end">{t('admin.orders.line_total')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(order.lines || []).map((line) => {
-                      const extraKeysTotal = line.extra_keys_qty > 0 && line.extra_key_unit_price != null
-                        ? line.extra_keys_qty * line.extra_key_unit_price
-                        : null;
-                      const targetUrl = lineTargetUrl(line);
-                      return (
-                        <tr
-                          key={line.id}
-                          role={targetUrl ? 'button' : undefined}
-                          tabIndex={targetUrl ? 0 : undefined}
-                          onClick={targetUrl ? () => navigate(targetUrl) : undefined}
-                          onKeyDown={targetUrl ? (e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              navigate(targetUrl);
-                            }
-                          } : undefined}
-                          className={targetUrl ? 'cursor-pointer hover:bg-base-200/50' : ''}
-                        >
-                          <td>
-                            <div className="avatar">
-                              <div className="mask mask-squircle w-10 h-10 bg-base-300">
-                                <img
-                                  src={line.image_url || PLACEHOLDER_IMAGE}
-                                  alt=""
-                                  className="object-cover w-full h-full"
-                                />
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span className="font-medium">{lineDisplayName(line)}</span>
-                            {line.extra_keys_qty > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-0.5">
-                                <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="text-center tabular-nums">{line.quantity}</td>
-                          <td className="text-end tabular-nums">{line.unit_price != null ? `${Number(line.unit_price).toFixed(2)} €` : ''}</td>
-                          <td className="text-end tabular-nums">{extraKeysTotal != null ? `${Number(extraKeysTotal).toFixed(2)} €` : ''}</td>
-                          <td className="text-center w-24 min-w-24">
-                            {line.pack?.contains_keys ? (line.keys_all_same ? t('common.yes') : t('common.no')) : ''}
-                          </td>
-                          <td className="text-end font-medium tabular-nums">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile: cards with image and link (same as pack product cards) */}
-              <div className="flex flex-col gap-3 sm:hidden">
-                {(order.lines || []).map((line) => {
-                  const extraKeysTotal = line.extra_keys_qty > 0 && line.extra_key_unit_price != null
-                    ? line.extra_keys_qty * line.extra_key_unit_price
-                    : null;
-                  const targetUrl = lineTargetUrl(line);
-                  const cardContent = (
-                    <div className="card-body p-4 flex-row items-center gap-3">
-                      <div className="avatar shrink-0">
-                        <div className="mask mask-squircle w-14 h-14 bg-base-300">
-                          <img
-                            src={line.image_url || PLACEHOLDER_IMAGE}
-                            alt=""
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate">{lineDisplayName(line)}</p>
-                        {line.extra_keys_qty > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-0.5">
-                            <span className="badge badge-sm badge-ghost">+{line.extra_keys_qty} {t('admin.orders.extra_keys')}</span>
-                          </div>
-                        )}
-                        {line.pack?.contains_keys && (
-                          <p className="text-sm text-base-content/70 mt-0.5">
-                            {t('admin.orders.keys_same')}: {line.keys_all_same ? t('common.yes') : t('common.no')}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap items-center gap-2 mt-1 text-sm">
-                          <span className="tabular-nums">{t('admin.orders.line_quantity')}: {line.quantity}</span>
-                          <span className="tabular-nums font-medium">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                  return targetUrl ? (
-                    <Link
-                      key={line.id}
-                      to={targetUrl}
-                      className="card card-border bg-base-200/50 hover:bg-base-200 border-base-300"
-                    >
-                      {cardContent}
-                    </Link>
-                  ) : (
-                    <div key={line.id} className="card card-border bg-base-200/50 border-base-300">
-                      {cardContent}
-                    </div>
-                  );
-                })}
-              </div>
-            </>
+            <div className="space-y-8">
+              {productLines.length > 0 && (
+                <section className="space-y-3" aria-labelledby="admin-order-lines-products-heading">
+                  <h3 id="admin-order-lines-products-heading" className="text-base font-semibold text-base-content">
+                    {t('admin.orders.lines_products')}
+                  </h3>
+                  <OrderLinesDesktopTable lines={productLines} navigate={navigate} t={t} />
+                  <OrderLinesMobileCards lines={productLines} t={t} />
+                </section>
+              )}
+              {packLines.length > 0 && (
+                <section className="space-y-3" aria-labelledby="admin-order-lines-packs-heading">
+                  <h3 id="admin-order-lines-packs-heading" className="text-base font-semibold text-base-content">
+                    {t('admin.orders.lines_packs')}
+                  </h3>
+                  <OrderLinesDesktopTable lines={packLines} navigate={navigate} t={t} />
+                  <OrderLinesMobileCards lines={packLines} t={t} />
+                </section>
+              )}
+            </div>
           )}
           <div className="flex justify-end pt-4 mt-4 border-t border-base-200">
             <p className="text-lg font-semibold tabular-nums">

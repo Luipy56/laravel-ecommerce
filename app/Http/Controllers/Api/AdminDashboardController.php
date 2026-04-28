@@ -6,12 +6,51 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController extends Controller
 {
+    /** @param  Builder<Order>  $query */
+    private function applyPostalCodeFilter(Builder $query, string $postalCode): void
+    {
+        if ($postalCode === '') {
+            return;
+        }
+        $query->whereHas('addresses', function ($q) use ($postalCode) {
+            $q->where('type', OrderAddress::TYPE_SHIPPING)->where('postal_code', $postalCode);
+        });
+    }
+
+    /**
+     * Resolve dashboard chart anchor year from request (optional).
+     * Invalid or missing values use the current calendar year.
+     */
+    private function resolveChartCurrentYear(Request $request): int
+    {
+        $y = $request->query('year');
+        if ($y === null || $y === '') {
+            return (int) date('Y');
+        }
+        $yi = (int) $y;
+
+        return ($yi >= 2000 && $yi <= 2100) ? $yi : (int) date('Y');
+    }
+
+    /** Optional month 1–12 from query; null means all months. */
+    private function resolveChartMonthFilter(Request $request): ?int
+    {
+        $m = $request->query('month');
+        if ($m === null || $m === '') {
+            return null;
+        }
+        $mi = (int) $m;
+
+        return ($mi >= 1 && $mi <= 12) ? $mi : null;
+    }
+
     /** Distinct postal codes from order shipping addresses (for dashboard filter). */
     public function postalCodes(): JsonResponse
     {
@@ -26,11 +65,12 @@ class AdminDashboardController extends Controller
         return response()->json(['success' => true, 'data' => $codes->values()->all()]);
     }
 
-    /** Sales by month: current year and previous year (12 months Jan–Dec each). Optional filter by shipping postal_code. */
+    /** Sales by month: anchor year Y vs Y−1 (Jan–Dec, or a single month if `month` is set). Optional `postal_code`, `year`, `month`. */
     public function salesByPeriod(Request $request): JsonResponse
     {
-        $currentYear = (int) date('Y');
+        $currentYear = $this->resolveChartCurrentYear($request);
         $previousYear = $currentYear - 1;
+        $monthFilter = $this->resolveChartMonthFilter($request);
         $postalCode = $request->get('postal_code');
         $postalCode = is_string($postalCode) ? trim($postalCode) : '';
 
@@ -42,18 +82,20 @@ class AdminDashboardController extends Controller
                     ->orWhereYear('order_date', $previousYear);
             });
 
-        if ($postalCode !== '') {
-            $query->whereHas('addresses', function ($q) use ($postalCode) {
-                $q->where('type', OrderAddress::TYPE_SHIPPING)->where('postal_code', $postalCode);
-            });
+        if ($monthFilter !== null) {
+            $query->whereMonth('order_date', $monthFilter);
         }
+
+        $this->applyPostalCodeFilter($query, $postalCode);
 
         $orders = $query->with('lines')->get();
 
         $byYearMonth = $orders->groupBy(fn ($o) => $o->order_date->format('Y-m'));
 
+        $monthsRange = $monthFilter !== null ? [$monthFilter] : range(1, 12);
+
         $result = [];
-        for ($m = 1; $m <= 12; $m++) {
+        foreach ($monthsRange as $m) {
             $monthKey = sprintf('%02d', $m);
             $currKey = "{$currentYear}-{$monthKey}";
             $prevKey = "{$previousYear}-{$monthKey}";
@@ -78,11 +120,19 @@ class AdminDashboardController extends Controller
         ]);
     }
 
-    /** Top 10 products by quantity sold. Optional filter by shipping postal_code. */
+    /** Top 10 products by quantity sold. Optional `postal_code`; `year` / `month` narrow to the same period as the sales chart when either is sent. */
     public function topProducts(Request $request): JsonResponse
     {
         $postalCode = $request->get('postal_code');
         $postalCode = is_string($postalCode) ? trim($postalCode) : '';
+
+        $yearRaw = $request->query('year');
+        $monthRaw = $request->query('month');
+        $applyChartPeriod = ($yearRaw !== null && $yearRaw !== '') || ($monthRaw !== null && $monthRaw !== '');
+
+        $currentYear = $this->resolveChartCurrentYear($request);
+        $previousYear = $currentYear - 1;
+        $monthFilter = $this->resolveChartMonthFilter($request);
 
         $linesQuery = DB::table('order_lines')
             ->join('orders', 'orders.id', '=', 'order_lines.order_id')
@@ -94,6 +144,16 @@ class AdminDashboardController extends Controller
                 $join->on('order_addresses.order_id', '=', 'orders.id')
                     ->where('order_addresses.type', '=', OrderAddress::TYPE_SHIPPING);
             })->where('order_addresses.postal_code', '=', $postalCode);
+        }
+
+        if ($applyChartPeriod) {
+            $linesQuery->where(function ($q) use ($currentYear, $previousYear) {
+                $q->whereYear('orders.order_date', $currentYear)
+                    ->orWhereYear('orders.order_date', $previousYear);
+            });
+            if ($monthFilter !== null) {
+                $linesQuery->whereMonth('orders.order_date', $monthFilter);
+            }
         }
 
         $lines = $linesQuery

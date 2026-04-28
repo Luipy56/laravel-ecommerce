@@ -29,9 +29,14 @@ class Payment extends Model
 
     public const GATEWAY_REVOLUT = 'revolut';
 
+    public const GATEWAY_PAYPAL = 'paypal';
+
     public const METHOD_CARD = 'card';
 
     public const METHOD_PAYPAL = 'paypal';
+
+    /** Internal-only when CHECKOUT_DEMO_SKIP_PAYMENT is enabled (storefront demo; not a real PSP). */
+    public const METHOD_CHECKOUT_DEMO_SKIP = 'checkout_demo_skip';
 
     public const METHOD_BIZUM = 'bizum';
 

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\OrderInstallationQuoteRequested;
+use App\Events\OrderPlacedPaymentPending;
+use App\Exceptions\PaymentProviderNotConfiguredException;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\Payment;
 use App\Services\Payments\PaymentCheckoutService;
+use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +19,6 @@ use Throwable;
 
 class OrderController extends Controller
 {
-    private const PAYMENT_METHODS = 'card,paypal,bizum,revolut';
-
     public function checkout(Request $request, PaymentCheckoutService $paymentCheckoutService): JsonResponse
     {
         $client = $request->user();
@@ -25,10 +27,26 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Cart is empty.'], 422);
         }
 
+        $cart->loadMissing('lines');
+        $merchandiseSubtotal = $cart->lines_subtotal;
+        $awaitingInstallationQuote = $cart->installation_requested
+            && $merchandiseSubtotal > Order::INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR;
+        $automaticInstallationFee = Order::automaticInstallationFeeFromMerchandiseSubtotal($merchandiseSubtotal);
+
+        $checkoutMethodIn = implode(',', PaymentCheckoutService::checkoutMethodKeysFromConfig());
+
+        // Temporary workaround for demo stacks: CHECKOUT_DEMO_SKIP_PAYMENT + checkout_demo_skip_payment on the request.
+        $demoSkipActive = ! $awaitingInstallationQuote
+            && $request->boolean('checkout_demo_skip_payment')
+            && PaymentCheckoutService::checkoutDemoSkipPaymentAllowed();
+
         $rules = [
-            'payment_method' => $cart->installation_requested
-                ? ['nullable', 'string', 'in:'.self::PAYMENT_METHODS]
-                : ['required', 'string', 'in:'.self::PAYMENT_METHODS],
+            'checkout_demo_skip_payment' => ['sometimes', 'boolean'],
+            'payment_method' => ($cart->installation_requested && $awaitingInstallationQuote)
+                ? ['nullable', 'string', 'in:'.$checkoutMethodIn]
+                : ($demoSkipActive
+                    ? ['prohibited']
+                    : ['required', 'string', 'in:'.$checkoutMethodIn]),
             'shipping_street' => ['required', 'string', 'max:255'],
             'shipping_city' => ['required', 'string', 'max:100'],
             'shipping_province' => ['nullable', 'string', 'max:100'],
@@ -48,8 +66,13 @@ class OrderController extends Controller
 
         $validated = $request->validate($rules);
 
-        $awaitingInstallationQuote = (bool) $cart->installation_requested;
-        if (! $awaitingInstallationQuote && ! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
+        $resolvedPaymentMethod = ($cart->installation_requested && $awaitingInstallationQuote)
+            ? ($validated['payment_method'] ?? null)
+            : ($demoSkipActive
+                ? Payment::METHOD_CHECKOUT_DEMO_SKIP
+                : $validated['payment_method']);
+
+        if (! $awaitingInstallationQuote && ! $demoSkipActive && ! PaymentCheckoutService::isPaymentMethodAvailable($resolvedPaymentMethod)) {
             return response()->json([
                 'success' => false,
                 'message' => __('shop.payment.method_unavailable'),
@@ -57,16 +80,30 @@ class OrderController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote) {
+        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote, $automaticInstallationFee, $resolvedPaymentMethod) {
+            $installationPrice = null;
+            $installationStatus = null;
+            if ($cart->installation_requested) {
+                if ($awaitingInstallationQuote) {
+                    $installationStatus = Order::INSTALLATION_PENDING;
+                } else {
+                    $installationPrice = $automaticInstallationFee;
+                    $installationStatus = Order::INSTALLATION_PRICED;
+                }
+            }
+
+            $initialStatus = $awaitingInstallationQuote
+                ? Order::STATUS_AWAITING_INSTALLATION_PRICE
+                : ($resolvedPaymentMethod === Payment::METHOD_PAYPAL
+                    ? Order::STATUS_AWAITING_PAYMENT
+                    : Order::STATUS_PENDING);
             $cart->update([
                 'kind' => Order::KIND_ORDER,
-                'status' => $awaitingInstallationQuote
-                    ? Order::STATUS_AWAITING_INSTALLATION_PRICE
-                    : Order::STATUS_PENDING,
+                'status' => $initialStatus,
                 'order_date' => now(),
                 'shipping_price' => Order::SHIPPING_FLAT_EUR,
-                'installation_status' => $awaitingInstallationQuote ? Order::INSTALLATION_PENDING : null,
-                'installation_price' => null,
+                'installation_status' => $installationStatus,
+                'installation_price' => $installationPrice,
             ]);
 
             $cart->addresses()->create([
@@ -78,7 +115,7 @@ class OrderController extends Controller
                 'note' => $validated['shipping_note'] ?? null,
             ]);
 
-            if ($awaitingInstallationQuote) {
+            if ($cart->installation_requested) {
                 $cart->addresses()->create([
                     'type' => OrderAddress::TYPE_INSTALLATION,
                     'street' => $validated['installation_street'] ?? '',
@@ -103,7 +140,7 @@ class OrderController extends Controller
                 $total = $cart->grand_total;
                 $cart->payments()->create([
                     'amount' => $total,
-                    'payment_method' => $validated['payment_method'],
+                    'payment_method' => $resolvedPaymentMethod,
                     'status' => Payment::STATUS_PENDING,
                     'currency' => 'EUR',
                 ]);
@@ -116,7 +153,15 @@ class OrderController extends Controller
         $paymentError = null;
         if (! $awaitingInstallationQuote) {
             $payment = $cart->payments()->latest()->first();
-            if ($payment && PaymentCheckoutService::allowSimulatedPayments()) {
+            if ($demoSkipActive && $payment) {
+                try {
+                    $paymentCheckoutService->markCheckoutDemoSkipSuccess($payment);
+                } catch (Throwable $e) {
+                    report($e);
+                    $paymentError = $e->getMessage();
+                }
+                $paymentCheckout = ['gateway' => 'checkout_demo_skip', 'demo_skip' => true];
+            } elseif ($payment && PaymentCheckoutService::shouldSimulateCheckoutForPayment($payment)) {
                 try {
                     $paymentCheckoutService->simulateSuccess($payment);
                 } catch (Throwable $e) {
@@ -127,14 +172,29 @@ class OrderController extends Controller
             } elseif ($payment) {
                 try {
                     $paymentCheckout = $paymentCheckoutService->start($payment);
+                } catch (PaymentProviderNotConfiguredException $e) {
+                    $paymentError = __('shop.payment.method_unavailable');
                 } catch (Throwable $e) {
                     report($e);
-                    $paymentError = config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error');
+                    $paymentError = $this->checkoutPaymentStartErrorMessage($payment, $e);
                 }
             }
         }
 
         $cart->refresh()->load('payments');
+
+        $mailLocale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
+        if ($awaitingInstallationQuote) {
+            OrderInstallationQuoteRequested::dispatch(
+                $cart->fresh(['client', 'lines.product', 'lines.pack', 'addresses']),
+                $mailLocale
+            );
+        } elseif (! $cart->hasSuccessfulPayment()) {
+            OrderPlacedPaymentPending::dispatch(
+                $cart->fresh(['client', 'lines.product', 'lines.pack', 'addresses', 'payments']),
+                $mailLocale
+            );
+        }
 
         return response()->json([
             'success' => true,
@@ -168,8 +228,10 @@ class OrderController extends Controller
             return response()->json(['success' => false, 'message' => __('shop.order.cannot_pay_yet')], 422);
         }
 
+        $checkoutMethodIn = implode(',', PaymentCheckoutService::checkoutMethodKeysFromConfig());
+
         $validated = $request->validate([
-            'payment_method' => ['required', 'string', 'in:'.self::PAYMENT_METHODS],
+            'payment_method' => ['required', 'string', 'in:'.$checkoutMethodIn],
         ]);
 
         if (! PaymentCheckoutService::isPaymentMethodAvailable($validated['payment_method'])) {
@@ -190,11 +252,14 @@ class OrderController extends Controller
                 'status' => Payment::STATUS_PENDING,
                 'currency' => 'EUR',
             ]);
+            if ($validated['payment_method'] === Payment::METHOD_PAYPAL) {
+                $order->update(['status' => Order::STATUS_AWAITING_PAYMENT]);
+            }
         });
 
         $payment = $order->payments()->latest()->first();
 
-        if (PaymentCheckoutService::allowSimulatedPayments()) {
+        if (PaymentCheckoutService::shouldSimulateCheckoutForPayment($payment)) {
             try {
                 $paymentCheckoutService->simulateSuccess($payment);
             } catch (Throwable $e) {
@@ -209,13 +274,12 @@ class OrderController extends Controller
         } else {
             try {
                 $paymentCheckout = $paymentCheckoutService->start($payment);
+            } catch (PaymentProviderNotConfiguredException $e) {
+                return $this->jsonWhenPaymentStartFailed($payment, $e);
             } catch (Throwable $e) {
                 report($e);
 
-                return response()->json([
-                    'success' => false,
-                    'message' => config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error'),
-                ], 422);
+                return $this->jsonWhenPaymentStartFailed($payment, $e);
             }
         }
 
@@ -312,6 +376,7 @@ class OrderController extends Controller
         $order->load(['lines.product', 'lines.pack', 'addresses', 'payments']);
 
         $payMethods = PaymentCheckoutService::paymentMethodsAvailability();
+        $anyPayMethod = $payMethods['card'] || $payMethods['paypal'];
 
         $lines = $order->lines->map(fn ($l) => [
             'id' => $l->id,
@@ -329,6 +394,7 @@ class OrderController extends Controller
             'data' => [
                 'id' => $order->id,
                 'status' => $order->status,
+                'status_timeline' => $order->buildClientStatusTimeline(),
                 'order_date' => $order->order_date?->toIso8601String(),
                 'shipping_date' => $order->shipping_date?->toIso8601String(),
                 'installation_requested' => (bool) $order->installation_requested,
@@ -344,10 +410,11 @@ class OrderController extends Controller
                 'payment_methods_available' => [
                     'card' => $payMethods['card'],
                     'paypal' => $payMethods['paypal'],
-                    'bizum' => $payMethods['bizum'],
-                    'revolut' => $payMethods['revolut'],
                 ],
                 'payments_simulated' => $payMethods['simulated'],
+                'paypal_missing_credentials' => PaymentCheckoutService::paypalMissingCredentialsForStorefront(),
+                'stripe_missing_credentials' => PaymentCheckoutService::stripeMissingCredentialsForStorefront(),
+                'local_checkout_needs_debug' => app()->environment('local') && ! $payMethods['simulated'] && ! $anyPayMethod,
                 'payments' => $order->payments->map(fn (Payment $p) => [
                     'id' => $p->id,
                     'status' => $p->status,
@@ -367,10 +434,17 @@ class OrderController extends Controller
         if ($order->client_id !== $request->user()->id || $order->kind !== Order::KIND_ORDER) {
             abort(404);
         }
+        if (! $order->hasSuccessfulPayment()) {
+            abort(403);
+        }
+        $allowed = config('app.available_locales', ['ca', 'es', 'en']);
         $locale = $request->query('locale');
-        if (! in_array($locale, ['ca', 'es'], true)) {
+        if (! in_array($locale, $allowed, true)) {
             $pref = $request->header('Accept-Language', '');
-            $locale = (preg_match('/^(ca|es)([-_]|$)/i', $pref, $m) ? $m[1] : null) ?? config('app.locale');
+            $locale = (preg_match('/^(ca|es|en)([-_]|$)/i', $pref, $m) ? strtolower($m[1]) : null) ?? config('app.locale');
+        }
+        if (! in_array($locale, $allowed, true)) {
+            $locale = config('app.locale');
         }
         app()->setLocale($locale);
         $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
@@ -381,5 +455,81 @@ class OrderController extends Controller
             'Content-Type' => 'text/html',
             'Content-Disposition' => 'inline; filename="invoice-'.$order->id.'.html"',
         ]);
+    }
+
+    private function paymentStartExceptionMatchesPayPalOAuth(Throwable $e): bool
+    {
+        $m = strtolower($e->getMessage());
+
+        return str_contains($m, 'paypal oauth')
+            || str_contains($m, 'client authentication failed')
+            || str_contains($m, 'invalid_client');
+    }
+
+    private function jsonWhenPaymentStartFailed(Payment $payment, Throwable $e): JsonResponse
+    {
+        if ($e instanceof PaymentProviderNotConfiguredException) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.payment.method_unavailable'),
+                'code' => 'payment_method_not_configured',
+            ], 422);
+        }
+
+        if ($payment->payment_method === Payment::METHOD_PAYPAL) {
+            if (str_starts_with($e->getMessage(), 'PAYPAL_START_ERROR|')) {
+                $msg = __('shop.payment.paypal_credentials_format_invalid');
+                if (config('app.debug')) {
+                    $msg .= ' ('.$e->getMessage().')';
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                    'code' => 'paypal_credentials_invalid',
+                ], 422);
+            }
+            if ($this->paymentStartExceptionMatchesPayPalOAuth($e)) {
+                $msg = __('shop.payment.paypal_oauth_failed');
+                if (config('app.debug')) {
+                    $msg .= ' '.$e->getMessage();
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                    'code' => 'paypal_oauth_failed',
+                ], 422);
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error'),
+        ], 422);
+    }
+
+    private function checkoutPaymentStartErrorMessage(Payment $payment, Throwable $e): string
+    {
+        if ($payment->payment_method === Payment::METHOD_PAYPAL) {
+            if (str_starts_with($e->getMessage(), 'PAYPAL_START_ERROR|')) {
+                $msg = __('shop.payment.paypal_credentials_format_invalid');
+                if (config('app.debug')) {
+                    $msg .= ' ('.$e->getMessage().')';
+                }
+
+                return $msg;
+            }
+            if ($this->paymentStartExceptionMatchesPayPalOAuth($e)) {
+                $msg = __('shop.payment.paypal_oauth_failed');
+                if (config('app.debug')) {
+                    $msg .= ' '.$e->getMessage();
+                }
+
+                return $msg;
+            }
+        }
+
+        return config('app.debug') ? $e->getMessage() : __('shop.payment.provider_error');
     }
 }

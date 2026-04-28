@@ -27,6 +27,27 @@ class CartController extends Controller
         ];
     }
 
+    /**
+     * @return array{installation_quote_required: bool, installation_fee_eur: float|null}
+     */
+    private function installationCartMeta(bool $installationRequested, float $merchandiseTotal): array
+    {
+        if (! $installationRequested) {
+            return [
+                'installation_quote_required' => false,
+                'installation_fee_eur' => null,
+            ];
+        }
+
+        $quoteRequired = $merchandiseTotal > Order::INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR;
+        $fee = Order::automaticInstallationFeeFromMerchandiseSubtotal($merchandiseTotal);
+
+        return [
+            'installation_quote_required' => $quoteRequired,
+            'installation_fee_eur' => $fee !== null ? round((float) $fee, 2) : null,
+        ];
+    }
+
     public function show(Request $request): JsonResponse
     {
         if ($request->user()) {
@@ -53,7 +74,7 @@ class CartController extends Controller
                 'lines' => $lines,
                 'total' => round($total, 2),
                 'installation_requested' => (bool) ($cart?->installation_requested ?? false),
-            ], $this->cartShippingMeta((float) $total)),
+            ], $this->installationCartMeta((bool) ($cart?->installation_requested ?? false), (float) $total), $this->cartShippingMeta((float) $total)),
         ]);
     }
 
@@ -113,14 +134,16 @@ class CartController extends Controller
             }
         }
 
+        $installationRequested = (bool) $request->session()->get(self::SESSION_CART_INSTALLATION, false);
+
         return response()->json([
             'success' => true,
             'data' => array_merge([
                 'id' => null,
                 'lines' => $lines,
                 'total' => round($total, 2),
-                'installation_requested' => (bool) $request->session()->get(self::SESSION_CART_INSTALLATION, false),
-            ], $this->cartShippingMeta((float) $total)),
+                'installation_requested' => $installationRequested,
+            ], $this->installationCartMeta($installationRequested, (float) $total), $this->cartShippingMeta((float) $total)),
         ]);
     }
 
@@ -232,14 +255,17 @@ class CartController extends Controller
         $cart->load(['lines.product.images', 'lines.product.features.featureName', 'lines.pack']);
         $lines = $this->formatLines($cart->lines);
         $total = $cart->lines->sum(fn ($l) => $l->line_total);
+        $installationRequested = (bool) $cart->installation_requested;
 
         return response()->json([
             'success' => true,
             'data' => array_merge([
+                'id' => $cart->id,
                 'line' => $this->formatLine($line),
                 'lines' => $lines,
                 'total' => round($total, 2),
-            ], $this->cartShippingMeta((float) $total)),
+                'installation_requested' => $installationRequested,
+            ], $this->installationCartMeta($installationRequested, (float) $total), $this->cartShippingMeta((float) $total)),
         ]);
     }
 

@@ -3,10 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 export default function AdminFeaturesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible: isVisibleFeatureType } = useAdminIndexColumnVisibility('feature_types');
+  const { isVisible: isVisibleFeature } = useAdminIndexColumnVisibility('features');
 
   // Feature types (tipos de características) – first list
   const [featureTypesList, setFeatureTypesList] = useState([]);
@@ -159,8 +162,8 @@ export default function AdminFeaturesPage() {
               <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
                 <thead>
                   <tr>
-                    <th>{t('admin.features.type')}</th>
-                    <th className="text-center">{t('admin.products.is_active')}</th>
+                    {isVisibleFeatureType('name') ? <th>{t('admin.features.type')}</th> : null}
+                    {isVisibleFeatureType('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -178,8 +181,8 @@ export default function AdminFeaturesPage() {
                         }
                       }}
                     >
-                      <td>{n.name}</td>
-                      <td className="text-center">{n.is_active ? t('common.yes') : t('common.no')}</td>
+                      {isVisibleFeatureType('name') ? <td>{n.name}</td> : null}
+                      {isVisibleFeatureType('is_active') ? <td className="text-center">{n.is_active ? t('common.yes') : t('common.no')}</td> : null}
                     </tr>
                   ))}
                 </tbody>
@@ -275,9 +278,9 @@ export default function AdminFeaturesPage() {
               <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
                 <thead>
                   <tr>
-                    <th>{t('admin.features.type')}</th>
-                    <th>{t('admin.features.value')}</th>
-                    <th className="text-center">{t('admin.products.is_active')}</th>
+                    {isVisibleFeature('feature_name') ? <th>{t('admin.features.type')}</th> : null}
+                    {isVisibleFeature('value') ? <th>{t('admin.features.value')}</th> : null}
+                    {isVisibleFeature('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -295,9 +298,9 @@ export default function AdminFeaturesPage() {
                         }
                       }}
                     >
-                      <td>{f.feature_name}</td>
-                      <td>{f.value}</td>
-                      <td className="text-center">{f.is_active ? t('common.yes') : t('common.no')}</td>
+                      {isVisibleFeature('feature_name') ? <td>{f.feature_name}</td> : null}
+                      {isVisibleFeature('value') ? <td>{f.value}</td> : null}
+                      {isVisibleFeature('is_active') ? <td className="text-center">{f.is_active ? t('common.yes') : t('common.no')}</td> : null}
                     </tr>
                   ))}
                 </tbody>

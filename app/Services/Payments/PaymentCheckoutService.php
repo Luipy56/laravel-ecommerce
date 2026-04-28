@@ -4,21 +4,34 @@ namespace App\Services\Payments;
 
 use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Models\Payment;
-use App\Services\Payments\Redsys\RedsysCheckoutStarter;
-use App\Services\Payments\Revolut\RevolutCheckoutStarter;
-use App\Services\Payments\Stripe\StripeCheckoutStarter;
+use App\Services\Payments\PayPal\PayPalCheckoutStarter;
+use App\Services\Payments\PayPal\PayPalClient;
+use App\Services\Payments\Stripe\StripeCredentials;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * Orchestrates starting a checkout session for a {@see Payment} using the configured gateway (Stripe or PayPal).
+ *
+ * Also exposes helpers for storefront configuration: which methods are available, simulated checkout in debug,
+ * and credential hints for the UI.
+ */
 class PaymentCheckoutService
 {
     public function __construct(
-        private readonly StripeCheckoutStarter $stripe,
-        private readonly RedsysCheckoutStarter $redsys,
-        private readonly RevolutCheckoutStarter $revolut,
+        private readonly PaymentCheckoutStarter $stripe,
+        private readonly PayPalCheckoutStarter $paypal,
+        private readonly PaymentCompletionService $completion,
     ) {}
 
-    /** @return array{type: string}&array<string, mixed> */
+    /**
+     * Starts the remote checkout flow for the given payment and returns gateway-specific payload for the client.
+     *
+     * @param  Payment  $payment  Persisted payment row including payment_method (e.g. card, paypal).
+     * @return array{type: string}&array<string, mixed> Gateway type plus fields from the selected starter (e.g. client_secret, approval URL).
+     *
+     * @throws InvalidArgumentException When payment_method is not supported by a registered starter.
+     */
     public function start(Payment $payment): array
     {
         $starter = $this->starterForPaymentMethod($payment->payment_method);
@@ -29,9 +42,8 @@ class PaymentCheckoutService
     private function starterForPaymentMethod(string $method): PaymentCheckoutStarter
     {
         return match ($method) {
-            Payment::METHOD_CARD, Payment::METHOD_PAYPAL => $this->stripe,
-            Payment::METHOD_BIZUM => $this->redsys,
-            Payment::METHOD_REVOLUT => $this->revolut,
+            Payment::METHOD_CARD => $this->stripe,
+            Payment::METHOD_PAYPAL => $this->paypal,
             default => throw new InvalidArgumentException('Unsupported payment_method: '.$method),
         };
     }
@@ -42,23 +54,125 @@ class PaymentCheckoutService
         return (bool) config('app.debug') && (bool) config('payments.allow_simulated');
     }
 
+    /** True when .env allows the storefront demo checkbox to bypass PSP checkout (see OrderController::checkout). */
+    public static function checkoutDemoSkipPaymentAllowed(): bool
+    {
+        return (bool) config('payments.checkout_demo_skip_payment');
+    }
+
+    /** @return list<string> */
+    public static function checkoutMethodKeysFromConfig(): array
+    {
+        $keys = config('payments.checkout_method_keys');
+
+        return is_array($keys) ? $keys : ['card', 'paypal'];
+    }
+
+    /** True when the PSP for this method has real credentials (ignores simulated blanket availability). */
+    public static function methodHasRealProviderCredentials(string $method): bool
+    {
+        return match ($method) {
+            Payment::METHOD_CARD => StripeCredentials::areConfigured(),
+            Payment::METHOD_PAYPAL => PayPalClient::envCredentialsPresent(),
+            default => false,
+        };
+    }
+
+    /** PayPal is allowed by PAYMENTS_CHECKOUT_METHODS but .env has no client id/secret (so it is hidden from the select). */
+    public static function paypalMissingCredentialsForStorefront(): bool
+    {
+        if (! in_array(Payment::METHOD_PAYPAL, self::checkoutMethodKeysFromConfig(), true)) {
+            return false;
+        }
+
+        return ! self::methodHasRealProviderCredentials(Payment::METHOD_PAYPAL);
+    }
+
     /**
-     * @return array{card: bool, paypal: bool, bizum: bool, revolut: bool, simulated: bool}
+     * Normalised PayPal REST environment for public config (`PAYPAL_MODE` / services.paypal.mode).
+     *
+     * @return 'live'|'sandbox'
      */
-    public static function paymentMethodsAvailability(): array
+    public static function paypalModeLabelForStorefront(): string
+    {
+        $mode = strtolower(trim((string) config('services.paypal.mode', 'sandbox')));
+
+        return $mode === 'live' ? 'live' : 'sandbox';
+    }
+
+    /**
+     * Card (Stripe) is whitelisted but STRIPE_KEY/STRIPE_SECRET are missing and simulated checkout is off.
+     * When simulated checkout is on, missing Stripe keys still expose "card" as simulated — no hint needed.
+     */
+    public static function stripeMissingCredentialsForStorefront(): bool
+    {
+        if (! in_array(Payment::METHOD_CARD, self::checkoutMethodKeysFromConfig(), true)) {
+            return false;
+        }
+        if (self::allowSimulatedPayments()) {
+            return false;
+        }
+
+        return ! self::methodHasRealProviderCredentials(Payment::METHOD_CARD);
+    }
+
+    /**
+     * When simulated mode is on, skip the PSP only if that method has no real credentials.
+     * PayPal is never simulated: without credentials it stays unavailable; with credentials the SDK must run.
+     */
+    public static function shouldSimulateCheckoutForPayment(Payment $payment): bool
+    {
+        if ($payment->payment_method === Payment::METHOD_PAYPAL) {
+            return false;
+        }
+        if ($payment->payment_method === Payment::METHOD_CHECKOUT_DEMO_SKIP) {
+            return false;
+        }
+
+        return self::allowSimulatedPayments()
+            && ! self::methodHasRealProviderCredentials($payment->payment_method);
+    }
+
+    /**
+     * @return array{card: bool, paypal: bool, simulated: bool}
+     */
+    private static function paymentMethodsBaseAvailability(): array
     {
         $simulated = self::allowSimulatedPayments();
-        $stripeOk = $simulated || (filled(config('services.stripe.secret')) && filled(config('services.stripe.key')));
-        $redsysOk = $simulated || (filled(config('services.redsys.merchant_code')) && filled(config('services.redsys.secret_key')));
-        $revolutOk = $simulated || filled(config('services.revolut.api_key'));
+        $stripeOk = $simulated || StripeCredentials::areConfigured();
+        $paypalOk = PayPalClient::envCredentialsPresent();
 
         return [
             'card' => $stripeOk,
-            'paypal' => $stripeOk,
-            'bizum' => $redsysOk,
-            'revolut' => $revolutOk,
+            'paypal' => $paypalOk,
             'simulated' => $simulated,
         ];
+    }
+
+    /**
+     * @param  array{card: bool, paypal: bool, simulated: bool}  $base
+     * @return array{card: bool, paypal: bool, simulated: bool}
+     */
+    private static function applyCheckoutMethodWhitelist(array $base): array
+    {
+        $allowed = self::checkoutMethodKeysFromConfig();
+        foreach (['card', 'paypal'] as $k) {
+            if (! in_array($k, $allowed, true)) {
+                $base[$k] = false;
+            }
+        }
+
+        return $base;
+    }
+
+    /**
+     * Storefront + API: credential/simulated availability intersected with PAYMENTS_CHECKOUT_METHODS.
+     *
+     * @return array{card: bool, paypal: bool, simulated: bool}
+     */
+    public static function paymentMethodsAvailability(): array
+    {
+        return self::applyCheckoutMethodWhitelist(self::paymentMethodsBaseAvailability());
     }
 
     public static function isPaymentMethodAvailable(string $method): bool
@@ -66,25 +180,45 @@ class PaymentCheckoutService
         $a = self::paymentMethodsAvailability();
 
         return match ($method) {
-            Payment::METHOD_CARD, Payment::METHOD_PAYPAL => $a['card'],
-            Payment::METHOD_BIZUM => $a['bizum'],
-            Payment::METHOD_REVOLUT => $a['revolut'],
+            Payment::METHOD_CARD => $a['card'],
+            Payment::METHOD_PAYPAL => $a['paypal'],
             default => false,
         };
     }
 
+    /**
+     * Marks a payment as succeeded without calling an external PSP (local/debug only).
+     *
+     * @param  Payment  $payment  Payment to complete in simulated mode.
+     *
+     * @throws RuntimeException When simulated payments are not allowed by configuration.
+     */
     public function simulateSuccess(Payment $payment): void
     {
         if (! self::allowSimulatedPayments()) {
             throw new RuntimeException('Simulated payments are disabled.');
         }
-        $payment->update([
+        $this->completion->markSucceeded($payment, [
             'gateway' => 'simulated',
-            'status' => Payment::STATUS_SUCCEEDED,
-            'paid_at' => now(),
             'gateway_reference' => 'sim_'.$payment->id.'_'.uniqid(),
-            'failure_code' => null,
-            'failure_message' => null,
+        ]);
+    }
+
+    /**
+     * Completes checkout without calling a PSP when CHECKOUT_DEMO_SKIP_PAYMENT is enabled.
+     * Temporary workaround for demo environments — not a real payment.
+     */
+    public function markCheckoutDemoSkipSuccess(Payment $payment): void
+    {
+        if (! self::checkoutDemoSkipPaymentAllowed()) {
+            throw new RuntimeException('Checkout demo skip payment is disabled.');
+        }
+        if ($payment->payment_method !== Payment::METHOD_CHECKOUT_DEMO_SKIP) {
+            throw new InvalidArgumentException('Payment is not a demo-skip checkout.');
+        }
+        $this->completion->markSucceeded($payment, [
+            'gateway' => 'checkout_demo_skip',
+            'gateway_reference' => 'demo_skip_'.$payment->id.'_'.uniqid(),
         ]);
     }
 }

@@ -20,6 +20,14 @@ if (is_file($projectRoot.'/.env')) {
     Dotenv\Dotenv::createImmutable($projectRoot)->safeLoad();
 }
 
+/*
+| A developer .env may set PAYMENTS_CHECKOUT_METHODS=paypal for PayPal-only E2E. PHPUnit must not
+| inherit that: config/payments.php resolves checkout_method_keys from env() at load time. Tests
+| that need a specific whitelist call config([...]) explicitly.
+*/
+unset($_ENV['PAYMENTS_CHECKOUT_METHODS'], $_SERVER['PAYMENTS_CHECKOUT_METHODS']);
+@putenv('PAYMENTS_CHECKOUT_METHODS');
+
 $connection = $_ENV['DB_CONNECTION'] ?? getenv('DB_CONNECTION') ?? 'sqlite';
 $connection = is_string($connection) ? strtolower($connection) : 'sqlite';
 
@@ -56,3 +64,14 @@ if (in_array($connection, ['mysql', 'mariadb', 'pgsql'], true)) {
 putenv('DB_DATABASE='.$testDb);
 $_ENV['DB_DATABASE'] = $testDb;
 $_SERVER['DB_DATABASE'] = $testDb;
+
+/*
+| Database sessions require a migrated `sessions` table. SQLite :memory: is a fresh schema per
+| process unless migrations run before every request; pairing it with SESSION_DRIVER=database
+| (from .env or cached config) causes "no such table: sessions". Align with phpunit.xml.
+*/
+if ($connection === 'sqlite' && $testDb === ':memory:') {
+    putenv('SESSION_DRIVER=array');
+    $_ENV['SESSION_DRIVER'] = 'array';
+    $_SERVER['SESSION_DRIVER'] = 'array';
+}

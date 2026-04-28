@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -183,6 +184,15 @@ class ProductSeeder extends Seeder
             'has_card' => true,
             'is_double_clutch' => false,
         ]);
+
+        foreach ($products as &$row) {
+            $row['search_text'] = Product::normalizeSearchText(
+                $row['name'] ?? null,
+                $row['code'] ?? null,
+                $row['description'] ?? null
+            );
+        }
+        unset($row);
 
         DB::table('products')->insert($products);
     }

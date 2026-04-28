@@ -5,15 +5,16 @@ import i18n from 'i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
-import StripeInlinePayment from '../components/payments/StripeInlinePayment';
-import RedsysAutoPost from '../components/payments/RedsysAutoPost';
+import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
+import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
+import { emitAppToast } from '../toastEvents';
 
 export default function OrderDetailPage() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [payLoading, setPayLoading] = useState(false);
@@ -21,6 +22,9 @@ export default function OrderDetailPage() {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [inlineCheckout, setInlineCheckout] = useState(null);
   const [stripeUiError, setStripeUiError] = useState('');
+  const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
+  const [paypalReturnInfo, setPaypalReturnInfo] = useState('');
+  const [payWarning, setPayWarning] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -40,9 +44,15 @@ export default function OrderDetailPage() {
   }, [location.state, location.pathname, navigate]);
 
   useEffect(() => {
+    if (!location.state?.paypalHostedWindow) return;
+    emitAppToast(t('shop.order.paypal_window_hint'), 'info');
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state, location.pathname, navigate, t]);
+
+  useEffect(() => {
     if (!order?.payment_methods_available) return;
     const m = order.payment_methods_available;
-    setPaymentMethod((pm) => (m[pm] ? pm : ['card', 'paypal', 'bizum', 'revolut'].find((k) => m[k]) || 'card'));
+    setPaymentMethod((pm) => (m[pm] ? pm : ['card', 'paypal'].find((k) => m[k]) || 'card'));
   }, [order?.payment_methods_available, order?.id]);
 
   useEffect(() => {
@@ -52,6 +62,9 @@ export default function OrderDetailPage() {
     const needsRefresh = payment != null || sp.has('payment_intent') || sp.has('redirect_status');
     if (!needsRefresh) return;
     if (payment === 'ko') setPayError(t('shop.order.payment_return_ko'));
+    if (payment === 'paypal_return') {
+      setPaypalReturnInfo(t('shop.order.paypal_return_check'));
+    }
     api.get(`orders/${id}`).then((r) => {
       if (r.data.success) setOrder(r.data.data);
     });
@@ -62,7 +75,9 @@ export default function OrderDetailPage() {
   const handlePay = async (e) => {
     e.preventDefault();
     setPayError('');
+    setPayWarning('');
     setStripeUiError('');
+    setPaypalApprovalFallbackUrl(null);
     setInlineCheckout(null);
     setPayLoading(true);
     try {
@@ -78,22 +93,26 @@ export default function OrderDetailPage() {
         return;
       }
       const c = d.payment_checkout;
-      if (c?.gateway === 'stripe' && c.client_secret && c.publishable_key) {
-        setInlineCheckout({
-          orderId: Number(id),
-          stripe: { client_secret: c.client_secret, publishable_key: c.publishable_key },
-        });
-        return;
-      }
-      if (c?.gateway === 'redsys' && c.action_url && c.fields) {
-        setInlineCheckout({
-          orderId: Number(id),
-          redsys: { action_url: c.action_url, fields: c.fields },
-        });
-        return;
-      }
-      if (c?.gateway === 'revolut' && c.checkout_url) {
+      if (c?.gateway === 'stripe' && c.checkout_url) {
         window.location.href = c.checkout_url;
+        return;
+      }
+      if (c?.gateway === 'paypal' && c.approval_url) {
+        const opened = openPayPalApprovalInNewTab(c.approval_url);
+        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
+        navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
+        return;
+      }
+      if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
+        setInlineCheckout({
+          orderId: Number(id),
+          paypal: {
+            client_id: c.client_id,
+            paypal_order_id: c.paypal_order_id,
+            payment_id: c.payment_id,
+            paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
+          },
+        });
         return;
       }
       const r = await api.get(`orders/${id}`);
@@ -126,21 +145,12 @@ export default function OrderDetailPage() {
     }
   };
 
+  if (authLoading) {
+    return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
+  }
   if (!user) return <Link to="/login" className="btn btn-primary">{t('auth.login')}</Link>;
   if (loading) return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
   if (!order) return <p>{t('common.error')}</p>;
-
-  if (inlineCheckout?.redsys) {
-    return (
-      <div className="max-w-3xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <PageTitle className="mb-0">{t('shop.order')} #{order.id}</PageTitle>
-          <Link to="/orders" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
-        </div>
-        <RedsysAutoPost actionUrl={inlineCheckout.redsys.action_url} fields={inlineCheckout.redsys.fields} />
-      </div>
-    );
-  }
 
   const statusKey = `shop.status.${order.status}`;
   const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : order.status;
@@ -149,17 +159,26 @@ export default function OrderDetailPage() {
 
   const formatAddress = (addr) => [addr.street, addr.city, addr.province, addr.postal_code].filter(Boolean).join(', ');
 
+  const timelineLabel = (row) => {
+    if (row.step === 'current' && row.status_code) {
+      const sk = `shop.status.${row.status_code}`;
+      return t(sk) !== sk ? t(sk) : row.status_code;
+    }
+    const lk = `shop.order.timeline.${row.step}`;
+    return t(lk) !== lk ? t(lk) : row.step;
+  };
+
   const linesSubtotal = order.lines_subtotal ?? order.lines?.reduce((s, l) => s + Number(l.line_total), 0) ?? 0;
   const grandTotal = order.grand_total ?? order.total ?? linesSubtotal;
   const showInstallationRow = order.installation_requested && order.installation_status === 'priced' && order.installation_price != null;
   const awaitingQuote = order.installation_requested && order.installation_status === 'pending' && order.status === 'awaiting_installation_price';
   const canPay = order.can_pay && !order.has_payment;
-  const payAvail = order.payment_methods_available ?? { card: true, paypal: true, bizum: true, revolut: true };
+  const payAvail = order.payment_methods_available ?? { card: false, paypal: false };
   const paymentsSimulated = !!order.payments_simulated;
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="mx-auto w-full min-w-0 max-w-3xl">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <PageTitle className="mb-0">{t('shop.order')} #{order.id}</PageTitle>
         <Link to="/orders" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
@@ -167,9 +186,36 @@ export default function OrderDetailPage() {
       <p className="text-base-content/80"><strong>{t('shop.order_status')}:</strong> {statusLabel}</p>
       <p className="text-base-content/80"><strong>{t('shop.order_date')}:</strong> {order.order_date ? new Date(order.order_date).toLocaleString() : ''}</p>
 
+      {order.status_timeline && order.status_timeline.length > 0 && (
+        <div id="order-timeline" className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
+          <div className="card-body py-4 space-y-3">
+            <h2 className="card-title text-base">{t('shop.order.status_timeline_title')}</h2>
+            <ul className="space-y-3">
+              {order.status_timeline.map((row, idx) => (
+                <li
+                  key={`${row.step}-${idx}`}
+                  className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-base-200 pb-3 last:border-0 last:pb-0"
+                >
+                  <span>{timelineLabel(row)}</span>
+                  <span className="text-sm text-base-content/70 tabular-nums">
+                    {row.at ? new Date(row.at).toLocaleString() : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {awaitingQuote && (
         <div role="status" className="alert alert-warning mt-4 text-sm">
           {t('shop.order.awaiting_installation_quote')}
+        </div>
+      )}
+
+      {!awaitingQuote && order.status === 'awaiting_payment' && !order.has_payment && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('shop.order.awaiting_payment_notice')}
         </div>
       )}
 
@@ -244,7 +290,33 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
+      {paypalReturnInfo && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {paypalReturnInfo}
+        </div>
+      )}
+
+      {payWarning && (
+        <div role="status" className="alert alert-warning mt-4 text-sm">
+          {payWarning}
+        </div>
+      )}
+
       {payError && <div role="alert" className="alert alert-error mt-4 text-sm">{payError}</div>}
+
+      {paypalApprovalFallbackUrl && (
+        <div role="status" className="alert alert-warning mt-4 text-sm space-y-2">
+          <p className="m-0">{t('shop.payment.paypal_popup_blocked')}</p>
+          <a
+            href={paypalApprovalFallbackUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link link-primary font-medium"
+          >
+            {t('shop.payment.paypal_open_link')}
+          </a>
+        </div>
+      )}
 
       {awaitingQuote && (
         <div className="mt-4">
@@ -259,6 +331,20 @@ export default function OrderDetailPage() {
         <div role="alert" className="alert alert-warning mt-4 text-sm space-y-2">
           <p className="m-0">{t('shop.order.payment_no_methods')}</p>
           <p className="m-0 text-base-content/80">{t('shop.order.payment_how_it_works')}</p>
+          {order.local_checkout_needs_debug ? (
+            <p className="m-0 text-base-content/90">{t('checkout.payment.local_debug_hint')}</p>
+          ) : null}
+        </div>
+      )}
+
+      {canPay && order.paypal_missing_credentials && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('checkout.payment.paypal_missing_credentials_hint')}
+        </div>
+      )}
+      {canPay && order.stripe_missing_credentials && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('checkout.payment.stripe_missing_credentials_hint')}
         </div>
       )}
 
@@ -272,9 +358,12 @@ export default function OrderDetailPage() {
                 className="select select-bordered w-full"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                disabled={!!inlineCheckout?.stripe || (!anyPaymentMethod && !paymentsSimulated)}
+                disabled={
+                  !!inlineCheckout?.paypal ||
+                  (!anyPaymentMethod && !paymentsSimulated)
+                }
               >
-                {['card', 'paypal', 'bizum', 'revolut']
+                {['card', 'paypal']
                   .filter((value) => payAvail[value])
                   .map((value) => (
                     <option key={value} value={value}>
@@ -286,23 +375,36 @@ export default function OrderDetailPage() {
             <button
               type="submit"
               className="btn btn-primary mt-2"
-              disabled={payLoading || !!inlineCheckout?.stripe || (!anyPaymentMethod && !paymentsSimulated)}
+              disabled={
+                payLoading ||
+                !!inlineCheckout?.paypal ||
+                (!anyPaymentMethod && !paymentsSimulated)
+              }
             >
               {payLoading ? t('common.loading') : t('shop.order.pay_now')}
             </button>
-            {inlineCheckout?.stripe && (
+            {inlineCheckout?.paypal && (
               <div className="mt-6 pt-6 border-t border-base-300 space-y-3">
-                <p className="text-sm text-base-content/70">{t('checkout.payment.card_help')}</p>
-                <StripeInlinePayment
-                  publishableKey={inlineCheckout.stripe.publishable_key}
-                  clientSecret={inlineCheckout.stripe.client_secret}
-                  orderId={inlineCheckout.orderId}
+                <p className="text-sm text-base-content/70">{t('checkout.payment.paypal_help')}</p>
+                <PayPalInlineButtons
+                  clientId={inlineCheckout.paypal.client_id}
+                  paypalOrderId={inlineCheckout.paypal.paypal_order_id}
+                  paymentId={inlineCheckout.paypal.payment_id}
+                  paypalMode={inlineCheckout.paypal.paypal_mode}
                   onSuccess={async () => {
                     const r = await api.get(`orders/${id}`);
                     if (r.data.success) setOrder(r.data.data);
                     setInlineCheckout(null);
                   }}
                   onError={(msg) => setStripeUiError(msg)}
+                  onCancel={() => {
+                    const msg = t('shop.payment.paypal_not_completed');
+                    setStripeUiError('');
+                    setPaypalReturnInfo('');
+                    setPayError('');
+                    emitAppToast(msg, 'warning');
+                    setPayWarning(msg);
+                  }}
                 />
                 {stripeUiError ? <div role="alert" className="alert alert-error text-sm">{stripeUiError}</div> : null}
               </div>

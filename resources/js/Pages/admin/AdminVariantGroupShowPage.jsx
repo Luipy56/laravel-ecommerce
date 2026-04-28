@@ -136,7 +136,7 @@ export default function AdminVariantGroupShowPage() {
                     to={`/admin/products/${p.id}`}
                     className="card card-border bg-base-200/50 hover:bg-base-200 border-base-300"
                   >
-                    <div className="card-body p-4 flex-row items-center gap-3">
+                    <div className="card-body p-4 flex flex-row items-center gap-3 min-w-0">
                       <div className="avatar shrink-0">
                         <div className="mask mask-squircle w-14 h-14 bg-base-300">
                           <img

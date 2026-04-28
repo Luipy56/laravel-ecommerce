@@ -10,3 +10,4 @@ alwaysApply: false
 - **Guard:** Use Laravel **session** guard (default `web`). Configure `config/auth.php` with your user provider (e.g. `users` → User model, or a custom provider like `professionals` if you use a different model).
 - **Routes:** Guest routes for GET/POST login; one POST logout; protect the rest with `middleware('auth')`. Same pattern as the reference app in `~/Repos/abp-app` (LoginController, no Breeze).
 - **SPA:** If the login form is in React, POST credentials to a Laravel route that validates and creates the session; use `withCredentials: true` (or equivalent) on API requests so the session cookie is sent. No need for token storage if the app is same-origin.
+- **API guests:** See **`.cursor/rules/testing-verification.mdc`** (section *Auth / API note*) for unauthenticated `api/*` behaviour.

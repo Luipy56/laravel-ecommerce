@@ -16,9 +16,11 @@ import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
 import CheckoutPage from './Pages/CheckoutPage';
 import OrdersPage from './Pages/OrdersPage';
+import PurchasesPage from './Pages/PurchasesPage';
 import OrderDetailPage from './Pages/OrderDetailPage';
 import ProfilePage from './Pages/ProfilePage';
 import CustomSolutionPage from './Pages/CustomSolutionPage';
+import ClientPersonalizedSolutionPage from './Pages/ClientPersonalizedSolutionPage';
 import AdminLoginPage from './Pages/admin/AdminLoginPage';
 import AdminDashboardPage from './Pages/admin/AdminDashboardPage';
 import AdminCategoriesPage from './Pages/admin/AdminCategoriesPage';
@@ -54,6 +56,8 @@ import AdminOrdersPage from './Pages/admin/AdminOrdersPage';
 import AdminOrderShowPage from './Pages/admin/AdminOrderShowPage';
 import AdminOrderEditPage from './Pages/admin/AdminOrderEditPage';
 import AdminPersonalizedSolutionsPage from './Pages/admin/AdminPersonalizedSolutionsPage';
+import AdminDataExplorerPage from './Pages/admin/AdminDataExplorerPage';
+import AdminShopSettingsPage from './Pages/admin/AdminShopSettingsPage';
 import AdminPersonalizedSolutionShowPage from './Pages/admin/AdminPersonalizedSolutionShowPage';
 import AdminPersonalizedSolutionEditPage from './Pages/admin/AdminPersonalizedSolutionEditPage';
 import NotFoundPage from './Pages/NotFoundPage';
@@ -93,15 +97,25 @@ export default function App() {
                   <Route path="register" element={<RegisterPage />} />
                   <Route path="checkout" element={<CheckoutPage />} />
                   <Route path="orders" element={<OrdersPage />} />
+                  <Route path="purchases" element={<PurchasesPage />} />
                   <Route path="orders/:id" element={<OrderDetailPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="custom-solution" element={<CustomSolutionPage />} />
+                  <Route
+                    path="client/personalized-solutions"
+                    element={<Navigate to="/custom-solution" replace />}
+                  />
+                  <Route path="client/personalized-solutions/:token" element={<ClientPersonalizedSolutionPage />} />
+                  <Route path="mi-solucion" element={<Navigate to="/custom-solution" replace />} />
+                  <Route path="my-solution" element={<Navigate to="/custom-solution" replace />} />
                   <Route path="session-expired" element={<SessionExpiredPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
                 <Route path="admin/login" element={<AdminLoginPage />} />
                 <Route path="admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboardPage />} />
+                  <Route path="data-explorer" element={<AdminDataExplorerPage />} />
+                  <Route path="settings" element={<AdminShopSettingsPage />} />
                   <Route path="categories" element={<AdminCategoriesPage />} />
                   <Route path="categories/new" element={<AdminCategoryNewPage />} />
                   <Route path="categories/:id/edit" element={<AdminCategoryEditPage />} />

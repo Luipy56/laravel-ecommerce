@@ -10,7 +10,7 @@ export default function SessionExpiredPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="max-w-lg mx-auto text-center py-16">
+    <div className="mx-auto w-full min-w-0 max-w-lg text-center py-16">
       <PageTitle>{t('errors.session_expired_title')}</PageTitle>
       <p className="text-base-content/80 mb-6">{t('errors.session_expired_body')}</p>
       <div className="flex flex-wrap gap-3 justify-center">

@@ -72,7 +72,7 @@ export default function RegisterPage() {
   const isCompany = form.type === 'company';
 
   return (
-    <div className="max-w-4xl mx-auto card bg-base-100 shadow-lg">
+    <div className="mx-auto w-full min-w-0 max-w-4xl card bg-base-100 shadow-lg">
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.register')}</h1>
         <p className="text-sm text-base-content/70">{t('register.required_note')}</p>
@@ -115,6 +115,7 @@ export default function RegisterPage() {
                   id="register-password"
                   type="password"
                   name="password"
+                  autoComplete="new-password"
                   className={`input input-bordered w-full${fieldErrors.password ? ' input-error' : ''}`}
                   value={form.password}
                   onChange={handleChange}
@@ -128,6 +129,7 @@ export default function RegisterPage() {
                   id="register-password_confirmation"
                   type="password"
                   name="password_confirmation"
+                  autoComplete="new-password"
                   className={`input input-bordered w-full${fieldErrors.password_confirmation ? ' input-error' : ''}`}
                   value={form.password_confirmation}
                   onChange={handleChange}

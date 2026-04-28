@@ -1,3 +1,6 @@
+// Laravel ecommerce schema (see database/migrations). Production target: PostgreSQL.
+// PHPUnit uses SQLite (:memory:); migrations branch on driver (pgsql-only extensions/indexes/citext alters are skipped on sqlite).
+//
 // =============================================================================
 // Enums
 // =============================================================================
@@ -9,7 +12,8 @@ Enum order_kind {
 }
 
 Enum order_status {
-  pending [note: 'Pending; ready to pay when no install quote needed']
+  pending [note: 'Paid (or non-PayPal path); fulfilment queue — not yet shipped']
+  awaiting_payment [note: 'Checkout started with PayPal; capture not done — do not treat as paid']
   awaiting_installation_price [note: 'Client requested installation; admin must set fee before payment']
   in_transit [note: 'In transit']
   sent [note: 'Shipped (with shipping date)']
@@ -51,7 +55,7 @@ Table CLIENTS [note: 'Account (person or company). Use CLIENT_CONTACTS for names
   id int [pk, increment]
   type client_type [not null, note: 'Person vs company']
   identification varchar(20) [null, unique, note: 'ID document (DNI, CIF or NIE); one per account']
-  login_email varchar(255) [not null, unique, note: 'Email for authentication']
+  login_email varchar(255) [not null, unique, note: 'Email for authentication; PostgreSQL type citext (case-insensitive)']
   password varchar(255) [not null]
   is_active boolean [not null, default: true, note: 'Soft delete']
 }
@@ -88,6 +92,14 @@ Table PRODUCT_CATEGORIES {
   is_active boolean [not null, default: true, note: 'Disable without deleting']
 }
 
+Table SHOP_SETTINGS [note: 'Key-value JSON settings for storefront and admin configuration panel'] {
+  id int [pk, increment]
+  key varchar(128) [not null, unique, note: 'Setting identifier']
+  value json [not null, note: 'Scalar or array encoded as JSON']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
 Table PRODUCT_VARIANT_GROUPS [note: 'Optional grouping of products as siblings (e.g. same screw 30mm, 40mm, 50mm). Order variants by name or value in SQL.'] {
   id int [pk, increment]
   name varchar(255) [null, note: 'Optional display name for the variant group']
@@ -112,8 +124,9 @@ Table PRODUCTS {
   is_extra_keys_available boolean [not null, default: false, note: 'Product can have extra physical keys']
   extra_key_unit_price decimal(10,2) [null, note: 'Price per extra key when is_extra_keys_available=true']
   is_featured boolean [not null, default: false, note: 'Featured on homepage']
-  is_trending boolean [not null, default: false, note: 'Trending product']
+  is_trending boolean [not null, default: false, note: 'Homepage automatic highlight; set by admin recalculate from shop_settings rules, not product form']
   is_active boolean [not null, default: true, note: 'Disable without deleting']
+  search_text text [null, note: 'Lowercase accent-folded name+code+description; GIN(trgm) idx on PostgreSQL']
 }
 
 Table FEATURE_NAMES {
@@ -201,6 +214,13 @@ Table PAYMENTS [note: 'PSP lifecycle: pending until webhook confirms succeeded.'
   paid_at timestamp [null]
 }
 
+Table STRIPE_WEBHOOK_EVENTS [note: 'Processed Stripe webhook event ids (idempotency).'] {
+  id int [pk, increment]
+  stripe_event_id varchar(255) [not null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
 Table ADMINS {
   id int [pk, increment]
   username varchar(255) [not null, unique]
@@ -251,6 +271,10 @@ Table PERSONALIZED_SOLUTIONS [note: 'Can be independent of client and order (cli
   address_note text [null, note: 'e.g. If I\'m not there..., I\'ll be there at 3...']
   problem_description text [null]
   resolution text [null, note: 'Admin resolution / quote']
+  public_token varchar(64) [null, unique, note: 'Random hex; client portal URL without login']
+  iterations_count int [not null, default: 0]
+  improvement_feedback text [null]
+  improvement_feedback_at datetime [null]
   status personalized_solution_status [not null]
   is_active boolean [not null, default: true, note: 'Soft delete']
 }

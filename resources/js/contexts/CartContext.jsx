@@ -1,5 +1,7 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import i18n from '../i18n';
 import { api } from '../api';
+import { emitAppToast } from '../toastEvents';
 import { useAuth } from './AuthContext';
 
 /**
@@ -8,44 +10,58 @@ import { useAuth } from './AuthContext';
  */
 const CartContext = createContext(null);
 
-const ADDED_FEEDBACK_DURATION_MS = 2500;
+/** @param {Record<string, unknown>} data */
+function cartStateFromApi(data) {
+  const total = Number(data.total ?? 0);
+  const ship = Number(data.shipping_flat_eur ?? 9);
+
+  return {
+    id: data.id,
+    lines: data.lines || [],
+    total,
+    installation_requested: !!data.installation_requested,
+    installation_quote_required: !!data.installation_quote_required,
+    installation_fee_eur: data.installation_fee_eur ?? null,
+    shipping_flat_eur: ship,
+    total_with_shipping: data.total_with_shipping ?? total + ship,
+  };
+}
 
 export function CartProvider({ children }) {
   const { user } = useAuth();
-  const [cart, setCart] = useState({
-    lines: [],
-    total: 0,
-    installation_requested: false,
-    shipping_flat_eur: 9,
-    total_with_shipping: 9,
-  });
+  const [cart, setCart] = useState(() =>
+    cartStateFromApi({
+      lines: [],
+      total: 0,
+      installation_requested: false,
+      installation_quote_required: false,
+      installation_fee_eur: null,
+      shipping_flat_eur: 9,
+      total_with_shipping: 9,
+    }),
+  );
   const [loading, setLoading] = useState(false);
-  const [showAddedFeedback, setShowAddedFeedback] = useState(false);
-  const addedFeedbackTimeoutRef = useRef(null);
 
   const fetchCart = useCallback(async (signal) => {
     setLoading(true);
     try {
       const { data } = await api.get('cart', signal ? { signal } : {});
       if (data.success && data.data) {
-        setCart({
-          id: data.data.id,
-          lines: data.data.lines || [],
-          total: data.data.total ?? 0,
-          installation_requested: !!data.data.installation_requested,
-          shipping_flat_eur: data.data.shipping_flat_eur ?? 9,
-          total_with_shipping: data.data.total_with_shipping ?? (Number(data.data.total ?? 0) + 9),
-        });
+        setCart(cartStateFromApi(data.data));
       }
     } catch (err) {
       if (err.name !== 'AbortError') {
-        setCart({
-          lines: [],
-          total: 0,
-          installation_requested: false,
-          shipping_flat_eur: 9,
-          total_with_shipping: 9,
-        });
+        setCart(
+          cartStateFromApi({
+            lines: [],
+            total: 0,
+            installation_requested: false,
+            installation_quote_required: false,
+            installation_fee_eur: null,
+            shipping_flat_eur: 9,
+            total_with_shipping: 9,
+          }),
+        );
       }
     } finally {
       setLoading(false);
@@ -70,14 +86,7 @@ export function CartProvider({ children }) {
   const setInstallationRequested = useCallback(async (requested) => {
     const { data } = await api.put('cart/installation', { installation_requested: requested });
     if (data.success && data.data) {
-      setCart({
-        id: data.data.id,
-        lines: data.data.lines || [],
-        total: data.data.total ?? 0,
-        installation_requested: !!data.data.installation_requested,
-        shipping_flat_eur: data.data.shipping_flat_eur ?? 9,
-        total_with_shipping: data.data.total_with_shipping ?? (Number(data.data.total ?? 0) + 9),
-      });
+      setCart(cartStateFromApi(data.data));
       return { success: true };
     }
     return { success: false };
@@ -88,21 +97,9 @@ export function CartProvider({ children }) {
     const { data } = await api.post('cart/lines', payload);
     if (data.success && data.data) {
       if (Array.isArray(data.data.lines)) {
-        setCart((c) => ({
-          id: data.data.id ?? c.id,
-          lines: data.data.lines,
-          total: data.data.total ?? 0,
-          installation_requested: data.data.installation_requested ?? c.installation_requested,
-          shipping_flat_eur: data.data.shipping_flat_eur ?? c.shipping_flat_eur,
-          total_with_shipping: data.data.total_with_shipping ?? (Number(data.data.total ?? 0) + (data.data.shipping_flat_eur ?? c.shipping_flat_eur)),
-        }));
+        setCart((c) => cartStateFromApi({ ...data.data, id: data.data.id ?? c.id }));
       } else await fetchCart();
-      if (addedFeedbackTimeoutRef.current) clearTimeout(addedFeedbackTimeoutRef.current);
-      setShowAddedFeedback(true);
-      addedFeedbackTimeoutRef.current = setTimeout(() => {
-        setShowAddedFeedback(false);
-        addedFeedbackTimeoutRef.current = null;
-      }, ADDED_FEEDBACK_DURATION_MS);
+      emitAppToast(i18n.t('shop.cart.added'), 'success');
       return { success: true };
     }
     return { success: false };
@@ -117,15 +114,7 @@ export function CartProvider({ children }) {
     }
     const { data } = await api.put(`cart/lines/${lineId}`, body);
     if (data.success && data.data) {
-      setCart((c) => ({
-        ...c,
-        lines: data.data.lines ?? c.lines,
-        total: data.data.total ?? c.total,
-        installation_requested: data.data.installation_requested ?? c.installation_requested,
-        shipping_flat_eur: data.data.shipping_flat_eur ?? c.shipping_flat_eur,
-        total_with_shipping: data.data.total_with_shipping
-          ?? (Number(data.data.total ?? c.total) + (data.data.shipping_flat_eur ?? c.shipping_flat_eur)),
-      }));
+      setCart(cartStateFromApi(data.data));
       if (!Array.isArray(data.data.lines)) await fetchCart();
       return { success: true };
     }
@@ -135,15 +124,7 @@ export function CartProvider({ children }) {
   const removeLine = useCallback(async (lineId) => {
     const { data } = await api.delete(`cart/lines/${lineId}`);
     if (data.success && data.data) {
-      setCart((c) => ({
-        ...c,
-        lines: data.data.lines ?? c.lines,
-        total: data.data.total ?? c.total,
-        installation_requested: data.data.installation_requested ?? c.installation_requested,
-        shipping_flat_eur: data.data.shipping_flat_eur ?? c.shipping_flat_eur,
-        total_with_shipping: data.data.total_with_shipping
-          ?? (Number(data.data.total ?? c.total) + (data.data.shipping_flat_eur ?? c.shipping_flat_eur)),
-      }));
+      setCart(cartStateFromApi(data.data));
       if (!Array.isArray(data.data.lines)) await fetchCart();
       return { success: true };
     }
@@ -152,17 +133,10 @@ export function CartProvider({ children }) {
 
   const itemCount = cart.lines.reduce((acc, l) => acc + (l.quantity || 0), 0);
 
-  useEffect(() => {
-    return () => {
-      if (addedFeedbackTimeoutRef.current) clearTimeout(addedFeedbackTimeoutRef.current);
-    };
-  }, []);
-
   const value = {
     cart,
     itemCount,
     loading,
-    showAddedFeedback,
     fetchCart,
     mergeCart,
     addLine,

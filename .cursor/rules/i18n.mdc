@@ -1,15 +1,15 @@
 ---
-description: Internationalization — Catalan and Spanish (Castilian); Laravel + React
+description: Internationalization — Catalan, Spanish (Castilian), and English; Laravel + React
 globs: "**/lang/**/*,resources/lang/**/*,**/locales/**/*,**/i18n/**/*"
 alwaysApply: false
 ---
 
 # Internationalization (i18n)
 
-- **Locales**: Support **Catalan (ca)** and **Spanish / Castellano (es)**. All user-facing text must be translatable; no hardcoded UI strings.
-- **Laravel**: Use `lang/` (Laravel 9+) with subdirs `ca/` and `es/`. PHP arrays for structured strings (e.g. `lang/ca/shop.php`, `lang/es/validation.php`); JSON files `lang/ca.json` and `lang/es.json` for simple key-value. In Blade use `{{ __("key") }}`, `@lang("key")`, or `trans("key")`. Set locale via `App::setLocale($locale)` (e.g. from session or route).
-- **Keys**: Use namespaced keys (e.g. `shop.cart.add`, `validation.required`) so translations stay organized. Same key in both locales.
-- **Validation**: Put validation messages in `lang/ca/validation.php` and `lang/es/validation.php`; use `lang/ca.json` and `lang/es.json` for attribute names if needed.
-- **React** (if used): Use **i18next** and **react-i18next**. Store translation files (e.g. `resources/js/locales/ca.json`, `es.json`) or load from Laravel API. Use `useTranslation()` and `t('key')` for all UI strings. Sync locale with Laravel (e.g. from shared Inertia props or API).
-- **Enums / fixed options**: Store display values in lang files (e.g. `shop.status.pending` → "Pendent" / "Pendiente") so they are translated in both locales.
-- **Catalog / admin data**: Seed data and content uploaded by admins are in **Catalan**. The storefront search (to be improved) must support queries in both **Catalan and Spanish** so clients can find products in either language; consider synonyms, aliases, or a search layer that maps both locales to the same catalog (stored in Catalan).
+- **Locales**: Support **Catalan (ca)**, **Spanish / Castellano (es)**, and **English (en)**. All user-facing text must be translatable; no hardcoded UI strings.
+- **Laravel**: Use `lang/` (Laravel 9+) with subdirs `ca/`, `es/`, and `en/`. PHP arrays for structured strings (e.g. `lang/*/mail.php`); JSON files `lang/ca.json`, `lang/es.json`, and `lang/en.json` for simple key-value. In Blade use `{{ __("key") }}`, `@lang("key")`, or `trans("key")`. Set locale via `App::setLocale($locale)` (e.g. from session or route). Supported API locales: `config('app.available_locales')` (default `ca`, `es`, `en`).
+- **Keys**: Use namespaced keys (e.g. `shop.cart.add`, `validation.required`) so translations stay organized. Same key in every locale file.
+- **Validation**: Put validation messages in `lang/ca/validation.php` and `lang/es/validation.php` when used; use `lang/*.json` for attribute names if needed. Add `en` when adding new copy.
+- **React** (if used): Use **i18next** and **react-i18next**. Store translation files in `resources/js/locales/ca.json`, `es.json`, and `en.json`. Use `useTranslation()` and `t('key')` for all UI strings. The language switcher must list all three; persist with `localStorage` key `locale` (`ca` | `es` | `en`).
+- **Enums / fixed options**: Store display values in lang files (e.g. `shop.status.pending` → "Pendent" / "Pendiente" / "Pending") so they are translated in every UI locale.
+- **Catalog / admin data**: Seed data and content uploaded by admins are in **Catalan**. The storefront search (to be improved) must support queries in **Catalan, Spanish, and English** so clients can find products; consider synonyms, aliases, or a search layer that maps locales to the same catalog (stored in Catalan).

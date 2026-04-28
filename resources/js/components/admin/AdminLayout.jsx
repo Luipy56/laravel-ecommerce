@@ -6,6 +6,8 @@ import { IconMenu } from '../icons';
 import { AdminToastProvider } from '../../contexts/AdminToastContext';
 
 const SECTION_NAV_KEYS = {
+  'data-explorer': 'admin.nav.data_explorer',
+  settings: 'admin.nav.settings',
   admins: 'admin.nav.admins',
   categories: 'admin.nav.categories',
   products: 'admin.nav.products',
@@ -62,6 +64,12 @@ export default function AdminLayout() {
   const location = useLocation();
   const pathname = location.pathname;
   const [locale, setLocale] = useState(i18n.language);
+  const localeCode = (lng) => (lng === 'ca' ? 'CA' : lng === 'es' ? 'ES' : 'EN');
+  const languageAria = () => {
+    if (locale === 'en') return 'English';
+    if (locale === 'es') return 'Español';
+    return 'Català';
+  };
 
   useEffect(() => {
     setLocale(i18n.language);
@@ -90,29 +98,60 @@ export default function AdminLayout() {
   };
 
   const navItems = useMemo(() => {
-    const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard' };
+    const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard', alertKey: null };
     const mainItems = [
-      { to: '/admin/admins', labelKey: 'admin.nav.admins' },
-      { to: '/admin/categories', labelKey: 'admin.nav.categories' },
-      { to: '/admin/products', labelKey: 'admin.nav.products' },
-      { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups' },
-      { to: '/admin/clients', labelKey: 'admin.nav.clients' },
-      { to: '/admin/orders', labelKey: 'admin.nav.orders' },
-      { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions' },
-      { to: '/admin/features', labelKey: 'admin.nav.features' },
-      { to: '/admin/packs', labelKey: 'admin.nav.packs' },
+      { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
+      { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
+      { to: '/admin/admins', labelKey: 'admin.nav.admins', alertKey: null },
+      { to: '/admin/categories', labelKey: 'admin.nav.categories', alertKey: null },
+      { to: '/admin/products', labelKey: 'admin.nav.products', alertKey: null },
+      { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups', alertKey: null },
+      { to: '/admin/clients', labelKey: 'admin.nav.clients', alertKey: null },
+      { to: '/admin/orders', labelKey: 'admin.nav.orders', alertKey: 'orders' },
+      { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions', alertKey: 'personalized_solutions' },
+      { to: '/admin/features', labelKey: 'admin.nav.features', alertKey: null },
+      { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
     ];
     const sorted = [...mainItems].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
     return [dashboard, ...sorted];
   }, [t]);
 
+  const [navAlerts, setNavAlerts] = useState({
+    orders: false,
+    personalized_solutions: false,
+  });
+
+  useEffect(() => {
+    if (!pathname.startsWith('/admin') || pathname.startsWith('/admin/login')) {
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: body } = await api.get('admin/nav-alerts');
+        if (cancelled || !body?.success || !body?.data) return;
+        setNavAlerts({
+          orders: Boolean(body.data.orders_need_attention),
+          personalized_solutions: Boolean(body.data.personalized_solutions_need_attention),
+        });
+      } catch {
+        if (!cancelled) {
+          setNavAlerts({ orders: false, personalized_solutions: false });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-base-200">
       <input id="admin-drawer" type="checkbox" className="drawer-toggle" aria-label={t('common.menu')} />
-      <div className="drawer-content flex flex-col">
+      <div className="drawer-content flex min-w-0 flex-col">
         <header className="sticky top-0 z-10 bg-base-100 border-b border-base-200 shrink-0">
           <div className="container mx-auto px-4 py-3 lg:px-6 flex items-center justify-between gap-4 w-full">
-            <div className="flex items-center gap-2 min-w-0 flex-1 lg:flex-initial">
+            <div className="flex min-w-0 flex-1 items-center gap-2 lg:flex-initial">
               <label
                 htmlFor="admin-drawer"
                 className="btn btn-ghost btn-square drawer-button shrink-0 lg:hidden"
@@ -120,8 +159,9 @@ export default function AdminLayout() {
               >
                 <IconMenu className="h-6 w-6" />
               </label>
-              <nav className="breadcrumbs text-sm min-w-0" aria-label="Breadcrumb">
-                <ul>
+              <div className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+                <nav className="breadcrumbs text-sm whitespace-nowrap" aria-label="Breadcrumb">
+                  <ul className="!flex-nowrap">
                   {breadcrumbs.map((crumb, i) => (
                     <li key={i}>
                       {crumb.path ? (
@@ -133,21 +173,23 @@ export default function AdminLayout() {
                       )}
                     </li>
                   ))}
-                </ul>
-              </nav>
+                  </ul>
+                </nav>
+              </div>
             </div>
             <div className="dropdown dropdown-end shrink-0">
-              <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={locale === 'ca' ? 'Català' : 'Español'}>
-                {locale === 'ca' ? 'CA' : 'ES'}
+              <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={languageAria()}>
+                {localeCode(locale)}
               </label>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-32 p-2 shadow border border-base-200">
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-36 p-2 shadow border border-base-200">
                 <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
                 <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
+                <li><button type="button" onClick={() => handleLocale('en')}>English</button></li>
               </ul>
             </div>
           </div>
         </header>
-        <main className="flex-1 container mx-auto px-4 pb-6 lg:px-6">
+        <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 pb-6 lg:px-6">
           <AdminToastProvider>
             <Outlet />
           </AdminToastProvider>
@@ -155,24 +197,44 @@ export default function AdminLayout() {
       </div>
       <div className="drawer-side z-30">
         <label htmlFor="admin-drawer" aria-label={t('common.close')} className="drawer-overlay" />
-        <aside className="bg-base-100 w-64 min-h-full flex flex-col border-r border-base-200">
+        <aside className="bg-base-100 w-64 max-w-[min(100vw,16rem)] min-h-full flex flex-col border-r border-base-200">
           <div className="p-4 border-b border-base-200">
             <span className="font-bold text-lg text-base-content">{t('home.hero.title')}</span>
             <span className="block text-sm text-base-content/70">Admin</span>
           </div>
           <ul className="menu p-4 flex-1">
-            {navItems.map(({ to, labelKey }) => (
-              <li key={to}>
-                <Link
-                  to={to}
-                  className={`rounded-lg ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
-                  onClick={closeDrawer}
-                  aria-current={isActive(to) ? 'page' : undefined}
-                >
-                  {t(labelKey)}
-                </Link>
-              </li>
-            ))}
+            {navItems.map(({ to, labelKey, alertKey }) => {
+              const showAttentionDot =
+                alertKey === 'orders'
+                  ? navAlerts.orders
+                  : alertKey === 'personalized_solutions'
+                    ? navAlerts.personalized_solutions
+                    : false;
+              const linkAria =
+                showAttentionDot && alertKey
+                  ? `${t(labelKey)} · ${t(`admin.nav.alert_link_suffix_${alertKey}`)}`
+                  : undefined;
+              return (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    className={`rounded-lg flex items-center justify-between gap-2 ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
+                    onClick={closeDrawer}
+                    aria-current={isActive(to) ? 'page' : undefined}
+                    aria-label={linkAria}
+                  >
+                    <span className="min-w-0 flex-1">{t(labelKey)}</span>
+                    {showAttentionDot ? (
+                      <span
+                        className="size-2 shrink-0 rounded-full bg-warning"
+                        aria-hidden="true"
+                        title={t(`admin.nav.alert_link_suffix_${alertKey}`)}
+                      />
+                    ) : null}
+                  </Link>
+                </li>
+              );
+            })}
             <li>
               <Link to="/" className="rounded-lg" onClick={closeDrawer}>
                 {t('admin.back_to_shop')}

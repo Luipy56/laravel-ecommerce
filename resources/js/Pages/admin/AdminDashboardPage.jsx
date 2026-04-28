@@ -22,12 +22,6 @@ function getThemeColor(variable) {
   return value || '#888';
 }
 
-function formatMonthLabel(monthStr, locale) {
-  if (!monthStr || monthStr.length < 7) return monthStr;
-  const date = new Date(monthStr + '-01');
-  return date.toLocaleDateString(locale || 'es', { month: 'short', year: 'numeric' });
-}
-
 /** Short month name from "01".."12" for axis labels. */
 function formatMonthShort(monthKey, locale) {
   if (!monthKey || monthKey.length < 2) return monthKey;
@@ -48,9 +42,12 @@ export default function AdminDashboardPage() {
   const [lowStock, setLowStock] = useState([]);
   const [postalCodes, setPostalCodes] = useState([]);
   const [postalCode, setPostalCode] = useState('');
+  const [filterYear, setFilterYear] = useState('');
+  const [filterMonth, setFilterMonth] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const locale = i18n.language || 'es';
+  const chartLocale = i18n.language === 'es' ? 'es-ES' : i18n.language === 'en' ? 'en-GB' : 'ca-ES';
+  const locale = chartLocale;
 
   const fetchPostalCodes = useCallback(async (signal) => {
     try {
@@ -61,8 +58,11 @@ export default function AdminDashboardPage() {
 
   const fetchStats = useCallback(
     async (signal) => {
-      const params = postalCode ? { postal_code: postalCode } : {};
-      const opts = signal ? { signal, params } : { params };
+      const params = {};
+      if (postalCode) params.postal_code = postalCode;
+      if (filterYear) params.year = filterYear;
+      if (filterMonth) params.month = filterMonth;
+      const opts = Object.keys(params).length ? (signal ? { signal, params } : { params }) : signal ? { signal } : {};
       try {
         const [s, tP, lS] = await Promise.all([
           api.get('admin/stats/sales-by-period', opts),
@@ -89,7 +89,24 @@ export default function AdminDashboardPage() {
         setLoading(false);
       }
     },
-    [navigate, postalCode]
+    [navigate, postalCode, filterYear, filterMonth]
+  );
+
+  const yearSelectOptions = useMemo(() => {
+    const y0 = new Date().getFullYear();
+    const out = [];
+    for (let y = y0; y >= y0 - 14; y -= 1) out.push(y);
+    return out;
+  }, []);
+
+  const monthOptions = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) => {
+        const value = String(i + 1);
+        const label = new Date(2000, i, 1).toLocaleDateString(locale, { month: 'long' });
+        return { value, label };
+      }),
+    [locale]
   );
 
   useEffect(() => {
@@ -154,24 +171,64 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-between">
         <PageTitle>{t('admin.dashboard.title')}</PageTitle>
-        <div className="flex items-center gap-2">
-          <label htmlFor="dashboard-postal-code" className="text-sm text-base-content/80 whitespace-nowrap">
-            {t('admin.dashboard.filter_postal_code')}
-          </label>
-          <select
-            id="dashboard-postal-code"
-            className="select select-bordered select-sm sm:select-md w-full min-w-0 max-w-[12rem]"
-            value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value)}
-            aria-label={t('admin.dashboard.filter_postal_code')}
-          >
-            <option value="">{t('admin.dashboard.filter_postal_code_all')}</option>
-            {postalCodes.map((code) => (
-              <option key={code} value={code}>
-                {code}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end">
+          <div className="flex items-center gap-2 shrink-0">
+            <label htmlFor="dashboard-postal-code" className="text-sm text-base-content/80 whitespace-nowrap">
+              {t('admin.dashboard.filter_postal_code')}
+            </label>
+            <select
+              id="dashboard-postal-code"
+              className="select select-bordered select-sm sm:select-md w-full min-w-0 max-w-[12rem]"
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              aria-label={t('admin.dashboard.filter_postal_code')}
+            >
+              <option value="">{t('admin.dashboard.filter_all')}</option>
+              {postalCodes.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <label htmlFor="dashboard-filter-year" className="text-sm text-base-content/80 whitespace-nowrap">
+              {t('admin.dashboard.filter_year')}
+            </label>
+            <select
+              id="dashboard-filter-year"
+              className="select select-bordered select-sm sm:select-md w-full min-w-0 max-w-[7.5rem]"
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              aria-label={t('admin.dashboard.filter_year')}
+            >
+              <option value="">{t('admin.dashboard.filter_all')}</option>
+              {yearSelectOptions.map((y) => (
+                <option key={y} value={String(y)}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <label htmlFor="dashboard-filter-month" className="text-sm text-base-content/80 whitespace-nowrap">
+              {t('admin.dashboard.filter_month')}
+            </label>
+            <select
+              id="dashboard-filter-month"
+              className="select select-bordered select-sm sm:select-md w-full min-w-0 max-w-[10rem]"
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+              aria-label={t('admin.dashboard.filter_month')}
+            >
+              <option value="">{t('admin.dashboard.filter_all')}</option>
+              {monthOptions.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

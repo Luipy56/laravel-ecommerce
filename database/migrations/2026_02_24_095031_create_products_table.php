@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -32,8 +33,14 @@ return new class extends Migration
             $table->boolean('is_featured')->default(false)->comment('Featured on homepage');
             $table->boolean('is_trending')->default(false)->comment('Trending product');
             $table->boolean('is_active')->default(true)->comment('Disable without deleting');
+            // Plain text (not citext): value is maintained in PHP for parity across SQLite/MySQL/PostgreSQL; pg_trgm GIN index on PostgreSQL only.
+            $table->text('search_text')->nullable()->comment('Normalized name+code+description for full-text style search');
             $table->timestamps();
         });
+
+        if (Schema::getConnection()->getDriverName() === 'pgsql') {
+            DB::statement('CREATE INDEX idx_products_search_text_trgm ON products USING gin (search_text gin_trgm_ops)');
+        }
     }
 
     /**

@@ -76,6 +76,16 @@ export default function AdminProductShowPage() {
             <div><dt className="text-sm text-base-content/70">{t('admin.products.name')}</dt><dd>{product.name}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.description')}</dt><dd>{product.description}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.sale_price')} (€)</dt><dd>{product.price != null ? Number(product.price).toFixed(2) : ''}</dd></div>
+            <div>
+              <dt className="text-sm text-base-content/70">{t('admin.products.discount_percent')}</dt>
+              <dd>
+                {product.discount_percent != null &&
+                product.discount_percent !== '' &&
+                Number(product.discount_percent) > 0
+                  ? `${Number(product.discount_percent)}%`
+                  : ''}
+              </dd>
+            </div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.purchase_price')} (€)</dt><dd>{product.purchase_price != null ? Number(product.purchase_price).toFixed(2) : ''}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.stock')}</dt><dd>{product.stock}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.weight_kg')}</dt><dd>{product.weight_kg != null ? Number(product.weight_kg).toFixed(3) : ''}</dd></div>
@@ -85,7 +95,13 @@ export default function AdminProductShowPage() {
             <div><dt className="text-sm text-base-content/70">{t('admin.products.has_card')}</dt><dd>{product.has_card ? t('common.yes') : t('common.no')}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_active')}</dt><dd>{product.is_active ? t('common.yes') : t('common.no')}</dd></div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_featured')}</dt><dd>{product.is_featured ? t('common.yes') : t('common.no')}</dd></div>
-            <div><dt className="text-sm text-base-content/70">{t('admin.products.is_trending')}</dt><dd>{product.is_trending ? t('common.yes') : t('common.no')}</dd></div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm text-base-content/70">{t('admin.products.is_trending')}</dt>
+              <dd>
+                {product.is_trending ? t('common.yes') : t('common.no')}
+                <p className="text-sm text-base-content/60 mt-1">{t('admin.products.is_trending_managed_by_settings')}</p>
+              </dd>
+            </div>
             <div><dt className="text-sm text-base-content/70">{t('admin.products.is_extra_keys_available')}</dt><dd>{product.is_extra_keys_available ? t('common.yes') : t('common.no')}</dd></div>
             {product.is_extra_keys_available && <div><dt className="text-sm text-base-content/70">{t('admin.products.extra_key_unit_price')} (€)</dt><dd>{product.extra_key_unit_price != null ? Number(product.extra_key_unit_price).toFixed(2) : ''}</dd></div>}
           </dl>

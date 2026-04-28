@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+            <title>Laravel E-commerce — Application code</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../">
+    <link rel="icon" href="images/favicon.ico"/>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/base.css">
+            <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/template.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" integrity="sha256-ybRkN9dBjhcS2qrW1z+hfCxq+1aBdwyQM5wlQoQVt/0=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/themes/prism-okaidia.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.css">
+                <script src="https://cdn.jsdelivr.net/npm/fuse.js@3.4.6"></script>
+        <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2"></script>
+        <script src="js/template.js"></script>
+        <script src="js/search.js"></script>
+        <script defer src="js/searchIndex.js"></script>
+    </head>
+<body id="top">
+    <header class="phpdocumentor-header phpdocumentor-section">
+    <h1 class="phpdocumentor-title"><a href="" class="phpdocumentor-title__link">Laravel E-commerce — Application code</a></h1>
+    <input class="phpdocumentor-header__menu-button" type="checkbox" id="menu-button" name="menu-button" />
+    <label class="phpdocumentor-header__menu-icon" for="menu-button">
+        <i class="fas fa-bars"></i>
+    </label>
+    <section data-search-form class="phpdocumentor-search">
+    <label>
+        <span class="visually-hidden">Search for</span>
+        <svg class="phpdocumentor-search__icon" width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+            <line x1="12.4892" y1="12.2727" x2="19.1559" y2="18.9393" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <input type="search" class="phpdocumentor-field phpdocumentor-search__field" placeholder="Loading .." disabled />
+    </label>
+</section>
+
+    <nav class="phpdocumentor-topnav">
+    <ul class="phpdocumentor-topnav__menu">
+        </ul>
+</nav>
+</header>
+
+    <main class="phpdocumentor">
+        <div class="phpdocumentor-section">
+            <input class="phpdocumentor-sidebar__menu-button" type="checkbox" id="sidebar-button" name="sidebar-button" />
+<label class="phpdocumentor-sidebar__menu-icon" for="sidebar-button">
+    Menu
+</label>
+<aside class="phpdocumentor-column -three phpdocumentor-sidebar">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
+            <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/app.html" class="">App</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/app-console.html" class="">Console</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-contracts.html" class="">Contracts</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-events.html" class="">Events</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-exceptions.html" class="">Exceptions</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-http.html" class="">Http</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-listeners.html" class="">Listeners</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-mail.html" class="">Mail</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-models.html" class="">Models</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-providers.html" class="">Providers</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-scout.html" class="">Scout</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-services.html" class="">Services</a>
+                
+            </li>
+                    <li>
+                <a href="namespaces/app-support.html" class="">Support</a>
+                
+            </li>
+            </ul>
+
+                        </section>
+                <section class="phpdocumentor-sidebar__category -packages">
+            <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/App.html" class="">App</a>
+</h4>
+
+                        </section>
+            
+    <section class="phpdocumentor-sidebar__category -reports">
+        <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
+                <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
+    </section>
+
+    <section class="phpdocumentor-sidebar__category -indices">
+        <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
+    </section>
+</aside>
+
+            <div class="phpdocumentor-column -nine phpdocumentor-content">
+                                        <section>
+        
+        <h2 class="phpdocumentor-content__title">Files</h2>
+                                            <h3>A</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-models-admin.html"><abbr title="app/Models/Admin.php">Admin.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminadmincontroller.html"><abbr title="app/Http/Controllers/Api/AdminAdminController.php">AdminAdminController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminauthcontroller.html"><abbr title="app/Http/Controllers/Api/AdminAuthController.php">AdminAuthController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-admincategorycontroller.html"><abbr title="app/Http/Controllers/Api/AdminCategoryController.php">AdminCategoryController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminclientcontroller.html"><abbr title="app/Http/Controllers/Api/AdminClientController.php">AdminClientController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-admindashboardcontroller.html"><abbr title="app/Http/Controllers/Api/AdminDashboardController.php">AdminDashboardController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-admindataexplorercontroller.html"><abbr title="app/Http/Controllers/Api/AdminDataExplorerController.php">AdminDataExplorerController.php</abbr></a></li>
+                            <li><a href="files/app-services-admindataexplorerservice.html"><abbr title="app/Services/AdminDataExplorerService.php">AdminDataExplorerService.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminfeaturecontroller.html"><abbr title="app/Http/Controllers/Api/AdminFeatureController.php">AdminFeatureController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminfeaturenamecontroller.html"><abbr title="app/Http/Controllers/Api/AdminFeatureNameController.php">AdminFeatureNameController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminordercontroller.html"><abbr title="app/Http/Controllers/Api/AdminOrderController.php">AdminOrderController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminpackcontroller.html"><abbr title="app/Http/Controllers/Api/AdminPackController.php">AdminPackController.php</abbr></a></li>
+                            <li><a href="files/app-http-resources-adminpackresource.html"><abbr title="app/Http/Resources/AdminPackResource.php">AdminPackResource.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminpersonalizedsolutioncontroller.html"><abbr title="app/Http/Controllers/Api/AdminPersonalizedSolutionController.php">AdminPersonalizedSolutionController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminproductcontroller.html"><abbr title="app/Http/Controllers/Api/AdminProductController.php">AdminProductController.php</abbr></a></li>
+                            <li><a href="files/app-http-resources-adminproductresource.html"><abbr title="app/Http/Resources/AdminProductResource.php">AdminProductResource.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminshopsettingscontroller.html"><abbr title="app/Http/Controllers/Api/AdminShopSettingsController.php">AdminShopSettingsController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-adminvariantgroupcontroller.html"><abbr title="app/Http/Controllers/Api/AdminVariantGroupController.php">AdminVariantGroupController.php</abbr></a></li>
+                            <li><a href="files/app-providers-appserviceprovider.html"><abbr title="app/Providers/AppServiceProvider.php">AppServiceProvider.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-authcontroller.html"><abbr title="app/Http/Controllers/Api/AuthController.php">AuthController.php</abbr></a></li>
+                            <li><a href="files/routes-api.html"><abbr title="routes/api.php">api.php</abbr></a></li>
+                        </ul>
+                                                                                        <h3>C</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-http-controllers-api-cartcontroller.html"><abbr title="app/Http/Controllers/Api/CartController.php">CartController.php</abbr></a></li>
+                            <li><a href="files/app-services-search-catalogproductsearchservice.html"><abbr title="app/Services/Search/CatalogProductSearchService.php">CatalogProductSearchService.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-categorycontroller.html"><abbr title="app/Http/Controllers/Api/CategoryController.php">CategoryController.php</abbr></a></li>
+                            <li><a href="files/app-http-resources-categoryresource.html"><abbr title="app/Http/Resources/CategoryResource.php">CategoryResource.php</abbr></a></li>
+                            <li><a href="files/app-models-client.html"><abbr title="app/Models/Client.php">Client.php</abbr></a></li>
+                            <li><a href="files/app-models-clientaddress.html"><abbr title="app/Models/ClientAddress.php">ClientAddress.php</abbr></a></li>
+                            <li><a href="files/app-models-clientcontact.html"><abbr title="app/Models/ClientContact.php">ClientContact.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-controller.html"><abbr title="app/Http/Controllers/Controller.php">Controller.php</abbr></a></li>
+                            <li><a href="files/routes-console.html"><abbr title="routes/console.php">console.php</abbr></a></li>
+                        </ul>
+                                                                                        <h3>E</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-scout-elasticsearchclientfactory.html"><abbr title="app/Scout/ElasticsearchClientFactory.php">ElasticsearchClientFactory.php</abbr></a></li>
+                            <li><a href="files/app-scout-elasticsearchengine.html"><abbr title="app/Scout/ElasticsearchEngine.php">ElasticsearchEngine.php</abbr></a></li>
+                            <li><a href="files/app-contracts-search-elasticsearchproductcatalogsearch.html"><abbr title="app/Contracts/Search/ElasticsearchProductCatalogSearch.php">ElasticsearchProductCatalogSearch.php</abbr></a></li>
+                            <li><a href="files/app-http-middleware-ensureadmin.html"><abbr title="app/Http/Middleware/EnsureAdmin.php">EnsureAdmin.php</abbr></a></li>
+                        </ul>
+                                                        <h3>F</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-models-feature.html"><abbr title="app/Models/Feature.php">Feature.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-featurecontroller.html"><abbr title="app/Http/Controllers/Api/FeatureController.php">FeatureController.php</abbr></a></li>
+                            <li><a href="files/app-models-featurename.html"><abbr title="app/Models/FeatureName.php">FeatureName.php</abbr></a></li>
+                        </ul>
+                                                                                                                        <h3>I</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-mail-installationpriceassignedmail.html"><abbr title="app/Mail/InstallationPriceAssignedMail.php">InstallationPriceAssignedMail.php</abbr></a></li>
+                            <li><a href="files/app-events-installationpricewasassigned.html"><abbr title="app/Events/InstallationPriceWasAssigned.php">InstallationPriceWasAssigned.php</abbr></a></li>
+                        </ul>
+                                                                                                                                                        <h3>M</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-support-maillocale.html"><abbr title="app/Support/MailLocale.php">MailLocale.php</abbr></a></li>
+                        </ul>
+                                                                                        <h3>O</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-models-order.html"><abbr title="app/Models/Order.php">Order.php</abbr></a></li>
+                            <li><a href="files/app-models-orderaddress.html"><abbr title="app/Models/OrderAddress.php">OrderAddress.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-ordercontroller.html"><abbr title="app/Http/Controllers/Api/OrderController.php">OrderController.php</abbr></a></li>
+                            <li><a href="files/app-events-orderinstallationquoterequested.html"><abbr title="app/Events/OrderInstallationQuoteRequested.php">OrderInstallationQuoteRequested.php</abbr></a></li>
+                            <li><a href="files/app-mail-orderinstallationquoterequestedadminmail.html"><abbr title="app/Mail/OrderInstallationQuoteRequestedAdminMail.php">OrderInstallationQuoteRequestedAdminMail.php</abbr></a></li>
+                            <li><a href="files/app-mail-orderinstallationquoterequestedmail.html"><abbr title="app/Mail/OrderInstallationQuoteRequestedMail.php">OrderInstallationQuoteRequestedMail.php</abbr></a></li>
+                            <li><a href="files/app-models-orderline.html"><abbr title="app/Models/OrderLine.php">OrderLine.php</abbr></a></li>
+                            <li><a href="files/app-mail-orderpaymentconfirmedmail.html"><abbr title="app/Mail/OrderPaymentConfirmedMail.php">OrderPaymentConfirmedMail.php</abbr></a></li>
+                            <li><a href="files/app-mail-orderpaymentpendingadminmail.html"><abbr title="app/Mail/OrderPaymentPendingAdminMail.php">OrderPaymentPendingAdminMail.php</abbr></a></li>
+                            <li><a href="files/app-mail-orderpaymentpendingmail.html"><abbr title="app/Mail/OrderPaymentPendingMail.php">OrderPaymentPendingMail.php</abbr></a></li>
+                            <li><a href="files/app-events-orderpaymentsucceeded.html"><abbr title="app/Events/OrderPaymentSucceeded.php">OrderPaymentSucceeded.php</abbr></a></li>
+                            <li><a href="files/app-events-orderplacedpaymentpending.html"><abbr title="app/Events/OrderPlacedPaymentPending.php">OrderPlacedPaymentPending.php</abbr></a></li>
+                            <li><a href="files/app-events-ordershipped.html"><abbr title="app/Events/OrderShipped.php">OrderShipped.php</abbr></a></li>
+                            <li><a href="files/app-mail-ordershippedmail.html"><abbr title="app/Mail/OrderShippedMail.php">OrderShippedMail.php</abbr></a></li>
+                        </ul>
+                                                        <h3>P</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-models-pack.html"><abbr title="app/Models/Pack.php">Pack.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-packcontroller.html"><abbr title="app/Http/Controllers/Api/PackController.php">PackController.php</abbr></a></li>
+                            <li><a href="files/app-models-packimage.html"><abbr title="app/Models/PackImage.php">PackImage.php</abbr></a></li>
+                            <li><a href="files/app-models-packitem.html"><abbr title="app/Models/PackItem.php">PackItem.php</abbr></a></li>
+                            <li><a href="files/app-http-resources-packresource.html"><abbr title="app/Http/Resources/PackResource.php">PackResource.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-paypal-paypalcheckoutstarter.html"><abbr title="app/Services/Payments/PayPal/PayPalCheckoutStarter.php">PayPalCheckoutStarter.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-paypal-paypalclient.html"><abbr title="app/Services/Payments/PayPal/PayPalClient.php">PayPalClient.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-paypalpaymentcontroller.html"><abbr title="app/Http/Controllers/Api/PayPalPaymentController.php">PayPalPaymentController.php</abbr></a></li>
+                            <li><a href="files/app-console-commands-paypaltestcredentialscommand.html"><abbr title="app/Console/Commands/PayPalTestCredentialsCommand.php">PayPalTestCredentialsCommand.php</abbr></a></li>
+                            <li><a href="files/app-models-payment.html"><abbr title="app/Models/Payment.php">Payment.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-paymentcheckoutservice.html"><abbr title="app/Services/Payments/PaymentCheckoutService.php">PaymentCheckoutService.php</abbr></a></li>
+                            <li><a href="files/app-contracts-payments-paymentcheckoutstarter.html"><abbr title="app/Contracts/Payments/PaymentCheckoutStarter.php">PaymentCheckoutStarter.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-paymentcompletionservice.html"><abbr title="app/Services/Payments/PaymentCompletionService.php">PaymentCompletionService.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-paymentconfigcontroller.html"><abbr title="app/Http/Controllers/Api/PaymentConfigController.php">PaymentConfigController.php</abbr></a></li>
+                            <li><a href="files/app-exceptions-paymentprovidernotconfiguredexception.html"><abbr title="app/Exceptions/PaymentProviderNotConfiguredException.php">PaymentProviderNotConfiguredException.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-paymentwebhookcontroller.html"><abbr title="app/Http/Controllers/Api/PaymentWebhookController.php">PaymentWebhookController.php</abbr></a></li>
+                            <li><a href="files/app-models-personalizedsolution.html"><abbr title="app/Models/PersonalizedSolution.php">PersonalizedSolution.php</abbr></a></li>
+                            <li><a href="files/app-models-personalizedsolutionattachment.html"><abbr title="app/Models/PersonalizedSolutionAttachment.php">PersonalizedSolutionAttachment.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-personalizedsolutioncontroller.html"><abbr title="app/Http/Controllers/Api/PersonalizedSolutionController.php">PersonalizedSolutionController.php</abbr></a></li>
+                            <li><a href="files/app-mail-personalizedsolutionimprovementrequestedadminmail.html"><abbr title="app/Mail/PersonalizedSolutionImprovementRequestedAdminMail.php">PersonalizedSolutionImprovementRequestedAdminMail.php</abbr></a></li>
+                            <li><a href="files/app-mail-personalizedsolutionreceivedmail.html"><abbr title="app/Mail/PersonalizedSolutionReceivedMail.php">PersonalizedSolutionReceivedMail.php</abbr></a></li>
+                            <li><a href="files/app-mail-personalizedsolutionresolvedmail.html"><abbr title="app/Mail/PersonalizedSolutionResolvedMail.php">PersonalizedSolutionResolvedMail.php</abbr></a></li>
+                            <li><a href="files/app-events-personalizedsolutionsubmitted.html"><abbr title="app/Events/PersonalizedSolutionSubmitted.php">PersonalizedSolutionSubmitted.php</abbr></a></li>
+                            <li><a href="files/app-models-product.html"><abbr title="app/Models/Product.php">Product.php</abbr></a></li>
+                            <li><a href="files/app-models-productcategory.html"><abbr title="app/Models/ProductCategory.php">ProductCategory.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-productcontroller.html"><abbr title="app/Http/Controllers/Api/ProductController.php">ProductController.php</abbr></a></li>
+                            <li><a href="files/app-models-productimage.html"><abbr title="app/Models/ProductImage.php">ProductImage.php</abbr></a></li>
+                            <li><a href="files/app-http-resources-productresource.html"><abbr title="app/Http/Resources/ProductResource.php">ProductResource.php</abbr></a></li>
+                            <li><a href="files/app-services-search-productsearchservice.html"><abbr title="app/Services/Search/ProductSearchService.php">ProductSearchService.php</abbr></a></li>
+                            <li><a href="files/app-services-productsearchtextrebuildservice.html"><abbr title="app/Services/ProductSearchTextRebuildService.php">ProductSearchTextRebuildService.php</abbr></a></li>
+                            <li><a href="files/app-models-productvariantgroup.html"><abbr title="app/Models/ProductVariantGroup.php">ProductVariantGroup.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-publicpersonalizedsolutioncontroller.html"><abbr title="app/Http/Controllers/Api/PublicPersonalizedSolutionController.php">PublicPersonalizedSolutionController.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-purchasedproductscontroller.html"><abbr title="app/Http/Controllers/Api/PurchasedProductsController.php">PurchasedProductsController.php</abbr></a></li>
+                        </ul>
+                                                                                        <h3>R</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-console-commands-rebuildproductsearchtextcommand.html"><abbr title="app/Console/Commands/RebuildProductSearchTextCommand.php">RebuildProductSearchTextCommand.php</abbr></a></li>
+                            <li><a href="files/app-contracts-rebuildsproductsearchtext.html"><abbr title="app/Contracts/RebuildsProductSearchText.php">RebuildsProductSearchText.php</abbr></a></li>
+                            <li><a href="files/app-services-recalculatetrendingproducts.html"><abbr title="app/Services/RecalculateTrendingProducts.php">RecalculateTrendingProducts.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-redsys-redsyscheckoutstarter.html"><abbr title="app/Services/Payments/Redsys/RedsysCheckoutStarter.php">RedsysCheckoutStarter.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-redsys-redsyssignature.html"><abbr title="app/Services/Payments/Redsys/RedsysSignature.php">RedsysSignature.php</abbr></a></li>
+                            <li><a href="files/app-console-commands-reindexelasticsearchproductscommand.html"><abbr title="app/Console/Commands/ReindexElasticsearchProductsCommand.php">ReindexElasticsearchProductsCommand.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-revolut-revolutcheckoutstarter.html"><abbr title="app/Services/Payments/Revolut/RevolutCheckoutStarter.php">RevolutCheckoutStarter.php</abbr></a></li>
+                            <li><a href="files/app-console-commands-routesmokecommand.html"><abbr title="app/Console/Commands/RouteSmokeCommand.php">RouteSmokeCommand.php</abbr></a></li>
+                        </ul>
+                                                        <h3>S</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-services-search-scoutelasticsearchproductcatalogsearch.html"><abbr title="app/Services/Search/ScoutElasticsearchProductCatalogSearch.php">ScoutElasticsearchProductCatalogSearch.php</abbr></a></li>
+                            <li><a href="files/app-services-search-searchsynonymdictionary.html"><abbr title="app/Services/Search/SearchSynonymDictionary.php">SearchSynonymDictionary.php</abbr></a></li>
+                            <li><a href="files/app-listeners-sendinstallationpriceassignedemail.html"><abbr title="app/Listeners/SendInstallationPriceAssignedEmail.php">SendInstallationPriceAssignedEmail.php</abbr></a></li>
+                            <li><a href="files/app-listeners-sendorderinstallationquoterequestadminemail.html"><abbr title="app/Listeners/SendOrderInstallationQuoteRequestAdminEmail.php">SendOrderInstallationQuoteRequestAdminEmail.php</abbr></a></li>
+                            <li><a href="files/app-listeners-sendorderinstallationquoterequestemail.html"><abbr title="app/Listeners/SendOrderInstallationQuoteRequestEmail.php">SendOrderInstallationQuoteRequestEmail.php</abbr></a></li>
+                            <li><a href="files/app-listeners-sendorderpaymentconfirmationemail.html"><abbr title="app/Listeners/SendOrderPaymentConfirmationEmail.php">SendOrderPaymentConfirmationEmail.php</abbr></a></li>
+                            <li><a href="files/app-listeners-sendorderpaymentpendingadminemail.html"><abbr title="app/Listeners/SendOrderPaymentPendingAdminEmail.php">SendOrderPaymentPendingAdminEmail.php</abbr></a></li>
+                            <li><a href="files/app-listeners-sendorderpaymentpendingemail.html"><abbr title="app/Listeners/SendOrderPaymentPendingEmail.php">SendOrderPaymentPendingEmail.php</abbr></a></li>
+                            <li><a href="files/app-listeners-sendordershippedemail.html"><abbr title="app/Listeners/SendOrderShippedEmail.php">SendOrderShippedEmail.php</abbr></a></li>
+                            <li><a href="files/app-listeners-sendpersonalizedsolutionacknowledgementemail.html"><abbr title="app/Listeners/SendPersonalizedSolutionAcknowledgementEmail.php">SendPersonalizedSolutionAcknowledgementEmail.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-shoppublicsettingscontroller.html"><abbr title="app/Http/Controllers/Api/ShopPublicSettingsController.php">ShopPublicSettingsController.php</abbr></a></li>
+                            <li><a href="files/app-models-shopsetting.html"><abbr title="app/Models/ShopSetting.php">ShopSetting.php</abbr></a></li>
+                            <li><a href="files/app-support-sqlitedatabasebootstrap.html"><abbr title="app/Support/SqliteDatabaseBootstrap.php">SqliteDatabaseBootstrap.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-stripe-stripecheckoutstarter.html"><abbr title="app/Services/Payments/Stripe/StripeCheckoutStarter.php">StripeCheckoutStarter.php</abbr></a></li>
+                            <li><a href="files/app-services-payments-stripe-stripecredentials.html"><abbr title="app/Services/Payments/Stripe/StripeCredentials.php">StripeCredentials.php</abbr></a></li>
+                            <li><a href="files/app-models-stripewebhookevent.html"><abbr title="app/Models/StripeWebhookEvent.php">StripeWebhookEvent.php</abbr></a></li>
+                        </ul>
+                                                                                        <h3>U</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/app-models-user.html"><abbr title="app/Models/User.php">User.php</abbr></a></li>
+                            <li><a href="files/app-http-controllers-api-usercontroller.html"><abbr title="app/Http/Controllers/Api/UserController.php">UserController.php</abbr></a></li>
+                        </ul>
+                                                                                        <h3>W</h3>
+            <ul class="phpdocumentor-list">
+                            <li><a href="files/routes-web.html"><abbr title="routes/web.php">web.php</abbr></a></li>
+                        </ul>
+                                                                                                                        </section>
+                            </div>
+            <section data-search-results class="phpdocumentor-search-results phpdocumentor-search-results--hidden">
+    <section class="phpdocumentor-search-results__dialog">
+        <header class="phpdocumentor-search-results__header">
+            <h2 class="phpdocumentor-search-results__title">Search results</h2>
+            <button class="phpdocumentor-search-results__close"><i class="fas fa-times"></i></button>
+        </header>
+        <section class="phpdocumentor-search-results__body">
+            <ul class="phpdocumentor-search-results__entries"></ul>
+        </section>
+    </section>
+</section>
+        </div>
+        <a href="indices/files.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+
+    </main>
+
+    <script>
+        cssVars({});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+</body>
+</html>

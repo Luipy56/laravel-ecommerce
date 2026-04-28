@@ -28,6 +28,22 @@ export default function ConfirmModal({
 }) {
   const { t } = useTranslation();
   const ref = useRef(null);
+  /** Stops a second "Confirm" click before the parent re-renders (avoids double POST, etc.) */
+  const confirmSentRef = useRef(false);
+  const prevLoadingRef = useRef(loading);
+
+  useEffect(() => {
+    if (open) {
+      confirmSentRef.current = false;
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (prevLoadingRef.current && !loading) {
+      confirmSentRef.current = false;
+    }
+    prevLoadingRef.current = loading;
+  }, [loading]);
 
   useEffect(() => {
     const el = ref.current;
@@ -61,7 +77,13 @@ export default function ConfirmModal({
             type="button"
             className={`btn ${confirmVariant === 'error' ? 'btn-error' : 'btn-primary'}`}
             disabled={loading}
-            onClick={onConfirm}
+            onClick={() => {
+              if (loading || confirmSentRef.current) {
+                return;
+              }
+              confirmSentRef.current = true;
+              onConfirm?.();
+            }}
           >
             {loading ? t('common.loading') : (confirmLabel ?? t('common.confirm'))}
           </button>

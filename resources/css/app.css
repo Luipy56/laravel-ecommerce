@@ -121,3 +121,10 @@ select.select.select-bordered:focus,
 .animate-slide-in-toast {
   animation: slide-in-toast 0.25s ease-out;
 }
+
+/* Floating success feedback: brand orange (primary), not semantic green */
+.alert-app-success {
+  background-color: var(--color-primary);
+  color: var(--color-primary-content);
+  border-color: color-mix(in oklab, var(--color-primary) 85%, black);
+}

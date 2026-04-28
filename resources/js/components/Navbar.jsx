@@ -34,19 +34,22 @@ function CartDropTarget({ to, className, children, ariaLabel, title }) {
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [locale, setLocale] = useState(i18n.language);
+  const localeCode = (lng) => (lng === 'ca' ? 'CA' : lng === 'es' ? 'ES' : 'EN');
   const [searchQ, setSearchQ] = useState('');
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const debounceTimerRef = useRef(null);
+  const hasUserEditedSearchRef = useRef(false);
 
   // Sync search input with URL when on product list (so clearing + Enter updates list)
   useEffect(() => {
     if (location.pathname === '/products') {
       const q = new URLSearchParams(location.search).get('search');
+      hasUserEditedSearchRef.current = false;
       setSearchQ(q ?? '');
     }
   }, [location.pathname, location.search]);
@@ -76,18 +79,59 @@ export default function Navbar() {
   const handleLogout = async () => {
     await logout();
     navigate('/');
-    setDrawerOpen(false);
   };
+
+  const navigateCatalogSearch = (rawTerm) => {
+    const term = rawTerm.trim();
+    if (!term) {
+      navigate('/products');
+      return;
+    }
+
+    const currentParams = new URLSearchParams(location.search);
+    const nextParams = new URLSearchParams();
+    nextParams.set('search', term);
+
+    if (location.pathname === '/products') {
+      const categoryId = currentParams.get('category_id');
+      if (categoryId) nextParams.set('category_id', categoryId);
+      currentParams.getAll('feature_id').forEach((id) => nextParams.append('feature_id', id));
+      navigate('/products?' + nextParams.toString());
+      return;
+    }
+
+    const categoryProductsMatch = location.pathname.match(/^\/categories\/([^/]+)\/products$/);
+    if (categoryProductsMatch) {
+      currentParams.getAll('feature_id').forEach((id) => nextParams.append('feature_id', id));
+      navigate(location.pathname + '?' + nextParams.toString());
+      return;
+    }
+
+    navigate('/products?' + nextParams.toString());
+  };
+
+  useEffect(() => {
+    if (!hasUserEditedSearchRef.current) return;
+    if (debounceTimerRef.current) window.clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = window.setTimeout(() => {
+      hasUserEditedSearchRef.current = false;
+      navigateCatalogSearch(searchQ);
+    }, 300);
+    return () => {
+      if (debounceTimerRef.current) window.clearTimeout(debounceTimerRef.current);
+    };
+  }, [searchQ]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const term = searchQ.trim();
-    if (term) {
-      navigate('/products?search=' + encodeURIComponent(term));
-    } else {
-      navigate('/products');
-    }
-    setDrawerOpen(false);
+    if (debounceTimerRef.current) window.clearTimeout(debounceTimerRef.current);
+    hasUserEditedSearchRef.current = false;
+    navigateCatalogSearch(searchQ);
+  };
+
+  const handleSearchInputChange = (e) => {
+    hasUserEditedSearchRef.current = true;
+    setSearchQ(e.target.value);
   };
 
   return (
@@ -112,14 +156,16 @@ export default function Navbar() {
               <span className="truncate">{t('shop.brand_name')}</span>
             </Link>
             <Link to="/products" className="btn btn-ghost hidden sm:inline-flex shrink-0">{t('shop.products')}</Link>
-            <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex shrink-0">{t('shop.custom_solution')}</Link>
+            <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex shrink-0">
+              {t('shop.custom_solution')}
+            </Link>
             <form onSubmit={handleSearch} className="join hidden lg:flex shrink-0 min-w-0">
               <input
                 type="search"
                 className="input input-bordered join-item w-36 xl:w-48 input-sm min-w-0"
                 placeholder={t('shop.search_placeholder')}
                 value={searchQ}
-                onChange={(e) => setSearchQ(e.target.value)}
+                onChange={handleSearchInputChange}
                 aria-label={t('shop.search_placeholder')}
               />
               <button type="submit" className="btn btn-primary join-item btn-sm">
@@ -130,11 +176,12 @@ export default function Navbar() {
           <div className="navbar-end gap-1 sm:gap-2 shrink-0">
             <div className="dropdown dropdown-end">
               <label tabIndex={0} className="btn btn-ghost btn-sm btn-square sm:btn-sm">
-                {locale === 'ca' ? 'CA' : 'ES'}
+                {localeCode(locale)}
               </label>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-32 p-2 shadow">
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-36 p-2 shadow">
                 <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
                 <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
+                <li><button type="button" onClick={() => handleLocale('en')}>English</button></li>
               </ul>
             </div>
             <CartDropTarget
@@ -146,7 +193,15 @@ export default function Navbar() {
               <span className="indicator-item badge badge-primary badge-sm" id="cart-count">0</span>
               <IconCart className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
             </CartDropTarget>
-            {user ? (
+            {authLoading ? (
+              <div
+                className="btn btn-ghost btn-sm min-w-[6rem] pointer-events-none shrink-0"
+                aria-busy="true"
+                aria-label={t('common.loading')}
+              >
+                <span className="loading loading-spinner loading-sm" />
+              </div>
+            ) : user ? (
               <div className="dropdown dropdown-end">
                 <label tabIndex={0} className="btn btn-ghost btn-sm max-w-[7rem] sm:max-w-none truncate">
                   <span className="truncate">{user.name?.trim() || user.login_email}</span>
@@ -154,6 +209,7 @@ export default function Navbar() {
                 <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow">
                   <li><Link to="/profile">{t('shop.profile')}</Link></li>
                   <li><Link to="/orders">{t('shop.orders')}</Link></li>
+                  <li><Link to="/purchases">{t('shop.purchases')}</Link></li>
                   <li><button type="button" onClick={handleLogout}>{t('auth.logout')}</button></li>
                 </ul>
               </div>
@@ -172,7 +228,7 @@ export default function Navbar() {
               className="input input-bordered input-sm flex-1 min-w-0"
               placeholder={t('shop.search_placeholder')}
               value={searchQ}
-              onChange={(e) => setSearchQ(e.target.value)}
+              onChange={handleSearchInputChange}
               aria-label={t('shop.search_placeholder')}
             />
             <button type="submit" className="btn btn-primary btn-sm shrink-0">

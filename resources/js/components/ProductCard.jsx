@@ -64,7 +64,7 @@ export default function ProductCard({ product, pack }) {
             </span>
           )}
           {!isPack && product.discount_percent > 0 && (
-            <span className="badge badge-error badge-sm absolute top-2 right-12 z-10">
+            <span className="badge badge-error badge-sm absolute top-2 right-2 z-10 font-bold">
               −{Math.round(Number(product.discount_percent))}%
             </span>
           )}

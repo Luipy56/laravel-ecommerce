@@ -5,16 +5,35 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PackResource;
 use App\Http\Resources\ProductResource;
+use App\Models\Feature;
 use App\Models\Pack;
 use App\Models\Product;
+use App\Services\Search\CatalogProductSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * REST API for storefront product discovery: listing, search, featured items, and product detail.
+ *
+ * Supports optional inclusion of packs in the catalog index and applies category and feature filters
+ * consistently across products and packs.
+ */
 class ProductController extends Controller
 {
+    /**
+     * Paginated product catalog (optionally merged with packs when include_packs=1).
+     *
+     * @param  Request  $request  Query string: per_page (1–50), page, category_id, feature_ids, search, include_packs, packs_only.
+     * @return JsonResponse JSON envelope with success, data (ProductResource collection or mixed catalog rows), and meta pagination.
+     */
     public function index(Request $request): JsonResponse
     {
         $perPage = max(1, min(50, (int) $request->get('per_page', 15)));
+
+        if ($request->boolean('packs_only')) {
+            return $this->indexPacksOnly($request, $perPage);
+        }
+
         $includePacks = $request->boolean('include_packs');
 
         if (! $includePacks) {
@@ -22,6 +41,31 @@ class ProductController extends Controller
         }
 
         return $this->indexCatalog($request, $perPage);
+    }
+
+    /**
+     * Packs only: same filters as mixed catalog (category, features, search) but only pack rows, SQL-paginated.
+     */
+    private function indexPacksOnly(Request $request, int $perPage): JsonResponse
+    {
+        $query = $this->buildPackQuery($request);
+        $packs = $query->with(['items.product', 'images'])->orderBy('name')->paginate($perPage);
+
+        $data = $packs->getCollection()->map(fn (Pack $pack) => [
+            'type' => 'pack',
+            'data' => (new PackResource($pack))->resolve(),
+        ])->values()->all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'meta' => [
+                'current_page' => $packs->currentPage(),
+                'last_page' => $packs->lastPage(),
+                'per_page' => $packs->perPage(),
+                'total' => $packs->total(),
+            ],
+        ]);
     }
 
     /**
@@ -106,9 +150,7 @@ class ProductController extends Controller
         if (($categoryId = $this->requestedCategoryId($request)) !== null) {
             $query->where('category_id', $categoryId);
         }
-        foreach ($this->requestedFeatureIds($request) as $featureId) {
-            $query->whereHas('features', fn ($q) => $q->where('features.id', $featureId));
-        }
+        $this->applyFeatureGroupFiltersToProductQuery($query, $request);
         if ($request->filled('search')) {
             $term = $request->search;
             $query->where(function ($q) use ($term) {
@@ -132,12 +174,7 @@ class ProductController extends Controller
         if (($categoryId = $this->requestedCategoryId($request)) !== null) {
             $query->whereHas('items.product', fn ($q) => $q->where('category_id', $categoryId));
         }
-        foreach ($this->requestedFeatureIds($request) as $featureId) {
-            $query->whereHas(
-                'items.product',
-                fn ($q) => $q->whereHas('features', fn ($f) => $f->where('features.id', $featureId))
-            );
-        }
+        $this->applyFeatureGroupFiltersToPackQuery($query, $request);
         if ($request->filled('search')) {
             $term = $request->search;
             $query->where(function ($q) use ($term) {
@@ -179,8 +216,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Parsed feature filter IDs. Each ID is applied as a separate constraint so products (and packs)
-     * must satisfy every selected feature (AND), combined with category and search filters.
+     * Parsed feature filter IDs from the request.
      *
      * @return list<int>
      */
@@ -197,9 +233,65 @@ class ProductController extends Controller
         return $ids;
     }
 
+    /**
+     * Group selected feature IDs by characteristic (feature_name_id).
+     * Multiple values of the same characteristic are OR; different characteristics are AND.
+     *
+     * @return array<int, list<int>> feature_name_id => feature ids
+     */
+    private function featureGroupsByNameId(Request $request): array
+    {
+        $ids = $this->requestedFeatureIds($request);
+        if ($ids === []) {
+            return [];
+        }
+
+        $features = Feature::query()
+            ->whereIn('id', $ids)
+            ->get(['id', 'feature_name_id']);
+
+        $groups = [];
+        foreach ($features as $feature) {
+            $nameId = (int) $feature->feature_name_id;
+            if (! isset($groups[$nameId])) {
+                $groups[$nameId] = [];
+            }
+            if (! in_array($feature->id, $groups[$nameId], true)) {
+                $groups[$nameId][] = (int) $feature->id;
+            }
+        }
+
+        return $groups;
+    }
+
+    private function applyFeatureGroupFiltersToProductQuery(\Illuminate\Database\Eloquent\Builder $query, Request $request): void
+    {
+        foreach ($this->featureGroupsByNameId($request) as $groupFeatureIds) {
+            $query->whereHas('features', fn ($q) => $q->whereIn('features.id', $groupFeatureIds));
+        }
+    }
+
+    private function applyFeatureGroupFiltersToPackQuery(\Illuminate\Database\Eloquent\Builder $query, Request $request): void
+    {
+        foreach ($this->featureGroupsByNameId($request) as $groupFeatureIds) {
+            $query->whereHas(
+                'items.product',
+                fn ($p) => $p->whereHas('features', fn ($f) => $f->whereIn('features.id', $groupFeatureIds))
+            );
+        }
+    }
+
+    /**
+     * Active products marked as featured or trending for home or promotional sections.
+     *
+     * @return JsonResponse JSON envelope with success and data as a ProductResource collection.
+     */
     public function featured(): JsonResponse
     {
-        $products = Product::query()->active()->featured()
+        $products = Product::query()->active()
+            ->where(function ($q) {
+                $q->where('is_featured', true)->orWhere('is_trending', true);
+            })
             ->with(['category', 'features.featureName', 'images'])
             ->orderBy('name')
             ->get();
@@ -210,27 +302,55 @@ class ProductController extends Controller
         ]);
     }
 
-    public function search(Request $request): JsonResponse
+    /**
+     * Catalog search: Elasticsearch when scout.driver is elasticsearch, otherwise ProductSearchService
+     * (PostgreSQL trigram or SQL token match). Query param suggest=1 returns autocomplete entries (text + product_id).
+     */
+    public function search(Request $request, CatalogProductSearchService $catalogSearch): JsonResponse
     {
-        $term = $request->get('q', '');
-        if (strlen($term) < 2) {
-            return response()->json(['success' => true, 'data' => []]);
+        $request->validate([
+            'q' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'search' => ['sometimes', 'nullable', 'string', 'max:500'],
+        ]);
+
+        $term = (string) ($request->input('q') ?? $request->input('search') ?? '');
+        $suggest = $request->boolean('suggest');
+        $limit = max(1, min(100, (int) config('product_search.api_limit', 20)));
+
+        $result = $catalogSearch->search($term, $suggest, $limit);
+
+        if ($suggest) {
+            return response()->json([
+                'success' => true,
+                'data' => $result['suggestions'],
+                'meta' => [
+                    'engine' => $result['engine'],
+                    'suggest' => true,
+                ],
+            ]);
         }
 
-        $products = Product::query()->active()
-            ->with(['category', 'images'])
-            ->where(fn ($q) => $q->where('name', 'like', "%{$term}%")
-                ->orWhere('description', 'like', "%{$term}%")
-                ->orWhere('code', 'like', "%{$term}%"))
-            ->limit(20)
-            ->get();
+        $products = $result['products'];
+        $products->loadMissing(['category', 'images']);
 
         return response()->json([
             'success' => true,
             'data' => ProductResource::collection($products),
+            'meta' => [
+                'engine' => $result['engine'],
+                'suggest' => false,
+            ],
         ]);
     }
 
+    /**
+     * Single active product with category, features, images, and sibling variants in the same group.
+     *
+     * @param  Product  $product  Route-model-bound product; inactive products yield 404.
+     * @return JsonResponse JSON envelope with success and data as ProductResource.
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the product is not active (404).
+     */
     public function show(Product $product): JsonResponse
     {
         if (! $product->is_active) {

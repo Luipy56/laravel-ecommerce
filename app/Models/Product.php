@@ -6,9 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 
+/**
+ * Sellable catalog item: pricing, stock, merchandising flags, and Scout indexing for search.
+ *
+ * Search text is denormalised on save for consistent catalog and Elasticsearch matching.
+ */
 class Product extends Model
 {
+    use Searchable;
+
     protected $table = 'products';
 
     protected $fillable = [
@@ -32,6 +40,61 @@ class Product extends Model
         'is_active',
         'discount_percent',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Product $product): void {
+            $product->search_text = self::normalizeSearchText(
+                $product->name,
+                $product->code,
+                $product->description
+            );
+        });
+    }
+
+    /**
+     * Builds a single normalised string used for catalog and full-text search.
+     *
+     * @param  string|null  $name  Product display name.
+     * @param  string|null  $code  Internal or supplier code.
+     * @param  string|null  $description  Long description text.
+     * @return string Lowercase, whitespace-collapsed text; diacritics folded when intl or iconv is available.
+     */
+    public static function normalizeSearchText(?string $name, ?string $code, ?string $description): string
+    {
+        $merged = trim(preg_replace('/\s+/u', ' ', implode(' ', array_filter([
+            $name ?? '',
+            $code ?? '',
+            $description ?? '',
+        ], fn ($part) => $part !== ''))));
+
+        $folded = self::foldDiacritics($merged);
+
+        return mb_strtolower($folded, 'UTF-8');
+    }
+
+    private static function foldDiacritics(string $text): string
+    {
+        if (extension_loaded('intl') && class_exists(\Transliterator::class)) {
+            $t = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
+            if ($t !== null) {
+                $out = $t->transliterate($text);
+                if ($out !== false && $out !== '') {
+                    return $out;
+                }
+            }
+        }
+
+        // CI and minimal PHP builds often omit intl; iconv transliteration matches search expectations.
+        if (function_exists('iconv')) {
+            $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+            if ($converted !== false && $converted !== '') {
+                return $converted;
+            }
+        }
+
+        return $text;
+    }
 
     protected function casts(): array
     {
@@ -121,5 +184,38 @@ class Product extends Model
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return (bool) $this->is_active;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        $inputs = array_values(array_filter([
+            $this->name,
+            $this->code,
+        ], fn ($v) => $v !== null && $v !== ''));
+
+        if ($inputs === []) {
+            $inputs = [(string) $this->getKey()];
+        }
+
+        return [
+            'id' => $this->getKey(),
+            'name' => (string) $this->name,
+            'code' => $this->code !== null ? (string) $this->code : '',
+            'description' => $this->description !== null ? (string) $this->description : '',
+            'search_text' => $this->search_text !== null ? (string) $this->search_text : '',
+            'is_active' => (bool) $this->is_active,
+            'suggest' => [
+                'input' => $inputs,
+                'weight' => $this->is_featured ? 2 : 1,
+            ],
+        ];
     }
 }

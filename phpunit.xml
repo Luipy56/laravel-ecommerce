@@ -18,14 +18,18 @@
         </include>
     </source>
     <php>
+        <!-- Fixed key for CI / environments without .env (never use in production). -->
+        <env name="APP_KEY" value="base64:aNMx3xQ9KrBB3wkrgY2O3sTsnVkwZ5L98K1F34tFt1M="/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
         <!-- DB: tests/bootstrap.php sets DB_DATABASE (sqlite :memory: by default; mysql uses DB_TESTING_DATABASE schema) -->
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SCOUT_DRIVER" value="null"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

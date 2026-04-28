@@ -52,10 +52,14 @@ class AdminUserJourneyTest extends TestCase
             '/api/v1/admin/admins/1',
             '/api/v1/admin/personalized-solutions',
             '/api/v1/admin/personalized-solutions/1',
+            '/api/v1/admin/nav-alerts',
+            '/api/v1/admin/settings',
+            '/api/v1/shop/public-settings',
             '/api/v1/admin/stats/postal-codes',
             '/api/v1/admin/stats/sales-by-period',
             '/api/v1/admin/stats/top-products',
             '/api/v1/admin/stats/low-stock',
+            '/api/v1/admin/data-explorer/schema',
         ];
 
         foreach ($endpoints as $uri) {

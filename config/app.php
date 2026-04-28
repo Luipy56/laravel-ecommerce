@@ -15,7 +15,31 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    'version' => '0.1.0',
+    /*
+    |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | Single source of truth is package.json at the repository root (same as
+    | the Vite front-end build). Optional APP_VERSION env overrides for deploys.
+    |
+    */
+
+    'version' => env(
+        'APP_VERSION',
+        (static function (): string {
+            $path = base_path('package.json');
+            if (! is_readable($path)) {
+                return '0.0.0';
+            }
+            $decoded = json_decode((string) file_get_contents($path), true);
+            if (! is_array($decoded) || empty($decoded['version']) || ! is_string($decoded['version'])) {
+                return '0.0.0';
+            }
+
+            return $decoded['version'];
+        })(),
+    ),
 
     /*
     |--------------------------------------------------------------------------
@@ -85,6 +109,18 @@ return [
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'es'),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Supported application locales
+    |--------------------------------------------------------------------------
+    |
+    | API and server-rendered text use these; the React app also offers them in
+    | resources/js/locales/*.json (ca, es, en).
+    |
+    */
+
+    'available_locales' => ['ca', 'es', 'en'],
 
     /*
     |--------------------------------------------------------------------------

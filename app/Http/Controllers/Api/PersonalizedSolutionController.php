@@ -2,15 +2,26 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PersonalizedSolutionSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\PersonalizedSolution;
+use App\Models\ShopSetting;
+use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PersonalizedSolutionController extends Controller
 {
     public function store(Request $request): JsonResponse
     {
+        if (! ShopSetting::get(ShopSetting::KEY_ACCEPT_PERSONALIZED_SOLUTIONS, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.personalized_solutions_disabled'),
+            ], 422);
+        }
+
         $validated = $request->validate([
             'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
@@ -23,6 +34,16 @@ class PersonalizedSolutionController extends Controller
             'attachments' => ['nullable', 'array'],
             'attachments.*' => ['file', 'max:10240'], // 10MB
         ]);
+
+        $dedupKey = 'ps-store:'.hash('sha256', (string) $request->ip().'|'
+            .strtolower($validated['email']).'|'
+            .substr($validated['problem_description'], 0, 200));
+        if (! Cache::add($dedupKey, 1, 8)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.personalized_solution_too_soon'),
+            ], 429);
+        }
 
         $solution = new PersonalizedSolution([
             'email' => $validated['email'],
@@ -43,7 +64,7 @@ class PersonalizedSolutionController extends Controller
 
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
-                $path = $file->store('personalized-solutions/' . $solution->id, 'uploads');
+                $path = $file->store('personalized-solutions/'.$solution->id, 'uploads');
                 \App\Models\PersonalizedSolutionAttachment::create([
                     'personalized_solution_id' => $solution->id,
                     'storage_path' => $path,
@@ -55,11 +76,20 @@ class PersonalizedSolutionController extends Controller
             }
         }
 
+        PersonalizedSolutionSubmitted::dispatch(
+            $solution->fresh(),
+            MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en']))),
+        );
+
+        $solution->refresh();
+
         return response()->json([
             'success' => true,
             'data' => [
                 'id' => $solution->id,
                 'status' => $solution->status,
+                'public_token' => $solution->public_token,
+                'client_portal_path' => '/client/personalized-solutions/'.$solution->public_token,
             ],
         ], 201);
     }

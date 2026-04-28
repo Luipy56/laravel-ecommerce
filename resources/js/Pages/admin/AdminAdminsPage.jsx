@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 export default function AdminAdminsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible } = useAdminIndexColumnVisibility('admins');
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -94,10 +96,10 @@ export default function AdminAdminsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.admins.username')}</th>
-                  <th className="text-center">{t('admin.products.is_active')}</th>
-                  <th>{t('admin.admins.last_login_at')}</th>
-                  <th>{t('admin.admins.created_at')}</th>
+                  {isVisible('username') ? <th>{t('admin.admins.username')}</th> : null}
+                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
+                  {isVisible('last_login_at') ? <th>{t('admin.admins.last_login_at')}</th> : null}
+                  {isVisible('created_at') ? <th>{t('admin.admins.created_at')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -115,10 +117,10 @@ export default function AdminAdminsPage() {
                       }
                     }}
                   >
-                    <td>{a.username}</td>
-                    <td className="text-center">{a.is_active ? t('common.yes') : t('common.no')}</td>
-                    <td>{a.last_login_at ? new Date(a.last_login_at).toLocaleString() : ''}</td>
-                    <td>{a.created_at ? new Date(a.created_at).toLocaleDateString() : ''}</td>
+                    {isVisible('username') ? <td>{a.username}</td> : null}
+                    {isVisible('is_active') ? <td className="text-center">{a.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                    {isVisible('last_login_at') ? <td>{a.last_login_at ? new Date(a.last_login_at).toLocaleString() : ''}</td> : null}
+                    {isVisible('created_at') ? <td>{a.created_at ? new Date(a.created_at).toLocaleDateString() : ''}</td> : null}
                   </tr>
                 ))}
               </tbody>

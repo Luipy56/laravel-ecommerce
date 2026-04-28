@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\InstallationPriceWasAssigned;
 use App\Mail\InstallationPriceAssignedMail;
+use App\Support\MailLocale;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -23,7 +24,7 @@ class SendInstallationPriceAssignedEmail
             return;
         }
 
-        $locale = in_array(app()->getLocale(), ['ca', 'es'], true) ? app()->getLocale() : 'ca';
+        $locale = MailLocale::resolve();
         Mail::to($client->login_email)->locale($locale)->send(new InstallationPriceAssignedMail($order));
     }
 

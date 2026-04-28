@@ -43,6 +43,7 @@ return [
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
+            'encryption' => env('MAIL_ENCRYPTION'),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
@@ -112,7 +113,24 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'name' => env('MAIL_FROM_NAME', 'Serralleria Solidària'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Transactional branding & admin alerts
+    |--------------------------------------------------------------------------
+    |
+    */
+
+    'brand' => [
+        'display_name' => env('MAIL_BRAND_DISPLAY_NAME', 'Serralleria Solidària'),
+        'logo_url' => env('MAIL_BRAND_LOGO_URL'),
+        /** Path under public/ when logo_url is empty (see public/images/…). */
+        'default_logo' => env('MAIL_BRAND_DEFAULT_LOGO', 'images/serraller_solidaria_logo_key.png'),
+        'footer_contact' => env('MAIL_FOOTER_CONTACT_LINE'),
+    ],
+
+    'admin_notification_address' => env('MAIL_ADMIN_NOTIFICATION_ADDRESS'),
 
 ];

@@ -162,6 +162,7 @@ export default function AdminFeaturesPage() {
               <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
                 <thead>
                   <tr>
+                    {isVisibleFeatureType('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
                     {isVisibleFeatureType('name') ? <th>{t('admin.features.type')}</th> : null}
                     {isVisibleFeatureType('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                   </tr>
@@ -181,6 +182,7 @@ export default function AdminFeaturesPage() {
                         }
                       }}
                     >
+                      {isVisibleFeatureType('id') ? <td className="text-center tabular-nums">{n.id}</td> : null}
                       {isVisibleFeatureType('name') ? <td>{n.name}</td> : null}
                       {isVisibleFeatureType('is_active') ? <td className="text-center">{n.is_active ? t('common.yes') : t('common.no')}</td> : null}
                     </tr>
@@ -278,6 +280,8 @@ export default function AdminFeaturesPage() {
               <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
                 <thead>
                   <tr>
+                    {isVisibleFeature('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
+                    {isVisibleFeature('feature_name_id') ? <th className="text-end tabular-nums">{t('admin.features.feature_name_id')}</th> : null}
                     {isVisibleFeature('feature_name') ? <th>{t('admin.features.type')}</th> : null}
                     {isVisibleFeature('value') ? <th>{t('admin.features.value')}</th> : null}
                     {isVisibleFeature('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
@@ -298,6 +302,8 @@ export default function AdminFeaturesPage() {
                         }
                       }}
                     >
+                      {isVisibleFeature('id') ? <td className="text-center tabular-nums">{f.id}</td> : null}
+                      {isVisibleFeature('feature_name_id') ? <td className="text-end tabular-nums">{f.feature_name_id ?? ''}</td> : null}
                       {isVisibleFeature('feature_name') ? <td>{f.feature_name}</td> : null}
                       {isVisibleFeature('value') ? <td>{f.value}</td> : null}
                       {isVisibleFeature('is_active') ? <td className="text-center">{f.is_active ? t('common.yes') : t('common.no')}</td> : null}

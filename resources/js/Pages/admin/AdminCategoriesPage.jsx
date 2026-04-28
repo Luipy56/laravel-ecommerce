@@ -96,6 +96,7 @@ export default function AdminCategoriesPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
+                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
                   {isVisible('code') ? <th>{t('admin.products.code')}</th> : null}
                   {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
                   {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
@@ -116,6 +117,7 @@ export default function AdminCategoriesPage() {
                       }
                     }}
                   >
+                    {isVisible('id') ? <td className="text-center tabular-nums">{c.id}</td> : null}
                     {isVisible('code') ? <td>{c.code ?? ''}</td> : null}
                     {isVisible('name') ? <td>{c.name}</td> : null}
                     {isVisible('is_active') ? <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td> : null}

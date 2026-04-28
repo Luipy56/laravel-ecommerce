@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Admin settings · column visibility:** Registry (`config/admin_index_columns.php` + `adminIndexColumnsRegistry.js`) lists **all** list columns per table (IDs, product destacat/tendència, order installation/shipping/timestamps, personalized solution client login email, feature type ID, etc.). Matching `<th>` / `<td>` on admin index pages; new i18n keys under **`admin.common.*`**, **`admin.orders.column_*`**, **`admin.personalized_solutions.client_login_email`**, **`admin.features.feature_name_id`**.
+
 ### Changed
 
 - **Storefront / order detail:** Status timeline no longer lists the synthetic **`current`** step (same label as the **Estado** badge above).

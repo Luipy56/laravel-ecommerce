@@ -88,6 +88,7 @@ export default function AdminVariantGroupsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
+                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
                   {isVisible('group_label') ? <th>{t('admin.variant_groups.group_label')}</th> : null}
                   {isVisible('products_in_group') ? <th>{t('admin.variant_groups.products_in_group')}</th> : null}
                 </tr>
@@ -107,6 +108,7 @@ export default function AdminVariantGroupsPage() {
                       }
                     }}
                   >
+                    {isVisible('id') ? <td className="text-center tabular-nums">{g.id}</td> : null}
                     {isVisible('group_label') ? <td>{g.name || `#${g.id}`}</td> : null}
                     {isVisible('products_in_group') ? (
                       <td>

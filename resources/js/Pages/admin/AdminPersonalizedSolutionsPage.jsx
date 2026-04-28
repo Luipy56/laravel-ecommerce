@@ -120,11 +120,13 @@ export default function AdminPersonalizedSolutionsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
+                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
                   {isVisible('email') ? <th>{t('admin.personalized_solutions.email')}</th> : null}
                   {isVisible('phone') ? <th>{t('admin.personalized_solutions.phone')}</th> : null}
                   {isVisible('problem_description') ? <th>{t('admin.personalized_solutions.problem_description')}</th> : null}
                   {isVisible('status') ? <th className="text-center">{t('admin.personalized_solutions.status')}</th> : null}
                   {isVisible('created_at') ? <th className="text-end">{t('admin.personalized_solutions.created_at')}</th> : null}
+                  {isVisible('client_login_email') ? <th>{t('admin.personalized_solutions.client_login_email')}</th> : null}
                   {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                 </tr>
               </thead>
@@ -143,6 +145,7 @@ export default function AdminPersonalizedSolutionsPage() {
                       }
                     }}
                   >
+                    {isVisible('id') ? <td className="text-center tabular-nums">{s.id}</td> : null}
                     {isVisible('email') ? <td>{s.email ?? ''}</td> : null}
                     {isVisible('phone') ? <td>{s.phone ?? ''}</td> : null}
                     {isVisible('problem_description') ? <td className="max-w-[200px] truncate">{s.problem_description ?? ''}</td> : null}
@@ -150,6 +153,7 @@ export default function AdminPersonalizedSolutionsPage() {
                       <td className="text-center"><span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>{t(`admin.personalized_solutions.status_${s.status}`)}</span></td>
                     ) : null}
                     {isVisible('created_at') ? <td className="text-end">{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</td> : null}
+                    {isVisible('client_login_email') ? <td>{s.client_login_email ?? ''}</td> : null}
                     {isVisible('is_active') ? <td className="text-center">{s.is_active ? t('common.yes') : t('common.no')}</td> : null}
                   </tr>
                 ))}

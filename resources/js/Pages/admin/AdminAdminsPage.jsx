@@ -96,6 +96,7 @@ export default function AdminAdminsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
+                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
                   {isVisible('username') ? <th>{t('admin.admins.username')}</th> : null}
                   {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                   {isVisible('last_login_at') ? <th>{t('admin.admins.last_login_at')}</th> : null}
@@ -117,6 +118,7 @@ export default function AdminAdminsPage() {
                       }
                     }}
                   >
+                    {isVisible('id') ? <td className="text-center tabular-nums">{a.id}</td> : null}
                     {isVisible('username') ? <td>{a.username}</td> : null}
                     {isVisible('is_active') ? <td className="text-center">{a.is_active ? t('common.yes') : t('common.no')}</td> : null}
                     {isVisible('last_login_at') ? <td>{a.last_login_at ? new Date(a.last_login_at).toLocaleString() : ''}</td> : null}

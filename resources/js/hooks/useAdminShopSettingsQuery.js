@@ -64,7 +64,7 @@ export function buildAdminIndexColumnsPayload(columnPrefs) {
       out[tableId] = allowed;
       continue;
     }
-    const visible = allowed.filter((id) => row[id]);
+    const visible = allowed.filter((id) => row[id] !== false);
     out[tableId] = visible.length > 0 ? visible : allowed;
   }
   return out;

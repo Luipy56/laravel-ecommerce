@@ -112,6 +112,7 @@ export default function AdminClientsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
+                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
                   {isVisible('email') ? <th>{t('admin.clients.email')}</th> : null}
                   {isVisible('type') ? <th>{t('admin.clients.filter_type')}</th> : null}
                   {isVisible('identification') ? <th>{t('admin.clients.identification')}</th> : null}
@@ -136,6 +137,7 @@ export default function AdminClientsPage() {
                       }
                     }}
                   >
+                    {isVisible('id') ? <td className="text-center tabular-nums">{c.id}</td> : null}
                     {isVisible('email') ? <td>{c.login_email}</td> : null}
                     {isVisible('type') ? <td>{clientTypeLabel(c.type, t)}</td> : null}
                     {isVisible('identification') ? <td>{c.identification}</td> : null}

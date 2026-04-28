@@ -8,6 +8,15 @@ import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQ
 const KINDS = ['cart', 'order', 'like'];
 const STATUSES = ['pending', 'awaiting_payment', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
 
+function installationStatusLabel(status, t) {
+  if (status == null || status === '') return '';
+  if (status === 'pending') return t('admin.orders.install_status_pending');
+  if (status === 'priced') return t('admin.orders.install_status_priced');
+  if (status === 'rejected') return t('admin.orders.install_status_rejected');
+
+  return String(status);
+}
+
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
@@ -135,6 +144,12 @@ export default function AdminOrdersPage() {
                   {isVisible('lines_count') ? <th className="text-center">{t('admin.orders.lines_count')}</th> : null}
                   {isVisible('total') ? <th className="text-end">{t('admin.orders.total')}</th> : null}
                   {isVisible('status') ? <th className="text-center">{t('admin.orders.status')}</th> : null}
+                  {isVisible('installation_requested') ? <th className="text-center">{t('admin.orders.column_installation_requested')}</th> : null}
+                  {isVisible('installation_status') ? <th>{t('admin.orders.installation_status_label')}</th> : null}
+                  {isVisible('installation_price') ? <th className="text-end">{t('admin.orders.column_installation_price')}</th> : null}
+                  {isVisible('shipping_date') ? <th className="text-end">{t('admin.orders.shipping_date')}</th> : null}
+                  {isVisible('created_at') ? <th className="text-end">{t('admin.orders.created_at')}</th> : null}
+                  {isVisible('updated_at') ? <th className="text-end">{t('admin.orders.updated_at')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -170,6 +185,28 @@ export default function AdminOrdersPage() {
                           ''
                         )}
                       </td>
+                    ) : null}
+                    {isVisible('installation_requested') ? (
+                      <td className="text-center">{o.installation_requested ? t('common.yes') : t('common.no')}</td>
+                    ) : null}
+                    {isVisible('installation_status') ? (
+                      <td>{installationStatusLabel(o.installation_status, t)}</td>
+                    ) : null}
+                    {isVisible('installation_price') ? (
+                      <td className="text-end tabular-nums">
+                        {o.installation_price != null && o.installation_price !== ''
+                          ? `${Number(o.installation_price).toFixed(2)} €`
+                          : ''}
+                      </td>
+                    ) : null}
+                    {isVisible('shipping_date') ? (
+                      <td className="text-end">{o.shipping_date ? new Date(o.shipping_date).toLocaleDateString() : ''}</td>
+                    ) : null}
+                    {isVisible('created_at') ? (
+                      <td className="text-end">{o.created_at ? new Date(o.created_at).toLocaleString() : ''}</td>
+                    ) : null}
+                    {isVisible('updated_at') ? (
+                      <td className="text-end">{o.updated_at ? new Date(o.updated_at).toLocaleString() : ''}</td>
                     ) : null}
                   </tr>
                 ))}

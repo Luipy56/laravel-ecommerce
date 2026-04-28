@@ -113,12 +113,15 @@ export default function AdminProductsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
+                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
                   {isVisible('code') ? <th>{t('admin.products.code')}</th> : null}
                   {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
                   {isVisible('category') ? <th>{t('admin.products.category')}</th> : null}
                   {isVisible('price') ? <th className="text-end">{t('admin.products.price')}</th> : null}
                   {isVisible('discount_percent') ? <th className="text-end">{t('admin.products.discount_percent')}</th> : null}
                   {isVisible('stock') ? <th className="text-center">{t('admin.products.stock')}</th> : null}
+                  {isVisible('is_featured') ? <th className="text-center">{t('admin.products.is_featured')}</th> : null}
+                  {isVisible('is_trending') ? <th className="text-center">{t('admin.products.is_trending')}</th> : null}
                   {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                 </tr>
               </thead>
@@ -137,6 +140,7 @@ export default function AdminProductsPage() {
                       }
                     }}
                   >
+                    {isVisible('id') ? <td className="text-center tabular-nums">{p.id}</td> : null}
                     {isVisible('code') ? <td>{p.code}</td> : null}
                     {isVisible('name') ? <td>{p.name}</td> : null}
                     {isVisible('category') ? <td>{p.category?.name}</td> : null}
@@ -153,6 +157,8 @@ export default function AdminProductsPage() {
                       </td>
                     ) : null}
                     {isVisible('stock') ? <td className="text-center tabular-nums">{p.stock}</td> : null}
+                    {isVisible('is_featured') ? <td className="text-center">{p.is_featured ? t('common.yes') : t('common.no')}</td> : null}
+                    {isVisible('is_trending') ? <td className="text-center">{p.is_trending ? t('common.yes') : t('common.no')}</td> : null}
                     {isVisible('is_active') ? <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td> : null}
                   </tr>
                 ))}

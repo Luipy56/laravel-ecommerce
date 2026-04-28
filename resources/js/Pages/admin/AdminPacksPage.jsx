@@ -111,6 +111,7 @@ export default function AdminPacksPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
+                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
                   {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
                   {isVisible('price') ? <th className="text-end">{t('admin.products.price')}</th> : null}
                   {isVisible('products_in_pack') ? <th className="text-center">{t('admin.packs.products_in_pack')}</th> : null}
@@ -133,6 +134,7 @@ export default function AdminPacksPage() {
                       }
                     }}
                   >
+                    {isVisible('id') ? <td className="text-center tabular-nums">{p.id}</td> : null}
                     {isVisible('name') ? <td>{p.name}</td> : null}
                     {isVisible('price') ? <td className="text-end tabular-nums">{p.price != null ? `${Number(p.price).toFixed(2)} €` : ''}</td> : null}
                     {isVisible('products_in_pack') ? <td className="text-center tabular-nums">{p.pack_items_count ?? 0}</td> : null}

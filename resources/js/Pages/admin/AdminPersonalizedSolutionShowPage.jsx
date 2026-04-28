@@ -196,14 +196,14 @@ export default function AdminPersonalizedSolutionShowPage() {
 
       <dialog ref={resolutionDialogRef} id="admin-sp-resolution-modal" className="modal">
         <div className="modal-box max-w-2xl">
-          <h2 className="font-semibold text-lg mb-4 whitespace-pre-line leading-snug">
+          <h2 className="font-semibold text-lg mb-4">
             {t('admin.personalized_solutions.resolution_modal_title')}
           </h2>
-          <div className="space-y-4">
-            <label className="form-control w-full max-w-xs">
-              <span className="label-text">{t('admin.personalized_solutions.status')}</span>
+          <div className="flex flex-col gap-8">
+            <label className="form-control w-full max-w-md">
+              <span className="label-text text-base">{t('admin.personalized_solutions.status')}</span>
               <select
-                className="select select-bordered select-sm w-full min-w-0"
+                className="select select-bordered select-md w-full min-w-0 text-base"
                 value={draftStatus}
                 onChange={(e) => setDraftStatus(e.target.value)}
                 aria-label={t('admin.personalized_solutions.status')}
@@ -214,13 +214,13 @@ export default function AdminPersonalizedSolutionShowPage() {
               </select>
             </label>
             <label className="form-control w-full">
-              <span className="label-text">{t('admin.personalized_solutions.resolution')}</span>
+              <span className="label-text text-base">{t('admin.personalized_solutions.resolution_modal_text_label')}</span>
               <textarea
-                className="textarea textarea-bordered w-full min-h-40"
+                className="textarea textarea-bordered w-full min-h-40 text-base leading-relaxed"
                 value={draftResolution}
                 onChange={(e) => setDraftResolution(e.target.value)}
                 placeholder={t('admin.personalized_solutions.resolution_placeholder')}
-                aria-label={t('admin.personalized_solutions.resolution')}
+                aria-label={t('admin.personalized_solutions.resolution_modal_text_label')}
               />
             </label>
           </div>

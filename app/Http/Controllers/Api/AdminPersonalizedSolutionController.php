@@ -114,6 +114,43 @@ class AdminPersonalizedSolutionController extends Controller
         ]);
     }
 
+    /**
+     * Partial update for admin response text (and optional status) without the full edit form.
+     */
+    public function patchResolution(Request $request, PersonalizedSolution $personalized_solution): JsonResponse
+    {
+        if (! $request->hasAny(['resolution', 'status'])) {
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.personalized_solutions.patch_requires_body'),
+            ], 422);
+        }
+
+        $statuses = implode(',', [
+            PersonalizedSolution::STATUS_PENDING_REVIEW,
+            PersonalizedSolution::STATUS_REVIEWED,
+            PersonalizedSolution::STATUS_CLIENT_CONTACTED,
+            PersonalizedSolution::STATUS_REJECTED,
+            PersonalizedSolution::STATUS_COMPLETED,
+        ]);
+
+        $validated = $request->validate([
+            'resolution' => ['sometimes', 'nullable', 'string', 'max:10000'],
+            'status' => ['sometimes', 'nullable', 'string', 'in:'.$statuses],
+        ]);
+
+        if (array_key_exists('resolution', $validated)) {
+            $personalized_solution->resolution = $validated['resolution'];
+        }
+        if (array_key_exists('status', $validated) && is_string($validated['status']) && $validated['status'] !== '') {
+            $personalized_solution->status = $validated['status'];
+        }
+
+        $personalized_solution->save();
+
+        return $this->show($personalized_solution->fresh());
+    }
+
     public function notifyResolution(Request $request, PersonalizedSolution $personalized_solution): JsonResponse
     {
         $email = $personalized_solution->email;

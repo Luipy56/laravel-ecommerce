@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Admin order detail:** Order lines are split into **Products** and **Packs** (each block omitted when empty); desktop table and mobile cards reuse the same row layout as before.
+
+- **Admin dashboard:** Filters next to postal code now include **year** (defaults to calendar anchor when “All”; narrows chart to Y vs Y−1) and **month** (optional; one month vs same month prior year). `GET admin/stats/sales-by-period` and `GET admin/stats/top-products` accept `year` and `month` query params; top sellers use the same period when either filter is set. Shared `admin.dashboard.filter_all` for all “All” options.
+
+- **Order invoice (HTML):** `GET /api/v1/orders/{order}/invoice` now uses the same **logo and brand** sources as transactional mail (`MAIL_BRAND_LOGO_URL` / `MAIL_BRAND_DEFAULT_LOGO`, `MAIL_BRAND_DISPLAY_NAME`, optional `MAIL_FOOTER_CONTACT_LINE`), a clearer **header** (reference `ORD-*`, date, status), **bill-to** panel with shipping and optional installation address, line columns for **unit price** and **line amount**, a right-aligned **summary** block, and neutral typography suitable for print.
+- **Transactional email:** The personalized-solution **acknowledgement** (`PersonalizedSolutionReceivedMail`) includes a **summary** of the request (problem text, optional phone and address lines, attachment filenames). Very long descriptions are truncated in the email with a note to open the portal for the full text.
+
 ### Added
+
+- **Admin settings · list columns:** Visible columns on admin **index** tables (products, categories, clients, variant groups, orders, packs, administrators, personalized solutions, feature types, feature values) are configurable under **Configuration**; preferences persist in **`shop_settings`** (`admin_index_columns`, JSON). **`App\Support\AdminIndexColumns`** and **`GET/PUT admin/settings`** normalize values so unknown column ids never break the UI. React registry: **`config/admin_index_columns.php`** + **`resources/js/config/adminIndexColumnsRegistry.js`** (keep in sync; see **`.cursor/rules/admin-shop-settings.mdc`**).
+
+- **Storefront catalog:** Query param **`packs_only=1`** on **`GET /api/v1/products`** returns **only packs** (same `category_id`, `feature_ids`, and `search` filters as the mixed catalog), SQL-paginated. The product list sidebar includes a **toggle** (“Packs only” / i18n) that sets this param.
+
+- **Admin custom solution detail:** A **modal** (primary **Resolution / quote**) edits **resolution or budget** and **status** without opening the full edit screen; **`PATCH /api/v1/admin/personalized-solutions/{id}/resolution`** saves those fields. A short **Email client** action (toolbar and modal) calls the existing **notify-resolution** endpoint so the mail uses the **currently saved** resolution (tooltip reminds to save first after edits).
+
+- **Admin sidebar:** `GET /api/v1/admin/nav-alerts` exposes whether any **orders** or **custom solutions** need attention (English status codes in DB: e.g. `pending`, `awaiting_payment`, `awaiting_installation_price`, `installation_pending`, installation quote `pending`; solutions `pending_review` or non-empty `improvement_feedback`). The admin layout shows a small **warning** dot on **Orders** and **Custom solutions** when applicable.
 
 - **Transactional email:** If checkout finishes **without** a successful payment in the same request (Stripe redirect, PayPal, etc.), the client receives **`OrderPaymentPendingMail`**. When **`MAIL_ADMIN_NOTIFICATION_ADDRESS`** is set, ops also get **`OrderPaymentPendingAdminMail`**. New installation-quote checkouts also notify that address with **`OrderInstallationQuoteRequestedAdminMail`**. `OrderInstallationQuoteRequested` now carries the resolved mail locale from `Accept-Language`.
 

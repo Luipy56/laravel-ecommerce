@@ -12,11 +12,12 @@ const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 
 /**
  * Query string for filters. When categoryInPath is true, category is only in the URL path (/categories/:id/products), not repeated here.
  */
-function buildSearchParams({ selectedCategoryId, featureIds, search, categoryInPath = false }) {
+function buildSearchParams({ selectedCategoryId, featureIds, search, categoryInPath = false, packsOnly = false }) {
   const next = new URLSearchParams();
   if (search) next.set('search', search);
   if (!categoryInPath && selectedCategoryId) next.set('category_id', String(selectedCategoryId));
   featureIds.forEach((id) => next.append('feature_id', id));
+  if (packsOnly) next.set('packs_only', '1');
   return next;
 }
 
@@ -77,12 +78,13 @@ export default function ProductListPage() {
 
   const featureIds = searchParams.getAll('feature_id');
   const search = searchParams.get('search');
+  const packsOnly = searchParams.get('packs_only') === '1';
 
   const featureIdsKey = featureIds.join(',');
 
   const catalogQueryKey = useMemo(
-    () => ['products', 'catalog', selectedCategoryId ?? '', featureIdsKey, search ?? ''],
-    [selectedCategoryId, featureIdsKey, search]
+    () => ['products', 'catalog', selectedCategoryId ?? '', featureIdsKey, search ?? '', packsOnly ? '1' : '0'],
+    [selectedCategoryId, featureIdsKey, search, packsOnly]
   );
 
   const loadMoreSentinelRef = useRef(null);
@@ -107,7 +109,12 @@ export default function ProductListPage() {
     queryKey: catalogQueryKey,
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {
-      const params = { page: pageParam, include_packs: true };
+      const params = { page: pageParam };
+      if (packsOnly) {
+        params.packs_only = 1;
+      } else {
+        params.include_packs = true;
+      }
       if (selectedCategoryId) params.category_id = selectedCategoryId;
       if (featureIds.length) params.feature_ids = featureIds;
       if (search) params.search = search;
@@ -130,8 +137,8 @@ export default function ProductListPage() {
   }, [searchParams, setSearchParams]);
 
   const filterKey = useMemo(
-    () => `${selectedCategoryId ?? ''}|${featureIdsKey}|${search ?? ''}`,
-    [selectedCategoryId, featureIdsKey, search]
+    () => `${selectedCategoryId ?? ''}|${featureIdsKey}|${search ?? ''}|${packsOnly ? '1' : '0'}`,
+    [selectedCategoryId, featureIdsKey, search, packsOnly]
   );
   const prevFilterKeyRef = useRef(null);
   useEffect(() => {
@@ -170,10 +177,11 @@ export default function ProductListPage() {
         featureIds: updates.featureIds ?? featureIds,
         search: updates.search ?? search ?? '',
         categoryInPath: isCategoryRoute,
+        packsOnly: updates.packsOnly !== undefined ? updates.packsOnly : packsOnly,
       });
       setSearchParams(next);
     },
-    [selectedCategoryId, featureIds, search, setSearchParams, isCategoryRoute]
+    [selectedCategoryId, featureIds, search, setSearchParams, isCategoryRoute, packsOnly]
   );
 
   const handleAllCategories = useCallback(() => {
@@ -182,9 +190,10 @@ export default function ProductListPage() {
       featureIds: [],
       search: search ?? '',
       categoryInPath: false,
+      packsOnly,
     });
     navigate('/products?' + next.toString());
-  }, [search, navigate]);
+  }, [search, navigate, packsOnly]);
 
   const selectCategory = useCallback(
     (id) => {
@@ -194,10 +203,11 @@ export default function ProductListPage() {
         featureIds,
         search: search ?? '',
         categoryInPath: true,
+        packsOnly,
       }).toString();
       navigate(`/categories/${sid}/products${qs ? `?${qs}` : ''}`);
     },
-    [featureIds, search, navigate]
+    [featureIds, search, navigate, packsOnly]
   );
 
   const toggleFeature = useCallback(
@@ -234,6 +244,20 @@ export default function ProductListPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <aside className="lg:w-64 shrink-0 space-y-6 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1">
+        <div className="bg-base-100 rounded-box border border-base-300 p-3">
+          <label className="flex items-center justify-between gap-3 cursor-pointer">
+            <span className="text-sm font-medium text-base-content">{t('shop.filters.packs_only')}</span>
+            <input
+              type="checkbox"
+              role="switch"
+              className="toggle toggle-primary toggle-sm shrink-0"
+              checked={packsOnly}
+              onChange={() => setFilters({ packsOnly: !packsOnly })}
+              aria-checked={packsOnly}
+              aria-label={t('shop.filters.packs_only')}
+            />
+          </label>
+        </div>
         <div>
           <h2 className="font-semibold mb-2">{t('shop.categories')}</h2>
           <ul className="menu bg-base-100 rounded-box border border-base-300">

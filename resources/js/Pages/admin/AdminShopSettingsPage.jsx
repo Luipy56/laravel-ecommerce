@@ -1,9 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
+import {
+  ADMIN_INDEX_COLUMN_REGISTRY,
+  ADMIN_INDEX_TABLE_META,
+  ADMIN_INDEX_TABLE_ORDER,
+} from '../../config/adminIndexColumnsRegistry';
+import {
+  adminShopSettingsQueryKey,
+  buildAdminIndexColumnsPayload,
+  columnPrefsFromServer,
+} from '../../hooks/useAdminShopSettingsQuery';
 
 function parseIdList(text) {
   const parts = String(text || '')
@@ -22,6 +33,7 @@ function idsToText(ids) {
 export default function AdminShopSettingsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showSuccess } = useAdminToast();
   const [loadError, setLoadError] = useState('');
   const [saveError, setSaveError] = useState('');
@@ -41,6 +53,8 @@ export default function AdminShopSettingsPage() {
 
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
 
+  const [columnPrefs, setColumnPrefs] = useState({});
+
   const applyPayload = useCallback((d) => {
     setLowStockEnabled(!!d.low_stock_enabled);
     setLowStockThreshold(Number(d.low_stock_threshold) || 0);
@@ -51,6 +65,7 @@ export default function AdminShopSettingsPage() {
     setOverstockBlacklistEnabled(!!d.overstock_blacklist_enabled);
     setOverstockBlacklistText(idsToText(d.overstock_blacklist_product_ids));
     setAcceptPersonalizedSolutions(d.accept_personalized_solutions !== false);
+    setColumnPrefs(columnPrefsFromServer(d.admin_index_columns));
   }, []);
 
   const fetchSettings = useCallback(async () => {
@@ -82,6 +97,7 @@ export default function AdminShopSettingsPage() {
     overstock_blacklist_enabled: overstockBlacklistEnabled,
     overstock_blacklist_product_ids: parseIdList(overstockBlacklistText),
     accept_personalized_solutions: acceptPersonalizedSolutions,
+    admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs),
   });
 
   const handleSave = async (e) => {
@@ -92,6 +108,7 @@ export default function AdminShopSettingsPage() {
       const { data } = await api.put('admin/settings', buildPutBody());
       if (data.success && data.data) {
         applyPayload(data.data);
+        queryClient.invalidateQueries({ queryKey: adminShopSettingsQueryKey });
         showSuccess(t('common.saved'));
       } else {
         setSaveError(t('common.error'));
@@ -248,6 +265,44 @@ export default function AdminShopSettingsPage() {
               />
               <span className="label-text">{t('admin.settings.accept_personalized_solutions')}</span>
             </label>
+          </div>
+        </section>
+
+        <section className="card bg-base-100 shadow border border-base-200">
+          <div className="card-body space-y-6">
+            <div>
+              <h2 className="card-title text-lg">{t('admin.settings.index_columns_title')}</h2>
+              <p className="text-sm text-base-content/70 mt-1">{t('admin.settings.index_columns_help')}</p>
+            </div>
+            {ADMIN_INDEX_TABLE_ORDER.map((tableId) => {
+              const cols = ADMIN_INDEX_COLUMN_REGISTRY[tableId] ?? [];
+              const titleKey = ADMIN_INDEX_TABLE_META[tableId]?.titleKey;
+              if (!titleKey || cols.length === 0) return null;
+              return (
+                <fieldset key={tableId} className="fieldset border border-base-200 rounded-box p-4 space-y-3">
+                  <legend className="fieldset-legend text-base font-semibold">{t(titleKey)}</legend>
+                  <div className="flex flex-wrap gap-x-4 gap-y-2">
+                    {cols.map((col) => (
+                      <label key={col.id} className="label cursor-pointer justify-start gap-2 py-1">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-sm checkbox-primary"
+                          checked={columnPrefs[tableId]?.[col.id] !== false}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setColumnPrefs((prev) => ({
+                              ...prev,
+                              [tableId]: { ...prev[tableId], [col.id]: checked },
+                            }));
+                          }}
+                        />
+                        <span className="label-text text-sm">{t(col.labelKey)}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              );
+            })}
           </div>
         </section>
 

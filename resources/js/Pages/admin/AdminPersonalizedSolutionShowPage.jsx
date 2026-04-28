@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
@@ -7,6 +7,8 @@ import { useAdminToast } from '../../contexts/AdminToastContext';
 import { useToast } from '../../contexts/ToastContext';
 
 const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
+
+const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 'completed'];
 
 function getStatusBadgeClass(status) {
   switch (status) {
@@ -34,6 +36,10 @@ export default function AdminPersonalizedSolutionShowPage() {
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [notifyLoading, setNotifyLoading] = useState(false);
+  const [resolutionSaveLoading, setResolutionSaveLoading] = useState(false);
+  const [draftResolution, setDraftResolution] = useState('');
+  const [draftStatus, setDraftStatus] = useState('pending_review');
+  const resolutionDialogRef = useRef(null);
 
   const fetchSolution = useCallback(async () => {
     if (!id) return;
@@ -53,6 +59,17 @@ export default function AdminPersonalizedSolutionShowPage() {
     fetchSolution();
   }, [fetchSolution]);
 
+  const openResolutionModal = () => {
+    if (!solution) return;
+    setDraftResolution(solution.resolution ?? '');
+    setDraftStatus(solution.status || 'pending_review');
+    resolutionDialogRef.current?.showModal();
+  };
+
+  const closeResolutionModal = () => {
+    resolutionDialogRef.current?.close();
+  };
+
   const handleNotifyResolution = async () => {
     if (!id) return;
     setNotifyLoading(true);
@@ -65,6 +82,28 @@ export default function AdminPersonalizedSolutionShowPage() {
       showToast({ message: err.response?.data?.message || t('common.error'), type: 'error' });
     } finally {
       setNotifyLoading(false);
+    }
+  };
+
+  const handleSaveResolutionModal = async () => {
+    if (!id) return;
+    setResolutionSaveLoading(true);
+    try {
+      const { data } = await api.patch(`admin/personalized-solutions/${id}/resolution`, {
+        resolution: draftResolution.trim() || null,
+        status: draftStatus,
+      });
+      if (data.success && data.data) {
+        setSolution(data.data);
+        showSuccess(t('admin.personalized_solutions.resolution_saved'));
+        closeResolutionModal();
+      } else {
+        showToast({ message: data.message || t('common.error'), type: 'error' });
+      }
+    } catch (err) {
+      showToast({ message: err.response?.data?.message || t('common.error'), type: 'error' });
+    } finally {
+      setResolutionSaveLoading(false);
     }
   };
 
@@ -95,19 +134,85 @@ export default function AdminPersonalizedSolutionShowPage() {
         <PageTitle className="mb-0">
           {t('admin.personalized_solutions.title')} #{solution.id}
         </PageTitle>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 justify-end">
           <Link to="/admin/personalized-solutions" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm shrink-0"
+            onClick={openResolutionModal}
+          >
+            {t('admin.personalized_solutions.resolution_modal_open')}
+          </button>
           <button
             type="button"
             className="btn btn-outline btn-sm shrink-0"
             disabled={notifyLoading || !solution.email}
             onClick={handleNotifyResolution}
+            title={t('admin.personalized_solutions.email_client_title')}
           >
-            {notifyLoading ? t('common.loading') : t('admin.personalized_solutions.resend_resolution')}
+            {notifyLoading ? t('common.loading') : t('admin.personalized_solutions.email_client_short')}
           </button>
-          <Link to={`/admin/personalized-solutions/${id}/edit`} className="btn btn-primary btn-sm shrink-0">{t('common.edit')}</Link>
+          <Link to={`/admin/personalized-solutions/${id}/edit`} className="btn btn-ghost btn-sm shrink-0">{t('common.edit')}</Link>
         </div>
       </div>
+
+      <dialog ref={resolutionDialogRef} id="admin-sp-resolution-modal" className="modal">
+        <div className="modal-box max-w-2xl">
+          <h2 className="font-semibold text-lg mb-4">{t('admin.personalized_solutions.resolution_modal_title')}</h2>
+          <div className="space-y-4">
+            <label className="form-control w-full">
+              <span className="label-text">{t('admin.personalized_solutions.status')}</span>
+              <select
+                className="select select-bordered w-full max-w-md"
+                value={draftStatus}
+                onChange={(e) => setDraftStatus(e.target.value)}
+                aria-label={t('admin.personalized_solutions.status')}
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>{t(`admin.personalized_solutions.status_${s}`)}</option>
+                ))}
+              </select>
+            </label>
+            <label className="form-control w-full">
+              <span className="label-text">{t('admin.personalized_solutions.resolution')}</span>
+              <textarea
+                className="textarea textarea-bordered w-full min-h-40"
+                value={draftResolution}
+                onChange={(e) => setDraftResolution(e.target.value)}
+                placeholder={t('admin.personalized_solutions.resolution_placeholder')}
+                aria-label={t('admin.personalized_solutions.resolution')}
+              />
+            </label>
+          </div>
+          <div className="modal-action flex flex-wrap items-center justify-between gap-2">
+            <form method="dialog">
+              <button type="submit" className="btn btn-ghost">{t('common.close')}</button>
+            </form>
+            <div className="flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                className="btn btn-outline btn-sm"
+                disabled={notifyLoading || !solution.email}
+                onClick={handleNotifyResolution}
+                title={t('admin.personalized_solutions.email_client_title')}
+              >
+                {notifyLoading ? t('common.loading') : t('admin.personalized_solutions.email_client_short')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={resolutionSaveLoading}
+                onClick={handleSaveResolutionModal}
+              >
+                {resolutionSaveLoading ? t('common.loading') : t('common.save')}
+              </button>
+            </div>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button type="submit" className="btn">{t('common.close')}</button>
+        </form>
+      </dialog>
 
       <div className="card bg-base-100 shadow border border-base-200">
         <div className="card-body space-y-6">

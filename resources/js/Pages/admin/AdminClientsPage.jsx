@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 function clientTypeLabel(type, t) {
   if (type === 'person') return t('admin.clients.type_person');
@@ -13,6 +14,7 @@ function clientTypeLabel(type, t) {
 export default function AdminClientsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible } = useAdminIndexColumnVisibility('clients');
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -110,13 +112,13 @@ export default function AdminClientsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.clients.email')}</th>
-                  <th>{t('admin.clients.filter_type')}</th>
-                  <th>{t('admin.clients.identification')}</th>
-                  <th>{t('admin.clients.primary_contact')}</th>
-                  <th className="text-center">{t('admin.clients.contacts_count')}</th>
-                  <th className="text-center">{t('admin.clients.addresses_count')}</th>
-                  <th className="text-center">{t('admin.products.is_active')}</th>
+                  {isVisible('email') ? <th>{t('admin.clients.email')}</th> : null}
+                  {isVisible('type') ? <th>{t('admin.clients.filter_type')}</th> : null}
+                  {isVisible('identification') ? <th>{t('admin.clients.identification')}</th> : null}
+                  {isVisible('primary_contact') ? <th>{t('admin.clients.primary_contact')}</th> : null}
+                  {isVisible('contacts_count') ? <th className="text-center">{t('admin.clients.contacts_count')}</th> : null}
+                  {isVisible('addresses_count') ? <th className="text-center">{t('admin.clients.addresses_count')}</th> : null}
+                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -134,13 +136,13 @@ export default function AdminClientsPage() {
                       }
                     }}
                   >
-                    <td>{c.login_email}</td>
-                    <td>{clientTypeLabel(c.type, t)}</td>
-                    <td>{c.identification}</td>
-                    <td>{c.primary_contact_name}</td>
-                    <td className="text-center tabular-nums">{c.contacts_count ?? 0}</td>
-                    <td className="text-center tabular-nums">{c.addresses_count ?? 0}</td>
-                    <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td>
+                    {isVisible('email') ? <td>{c.login_email}</td> : null}
+                    {isVisible('type') ? <td>{clientTypeLabel(c.type, t)}</td> : null}
+                    {isVisible('identification') ? <td>{c.identification}</td> : null}
+                    {isVisible('primary_contact') ? <td>{c.primary_contact_name}</td> : null}
+                    {isVisible('contacts_count') ? <td className="text-center tabular-nums">{c.contacts_count ?? 0}</td> : null}
+                    {isVisible('addresses_count') ? <td className="text-center tabular-nums">{c.addresses_count ?? 0}</td> : null}
+                    {isVisible('is_active') ? <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td> : null}
                   </tr>
                 ))}
               </tbody>

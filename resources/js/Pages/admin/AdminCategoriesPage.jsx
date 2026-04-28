@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 export default function AdminCategoriesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible } = useAdminIndexColumnVisibility('categories');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -94,9 +96,9 @@ export default function AdminCategoriesPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.products.code')}</th>
-                  <th>{t('admin.products.name')}</th>
-                  <th className="text-center">{t('admin.products.is_active')}</th>
+                  {isVisible('code') ? <th>{t('admin.products.code')}</th> : null}
+                  {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
+                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -114,9 +116,9 @@ export default function AdminCategoriesPage() {
                       }
                     }}
                   >
-                    <td>{c.code ?? ''}</td>
-                    <td>{c.name}</td>
-                    <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td>
+                    {isVisible('code') ? <td>{c.code ?? ''}</td> : null}
+                    {isVisible('name') ? <td>{c.name}</td> : null}
+                    {isVisible('is_active') ? <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td> : null}
                   </tr>
                 ))}
               </tbody>

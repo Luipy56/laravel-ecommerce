@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 function productsLabel(products) {
   if (!products?.length) return '';
@@ -14,6 +15,7 @@ function productsLabel(products) {
 export default function AdminVariantGroupsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible } = useAdminIndexColumnVisibility('variant_groups');
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -86,8 +88,8 @@ export default function AdminVariantGroupsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.variant_groups.group_label')}</th>
-                  <th>{t('admin.variant_groups.products_in_group')}</th>
+                  {isVisible('group_label') ? <th>{t('admin.variant_groups.group_label')}</th> : null}
+                  {isVisible('products_in_group') ? <th>{t('admin.variant_groups.products_in_group')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -105,12 +107,14 @@ export default function AdminVariantGroupsPage() {
                       }
                     }}
                   >
-                    <td>{g.name || `#${g.id}`}</td>
-                    <td>
-                      {g.products_count === 0
-                        ? ''
-                        : productsLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
-                    </td>
+                    {isVisible('group_label') ? <td>{g.name || `#${g.id}`}</td> : null}
+                    {isVisible('products_in_group') ? (
+                      <td>
+                        {g.products_count === 0
+                          ? ''
+                          : productsLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
+                      </td>
+                    ) : null}
                   </tr>
                 ))}
               </tbody>

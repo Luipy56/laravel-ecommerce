@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 const KINDS = ['cart', 'order', 'like'];
 const STATUSES = ['pending', 'awaiting_payment', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
@@ -23,6 +24,7 @@ function getStatusBadgeClass(status) {
 export default function AdminOrdersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible } = useAdminIndexColumnVisibility('orders');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -139,13 +141,13 @@ export default function AdminOrdersPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.orders.id')}</th>
-                  <th className="text-center">{t('admin.orders.kind')}</th>
-                  <th>{t('admin.orders.client')}</th>
-                  <th className="text-end">{t('admin.orders.order_date')}</th>
-                  <th className="text-center">{t('admin.orders.lines_count')}</th>
-                  <th className="text-end">{t('admin.orders.total')}</th>
-                  <th className="text-center">{t('admin.orders.status')}</th>
+                  {isVisible('id') ? <th>{t('admin.orders.id')}</th> : null}
+                  {isVisible('kind') ? <th className="text-center">{t('admin.orders.kind')}</th> : null}
+                  {isVisible('client') ? <th>{t('admin.orders.client')}</th> : null}
+                  {isVisible('order_date') ? <th className="text-end">{t('admin.orders.order_date')}</th> : null}
+                  {isVisible('lines_count') ? <th className="text-center">{t('admin.orders.lines_count')}</th> : null}
+                  {isVisible('total') ? <th className="text-end">{t('admin.orders.total')}</th> : null}
+                  {isVisible('status') ? <th className="text-center">{t('admin.orders.status')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -163,19 +165,25 @@ export default function AdminOrdersPage() {
                       }
                     }}
                   >
-                    <td className="font-mono text-center">#{o.id}</td>
-                    <td className="text-center"><span className="badge badge-ghost">{t(`admin.orders.kind_${o.kind}`)}</span></td>
-                    <td>{o.client_login_email ?? ''}</td>
-                    <td className="text-end">{o.order_date ? new Date(o.order_date).toLocaleDateString() : ''}</td>
-                    <td className="text-center tabular-nums">{o.lines_count ?? 0}</td>
-                    <td className="text-end font-medium tabular-nums">{o.total != null ? Number(o.total).toFixed(2) : '0.00'} €</td>
-                    <td className="text-center">
-                      {o.kind === 'order' && o.status ? (
-                        <span className={`badge badge-sm ${getStatusBadgeClass(o.status)}`}>{t(`admin.orders.status_${o.status}`)}</span>
-                      ) : (
-                        ''
-                      )}
-                    </td>
+                    {isVisible('id') ? <td className="font-mono text-center">#{o.id}</td> : null}
+                    {isVisible('kind') ? (
+                      <td className="text-center"><span className="badge badge-ghost">{t(`admin.orders.kind_${o.kind}`)}</span></td>
+                    ) : null}
+                    {isVisible('client') ? <td>{o.client_login_email ?? ''}</td> : null}
+                    {isVisible('order_date') ? <td className="text-end">{o.order_date ? new Date(o.order_date).toLocaleDateString() : ''}</td> : null}
+                    {isVisible('lines_count') ? <td className="text-center tabular-nums">{o.lines_count ?? 0}</td> : null}
+                    {isVisible('total') ? (
+                      <td className="text-end font-medium tabular-nums">{o.total != null ? Number(o.total).toFixed(2) : '0.00'} €</td>
+                    ) : null}
+                    {isVisible('status') ? (
+                      <td className="text-center">
+                        {o.kind === 'order' && o.status ? (
+                          <span className={`badge badge-sm ${getStatusBadgeClass(o.status)}`}>{t(`admin.orders.status_${o.status}`)}</span>
+                        ) : (
+                          ''
+                        )}
+                      </td>
+                    ) : null}
                   </tr>
                 ))}
               </tbody>

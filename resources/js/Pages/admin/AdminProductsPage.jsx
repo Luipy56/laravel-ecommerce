@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 export default function AdminProductsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible } = useAdminIndexColumnVisibility('products');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,13 +113,13 @@ export default function AdminProductsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.products.code')}</th>
-                  <th>{t('admin.products.name')}</th>
-                  <th>{t('admin.products.category')}</th>
-                  <th className="text-end">{t('admin.products.price')}</th>
-                  <th className="text-end">{t('admin.products.discount_percent')}</th>
-                  <th className="text-center">{t('admin.products.stock')}</th>
-                  <th className="text-center">{t('admin.products.is_active')}</th>
+                  {isVisible('code') ? <th>{t('admin.products.code')}</th> : null}
+                  {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
+                  {isVisible('category') ? <th>{t('admin.products.category')}</th> : null}
+                  {isVisible('price') ? <th className="text-end">{t('admin.products.price')}</th> : null}
+                  {isVisible('discount_percent') ? <th className="text-end">{t('admin.products.discount_percent')}</th> : null}
+                  {isVisible('stock') ? <th className="text-center">{t('admin.products.stock')}</th> : null}
+                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -135,19 +137,23 @@ export default function AdminProductsPage() {
                       }
                     }}
                   >
-                    <td>{p.code}</td>
-                    <td>{p.name}</td>
-                    <td>{p.category?.name}</td>
-                    <td className="text-end tabular-nums">{p.price != null ? Number(p.price).toFixed(2) + ' €' : ''}</td>
-                    <td className="text-end tabular-nums">
-                      {p.discount_percent != null &&
-                      p.discount_percent !== '' &&
-                      Number(p.discount_percent) > 0
-                        ? `${Number(p.discount_percent)}%`
-                        : ''}
-                    </td>
-                    <td className="text-center tabular-nums">{p.stock}</td>
-                    <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td>
+                    {isVisible('code') ? <td>{p.code}</td> : null}
+                    {isVisible('name') ? <td>{p.name}</td> : null}
+                    {isVisible('category') ? <td>{p.category?.name}</td> : null}
+                    {isVisible('price') ? (
+                      <td className="text-end tabular-nums">{p.price != null ? Number(p.price).toFixed(2) + ' €' : ''}</td>
+                    ) : null}
+                    {isVisible('discount_percent') ? (
+                      <td className="text-end tabular-nums">
+                        {p.discount_percent != null &&
+                        p.discount_percent !== '' &&
+                        Number(p.discount_percent) > 0
+                          ? `${Number(p.discount_percent)}%`
+                          : ''}
+                      </td>
+                    ) : null}
+                    {isVisible('stock') ? <td className="text-center tabular-nums">{p.stock}</td> : null}
+                    {isVisible('is_active') ? <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td> : null}
                   </tr>
                 ))}
               </tbody>

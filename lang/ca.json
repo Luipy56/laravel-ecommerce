@@ -35,7 +35,17 @@
     "shop.quantity": "Quantitat",
     "shop.total": "Total",
     "shop.subtotal": "Subtotal",
+    "shop.brand_name": "Serralleria Solidària",
+    "shop.brand_logo_alt": "Logotip Serralleria Solidària",
     "shop.invoice_title": "Factura",
+    "shop.invoice_order_ref_label": "Referència de comanda",
+    "shop.invoice_bill_to": "Dades del client",
+    "shop.invoice_shipping_address": "Adreça d'enviament",
+    "shop.invoice_installation_address": "Adreça d'instal·lació",
+    "shop.invoice_unit_price": "Preu unitari",
+    "shop.invoice_line_amount": "Import",
+    "shop.invoice_summary": "Resum",
+    "shop.invoice_footer_thanks": "Gràcies per la teva compra.",
     "shop.order": "Comanda",
     "shop.order_status": "Estat",
     "shop.order_date": "Data",
@@ -92,5 +102,6 @@
     "admin.data_explorer.errors.invalid_value_column": "La columna numèrica per calcular no és vàlida.",
     "admin.data_explorer.errors.invalid_metric": "La mètrica ha de ser count, sum o avg.",
     "shop.personalized_solutions_disabled": "En aquests moments no acceptem noves sol·licituds de solució personalitzada.",
-    "shop.personalized_solution_too_soon": "Hem rebut la mateixa sol·licitud fa un moment. Espera uns segons abans de tornar a enviar."
+    "shop.personalized_solution_too_soon": "Hem rebut la mateixa sol·licitud fa un moment. Espera uns segons abans de tornar a enviar.",
+    "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat."
 }

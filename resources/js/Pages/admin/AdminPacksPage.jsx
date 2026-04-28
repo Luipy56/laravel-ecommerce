@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 export default function AdminPacksPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible } = useAdminIndexColumnVisibility('packs');
   const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -109,11 +111,11 @@ export default function AdminPacksPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.products.name')}</th>
-                  <th className="text-end">{t('admin.products.price')}</th>
-                  <th className="text-center">{t('admin.packs.products_in_pack')}</th>
-                  <th className="text-center">{t('admin.products.is_trending')}</th>
-                  <th className="text-center">{t('admin.products.is_active')}</th>
+                  {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
+                  {isVisible('price') ? <th className="text-end">{t('admin.products.price')}</th> : null}
+                  {isVisible('products_in_pack') ? <th className="text-center">{t('admin.packs.products_in_pack')}</th> : null}
+                  {isVisible('is_trending') ? <th className="text-center">{t('admin.products.is_trending')}</th> : null}
+                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -131,11 +133,11 @@ export default function AdminPacksPage() {
                       }
                     }}
                   >
-                    <td>{p.name}</td>
-                    <td className="text-end tabular-nums">{p.price != null ? `${Number(p.price).toFixed(2)} €` : ''}</td>
-                    <td className="text-center tabular-nums">{p.pack_items_count ?? 0}</td>
-                    <td className="text-center">{p.is_trending ? t('common.yes') : t('common.no')}</td>
-                    <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td>
+                    {isVisible('name') ? <td>{p.name}</td> : null}
+                    {isVisible('price') ? <td className="text-end tabular-nums">{p.price != null ? `${Number(p.price).toFixed(2)} €` : ''}</td> : null}
+                    {isVisible('products_in_pack') ? <td className="text-center tabular-nums">{p.pack_items_count ?? 0}</td> : null}
+                    {isVisible('is_trending') ? <td className="text-center">{p.is_trending ? t('common.yes') : t('common.no')}</td> : null}
+                    {isVisible('is_active') ? <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td> : null}
                   </tr>
                 ))}
               </tbody>

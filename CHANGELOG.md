@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Admin · index column settings:** Sortable column rows use **`items-center`** so the drag handle, checkbox, and label align vertically in **`AdminIndexColumnsFieldset`**.
+
 - **Client verification email:** Laravel routes notification mail to an `email` attribute; storefront clients only have `login_email`, so verification (and password-reset) messages were skipped. **`Client::routeNotificationForMail()`** now returns `login_email`. Registration and **resend verification** set **`MailLocale`** from **`Accept-Language`** like other transactional mail.
 
 ### Added

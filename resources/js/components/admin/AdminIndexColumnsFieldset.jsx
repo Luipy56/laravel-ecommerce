@@ -28,7 +28,7 @@ function SortableColumnRow({ colId, label, checked, onToggle, dragLabel }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-start gap-2 rounded-lg border border-base-200 bg-base-100 p-2 ${
+      className={`flex items-center gap-2 rounded-lg border border-base-200 bg-base-100 p-2 ${
         isDragging ? 'z-10 opacity-60 shadow-lg' : ''
       }`}
     >
@@ -43,10 +43,10 @@ function SortableColumnRow({ colId, label, checked, onToggle, dragLabel }) {
           ⋮⋮
         </span>
       </button>
-      <label className="label min-w-0 flex-1 cursor-pointer items-start justify-start gap-2 py-0">
+      <label className="label min-w-0 flex-1 cursor-pointer items-center justify-start gap-2 py-0">
         <input
           type="checkbox"
-          className="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0"
+          className="checkbox checkbox-sm checkbox-primary shrink-0"
           checked={checked}
           onChange={(e) => onToggle(colId, e.target.checked)}
         />

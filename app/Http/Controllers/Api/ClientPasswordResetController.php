@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\ValidationRules;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class ClientPasswordResetController extends Controller
     public function forgot(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'login_email' => ['required', 'string', 'email'],
+            'login_email' => ['required', 'string', ValidationRules::emailDns()],
         ]);
 
         $status = Password::broker('clients')->sendResetLink([
@@ -46,15 +47,18 @@ class ClientPasswordResetController extends Controller
     {
         $validated = $request->validate([
             'token' => ['required', 'string'],
-            'login_email' => ['required', 'string', 'email'],
+            'login_email' => ['required', 'string', ValidationRules::emailDns()],
             'password' => ['required', 'string', 'confirmed', PasswordRule::defaults()],
         ]);
+
+        // `validated()` does not include `password_confirmation` even when `password` uses `confirmed`.
+        $passwordConfirmation = $request->input('password_confirmation', '');
 
         $status = Password::broker('clients')->reset(
             [
                 'login_email' => $validated['login_email'],
                 'password' => $validated['password'],
-                'password_confirmation' => $validated['password_confirmation'],
+                'password_confirmation' => is_string($passwordConfirmation) ? $passwordConfirmation : '',
                 'token' => $validated['token'],
             ],
             function ($user, $password): void {

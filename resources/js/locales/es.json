@@ -370,7 +370,7 @@
   "admin.about.stack_frontend": "React, Vite, Tailwind CSS 4, daisyUI 5, i18n (catalán, castellano, inglés).",
   "admin.about.stack_data": "Base de datos: MySQL, MariaDB, PostgreSQL o SQLite según entorno; Eloquent, migraciones y seeders.",
   "admin.about.stack_payments": "Pasarelas: Stripe (tarjeta), PayPal y modo simulado en desarrollo; webhooks y finalización de pedidos.",
-  "admin.about.changelog_title": "Historial de cambios (Changelog)",
+  "admin.about.changelog_title": "Changelog",
   "admin.breadcrumb.detail": "Detalle",
   "admin.dashboard.sales_by_period": "Ventas por período",
   "admin.dashboard.sales_by_period_linear": "Ventas por período (lineal)",

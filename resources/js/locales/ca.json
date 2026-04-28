@@ -370,7 +370,7 @@
   "admin.about.stack_frontend": "React, Vite, Tailwind CSS 4, daisyUI 5, i18n (català, castellà, anglès).",
   "admin.about.stack_data": "Base de dades: MySQL, MariaDB, PostgreSQL o SQLite segons entorn; Eloquent, migracions i seeders.",
   "admin.about.stack_payments": "Passarel·les: Stripe (targeta), PayPal, i mode simulat en desenvolupament; webhooks i finalització de comandes.",
-  "admin.about.changelog_title": "Registre de canvis (Changelog)",
+  "admin.about.changelog_title": "Changelog",
   "admin.breadcrumb.detail": "Detall",
   "admin.dashboard.sales_by_period": "Vendes per període",
   "admin.dashboard.sales_by_period_linear": "Vendes per període (lineal)",

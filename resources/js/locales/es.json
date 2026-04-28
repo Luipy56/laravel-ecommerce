@@ -626,7 +626,7 @@
   "admin.personalized_solutions.iterations": "Ronda de mejoras",
   "admin.personalized_solutions.improvement_feedback": "Última petición de mejoras",
   "admin.personalized_solutions.improvement_at": "Fecha de la petición",
-  "admin.personalized_solutions.portal_url": "Enlace cliente (secreto)",
+  "admin.personalized_solutions.portal_url": "Enlace vista cliente",
   "admin.personalized_solutions.clear_improvement": "Borrar la petición de mejoras al guardar",
   "admin.personalized_solutions.resend_resolution": "Reenviar correo de resolución",
   "admin.personalized_solutions.resend_resolution_done": "Correo enviado.",

@@ -626,7 +626,7 @@
   "admin.personalized_solutions.iterations": "Improvement round",
   "admin.personalized_solutions.improvement_feedback": "Last request for improvements",
   "admin.personalized_solutions.improvement_at": "Request date",
-  "admin.personalized_solutions.portal_url": "Client link (secret)",
+  "admin.personalized_solutions.portal_url": "Client view link",
   "admin.personalized_solutions.clear_improvement": "Delete the improvement request when saving",
   "admin.personalized_solutions.resend_resolution": "Resend resolution email",
   "admin.personalized_solutions.resend_resolution_done": "Email sent.",

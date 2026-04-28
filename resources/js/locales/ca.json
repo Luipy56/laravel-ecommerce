@@ -626,7 +626,7 @@
   "admin.personalized_solutions.iterations": "Torn de millores",
   "admin.personalized_solutions.improvement_feedback": "Última petició de millores",
   "admin.personalized_solutions.improvement_at": "Data de la petició",
-  "admin.personalized_solutions.portal_url": "Enllaç client (secret)",
+  "admin.personalized_solutions.portal_url": "Enllaç vista client",
   "admin.personalized_solutions.clear_improvement": "Esborrar la petició de millores en desar",
   "admin.personalized_solutions.resend_resolution": "Reenviar correu de resolució",
   "admin.personalized_solutions.resend_resolution_done": "Correu enviat.",

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Admin order detail:** Order lines are split into **Products** and **Packs** (each block omitted when empty); desktop table and mobile cards reuse the same row layout as before.
+
 - **Admin dashboard:** Filters next to postal code now include **year** (defaults to calendar anchor when “All”; narrows chart to Y vs Y−1) and **month** (optional; one month vs same month prior year). `GET admin/stats/sales-by-period` and `GET admin/stats/top-products` accept `year` and `month` query params; top sellers use the same period when either filter is set. Shared `admin.dashboard.filter_all` for all “All” options.
 
 - **Order invoice (HTML):** `GET /api/v1/orders/{order}/invoice` now uses the same **logo and brand** sources as transactional mail (`MAIL_BRAND_LOGO_URL` / `MAIL_BRAND_DEFAULT_LOGO`, `MAIL_BRAND_DISPLAY_NAME`, optional `MAIL_FOOTER_CONTACT_LINE`), a clearer **header** (reference `ORD-*`, date, status), **bill-to** panel with shipping and optional installation address, line columns for **unit price** and **line amount**, a right-aligned **summary** block, and neutral typography suitable for print.

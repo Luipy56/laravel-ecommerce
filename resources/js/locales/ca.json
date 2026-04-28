@@ -522,6 +522,8 @@
   "admin.orders.address_shipping": "Enviament",
   "admin.orders.address_installation": "Instal·lació",
   "admin.orders.lines": "Línies de la comanda",
+  "admin.orders.lines_products": "Productes",
+  "admin.orders.lines_packs": "Packs",
   "admin.orders.no_lines": "Aquesta comanda no té línies.",
   "admin.orders.line_product": "Producte / Pack",
   "admin.orders.line_quantity": "Quantitat",

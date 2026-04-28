@@ -22,12 +22,6 @@ function getThemeColor(variable) {
   return value || '#888';
 }
 
-function formatMonthLabel(monthStr, locale) {
-  if (!monthStr || monthStr.length < 7) return monthStr;
-  const date = new Date(monthStr + '-01');
-  return date.toLocaleDateString(locale || 'es', { month: 'short', year: 'numeric' });
-}
-
 /** Short month name from "01".."12" for axis labels. */
 function formatMonthShort(monthKey, locale) {
   if (!monthKey || monthKey.length < 2) return monthKey;

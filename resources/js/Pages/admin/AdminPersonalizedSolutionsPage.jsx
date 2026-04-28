@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 
 const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 'completed'];
 
@@ -20,6 +21,7 @@ function getStatusBadgeClass(status) {
 export default function AdminPersonalizedSolutionsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isVisible } = useAdminIndexColumnVisibility('personalized_solutions');
   const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -118,12 +120,12 @@ export default function AdminPersonalizedSolutionsPage() {
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
                 <tr>
-                  <th>{t('admin.personalized_solutions.email')}</th>
-                  <th>{t('admin.personalized_solutions.phone')}</th>
-                  <th>{t('admin.personalized_solutions.problem_description')}</th>
-                  <th className="text-center">{t('admin.personalized_solutions.status')}</th>
-                  <th className="text-end">{t('admin.personalized_solutions.created_at')}</th>
-                  <th className="text-center">{t('admin.products.is_active')}</th>
+                  {isVisible('email') ? <th>{t('admin.personalized_solutions.email')}</th> : null}
+                  {isVisible('phone') ? <th>{t('admin.personalized_solutions.phone')}</th> : null}
+                  {isVisible('problem_description') ? <th>{t('admin.personalized_solutions.problem_description')}</th> : null}
+                  {isVisible('status') ? <th className="text-center">{t('admin.personalized_solutions.status')}</th> : null}
+                  {isVisible('created_at') ? <th className="text-end">{t('admin.personalized_solutions.created_at')}</th> : null}
+                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -141,12 +143,14 @@ export default function AdminPersonalizedSolutionsPage() {
                       }
                     }}
                   >
-                    <td>{s.email ?? ''}</td>
-                    <td>{s.phone ?? ''}</td>
-                    <td className="max-w-[200px] truncate">{s.problem_description ?? ''}</td>
-                    <td className="text-center"><span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>{t(`admin.personalized_solutions.status_${s.status}`)}</span></td>
-                    <td className="text-end">{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</td>
-                    <td className="text-center">{s.is_active ? t('common.yes') : t('common.no')}</td>
+                    {isVisible('email') ? <td>{s.email ?? ''}</td> : null}
+                    {isVisible('phone') ? <td>{s.phone ?? ''}</td> : null}
+                    {isVisible('problem_description') ? <td className="max-w-[200px] truncate">{s.problem_description ?? ''}</td> : null}
+                    {isVisible('status') ? (
+                      <td className="text-center"><span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>{t(`admin.personalized_solutions.status_${s.status}`)}</span></td>
+                    ) : null}
+                    {isVisible('created_at') ? <td className="text-end">{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</td> : null}
+                    {isVisible('is_active') ? <td className="text-center">{s.is_active ? t('common.yes') : t('common.no')}</td> : null}
                   </tr>
                 ))}
               </tbody>

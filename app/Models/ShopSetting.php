@@ -31,6 +31,9 @@ class ShopSetting extends Model
 
     public const KEY_ACCEPT_PERSONALIZED_SOLUTIONS = 'accept_personalized_solutions';
 
+    /** JSON object: table_id => list of visible column ids (see config/admin_index_columns.php). */
+    public const KEY_ADMIN_INDEX_COLUMNS = 'admin_index_columns';
+
     /**
      * @var array<string, mixed>
      */

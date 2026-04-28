@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\ShopSetting;
+use App\Support\AdminIndexColumns;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -59,7 +60,8 @@ class ShopSettingsTest extends TestCase
         $this->getJson('/api/v1/admin/settings')
             ->assertOk()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.low_stock_enabled', false);
+            ->assertJsonPath('data.low_stock_enabled', false)
+            ->assertJsonStructure(['data' => ['admin_index_columns' => ['products', 'orders']]]);
 
         $this->putJson('/api/v1/admin/settings', [
             'low_stock_enabled' => true,
@@ -94,6 +96,57 @@ class ShopSettingsTest extends TestCase
         $this->postJson('/api/v1/admin/settings/recalculate-trending')->assertOk();
 
         $this->assertFalse($product->fresh()->is_trending);
+    }
+
+    public function test_admin_index_columns_persist_valid_subset(): void
+    {
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $payload = [
+            'low_stock_enabled' => false,
+            'low_stock_threshold' => 10,
+            'low_stock_blacklist_enabled' => false,
+            'low_stock_blacklist_product_ids' => [],
+            'overstock_enabled' => false,
+            'overstock_threshold' => 100,
+            'overstock_blacklist_enabled' => false,
+            'overstock_blacklist_product_ids' => [],
+            'accept_personalized_solutions' => true,
+            'admin_index_columns' => [
+                'products' => ['code', 'name'],
+            ],
+        ];
+
+        $this->putJson('/api/v1/admin/settings', $payload)->assertOk();
+
+        $this->getJson('/api/v1/admin/settings')
+            ->assertOk()
+            ->assertJsonPath('data.admin_index_columns.products', ['code', 'name']);
+    }
+
+    public function test_admin_index_columns_response_strips_unknown_ids_from_db(): void
+    {
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+
+        ShopSetting::set(ShopSetting::KEY_ADMIN_INDEX_COLUMNS, [
+            'products' => ['code', 'legacy_bad_column', 'name'],
+        ]);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $this->getJson('/api/v1/admin/settings')
+            ->assertOk()
+            ->assertJsonPath('data.admin_index_columns.products', ['code', 'name']);
     }
 
     public function test_featured_endpoint_combines_featured_and_trending_without_duplicate_ids(): void

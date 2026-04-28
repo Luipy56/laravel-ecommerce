@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Admin settings · list columns:** Visible columns on admin **index** tables (products, categories, clients, variant groups, orders, packs, administrators, personalized solutions, feature types, feature values) are configurable under **Configuration**; preferences persist in **`shop_settings`** (`admin_index_columns`, JSON). **`App\Support\AdminIndexColumns`** and **`GET/PUT admin/settings`** normalize values so unknown column ids never break the UI. React registry: **`config/admin_index_columns.php`** + **`resources/js/config/adminIndexColumnsRegistry.js`** (keep in sync; see **`.cursor/rules/admin-shop-settings.mdc`**).
+
 - **Storefront catalog:** Query param **`packs_only=1`** on **`GET /api/v1/products`** returns **only packs** (same `category_id`, `feature_ids`, and `search` filters as the mixed catalog), SQL-paginated. The product list sidebar includes a **toggle** (“Packs only” / i18n) that sets this param.
 
 - **Admin custom solution detail:** A **modal** (primary **Resolution / quote**) edits **resolution or budget** and **status** without opening the full edit screen; **`PATCH /api/v1/admin/personalized-solutions/{id}/resolution`** saves those fields. A short **Email client** action (toolbar and modal) calls the existing **notify-resolution** endpoint so the mail uses the **currently saved** resolution (tooltip reminds to save first after edits).

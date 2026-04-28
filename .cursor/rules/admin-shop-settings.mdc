@@ -1,6 +1,6 @@
 ---
 description: Shop settings key-value, automatic is_trending recalc, admin settings UI, public storefront flags
-globs: app/Models/ShopSetting.php,app/Services/RecalculateTrendingProducts.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx
+globs: app/Models/ShopSetting.php,app/Services/RecalculateTrendingProducts.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,app/Support/AdminIndexColumns.php,config/admin_index_columns.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx,resources/js/config/adminIndexColumnsRegistry.js,resources/js/hooks/useAdminShopSettingsQuery.js
 alwaysApply: false
 ---
 
@@ -36,6 +36,14 @@ alwaysApply: false
 - **`PageTitle`** + toolbar row; primary **Recalculate** action; form sections as **`card`** blocks; submit row **`flex justify-end`** for **Save**.
 - All UI copy: **`admin.settings.*`** in **`resources/js/locales/ca.json`**, **`es.json`**, **`en.json`** (no hardcoded strings).
 - Do not add placeholder “more options later” cards unless explicitly requested.
+
+## Admin index column visibility (`admin_index_columns`)
+
+- Stored under **`shop_settings`** key **`ShopSetting::KEY_ADMIN_INDEX_COLUMNS`** as JSON: **`{ "table_id": ["col_id", ...] }`** (visible columns only; order follows **`config/admin_index_columns.php`** registry order).
+- **Registry:** **`config/admin_index_columns.php`** defines allowed column ids per **`table_id`**. **`App\Support\AdminIndexColumns::normalize()`** strips unknown ids and falls back to **all** columns for a table if the stored list is empty or invalid (so the UI never breaks after refactors).
+- **API:** **`GET`/`PUT admin/settings`** includes **`admin_index_columns`** in the shaped payload; validate nested keys in **`AdminShopSettingsController`**.
+- **React:** **`resources/js/config/adminIndexColumnsRegistry.js`** must list the **same** `table_id` and column ids (plus `labelKey` for settings checkboxes). Admin list pages use **`useAdminIndexColumnVisibility(tableId)`** from **`resources/js/hooks/useAdminShopSettingsQuery.js`**. After saving settings, **`queryClient.invalidateQueries({ queryKey: ['admin', 'shop-settings'] })`** so lists refresh.
+- **When adding/removing a list column:** update **`config/admin_index_columns.php`**, **`adminIndexColumnsRegistry.js`**, and the matching **`<th>` / `<td>`** in the admin page; existing DB values self-heal via **`normalize()`**.
 
 ## Routes
 

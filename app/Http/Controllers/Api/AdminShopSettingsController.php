@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ShopSetting;
 use App\Services\RecalculateTrendingProducts;
+use App\Support\AdminIndexColumns;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AdminShopSettingsController extends Controller
 {
@@ -22,7 +24,7 @@ class AdminShopSettingsController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             'low_stock_enabled' => ['boolean'],
             'low_stock_threshold' => ['integer', 'min:0'],
             'low_stock_blacklist_enabled' => ['boolean'],
@@ -34,10 +36,17 @@ class AdminShopSettingsController extends Controller
             'overstock_blacklist_product_ids' => ['array'],
             'overstock_blacklist_product_ids.*' => ['integer', 'min:1'],
             'accept_personalized_solutions' => ['boolean'],
-        ]);
+        ], $this->adminIndexColumnsValidationRules()));
 
         foreach ($this->mapRequestToKeys($validated) as $key => $value) {
             ShopSetting::set($key, $value);
+        }
+
+        if (array_key_exists('admin_index_columns', $validated)) {
+            ShopSetting::set(
+                ShopSetting::KEY_ADMIN_INDEX_COLUMNS,
+                AdminIndexColumns::normalize($validated['admin_index_columns'])
+            );
         }
 
         return response()->json([
@@ -64,6 +73,8 @@ class AdminShopSettingsController extends Controller
      */
     private function shapeForClient(array $merged): array
     {
+        $storedColumns = $merged[ShopSetting::KEY_ADMIN_INDEX_COLUMNS] ?? null;
+
         return [
             'low_stock_enabled' => (bool) ($merged[ShopSetting::KEY_LOW_STOCK_ENABLED] ?? false),
             'low_stock_threshold' => (int) ($merged[ShopSetting::KEY_LOW_STOCK_THRESHOLD] ?? 0),
@@ -74,7 +85,24 @@ class AdminShopSettingsController extends Controller
             'overstock_blacklist_enabled' => (bool) ($merged[ShopSetting::KEY_OVERSTOCK_BLACKLIST_ENABLED] ?? false),
             'overstock_blacklist_product_ids' => $this->intArray($merged[ShopSetting::KEY_OVERSTOCK_BLACKLIST_PRODUCT_IDS] ?? []),
             'accept_personalized_solutions' => (bool) ($merged[ShopSetting::KEY_ACCEPT_PERSONALIZED_SOLUTIONS] ?? true),
+            'admin_index_columns' => AdminIndexColumns::normalize(is_array($storedColumns) ? $storedColumns : null),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function adminIndexColumnsValidationRules(): array
+    {
+        $rules = [
+            'admin_index_columns' => ['sometimes', 'nullable', 'array'],
+        ];
+        foreach (AdminIndexColumns::registry() as $tableId => $allowed) {
+            $rules['admin_index_columns.'.$tableId] = ['nullable', 'array'];
+            $rules['admin_index_columns.'.$tableId.'.*'] = ['string', Rule::in($allowed)];
+        }
+
+        return $rules;
     }
 
     /**

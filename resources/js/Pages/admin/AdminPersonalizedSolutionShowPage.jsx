@@ -40,6 +40,7 @@ export default function AdminPersonalizedSolutionShowPage() {
   const [draftResolution, setDraftResolution] = useState('');
   const [draftStatus, setDraftStatus] = useState('pending_review');
   const resolutionDialogRef = useRef(null);
+  const notifyConfirmDialogRef = useRef(null);
 
   const fetchSolution = useCallback(async () => {
     if (!id) return;
@@ -68,6 +69,16 @@ export default function AdminPersonalizedSolutionShowPage() {
 
   const closeResolutionModal = () => {
     resolutionDialogRef.current?.close();
+  };
+
+  const openNotifyConfirmModal = () => {
+    if (!solution?.email) return;
+    notifyConfirmDialogRef.current?.showModal();
+  };
+
+  const confirmAndNotifyResolution = () => {
+    notifyConfirmDialogRef.current?.close();
+    void handleNotifyResolution();
   };
 
   const handleNotifyResolution = async () => {
@@ -147,7 +158,7 @@ export default function AdminPersonalizedSolutionShowPage() {
             type="button"
             className="btn btn-outline btn-sm shrink-0"
             disabled={notifyLoading || !solution.email}
-            onClick={handleNotifyResolution}
+            onClick={openNotifyConfirmModal}
             title={t('admin.personalized_solutions.email_client_title')}
           >
             {notifyLoading ? t('common.loading') : t('admin.personalized_solutions.email_client_short')}
@@ -155,6 +166,33 @@ export default function AdminPersonalizedSolutionShowPage() {
           <Link to={`/admin/personalized-solutions/${id}/edit`} className="btn btn-ghost btn-sm shrink-0">{t('common.edit')}</Link>
         </div>
       </div>
+
+      <dialog ref={notifyConfirmDialogRef} id="admin-sp-notify-confirm-modal" className="modal" aria-labelledby="admin-sp-notify-confirm-title">
+        <div className="modal-box max-w-md">
+          <h2 id="admin-sp-notify-confirm-title" className="font-semibold text-lg mb-2">
+            {t('admin.personalized_solutions.email_client_confirm_title')}
+          </h2>
+          <p className="text-sm text-base-content/80 mb-4">
+            {t('admin.personalized_solutions.email_client_confirm_body')}
+          </p>
+          <div className="modal-action flex flex-wrap items-center justify-between gap-2">
+            <form method="dialog">
+              <button type="submit" className="btn btn-ghost">{t('common.cancel')}</button>
+            </form>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={notifyLoading}
+              onClick={confirmAndNotifyResolution}
+            >
+              {notifyLoading ? t('common.loading') : t('common.confirm')}
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button type="submit" className="btn" aria-label={t('common.close')}>{t('common.close')}</button>
+        </form>
+      </dialog>
 
       <dialog ref={resolutionDialogRef} id="admin-sp-resolution-modal" className="modal">
         <div className="modal-box max-w-2xl">

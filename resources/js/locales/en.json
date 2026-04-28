@@ -619,6 +619,8 @@
   "admin.personalized_solutions.resolution_modal_title": "Resolution or\nbudget",
   "admin.personalized_solutions.email_client_short": "Send to client",
   "admin.personalized_solutions.email_client_title": "Emails the client using the resolution saved in the database. Save the form first if you edited the text.",
+  "admin.personalized_solutions.email_client_confirm_title": "Send resolution email?",
+  "admin.personalized_solutions.email_client_confirm_body": "The client will receive an email with the resolution saved in the database. Save under Resolution first if you edited the text.",
   "admin.personalized_solutions.resolution_saved": "Saved.",
   "admin.nav.settings": "Configuration",
   "admin.settings.title": "Shop configuration",

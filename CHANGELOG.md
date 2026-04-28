@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Vite dev:** `npm run dev` now sets **`LARAVEL_VITE_NO_AUTO_RELOAD=1`** with **cross-env** (Windows-safe), disabling WebSocket HMR, React Fast Refresh, and Laravel plugin full-page refresh; use **`npm run dev:hmr`** for the previous default. Added devDependency **cross-env**; **`vite.config.js`** uses explicit **`hmr: true`** when hot reload is enabled.
+
+- **Admin / personalized solution:** **Send to client** opens a **confirmation dialog** before **`POST …/notify-resolution`** (**`email_client_confirm_*`** i18n).
+
 - **Admin / personalized solution modal:** Removed the duplicate **Send to client** button from the modal footer; it remains on the detail toolbar.
 
 ## [0.1.28] - 2026-04-29

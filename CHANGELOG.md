@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Storefront i18n:** **`shop.shipping_flat`** is shortened to **Envío / Enviament / Shipping** (removed flat-rate parenthetical); used on cart, checkout, and order detail totals.
 - **Storefront / order detail (`/orders/:id`):** **Estado** and **fecha** are shown in a compact **summary card** (status badge, locale-aware date). Order lines match admin: **Productes** and **Packs** sections (hidden when empty), **totals** in a separate shaded footer; new i18n keys under **`shop.order.*`**.
 - **Storefront / custom solution:** Success toast copy (**`shop.custom_solution.success`**) reminds the user to **check email** (ca / es / en).
 - **Storefront / navbar:** The **`header-gradient-line`** loading animation tracks **all in-flight `api` (axios) requests**, not only **React Query**, so cart, profile, orders, checkout, etc. show the same bar as the product catalog (respects **`prefers-reduced-motion`**).

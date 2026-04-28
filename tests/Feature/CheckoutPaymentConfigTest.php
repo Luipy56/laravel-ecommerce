@@ -359,4 +359,115 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertJsonPath('data.stripe_missing_credentials', false);
         $response->assertJsonPath('data.paypal_mode', 'sandbox');
     }
+
+    public function test_payments_config_exposes_checkout_demo_skip_payment_allowed(): void
+    {
+        config(['payments.checkout_demo_skip_payment' => true]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.checkout_demo_skip_payment_allowed', true);
+    }
+
+    public function test_checkout_demo_skip_payment_completes_without_psp_when_config_enabled(): void
+    {
+        config([
+            'payments.checkout_demo_skip_payment' => true,
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'payments.checkout_method_keys' => ['card', 'paypal'],
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'services.paypal.client_id' => '',
+            'services.paypal.secret' => '',
+        ]);
+
+        $client = $this->makeClientWithCart();
+
+        $payload = [
+            'checkout_demo_skip_payment' => true,
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => '',
+            'installation_city' => '',
+            'installation_postal_code' => '',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.has_payment', true);
+        $response->assertJsonPath('data.payment_checkout.gateway', 'checkout_demo_skip');
+        $response->assertJsonPath('data.payment_checkout.demo_skip', true);
+    }
+
+    public function test_checkout_demo_skip_payment_rejects_payment_method_when_active(): void
+    {
+        config([
+            'payments.checkout_demo_skip_payment' => true,
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'payments.checkout_method_keys' => ['card'],
+            'services.stripe.key' => 'pk_test_xxx',
+            'services.stripe.secret' => 'sk_test_xxx',
+        ]);
+
+        $client = $this->makeClientWithCart();
+
+        $payload = [
+            'checkout_demo_skip_payment' => true,
+            'payment_method' => 'card',
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => '',
+            'installation_city' => '',
+            'installation_postal_code' => '',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_checkout_demo_skip_payment_flag_ignored_when_config_disabled(): void
+    {
+        config([
+            'payments.checkout_demo_skip_payment' => false,
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'payments.checkout_method_keys' => ['card'],
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+        ]);
+
+        $client = $this->makeClientWithCart();
+
+        $payload = [
+            'checkout_demo_skip_payment' => true,
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => '',
+            'installation_city' => '',
+            'installation_postal_code' => '',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload);
+
+        $response->assertStatus(422);
+    }
 }

@@ -20,6 +20,12 @@ return [
     })(),
 
     /*
+    | When true, checkout may accept checkout_demo_skip_payment=true and complete the order without a PSP.
+    | Temporary demo / QA only — keep false in production unless you intentionally run a throwaway demo stack.
+    */
+    'checkout_demo_skip_payment' => filter_var(env('CHECKOUT_DEMO_SKIP_PAYMENT', false), FILTER_VALIDATE_BOOLEAN),
+
+    /*
     | Comma-separated payment_method keys exposed on the storefront and accepted by checkout/pay.
     | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal.
     |

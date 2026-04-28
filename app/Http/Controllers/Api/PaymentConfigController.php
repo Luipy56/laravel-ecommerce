@@ -30,6 +30,8 @@ class PaymentConfigController extends Controller
                 'stripe_missing_credentials' => PaymentCheckoutService::stripeMissingCredentialsForStorefront(),
                 /** Mirrors `PAYPAL_MODE`: helps operators confirm sandbox vs live matches credentials. */
                 'paypal_mode' => PaymentCheckoutService::paypalModeLabelForStorefront(),
+                /** True when CHECKOUT_DEMO_SKIP_PAYMENT=true (demo-only checkout bypass). */
+                'checkout_demo_skip_payment_allowed' => PaymentCheckoutService::checkoutDemoSkipPaymentAllowed(),
             ],
         ]);
     }

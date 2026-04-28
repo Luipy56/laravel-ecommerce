@@ -94,6 +94,8 @@
   "checkout.note": "Nota",
   "checkout.payment": "Pagament",
   "checkout.payment_method": "Mètode de pagament",
+  "checkout.checkout_demo_skip_payment": "Ometre el pagament (demo)",
+  "checkout.payment.checkout_demo_skip": "Demo · sense PSP",
   "checkout.payment.card": "Targeta, Bizum i moneders (Stripe)",
   "checkout.payment.paypal": "PayPal",
   "checkout.payment.bizum": "Bizum",

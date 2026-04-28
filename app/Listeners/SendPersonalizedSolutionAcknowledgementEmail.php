@@ -21,6 +21,7 @@ class SendPersonalizedSolutionAcknowledgementEmail
         }
 
         $locale = MailLocale::resolve($event->locale);
+        $solution->loadMissing('attachments');
         Mail::to($email)->locale($locale)->send(new PersonalizedSolutionReceivedMail($solution, $locale));
     }
 

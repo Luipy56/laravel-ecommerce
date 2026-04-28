@@ -22,6 +22,7 @@ use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -435,7 +436,18 @@ class CustomerTransactionalEmailTest extends TestCase
         ], ['Accept-Language' => 'es'])->assertCreated();
 
         Mail::assertSent(PersonalizedSolutionReceivedMail::class, function (PersonalizedSolutionReceivedMail $mail) use ($email) {
-            return $mail->hasTo($email);
+            if (! $mail->hasTo($email)) {
+                return false;
+            }
+            Config::set('mail.from', [
+                'address' => 'noreply@example.test',
+                'name' => 'Test Shop',
+            ]);
+            $html = $mail->render();
+
+            return str_contains($html, 'Need a custom lock setup')
+                && str_contains($html, '08001')
+                && str_contains($html, 'Resumen de tu solicitud');
         });
     }
 

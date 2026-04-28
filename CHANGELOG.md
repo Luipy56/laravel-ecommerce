@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Order invoice (HTML):** `GET /api/v1/orders/{order}/invoice` now uses the same **logo and brand** sources as transactional mail (`MAIL_BRAND_LOGO_URL` / `MAIL_BRAND_DEFAULT_LOGO`, `MAIL_BRAND_DISPLAY_NAME`, optional `MAIL_FOOTER_CONTACT_LINE`), a clearer **header** (reference `ORD-*`, date, status), **bill-to** panel with shipping and optional installation address, line columns for **unit price** and **line amount**, a right-aligned **summary** block, and neutral typography suitable for print.
+- **Transactional email:** The personalized-solution **acknowledgement** (`PersonalizedSolutionReceivedMail`) includes a **summary** of the request (problem text, optional phone and address lines, attachment filenames). Very long descriptions are truncated in the email with a note to open the portal for the full text.
 
 ### Added
 

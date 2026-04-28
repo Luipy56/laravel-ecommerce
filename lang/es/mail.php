@@ -95,6 +95,25 @@ return [
         'button' => 'Abrir en el panel',
     ],
 
+    'verify_email' => [
+        'subject' => 'Verifica tu correo',
+        'greeting' => 'Hola,',
+        'body' => 'Haz clic en el botón siguiente para confirmar tu dirección de correo y activar la cuenta.',
+        'button' => 'Verificar correo',
+        'link_fallback_label' => 'Si el botón no funciona',
+        'line2' => 'Si no creaste una cuenta, puedes ignorar este mensaje.',
+    ],
+
+    'reset_password' => [
+        'subject' => 'Recuperar contraseña',
+        'greeting' => 'Hola,',
+        'body' => 'Hemos recibido una solicitud para restablecer la contraseña de tu cuenta. Haz clic en el botón para elegir una contraseña nueva.',
+        'button' => 'Restablecer contraseña',
+        'expiry' => 'Este enlace caduca en :minutes minutos.',
+        'link_fallback_label' => 'Si el botón no funciona',
+        'line2' => 'Si no solicitaste cambiar la contraseña, ignora este correo.',
+    ],
+
     'order_shipped' => [
         'subject' => 'Tu pedido #:id va en camino',
         'greeting' => 'Hola,',

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.28] - 2026-04-29
+
 ### Added
 
 - **Admin layout:** Sidebar subtitle under the shop title shows **Admin** and the app semver (**`admin.sidebar.subtitle`**, same source as the storefront footer: **`APP_VERSION`** / `package.json`).
@@ -17,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Cursor rules:** Clarify that **`footer.version`** / **`__APP_VERSION__`** come from root **`package.json`** (nothing auto-bumps per prompt); document **patch semver** on each shippable task before push and **`prod`** merge (**`app-version-cadence.mdc`**, **`commit-changelog-version.mdc`**, **`testing-verification.mdc`**).
 
+- **Admin / personalized solution modal:** Status **select** uses **`select-sm`**, **`max-w-xs`**, and **`min-w-0`** so it does not stretch full modal width; modal title (**`resolution_modal_title`**) includes a **line break** after “o” / “or”; **`h2`** uses **`whitespace-pre-line`**.
 - **Admin / personalized solution detail:** Toolbar **`admin.personalized_solutions.email_client_short`** label is **Enviar al cliente / Enviar al client / Send to client**; **`resolution_modal_open`** remains **Resolución / Resolució / Resolution**.
 - **Storefront / order detail:** Status timeline no longer lists the synthetic **`current`** step (same label as the **Estado** badge above).
 - **Storefront i18n:** **`shop.shipping_flat`** is shortened to **Envío / Enviament / Shipping** (removed flat-rate parenthetical); used on cart, checkout, and order detail totals.

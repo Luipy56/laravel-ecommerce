@@ -158,12 +158,14 @@ export default function AdminPersonalizedSolutionShowPage() {
 
       <dialog ref={resolutionDialogRef} id="admin-sp-resolution-modal" className="modal">
         <div className="modal-box max-w-2xl">
-          <h2 className="font-semibold text-lg mb-4">{t('admin.personalized_solutions.resolution_modal_title')}</h2>
+          <h2 className="font-semibold text-lg mb-4 whitespace-pre-line leading-snug">
+            {t('admin.personalized_solutions.resolution_modal_title')}
+          </h2>
           <div className="space-y-4">
-            <label className="form-control w-full">
+            <label className="form-control w-full max-w-xs">
               <span className="label-text">{t('admin.personalized_solutions.status')}</span>
               <select
-                className="select select-bordered w-full max-w-md"
+                className="select select-bordered select-sm w-full min-w-0"
                 value={draftStatus}
                 onChange={(e) => setDraftStatus(e.target.value)}
                 aria-label={t('admin.personalized_solutions.status')}

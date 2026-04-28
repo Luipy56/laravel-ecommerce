@@ -616,7 +616,7 @@
   "admin.personalized_solutions.resend_resolution": "Resend resolution email",
   "admin.personalized_solutions.resend_resolution_done": "Email sent.",
   "admin.personalized_solutions.resolution_modal_open": "Resolution",
-  "admin.personalized_solutions.resolution_modal_title": "Resolution or budget",
+  "admin.personalized_solutions.resolution_modal_title": "Resolution or\nbudget",
   "admin.personalized_solutions.email_client_short": "Send to client",
   "admin.personalized_solutions.email_client_title": "Emails the client using the resolution saved in the database. Save the form first if you edited the text.",
   "admin.personalized_solutions.resolution_saved": "Saved.",

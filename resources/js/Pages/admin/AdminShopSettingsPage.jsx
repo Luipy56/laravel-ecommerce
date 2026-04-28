@@ -10,10 +10,11 @@ import {
   ADMIN_INDEX_TABLE_META,
   ADMIN_INDEX_TABLE_ORDER,
 } from '../../config/adminIndexColumnsRegistry';
+import AdminIndexColumnsFieldset from '../../components/admin/AdminIndexColumnsFieldset';
 import {
   adminShopSettingsQueryKey,
   buildAdminIndexColumnsPayload,
-  columnPrefsFromServer,
+  columnOrderAndPrefsFromServer,
 } from '../../hooks/useAdminShopSettingsQuery';
 
 function parseIdList(text) {
@@ -54,6 +55,7 @@ export default function AdminShopSettingsPage() {
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
 
   const [columnPrefs, setColumnPrefs] = useState({});
+  const [columnOrder, setColumnOrder] = useState({});
 
   const applyPayload = useCallback((d) => {
     setLowStockEnabled(!!d.low_stock_enabled);
@@ -65,7 +67,9 @@ export default function AdminShopSettingsPage() {
     setOverstockBlacklistEnabled(!!d.overstock_blacklist_enabled);
     setOverstockBlacklistText(idsToText(d.overstock_blacklist_product_ids));
     setAcceptPersonalizedSolutions(d.accept_personalized_solutions !== false);
-    setColumnPrefs(columnPrefsFromServer(d.admin_index_columns));
+    const { columnPrefs: cp, columnOrder: co } = columnOrderAndPrefsFromServer(d.admin_index_columns);
+    setColumnPrefs(cp);
+    setColumnOrder(co);
   }, []);
 
   const fetchSettings = useCallback(async () => {
@@ -97,7 +101,7 @@ export default function AdminShopSettingsPage() {
     overstock_blacklist_enabled: overstockBlacklistEnabled,
     overstock_blacklist_product_ids: parseIdList(overstockBlacklistText),
     accept_personalized_solutions: acceptPersonalizedSolutions,
-    admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs),
+    admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs, columnOrder),
   });
 
   const handleSave = async (e) => {
@@ -279,31 +283,17 @@ export default function AdminShopSettingsPage() {
               const titleKey = ADMIN_INDEX_TABLE_META[tableId]?.titleKey;
               if (!titleKey || cols.length === 0) return null;
               return (
-                <fieldset key={tableId} className="fieldset border border-base-200 rounded-box p-4 space-y-3 min-w-0">
-                  <legend className="fieldset-legend text-base font-semibold">{t(titleKey)}</legend>
-                  <div className="flex flex-wrap gap-x-4 gap-y-2">
-                    {cols.map((col) => (
-                      <label
-                        key={col.id}
-                        className="label w-full min-w-0 cursor-pointer items-start justify-start gap-2 py-1 sm:w-[calc(50%-0.5rem)] sm:max-w-[calc(50%-0.5rem)]"
-                      >
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm checkbox-primary shrink-0 mt-0.5"
-                          checked={columnPrefs[tableId]?.[col.id] !== false}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setColumnPrefs((prev) => ({
-                              ...prev,
-                              [tableId]: { ...prev[tableId], [col.id]: checked },
-                            }));
-                          }}
-                        />
-                        <span className="label-text text-sm min-w-0 flex-1">{t(col.labelKey)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
+                <AdminIndexColumnsFieldset
+                  key={tableId}
+                  tableId={tableId}
+                  cols={cols}
+                  title={t(titleKey)}
+                  columnPrefs={columnPrefs}
+                  setColumnPrefs={setColumnPrefs}
+                  columnOrder={columnOrder}
+                  setColumnOrder={setColumnOrder}
+                  t={t}
+                />
               );
             })}
           </div>

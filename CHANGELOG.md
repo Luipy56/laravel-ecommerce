@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Admin · shop settings · index columns:** Visible columns and **column order** are configurable per table (drag-and-drop in settings); list pages render columns in **`orderedVisibleColumnIds`** order. **`AdminIndexColumns::normalize()`** preserves stored order.
+
 - **Scroll to top:** FAB uses **brand gradient** (**`from-primary` → `to-secondary`**), subtle **inset ring**, stronger shadow on hover, and **motion-safe** press feedback (still **`btn-circle`**).
 
 - **App version in SPA:** **`welcome.blade.php`** sets **`window.__LARAVEL_APP_VERSION__`** from **`config('app.version')`**; **`resources/js/config/version.js`** prefers it over Vite **`define`** so admin sidebar / footer match **`package.json`** without restarting the dev server.

@@ -33,20 +33,17 @@ final class AdminIndexColumns
 
                 continue;
             }
+            /** @var list<string> $filtered Preserve client order; drop unknown ids and duplicates. */
             $filtered = [];
+            $seen = [];
             foreach ($row as $id) {
-                if (is_string($id) && in_array($id, $allowed, true)) {
-                    $filtered[] = $id;
+                if (! is_string($id) || ! in_array($id, $allowed, true) || isset($seen[$id])) {
+                    continue;
                 }
+                $seen[$id] = true;
+                $filtered[] = $id;
             }
-            $filtered = array_values(array_unique($filtered));
-            $ordered = [];
-            foreach ($allowed as $id) {
-                if (in_array($id, $filtered, true)) {
-                    $ordered[] = $id;
-                }
-            }
-            $out[$tableId] = $ordered !== [] ? $ordered : $allowed;
+            $out[$tableId] = $filtered !== [] ? $filtered : $allowed;
         }
 
         return $out;

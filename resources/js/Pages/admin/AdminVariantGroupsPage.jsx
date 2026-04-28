@@ -15,7 +15,7 @@ function productsLabel(products) {
 export default function AdminVariantGroupsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('variant_groups');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('variant_groups');
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -54,6 +54,46 @@ export default function AdminVariantGroupsPage() {
     return () => clearTimeout(tid);
   }, [search]);
 
+  const variantGroupHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'group_label':
+        return <th key={colId}>{t('admin.variant_groups.group_label')}</th>;
+      case 'products_in_group':
+        return <th key={colId}>{t('admin.variant_groups.products_in_group')}</th>;
+      default:
+        return null;
+    }
+  };
+
+  const variantGroupBodyCell = (colId, g) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {g.id}
+          </td>
+        );
+      case 'group_label':
+        return <td key={colId}>{g.name || `#${g.id}`}</td>;
+      case 'products_in_group':
+        return (
+          <td key={colId}>
+            {g.products_count === 0
+              ? ''
+              : productsLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageTitle>{t('admin.variant_groups.title')}</PageTitle>
@@ -87,11 +127,7 @@ export default function AdminVariantGroupsPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
-                  {isVisible('group_label') ? <th>{t('admin.variant_groups.group_label')}</th> : null}
-                  {isVisible('products_in_group') ? <th>{t('admin.variant_groups.products_in_group')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => variantGroupHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {groups.map((g) => (
@@ -108,15 +144,7 @@ export default function AdminVariantGroupsPage() {
                       }
                     }}
                   >
-                    {isVisible('id') ? <td className="text-center tabular-nums">{g.id}</td> : null}
-                    {isVisible('group_label') ? <td>{g.name || `#${g.id}`}</td> : null}
-                    {isVisible('products_in_group') ? (
-                      <td>
-                        {g.products_count === 0
-                          ? ''
-                          : productsLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
-                      </td>
-                    ) : null}
+                    {orderedVisibleColumnIds.map((colId) => variantGroupBodyCell(colId, g))}
                   </tr>
                 ))}
               </tbody>

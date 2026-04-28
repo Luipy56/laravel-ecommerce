@@ -14,7 +14,7 @@ function clientTypeLabel(type, t) {
 export default function AdminClientsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('clients');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('clients');
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -51,6 +51,84 @@ export default function AdminClientsPage() {
   useEffect(() => {
     setPage(1);
   }, [searchDebounce, typeFilter, activeFilter]);
+
+  const clientHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'email':
+        return <th key={colId}>{t('admin.clients.email')}</th>;
+      case 'type':
+        return <th key={colId}>{t('admin.clients.filter_type')}</th>;
+      case 'identification':
+        return <th key={colId}>{t('admin.clients.identification')}</th>;
+      case 'primary_contact':
+        return <th key={colId}>{t('admin.clients.primary_contact')}</th>;
+      case 'contacts_count':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.clients.contacts_count')}
+          </th>
+        );
+      case 'addresses_count':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.clients.addresses_count')}
+          </th>
+        );
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const clientBodyCell = (colId, c) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {c.id}
+          </td>
+        );
+      case 'email':
+        return <td key={colId}>{c.login_email}</td>;
+      case 'type':
+        return <td key={colId}>{clientTypeLabel(c.type, t)}</td>;
+      case 'identification':
+        return <td key={colId}>{c.identification}</td>;
+      case 'primary_contact':
+        return <td key={colId}>{c.primary_contact_name}</td>;
+      case 'contacts_count':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {c.contacts_count ?? 0}
+          </td>
+        );
+      case 'addresses_count':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {c.addresses_count ?? 0}
+          </td>
+        );
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {c.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
@@ -111,16 +189,7 @@ export default function AdminClientsPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('id') ? <th className="text-center tabular-nums">{t('admin.common.column_id')}</th> : null}
-                  {isVisible('email') ? <th>{t('admin.clients.email')}</th> : null}
-                  {isVisible('type') ? <th>{t('admin.clients.filter_type')}</th> : null}
-                  {isVisible('identification') ? <th>{t('admin.clients.identification')}</th> : null}
-                  {isVisible('primary_contact') ? <th>{t('admin.clients.primary_contact')}</th> : null}
-                  {isVisible('contacts_count') ? <th className="text-center">{t('admin.clients.contacts_count')}</th> : null}
-                  {isVisible('addresses_count') ? <th className="text-center">{t('admin.clients.addresses_count')}</th> : null}
-                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => clientHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {clients.map((c) => (
@@ -137,14 +206,7 @@ export default function AdminClientsPage() {
                       }
                     }}
                   >
-                    {isVisible('id') ? <td className="text-center tabular-nums">{c.id}</td> : null}
-                    {isVisible('email') ? <td>{c.login_email}</td> : null}
-                    {isVisible('type') ? <td>{clientTypeLabel(c.type, t)}</td> : null}
-                    {isVisible('identification') ? <td>{c.identification}</td> : null}
-                    {isVisible('primary_contact') ? <td>{c.primary_contact_name}</td> : null}
-                    {isVisible('contacts_count') ? <td className="text-center tabular-nums">{c.contacts_count ?? 0}</td> : null}
-                    {isVisible('addresses_count') ? <td className="text-center tabular-nums">{c.addresses_count ?? 0}</td> : null}
-                    {isVisible('is_active') ? <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                    {orderedVisibleColumnIds.map((colId) => clientBodyCell(colId, c))}
                   </tr>
                 ))}
               </tbody>

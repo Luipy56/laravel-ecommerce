@@ -8,7 +8,7 @@ import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQ
 export default function AdminPacksPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('packs');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('packs');
   const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -50,6 +50,80 @@ export default function AdminPacksPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  const packHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'name':
+        return <th key={colId}>{t('admin.products.name')}</th>;
+      case 'price':
+        return <th key={colId} className="text-end">{t('admin.products.price')}</th>;
+      case 'products_in_pack':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.packs.products_in_pack')}
+          </th>
+        );
+      case 'is_trending':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_trending')}
+          </th>
+        );
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const packBodyCell = (colId, p) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {p.id}
+          </td>
+        );
+      case 'name':
+        return <td key={colId}>{p.name}</td>;
+      case 'price':
+        return (
+          <td key={colId} className="text-end tabular-nums">
+            {p.price != null ? `${Number(p.price).toFixed(2)} €` : ''}
+          </td>
+        );
+      case 'products_in_pack':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {p.pack_items_count ?? 0}
+          </td>
+        );
+      case 'is_trending':
+        return (
+          <td key={colId} className="text-center">
+            {p.is_trending ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {p.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -110,13 +184,7 @@ export default function AdminPacksPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
-                  {isVisible('price') ? <th className="text-end">{t('admin.products.price')}</th> : null}
-                  {isVisible('products_in_pack') ? <th className="text-center">{t('admin.packs.products_in_pack')}</th> : null}
-                  {isVisible('is_trending') ? <th className="text-center">{t('admin.products.is_trending')}</th> : null}
-                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => packHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {packs.map((p) => (
@@ -133,11 +201,7 @@ export default function AdminPacksPage() {
                       }
                     }}
                   >
-                    {isVisible('name') ? <td>{p.name}</td> : null}
-                    {isVisible('price') ? <td className="text-end tabular-nums">{p.price != null ? `${Number(p.price).toFixed(2)} €` : ''}</td> : null}
-                    {isVisible('products_in_pack') ? <td className="text-center tabular-nums">{p.pack_items_count ?? 0}</td> : null}
-                    {isVisible('is_trending') ? <td className="text-center">{p.is_trending ? t('common.yes') : t('common.no')}</td> : null}
-                    {isVisible('is_active') ? <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                    {orderedVisibleColumnIds.map((colId) => packBodyCell(colId, p))}
                   </tr>
                 ))}
               </tbody>

@@ -49,7 +49,7 @@ class PublicPersonalizedSolutionController extends Controller
             'address_street' => ['nullable', 'string', 'max:255'],
             'address_city' => ['nullable', 'string', 'max:100'],
             'address_province' => ['nullable', 'string', 'max:100'],
-            'address_postal_code' => ['required', 'string', 'max:20'],
+            'address_postal_code' => ['required', 'string', 'regex:/^\d{1,20}$/'],
             'address_note' => ['nullable', 'string', 'max:1000'],
         ]);
 

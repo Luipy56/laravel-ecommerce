@@ -60,6 +60,11 @@ export default function Layout() {
               </Link>
             </li>
             <li>
+              <Link to="/faq" onClick={closeStorefrontDrawer}>
+                {t('shop.faq.nav')}
+              </Link>
+            </li>
+            <li>
               <Link to="/cart" onClick={closeStorefrontDrawer}>
                 {t('shop.cart')}
               </Link>

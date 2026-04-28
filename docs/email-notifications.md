@@ -4,6 +4,8 @@
 
 Transactional emails use Laravel Mail with copy in **Catalan**, **Spanish**, and **English** (`lang/ca/mail.php`, `lang/es/mail.php`, `lang/en/mail.php`). Locale is chosen from `Accept-Language` when the request provides `ca`, `es`, or `en`; otherwise it defaults to **Catalan** (or the app locale from `config('app.locale')` when resolving via `MailLocale`).
 
+**Email address validation:** Registration, password reset, and the personalized-solution form validate addresses with **RFC compliance plus DNS (MX / mail-capable host)** so non-existent or non-mail domains are rejected early. Reserved documentation domains such as **example.com** may use “null MX” and therefore fail this check even though the address looks conventional. That still does **not** verify that a specific mailbox exists on large providers (for example Gmail); some invalid local parts only surface as bounces after SMTP.
+
 ## When messages are sent
 
 | Trigger | Recipient |

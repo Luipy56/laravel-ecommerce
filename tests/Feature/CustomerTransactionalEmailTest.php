@@ -41,9 +41,10 @@ class CustomerTransactionalEmailTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'buyer_'.uniqid('', true).'@example.test',
+            'login_email' => 'buyer_'.uniqid('', true).'@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $category = ProductCategory::query()->create([
@@ -166,7 +167,7 @@ class CustomerTransactionalEmailTest extends TestCase
             };
         });
 
-        $admin = 'ops_'.uniqid('', true).'@example.test';
+        $admin = 'ops_'.uniqid('', true).'@ietf.org';
         config([
             'services.stripe.key' => 'pk_test_valid_length_fake',
             'services.stripe.secret' => 'sk_test_valid_length_fake',
@@ -287,7 +288,7 @@ class CustomerTransactionalEmailTest extends TestCase
     {
         Mail::fake();
 
-        $admin = 'ops_'.uniqid('', true).'@example.test';
+        $admin = 'ops_'.uniqid('', true).'@ietf.org';
         config([
             'services.stripe.key' => '',
             'services.stripe.secret' => '',
@@ -422,7 +423,7 @@ class CustomerTransactionalEmailTest extends TestCase
     {
         Mail::fake();
 
-        $email = 'sol_'.uniqid('', true).'@example.test';
+        $email = 'sol_'.uniqid('', true).'@ietf.org';
 
         $this->postJson('/api/v1/personalized-solutions', [
             'email' => $email,
@@ -440,7 +441,7 @@ class CustomerTransactionalEmailTest extends TestCase
                 return false;
             }
             Config::set('mail.from', [
-                'address' => 'noreply@example.test',
+                'address' => 'noreply@ietf.org',
                 'name' => 'Test Shop',
             ]);
             $html = $mail->render();

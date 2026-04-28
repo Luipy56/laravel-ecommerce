@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
+import { scrollWindowToTopOnFormError } from '../../lib/formScroll';
 import { adminLoginSchema, parseWithZod } from '../../validation';
 
 export default function AdminLoginPage() {
@@ -20,9 +21,13 @@ export default function AdminLoginPage() {
     try {
       const { data } = await api.post('admin/login', { username: user, password: pass });
       if (data.success) navigate('/admin');
-      else setError(data.message || t('admin.login.error'));
+      else {
+        setError(data.message || t('admin.login.error'));
+        scrollWindowToTopOnFormError();
+      }
     } catch (err) {
       setError(err.response?.data?.message || t('admin.login.error'));
+      scrollWindowToTopOnFormError();
     } finally {
       setLoading(false);
     }
@@ -34,6 +39,7 @@ export default function AdminLoginPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
+      scrollWindowToTopOnFormError();
       return;
     }
     await doLogin(parsed.data.username, parsed.data.password);

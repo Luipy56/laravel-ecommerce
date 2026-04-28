@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
     const { data } = await api.post('login', { login_email: loginEmail, password, remember });
     if (data.success) {
       setUser(data.data);
-      return { success: true };
+      return { success: true, user: data.data };
     }
     return { success: false, message: data.message, errors: data.errors };
   }, []);
@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
     const { data } = await api.post('register', payload);
     if (data.success) {
       setUser(data.data);
-      return { success: true };
+      return { success: true, user: data.data };
     }
     return { success: false, message: data.message, errors: data.errors };
   }, []);

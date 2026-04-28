@@ -71,6 +71,15 @@ export function IconChevronRight({ className, strokeWidth, ...rest }) {
   );
 }
 
+/** Close / dismiss (X). */
+export function IconX({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path strokeWidth={strokeWidth ?? 2} d="M18 6L6 18M6 6l12 12" />
+    </IconWrapper>
+  );
+}
+
 /** Hamburger menu (three horizontal lines). */
 export function IconMenu({ className, strokeWidth, ...rest }) {
   return (

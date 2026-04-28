@@ -8,6 +8,15 @@ import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQ
 const KINDS = ['cart', 'order', 'like'];
 const STATUSES = ['pending', 'awaiting_payment', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
 
+function installationStatusLabel(status, t) {
+  if (status == null || status === '') return '';
+  if (status === 'pending') return t('admin.orders.install_status_pending');
+  if (status === 'priced') return t('admin.orders.install_status_priced');
+  if (status === 'rejected') return t('admin.orders.install_status_rejected');
+
+  return String(status);
+}
+
 function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
@@ -24,7 +33,7 @@ function getStatusBadgeClass(status) {
 export default function AdminOrdersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('orders');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('orders');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -33,7 +42,6 @@ export default function AdminOrdersPage() {
   const [searchDebounce, setSearchDebounce] = useState('');
   const [kindFilter, setKindFilter] = useState('order');
   const [statusFilter, setStatusFilter] = useState('');
-  const [installationPendingOnly, setInstallationPendingOnly] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -42,7 +50,6 @@ export default function AdminOrdersPage() {
       if (searchDebounce) params.search = searchDebounce;
       if (kindFilter) params.kind = kindFilter;
       if (statusFilter) params.status = statusFilter;
-      if (installationPendingOnly) params.installation_pending = 1;
       const { data } = await api.get('admin/orders', { params });
       if (data.success) {
         setOrders(data.data || []);
@@ -54,7 +61,7 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [navigate, page, searchDebounce, kindFilter, statusFilter, installationPendingOnly]);
+  }, [navigate, page, searchDebounce, kindFilter, statusFilter]);
 
   useEffect(() => {
     fetchOrders();
@@ -62,12 +69,144 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [searchDebounce, kindFilter, statusFilter, installationPendingOnly]);
+  }, [searchDebounce, kindFilter, statusFilter]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  const orderHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return <th key={colId}>{t('admin.orders.id')}</th>;
+      case 'kind':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.orders.kind')}
+          </th>
+        );
+      case 'client':
+        return <th key={colId}>{t('admin.orders.client')}</th>;
+      case 'order_date':
+        return <th key={colId} className="text-end">{t('admin.orders.order_date')}</th>;
+      case 'lines_count':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.orders.lines_count')}
+          </th>
+        );
+      case 'total':
+        return <th key={colId} className="text-end">{t('admin.orders.total')}</th>;
+      case 'status':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.orders.status')}
+          </th>
+        );
+      case 'installation_requested':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.orders.column_installation_requested')}
+          </th>
+        );
+      case 'installation_status':
+        return <th key={colId}>{t('admin.orders.installation_status_label')}</th>;
+      case 'installation_price':
+        return <th key={colId} className="text-end">{t('admin.orders.column_installation_price')}</th>;
+      case 'shipping_date':
+        return <th key={colId} className="text-end">{t('admin.orders.shipping_date')}</th>;
+      case 'created_at':
+        return <th key={colId} className="text-end">{t('admin.orders.created_at')}</th>;
+      case 'updated_at':
+        return <th key={colId} className="text-end">{t('admin.orders.updated_at')}</th>;
+      default:
+        return null;
+    }
+  };
+
+  const orderBodyCell = (colId, o) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center font-mono">
+            #{o.id}
+          </td>
+        );
+      case 'kind':
+        return (
+          <td key={colId} className="text-center">
+            <span className="badge badge-ghost">{t(`admin.orders.kind_${o.kind}`)}</span>
+          </td>
+        );
+      case 'client':
+        return <td key={colId}>{o.client_login_email ?? ''}</td>;
+      case 'order_date':
+        return (
+          <td key={colId} className="text-end">
+            {o.order_date ? new Date(o.order_date).toLocaleDateString() : ''}
+          </td>
+        );
+      case 'lines_count':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {o.lines_count ?? 0}
+          </td>
+        );
+      case 'total':
+        return (
+          <td key={colId} className="text-end font-medium tabular-nums">
+            {o.total != null ? Number(o.total).toFixed(2) : '0.00'} €
+          </td>
+        );
+      case 'status':
+        return (
+          <td key={colId} className="text-center">
+            {o.kind === 'order' && o.status ? (
+              <span className={`badge badge-sm ${getStatusBadgeClass(o.status)}`}>{t(`admin.orders.status_${o.status}`)}</span>
+            ) : (
+              ''
+            )}
+          </td>
+        );
+      case 'installation_requested':
+        return (
+          <td key={colId} className="text-center">
+            {o.installation_requested ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      case 'installation_status':
+        return <td key={colId}>{installationStatusLabel(o.installation_status, t)}</td>;
+      case 'installation_price':
+        return (
+          <td key={colId} className="text-end tabular-nums">
+            {o.installation_price != null && o.installation_price !== ''
+              ? `${Number(o.installation_price).toFixed(2)} €`
+              : ''}
+          </td>
+        );
+      case 'shipping_date':
+        return (
+          <td key={colId} className="text-end">
+            {o.shipping_date ? new Date(o.shipping_date).toLocaleDateString() : ''}
+          </td>
+        );
+      case 'created_at':
+        return (
+          <td key={colId} className="text-end">
+            {o.created_at ? new Date(o.created_at).toLocaleString() : ''}
+          </td>
+        );
+      case 'updated_at':
+        return (
+          <td key={colId} className="text-end">
+            {o.updated_at ? new Date(o.updated_at).toLocaleString() : ''}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -114,17 +253,6 @@ export default function AdminOrdersPage() {
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-2 shrink-0 cursor-pointer">
-          <input
-            type="checkbox"
-            className="checkbox checkbox-sm checkbox-primary"
-            checked={installationPendingOnly}
-            onChange={(e) => setInstallationPendingOnly(e.target.checked)}
-            disabled={kindFilter !== 'order'}
-            aria-label={t('admin.orders.filter_installation_pending')}
-          />
-          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.orders.filter_installation_pending')}</span>
-        </label>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
@@ -140,15 +268,7 @@ export default function AdminOrdersPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('id') ? <th>{t('admin.orders.id')}</th> : null}
-                  {isVisible('kind') ? <th className="text-center">{t('admin.orders.kind')}</th> : null}
-                  {isVisible('client') ? <th>{t('admin.orders.client')}</th> : null}
-                  {isVisible('order_date') ? <th className="text-end">{t('admin.orders.order_date')}</th> : null}
-                  {isVisible('lines_count') ? <th className="text-center">{t('admin.orders.lines_count')}</th> : null}
-                  {isVisible('total') ? <th className="text-end">{t('admin.orders.total')}</th> : null}
-                  {isVisible('status') ? <th className="text-center">{t('admin.orders.status')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => orderHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {orders.map((o) => (
@@ -165,25 +285,7 @@ export default function AdminOrdersPage() {
                       }
                     }}
                   >
-                    {isVisible('id') ? <td className="font-mono text-center">#{o.id}</td> : null}
-                    {isVisible('kind') ? (
-                      <td className="text-center"><span className="badge badge-ghost">{t(`admin.orders.kind_${o.kind}`)}</span></td>
-                    ) : null}
-                    {isVisible('client') ? <td>{o.client_login_email ?? ''}</td> : null}
-                    {isVisible('order_date') ? <td className="text-end">{o.order_date ? new Date(o.order_date).toLocaleDateString() : ''}</td> : null}
-                    {isVisible('lines_count') ? <td className="text-center tabular-nums">{o.lines_count ?? 0}</td> : null}
-                    {isVisible('total') ? (
-                      <td className="text-end font-medium tabular-nums">{o.total != null ? Number(o.total).toFixed(2) : '0.00'} €</td>
-                    ) : null}
-                    {isVisible('status') ? (
-                      <td className="text-center">
-                        {o.kind === 'order' && o.status ? (
-                          <span className={`badge badge-sm ${getStatusBadgeClass(o.status)}`}>{t(`admin.orders.status_${o.status}`)}</span>
-                        ) : (
-                          ''
-                        )}
-                      </td>
-                    ) : null}
+                    {orderedVisibleColumnIds.map((colId) => orderBodyCell(colId, o))}
                   </tr>
                 ))}
               </tbody>

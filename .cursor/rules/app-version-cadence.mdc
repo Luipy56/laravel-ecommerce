@@ -1,0 +1,29 @@
+---
+description: Why APP_VERSION is static and when to bump root package.json semver per task
+alwaysApply: true
+---
+
+# App version cadence (footer / `__APP_VERSION__`)
+
+## Why the version does not change “by itself”
+
+- The footer and **`footer.version`** use **`resources/js/config/version.js`**. In the browser, **`window.__LARAVEL_APP_VERSION__`** is set from **`config('app.version')`** (reads root **`package.json`** each request) in **`welcome.blade.php`**, so the UI tracks bumps **without restarting `npm run dev`**. Vite’s **`define`** **`__APP_VERSION__`** is the fallback (build / SSR / tests).
+- If **`package.json`** is not edited, **`npm run build`** and the dev server keep embedding the **same** string. There is no automatic increment. **Every agent that commits work must bump patch** per **`.cursor/rules/agent-task-version-bump.mdc`**.
+
+## When to bump (patch)
+
+Bump **`package.json`** and **`package-lock.json`** together (e.g. `npm version patch --no-git-tag-version`) in the **same push series** as the work, **before** `git push` to the integration branch, when the change:
+
+- touches **storefront, admin, API, mail, payments, or database** in a way that matters to users or operators; **or**
+- adds or updates a bullet under **`CHANGELOG.md`** `[Unreleased]` for that work.
+
+**Coders** should not hand off “done” without a version bump for shippable work; **committer** (or the same agent) applies it in the final commit if the feature commit did not.
+
+## When a bump is optional (non-agent or no commit)
+
+- **Local-only** experiments not pushed, or **human** docs-only commits by team policy.
+- **Agent** runs that **commit** are covered by **`agent-task-version-bump.mdc`** — default is **always bump** with the task.
+
+## Deploy / `prod`
+
+Before merging into **`prod`** or deploying production assets, confirm the branch being promoted includes a **semver bump** after the last user-visible change so rebuilt bundles match the footer (**`.cursor/rules/commit-changelog-version.mdc`**).

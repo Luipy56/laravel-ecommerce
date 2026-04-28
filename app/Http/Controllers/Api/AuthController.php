@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Support\MailLocale;
+use App\Support\ValidationRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -15,7 +16,7 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'login_email' => ['required', 'string', 'email'],
+            'login_email' => ['required', 'string', ValidationRules::emailDns()],
             'password' => ['required', 'string'],
         ]);
 
@@ -41,6 +42,8 @@ class AuthController extends Controller
                 'identification' => $client->identification,
                 'name' => $primary?->name,
                 'surname' => $primary?->surname,
+                'email_verified' => $client->hasVerifiedEmail(),
+                'email_verified_at' => $client->email_verified_at?->toIso8601String(),
             ],
         ]);
     }
@@ -50,7 +53,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'type' => ['required', 'string', 'in:person,company'],
             'identification' => ['nullable', 'string', 'max:20', 'unique:clients,identification'],
-            'login_email' => ['required', 'string', 'email', 'max:255', 'unique:clients,login_email'],
+            'login_email' => ['required', 'string', 'max:255', ValidationRules::emailDns(), 'unique:clients,login_email'],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'name' => ['required', 'string', 'max:255'],
             'surname' => ['nullable', 'string', 'max:255'],
@@ -58,7 +61,7 @@ class AuthController extends Controller
             'address_street' => ['nullable', 'string', 'max:255'],
             'address_city' => ['nullable', 'string', 'max:100'],
             'address_province' => ['nullable', 'string', 'max:100'],
-            'address_postal_code' => ['required', 'string', 'max:20'],
+            'address_postal_code' => ['required', 'string', 'regex:/^\d{1,20}$/'],
         ]);
 
         $client = Client::create([
@@ -92,6 +95,11 @@ class AuthController extends Controller
         Auth::login($client);
         $request->session()->regenerate();
 
+        $locale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
+        app()->setLocale($locale);
+
+        $client->sendEmailVerificationNotification();
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -101,6 +109,8 @@ class AuthController extends Controller
                 'identification' => $client->identification,
                 'name' => $validated['name'],
                 'surname' => $validated['surname'] ?? null,
+                'email_verified' => false,
+                'email_verified_at' => null,
             ],
         ], 201);
     }
@@ -141,6 +151,8 @@ class AuthController extends Controller
                     'province' => $client->addresses->first()->province,
                     'postal_code' => $client->addresses->first()->postal_code,
                 ] : null,
+                'email_verified' => $client->hasVerifiedEmail(),
+                'email_verified_at' => $client->email_verified_at?->toIso8601String(),
             ],
         ]);
     }

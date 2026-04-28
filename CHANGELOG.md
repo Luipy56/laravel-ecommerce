@@ -7,6 +7,112 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Password reset API:** **`POST /api/v1/reset-password`** no longer reads **`password_confirmation`** from **`validated()`** (Laravel omits it even when **`password`** uses **`confirmed`**), which caused an undefined index and HTTP **500**. The confirmation value is taken from the request body.
+
+- **Admin · index column settings:** Sortable column rows use **`items-center`** so the drag handle, checkbox, and label align vertically in **`AdminIndexColumnsFieldset`**.
+
+- **Client verification email:** Laravel routes notification mail to an `email` attribute; storefront clients only have `login_email`, so verification (and password-reset) messages were skipped. **`Client::routeNotificationForMail()`** now returns `login_email`. Registration and **resend verification** set **`MailLocale`** from **`Accept-Language`** like other transactional mail.
+
+### Added
+
+- **Cursor rules:** **`agent-task-version-bump.mdc`** — mandatory root **`package.json`** patch bump after **each agent-completed task** that commits; **`app-version-cadence.mdc`** / **`commit-changelog-version.mdc`** aligned; **`docs/agent-cursor-rules.md`** inventory updated.
+
+- **Storefront auth:** `clients.email_verified_at` and `remember_token`; `Client` implements email verification and password reset; JSON routes **forgot-password**, **reset-password**, **email/resend**, signed **email/verify/{id}/{hash}**; middleware **`client.verified`** on sensitive storefront APIs; **`GET reports/summary`** with **`auth.client_or_admin`** (shop metrics for admins, scoped metrics for verified clients).
+- **FAQ:** `faqs` table, public **`GET /faqs`**, admin **`apiResource`**, storefront FAQ page and admin CRUD (ca / es / en).
+- **Delivery note (albarán):** **`GET /orders/{order}/delivery-note`** (same rules as invoice), Blade **`pdf/delivery_note`**, links on order detail and orders list.
+
+- **Storefront / admin navigation:** React routes **`/faq`**, **`/forgot-password`**, **`/reset-password`**, **`/verify-email`**, admin **`/admin/faqs`** (and new/edit); **FAQ** and **forgot password** links in navbar, footer, and login; **register** hint about the verification screen; **login** success line when opening **`/login?verified=1`** after email verification.
+
+### Changed
+
+- **Transactional email addresses:** Registration, login, password reset, and personalized-solution **`POST`** validate **`login_email` / `email`** with **RFC + DNS (MX-capable domain)** via **`ValidationRules::emailDns()`**; clearer validation messages in **ca / es / en**. Does not prove a mailbox exists on third-party hosts. Feature tests use **`@ietf.org`** sample addresses because **`example.com`** / **`example.org`** publish null MX (RFC 7505).
+
+- **Cart · quantity column:** Quantity **`input`** uses **`w-16`** like extra-keys (was **`w-20`**).
+
+- **Cart line · extra keys column:** The **input** is vertically centered in the row; the **€/u** line sits **`absolute`** under the input so it does not shift the centering anchor (inner wrapper height = input only).
+
+- **Admin · shop settings (Inici):** **General** only has **max manual** featured; **max tendència** sits in **Stock baix** / **Sobrestock** blocks without redundant «(stock bajo)» / «(sobrestock)» in labels. New i18n **`admin.settings.section_general`**.
+
+- **Login page:** Primary **Iniciar sesión** / **Log in** submit uses the **brand gradient** (**`from-primary` → `to-secondary`**) and shadow like **verify-email** and the scroll FAB.
+
+- **Auth notification HTML (verify + reset):** **Verify email** and **reset password** mails use the same **branded** **`emails.layouts.transactional`** layout as other shop mail (logo, orange gradient, CTA), with copy in **`lang/*/mail.php`**; **`App\Support\FrontendPasswordResetUrl`** builds the SPA reset link.
+
+- **Forgot password:** **`auth.forgot_sent`** (ca / es / en) is now a short confirmation that a **recovery email was sent**, instead of the conditional “if the email exists…” wording.
+
+- **Register (`RegisterPage`):** Removed the global mandatory-field legend line; required fields remain marked with **`*`** on labels.
+
+- **Verify email page:** Removed the **Home / Inicio** ghost button from **`EmailVerifyPage`**; navigation to **`next`** after verification is unchanged. Primary **resend** control is **centered** in the card.
+
+- **Storefront navbar · language menu:** Replaced the plain **dropdown** with a **card** panel (title, **close** control, **gradient** highlight for the active locale, checkmark), **click-outside** and **Escape** to dismiss; trigger shows **CA/ES/EN** with clearer styling. New **`IconX`**, i18n **`common.language`**.
+
+- **Email verification UX:** Removed **`EmailVerificationBanner`**. Dedicated **`/verify-email`** page (copy, **resend** with cooldown, **poll** **`GET user`**, **`navigate`** to **`next`** when verified); **register** → **`/verify-email?next=/`**, unverified **login** → **`/verify-email?next=…`**; **`AuthContext`** **`login`** / **`register`** now return **`user`** for redirects.
+
+- **Storefront / admin forms:** On failed submit (Zod or API error), the UI scrolls so feedback is visible: **`scrollWindowToTopOnFormError()`** for full-page and drawer forms, **`scrollOpenModalBoxToTop()`** for daisyUI modals (profile address/contact). Shared helpers in **`resources/js/lib/formScroll.js`**; pattern documented in **`.cursor/rules/react-use.mdc`**.
+
+- **Admin · shop settings · index columns:** Visible columns and **column order** are configurable per table (drag-and-drop in settings); list pages render columns in **`orderedVisibleColumnIds`** order. **`AdminIndexColumns::normalize()`** preserves stored order.
+
+- **Scroll to top:** FAB uses **brand gradient** (**`from-primary` → `to-secondary`**), subtle **inset ring**, stronger shadow on hover, and **motion-safe** press feedback (still **`btn-circle`**).
+
+- **App version in SPA:** **`welcome.blade.php`** sets **`window.__LARAVEL_APP_VERSION__`** from **`config('app.version')`**; **`resources/js/config/version.js`** prefers it over Vite **`define`** so admin sidebar / footer match **`package.json`** without restarting the dev server.
+
+- **Admin layout:** Sidebar **`menu`**: first block = Panel + sorted **catalog / ops** links; second block = **Settings**, **Data explorer**, **FAQ**, **About**, **Back to shop** (horizontal rule between).
+
+- **Custom solution (`/custom-solution`):** With an active session, **email**, **phone**, and **address** fields pre-fill from **`GET /api/v1/user`** (primary contact + first saved address); empty fields only so late auth load does not overwrite user typing.
+
+- **API + storefront locale:** `Accept-Language` (ca / es / en) is sent on all **`api`** requests and middleware **`SetApiLocaleFromAcceptLanguage`** sets the app locale so **validation** messages (e.g. postal **regex**) match the UI language. Custom **`lang/*/validation.php`** entries for postal fields; **`CustomSolutionPage`** shows API errors via **`messageFromApiValidationError`** and maps **`fieldErrorsFromApiValidation`** onto inputs (red borders / hints).
+
+- **Admin / personalized solution resolution modal:** Title is a single word (**`resolution_modal_title`**); status field uses **`select-md`**, **`text-base`**, **`max-w-md`**, and **`gap-8`** before the textarea; textarea label **`resolution_modal_text_label`** (*Texto de la resolución* / …).
+
+- **Admin · shop settings:** Toggle and checkbox labels use **`w-full min-w-0`**, **`items-start`**, **`shrink-0`** on controls, and **`min-w-0 flex-1`** on **`label-text`** so long strings wrap on narrow viewports instead of overflowing the card.
+
+- **Admin · About · team:** Simplified to two lines (Yoel Berjaga as link to **ldeluipy.es**, Laia Martín); removed intro and bios; i18n names updated in **ca** / **es** / **en**.
+
+## [0.1.33] - 2026-04-30
+
+### Changed
+
+- **Postal codes (digits only):** Shared **`resources/js/lib/postalInput.js`** (`sanitizePostalCodeDigits`, `coercePostalCodeFieldValue`) used on **CustomSolution**, **Register**, **Checkout**, **Profile** addresses, **client personalized-solution** portal, and **admin personalized-solution edit**. Inputs use **`inputMode="numeric"`**, **`pattern="[0-9]*"`**, and **`autoComplete="postal-code"`** where appropriate.
+- **Zod:** **`postalCodeRequired`** / **`postalCodeLoose`** and checkout’s optional installation postal require **1–20 digits**; new i18n **`validation.postal_digits`** (ca / es / en).
+- **API:** Laravel validation uses **`regex:/^\d{1,20}$/`** (or **`^\d{0,20}$`** for nullable installation postal when installation is off) on register, personalized solutions, profile addresses, and order checkout.
+
+## [0.1.30] - 2026-04-30
+
+### Added
+
+- **Admin · About (`/admin/about`):** Sidebar entry **About / Quant a / Acerca de** with application version (**`APP_VERSION`**), development team (Luipy56, Laia Martín de la Fuente), technical stack summary (ca / es / en), and the **full repository changelog** loaded dynamically from **`CHANGELOG.md`** via **`GET /api/v1/admin/changelog`** (**`AdminAboutController`**). Markdown rendered in the SPA with **react-markdown**.
+
+### Changed
+
+- **Admin order detail (`AdminOrderShowPage`):** One desktop **table** for both Products and Packs so column widths align; header **`admin.orders.line_name`** (Nom / Nombre / Name); order total uses **`text-end`**; **Llaves iguales** shows **No** when the field does not apply (no blank cells).
+
+- **Vite dev:** `npm run dev` now sets **`LARAVEL_VITE_NO_AUTO_RELOAD=1`** with **cross-env** (Windows-safe), disabling WebSocket HMR, React Fast Refresh, and Laravel plugin full-page refresh; use **`npm run dev:hmr`** for the previous default. Added devDependency **cross-env**; **`vite.config.js`** uses explicit **`hmr: true`** when hot reload is enabled.
+
+- **Admin / personalized solution:** **Send to client** opens a **confirmation dialog** before **`POST …/notify-resolution`** (**`email_client_confirm_*`** i18n).
+
+- **Admin / personalized solution modal:** Removed the duplicate **Send to client** button from the modal footer; it remains on the detail toolbar.
+
+## [0.1.28] - 2026-04-29
+
+### Added
+
+- **Admin layout:** Sidebar subtitle under the shop title shows **Admin** and the app semver (**`admin.sidebar.subtitle`**, same source as the storefront footer: **`APP_VERSION`** / `package.json`).
+
+- **Admin settings · column visibility:** Registry (`config/admin_index_columns.php` + `adminIndexColumnsRegistry.js`) lists **all** list columns per table (IDs, product destacat/tendència, order installation/shipping/timestamps, personalized solution client login email, feature type ID, etc.). Matching `<th>` / `<td>` on admin index pages; new i18n keys under **`admin.common.*`**, **`admin.orders.column_*`**, **`admin.personalized_solutions.client_login_email`**, **`admin.features.feature_name_id`**.
+
+### Changed
+
+- **Cursor rules:** Clarify that **`footer.version`** / **`__APP_VERSION__`** come from root **`package.json`** (nothing auto-bumps per prompt); document **patch semver** on each shippable task before push and **`prod`** merge (**`app-version-cadence.mdc`**, **`commit-changelog-version.mdc`**, **`testing-verification.mdc`**).
+
+- **Admin / personalized solution modal:** Status **select** uses **`select-sm`**, **`max-w-xs`**, and **`min-w-0`** so it does not stretch full modal width; modal title (**`resolution_modal_title`**) includes a **line break** after “o” / “or”; **`h2`** uses **`whitespace-pre-line`**.
+- **Admin / personalized solution detail:** Toolbar **`admin.personalized_solutions.email_client_short`** label is **Enviar al cliente / Enviar al client / Send to client**; **`resolution_modal_open`** remains **Resolución / Resolució / Resolution**.
+- **Storefront / order detail:** Status timeline no longer lists the synthetic **`current`** step (same label as the **Estado** badge above).
+- **Storefront i18n:** **`shop.shipping_flat`** is shortened to **Envío / Enviament / Shipping** (removed flat-rate parenthetical); used on cart, checkout, and order detail totals.
+- **Storefront / order detail (`/orders/:id`):** **Estado** and **fecha** are shown in a compact **summary card** (status badge, locale-aware date). Order lines match admin: **Productes** and **Packs** sections (hidden when empty), **totals** in a separate shaded footer; new i18n keys under **`shop.order.*`**.
+- **Storefront / custom solution:** Success toast copy (**`shop.custom_solution.success`**) reminds the user to **check email** (ca / es / en).
+- **Storefront / navbar:** The **`header-gradient-line`** loading animation tracks **all in-flight `api` (axios) requests**, not only **React Query**, so cart, profile, orders, checkout, etc. show the same bar as the product catalog (respects **`prefers-reduced-motion`**).
+
 ## [0.1.25] - 2026-04-28
 
 ### Changed

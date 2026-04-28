@@ -49,6 +49,9 @@ export default function Footer() {
             <Link to="/custom-solution" className="link link-hover text-sm">
               {t('shop.custom_solution')}
             </Link>
+            <Link to="/faq" className="link link-hover text-sm">
+              {t('shop.faq.nav')}
+            </Link>
           </nav>
 
           {/* Legal */}

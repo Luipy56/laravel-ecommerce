@@ -8,7 +8,7 @@ import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQ
 export default function AdminCategoriesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('categories');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('categories');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -48,6 +48,52 @@ export default function AdminCategoriesPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  const categoryHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'code':
+        return <th key={colId}>{t('admin.products.code')}</th>;
+      case 'name':
+        return <th key={colId}>{t('admin.products.name')}</th>;
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const categoryBodyCell = (colId, c) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {c.id}
+          </td>
+        );
+      case 'code':
+        return <td key={colId}>{c.code ?? ''}</td>;
+      case 'name':
+        return <td key={colId}>{c.name}</td>;
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {c.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -95,11 +141,7 @@ export default function AdminCategoriesPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('code') ? <th>{t('admin.products.code')}</th> : null}
-                  {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
-                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => categoryHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {categories.map((c) => (
@@ -116,9 +158,7 @@ export default function AdminCategoriesPage() {
                       }
                     }}
                   >
-                    {isVisible('code') ? <td>{c.code ?? ''}</td> : null}
-                    {isVisible('name') ? <td>{c.name}</td> : null}
-                    {isVisible('is_active') ? <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                    {orderedVisibleColumnIds.map((colId) => categoryBodyCell(colId, c))}
                   </tr>
                 ))}
               </tbody>

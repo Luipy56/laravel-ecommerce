@@ -14,6 +14,7 @@ import PackDetailPage from './Pages/PackDetailPage';
 import CartPage from './Pages/CartPage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
+import EmailVerifyPage from './Pages/EmailVerifyPage';
 import CheckoutPage from './Pages/CheckoutPage';
 import OrdersPage from './Pages/OrdersPage';
 import PurchasesPage from './Pages/PurchasesPage';
@@ -58,8 +59,15 @@ import AdminOrderEditPage from './Pages/admin/AdminOrderEditPage';
 import AdminPersonalizedSolutionsPage from './Pages/admin/AdminPersonalizedSolutionsPage';
 import AdminDataExplorerPage from './Pages/admin/AdminDataExplorerPage';
 import AdminShopSettingsPage from './Pages/admin/AdminShopSettingsPage';
+import AdminAboutPage from './Pages/admin/AdminAboutPage';
 import AdminPersonalizedSolutionShowPage from './Pages/admin/AdminPersonalizedSolutionShowPage';
 import AdminPersonalizedSolutionEditPage from './Pages/admin/AdminPersonalizedSolutionEditPage';
+import AdminFaqsPage from './Pages/admin/AdminFaqsPage';
+import AdminFaqNewPage from './Pages/admin/AdminFaqNewPage';
+import AdminFaqEditPage from './Pages/admin/AdminFaqEditPage';
+import FaqPage from './Pages/FaqPage';
+import ForgotPasswordPage from './Pages/ForgotPasswordPage';
+import ResetPasswordPage from './Pages/ResetPasswordPage';
 import NotFoundPage from './Pages/NotFoundPage';
 import SessionExpiredPage from './Pages/SessionExpiredPage';
 
@@ -95,6 +103,10 @@ export default function App() {
                   <Route path="cart" element={<CartPage />} />
                   <Route path="login" element={<LoginPage />} />
                   <Route path="register" element={<RegisterPage />} />
+                  <Route path="verify-email" element={<EmailVerifyPage />} />
+                  <Route path="faq" element={<FaqPage />} />
+                  <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="reset-password" element={<ResetPasswordPage />} />
                   <Route path="checkout" element={<CheckoutPage />} />
                   <Route path="orders" element={<OrdersPage />} />
                   <Route path="purchases" element={<PurchasesPage />} />
@@ -115,6 +127,7 @@ export default function App() {
                 <Route path="admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="data-explorer" element={<AdminDataExplorerPage />} />
+                  <Route path="about" element={<AdminAboutPage />} />
                   <Route path="settings" element={<AdminShopSettingsPage />} />
                   <Route path="categories" element={<AdminCategoriesPage />} />
                   <Route path="categories/new" element={<AdminCategoryNewPage />} />
@@ -124,6 +137,9 @@ export default function App() {
                   <Route path="products/new" element={<AdminProductNewPage />} />
                   <Route path="products/:id/edit" element={<AdminProductEditPage />} />
                   <Route path="products/:id" element={<AdminProductShowPage />} />
+                  <Route path="faqs/new" element={<AdminFaqNewPage />} />
+                  <Route path="faqs/:id/edit" element={<AdminFaqEditPage />} />
+                  <Route path="faqs" element={<AdminFaqsPage />} />
                   <Route path="features" element={<AdminFeaturesPage />} />
                   <Route path="features/new" element={<AdminFeatureNewPage />} />
                   <Route path="features/:id/edit" element={<AdminFeatureEditPage />} />

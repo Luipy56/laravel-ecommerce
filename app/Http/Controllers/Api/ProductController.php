@@ -8,6 +8,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Feature;
 use App\Models\Pack;
 use App\Models\Product;
+use App\Services\HomeFeaturedProductIds;
 use App\Services\Search\CatalogProductSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -286,19 +287,30 @@ class ProductController extends Controller
      *
      * @return JsonResponse JSON envelope with success and data as a ProductResource collection.
      */
-    public function featured(): JsonResponse
+    public function featured(HomeFeaturedProductIds $homeFeatured): JsonResponse
     {
+        $ids = $homeFeatured->orderedIds();
+        if ($ids === []) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+            ]);
+        }
+
         $products = Product::query()->active()
-            ->where(function ($q) {
-                $q->where('is_featured', true)->orWhere('is_trending', true);
-            })
+            ->whereIn('id', $ids)
             ->with(['category', 'features.featureName', 'images'])
-            ->orderBy('name')
             ->get();
+
+        $byId = $products->keyBy('id');
+        $ordered = collect($ids)
+            ->map(fn (int $id) => $byId->get($id))
+            ->filter()
+            ->values();
 
         return response()->json([
             'success' => true,
-            'data' => ProductResource::collection($products),
+            'data' => ProductResource::collection($ordered),
         ]);
     }
 

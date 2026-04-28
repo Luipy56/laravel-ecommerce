@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PersonalizedSolution;
 use App\Models\ShopSetting;
 use App\Support\MailLocale;
+use App\Support\ValidationRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -23,13 +24,13 @@ class PersonalizedSolutionController extends Controller
         }
 
         $validated = $request->validate([
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => ['required', 'string', 'max:255', ValidationRules::emailDns()],
             'phone' => ['nullable', 'string', 'max:50'],
             'problem_description' => ['required', 'string', 'max:5000'],
             'address_street' => ['nullable', 'string', 'max:255'],
             'address_city' => ['nullable', 'string', 'max:100'],
             'address_province' => ['nullable', 'string', 'max:100'],
-            'address_postal_code' => ['required', 'string', 'max:20'],
+            'address_postal_code' => ['required', 'string', 'regex:/^\d{1,20}$/'],
             'address_note' => ['nullable', 'string', 'max:1000'],
             'attachments' => ['nullable', 'array'],
             'attachments.*' => ['file', 'max:10240'], // 10MB

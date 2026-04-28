@@ -50,18 +50,18 @@ class OrderController extends Controller
             'shipping_street' => ['required', 'string', 'max:255'],
             'shipping_city' => ['required', 'string', 'max:100'],
             'shipping_province' => ['nullable', 'string', 'max:100'],
-            'shipping_postal_code' => ['required', 'string', 'max:20'],
+            'shipping_postal_code' => ['required', 'string', 'regex:/^\d{1,20}$/'],
             'shipping_note' => ['nullable', 'string'],
             'installation_street' => ['nullable', 'string', 'max:255'],
             'installation_city' => ['nullable', 'string', 'max:100'],
-            'installation_postal_code' => ['nullable', 'string', 'max:20'],
+            'installation_postal_code' => ['nullable', 'string', 'regex:/^\d{0,20}$/'],
             'installation_note' => ['nullable', 'string'],
         ];
 
         if ($cart->installation_requested) {
             $rules['installation_street'] = ['required', 'string', 'max:255'];
             $rules['installation_city'] = ['required', 'string', 'max:100'];
-            $rules['installation_postal_code'] = ['required', 'string', 'max:20'];
+            $rules['installation_postal_code'] = ['required', 'string', 'regex:/^\d{1,20}$/'];
         }
 
         $validated = $request->validate($rules);
@@ -454,6 +454,34 @@ class OrderController extends Controller
         return response($html, 200, [
             'Content-Type' => 'text/html',
             'Content-Disposition' => 'inline; filename="invoice-'.$order->id.'.html"',
+        ]);
+    }
+
+    public function deliveryNote(Request $request, Order $order): Response
+    {
+        if ($order->client_id !== $request->user()->id || $order->kind !== Order::KIND_ORDER) {
+            abort(404);
+        }
+        if (! $order->hasSuccessfulPayment()) {
+            abort(403);
+        }
+        $allowed = config('app.available_locales', ['ca', 'es', 'en']);
+        $locale = $request->query('locale');
+        if (! in_array($locale, $allowed, true)) {
+            $pref = $request->header('Accept-Language', '');
+            $locale = (preg_match('/^(ca|es|en)([-_]|$)/i', $pref, $m) ? strtolower($m[1]) : null) ?? config('app.locale');
+        }
+        if (! in_array($locale, $allowed, true)) {
+            $locale = config('app.locale');
+        }
+        app()->setLocale($locale);
+        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
+
+        $html = view('pdf.delivery_note', ['order' => $order])->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html',
+            'Content-Disposition' => 'inline; filename="delivery-note-'.$order->id.'.html"',
         ]);
     }
 

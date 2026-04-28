@@ -8,7 +8,7 @@ import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQ
 export default function AdminProductsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('products');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('products');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +63,112 @@ export default function AdminProductsPage() {
     setPage(1);
   }, [searchDebounce, categoryId]);
 
+  const productHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'code':
+        return <th key={colId}>{t('admin.products.code')}</th>;
+      case 'name':
+        return <th key={colId}>{t('admin.products.name')}</th>;
+      case 'category':
+        return <th key={colId}>{t('admin.products.category')}</th>;
+      case 'price':
+        return <th key={colId} className="text-end">{t('admin.products.price')}</th>;
+      case 'discount_percent':
+        return <th key={colId} className="text-end">{t('admin.products.discount_percent')}</th>;
+      case 'stock':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.stock')}
+          </th>
+        );
+      case 'is_featured':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_featured')}
+          </th>
+        );
+      case 'is_trending':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_trending')}
+          </th>
+        );
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const productBodyCell = (colId, p) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {p.id}
+          </td>
+        );
+      case 'code':
+        return <td key={colId}>{p.code}</td>;
+      case 'name':
+        return <td key={colId}>{p.name}</td>;
+      case 'category':
+        return <td key={colId}>{p.category?.name}</td>;
+      case 'price':
+        return (
+          <td key={colId} className="text-end tabular-nums">
+            {p.price != null ? `${Number(p.price).toFixed(2)} €` : ''}
+          </td>
+        );
+      case 'discount_percent':
+        return (
+          <td key={colId} className="text-end tabular-nums">
+            {p.discount_percent != null &&
+            p.discount_percent !== '' &&
+            Number(p.discount_percent) > 0
+              ? `${Number(p.discount_percent)}%`
+              : ''}
+          </td>
+        );
+      case 'stock':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {p.stock}
+          </td>
+        );
+      case 'is_featured':
+        return (
+          <td key={colId} className="text-center">
+            {p.is_featured ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      case 'is_trending':
+        return (
+          <td key={colId} className="text-center">
+            {p.is_trending ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {p.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageTitle>{t('admin.products.title')}</PageTitle>
@@ -112,15 +218,7 @@ export default function AdminProductsPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('code') ? <th>{t('admin.products.code')}</th> : null}
-                  {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
-                  {isVisible('category') ? <th>{t('admin.products.category')}</th> : null}
-                  {isVisible('price') ? <th className="text-end">{t('admin.products.price')}</th> : null}
-                  {isVisible('discount_percent') ? <th className="text-end">{t('admin.products.discount_percent')}</th> : null}
-                  {isVisible('stock') ? <th className="text-center">{t('admin.products.stock')}</th> : null}
-                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => productHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {products.map((p) => (
@@ -137,23 +235,7 @@ export default function AdminProductsPage() {
                       }
                     }}
                   >
-                    {isVisible('code') ? <td>{p.code}</td> : null}
-                    {isVisible('name') ? <td>{p.name}</td> : null}
-                    {isVisible('category') ? <td>{p.category?.name}</td> : null}
-                    {isVisible('price') ? (
-                      <td className="text-end tabular-nums">{p.price != null ? Number(p.price).toFixed(2) + ' €' : ''}</td>
-                    ) : null}
-                    {isVisible('discount_percent') ? (
-                      <td className="text-end tabular-nums">
-                        {p.discount_percent != null &&
-                        p.discount_percent !== '' &&
-                        Number(p.discount_percent) > 0
-                          ? `${Number(p.discount_percent)}%`
-                          : ''}
-                      </td>
-                    ) : null}
-                    {isVisible('stock') ? <td className="text-center tabular-nums">{p.stock}</td> : null}
-                    {isVisible('is_active') ? <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                    {orderedVisibleColumnIds.map((colId) => productBodyCell(colId, p))}
                   </tr>
                 ))}
               </tbody>

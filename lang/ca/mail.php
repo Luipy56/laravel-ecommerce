@@ -95,6 +95,25 @@ return [
         'button' => 'Obrir al panell',
     ],
 
+    'verify_email' => [
+        'subject' => 'Verifica el teu correu',
+        'greeting' => 'Hola,',
+        'body' => 'Fes clic al botó següent per confirmar la teva adreça de correu i activar el compte.',
+        'button' => 'Verificar correu',
+        'link_fallback_label' => 'Si el botó no funciona',
+        'line2' => 'Si no has creat un compte, pots ignorar aquest missatge.',
+    ],
+
+    'reset_password' => [
+        'subject' => 'Recuperar contrasenya',
+        'greeting' => 'Hola,',
+        'body' => 'Hem rebut una sol·licitud per restablir la contrasenya del teu compte. Fes clic al botó per triar una contrasenya nova.',
+        'button' => 'Restablir contrasenya',
+        'expiry' => 'Aquest enllaç caduca en :minutes minuts.',
+        'link_fallback_label' => 'Si el botó no funciona',
+        'line2' => 'Si no has sol·licitat canviar la contrasenya, ignora aquest correu.',
+    ],
+
     'order_shipped' => [
         'subject' => 'La teva comanda #:id està en camí',
         'greeting' => 'Hola,',

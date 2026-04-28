@@ -36,6 +36,9 @@ class AdminShopSettingsController extends Controller
             'overstock_blacklist_product_ids' => ['array'],
             'overstock_blacklist_product_ids.*' => ['integer', 'min:1'],
             'accept_personalized_solutions' => ['boolean'],
+            'featured_max_manual' => ['integer', 'min:0'],
+            'featured_max_low_stock' => ['integer', 'min:0'],
+            'featured_max_overstock' => ['integer', 'min:0'],
         ], $this->adminIndexColumnsValidationRules()));
 
         foreach ($this->mapRequestToKeys($validated) as $key => $value) {
@@ -85,6 +88,9 @@ class AdminShopSettingsController extends Controller
             'overstock_blacklist_enabled' => (bool) ($merged[ShopSetting::KEY_OVERSTOCK_BLACKLIST_ENABLED] ?? false),
             'overstock_blacklist_product_ids' => $this->intArray($merged[ShopSetting::KEY_OVERSTOCK_BLACKLIST_PRODUCT_IDS] ?? []),
             'accept_personalized_solutions' => (bool) ($merged[ShopSetting::KEY_ACCEPT_PERSONALIZED_SOLUTIONS] ?? true),
+            'featured_max_manual' => (int) ($merged[ShopSetting::KEY_FEATURED_MAX_MANUAL] ?? 0),
+            'featured_max_low_stock' => (int) ($merged[ShopSetting::KEY_FEATURED_MAX_LOW_STOCK] ?? 0),
+            'featured_max_overstock' => (int) ($merged[ShopSetting::KEY_FEATURED_MAX_OVERSTOCK] ?? 0),
             'admin_index_columns' => AdminIndexColumns::normalize(is_array($storedColumns) ? $storedColumns : null),
         ];
     }
@@ -121,6 +127,9 @@ class AdminShopSettingsController extends Controller
             'overstock_blacklist_enabled' => ShopSetting::KEY_OVERSTOCK_BLACKLIST_ENABLED,
             'overstock_blacklist_product_ids' => ShopSetting::KEY_OVERSTOCK_BLACKLIST_PRODUCT_IDS,
             'accept_personalized_solutions' => ShopSetting::KEY_ACCEPT_PERSONALIZED_SOLUTIONS,
+            'featured_max_manual' => ShopSetting::KEY_FEATURED_MAX_MANUAL,
+            'featured_max_low_stock' => ShopSetting::KEY_FEATURED_MAX_LOW_STOCK,
+            'featured_max_overstock' => ShopSetting::KEY_FEATURED_MAX_OVERSTOCK,
         ];
         $out = [];
         foreach ($map as $requestKey => $dbKey) {

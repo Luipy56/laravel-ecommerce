@@ -4,8 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import { IconMenu } from '../icons';
 import { AdminToastProvider } from '../../contexts/AdminToastContext';
+import { APP_VERSION } from '../../config/version';
 
 const SECTION_NAV_KEYS = {
+  about: 'admin.nav.about',
   'data-explorer': 'admin.nav.data_explorer',
   settings: 'admin.nav.settings',
   admins: 'admin.nav.admins',
@@ -16,6 +18,7 @@ const SECTION_NAV_KEYS = {
   orders: 'admin.nav.orders',
   'personalized-solutions': 'admin.nav.personalized_solutions',
   features: 'admin.nav.features',
+  faqs: 'admin.nav.faqs',
   'feature-names': 'admin.nav.feature_types',
   packs: 'admin.nav.packs',
 };
@@ -25,6 +28,7 @@ const SECTION_NEW_KEYS = {
   categories: 'admin.categories.new',
   products: 'admin.products.new',
   features: 'admin.features.new',
+  faqs: 'admin.faqs.new',
   'feature-names': 'admin.feature_types.new',
   packs: 'admin.packs.new',
   'variant-groups': 'admin.variant_groups.new',
@@ -97,11 +101,9 @@ export default function AdminLayout() {
     }
   };
 
-  const navItems = useMemo(() => {
+  const { primaryNavItems, secondaryNavItems } = useMemo(() => {
     const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard', alertKey: null };
-    const mainItems = [
-      { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
-      { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
+    const primarySource = [
       { to: '/admin/admins', labelKey: 'admin.nav.admins', alertKey: null },
       { to: '/admin/categories', labelKey: 'admin.nav.categories', alertKey: null },
       { to: '/admin/products', labelKey: 'admin.nav.products', alertKey: null },
@@ -112,8 +114,18 @@ export default function AdminLayout() {
       { to: '/admin/features', labelKey: 'admin.nav.features', alertKey: null },
       { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
     ];
-    const sorted = [...mainItems].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
-    return [dashboard, ...sorted];
+    const primarySorted = [...primarySource].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
+    const secondarySource = [
+      { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
+      { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
+      { to: '/admin/faqs', labelKey: 'admin.nav.faqs', alertKey: null },
+      { to: '/admin/about', labelKey: 'admin.nav.about', alertKey: null },
+      { to: '/', labelKey: 'admin.back_to_shop', alertKey: null },
+    ];
+    return {
+      primaryNavItems: [dashboard, ...primarySorted],
+      secondaryNavItems: secondarySource,
+    };
   }, [t]);
 
   const [navAlerts, setNavAlerts] = useState({
@@ -144,6 +156,40 @@ export default function AdminLayout() {
       cancelled = true;
     };
   }, [pathname]);
+
+  const renderNavMenuItem = (item) => {
+    const { to, labelKey, alertKey } = item;
+    const showAttentionDot =
+      alertKey === 'orders'
+        ? navAlerts.orders
+        : alertKey === 'personalized_solutions'
+          ? navAlerts.personalized_solutions
+          : false;
+    const linkAria =
+      showAttentionDot && alertKey
+        ? `${t(labelKey)} · ${t(`admin.nav.alert_link_suffix_${alertKey}`)}`
+        : undefined;
+    return (
+      <li key={to === '/' ? 'back-to-shop' : to}>
+        <Link
+          to={to}
+          className={`rounded-lg flex items-center justify-between gap-2 ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
+          onClick={closeDrawer}
+          aria-current={isActive(to) ? 'page' : undefined}
+          aria-label={linkAria}
+        >
+          <span className="min-w-0 flex-1">{t(labelKey)}</span>
+          {showAttentionDot ? (
+            <span
+              className="size-2 shrink-0 rounded-full bg-warning"
+              aria-hidden="true"
+              title={t(`admin.nav.alert_link_suffix_${alertKey}`)}
+            />
+          ) : null}
+        </Link>
+      </li>
+    );
+  };
 
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-base-200">
@@ -200,46 +246,16 @@ export default function AdminLayout() {
         <aside className="bg-base-100 w-64 max-w-[min(100vw,16rem)] min-h-full flex flex-col border-r border-base-200">
           <div className="p-4 border-b border-base-200">
             <span className="font-bold text-lg text-base-content">{t('home.hero.title')}</span>
-            <span className="block text-sm text-base-content/70">Admin</span>
+            <span className="block text-sm text-base-content/70">
+              {t('admin.sidebar.subtitle', { version: APP_VERSION })}
+            </span>
           </div>
           <ul className="menu p-4 flex-1">
-            {navItems.map(({ to, labelKey, alertKey }) => {
-              const showAttentionDot =
-                alertKey === 'orders'
-                  ? navAlerts.orders
-                  : alertKey === 'personalized_solutions'
-                    ? navAlerts.personalized_solutions
-                    : false;
-              const linkAria =
-                showAttentionDot && alertKey
-                  ? `${t(labelKey)} · ${t(`admin.nav.alert_link_suffix_${alertKey}`)}`
-                  : undefined;
-              return (
-                <li key={to}>
-                  <Link
-                    to={to}
-                    className={`rounded-lg flex items-center justify-between gap-2 ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
-                    onClick={closeDrawer}
-                    aria-current={isActive(to) ? 'page' : undefined}
-                    aria-label={linkAria}
-                  >
-                    <span className="min-w-0 flex-1">{t(labelKey)}</span>
-                    {showAttentionDot ? (
-                      <span
-                        className="size-2 shrink-0 rounded-full bg-warning"
-                        aria-hidden="true"
-                        title={t(`admin.nav.alert_link_suffix_${alertKey}`)}
-                      />
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            })}
-            <li>
-              <Link to="/" className="rounded-lg" onClick={closeDrawer}>
-                {t('admin.back_to_shop')}
-              </Link>
+            {primaryNavItems.map(renderNavMenuItem)}
+            <li className="!min-h-0 !p-0 !py-0 list-none pointer-events-none my-2" aria-hidden="true">
+              <hr className="m-0 w-full border-0 border-t border-base-300" />
             </li>
+            {secondaryNavItems.map(renderNavMenuItem)}
           </ul>
           <div className="p-4 border-t border-base-200">
             <button type="button" className="btn btn-ghost btn-block justify-start" onClick={handleLogout}>

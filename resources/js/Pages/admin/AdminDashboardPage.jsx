@@ -169,6 +169,10 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle>{t('admin.dashboard.title')}</PageTitle>
+
+      {/*
+      Previous layout (title + filters squeezed on one row). Kept for easy revert.
       <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-between">
         <PageTitle>{t('admin.dashboard.title')}</PageTitle>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end">
@@ -231,6 +235,72 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
+      */}
+
+      <section className="card bg-base-100 shadow border border-base-200" aria-label={t('admin.dashboard.filters_section')}>
+        <div className="card-body gap-4 py-4 sm:py-5">
+          <h2 className="text-base font-semibold">{t('admin.dashboard.filters_section')}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full min-w-0">
+            <label className="form-control w-full min-w-0">
+              <div className="label py-0">
+                <span className="label-text text-sm">{t('admin.dashboard.filter_postal_code')}</span>
+              </div>
+              <select
+                id="dashboard-postal-code"
+                className="select select-bordered select-sm sm:select-md w-full min-w-0"
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+                aria-label={t('admin.dashboard.filter_postal_code')}
+              >
+                <option value="">{t('admin.dashboard.filter_all')}</option>
+                {postalCodes.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="form-control w-full min-w-0">
+              <div className="label py-0">
+                <span className="label-text text-sm">{t('admin.dashboard.filter_year')}</span>
+              </div>
+              <select
+                id="dashboard-filter-year"
+                className="select select-bordered select-sm sm:select-md w-full min-w-0"
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+                aria-label={t('admin.dashboard.filter_year')}
+              >
+                <option value="">{t('admin.dashboard.filter_all')}</option>
+                {yearSelectOptions.map((y) => (
+                  <option key={y} value={String(y)}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="form-control w-full min-w-0">
+              <div className="label py-0">
+                <span className="label-text text-sm">{t('admin.dashboard.filter_month')}</span>
+              </div>
+              <select
+                id="dashboard-filter-month"
+                className="select select-bordered select-sm sm:select-md w-full min-w-0"
+                value={filterMonth}
+                onChange={(e) => setFilterMonth(e.target.value)}
+                aria-label={t('admin.dashboard.filter_month')}
+              >
+                <option value="">{t('admin.dashboard.filter_all')}</option>
+                {monthOptions.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+      </section>
 
       <div className="stats stats-vertical w-full shadow sm:stats-horizontal bg-base-100 rounded-box overflow-hidden">
         <div className="stat">

@@ -7,12 +7,12 @@ use Tests\TestCase;
 
 class AdminIndexColumnsTest extends TestCase
 {
-    public function test_normalize_orders_visible_columns_by_registry_order(): void
+    public function test_normalize_preserves_stored_column_order(): void
     {
         $out = AdminIndexColumns::normalize([
             'products' => ['name', 'code'],
         ]);
-        $this->assertSame(['code', 'name'], $out['products']);
+        $this->assertSame(['name', 'code'], $out['products']);
     }
 
     public function test_normalize_drops_unknown_column_ids(): void

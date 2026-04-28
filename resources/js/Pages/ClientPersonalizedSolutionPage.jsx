@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
+import { sanitizePostalCodeDigits } from '../lib/postalInput';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../contexts/ToastContext';
@@ -237,7 +238,18 @@ export default function ClientPersonalizedSolutionPage() {
             </label>
             <label className="form-field">
               <span className="form-label">{t('admin.personalized_solutions.address_postal_code')} *</span>
-              <input type="text" className="input input-bordered w-full" value={form.address_postal_code} onChange={(e) => setForm((f) => ({ ...f, address_postal_code: e.target.value }))} required />
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                pattern="[0-9]*"
+                className="input input-bordered w-full"
+                value={form.address_postal_code}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, address_postal_code: sanitizePostalCodeDigits(e.target.value) }))
+                }
+                required
+              />
             </label>
             <label className="form-field sm:col-span-2">
               <span className="form-label">{t('shop.custom_solution.address_note')}</span>

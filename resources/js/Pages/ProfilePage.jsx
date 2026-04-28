@@ -5,6 +5,8 @@ import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
+import { scrollOpenModalBoxToTop, scrollWindowToTopOnFormError } from '../lib/formScroll';
+import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import {
   parseWithZod,
   profileAccountSchema,
@@ -112,6 +114,7 @@ export default function ProfilePage() {
     const parsed = parseWithZod(profileAccountSchema, accountForm, t);
     if (!parsed.ok) {
       setAccountFieldErrors(parsed.fieldErrors);
+      scrollWindowToTopOnFormError();
       return;
     }
     setAccountSaving(true);
@@ -147,6 +150,7 @@ export default function ProfilePage() {
     const parsed = parseWithZod(profilePasswordSchema, passwordForm, t);
     if (!parsed.ok) {
       setPasswordFieldErrors(parsed.fieldErrors);
+      scrollWindowToTopOnFormError();
       return;
     }
     setPasswordSaving(true);
@@ -194,9 +198,11 @@ export default function ProfilePage() {
 
   const handleAddressFormChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const nextVal =
+      type === 'checkbox' ? checked : coercePostalCodeFieldValue(name, value);
     setAddressForm((f) => ({
       ...f,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: nextVal,
     }));
     if (addressFieldErrors[name]) {
       setAddressFieldErrors((fe) => {
@@ -213,6 +219,7 @@ export default function ProfilePage() {
     const parsed = parseWithZod(profileAddressSchema, addressForm, t);
     if (!parsed.ok) {
       setAddressFieldErrors(parsed.fieldErrors);
+      scrollOpenModalBoxToTop();
       return;
     }
     setAddressSaving(true);
@@ -295,6 +302,7 @@ export default function ProfilePage() {
     const parsed = parseWithZod(profileContactSchema, contactForm, t);
     if (!parsed.ok) {
       setContactFieldErrors(parsed.fieldErrors);
+      scrollOpenModalBoxToTop();
       return;
     }
     setContactSaving(true);
@@ -634,6 +642,9 @@ export default function ProfilePage() {
                 <input
                   type="text"
                   name="postal_code"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  pattern="[0-9]*"
                   className={`input input-bordered w-full${addressFieldErrors.postal_code ? ' input-error' : ''}`}
                   value={addressForm.postal_code}
                   onChange={handleAddressFormChange}

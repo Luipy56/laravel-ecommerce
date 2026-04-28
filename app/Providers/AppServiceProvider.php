@@ -26,7 +26,12 @@ use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use App\Services\ProductSearchTextRebuildService;
 use App\Services\Search\ScoutElasticsearchProductCatalogSearch;
 use App\Services\Search\SearchSynonymDictionary;
+use App\Support\FrontendPasswordResetUrl;
+use App\Support\MailLocale;
 use App\Support\SqliteDatabaseBootstrap;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
@@ -108,5 +113,36 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(OrderPlacedPaymentPending::class, SendOrderPaymentPendingAdminEmail::class);
         Event::listen(PersonalizedSolutionSubmitted::class, SendPersonalizedSolutionAcknowledgementEmail::class);
         Event::listen(OrderShipped::class, SendOrderShippedEmail::class);
+
+        VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
+            $locale = MailLocale::resolve();
+            app()->setLocale($locale);
+
+            return (new MailMessage)
+                ->subject(__('mail.verify_email.subject', [], $locale))
+                ->view('emails.auth-verify-email', [
+                    'actionUrl' => $url,
+                    'emailTitle' => (string) __('mail.verify_email.subject', [], $locale),
+                    'mailLocale' => $locale,
+                ]);
+        });
+
+        ResetPassword::createUrlUsing(fn ($user, string $token): string => FrontendPasswordResetUrl::make($user, $token));
+
+        ResetPassword::toMailUsing(function ($notifiable, string $token): MailMessage {
+            $locale = MailLocale::resolve();
+            app()->setLocale($locale);
+            $url = FrontendPasswordResetUrl::make($notifiable, $token);
+            $expireMinutes = (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire');
+
+            return (new MailMessage)
+                ->subject(__('mail.reset_password.subject', [], $locale))
+                ->view('emails.auth-reset-password', [
+                    'actionUrl' => $url,
+                    'emailTitle' => (string) __('mail.reset_password.subject', [], $locale),
+                    'mailLocale' => $locale,
+                    'expireMinutes' => $expireMinutes,
+                ]);
+        });
     }
 }

@@ -95,6 +95,25 @@ return [
         'button' => 'Open in admin',
     ],
 
+    'verify_email' => [
+        'subject' => 'Verify your email',
+        'greeting' => 'Hello,',
+        'body' => 'Click the button below to confirm your email address and activate your account.',
+        'button' => 'Verify email',
+        'link_fallback_label' => 'If the button does not work',
+        'line2' => 'If you did not create an account, you can ignore this message.',
+    ],
+
+    'reset_password' => [
+        'subject' => 'Reset your password',
+        'greeting' => 'Hello,',
+        'body' => 'We received a request to reset your account password. Click the button to choose a new password.',
+        'button' => 'Reset password',
+        'expiry' => 'This link expires in :minutes minutes.',
+        'link_fallback_label' => 'If the button does not work',
+        'line2' => 'If you did not request a password reset, you can ignore this email.',
+    ],
+
     'order_shipped' => [
         'subject' => 'Your order #:id is on the way',
         'greeting' => 'Hello,',

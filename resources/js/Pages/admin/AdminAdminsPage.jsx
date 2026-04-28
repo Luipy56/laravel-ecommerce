@@ -8,7 +8,7 @@ import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQ
 export default function AdminAdminsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('admins');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('admins');
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
@@ -48,6 +48,60 @@ export default function AdminAdminsPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  const adminHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'username':
+        return <th key={colId}>{t('admin.admins.username')}</th>;
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      case 'last_login_at':
+        return <th key={colId}>{t('admin.admins.last_login_at')}</th>;
+      case 'created_at':
+        return <th key={colId}>{t('admin.admins.created_at')}</th>;
+      default:
+        return null;
+    }
+  };
+
+  const adminBodyCell = (colId, a) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {a.id}
+          </td>
+        );
+      case 'username':
+        return <td key={colId}>{a.username}</td>;
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {a.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      case 'last_login_at':
+        return (
+          <td key={colId}>{a.last_login_at ? new Date(a.last_login_at).toLocaleString() : ''}</td>
+        );
+      case 'created_at':
+        return (
+          <td key={colId}>{a.created_at ? new Date(a.created_at).toLocaleDateString() : ''}</td>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -95,12 +149,7 @@ export default function AdminAdminsPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('username') ? <th>{t('admin.admins.username')}</th> : null}
-                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                  {isVisible('last_login_at') ? <th>{t('admin.admins.last_login_at')}</th> : null}
-                  {isVisible('created_at') ? <th>{t('admin.admins.created_at')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => adminHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {admins.map((a) => (
@@ -117,10 +166,7 @@ export default function AdminAdminsPage() {
                       }
                     }}
                   >
-                    {isVisible('username') ? <td>{a.username}</td> : null}
-                    {isVisible('is_active') ? <td className="text-center">{a.is_active ? t('common.yes') : t('common.no')}</td> : null}
-                    {isVisible('last_login_at') ? <td>{a.last_login_at ? new Date(a.last_login_at).toLocaleString() : ''}</td> : null}
-                    {isVisible('created_at') ? <td>{a.created_at ? new Date(a.created_at).toLocaleDateString() : ''}</td> : null}
+                    {orderedVisibleColumnIds.map((colId) => adminBodyCell(colId, a))}
                   </tr>
                 ))}
               </tbody>

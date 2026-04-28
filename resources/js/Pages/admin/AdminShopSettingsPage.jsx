@@ -10,10 +10,11 @@ import {
   ADMIN_INDEX_TABLE_META,
   ADMIN_INDEX_TABLE_ORDER,
 } from '../../config/adminIndexColumnsRegistry';
+import AdminIndexColumnsFieldset from '../../components/admin/AdminIndexColumnsFieldset';
 import {
   adminShopSettingsQueryKey,
   buildAdminIndexColumnsPayload,
-  columnPrefsFromServer,
+  columnOrderAndPrefsFromServer,
 } from '../../hooks/useAdminShopSettingsQuery';
 
 function parseIdList(text) {
@@ -53,7 +54,12 @@ export default function AdminShopSettingsPage() {
 
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
 
+  const [featuredMaxManual, setFeaturedMaxManual] = useState(0);
+  const [featuredMaxLowStock, setFeaturedMaxLowStock] = useState(0);
+  const [featuredMaxOverstock, setFeaturedMaxOverstock] = useState(0);
+
   const [columnPrefs, setColumnPrefs] = useState({});
+  const [columnOrder, setColumnOrder] = useState({});
 
   const applyPayload = useCallback((d) => {
     setLowStockEnabled(!!d.low_stock_enabled);
@@ -65,7 +71,12 @@ export default function AdminShopSettingsPage() {
     setOverstockBlacklistEnabled(!!d.overstock_blacklist_enabled);
     setOverstockBlacklistText(idsToText(d.overstock_blacklist_product_ids));
     setAcceptPersonalizedSolutions(d.accept_personalized_solutions !== false);
-    setColumnPrefs(columnPrefsFromServer(d.admin_index_columns));
+    setFeaturedMaxManual(Number(d.featured_max_manual) || 0);
+    setFeaturedMaxLowStock(Number(d.featured_max_low_stock) || 0);
+    setFeaturedMaxOverstock(Number(d.featured_max_overstock) || 0);
+    const { columnPrefs: cp, columnOrder: co } = columnOrderAndPrefsFromServer(d.admin_index_columns);
+    setColumnPrefs(cp);
+    setColumnOrder(co);
   }, []);
 
   const fetchSettings = useCallback(async () => {
@@ -97,7 +108,10 @@ export default function AdminShopSettingsPage() {
     overstock_blacklist_enabled: overstockBlacklistEnabled,
     overstock_blacklist_product_ids: parseIdList(overstockBlacklistText),
     accept_personalized_solutions: acceptPersonalizedSolutions,
-    admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs),
+    featured_max_manual: Math.max(0, parseInt(String(featuredMaxManual), 10) || 0),
+    featured_max_low_stock: Math.max(0, parseInt(String(featuredMaxLowStock), 10) || 0),
+    featured_max_overstock: Math.max(0, parseInt(String(featuredMaxOverstock), 10) || 0),
+    admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs, columnOrder),
   });
 
   const handleSave = async (e) => {
@@ -152,7 +166,7 @@ export default function AdminShopSettingsPage() {
   }
 
   return (
-    <div className="space-y-6 pt-4 sm:pt-6">
+    <div className="space-y-6 pt-4 sm:pt-6 min-w-0">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <PageTitle>{t('admin.settings.title')}</PageTitle>
         <button
@@ -167,21 +181,36 @@ export default function AdminShopSettingsPage() {
 
       {saveError ? <div className="alert alert-error text-sm">{saveError}</div> : null}
 
-      <form onSubmit={handleSave} className="space-y-6">
+      <form onSubmit={handleSave} className="space-y-6 min-w-0">
         <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-4">
+          <div className="card-body space-y-4 min-w-0">
             <h2 className="card-title text-lg">{t('admin.settings.section_home')}</h2>
             <p className="text-sm text-base-content/70">{t('admin.settings.section_home_help')}</p>
 
+            <div className="divider my-1">{t('admin.settings.section_general')}</div>
+
+            <p className="text-sm font-medium">{t('admin.settings.featured_limits_title')}</p>
+            <p className="text-xs text-base-content/60">{t('admin.settings.featured_max_hint')}</p>
+            <label className="form-field max-w-xs">
+              <span className="label-text">{t('admin.settings.featured_max_manual')}</span>
+              <input
+                type="number"
+                min={0}
+                className="input input-bordered input-sm sm:input-md w-full"
+                value={featuredMaxManual}
+                onChange={(e) => setFeaturedMaxManual(e.target.value)}
+              />
+            </label>
+
             <div className="divider my-1">{t('admin.settings.low_stock')}</div>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={lowStockEnabled}
                 onChange={(e) => setLowStockEnabled(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.low_stock_enabled')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.low_stock_enabled')}</span>
             </label>
             <label className="form-field max-w-xs">
               <span className="label-text">{t('admin.settings.low_stock_threshold')}</span>
@@ -193,14 +222,14 @@ export default function AdminShopSettingsPage() {
                 onChange={(e) => setLowStockThreshold(e.target.value)}
               />
             </label>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={lowStockBlacklistEnabled}
                 onChange={(e) => setLowStockBlacklistEnabled(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.blacklist_enabled')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.blacklist_enabled')}</span>
             </label>
             <label className="form-field w-full max-w-xl">
               <span className="label-text">{t('admin.settings.blacklist_ids_hint')}</span>
@@ -211,16 +240,26 @@ export default function AdminShopSettingsPage() {
                 placeholder="1, 2, 3"
               />
             </label>
+            <label className="form-field max-w-xs">
+              <span className="label-text">{t('admin.settings.featured_max_low_stock')}</span>
+              <input
+                type="number"
+                min={0}
+                className="input input-bordered input-sm sm:input-md w-full"
+                value={featuredMaxLowStock}
+                onChange={(e) => setFeaturedMaxLowStock(e.target.value)}
+              />
+            </label>
 
             <div className="divider my-1">{t('admin.settings.overstock')}</div>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={overstockEnabled}
                 onChange={(e) => setOverstockEnabled(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.overstock_enabled')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.overstock_enabled')}</span>
             </label>
             <label className="form-field max-w-xs">
               <span className="label-text">{t('admin.settings.overstock_threshold')}</span>
@@ -232,14 +271,14 @@ export default function AdminShopSettingsPage() {
                 onChange={(e) => setOverstockThreshold(e.target.value)}
               />
             </label>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
-                className="toggle toggle-primary"
+                className="toggle toggle-primary shrink-0"
                 checked={overstockBlacklistEnabled}
                 onChange={(e) => setOverstockBlacklistEnabled(e.target.checked)}
               />
-              <span className="label-text">{t('admin.settings.overstock_blacklist_enabled')}</span>
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.overstock_blacklist_enabled')}</span>
             </label>
             <label className="form-field w-full max-w-xl">
               <span className="label-text">{t('admin.settings.blacklist_ids_hint')}</span>
@@ -250,27 +289,37 @@ export default function AdminShopSettingsPage() {
                 placeholder="1, 2, 3"
               />
             </label>
-          </div>
-        </section>
-
-        <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-4">
-            <h2 className="card-title text-lg">{t('admin.settings.section_personalized')}</h2>
-            <label className="label cursor-pointer justify-start gap-3">
+            <label className="form-field max-w-xs">
+              <span className="label-text">{t('admin.settings.featured_max_overstock')}</span>
               <input
-                type="checkbox"
-                className="toggle toggle-primary"
-                checked={acceptPersonalizedSolutions}
-                onChange={(e) => setAcceptPersonalizedSolutions(e.target.checked)}
+                type="number"
+                min={0}
+                className="input input-bordered input-sm sm:input-md w-full"
+                value={featuredMaxOverstock}
+                onChange={(e) => setFeaturedMaxOverstock(e.target.value)}
               />
-              <span className="label-text">{t('admin.settings.accept_personalized_solutions')}</span>
             </label>
           </div>
         </section>
 
         <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-6">
-            <div>
+          <div className="card-body space-y-4 min-w-0">
+            <h2 className="card-title text-lg">{t('admin.settings.section_personalized')}</h2>
+            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
+              <input
+                type="checkbox"
+                className="toggle toggle-primary shrink-0"
+                checked={acceptPersonalizedSolutions}
+                onChange={(e) => setAcceptPersonalizedSolutions(e.target.checked)}
+              />
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.accept_personalized_solutions')}</span>
+            </label>
+          </div>
+        </section>
+
+        <section className="card bg-base-100 shadow border border-base-200">
+          <div className="card-body space-y-6 min-w-0">
+            <div className="min-w-0">
               <h2 className="card-title text-lg">{t('admin.settings.index_columns_title')}</h2>
               <p className="text-sm text-base-content/70 mt-1">{t('admin.settings.index_columns_help')}</p>
             </div>
@@ -279,28 +328,17 @@ export default function AdminShopSettingsPage() {
               const titleKey = ADMIN_INDEX_TABLE_META[tableId]?.titleKey;
               if (!titleKey || cols.length === 0) return null;
               return (
-                <fieldset key={tableId} className="fieldset border border-base-200 rounded-box p-4 space-y-3">
-                  <legend className="fieldset-legend text-base font-semibold">{t(titleKey)}</legend>
-                  <div className="flex flex-wrap gap-x-4 gap-y-2">
-                    {cols.map((col) => (
-                      <label key={col.id} className="label cursor-pointer justify-start gap-2 py-1">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm checkbox-primary"
-                          checked={columnPrefs[tableId]?.[col.id] !== false}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setColumnPrefs((prev) => ({
-                              ...prev,
-                              [tableId]: { ...prev[tableId], [col.id]: checked },
-                            }));
-                          }}
-                        />
-                        <span className="label-text text-sm">{t(col.labelKey)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
+                <AdminIndexColumnsFieldset
+                  key={tableId}
+                  tableId={tableId}
+                  cols={cols}
+                  title={t(titleKey)}
+                  columnPrefs={columnPrefs}
+                  setColumnPrefs={setColumnPrefs}
+                  columnOrder={columnOrder}
+                  setColumnOrder={setColumnOrder}
+                  t={t}
+                />
               );
             })}
           </div>

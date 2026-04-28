@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Developer docs:** API HTML under **`docs/phpdoc`** uses phpDocumentor’s **`default`** template (modern layout and search UI) instead of legacy **`clean`**; run **`composer phpdoc`** after changing `app/` or `routes/` PHPDoc.
+
 - **Storefront / custom solution:** Removed the optional **“open case / access code”** block and hash scroll on **`/custom-solution`**. Short paths **`/client/personalized-solutions`**, **`/mi-solucion`**, and **`/my-solution`** now redirect to **`/custom-solution`** without a hash. Direct portal access remains **`/client/personalized-solutions/:token`**; removed dead **`resources/js/lib/personalizedSolutionCode.js`**.
 - **Transactional email layout:** Default logo is **`public/images/serraller_solidaria_logo_key.png`** (config `mail.brand.default_logo` / `MAIL_BRAND_DEFAULT_LOGO`); optional `MAIL_BRAND_LOGO_URL` still overrides. **Visible** brand from `mail.brand.display_name` (`MAIL_BRAND_DISPLAY_NAME`, default Serralleria Solidària), not `MAIL_FROM_NAME`. Personalized-solution subjects and body use the request mail locale via `trans(..., $locale)`.
 - **Personalized solution API:** 8s idempotency for duplicate POST (same IP, email, start of description) to cut double emails; storefront submit uses an in-flight ref on top of the confirmation modal.
@@ -34,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Agent pipeline:** archived closed PayPal sandbox CSP/CORS console task (**`CLOSED-20260419-1734-paypal-sandbox-csp-cors-console-errors.md`**) under **`agents/tasks/done/2026/04/19/`**; **log reviewer** latest pass (**2026-04-19T18:13Z**) recorded in **`agents/001-log-reviewer/time-of-last-review.txt`**.
+
+## [0.1.24] - 2026-04-28
+
+### Changed
+
+- **Release:** Patch version bump (`package.json` / `package-lock.json`) to trigger CI/CD rebuild and deploy.
 
 ## [0.1.23] - 2026-04-25
 

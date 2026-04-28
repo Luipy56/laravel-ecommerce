@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate API documentation (HTML) with phpDocumentor. Mirrors phpdoc.xml (app + routes, clean template).
+# Generate API documentation (HTML) with phpDocumentor. Mirrors phpdoc.xml (app + routes, default template).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -11,7 +11,7 @@ fi
 exec "$ROOT/tools/phpdocumentor/vendor/bin/phpdoc" run -c none \
     -d app -d routes \
     -t "file://${ROOT}/docs/phpdoc" \
-    --template=clean \
+    --template=default \
     --cache-folder="${ROOT}/.phpdoc/cache" \
     --defaultpackagename=App \
     --title="Laravel E-commerce — Application code" \

@@ -3,6 +3,7 @@
   phpDocumentor v3 configuration (same scope as scripts/phpdoc.sh).
   Generate HTML with: composer phpdoc
   (Direct "phpdoc -c phpdoc.xml" can fail on some setups due to URI resolution; the Composer script uses stable CLI flags.)
+  Template "default" is the bundled phpDocumentor 3 layout (cleaner than legacy "clean").
 -->
 <phpdocumentor xmlns="https://www.phpdoc.org" configVersion="3">
     <title>Laravel E-commerce — Application code</title>
@@ -22,5 +23,5 @@
             <default-package-name>App</default-package-name>
         </api>
     </version>
-    <template name="clean"/>
+    <template name="default"/>
 </phpdocumentor>

@@ -112,13 +112,13 @@ export default function AdminLayout() {
       { to: '/admin/orders', labelKey: 'admin.nav.orders', alertKey: 'orders' },
       { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions', alertKey: 'personalized_solutions' },
       { to: '/admin/features', labelKey: 'admin.nav.features', alertKey: null },
-      { to: '/admin/faqs', labelKey: 'admin.nav.faqs', alertKey: null },
       { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
     ];
     const primarySorted = [...primarySource].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
     const secondarySource = [
       { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
       { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
+      { to: '/admin/faqs', labelKey: 'admin.nav.faqs', alertKey: null },
       { to: '/admin/about', labelKey: 'admin.nav.about', alertKey: null },
       { to: '/', labelKey: 'admin.back_to_shop', alertKey: null },
     ];

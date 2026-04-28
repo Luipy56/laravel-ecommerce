@@ -6,6 +6,9 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { APP_VERSION } from '../../config/version';
 
+/** Lead developer site (external); not localized. */
+const PRIMARY_DEVELOPER_URL = 'https://ldeluipy.es';
+
 function markdownComponents() {
   return {
     h1: ({ children }) => <h2 className="text-xl font-bold text-base-content mt-6 mb-2 first:mt-0">{children}</h2>,
@@ -82,19 +85,21 @@ export default function AdminAboutPage() {
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200">
-        <div className="card-body space-y-4">
+        <div className="card-body space-y-3">
           <h2 className="card-title text-base">{t('admin.about.team_title')}</h2>
-          <p className="text-base-content/90">{t('admin.about.team_intro')}</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-base-300 bg-base-200/40 p-4">
-              <p className="font-semibold text-base-content">{t('admin.about.developer_primary_name')}</p>
-              <p className="text-sm text-base-content/80 mt-2 leading-relaxed">{t('admin.about.developer_primary_bio')}</p>
-            </div>
-            <div className="rounded-lg border border-base-300 bg-base-200/40 p-4">
-              <p className="font-semibold text-base-content">{t('admin.about.developer_laia_name')}</p>
-              <p className="text-sm text-base-content/80 mt-2 leading-relaxed">{t('admin.about.developer_laia_bio')}</p>
-            </div>
-          </div>
+          <ul className="list-none space-y-2 p-0 m-0 text-base-content/90">
+            <li>
+              <a
+                href={PRIMARY_DEVELOPER_URL}
+                className="link link-primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('admin.about.developer_primary_name')}
+              </a>
+            </li>
+            <li>{t('admin.about.developer_laia_name')}</li>
+          </ul>
         </div>
       </div>
 

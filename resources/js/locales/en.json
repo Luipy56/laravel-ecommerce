@@ -503,7 +503,6 @@
   "admin.orders.status_installation_pending": "Installation pending",
   "admin.orders.status_installation_confirmed": "Finalized",
   "admin.orders.status_awaiting_installation_price": "Installation budget pending",
-  "admin.orders.filter_installation_pending": "Installation only without price",
   "admin.orders.installation_fee_label": "Installation price (order)",
   "admin.orders.installation_status_label": "Installation status",
   "admin.orders.install_status_pending": "Budget pending",

@@ -503,7 +503,6 @@
   "admin.orders.status_installation_pending": "Instal·lació pendent",
   "admin.orders.status_installation_confirmed": "Finalitzat",
   "admin.orders.status_awaiting_installation_price": "Pendent pressupost instal·lació",
-  "admin.orders.filter_installation_pending": "Només instal·lació sense preu",
   "admin.orders.installation_fee_label": "Preu instal·lació (comanda)",
   "admin.orders.installation_status_label": "Estat instal·lació",
   "admin.orders.install_status_pending": "Pendent pressupost",

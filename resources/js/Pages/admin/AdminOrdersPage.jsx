@@ -33,7 +33,6 @@ export default function AdminOrdersPage() {
   const [searchDebounce, setSearchDebounce] = useState('');
   const [kindFilter, setKindFilter] = useState('order');
   const [statusFilter, setStatusFilter] = useState('');
-  const [installationPendingOnly, setInstallationPendingOnly] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -42,7 +41,6 @@ export default function AdminOrdersPage() {
       if (searchDebounce) params.search = searchDebounce;
       if (kindFilter) params.kind = kindFilter;
       if (statusFilter) params.status = statusFilter;
-      if (installationPendingOnly) params.installation_pending = 1;
       const { data } = await api.get('admin/orders', { params });
       if (data.success) {
         setOrders(data.data || []);
@@ -54,7 +52,7 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [navigate, page, searchDebounce, kindFilter, statusFilter, installationPendingOnly]);
+  }, [navigate, page, searchDebounce, kindFilter, statusFilter]);
 
   useEffect(() => {
     fetchOrders();
@@ -62,7 +60,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [searchDebounce, kindFilter, statusFilter, installationPendingOnly]);
+  }, [searchDebounce, kindFilter, statusFilter]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
@@ -113,17 +111,6 @@ export default function AdminOrdersPage() {
               <option key={s} value={s}>{t(`admin.orders.status_${s}`)}</option>
             ))}
           </select>
-        </label>
-        <label className="flex items-center gap-2 shrink-0 cursor-pointer">
-          <input
-            type="checkbox"
-            className="checkbox checkbox-sm checkbox-primary"
-            checked={installationPendingOnly}
-            onChange={(e) => setInstallationPendingOnly(e.target.checked)}
-            disabled={kindFilter !== 'order'}
-            aria-label={t('admin.orders.filter_installation_pending')}
-          />
-          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.orders.filter_installation_pending')}</span>
         </label>
       </div>
 

@@ -8,7 +8,19 @@ import CartWidget from './CartWidget';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import CookieConsentBanner from './CookieConsentBanner';
-import { IconCart, IconChevronDown, IconGrid, IconHelpCircle, IconHome, IconSparkles, IconX } from './icons';
+import {
+  IconCart,
+  IconChevronDown,
+  IconClipboardList,
+  IconGrid,
+  IconHelpCircle,
+  IconHome,
+  IconLogIn,
+  IconPackage,
+  IconSparkles,
+  IconUser,
+  IconX,
+} from './icons';
 
 const STOREFRONT_DRAWER_ID = 'drawer-nav';
 
@@ -207,43 +219,65 @@ export default function Layout() {
                 <span className="loading loading-spinner loading-sm text-primary" />
               </div>
             ) : user ? (
-              <ul className="flex flex-col gap-1.5" aria-label={t('shop.account')}>
+              <ul className="flex flex-col gap-1" aria-label={t('shop.account')}>
                 <li>
-                  <Link
+                  <NavLink
                     to="/profile"
+                    end
                     onClick={closeStorefrontDrawer}
-                    className="btn btn-ghost btn-sm h-auto min-h-9 w-full justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
+                    className={({ isActive }) => drawerNavClass(isActive)}
                   >
-                    {t('shop.profile')}
-                  </Link>
+                    {({ isActive }) => (
+                      <>
+                        <IconUser className={drawerIconClass(isActive)} aria-hidden="true" />
+                        {t('shop.profile')}
+                      </>
+                    )}
+                  </NavLink>
                 </li>
                 <li>
-                  <Link
+                  <NavLink
                     to="/orders"
                     onClick={closeStorefrontDrawer}
-                    className="btn btn-ghost btn-sm h-auto min-h-9 w-full justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
+                    className={({ isActive }) => drawerNavClass(isActive)}
                   >
-                    {t('shop.orders')}
-                  </Link>
+                    {({ isActive }) => (
+                      <>
+                        <IconClipboardList className={drawerIconClass(isActive)} aria-hidden="true" />
+                        {t('shop.orders')}
+                      </>
+                    )}
+                  </NavLink>
                 </li>
                 <li>
-                  <Link
+                  <NavLink
                     to="/purchases"
+                    end
                     onClick={closeStorefrontDrawer}
-                    className="btn btn-ghost btn-sm h-auto min-h-9 w-full justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
+                    className={({ isActive }) => drawerNavClass(isActive)}
                   >
-                    {t('shop.purchases')}
-                  </Link>
+                    {({ isActive }) => (
+                      <>
+                        <IconPackage className={drawerIconClass(isActive)} aria-hidden="true" />
+                        {t('shop.purchases')}
+                      </>
+                    )}
+                  </NavLink>
                 </li>
               </ul>
             ) : (
-              <Link
-                to="/login"
-                onClick={closeStorefrontDrawer}
-                className="btn btn-primary btn-sm w-full shadow-sm"
-              >
-                {t('auth.login')}
-              </Link>
+              <ul className="flex flex-col gap-1">
+                <li>
+                  <Link
+                    to="/login"
+                    onClick={closeStorefrontDrawer}
+                    className={drawerNavClass(false)}
+                  >
+                    <IconLogIn className={drawerIconClass(false)} aria-hidden="true" />
+                    {t('auth.login')}
+                  </Link>
+                </li>
+              </ul>
             )}
 
             <div className="mt-auto border-t border-base-200 bg-gradient-to-b from-base-100 to-base-200/50 px-3 pb-4 pt-4">

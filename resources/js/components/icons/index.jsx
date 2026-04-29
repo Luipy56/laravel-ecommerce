@@ -136,3 +136,51 @@ export function IconHelpCircle({ className, strokeWidth, ...rest }) {
     </IconWrapper>
   );
 }
+
+/** User / profile (silhouette in circle). */
+export function IconUser({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path
+        strokeWidth={strokeWidth ?? 2}
+        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+      />
+    </IconWrapper>
+  );
+}
+
+/** Orders / clipboard list. */
+export function IconClipboardList({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path
+        strokeWidth={strokeWidth ?? 2}
+        d="M9 5H7.25A2.25 2.25 0 005 7.25v12.5A2.25 2.25 0 007.25 22h9.5A2.25 2.25 0 0019 19.75V7.25A2.25 2.25 0 0016.75 5H15m-6 0V3.75A1.75 1.75 0 0110.75 2h2.5A1.75 1.75 0 0115 3.75V5M9 10h6M9 14h6M9 18h4"
+      />
+    </IconWrapper>
+  );
+}
+
+/** Purchases / package. */
+export function IconPackage({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path
+        strokeWidth={strokeWidth ?? 2}
+        d="M21 16.5V8.25a2.25 2.25 0 00-1.2-1.985l-7.5-4.125a2.25 2.25 0 00-2.1 0l-7.5 4.125A2.25 2.25 0 003 8.25v8.25a2.25 2.25 0 001.2 1.985l7.5 4.125a2.25 2.25 0 002.1 0l7.5-4.125A2.25 2.25 0 0021 16.5zM12 12.75L3.75 8.25 12 3.75l8.25 4.5L12 12.75zM12 12.75l8.25-4.5M12 12.75v8.25"
+      />
+    </IconWrapper>
+  );
+}
+
+/** Log in (arrow into bracket). */
+export function IconLogIn({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path
+        strokeWidth={strokeWidth ?? 2}
+        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H3"
+      />
+    </IconWrapper>
+  );
+}

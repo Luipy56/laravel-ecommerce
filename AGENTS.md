@@ -26,6 +26,8 @@ Laravel ecommerce: REST API + React storefront and admin UI.
 4. **Frontend deps:** `npm ci` (or `npm install` per team habit)
 5. **Run:** `php artisan serve` and `npm run dev` (or your local orchestration script)
 
+**Docker (optional):** **`docker compose up`** for the full dev stack (Postgres, Nginx, PHP-FPM, Vite, queue) — see **README.md** section *Docker (development and production)*. Production-style stack: **`docker compose -f docker-compose.prod.yml`**.
+
 ## Smoke checks
 
 When the user **explicitly** asks for verification before calling a fix complete, run:

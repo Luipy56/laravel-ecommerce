@@ -228,16 +228,6 @@ export default function Layout() {
                 </button>
                 <div className="dropdown-content z-[70] mt-1 w-full min-w-[12rem] max-w-full">
                   <div className="card card-border border border-base-300 bg-base-100 p-2 shadow-xl">
-                    <div className="mb-1 flex justify-end">
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-xs btn-square shrink-0"
-                        aria-label={t('common.close')}
-                        onClick={() => setLocaleMenuOpen(false)}
-                      >
-                        <IconX className="h-4 w-4" aria-hidden="true" />
-                      </button>
-                    </div>
                     <ul className="menu menu-sm max-h-60 flex-nowrap overflow-y-auto p-0" role="listbox" aria-label={t('common.language')}>
                       {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
                         const selected = locale === code;

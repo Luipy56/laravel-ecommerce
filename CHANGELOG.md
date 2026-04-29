@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Storefront mobile drawer · locale panel:** Removed the redundant **close (X)** row inside the language card; the trigger, outside tap, and **Escape** remain sufficient.
+
 - **Storefront mobile drawer (`Layout.jsx`):** Hamburger panel restyled (brand line, header close, icon + active state on primary nav, footer with brand/tagline, account shortcuts, language control). Shared **`STOREFRONT_LANGUAGE_OPTIONS`**; daisyUI **`dropdown-close`** when the locale menu is shut so the panel does not stay open on **`:focus-within`**; blur focused controls inside the widget; outside **`pointerdown`** (capture) to dismiss.
 - **Navbar:** Below **`lg`**, hide the locale control and guest **login** (available in the mobile drawer). Navbar locale dropdown uses the same **`dropdown-open` / `dropdown-close`** pattern as the drawer; sync **`locale`** state when **`i18n.language`** changes.
 - **Icons (`icons/index.jsx`):** **`IconHome`**, **`IconGrid`**, **`IconSparkles`**, **`IconHelpCircle`** for drawer links.

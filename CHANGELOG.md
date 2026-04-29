@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Production ops:** Base URL in server **`.env`** corrected (production deployment).
+
 - **Admin · About (`/admin/about`):** Laia Martín is linked to **GitHub** (**ViperBite03**), same pattern as Yoel Berjaga’s site link.
 
 - **Transactional email addresses:** Registration, login, password reset, and personalized-solution **`POST`** validate **`login_email` / `email`** with **RFC + DNS (MX-capable domain)** via **`ValidationRules::emailDns()`**; clearer validation messages in **ca / es / en**. Does not prove a mailbox exists on third-party hosts. Feature tests use **`@ietf.org`** sample addresses because **`example.com`** / **`example.org`** publish null MX (RFC 7505).

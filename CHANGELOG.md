@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Cursor rules:** **`agent-verification-opt-in.mdc`** — unless the user explicitly requests verification, agents **skip** running **`php artisan test`**, **`routes:smoke`**, **`npm run build`**, **`migrate:fresh --seed`** for QA gates; **mandatory** root **`package.json`** patch bump before **`git push`** when tracked files changed (overrides default **testing-verification** / smoke execution). **`AGENTS.md`** and **`docs/agent-cursor-rules.md`** updated.
+
 - **Cursor rules:** **`agent-task-version-bump.mdc`** — mandatory root **`package.json`** patch bump after **each agent-completed task** that commits; **`app-version-cadence.mdc`** / **`commit-changelog-version.mdc`** aligned; **`docs/agent-cursor-rules.md`** inventory updated.
 
 - **Storefront auth:** `clients.email_verified_at` and `remember_token`; `Client` implements email verification and password reset; JSON routes **forgot-password**, **reset-password**, **email/resend**, signed **email/verify/{id}/{hash}**; middleware **`client.verified`** on sensitive storefront APIs; **`GET reports/summary`** with **`auth.client_or_admin`** (shop metrics for admins, scoped metrics for verified clients).

@@ -200,6 +200,52 @@ export default function Layout() {
               </li>
             </ul>
 
+            <hr className="my-3 shrink-0 border-0 border-t border-base-200" />
+
+            {authLoading ? (
+              <div className="flex justify-center py-2" aria-busy="true" aria-label={t('common.loading')}>
+                <span className="loading loading-spinner loading-sm text-primary" />
+              </div>
+            ) : user ? (
+              <ul className="flex flex-col gap-1.5" aria-label={t('shop.account')}>
+                <li>
+                  <Link
+                    to="/profile"
+                    onClick={closeStorefrontDrawer}
+                    className="btn btn-ghost btn-sm h-auto min-h-9 w-full justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
+                  >
+                    {t('shop.profile')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/orders"
+                    onClick={closeStorefrontDrawer}
+                    className="btn btn-ghost btn-sm h-auto min-h-9 w-full justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
+                  >
+                    {t('shop.orders')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/purchases"
+                    onClick={closeStorefrontDrawer}
+                    className="btn btn-ghost btn-sm h-auto min-h-9 w-full justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
+                  >
+                    {t('shop.purchases')}
+                  </Link>
+                </li>
+              </ul>
+            ) : (
+              <Link
+                to="/login"
+                onClick={closeStorefrontDrawer}
+                className="btn btn-primary btn-sm w-full shadow-sm"
+              >
+                {t('auth.login')}
+              </Link>
+            )}
+
             <div className="mt-auto border-t border-base-200 bg-gradient-to-b from-base-100 to-base-200/50 px-3 pb-4 pt-4">
               <div
                 ref={localeMenuRef}
@@ -261,44 +307,6 @@ export default function Layout() {
 
               <p className="text-sm font-semibold leading-tight text-base-content">{t('shop.brand_name')}</p>
               <p className="mt-1 text-xs leading-snug text-base-content/65">{t('footer.tagline')}</p>
-
-              {authLoading ? (
-                <div className="mt-3 flex justify-center py-2" aria-busy="true" aria-label={t('common.loading')}>
-                  <span className="loading loading-spinner loading-sm text-primary" />
-                </div>
-              ) : user ? (
-                <div className="mt-3 flex flex-col gap-1.5">
-                  <Link
-                    to="/profile"
-                    onClick={closeStorefrontDrawer}
-                    className="btn btn-ghost btn-sm h-auto min-h-9 justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
-                  >
-                    {t('shop.profile')}
-                  </Link>
-                  <Link
-                    to="/orders"
-                    onClick={closeStorefrontDrawer}
-                    className="btn btn-ghost btn-sm h-auto min-h-9 justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
-                  >
-                    {t('shop.orders')}
-                  </Link>
-                  <Link
-                    to="/purchases"
-                    onClick={closeStorefrontDrawer}
-                    className="btn btn-ghost btn-sm h-auto min-h-9 justify-start gap-2 rounded-lg px-2 font-normal normal-case text-base-content"
-                  >
-                    {t('shop.purchases')}
-                  </Link>
-                </div>
-              ) : (
-                <Link
-                  to="/login"
-                  onClick={closeStorefrontDrawer}
-                  className="btn btn-primary btn-sm mt-3 w-full shadow-sm"
-                >
-                  {t('auth.login')}
-                </Link>
-              )}
             </div>
           </nav>
         </aside>

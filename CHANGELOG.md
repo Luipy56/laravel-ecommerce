@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Storefront mobile drawer:** **Perfil** / **Comandes** / **Compres** (session) and guest **login** sit directly under the main nav list, separated by a thin **`hr`**; footer strip keeps language + brand only.
+
 - **Storefront mobile drawer · locale panel:** Removed the redundant **close (X)** row inside the language card; the trigger, outside tap, and **Escape** remain sufficient.
 
 - **Storefront mobile drawer (`Layout.jsx`):** Hamburger panel restyled (brand line, header close, icon + active state on primary nav, footer with brand/tagline, account shortcuts, language control). Shared **`STOREFRONT_LANGUAGE_OPTIONS`**; daisyUI **`dropdown-close`** when the locale menu is shut so the panel does not stay open on **`:focus-within`**; blur focused controls inside the widget; outside **`pointerdown`** (capture) to dismiss.

@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Icons (`IconUser`, `IconHelpCircle`):** SVG **`d`** arc flags were glued to coordinates (`011-7.5`, `0118`), which broke React’s DOM parser and distorted the profile icon; paths now use explicit separators (`0 1 1 -7.5`, `0 0 1 18`, etc.).
+
 - **Password reset API:** **`POST /api/v1/reset-password`** no longer reads **`password_confirmation`** from **`validated()`** (Laravel omits it even when **`password`** uses **`confirmed`**), which caused an undefined index and HTTP **500**. The confirmation value is taken from the request body.
 
 - **Admin · index column settings:** Sortable column rows use **`items-center`** so the drag handle, checkbox, and label align vertically in **`AdminIndexColumnsFieldset`**.

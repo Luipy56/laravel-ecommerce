@@ -7,6 +7,8 @@ alwaysApply: true
 
 See **`.cursor/rules/app-version-cadence.mdc`** for **why** the footer version does not auto-increment, and **`.cursor/rules/agent-task-version-bump.mdc`** for the **mandatory patch bump after every agent task** that commits.
 
+Treat **prompt finished** / **task done** / **hand-off ready** the same as **before `git push`**: if the agent changed the tree, bump patch and sync **`CHANGELOG.md`** **`[Unreleased]`** — **not only** when the user types **commit**.
+
 When the user says **"commit"** (or asks to commit changes), or when finishing **any shippable task** before **`git push`**:
 
 1. **Review and update** before committing:

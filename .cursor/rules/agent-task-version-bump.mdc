@@ -15,6 +15,8 @@ alwaysApply: true
 
 **Clarification:** “Each prompt” means **each finished agent run that changes the tree**, not a no-op chat turn. If no files are modified, no bump.
 
+**End of user prompt / session:** When the user signals work is **done** (or the agent finishes a substantive request) and **tracked files changed**, bump patch and add **`CHANGELOG.md`** **`[Unreleased]`** bullets **in that same session** — **do not wait** for the word **commit** unless the user explicitly defers versioning. Stale **`footer.version`** / **`APP_VERSION`** confuse operators.
+
 ## What this overrides
 
 Loose “docs-only may skip” habits do **not** apply to **agent-delivered** work: if you **commit** a change, **bump patch** unless the only event is a **git revert** that fully restores a previous release (team discretion).

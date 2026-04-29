@@ -5,15 +5,10 @@ import useApiPendingCount from '../hooks/useApiPendingCount';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { IconCart, IconMenu, IconX } from './icons';
+import { STOREFRONT_LANGUAGE_OPTIONS } from '../lib/storefrontLanguageOptions';
 
 const SCROLL_THRESHOLD = 10;   // px: below this, navbar is always visible
 const SCROLL_DELTA = 5;        // px: min scroll movement to consider direction
-
-const LANGUAGE_OPTIONS = [
-  { code: 'ca', label: 'Català' },
-  { code: 'es', label: 'Español' },
-  { code: 'en', label: 'English' },
-];
 
 function CartDropTarget({ to, className, children, ariaLabel, title }) {
   const { addLine } = useCart();
@@ -54,6 +49,7 @@ export default function Navbar() {
   const hasUserEditedSearchRef = useRef(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const localeMenuRef = useRef(null);
+  const localeTriggerRef = useRef(null);
 
   // Sync search input with URL when on product list (so clearing + Enter updates list)
   useEffect(() => {
@@ -63,6 +59,22 @@ export default function Navbar() {
       setSearchQ(q ?? '');
     }
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    setLocale(i18n.language);
+  }, [i18n.language]);
+
+  /** daisyUI 5: :focus-within keeps panel open; .dropdown-close forces it closed — blur focus inside the control. */
+  useEffect(() => {
+    if (localeMenuOpen) return;
+    const root = localeMenuRef.current;
+    const ae = document.activeElement;
+    if (root && ae instanceof HTMLElement && root.contains(ae)) {
+      ae.blur();
+    } else {
+      localeTriggerRef.current?.blur();
+    }
+  }, [localeMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -208,9 +220,10 @@ export default function Navbar() {
           <div className="navbar-end gap-1 sm:gap-2 shrink-0">
             <div
               ref={localeMenuRef}
-              className={`dropdown dropdown-end ${localeMenuOpen ? 'dropdown-open' : ''}`}
+              className={`dropdown dropdown-end hidden lg:inline-block ${localeMenuOpen ? 'dropdown-open' : 'dropdown-close'}`}
             >
               <button
+                ref={localeTriggerRef}
                 type="button"
                 className="btn btn-ghost btn-sm btn-square sm:btn-sm border border-transparent hover:border-base-300"
                 aria-expanded={localeMenuOpen}
@@ -234,7 +247,7 @@ export default function Navbar() {
                     </button>
                   </div>
                   <ul className="menu menu-sm p-2 gap-0.5" role="listbox" aria-label={t('common.language')}>
-                    {LANGUAGE_OPTIONS.map(({ code, label }) => {
+                    {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
                       const selected = locale === code;
                       return (
                         <li key={code} role="none">
@@ -274,7 +287,7 @@ export default function Navbar() {
             </CartDropTarget>
             {authLoading ? (
               <div
-                className="btn btn-ghost btn-sm min-w-[6rem] pointer-events-none shrink-0"
+                className="btn btn-ghost btn-sm min-w-[6rem] pointer-events-none shrink-0 hidden lg:flex"
                 aria-busy="true"
                 aria-label={t('common.loading')}
               >
@@ -293,7 +306,7 @@ export default function Navbar() {
                 </ul>
               </div>
             ) : (
-              <Link to="/login" className="btn btn-primary btn-sm shrink-0">
+              <Link to="/login" className="btn btn-primary btn-sm hidden shrink-0 lg:inline-flex">
                 {t('auth.login')}
               </Link>
             )}

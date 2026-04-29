@@ -9,6 +9,9 @@ import { APP_VERSION } from '../../config/version';
 /** Lead developer site (external); not localized. */
 const PRIMARY_DEVELOPER_URL = 'https://ldeluipy.es';
 
+/** Developer GitHub profile (external); not localized. */
+const LAIA_DEVELOPER_URL = 'https://github.com/ViperBite03';
+
 function markdownComponents() {
   return {
     h1: ({ children }) => <h2 className="text-xl font-bold text-base-content mt-6 mb-2 first:mt-0">{children}</h2>,
@@ -98,7 +101,16 @@ export default function AdminAboutPage() {
                 {t('admin.about.developer_primary_name')}
               </a>
             </li>
-            <li>{t('admin.about.developer_laia_name')}</li>
+            <li>
+              <a
+                href={LAIA_DEVELOPER_URL}
+                className="link link-primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('admin.about.developer_laia_name')}
+              </a>
+            </li>
           </ul>
         </div>
       </div>

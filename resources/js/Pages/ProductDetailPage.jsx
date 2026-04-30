@@ -6,6 +6,7 @@ import { api } from '../api';
 import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
 import { IconCart, IconChevronLeft, IconChevronRight, IconChevronUp } from '../components/icons';
+import FavoriteToggle from '../components/FavoriteToggle';
 
 const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
@@ -376,6 +377,7 @@ export default function ProductDetailPage() {
                   className="input input-bordered input-sm w-20"
                 />
               </label>
+              <FavoriteToggle productId={product.id} />
               <button
                 type="button"
                 className="btn btn-primary btn-sm gap-1.5 px-3 min-h-8 shrink-0"

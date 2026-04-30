@@ -25,6 +25,10 @@
     "shop.cart": "Cart",
     "shop.cart.add": "Add to cart",
     "shop.cart.empty": "The cart is empty.",
+    "shop.favorites.specify_one": "Send either product_id or pack_id, not both and not neither.",
+    "shop.favorites.product_unavailable": "This product is not available or is inactive.",
+    "shop.favorites.pack_unavailable": "This pack is not available or is inactive.",
+    "shop.favorites.line_not_found": "Favorite line not found.",
     "shop.checkout": "Finalize order",
     "shop.orders": "Orders",
     "shop.account": "My account",
@@ -74,6 +78,9 @@
     "shop.payment.paypal_capture_failed": "Payment with PayPal could not be confirmed. Please try again or contact us.",
     "shop.payment.paypal_oauth_failed": "PayPal rejected server credentials (wrong Client ID or Secret, or Live app used in Sandbox mode). Check PAYPAL_CLIENT_ID, PAYPAL_SECRET and PAYPAL_MODE in .env and copy the full values ​​again from the PayPal Developer panel.",
     "shop.payment.paypal_credentials_format_invalid": "PAYPAL_CLIENT_ID seems incomplete: on PayPal it is usually a long string (~80 characters). Copy the full Client ID from Apps & Credentials (Sandbox or Live) and the corresponding Secret.",
+    "shop.payment.stripe_session_invalid": "The Stripe payment session is invalid or was not found.",
+    "shop.payment.stripe_session_forbidden": "This payment session does not belong to your account.",
+    "shop.payment.stripe_confirm_pending": "Payment is not yet marked as completed in Stripe. Wait a moment or check payment status.",
     "shop.checkout_stripe_product": "Order #:id",
     "shop.order.timeline.placed": "Registered order",
     "shop.order.timeline.payment_received": "Registered payment",
@@ -97,5 +104,9 @@
     "admin.data_explorer.errors.invalid_metric": "The metric must be count, sum, or avg.",
     "shop.personalized_solutions_disabled": "We are not accepting new custom solution requests at the moment.",
     "shop.personalized_solution_too_soon": "We just received the same request. Please wait a few seconds before sending again.",
-    "admin.personalized_solutions.patch_requires_body": "Send at least a resolution text or a status value."
+    "admin.personalized_solutions.patch_requires_body": "Send at least a resolution text or a status value.",
+    "admin.orders.manual_settlement_invalid": "This action only applies to real orders.",
+    "admin.orders.manual_settlement_wrong_status": "The order must be awaiting payment.",
+    "admin.orders.manual_settlement_payment_not_pending": "The payment is not pending.",
+    "admin.orders.manual_settlement_not_offline": "Only bank transfer or manual Bizum payments can be recorded manually."
 }

@@ -13,6 +13,7 @@ import {
   IconChevronDown,
   IconClipboardList,
   IconGrid,
+  IconHeart,
   IconHelpCircle,
   IconHome,
   IconLogIn,
@@ -249,6 +250,22 @@ export default function Layout() {
                     )}
                   </NavLink>
                 </li>
+                {user.email_verified ? (
+                  <li>
+                    <NavLink
+                      to="/favorites"
+                      onClick={closeStorefrontDrawer}
+                      className={({ isActive }) => drawerNavClass(isActive)}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <IconHeart className={drawerIconClass(isActive)} filled={isActive} aria-hidden="true" />
+                          {t('shop.favorites')}
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ) : null}
                 <li>
                   <NavLink
                     to="/purchases"

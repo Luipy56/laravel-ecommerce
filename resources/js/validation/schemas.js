@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-const PAYMENT_METHODS = z.enum(['card', 'paypal']);
+/** Order of options in checkout / pay forms (must match server `payment_method` values). */
+export const CHECKOUT_PAYMENT_METHOD_ORDER = ['card', 'paypal', 'bank_transfer', 'bizum_manual'];
 
 /** Optional phone: empty or international-style with at least 6 digits. */
 export const optionalPhoneString = z
@@ -75,14 +76,20 @@ export const customSolutionFormSchema = z.object({
 });
 
 /**
- * @param {{ wantsInstallation: boolean, installationQuoteRequired: boolean, checkoutDemoSkipPayment?: boolean }} opts
+ * @param {{ wantsInstallation: boolean, installationQuoteRequired: boolean, checkoutDemoSkipPayment?: boolean, allowedPaymentMethods?: string[] }} opts
  */
 export function checkoutFormSchema({
   wantsInstallation,
   installationQuoteRequired,
   checkoutDemoSkipPayment = false,
+  allowedPaymentMethods = ['card', 'paypal'],
 }) {
-  const paymentMethodField = checkoutDemoSkipPayment ? z.enum(['card', 'paypal']).optional() : PAYMENT_METHODS;
+  const allowed = [...new Set((allowedPaymentMethods || []).filter(Boolean))];
+  const paymentMethodSchema = z
+    .string()
+    .min(1, { message: 'validation.required' })
+    .refine((m) => allowed.length === 0 || allowed.includes(m), { message: 'validation.invalid' });
+  const paymentMethodField = checkoutDemoSkipPayment ? z.string().optional().nullable() : paymentMethodSchema;
   const shipping = {
     shipping_street: z.string().trim().min(1, { message: 'validation.required' }).max(255),
     shipping_city: z.string().trim().min(1, { message: 'validation.required' }).max(100),

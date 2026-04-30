@@ -4,9 +4,11 @@ namespace App\Services\Payments;
 
 use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Models\Payment;
+use App\Models\ShopSetting;
 use App\Services\Payments\PayPal\PayPalCheckoutStarter;
 use App\Services\Payments\PayPal\PayPalClient;
 use App\Services\Payments\Stripe\StripeCredentials;
+use App\Support\PaymentOfflineInstructions;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -74,6 +76,8 @@ class PaymentCheckoutService
         return match ($method) {
             Payment::METHOD_CARD => StripeCredentials::areConfigured(),
             Payment::METHOD_PAYPAL => PayPalClient::envCredentialsPresent(),
+            Payment::METHOD_BANK_TRANSFER => PaymentOfflineInstructions::bankTransferConfigured(ShopSetting::allMerged()),
+            Payment::METHOD_BIZUM_MANUAL => PaymentOfflineInstructions::bizumManualConfigured(ShopSetting::allMerged()),
             default => false,
         };
     }
@@ -86,6 +90,24 @@ class PaymentCheckoutService
         }
 
         return ! self::methodHasRealProviderCredentials(Payment::METHOD_PAYPAL);
+    }
+
+    public static function bankTransferMissingInstructionsForStorefront(): bool
+    {
+        if (! in_array(Payment::METHOD_BANK_TRANSFER, self::checkoutMethodKeysFromConfig(), true)) {
+            return false;
+        }
+
+        return ! self::methodHasRealProviderCredentials(Payment::METHOD_BANK_TRANSFER);
+    }
+
+    public static function bizumManualMissingInstructionsForStorefront(): bool
+    {
+        if (! in_array(Payment::METHOD_BIZUM_MANUAL, self::checkoutMethodKeysFromConfig(), true)) {
+            return false;
+        }
+
+        return ! self::methodHasRealProviderCredentials(Payment::METHOD_BIZUM_MANUAL);
     }
 
     /**
@@ -128,35 +150,43 @@ class PaymentCheckoutService
         if ($payment->payment_method === Payment::METHOD_CHECKOUT_DEMO_SKIP) {
             return false;
         }
+        if (Payment::isOfflineCheckoutMethod($payment->payment_method)) {
+            return false;
+        }
 
         return self::allowSimulatedPayments()
             && ! self::methodHasRealProviderCredentials($payment->payment_method);
     }
 
     /**
-     * @return array{card: bool, paypal: bool, simulated: bool}
+     * @return array{card: bool, paypal: bool, bank_transfer: bool, bizum_manual: bool, simulated: bool}
      */
     private static function paymentMethodsBaseAvailability(): array
     {
         $simulated = self::allowSimulatedPayments();
         $stripeOk = $simulated || StripeCredentials::areConfigured();
         $paypalOk = PayPalClient::envCredentialsPresent();
+        $merged = ShopSetting::allMerged();
+        $bankOk = PaymentOfflineInstructions::bankTransferConfigured($merged);
+        $bizumManualOk = PaymentOfflineInstructions::bizumManualConfigured($merged);
 
         return [
             'card' => $stripeOk,
             'paypal' => $paypalOk,
+            'bank_transfer' => $bankOk,
+            'bizum_manual' => $bizumManualOk,
             'simulated' => $simulated,
         ];
     }
 
     /**
-     * @param  array{card: bool, paypal: bool, simulated: bool}  $base
-     * @return array{card: bool, paypal: bool, simulated: bool}
+     * @param  array{card: bool, paypal: bool, bank_transfer: bool, bizum_manual: bool, simulated: bool}  $base
+     * @return array{card: bool, paypal: bool, bank_transfer: bool, bizum_manual: bool, simulated: bool}
      */
     private static function applyCheckoutMethodWhitelist(array $base): array
     {
         $allowed = self::checkoutMethodKeysFromConfig();
-        foreach (['card', 'paypal'] as $k) {
+        foreach (['card', 'paypal', 'bank_transfer', 'bizum_manual'] as $k) {
             if (! in_array($k, $allowed, true)) {
                 $base[$k] = false;
             }
@@ -168,7 +198,7 @@ class PaymentCheckoutService
     /**
      * Storefront + API: credential/simulated availability intersected with PAYMENTS_CHECKOUT_METHODS.
      *
-     * @return array{card: bool, paypal: bool, simulated: bool}
+     * @return array{card: bool, paypal: bool, bank_transfer: bool, bizum_manual: bool, simulated: bool}
      */
     public static function paymentMethodsAvailability(): array
     {
@@ -182,6 +212,8 @@ class PaymentCheckoutService
         return match ($method) {
             Payment::METHOD_CARD => $a['card'],
             Payment::METHOD_PAYPAL => $a['paypal'],
+            Payment::METHOD_BANK_TRANSFER => $a['bank_transfer'],
+            Payment::METHOD_BIZUM_MANUAL => $a['bizum_manual'],
             default => false,
         };
     }

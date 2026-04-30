@@ -82,6 +82,11 @@ export default function AdminShopSettingsPage() {
   const [featuredMaxOverstock, setFeaturedMaxOverstock] = useState(0);
 
   const [shippingFlatEur, setShippingFlatEur] = useState('9');
+  const [bankTransferIban, setBankTransferIban] = useState('');
+  const [bankTransferBeneficiary, setBankTransferBeneficiary] = useState('');
+  const [bankTransferReferenceHint, setBankTransferReferenceHint] = useState('');
+  const [bizumManualPhone, setBizumManualPhone] = useState('');
+  const [bizumManualInstructions, setBizumManualInstructions] = useState('');
   const [installationQuoteAbove, setInstallationQuoteAbove] = useState('1000');
   const [installationTiers, setInstallationTiers] = useState(() => defaultInstallationRows());
 
@@ -102,6 +107,11 @@ export default function AdminShopSettingsPage() {
     setFeaturedMaxLowStock(Number(d.featured_max_low_stock) || 0);
     setFeaturedMaxOverstock(Number(d.featured_max_overstock) || 0);
     setShippingFlatEur(String(d.shipping_flat_eur ?? '9'));
+    setBankTransferIban(String(d.bank_transfer_iban ?? ''));
+    setBankTransferBeneficiary(String(d.bank_transfer_beneficiary ?? ''));
+    setBankTransferReferenceHint(String(d.bank_transfer_reference_hint ?? ''));
+    setBizumManualPhone(String(d.bizum_manual_phone ?? ''));
+    setBizumManualInstructions(String(d.bizum_manual_instructions ?? ''));
     const { quote, tiers } = parseInstallationFromApi(d.installation_auto_pricing);
     setInstallationQuoteAbove(quote);
     setInstallationTiers(tiers);
@@ -161,6 +171,11 @@ export default function AdminShopSettingsPage() {
       featured_max_low_stock: Math.max(0, parseInt(String(featuredMaxLowStock), 10) || 0),
       featured_max_overstock: Math.max(0, parseInt(String(featuredMaxOverstock), 10) || 0),
       shipping_flat_eur: ship,
+      bank_transfer_iban: bankTransferIban.trim(),
+      bank_transfer_beneficiary: bankTransferBeneficiary.trim(),
+      bank_transfer_reference_hint: bankTransferReferenceHint.trim(),
+      bizum_manual_phone: bizumManualPhone.trim(),
+      bizum_manual_instructions: bizumManualInstructions.trim(),
       installation_auto_pricing: {
         quote_when_merchandise_above_eur: quote,
         tiers,
@@ -409,6 +424,56 @@ export default function AdminShopSettingsPage() {
                   className="input input-bordered input-sm sm:input-md w-full"
                   value={shippingFlatEur}
                   onChange={(e) => setShippingFlatEur(e.target.value)}
+                />
+              </label>
+            </div>
+
+            <div className="divider my-2">{t('admin.settings.offline_payments_section')}</div>
+            <div>
+              <p className="text-sm font-medium">{t('admin.settings.offline_payments_title')}</p>
+              <p className="text-xs text-base-content/60 mt-1">{t('admin.settings.offline_payments_help')}</p>
+              <label className="form-field w-full max-w-xl mt-3">
+                <span className="label-text">{t('admin.settings.bank_transfer_iban')}</span>
+                <input
+                  type="text"
+                  className="input input-bordered input-sm sm:input-md w-full font-mono"
+                  value={bankTransferIban}
+                  onChange={(e) => setBankTransferIban(e.target.value)}
+                  autoComplete="off"
+                />
+              </label>
+              <label className="form-field w-full max-w-xl mt-2">
+                <span className="label-text">{t('admin.settings.bank_transfer_beneficiary')}</span>
+                <input
+                  type="text"
+                  className="input input-bordered input-sm sm:input-md w-full"
+                  value={bankTransferBeneficiary}
+                  onChange={(e) => setBankTransferBeneficiary(e.target.value)}
+                />
+              </label>
+              <label className="form-field w-full max-w-xl mt-2">
+                <span className="label-text">{t('admin.settings.bank_transfer_reference_hint')}</span>
+                <textarea
+                  className="textarea textarea-bordered w-full text-sm min-h-[4rem]"
+                  value={bankTransferReferenceHint}
+                  onChange={(e) => setBankTransferReferenceHint(e.target.value)}
+                />
+              </label>
+              <label className="form-field w-full max-w-xl mt-2">
+                <span className="label-text">{t('admin.settings.bizum_manual_phone')}</span>
+                <input
+                  type="text"
+                  className="input input-bordered input-sm sm:input-md w-full"
+                  value={bizumManualPhone}
+                  onChange={(e) => setBizumManualPhone(e.target.value)}
+                />
+              </label>
+              <label className="form-field w-full max-w-xl mt-2">
+                <span className="label-text">{t('admin.settings.bizum_manual_instructions')}</span>
+                <textarea
+                  className="textarea textarea-bordered w-full text-sm min-h-[5rem]"
+                  value={bizumManualInstructions}
+                  onChange={(e) => setBizumManualInstructions(e.target.value)}
                 />
               </label>
             </div>

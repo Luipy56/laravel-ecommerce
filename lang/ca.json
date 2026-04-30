@@ -27,6 +27,10 @@
     "shop.cart": "Cistella",
     "shop.cart.add": "Afegir a la cistella",
     "shop.cart.empty": "La cistella està buida.",
+    "shop.favorites.specify_one": "Envia product_id o pack_id, no tots dos ni cap.",
+    "shop.favorites.product_unavailable": "Aquest producte no està disponible o està inactiu.",
+    "shop.favorites.pack_unavailable": "Aquest pack no està disponible o està inactiu.",
+    "shop.favorites.line_not_found": "No s'ha trobat la línia de favorits.",
     "shop.checkout": "Finalitzar comanda",
     "shop.orders": "Comandes",
     "shop.account": "El meu compte",
@@ -76,6 +80,9 @@
     "shop.payment.paypal_capture_failed": "No s'ha pogut confirmar el pagament amb PayPal. Torna-ho a provar o contacta'ns.",
     "shop.payment.paypal_oauth_failed": "PayPal ha rebutjat les credencials del servidor (Client ID o Secret incorrectes, o app Live en mode Sandbox). Revisa PAYPAL_CLIENT_ID, PAYPAL_SECRET i PAYPAL_MODE al .env i torna a copiar els valors complets des del panell de desenvolupador de PayPal.",
     "shop.payment.paypal_credentials_format_invalid": "PAYPAL_CLIENT_ID sembla incomplet: a PayPal sol ser una cadena llarga (~80 caràcters). Copia el Client ID complet des d'Apps & Credentials (Sandbox o Live) i el Secret corresponent.",
+    "shop.payment.stripe_session_invalid": "La sessió de pagament de Stripe no és vàlida o no s'ha trobat.",
+    "shop.payment.stripe_session_forbidden": "Aquesta sessió de pagament no correspon al teu compte.",
+    "shop.payment.stripe_confirm_pending": "El pagament encara no consta com a completat a Stripe. Espera uns moments o revisa l'estat del pagament.",
     "shop.checkout_stripe_product": "Comanda #:id",
 
     "shop.order.timeline.placed": "Comanda registrada",
@@ -103,5 +110,9 @@
     "admin.data_explorer.errors.invalid_metric": "La mètrica ha de ser count, sum o avg.",
     "shop.personalized_solutions_disabled": "En aquests moments no acceptem noves sol·licituds de solució personalitzada.",
     "shop.personalized_solution_too_soon": "Hem rebut la mateixa sol·licitud fa un moment. Espera uns segons abans de tornar a enviar.",
-    "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat."
+    "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat.",
+    "admin.orders.manual_settlement_invalid": "Aquesta acció només aplica a comandes reals.",
+    "admin.orders.manual_settlement_wrong_status": "La comanda ha d'estar en estat d'espera de pagament.",
+    "admin.orders.manual_settlement_payment_not_pending": "El pagament no està pendent.",
+    "admin.orders.manual_settlement_not_offline": "Només es poden registrar manualment pagaments per transferència o Bizum manual."
 }

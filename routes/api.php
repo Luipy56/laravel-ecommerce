@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ClientPasswordResetController;
 use App\Http\Controllers\Api\ClientVerificationController;
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\OrderController;
@@ -35,6 +36,7 @@ use App\Http\Controllers\Api\PublicPersonalizedSolutionController;
 use App\Http\Controllers\Api\PurchasedProductsController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ShopPublicSettingsController;
+use App\Http\Controllers\Api\StripeCheckoutConfirmController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -109,7 +111,14 @@ Route::middleware(['auth', 'client.verified'])->group(function () {
 
     Route::post('cart/merge', [CartController::class, 'merge']); // merge session cart into DB on login
 
+    Route::get('favorites/ids', [FavoriteController::class, 'ids']);
+    Route::get('favorites', [FavoriteController::class, 'index']);
+    Route::post('favorites/toggle', [FavoriteController::class, 'toggle']);
+    Route::delete('favorites/lines/{orderLine}', [FavoriteController::class, 'destroyLine']);
+
     Route::post('payments/paypal/capture', [PayPalPaymentController::class, 'capture']);
+    Route::post('payments/stripe/checkout/confirm', [StripeCheckoutConfirmController::class, 'store'])
+        ->middleware('throttle:12,1');
 
     Route::post('orders/checkout', [OrderController::class, 'checkout']);
     Route::post('orders/{order}/pay', [OrderController::class, 'pay']);
@@ -162,6 +171,8 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('orders', [AdminOrderController::class, 'index']);
     Route::get('orders/{order}', [AdminOrderController::class, 'show']);
     Route::put('orders/{order}', [AdminOrderController::class, 'update']);
+    Route::post('orders/{order}/payments/{payment}/record-manual-settlement', [AdminOrderController::class, 'recordManualSettlement'])
+        ->middleware('throttle:30,1');
     Route::apiResource('admins', AdminAdminController::class);
     Route::get('personalized-solutions', [AdminPersonalizedSolutionController::class, 'index']);
     Route::get('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'show']);

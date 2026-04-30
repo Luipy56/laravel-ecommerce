@@ -20,6 +20,7 @@ import OrdersPage from './Pages/OrdersPage';
 import PurchasesPage from './Pages/PurchasesPage';
 import OrderDetailPage from './Pages/OrderDetailPage';
 import ProfilePage from './Pages/ProfilePage';
+import FavoritesPage from './Pages/FavoritesPage';
 import CustomSolutionPage from './Pages/CustomSolutionPage';
 import ClientPersonalizedSolutionPage from './Pages/ClientPersonalizedSolutionPage';
 import AdminLoginPage from './Pages/admin/AdminLoginPage';
@@ -109,6 +110,7 @@ export default function App() {
                   <Route path="reset-password" element={<ResetPasswordPage />} />
                   <Route path="checkout" element={<CheckoutPage />} />
                   <Route path="orders" element={<OrdersPage />} />
+                  <Route path="favorites" element={<FavoritesPage />} />
                   <Route path="purchases" element={<PurchasesPage />} />
                   <Route path="orders/:id" element={<OrderDetailPage />} />
                   <Route path="profile" element={<ProfilePage />} />

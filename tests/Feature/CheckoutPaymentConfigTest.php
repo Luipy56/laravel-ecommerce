@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderLine;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ShopSetting;
 use App\Services\Payments\PayPal\PayPalClient;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -470,5 +472,61 @@ class CheckoutPaymentConfigTest extends TestCase
         $response = $this->postJson('/api/v1/orders/checkout', $payload);
 
         $response->assertStatus(422);
+    }
+
+    public function test_payments_config_shows_bank_transfer_when_whitelisted_and_iban_configured(): void
+    {
+        ShopSetting::set(ShopSetting::KEY_BANK_TRANSFER_IBAN, 'ES9121000418450200051332');
+
+        config([
+            'payments.checkout_method_keys' => ['card', 'bank_transfer'],
+            'payments.allow_simulated' => true,
+            'app.debug' => true,
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.methods.bank_transfer', true);
+        $response->assertJsonPath('data.bank_transfer_missing_instructions', false);
+    }
+
+    public function test_checkout_bank_transfer_returns_manual_gateway_and_instructions(): void
+    {
+        ShopSetting::set(ShopSetting::KEY_BANK_TRANSFER_IBAN, 'ES9121000418450200051332');
+        ShopSetting::set(ShopSetting::KEY_BANK_TRANSFER_BENEFICIARY, 'Test Shop SL');
+
+        config([
+            'payments.checkout_method_keys' => ['bank_transfer'],
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+        ]);
+
+        $client = $this->makeClientWithCart();
+
+        $payload = [
+            'payment_method' => Payment::METHOD_BANK_TRANSFER,
+            'shipping_street' => 'Carrer 1',
+            'shipping_city' => 'Barcelona',
+            'shipping_province' => '',
+            'shipping_postal_code' => '08001',
+            'shipping_note' => '',
+            'installation_street' => '',
+            'installation_city' => '',
+            'installation_postal_code' => '',
+            'installation_note' => '',
+        ];
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/orders/checkout', $payload);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.status', Order::STATUS_AWAITING_PAYMENT);
+        $response->assertJsonPath('data.payment_checkout.gateway', Payment::GATEWAY_MANUAL);
+        $response->assertJsonPath('data.payment_instructions.type', 'bank_transfer');
+        $response->assertJsonPath('data.has_payment', false);
     }
 }

@@ -1,0 +1,39 @@
+---
+description: Skip heavy verification unless the user asks; version bump stays mandatory before commit/push
+alwaysApply: true
+---
+
+# Verification opt-in (speed policy) — precedence
+
+## Precedence
+
+This rule has **higher priority** than:
+
+- **`.cursor/rules/testing-verification.mdc`** (sections that require **running** checks),
+- **`AGENTS.md`** (smoke / verification checklist that require **running** those commands),
+- the sentence in **`.cursor/rules/agent-task-version-bump.mdc`** that requires **`npm run build`** after JS/Vite edits **for verification or version-string alignment**.
+
+When the **current user prompt or task** does **not** explicitly ask to run tests, smoke, build, migrate/seed verification, checkout/payment manual QA, or equivalent (“CI”, “quality gate”, “verify before merge”, etc.), the agent **must not** run:
+
+- `php artisan test`
+- `php artisan routes:smoke` (or `--details`)
+- `php artisan migrate:fresh --seed` **for verification** (still run it **only** when the user explicitly requires it or the user’s instructions say schema/seed work must be validated that way)
+- `npm run build`, `npm test`, or other npm scripts **for verification**
+- discretionary browser / curl checks solely to “prove” the change
+
+**Optional:** Briefly state in the reply that verification was skipped because the user did not request it (no need to apologize at length).
+
+If the user **does** explicitly request any of the above, follow those instructions and the stricter rules normally.
+
+## Always: project version
+
+Whenever the agent **changes tracked files** and the work is intended to end in **commit and/or `git push`** to the integration branch, **always** bump the root app semver using **`npm version patch --no-git-tag-version`** (same workflow as **`.cursor/rules/agent-task-version-bump.mdc`**) **before** push, included in the same commit series as the functional change when practical.
+
+- If **no** files were modified, **no** version bump.
+- Exception: full **git revert** restoring a prior release — team discretion, same as **`.cursor/rules/agent-task-version-bump.mdc`**.
+
+Do **not** skip the version bump to save time.
+
+## Changelog / commits
+
+When the user says **commit** or the task is shippable, still follow **`.cursor/rules/commit-changelog-version.mdc`** for `CHANGELOG.md` / README / docs review; this rule only relaxes **execution** of heavy verification commands unless asked.

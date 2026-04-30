@@ -27,6 +27,10 @@
     "shop.cart": "Carrito",
     "shop.cart.add": "Añadir al carrito",
     "shop.cart.empty": "El carrito está vacío.",
+    "shop.favorites.specify_one": "Envía product_id o pack_id, no ambos ni ninguno.",
+    "shop.favorites.product_unavailable": "Este producto no está disponible o está inactivo.",
+    "shop.favorites.pack_unavailable": "Este pack no está disponible o está inactivo.",
+    "shop.favorites.line_not_found": "No se encontró la línea de favoritos.",
     "shop.checkout": "Finalizar pedido",
     "shop.orders": "Pedidos",
     "shop.account": "Mi cuenta",
@@ -76,6 +80,9 @@
     "shop.payment.paypal_capture_failed": "No se pudo confirmar el pago con PayPal. Inténtalo de nuevo o contáctanos.",
     "shop.payment.paypal_oauth_failed": "PayPal rechazó las credenciales del servidor (Client ID o Secret incorrectos, o app Live usada en modo Sandbox). Revisa PAYPAL_CLIENT_ID, PAYPAL_SECRET y PAYPAL_MODE en .env y vuelve a copiar los valores completos desde el panel de desarrollador de PayPal.",
     "shop.payment.paypal_credentials_format_invalid": "PAYPAL_CLIENT_ID parece incompleto: en PayPal suele ser una cadena larga (~80 caracteres). Copia el Client ID completo desde Apps & Credentials (Sandbox o Live) y el Secret correspondiente.",
+    "shop.payment.stripe_session_invalid": "La sesión de pago de Stripe no es válida o no se ha encontrado.",
+    "shop.payment.stripe_session_forbidden": "Esta sesión de pago no corresponde a tu cuenta.",
+    "shop.payment.stripe_confirm_pending": "El pago aún no consta como completado en Stripe. Espera unos momentos o revisa el estado del pago.",
     "shop.checkout_stripe_product": "Pedido #:id",
 
     "shop.order.timeline.placed": "Pedido registrado",
@@ -103,5 +110,9 @@
     "admin.data_explorer.errors.invalid_metric": "La métrica debe ser count, sum o avg.",
     "shop.personalized_solutions_disabled": "En este momento no aceptamos nuevas solicitudes de solución personalizada.",
     "shop.personalized_solution_too_soon": "Hemos recibido la misma solicitud hace un momento. Espera unos segundos antes de volver a enviar.",
-    "admin.personalized_solutions.patch_requires_body": "Envía al menos el texto de resolución o un estado."
+    "admin.personalized_solutions.patch_requires_body": "Envía al menos el texto de resolución o un estado.",
+    "admin.orders.manual_settlement_invalid": "Esta acción solo aplica a pedidos reales.",
+    "admin.orders.manual_settlement_wrong_status": "El pedido debe estar en espera de pago.",
+    "admin.orders.manual_settlement_payment_not_pending": "El pago no está pendiente.",
+    "admin.orders.manual_settlement_not_offline": "Solo se pueden registrar manualmente pagos por transferencia o Bizum manual."
 }

@@ -4,16 +4,21 @@ import { useTranslation } from 'react-i18next';
 import useApiPendingCount from '../hooks/useApiPendingCount';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { IconCart, IconMenu, IconX } from './icons';
+import {
+  IconCart,
+  IconChevronDown,
+  IconClipboardList,
+  IconHeart,
+  IconLogOut,
+  IconMenu,
+  IconPackage,
+  IconUser,
+  IconX,
+} from './icons';
+import { STOREFRONT_LANGUAGE_OPTIONS } from '../lib/storefrontLanguageOptions';
 
 const SCROLL_THRESHOLD = 10;   // px: below this, navbar is always visible
 const SCROLL_DELTA = 5;        // px: min scroll movement to consider direction
-
-const LANGUAGE_OPTIONS = [
-  { code: 'ca', label: 'Català' },
-  { code: 'es', label: 'Español' },
-  { code: 'en', label: 'English' },
-];
 
 function CartDropTarget({ to, className, children, ariaLabel, title }) {
   const { addLine } = useCart();
@@ -54,6 +59,7 @@ export default function Navbar() {
   const hasUserEditedSearchRef = useRef(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const localeMenuRef = useRef(null);
+  const localeTriggerRef = useRef(null);
 
   // Sync search input with URL when on product list (so clearing + Enter updates list)
   useEffect(() => {
@@ -63,6 +69,22 @@ export default function Navbar() {
       setSearchQ(q ?? '');
     }
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    setLocale(i18n.language);
+  }, [i18n.language]);
+
+  /** daisyUI 5: :focus-within keeps panel open; .dropdown-close forces it closed — blur focus inside the control. */
+  useEffect(() => {
+    if (localeMenuOpen) return;
+    const root = localeMenuRef.current;
+    const ae = document.activeElement;
+    if (root && ae instanceof HTMLElement && root.contains(ae)) {
+      ae.blur();
+    } else {
+      localeTriggerRef.current?.blur();
+    }
+  }, [localeMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -208,9 +230,10 @@ export default function Navbar() {
           <div className="navbar-end gap-1 sm:gap-2 shrink-0">
             <div
               ref={localeMenuRef}
-              className={`dropdown dropdown-end ${localeMenuOpen ? 'dropdown-open' : ''}`}
+              className={`dropdown dropdown-end hidden lg:inline-block ${localeMenuOpen ? 'dropdown-open' : 'dropdown-close'}`}
             >
               <button
+                ref={localeTriggerRef}
                 type="button"
                 className="btn btn-ghost btn-sm btn-square sm:btn-sm border border-transparent hover:border-base-300"
                 aria-expanded={localeMenuOpen}
@@ -234,7 +257,7 @@ export default function Navbar() {
                     </button>
                   </div>
                   <ul className="menu menu-sm p-2 gap-0.5" role="listbox" aria-label={t('common.language')}>
-                    {LANGUAGE_OPTIONS.map(({ code, label }) => {
+                    {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
                       const selected = locale === code;
                       return (
                         <li key={code} role="none">
@@ -274,7 +297,7 @@ export default function Navbar() {
             </CartDropTarget>
             {authLoading ? (
               <div
-                className="btn btn-ghost btn-sm min-w-[6rem] pointer-events-none shrink-0"
+                className="btn btn-ghost btn-sm min-w-[6rem] pointer-events-none shrink-0 hidden lg:flex"
                 aria-busy="true"
                 aria-label={t('common.loading')}
               >
@@ -282,18 +305,91 @@ export default function Navbar() {
               </div>
             ) : user ? (
               <div className="dropdown dropdown-end">
-                <label tabIndex={0} className="btn btn-ghost btn-sm max-w-[7rem] sm:max-w-none truncate">
-                  <span className="truncate">{user.name?.trim() || user.login_email}</span>
+                <label
+                  tabIndex={0}
+                  className="btn btn-ghost btn-sm max-w-[8rem] sm:max-w-none gap-1.5 border border-transparent px-2 hover:border-base-300 normal-case"
+                >
+                  <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <IconUser className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="truncate text-left">{user.name?.trim() || user.login_email}</span>
+                  <IconChevronDown className="h-4 w-4 shrink-0 opacity-60 hidden sm:block" aria-hidden="true" />
                 </label>
-                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow">
-                  <li><Link to="/profile">{t('shop.profile')}</Link></li>
-                  <li><Link to="/orders">{t('shop.orders')}</Link></li>
-                  <li><Link to="/purchases">{t('shop.purchases')}</Link></li>
-                  <li><button type="button" onClick={handleLogout}>{t('auth.logout')}</button></li>
-                </ul>
+                <div
+                  tabIndex={0}
+                  className="dropdown-content z-[60] mt-2 w-[min(18rem,calc(100vw-1.5rem))] sm:w-56 max-sm:right-0 max-sm:left-auto sm:right-0"
+                >
+                  <div className="card card-border border-base-300 bg-base-100 shadow-xl overflow-hidden">
+                    <div className="flex items-center gap-2 border-b border-base-200 bg-gradient-to-r from-base-200/80 via-base-100 to-base-100 px-3 py-2.5">
+                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-primary/20">
+                        <IconUser className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-base-content">
+                          {user.name?.trim() || user.login_email}
+                        </p>
+                        {user.login_email && user.name?.trim() && user.login_email !== user.name.trim() ? (
+                          <p className="truncate text-xs text-base-content/60">{user.login_email}</p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <nav className="p-2" aria-label={t('shop.account')}>
+                      <ul className="flex flex-col gap-0.5">
+                        <li>
+                          <Link
+                            to="/profile"
+                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                          >
+                            <IconUser className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                            {t('shop.profile')}
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            to="/orders"
+                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                          >
+                            <IconClipboardList className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                            {t('shop.orders')}
+                          </Link>
+                        </li>
+                        {user.email_verified ? (
+                          <li>
+                            <Link
+                              to="/favorites"
+                              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                            >
+                              <IconHeart className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                              {t('shop.favorites')}
+                            </Link>
+                          </li>
+                        ) : null}
+                        <li>
+                          <Link
+                            to="/purchases"
+                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                          >
+                            <IconPackage className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                            {t('shop.purchases')}
+                          </Link>
+                        </li>
+                      </ul>
+                      <div className="mt-1 border-t border-base-200 pt-1">
+                        <button
+                          type="button"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-error transition-colors duration-200 hover:bg-error/10 active:bg-error/15"
+                          onClick={handleLogout}
+                        >
+                          <IconLogOut className="h-5 w-5 shrink-0" aria-hidden="true" />
+                          {t('auth.logout')}
+                        </button>
+                      </div>
+                    </nav>
+                  </div>
+                </div>
               </div>
             ) : (
-              <Link to="/login" className="btn btn-primary btn-sm shrink-0">
+              <Link to="/login" className="btn btn-primary btn-sm hidden shrink-0 lg:inline-flex">
                 {t('auth.login')}
               </Link>
             )}

@@ -27,19 +27,20 @@ return [
 
     /*
     | Comma-separated payment_method keys exposed on the storefront and accepted by checkout/pay.
-    | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal.
+    | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal,
+    | bank_transfer, bizum_manual (offline: configure IBAN / Bizum text in admin shop settings).
     |
-    | Omitted or empty string in .env → both card and paypal are allowed (then filtered by credentials).
-    | To expose Stripe (card) together with PayPal, use e.g. PAYMENTS_CHECKOUT_METHODS=card,paypal or leave empty.
-    | If you set PAYMENTS_CHECKOUT_METHODS=paypal only, methods.card stays false in the API even when STRIPE_* are set.
+    | Omitted or empty string in .env → card, paypal, bank_transfer, bizum_manual are allowed
+    | (then filtered by credentials for PSP methods and by configured instructions for offline).
     |
-    | Invalid tokens are ignored; if the list is empty after parsing, card and paypal are allowed.
+    | Invalid tokens are ignored; if the list is empty after parsing, defaults apply.
     */
     'checkout_method_keys' => (function () {
-        $valid = ['card', 'paypal'];
+        $valid = ['card', 'paypal', 'bank_transfer', 'bizum_manual'];
+        $defaults = ['card', 'paypal'];
         $raw = env('PAYMENTS_CHECKOUT_METHODS');
         if ($raw === null || trim((string) $raw) === '') {
-            return $valid;
+            return $defaults;
         }
         $out = [];
         foreach (explode(',', (string) $raw) as $part) {
@@ -49,7 +50,7 @@ return [
             }
         }
 
-        return $out !== [] ? array_values(array_unique($out)) : $valid;
+        return $out !== [] ? array_values(array_unique($out)) : $defaults;
     })(),
 
     /*

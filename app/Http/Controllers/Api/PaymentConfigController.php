@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ShopSetting;
 use App\Services\Payments\PaymentCheckoutService;
+use App\Support\PaymentOfflineInstructions;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -14,7 +16,7 @@ class PaymentConfigController extends Controller
     public function show(): JsonResponse
     {
         $m = PaymentCheckoutService::paymentMethodsAvailability();
-        $anyMethod = $m['card'] || $m['paypal'];
+        $anyMethod = $m['card'] || $m['paypal'] || $m['bank_transfer'] || $m['bizum_manual'];
 
         return response()->json([
             'success' => true,
@@ -22,16 +24,21 @@ class PaymentConfigController extends Controller
                 'methods' => [
                     'card' => $m['card'],
                     'paypal' => $m['paypal'],
+                    'bank_transfer' => $m['bank_transfer'],
+                    'bizum_manual' => $m['bizum_manual'],
                 ],
                 'simulated' => $m['simulated'],
                 /** True when local env, no PSP keys, and simulated payments are off (usually APP_DEBUG=false). */
                 'local_checkout_needs_debug' => app()->environment('local') && ! $m['simulated'] && ! $anyMethod,
                 'paypal_missing_credentials' => PaymentCheckoutService::paypalMissingCredentialsForStorefront(),
                 'stripe_missing_credentials' => PaymentCheckoutService::stripeMissingCredentialsForStorefront(),
+                'bank_transfer_missing_instructions' => PaymentCheckoutService::bankTransferMissingInstructionsForStorefront(),
+                'bizum_manual_missing_instructions' => PaymentCheckoutService::bizumManualMissingInstructionsForStorefront(),
                 /** Mirrors `PAYPAL_MODE`: helps operators confirm sandbox vs live matches credentials. */
                 'paypal_mode' => PaymentCheckoutService::paypalModeLabelForStorefront(),
                 /** True when CHECKOUT_DEMO_SKIP_PAYMENT=true (demo-only checkout bypass). */
                 'checkout_demo_skip_payment_allowed' => PaymentCheckoutService::checkoutDemoSkipPaymentAllowed(),
+                'offline_payment_instructions' => PaymentOfflineInstructions::publicPayload(ShopSetting::allMerged()),
             ],
         ]);
     }

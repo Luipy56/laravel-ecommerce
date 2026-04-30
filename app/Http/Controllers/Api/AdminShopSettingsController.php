@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\ShopSetting;
 use App\Services\RecalculateTrendingProducts;
 use App\Support\AdminIndexColumns;
+use App\Support\InstallationAutoPricing;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class AdminShopSettingsController extends Controller
 {
@@ -39,7 +41,24 @@ class AdminShopSettingsController extends Controller
             'featured_max_manual' => ['integer', 'min:0'],
             'featured_max_low_stock' => ['integer', 'min:0'],
             'featured_max_overstock' => ['integer', 'min:0'],
+            'shipping_flat_eur' => ['sometimes', 'numeric', 'min:0', 'max:99999.99'],
+            'bank_transfer_iban' => ['nullable', 'string', 'max:64'],
+            'bank_transfer_beneficiary' => ['nullable', 'string', 'max:255'],
+            'bank_transfer_reference_hint' => ['nullable', 'string', 'max:500'],
+            'bizum_manual_phone' => ['nullable', 'string', 'max:80'],
+            'bizum_manual_instructions' => ['nullable', 'string', 'max:2000'],
+            'installation_auto_pricing' => ['sometimes', 'array'],
+            'installation_auto_pricing.quote_when_merchandise_above_eur' => ['required_with:installation_auto_pricing', 'numeric', 'min:0', 'max:999999'],
+            'installation_auto_pricing.tiers' => ['required_with:installation_auto_pricing', 'array', 'min:1'],
+            'installation_auto_pricing.tiers.*.max_merchandise_eur' => ['required', 'numeric', 'min:0.01', 'max:999999'],
+            'installation_auto_pricing.tiers.*.fee_eur' => ['required', 'numeric', 'min:0', 'max:999999'],
         ], $this->adminIndexColumnsValidationRules()));
+
+        if (array_key_exists('installation_auto_pricing', $validated) && is_array($validated['installation_auto_pricing'])) {
+            $validated['installation_auto_pricing'] = $this->normalizeInstallationAutoPricingOrFail(
+                $validated['installation_auto_pricing']
+            );
+        }
 
         foreach ($this->mapRequestToKeys($validated) as $key => $value) {
             ShopSetting::set($key, $value);
@@ -91,8 +110,47 @@ class AdminShopSettingsController extends Controller
             'featured_max_manual' => (int) ($merged[ShopSetting::KEY_FEATURED_MAX_MANUAL] ?? 0),
             'featured_max_low_stock' => (int) ($merged[ShopSetting::KEY_FEATURED_MAX_LOW_STOCK] ?? 0),
             'featured_max_overstock' => (int) ($merged[ShopSetting::KEY_FEATURED_MAX_OVERSTOCK] ?? 0),
+            'shipping_flat_eur' => round((float) ($merged[ShopSetting::KEY_SHIPPING_FLAT_EUR] ?? ShopSetting::DEFAULTS[ShopSetting::KEY_SHIPPING_FLAT_EUR]), 2),
+            'installation_auto_pricing' => InstallationAutoPricing::fromMerged($merged)->toStorageArray(),
+            'bank_transfer_iban' => (string) ($merged[ShopSetting::KEY_BANK_TRANSFER_IBAN] ?? ''),
+            'bank_transfer_beneficiary' => (string) ($merged[ShopSetting::KEY_BANK_TRANSFER_BENEFICIARY] ?? ''),
+            'bank_transfer_reference_hint' => (string) ($merged[ShopSetting::KEY_BANK_TRANSFER_REFERENCE_HINT] ?? ''),
+            'bizum_manual_phone' => (string) ($merged[ShopSetting::KEY_BIZUM_MANUAL_PHONE] ?? ''),
+            'bizum_manual_instructions' => (string) ($merged[ShopSetting::KEY_BIZUM_MANUAL_INSTRUCTIONS] ?? ''),
             'admin_index_columns' => AdminIndexColumns::normalize(is_array($storedColumns) ? $storedColumns : null),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     * @return array{quote_when_merchandise_above_eur: float, tiers: list<array{max_merchandise_eur: float, fee_eur: float}>}
+     */
+    private function normalizeInstallationAutoPricingOrFail(array $input): array
+    {
+        $pricing = InstallationAutoPricing::fromArray($input);
+        $storage = $pricing->toStorageArray();
+        $tiers = $storage['tiers'];
+        if ($tiers === []) {
+            throw ValidationException::withMessages([
+                'installation_auto_pricing' => [__('validation.custom.installation_auto_pricing.tiers_required')],
+            ]);
+        }
+        $quote = $storage['quote_when_merchandise_above_eur'];
+        $lastMax = $tiers[count($tiers) - 1]['max_merchandise_eur'];
+        if (abs($lastMax - $quote) > 0.02) {
+            throw ValidationException::withMessages([
+                'installation_auto_pricing' => [__('validation.custom.installation_auto_pricing.last_tier_max_must_match_quote')],
+            ]);
+        }
+        for ($i = 1, $n = count($tiers); $i < $n; $i++) {
+            if ($tiers[$i]['max_merchandise_eur'] <= $tiers[$i - 1]['max_merchandise_eur']) {
+                throw ValidationException::withMessages([
+                    'installation_auto_pricing' => [__('validation.custom.installation_auto_pricing.tiers_must_increase')],
+                ]);
+            }
+        }
+
+        return $storage;
     }
 
     /**
@@ -130,11 +188,22 @@ class AdminShopSettingsController extends Controller
             'featured_max_manual' => ShopSetting::KEY_FEATURED_MAX_MANUAL,
             'featured_max_low_stock' => ShopSetting::KEY_FEATURED_MAX_LOW_STOCK,
             'featured_max_overstock' => ShopSetting::KEY_FEATURED_MAX_OVERSTOCK,
+            'shipping_flat_eur' => ShopSetting::KEY_SHIPPING_FLAT_EUR,
+            'installation_auto_pricing' => ShopSetting::KEY_INSTALLATION_AUTO_PRICING,
+            'bank_transfer_iban' => ShopSetting::KEY_BANK_TRANSFER_IBAN,
+            'bank_transfer_beneficiary' => ShopSetting::KEY_BANK_TRANSFER_BENEFICIARY,
+            'bank_transfer_reference_hint' => ShopSetting::KEY_BANK_TRANSFER_REFERENCE_HINT,
+            'bizum_manual_phone' => ShopSetting::KEY_BIZUM_MANUAL_PHONE,
+            'bizum_manual_instructions' => ShopSetting::KEY_BIZUM_MANUAL_INSTRUCTIONS,
         ];
         $out = [];
         foreach ($map as $requestKey => $dbKey) {
             if (array_key_exists($requestKey, $validated)) {
-                $out[$dbKey] = $validated[$requestKey];
+                $value = $validated[$requestKey];
+                if ($requestKey === 'shipping_flat_eur') {
+                    $value = round((float) $value, 2);
+                }
+                $out[$dbKey] = $value;
             }
         }
 

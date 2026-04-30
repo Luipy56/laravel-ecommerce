@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\StripeWebhookEvent;
 use App\Services\Payments\PaymentCompletionService;
+use App\Services\Payments\Stripe\StripeCheckoutSessionCompleter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +22,7 @@ class PaymentWebhookController extends Controller
 {
     public function __construct(
         private readonly PaymentCompletionService $completion,
+        private readonly StripeCheckoutSessionCompleter $stripeCheckoutSessionCompleter,
     ) {}
 
     public function stripe(Request $request): SymfonyResponse
@@ -85,67 +87,18 @@ class PaymentWebhookController extends Controller
             return;
         }
 
-        if (($session->payment_status ?? '') !== 'paid') {
+        $payment = $this->stripeCheckoutSessionCompleter->completePaidCheckoutSession($session);
+        if ($payment === null) {
             return;
         }
 
-        $payment = $this->findPaymentForStripeSession($session);
-        if (! $payment) {
-            Log::warning('stripe.webhook.session_payment_not_found', [
-                'event_id' => $event->id,
-                'session_id' => $session->id ?? null,
-            ]);
-
-            return;
-        }
-
-        $expectedCents = (int) round((float) $payment->amount * 100);
-        $total = (int) ($session->amount_total ?? 0);
-        if ($total > 0 && $total !== $expectedCents) {
-            Log::warning('stripe.webhook.session_amount_mismatch', [
-                'event_id' => $event->id,
-                'payment_id' => $payment->id,
-                'expected_cents' => $expectedCents,
-                'session_total_cents' => $total,
-            ]);
-
-            return;
-        }
-
-        DB::transaction(function () use ($payment, $session, $event): void {
-            $this->completion->markSucceeded($payment);
-            $this->recordStripeEventProcessed($event->id);
-
-            $payment->refresh();
-            $pi = $session->payment_intent;
-            if (is_string($pi) && $pi !== '') {
-                $meta = $payment->metadata ?? [];
-                $meta['stripe_payment_intent_id'] = $pi;
-                $payment->update(['metadata' => $meta]);
-            }
-        });
+        $this->recordStripeEventProcessed($event->id);
 
         Log::info('stripe.webhook.checkout_session_completed', [
             'event_id' => $event->id,
             'payment_id' => $payment->id,
             'order_id' => $payment->order_id,
         ]);
-    }
-
-    private function findPaymentForStripeSession(StripeCheckoutSession $session): ?Payment
-    {
-        $paymentId = $session->metadata['payment_id'] ?? null;
-        if (is_string($paymentId) && $paymentId !== '') {
-            $p = Payment::query()->find((int) $paymentId);
-            if ($p && $p->gateway === Payment::GATEWAY_STRIPE && $p->gateway_reference === $session->id) {
-                return $p;
-            }
-        }
-
-        return Payment::query()
-            ->where('gateway', Payment::GATEWAY_STRIPE)
-            ->where('gateway_reference', $session->id)
-            ->first();
     }
 
     private function handleStripeIntentSucceeded(Event $event): void

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { useCart } from '../contexts/CartContext';
 import { IconCart, IconChevronLeft, IconChevronRight } from '../components/icons';
+import FavoriteToggle from '../components/FavoriteToggle';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
@@ -190,6 +191,7 @@ export default function PackDetailPage() {
                   className="input input-bordered input-sm w-20"
                 />
               </label>
+              <FavoriteToggle packId={pack.id} />
               <button
                 type="button"
                 className="btn btn-primary btn-sm gap-1.5 px-3 min-h-8 shrink-0"

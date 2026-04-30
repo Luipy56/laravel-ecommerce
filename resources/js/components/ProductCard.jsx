@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
 import { IconCart } from './icons';
+import FavoriteToggle from './FavoriteToggle';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
@@ -64,10 +65,13 @@ export default function ProductCard({ product, pack }) {
             </span>
           )}
           {!isPack && product.discount_percent > 0 && (
-            <span className="badge badge-error badge-sm absolute top-2 right-2 z-10 font-bold">
+            <span className="badge badge-error badge-sm absolute top-2 right-12 z-10 font-bold">
               −{Math.round(Number(product.discount_percent))}%
             </span>
           )}
+          <div className="absolute top-2 right-2 z-20">
+            <FavoriteToggle productId={isPack ? undefined : product.id} packId={isPack ? pack.id : undefined} />
+          </div>
           <img
             src={imageUrl}
             alt={name}

@@ -7,7 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Storefront favorites:** Authenticated clients can favorite products and packs via **`POST /api/v1/favorites/toggle`**, list IDs with **`GET /api/v1/favorites/ids`**, list items with **`GET /api/v1/favorites`**, and remove a line with **`DELETE /api/v1/favorites/lines/{orderLine}`** (favorites stored as a dedicated **`orders.kind = like`** basket). React: **`FavoritesPage`**, **`FavoriteToggle`**, **`useFavoriteIdsQuery`**, nav link from **`Layout`**.
+
+- **Payments (PSP + offline):** Configurable **`bank_transfer`** and **`bizum_manual`** checkout methods (whitelist via **`PAYMENTS_CHECKOUT_METHODS`** / `config/payments.php`); shop settings for IBAN / Bizum instructions; checkout and **`POST orders/{id}/pay`** return **`payment_checkout.gateway`** `manual` plus **`payment_instructions`** without calling Stripe/PayPal. **`POST /api/v1/payments/stripe/checkout/confirm`** (authenticated, verified client) completes a paid Stripe Checkout session server-side (shared logic with the Stripe webhook). **`POST /api/v1/admin/orders/{order}/payments/{payment}/record-manual-settlement`** marks an offline pending payment succeeded and advances the order. Storefront: checkout/order pay UI, order detail Stripe return handling with **`session_id`**, offline instructions panel; admin shop settings and order “record manual settlement” action. API: **`GET payments/config`** and **`GET orders/{id}`** expose offline method flags and instruction hints.
+
+- **Admin · shop configuration:** Collapsible sections (daisyUI **`collapse`**); **default flat shipping (EUR)** and **automatic installation pricing** (quote threshold + editable tiers) persisted in **`shop_settings`** (`shipping_flat_eur`, `installation_auto_pricing`); cart, checkout, order totals, PDFs, and admin order updates use these values. Placeholder block for **shipping by postal code** (not implemented). **`App\Support\InstallationAutoPricing`**; **`Order::automaticInstallationFeeFromMerchandiseSubtotal`** accepts optional merged settings for unit tests without a database.
+
+- **Docker:** **`docker-compose.yml`** for local development (PostgreSQL, Nginx, PHP 8.2 FPM, Vite, queue worker, named volumes for `vendor` / `node_modules`), **`docker-compose.prod.yml`** for production builds, multi-stage **`docker/php/Dockerfile`**, **`docker/nginx/default.conf`**, **`docker/nginx/Dockerfile.prod`**, **`.dockerignore`**, and **`docker/php/docker-entrypoint.sh`**. **`config/trustedproxy.php`** wires **`TRUSTED_PROXIES`** into Laravel’s **`TrustProxies`** middleware. **`vite.config.js`** supports **`DOCKER=1`** for HMR behind the dev server.
+
+### Changed
+
+- **Order status badges (admin + storefront):** Status chips use **`badge-outline`** with semantic colors (warning / success / info / neutral) for stronger hue than soft fills while keeping an open, table-friendly look (tinted text and border, not a solid block). **`awaiting_installation_price`** stays on the warning hue (not info blue).
+
+- **Product list sidebar:** **Packs only** toggle sits **below** the **Categories** block (same **`space-y-6`** spacing as before).
+
+- **Storefront mobile drawer · account rows:** **Perfil**, **Comandes**, **Compres**, and guest **login** use the same **`drawerNavClass`** / **`drawerIconClass`** treatment as the main links (**`NavLink`** + **`IconUser`**, **`IconClipboardList`**, **`IconPackage`**, **`IconLogIn`**).
+
+- **Storefront mobile drawer:** **Perfil** / **Comandes** / **Compres** (session) and guest **login** sit directly under the main nav list, separated by a thin **`hr`**; footer strip keeps language + brand only.
+
+- **Storefront mobile drawer · locale panel:** Removed the redundant **close (X)** row inside the language card; the trigger, outside tap, and **Escape** remain sufficient.
+
+- **Storefront mobile drawer (`Layout.jsx`):** Hamburger panel restyled (brand line, header close, icon + active state on primary nav, footer with brand/tagline, account shortcuts, language control). Shared **`STOREFRONT_LANGUAGE_OPTIONS`**; daisyUI **`dropdown-close`** when the locale menu is shut so the panel does not stay open on **`:focus-within`**; blur focused controls inside the widget; outside **`pointerdown`** (capture) to dismiss.
+- **Navbar:** Below **`lg`**, hide the locale control and guest **login** (available in the mobile drawer). Navbar locale dropdown uses the same **`dropdown-open` / `dropdown-close`** pattern as the drawer; sync **`locale`** state when **`i18n.language`** changes.
+- **Navbar (logged-in user):** Desktop account menu uses a **card** panel (gradient header, avatar chip on trigger, **`IconChevronDown`**) and the same icon set as the mobile drawer (**`IconUser`**, **`IconClipboardList`**, **`IconHeart`**, **`IconPackage`**, **`IconLogOut`**) on rounded hover rows; logout separated with error styling.
+- **Icons (`icons/index.jsx`):** **`IconHome`**, **`IconGrid`**, **`IconSparkles`**, **`IconHelpCircle`** for drawer links; **`IconLogOut`** for account sign-out.
+
+### Added
+
+- **`resources/js/lib/storefrontLanguageOptions.js`:** Single source for storefront locale labels (ca / es / en) used by **Navbar** and **Layout**.
+
 ### Fixed
+
+- **Transactional email sender name:** When **`APP_NAME`** was unset or still the framework default, **`MAIL_FROM_NAME="${APP_NAME}"`** (as in **`.env.example`**) resolved to **“Laravel”** in clients’ inboxes. **`config/app.php`** now defaults **`APP_NAME`** to **Serralleria Solidària**, matching **`MAIL_FROM_NAME`** / branding.
+
+- **Icons (`IconUser`, `IconHelpCircle`):** SVG **`d`** arc flags were glued to coordinates (`011-7.5`, `0118`), which broke React’s DOM parser and distorted the profile icon; paths now use explicit separators (`0 1 1 -7.5`, `0 0 1 18`, etc.).
 
 - **Password reset API:** **`POST /api/v1/reset-password`** no longer reads **`password_confirmation`** from **`validated()`** (Laravel omits it even when **`password`** uses **`confirmed`**), which caused an undefined index and HTTP **500**. The confirmation value is taken from the request body.
 
@@ -16,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Client verification email:** Laravel routes notification mail to an `email` attribute; storefront clients only have `login_email`, so verification (and password-reset) messages were skipped. **`Client::routeNotificationForMail()`** now returns `login_email`. Registration and **resend verification** set **`MailLocale`** from **`Accept-Language`** like other transactional mail.
 
 ### Added
+
+- **Cursor rules:** **`agent-verification-opt-in.mdc`** — unless the user explicitly requests verification, agents **skip** running **`php artisan test`**, **`routes:smoke`**, **`npm run build`**, **`migrate:fresh --seed`** for QA gates; **mandatory** root **`package.json`** patch bump before **`git push`** when tracked files changed (overrides default **testing-verification** / smoke execution). **`AGENTS.md`** and **`docs/agent-cursor-rules.md`** updated.
 
 - **Cursor rules:** **`agent-task-version-bump.mdc`** — mandatory root **`package.json`** patch bump after **each agent-completed task** that commits; **`app-version-cadence.mdc`** / **`commit-changelog-version.mdc`** aligned; **`docs/agent-cursor-rules.md`** inventory updated.
 

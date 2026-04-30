@@ -1,6 +1,6 @@
 ---
 description: Shop settings key-value, automatic is_trending recalc, admin settings UI, public storefront flags
-globs: app/Models/ShopSetting.php,app/Services/RecalculateTrendingProducts.php,app/Services/TrendingStockRuleQueries.php,app/Services/HomeFeaturedProductIds.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,app/Http/Controllers/Api/ProductController.php,app/Support/AdminIndexColumns.php,config/admin_index_columns.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx,resources/js/config/adminIndexColumnsRegistry.js,resources/js/hooks/useAdminShopSettingsQuery.js
+globs: app/Models/ShopSetting.php,app/Support/InstallationAutoPricing.php,app/Services/RecalculateTrendingProducts.php,app/Services/TrendingStockRuleQueries.php,app/Services/HomeFeaturedProductIds.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,app/Http/Controllers/Api/ProductController.php,app/Support/AdminIndexColumns.php,config/admin_index_columns.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx,resources/js/components/admin/AdminSettingsCollapseSection.jsx,resources/js/config/adminIndexColumnsRegistry.js,resources/js/hooks/useAdminShopSettingsQuery.js
 alwaysApply: false
 ---
 
@@ -31,6 +31,12 @@ alwaysApply: false
 - **`GET products/featured`** is built by **`HomeFeaturedProductIds`**: (1) manual **`is_featured`** (random subset when capped); (2) low-stock **rule** + **`is_trending`**; (3) overstock **rule** + **`is_trending`**, excluding IDs that match the low-stock rule so each product counts once. Order returned: manual, then low, then over; **`TrendingStockRuleQueries`** shares rule logic with **`RecalculateTrendingProducts`**.
 - These caps affect **only** the storefront featured JSON response, not how many rows **`RecalculateTrendingProducts`** marks **`is_trending`**.
 
+## Shipping flat rate and installation auto pricing
+
+- **`ShopSetting::KEY_SHIPPING_FLAT_EUR`**: scalar EUR; **`ShopSetting::shippingFlatEur()`** for runtime reads. New checkouts persist **`orders.shipping_price`** from this default; **`Order` grand total** uses **`shipping_price`** when set, else falls back to **`shippingFlatEur()`** for legacy rows.
+- **`ShopSetting::KEY_INSTALLATION_AUTO_PRICING`**: JSON **`{ quote_when_merchandise_above_eur, tiers: [{ max_merchandise_eur, fee_eur }] }`**. **`App\Support\InstallationAutoPricing`** sorts tiers by max; **`merchandise_subtotal > quote_when…`** ⇒ manual quote; else first tier with **`subtotal <= max_merchandise_eur`** wins. **`AdminShopSettingsController`** requires strictly increasing **`max`** values and **`last max ≈ quote threshold`** (same EUR) before save.
+- **`Order::automaticInstallationFeeFromMerchandiseSubtotal($subtotal, ?array $merged)`**: optional second argument for tests without DB (**`ShopSetting::DEFAULTS`**); production omits it and uses **`ShopSetting::allMerged()`**.
+
 ## Storefront API (when touching related controllers)
 
 - **Featured / home**: implemented via **`HomeFeaturedProductIds`** + **`ProductController@featured`** (not a single `orWhere` query).
@@ -39,7 +45,7 @@ alwaysApply: false
 
 ## Admin settings page (React)
 
-- **`PageTitle`** + toolbar row; primary **Recalculate** action; form sections as **`card`** blocks; submit row **`flex justify-end`** for **Save**.
+- **`PageTitle`** + toolbar row; primary **Recalculate** action; sections in **daisyUI `collapse`** via **`AdminSettingsCollapseSection`** (independent collapses); submit row **`flex justify-end`** for **Save**.
 - All UI copy: **`admin.settings.*`** in **`resources/js/locales/ca.json`**, **`es.json`**, **`en.json`** (no hardcoded strings).
 - Do not add placeholder “more options later” cards unless explicitly requested.
 

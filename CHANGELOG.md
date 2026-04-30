@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Order status badges (admin + storefront):** Status chips use **`badge-soft`** with semantic colors (warning for pending / payment / installation-quote / install pending, success for in transit / sent, info for installation confirmed, neutral for unknown) so dense tables read lighter than solid fills while keeping quick visual distinction. **`awaiting_installation_price`** stays on the warning hue (not info blue).
+- **Order status badges (admin + storefront):** Status chips use **`badge-outline`** with semantic colors (warning / success / info / neutral) for stronger hue than soft fills while keeping an open, table-friendly look (tinted text and border, not a solid block). **`awaiting_installation_price`** stays on the warning hue (not info blue).
 
 - **Product list sidebar:** **Packs only** toggle sits **below** the **Categories** block (same **`space-y-6`** spacing as before).
 

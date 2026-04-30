@@ -13,14 +13,14 @@ function getStatusBadgeClass(status) {
     case 'awaiting_payment':
     case 'awaiting_installation_price':
     case 'installation_pending':
-      return 'badge-soft badge-warning';
+      return 'badge-outline badge-warning';
     case 'in_transit':
     case 'sent':
-      return 'badge-soft badge-success';
+      return 'badge-outline badge-success';
     case 'installation_confirmed':
-      return 'badge-soft badge-info';
+      return 'badge-outline badge-info';
     default:
-      return 'badge-soft badge-neutral';
+      return 'badge-outline badge-neutral';
   }
 }
 

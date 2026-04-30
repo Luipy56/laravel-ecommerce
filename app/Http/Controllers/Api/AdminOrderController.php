@@ -6,7 +6,10 @@ use App\Events\InstallationPriceWasAssigned;
 use App\Events\OrderShipped;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Payment;
+use App\Models\ShopSetting;
 use App\Models\OrderLine;
+use App\Services\Payments\PaymentCompletionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -204,8 +207,8 @@ class AdminOrderController extends Controller
         if (array_key_exists('shipping_date', $validated)) {
             $order->shipping_date = $validated['shipping_date'] ? \Carbon\Carbon::parse($validated['shipping_date']) : null;
         }
-        if ($order->kind === Order::KIND_ORDER) {
-            $order->shipping_price = Order::SHIPPING_FLAT_EUR;
+        if ($order->kind === Order::KIND_ORDER && $order->shipping_price === null) {
+            $order->shipping_price = ShopSetting::shippingFlatEur();
         }
 
         if ($order->installation_requested && $order->kind === Order::KIND_ORDER) {
@@ -266,6 +269,64 @@ class AdminOrderController extends Controller
                 'installation_status' => $order->installation_status,
                 'installation_price' => $order->installation_price !== null ? (float) $order->installation_price : null,
                 'total' => round($order->grand_total, 2),
+            ],
+        ]);
+    }
+
+    public function recordManualSettlement(Request $request, Order $order, Payment $payment, PaymentCompletionService $completion): JsonResponse
+    {
+        if ((int) $payment->order_id !== (int) $order->id) {
+            abort(404);
+        }
+        if ($order->kind !== Order::KIND_ORDER) {
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.orders.manual_settlement_invalid'),
+            ], 422);
+        }
+        if ($order->status !== Order::STATUS_AWAITING_PAYMENT) {
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.orders.manual_settlement_wrong_status'),
+            ], 422);
+        }
+        if ($payment->status !== Payment::STATUS_PENDING) {
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.orders.manual_settlement_payment_not_pending'),
+            ], 422);
+        }
+        if (! Payment::isOfflineCheckoutMethod($payment->payment_method)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.orders.manual_settlement_not_offline'),
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $admin = $request->user('admin');
+        $meta = array_filter([
+            'recorded_via' => 'admin_manual_settlement',
+            'note' => $validated['note'] ?? null,
+            'admin_id' => $admin?->id,
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $completion->markSucceeded($payment, [
+            'gateway' => Payment::GATEWAY_MANUAL,
+            'metadata' => $meta,
+        ]);
+
+        $order->refresh();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'order_id' => $order->id,
+                'status' => $order->status,
+                'has_payment' => $order->hasSuccessfulPayment(),
             ],
         ]);
     }

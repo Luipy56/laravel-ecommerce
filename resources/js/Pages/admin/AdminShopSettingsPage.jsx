@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,6 +11,7 @@ import {
   ADMIN_INDEX_TABLE_ORDER,
 } from '../../config/adminIndexColumnsRegistry';
 import AdminIndexColumnsFieldset from '../../components/admin/AdminIndexColumnsFieldset';
+import AdminSettingsCollapseSection from '../../components/admin/AdminSettingsCollapseSection';
 import {
   adminShopSettingsQueryKey,
   buildAdminIndexColumnsPayload,
@@ -29,6 +30,28 @@ function parseIdList(text) {
 function idsToText(ids) {
   if (!Array.isArray(ids) || ids.length === 0) return '';
   return ids.join(', ');
+}
+
+function defaultInstallationRows() {
+  return [
+    { max_merchandise_eur: '250', fee_eur: '90' },
+    { max_merchandise_eur: '500', fee_eur: '120' },
+    { max_merchandise_eur: '1000', fee_eur: '180' },
+  ];
+}
+
+function parseInstallationFromApi(inst) {
+  if (!inst || typeof inst !== 'object') {
+    return { quote: '1000', tiers: defaultInstallationRows() };
+  }
+  const quote = inst.quote_when_merchandise_above_eur;
+  const tiers = Array.isArray(inst.tiers)
+    ? inst.tiers.map((row) => ({
+        max_merchandise_eur: String(row.max_merchandise_eur ?? ''),
+        fee_eur: String(row.fee_eur ?? ''),
+      }))
+    : defaultInstallationRows();
+  return { quote: String(quote ?? '1000'), tiers: tiers.length ? tiers : defaultInstallationRows() };
 }
 
 export default function AdminShopSettingsPage() {
@@ -58,6 +81,10 @@ export default function AdminShopSettingsPage() {
   const [featuredMaxLowStock, setFeaturedMaxLowStock] = useState(0);
   const [featuredMaxOverstock, setFeaturedMaxOverstock] = useState(0);
 
+  const [shippingFlatEur, setShippingFlatEur] = useState('9');
+  const [installationQuoteAbove, setInstallationQuoteAbove] = useState('1000');
+  const [installationTiers, setInstallationTiers] = useState(() => defaultInstallationRows());
+
   const [columnPrefs, setColumnPrefs] = useState({});
   const [columnOrder, setColumnOrder] = useState({});
 
@@ -74,10 +101,23 @@ export default function AdminShopSettingsPage() {
     setFeaturedMaxManual(Number(d.featured_max_manual) || 0);
     setFeaturedMaxLowStock(Number(d.featured_max_low_stock) || 0);
     setFeaturedMaxOverstock(Number(d.featured_max_overstock) || 0);
+    setShippingFlatEur(String(d.shipping_flat_eur ?? '9'));
+    const { quote, tiers } = parseInstallationFromApi(d.installation_auto_pricing);
+    setInstallationQuoteAbove(quote);
+    setInstallationTiers(tiers);
     const { columnPrefs: cp, columnOrder: co } = columnOrderAndPrefsFromServer(d.admin_index_columns);
     setColumnPrefs(cp);
     setColumnOrder(co);
   }, []);
+
+  const installationTierMismatch = useMemo(() => {
+    const quote = parseFloat(String(installationQuoteAbove).replace(',', '.'));
+    if (!Number.isFinite(quote) || installationTiers.length === 0) return false;
+    const last = installationTiers[installationTiers.length - 1];
+    const lastMax = parseFloat(String(last.max_merchandise_eur).replace(',', '.'));
+    if (!Number.isFinite(lastMax)) return true;
+    return Math.abs(lastMax - quote) > 0.02;
+  }, [installationQuoteAbove, installationTiers]);
 
   const fetchSettings = useCallback(async () => {
     setLoadError('');
@@ -98,21 +138,36 @@ export default function AdminShopSettingsPage() {
     fetchSettings();
   }, [fetchSettings]);
 
-  const buildPutBody = () => ({
-    low_stock_enabled: lowStockEnabled,
-    low_stock_threshold: Math.max(0, parseInt(String(lowStockThreshold), 10) || 0),
-    low_stock_blacklist_enabled: lowStockBlacklistEnabled,
-    low_stock_blacklist_product_ids: parseIdList(lowStockBlacklistText),
-    overstock_enabled: overstockEnabled,
-    overstock_threshold: Math.max(0, parseInt(String(overstockThreshold), 10) || 0),
-    overstock_blacklist_enabled: overstockBlacklistEnabled,
-    overstock_blacklist_product_ids: parseIdList(overstockBlacklistText),
-    accept_personalized_solutions: acceptPersonalizedSolutions,
-    featured_max_manual: Math.max(0, parseInt(String(featuredMaxManual), 10) || 0),
-    featured_max_low_stock: Math.max(0, parseInt(String(featuredMaxLowStock), 10) || 0),
-    featured_max_overstock: Math.max(0, parseInt(String(featuredMaxOverstock), 10) || 0),
-    admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs, columnOrder),
-  });
+  const buildPutBody = () => {
+    const quote = parseFloat(String(installationQuoteAbove).replace(',', '.')) || 0;
+    const tiers = installationTiers
+      .map((r) => ({
+        max_merchandise_eur: parseFloat(String(r.max_merchandise_eur).replace(',', '.')) || 0,
+        fee_eur: parseFloat(String(r.fee_eur).replace(',', '.')) || 0,
+      }))
+      .filter((r) => r.max_merchandise_eur > 0);
+    const ship = Math.min(99999.99, Math.max(0, parseFloat(String(shippingFlatEur).replace(',', '.')) || 0));
+    return {
+      low_stock_enabled: lowStockEnabled,
+      low_stock_threshold: Math.max(0, parseInt(String(lowStockThreshold), 10) || 0),
+      low_stock_blacklist_enabled: lowStockBlacklistEnabled,
+      low_stock_blacklist_product_ids: parseIdList(lowStockBlacklistText),
+      overstock_enabled: overstockEnabled,
+      overstock_threshold: Math.max(0, parseInt(String(overstockThreshold), 10) || 0),
+      overstock_blacklist_enabled: overstockBlacklistEnabled,
+      overstock_blacklist_product_ids: parseIdList(overstockBlacklistText),
+      accept_personalized_solutions: acceptPersonalizedSolutions,
+      featured_max_manual: Math.max(0, parseInt(String(featuredMaxManual), 10) || 0),
+      featured_max_low_stock: Math.max(0, parseInt(String(featuredMaxLowStock), 10) || 0),
+      featured_max_overstock: Math.max(0, parseInt(String(featuredMaxOverstock), 10) || 0),
+      shipping_flat_eur: ship,
+      installation_auto_pricing: {
+        quote_when_merchandise_above_eur: quote,
+        tiers,
+      },
+      admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs, columnOrder),
+    };
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -129,7 +184,13 @@ export default function AdminShopSettingsPage() {
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      else setSaveError(err.response?.data?.message || t('common.error'));
+      else {
+        const errs = err.response?.data?.errors;
+        const first =
+          err.response?.data?.message ||
+          (errs && typeof errs === 'object' ? Object.values(errs).flat().find(Boolean) : null);
+        setSaveError(first || t('common.error'));
+      }
     } finally {
       setSaving(false);
     }
@@ -151,6 +212,20 @@ export default function AdminShopSettingsPage() {
     } finally {
       setRecalculating(false);
     }
+  };
+
+  const addInstallationTier = () => {
+    setInstallationTiers((rows) => [...rows, { max_merchandise_eur: '', fee_eur: '' }]);
+  };
+
+  const removeInstallationTier = (index) => {
+    setInstallationTiers((rows) => rows.filter((_, i) => i !== index));
+  };
+
+  const updateInstallationTier = (index, field, value) => {
+    setInstallationTiers((rows) =>
+      rows.map((row, i) => (i === index ? { ...row, [field]: value } : row))
+    );
   };
 
   if (loading) {
@@ -181,12 +256,13 @@ export default function AdminShopSettingsPage() {
 
       {saveError ? <div className="alert alert-error text-sm">{saveError}</div> : null}
 
-      <form onSubmit={handleSave} className="space-y-6 min-w-0">
-        <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-4 min-w-0">
-            <h2 className="card-title text-lg">{t('admin.settings.section_home')}</h2>
-            <p className="text-sm text-base-content/70">{t('admin.settings.section_home_help')}</p>
-
+      <form onSubmit={handleSave} className="space-y-4 sm:space-y-6 min-w-0">
+        <AdminSettingsCollapseSection
+          title={t('admin.settings.section_home')}
+          subtitle={t('admin.settings.section_home_help')}
+          defaultOpen
+        >
+          <div className="space-y-4 min-w-0 px-1 pb-1">
             <div className="divider my-1">{t('admin.settings.section_general')}</div>
 
             <p className="text-sm font-medium">{t('admin.settings.featured_limits_title')}</p>
@@ -300,11 +376,10 @@ export default function AdminShopSettingsPage() {
               />
             </label>
           </div>
-        </section>
+        </AdminSettingsCollapseSection>
 
-        <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-4 min-w-0">
-            <h2 className="card-title text-lg">{t('admin.settings.section_personalized')}</h2>
+        <AdminSettingsCollapseSection title={t('admin.settings.section_personalized')}>
+          <div className="space-y-4 min-w-0 px-1 pb-1">
             <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
                 type="checkbox"
@@ -315,14 +390,118 @@ export default function AdminShopSettingsPage() {
               <span className="label-text min-w-0 flex-1">{t('admin.settings.accept_personalized_solutions')}</span>
             </label>
           </div>
-        </section>
+        </AdminSettingsCollapseSection>
 
-        <section className="card bg-base-100 shadow border border-base-200">
-          <div className="card-body space-y-6 min-w-0">
-            <div className="min-w-0">
-              <h2 className="card-title text-lg">{t('admin.settings.index_columns_title')}</h2>
-              <p className="text-sm text-base-content/70 mt-1">{t('admin.settings.index_columns_help')}</p>
+        <AdminSettingsCollapseSection
+          title={t('admin.settings.section_closed_prices')}
+          subtitle={t('admin.settings.section_closed_prices_help')}
+        >
+          <div className="space-y-6 min-w-0 px-1 pb-1">
+            <div>
+              <p className="text-sm font-medium">{t('admin.settings.shipping_flat_title')}</p>
+              <p className="text-xs text-base-content/60 mt-1">{t('admin.settings.shipping_flat_help')}</p>
+              <label className="form-field max-w-xs mt-2">
+                <span className="label-text">{t('admin.settings.shipping_flat_eur')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  className="input input-bordered input-sm sm:input-md w-full"
+                  value={shippingFlatEur}
+                  onChange={(e) => setShippingFlatEur(e.target.value)}
+                />
+              </label>
             </div>
+
+            <div>
+              <p className="text-sm font-medium">{t('admin.settings.installation_auto_title')}</p>
+              <p className="text-xs text-base-content/60 mt-1">{t('admin.settings.installation_auto_help')}</p>
+              <label className="form-field max-w-xs mt-2">
+                <span className="label-text">{t('admin.settings.installation_quote_above_eur')}</span>
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  className="input input-bordered input-sm sm:input-md w-full"
+                  value={installationQuoteAbove}
+                  onChange={(e) => setInstallationQuoteAbove(e.target.value)}
+                />
+              </label>
+              <p className="text-xs text-base-content/60 mt-2">{t('admin.settings.installation_tiers_hint')}</p>
+              {installationTierMismatch ? (
+                <div role="status" className="alert alert-warning text-sm mt-2 py-2">
+                  {t('admin.settings.installation_tier_mismatch_warning')}
+                </div>
+              ) : null}
+              <div className="mt-3 overflow-x-auto">
+                <table className="table table-sm table-zebra border border-base-200 rounded-box">
+                  <thead>
+                    <tr>
+                      <th>{t('admin.settings.installation_tier_max_merchandise')}</th>
+                      <th>{t('admin.settings.installation_tier_fee')}</th>
+                      <th className="w-24 text-end">{t('admin.settings.installation_tier_actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {installationTiers.map((row, index) => (
+                      <tr key={index}>
+                        <td>
+                          <input
+                            type="number"
+                            min={0.01}
+                            step="0.01"
+                            className="input input-bordered input-sm w-full min-w-[6rem]"
+                            value={row.max_merchandise_eur}
+                            onChange={(e) => updateInstallationTier(index, 'max_merchandise_eur', e.target.value)}
+                            aria-label={t('admin.settings.installation_tier_max_merchandise')}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            className="input input-bordered input-sm w-full min-w-[6rem]"
+                            value={row.fee_eur}
+                            onChange={(e) => updateInstallationTier(index, 'fee_eur', e.target.value)}
+                            aria-label={t('admin.settings.installation_tier_fee')}
+                          />
+                        </td>
+                        <td className="text-end">
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-xs text-error"
+                            onClick={() => removeInstallationTier(index)}
+                            disabled={installationTiers.length <= 1}
+                          >
+                            {t('admin.settings.installation_tier_remove')}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" className="btn btn-outline btn-sm mt-2" onClick={addInstallationTier}>
+                {t('admin.settings.installation_tier_add')}
+              </button>
+            </div>
+
+            {/* Sin implementar — solo UI: envío por código postal */}
+            <div>
+              <p className="text-sm font-medium">{t('admin.settings.shipping_postal_title')}</p>
+              <div role="status" className="alert alert-info text-sm mt-2">
+                <span>{t('admin.settings.shipping_postal_not_implemented')}</span>
+              </div>
+            </div>
+          </div>
+        </AdminSettingsCollapseSection>
+
+        <AdminSettingsCollapseSection
+          title={t('admin.settings.index_columns_title')}
+          subtitle={t('admin.settings.index_columns_help')}
+        >
+          <div className="space-y-6 min-w-0 px-1 pb-1">
             {ADMIN_INDEX_TABLE_ORDER.map((tableId) => {
               const cols = ADMIN_INDEX_COLUMN_REGISTRY[tableId] ?? [];
               const titleKey = ADMIN_INDEX_TABLE_META[tableId]?.titleKey;
@@ -342,7 +521,7 @@ export default function AdminShopSettingsPage() {
               );
             })}
           </div>
-        </section>
+        </AdminSettingsCollapseSection>
 
         <div className="flex justify-end">
           <button type="submit" className="btn btn-primary btn-sm sm:btn-md" disabled={saving || recalculating}>

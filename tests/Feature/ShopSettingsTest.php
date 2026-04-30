@@ -63,7 +63,15 @@ class ShopSettingsTest extends TestCase
             ->assertJsonPath('data.featured_max_manual', 0)
             ->assertJsonPath('data.featured_max_low_stock', 0)
             ->assertJsonPath('data.featured_max_overstock', 0)
-            ->assertJsonStructure(['data' => ['admin_index_columns' => ['products', 'orders']]]);
+            ->assertJsonStructure([
+                'data' => [
+                    'admin_index_columns' => ['products', 'orders'],
+                    'shipping_flat_eur',
+                    'installation_auto_pricing',
+                ],
+            ])
+            ->assertJsonPath('data.shipping_flat_eur', 9)
+            ->assertJsonPath('data.installation_auto_pricing.quote_when_merchandise_above_eur', 1000);
 
         $this->putJson('/api/v1/admin/settings', [
             'low_stock_enabled' => true,
@@ -104,6 +112,47 @@ class ShopSettingsTest extends TestCase
         $this->postJson('/api/v1/admin/settings/recalculate-trending')->assertOk();
 
         $this->assertFalse($product->fresh()->is_trending);
+    }
+
+    public function test_admin_can_update_shipping_flat_eur(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $this->putJson('/api/v1/admin/settings', [
+            'shipping_flat_eur' => 12.5,
+        ])->assertOk()
+            ->assertJsonPath('data.shipping_flat_eur', 12.5);
+
+        $this->getJson('/api/v1/admin/settings')
+            ->assertOk()
+            ->assertJsonPath('data.shipping_flat_eur', 12.5);
+    }
+
+    public function test_admin_installation_auto_pricing_rejects_mismatched_last_tier(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $this->putJson('/api/v1/admin/settings', [
+            'installation_auto_pricing' => [
+                'quote_when_merchandise_above_eur' => 1000,
+                'tiers' => [
+                    ['max_merchandise_eur' => 250, 'fee_eur' => 90],
+                    ['max_merchandise_eur' => 500, 'fee_eur' => 120],
+                ],
+            ],
+        ])->assertStatus(422);
     }
 
     public function test_admin_index_columns_persist_valid_subset(): void

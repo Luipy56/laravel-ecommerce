@@ -246,7 +246,7 @@
                     @if($order->kind === \App\Models\Order::KIND_ORDER)
                         <tr>
                             <td>{{ __('shop.invoice_shipping_line') }}</td>
-                            <td>{{ number_format(\App\Models\Order::SHIPPING_FLAT_EUR, 2, ',', '.') }} €</td>
+                            <td>{{ number_format((float) ($order->shipping_price ?? \App\Models\ShopSetting::shippingFlatEur()), 2, ',', '.') }} €</td>
                         </tr>
                     @endif
                     @if($order->installation_requested && $order->installation_status === \App\Models\Order::INSTALLATION_PRICED && $order->installation_price !== null)

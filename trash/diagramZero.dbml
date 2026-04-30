@@ -179,12 +179,12 @@ Table ORDERS {
   id int [pk, increment]
   client_id int [not null, ref: > CLIENTS.id]
 
-  kind order_kind [not null, note: 'cart = shopping cart; order = confirmed order']
-  status order_status [null, note: 'Only when kind=order; null when cart']
+  kind order_kind [not null, note: 'cart = shopping cart; order = confirmed order; like = one wishlist row per client (order_lines hold favorited product or pack)']
+  status order_status [null, note: 'Only when kind=order; null when cart or kind=like']
 
   order_date timestamp [null, note: 'Null while cart; set on checkout']
   shipping_date timestamp [null]
-  shipping_price decimal(10,2) [null, note: 'Flat 9 EUR shipping for confirmed orders; grand total uses constant in app']
+  shipping_price decimal(10,2) [null, note: 'Flat shipping amount stored at checkout; default rate from shop_settings.shipping_flat_eur; grand total uses this column when set']
   installation_requested boolean [not null, default: false, note: 'Whole-order installation; fee set by admin']
   installation_price decimal(10,2) [null, note: 'One installation fee per order when priced']
   installation_status varchar(32) [null, note: 'pending | priced | rejected; null if installation not requested']
@@ -201,7 +201,7 @@ Table ORDER_ADDRESSES [note: 'One row per address type per order (shipping, inst
   note text [null, note: 'e.g. If I\'m not there..., I\'ll be there at 3...']
 }
 
-Table ORDER_LINES [note: 'Line items of an order (product or pack, quantity, price)'] {
+Table ORDER_LINES [note: 'Line items of an order (product or pack, quantity, price). For orders.kind=like, each line is one favorite; FKs nullOnDelete so deleted catalog rows become orphan lines (API exposes unavailable + remove).'] {
   id int [pk, increment]
   order_id int [not null, ref: > ORDERS.id]
   product_id int [null, ref: > PRODUCTS.id, note: 'One of product_id or pack_id must be set']
@@ -233,6 +233,14 @@ Table PAYMENTS [note: 'PSP lifecycle: pending until webhook confirms succeeded.'
 Table STRIPE_WEBHOOK_EVENTS [note: 'Processed Stripe webhook event ids (idempotency).'] {
   id int [pk, increment]
   stripe_event_id varchar(255) [not null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table SHOP_SETTINGS [note: 'Key-value JSON per row. Notable keys: low_stock_*, overstock_*, featured_max_*, admin_index_columns, accept_personalized_solutions, shipping_flat_eur (default flat shipping EUR), installation_auto_pricing (JSON quote_when_merchandise_above_eur + tiers max_merchandise_eur/fee_eur; last tier max must equal quote threshold).'] {
+  id int [pk, increment]
+  key varchar(128) [not null, unique]
+  value json [not null]
   created_at timestamp [null]
   updated_at timestamp [null]
 }

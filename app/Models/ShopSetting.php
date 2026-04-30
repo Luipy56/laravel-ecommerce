@@ -41,6 +41,29 @@ class ShopSetting extends Model
 
     public const KEY_FEATURED_MAX_OVERSTOCK = 'featured_max_overstock';
 
+    /** Flat shipping fee (EUR) for new orders; persisted on each order row at checkout. */
+    public const KEY_SHIPPING_FLAT_EUR = 'shipping_flat_eur';
+
+    /**
+     * JSON: quote_when_merchandise_above_eur, tiers[{max_merchandise_eur, fee_eur}] sorted ascending by max.
+     */
+    public const KEY_INSTALLATION_AUTO_PRICING = 'installation_auto_pricing';
+
+    /** IBAN shown to customers who choose bank transfer at checkout (string). */
+    public const KEY_BANK_TRANSFER_IBAN = 'bank_transfer_iban';
+
+    /** Account holder name for bank transfer instructions. */
+    public const KEY_BANK_TRANSFER_BENEFICIARY = 'bank_transfer_beneficiary';
+
+    /** Optional hint for payment reference / concept (string). */
+    public const KEY_BANK_TRANSFER_REFERENCE_HINT = 'bank_transfer_reference_hint';
+
+    /** Phone or alias for manual Bizum instructions. */
+    public const KEY_BIZUM_MANUAL_PHONE = 'bizum_manual_phone';
+
+    /** Optional extra lines for manual Bizum (string). */
+    public const KEY_BIZUM_MANUAL_INSTRUCTIONS = 'bizum_manual_instructions';
+
     /**
      * @var array<string, mixed>
      */
@@ -57,7 +80,28 @@ class ShopSetting extends Model
         self::KEY_FEATURED_MAX_MANUAL => 0,
         self::KEY_FEATURED_MAX_LOW_STOCK => 0,
         self::KEY_FEATURED_MAX_OVERSTOCK => 0,
+        self::KEY_SHIPPING_FLAT_EUR => 9.0,
+        self::KEY_INSTALLATION_AUTO_PRICING => [
+            'quote_when_merchandise_above_eur' => 1000,
+            'tiers' => [
+                ['max_merchandise_eur' => 250, 'fee_eur' => 90],
+                ['max_merchandise_eur' => 500, 'fee_eur' => 120],
+                ['max_merchandise_eur' => 1000, 'fee_eur' => 180],
+            ],
+        ],
+        self::KEY_BANK_TRANSFER_IBAN => '',
+        self::KEY_BANK_TRANSFER_BENEFICIARY => '',
+        self::KEY_BANK_TRANSFER_REFERENCE_HINT => '',
+        self::KEY_BIZUM_MANUAL_PHONE => '',
+        self::KEY_BIZUM_MANUAL_INSTRUCTIONS => '',
     ];
+
+    public static function shippingFlatEur(): float
+    {
+        $v = self::get(self::KEY_SHIPPING_FLAT_EUR);
+
+        return round((float) $v, 2);
+    }
 
     protected function casts(): array
     {

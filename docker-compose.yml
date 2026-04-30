@@ -1,8 +1,8 @@
 # Local development: Nginx + PHP-FPM + Postgres + Vite + queue worker.
 # Prerequisites: copy .env from .env.example, set APP_KEY, then:
-#   docker compose -f docker-compose-dev.yml run --rm app composer install
-#   docker compose -f docker-compose-dev.yml run --rm node npm ci   # or let the node service install on first start
-#   docker compose -f docker-compose-dev.yml up -d
+#   docker compose run --rm app composer install
+#   docker compose run --rm node npm ci   # or let the node service install on first start
+#   docker compose up -d
 # App: http://localhost:8080  Vite: http://localhost:5173
 
 name: laravel-ecommerce

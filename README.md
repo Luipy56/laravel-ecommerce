@@ -89,7 +89,7 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
 
 Requires **Docker** and **Docker Compose v2** (v2.17+ recommended for production builds because the **nginx** image uses `additional_contexts` to copy `public/` from the PHP image).
 
-### Development (`docker-compose-dev.yml`)
+### Development (`docker-compose.yml`)
 
 Uses **PostgreSQL 16**, **PHP 8.2 FPM**, **Nginx**, a **Node** service for Vite (`npm run dev:hmr` on port **5173**), and a **queue** worker. Named volumes keep **`vendor/`** and **`node_modules/`** inside the stack so bind-mounting the repo does not wipe dependencies.
 
@@ -101,24 +101,24 @@ Uses **PostgreSQL 16**, **PHP 8.2 FPM**, **Nginx**, a **Node** service for Vite 
 2. Install PHP dependencies into the **`vendor`** volume:
 
    ```bash
-   docker compose -f docker-compose-dev.yml run --rm app composer install
+   docker compose run --rm app composer install
    ```
 
 3. Start the stack:
 
    ```bash
-   docker compose -f docker-compose-dev.yml up -d
+   docker compose up -d
    ```
 
 4. Migrate and seed (development database only):
 
    ```bash
-   docker compose -f docker-compose-dev.yml exec app php artisan migrate --seed
+   docker compose exec app php artisan migrate --seed
    ```
 
 5. Open **http://localhost:8080** (storefront + API). Vite HMR uses **`DOCKER=1`** and **`VITE_DOCKER_HMR_HOST`** (default **`localhost`**) — see **`vite.config.js`**.
 
-Common Artisan commands: **`docker compose -f docker-compose-dev.yml exec app php artisan …`**. Compose sets **`TRUSTED_PROXIES=*`** (read via **`config/trustedproxy.php`** by Laravel’s **`TrustProxies`** middleware), **`DB_HOST=postgres`**, and **`WAIT_FOR_DB=1`** for the app and queue services.
+Common Artisan commands: **`docker compose exec app php artisan …`**. Compose sets **`TRUSTED_PROXIES=*`** (read via **`config/trustedproxy.php`** by Laravel’s **`TrustProxies`** middleware), **`DB_HOST=postgres`**, and **`WAIT_FOR_DB=1`** for the app and queue services.
 
 ### Production (`docker-compose.prod.yml`)
 
@@ -140,7 +140,7 @@ docker compose -f docker-compose.prod.yml exec app php artisan migrate --force
 
 Optional: set **`APP_IMAGE_NAME`** in the environment to prefix image names (default **`laravel-ecommerce-app`**).
 
-**Laravel Sail** remains available as a dev dependency (`php artisan sail:install`); the supported path in this repo is **`docker-compose-dev.yml`** (development) and **`docker-compose.prod.yml`** (production).
+**Laravel Sail** remains available as a dev dependency (`php artisan sail:install`); the supported path in this repo is the **`docker compose`** files above.
 
 ## Verification and smoke checks
 
@@ -165,7 +165,7 @@ For checkout and payments work, see **`.cursor/rules/testing-verification.mdc`**
 | [`docs/postgresql.md`](docs/postgresql.md) | PostgreSQL setup, PHP `pdo_pgsql`, SSL, extensions, search |
 | [`docs/agent-loop.md`](docs/agent-loop.md) | Task pipeline and labels (for teams using `agents/tasks/`) |
 | [`docs/agent-cursor-rules.md`](docs/agent-cursor-rules.md) | Index of Cursor/project rules |
-| [`docker-compose-dev.yml`](docker-compose-dev.yml) / [`docker-compose.prod.yml`](docker-compose.prod.yml) | Docker development and production stacks (see *Docker* above) |
+| [`docker-compose.yml`](docker-compose.yml) / [`docker-compose.prod.yml`](docker-compose.prod.yml) | Docker development and production stacks (see *Docker* above) |
 
 Do **not** commit secrets, API keys, or production credentials. Use `.env` (ignored by git) and document only variable *names* and safe examples.
 

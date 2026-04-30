@@ -1,5 +1,4 @@
 # Production-oriented stack (build images, no bind-mounted source).
-# Local development stack: docker-compose-dev.yml
 # Usage:
 #   cp .env.example .env   # set APP_KEY, APP_ENV=production, APP_DEBUG=false, DB_*, etc.
 #   docker compose -f docker-compose.prod.yml build

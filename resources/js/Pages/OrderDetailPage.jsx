@@ -20,18 +20,16 @@ function storefrontOrderStatusBadgeClass(status) {
   switch (status) {
     case 'pending':
     case 'awaiting_payment':
-      return 'badge-warning';
     case 'awaiting_installation_price':
-      return 'badge-warning';
+    case 'installation_pending':
+      return 'badge-soft badge-warning';
     case 'in_transit':
     case 'sent':
-      return 'badge-success';
-    case 'installation_pending':
-      return 'badge-warning';
+      return 'badge-soft badge-success';
     case 'installation_confirmed':
-      return 'badge-info text-base-content';
+      return 'badge-soft badge-info';
     default:
-      return 'badge-ghost';
+      return 'badge-soft badge-neutral';
   }
 }
 

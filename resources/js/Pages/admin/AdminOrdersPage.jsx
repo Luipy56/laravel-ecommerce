@@ -19,14 +19,18 @@ function installationStatusLabel(status, t) {
 
 function getStatusBadgeClass(status) {
   switch (status) {
-    case 'pending': return 'badge-warning';
-    case 'awaiting_payment': return 'badge-warning';
-    case 'awaiting_installation_price': return 'badge-warning';
-    case 'in_transit': return 'badge-success';
-    case 'sent': return 'badge-success';
-    case 'installation_pending': return 'badge-warning';
-    case 'installation_confirmed': return 'badge-info text-base-content';
-    default: return 'badge-ghost';
+    case 'pending':
+    case 'awaiting_payment':
+    case 'awaiting_installation_price':
+    case 'installation_pending':
+      return 'badge-soft badge-warning';
+    case 'in_transit':
+    case 'sent':
+      return 'badge-soft badge-success';
+    case 'installation_confirmed':
+      return 'badge-soft badge-info';
+    default:
+      return 'badge-soft badge-neutral';
   }
 }
 

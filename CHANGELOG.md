@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Payments (PSP + offline):** Configurable **`bank_transfer`** and **`bizum_manual`** checkout methods (whitelist via **`PAYMENTS_CHECKOUT_METHODS`** / `config/payments.php`); shop settings for IBAN / Bizum instructions; checkout and **`POST orders/{id}/pay`** return **`payment_checkout.gateway`** `manual` plus **`payment_instructions`** without calling Stripe/PayPal. **`POST /api/v1/payments/stripe/checkout/confirm`** (authenticated, verified client) completes a paid Stripe Checkout session server-side (shared logic with the Stripe webhook). **`POST /api/v1/admin/orders/{order}/payments/{payment}/record-manual-settlement`** marks an offline pending payment succeeded and advances the order. Storefront: checkout/order pay UI, order detail Stripe return handling with **`session_id`**, offline instructions panel; admin shop settings and order “record manual settlement” action. API: **`GET payments/config`** and **`GET orders/{id}`** expose offline method flags and instruction hints.
+
 - **Admin · shop configuration:** Collapsible sections (daisyUI **`collapse`**); **default flat shipping (EUR)** and **automatic installation pricing** (quote threshold + editable tiers) persisted in **`shop_settings`** (`shipping_flat_eur`, `installation_auto_pricing`); cart, checkout, order totals, PDFs, and admin order updates use these values. Placeholder block for **shipping by postal code** (not implemented). **`App\Support\InstallationAutoPricing`**; **`Order::automaticInstallationFeeFromMerchandiseSubtotal`** accepts optional merged settings for unit tests without a database.
 
 - **Docker:** **`docker-compose.yml`** for local development (PostgreSQL, Nginx, PHP 8.2 FPM, Vite, queue worker, named volumes for `vendor` / `node_modules`), **`docker-compose.prod.yml`** for production builds, multi-stage **`docker/php/Dockerfile`**, **`docker/nginx/default.conf`**, **`docker/nginx/Dockerfile.prod`**, **`.dockerignore`**, and **`docker/php/docker-entrypoint.sh`**. **`config/trustedproxy.php`** wires **`TRUSTED_PROXIES`** into Laravel’s **`TrustProxies`** middleware. **`vite.config.js`** supports **`DOCKER=1`** for HMR behind the dev server.
@@ -34,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`resources/js/lib/storefrontLanguageOptions.js`:** Single source for storefront locale labels (ca / es / en) used by **Navbar** and **Layout**.
 
 ### Fixed
+
+- **Transactional email sender name:** When **`APP_NAME`** was unset or still the framework default, **`MAIL_FROM_NAME="${APP_NAME}"`** (as in **`.env.example`**) resolved to **“Laravel”** in clients’ inboxes. **`config/app.php`** now defaults **`APP_NAME`** to **Serralleria Solidària**, matching **`MAIL_FROM_NAME`** / branding.
 
 - **Icons (`IconUser`, `IconHelpCircle`):** SVG **`d`** arc flags were glued to coordinates (`011-7.5`, `0118`), which broke React’s DOM parser and distorted the profile icon; paths now use explicit separators (`0 1 1 -7.5`, `0 0 1 18`, etc.).
 

@@ -22,7 +22,7 @@ function storefrontOrderStatusBadgeClass(status) {
     case 'awaiting_payment':
       return 'badge-warning';
     case 'awaiting_installation_price':
-      return 'badge-info text-base-content';
+      return 'badge-warning';
     case 'in_transit':
     case 'sent':
       return 'badge-success';

@@ -21,7 +21,7 @@ function getStatusBadgeClass(status) {
   switch (status) {
     case 'pending': return 'badge-warning';
     case 'awaiting_payment': return 'badge-warning';
-    case 'awaiting_installation_price': return 'badge-info text-base-content';
+    case 'awaiting_installation_price': return 'badge-warning';
     case 'in_transit': return 'badge-success';
     case 'sent': return 'badge-success';
     case 'installation_pending': return 'badge-warning';

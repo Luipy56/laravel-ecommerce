@@ -7,11 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- **Docker:** **`docker-compose.yml`** for local development (PostgreSQL, Nginx, PHP 8.2 FPM, Vite, queue worker, named volumes for `vendor` / `node_modules`), **`docker-compose.prod.yml`** for production builds, multi-stage **`docker/php/Dockerfile`**, **`docker/nginx/default.conf`**, **`docker/nginx/Dockerfile.prod`**, **`.dockerignore`**, and **`docker/php/docker-entrypoint.sh`**. **`config/trustedproxy.php`** wires **`TRUSTED_PROXIES`** into Laravel’s **`TrustProxies`** middleware. **`vite.config.js`** supports **`DOCKER=1`** for HMR behind the dev server.
-
 ### Changed
+
+- **Docker:** Development Compose file renamed from **`docker-compose.yml`** to **`docker-compose-dev.yml`**; use **`docker compose -f docker-compose-dev.yml …`** (README, **AGENTS.md**, **testing-verification.mdc**).
 
 - **Storefront mobile drawer · account rows:** **Perfil**, **Comandes**, **Compres**, and guest **login** use the same **`drawerNavClass`** / **`drawerIconClass`** treatment as the main links (**`NavLink`** + **`IconUser`**, **`IconClipboardList`**, **`IconPackage`**, **`IconLogIn`**).
 

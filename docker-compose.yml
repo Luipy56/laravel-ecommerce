@@ -3,7 +3,15 @@
 #   docker compose run --rm app composer install
 #   docker compose run --rm node npm ci   # or let the node service install on first start
 #   docker compose up -d
+# Commands to know:
+# First time:
+# docker compose run --rm app composer install
+# Start
+# docker compose up -d
+# Migrations
+# docker compose exec app php artisan migrate --seed
 # App: http://localhost:8080  Vite: http://localhost:5173
+#
 
 name: laravel-ecommerce
 

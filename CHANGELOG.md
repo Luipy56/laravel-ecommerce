@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Product list sidebar:** **Packs only** toggle sits **below** the **Categories** block (same **`space-y-6`** spacing as before).
+
 - **Storefront mobile drawer · account rows:** **Perfil**, **Comandes**, **Compres**, and guest **login** use the same **`drawerNavClass`** / **`drawerIconClass`** treatment as the main links (**`NavLink`** + **`IconUser`**, **`IconClipboardList`**, **`IconPackage`**, **`IconLogIn`**).
 
 - **Storefront mobile drawer:** **Perfil** / **Comandes** / **Compres** (session) and guest **login** sit directly under the main nav list, separated by a thin **`hr`**; footer strip keeps language + brand only.

@@ -244,20 +244,6 @@ export default function ProductListPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <aside className="lg:w-64 shrink-0 space-y-6 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1">
-        <div className="bg-base-100 rounded-box border border-base-300 p-3">
-          <label className="flex items-center justify-between gap-3 cursor-pointer">
-            <span className="text-sm font-medium text-base-content">{t('shop.filters.packs_only')}</span>
-            <input
-              type="checkbox"
-              role="switch"
-              className="toggle toggle-primary toggle-sm shrink-0"
-              checked={packsOnly}
-              onChange={() => setFilters({ packsOnly: !packsOnly })}
-              aria-checked={packsOnly}
-              aria-label={t('shop.filters.packs_only')}
-            />
-          </label>
-        </div>
         <div>
           <h2 className="font-semibold mb-2">{t('shop.categories')}</h2>
           <ul className="menu bg-base-100 rounded-box border border-base-300">
@@ -282,6 +268,20 @@ export default function ProductListPage() {
               </li>
             ))}
           </ul>
+        </div>
+        <div className="bg-base-100 rounded-box border border-base-300 p-3">
+          <label className="flex items-center justify-between gap-3 cursor-pointer">
+            <span className="text-sm font-medium text-base-content">{t('shop.filters.packs_only')}</span>
+            <input
+              type="checkbox"
+              role="switch"
+              className="toggle toggle-primary toggle-sm shrink-0"
+              checked={packsOnly}
+              onChange={() => setFilters({ packsOnly: !packsOnly })}
+              aria-checked={packsOnly}
+              aria-label={t('shop.filters.packs_only')}
+            />
+          </label>
         </div>
         {featuresByGroup.length > 0 && (
           <div>

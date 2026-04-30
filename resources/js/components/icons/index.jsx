@@ -173,6 +173,32 @@ export function IconPackage({ className, strokeWidth, ...rest }) {
   );
 }
 
+/** Heart (favorites / wishlist). Outline or filled. */
+export function IconHeart({ className = '', filled = false, strokeWidth = 2, ...rest }) {
+  if (filled) {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox={viewBox}
+        fill="currentColor"
+        className={className}
+        aria-hidden="true"
+        {...rest}
+      >
+        <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2 12.39 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.89-2.688 6.86-5.55 9.09-.12.08-.25.16-.383.218l-.022.012-.007.003-.002.001L12 21.173l-.645-.263z" />
+      </svg>
+    );
+  }
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path
+        strokeWidth={strokeWidth ?? 2}
+        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+      />
+    </IconWrapper>
+  );
+}
+
 /** Log in (arrow into bracket). */
 export function IconLogIn({ className, strokeWidth, ...rest }) {
   return (
@@ -180,6 +206,18 @@ export function IconLogIn({ className, strokeWidth, ...rest }) {
       <path
         strokeWidth={strokeWidth ?? 2}
         d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H3"
+      />
+    </IconWrapper>
+  );
+}
+
+/** Log out (door + arrow). */
+export function IconLogOut({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path
+        strokeWidth={strokeWidth ?? 2}
+        d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"
       />
     </IconWrapper>
   );

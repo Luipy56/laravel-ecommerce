@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.96] - 2026-05-03
+
+### Fixed
+
+- **Admin nav alert — orders:** Removed an `orWhere` clause from the `orders_need_attention` query that incorrectly triggered the sidebar dot for orders with `installation_requested=true` and `installation_status=pending` regardless of the order's main status (e.g. already-sent orders). The dot now only activates for orders whose status is `pending`, `awaiting_payment`, `awaiting_installation_price`, or `installation_pending`.
+
 ## [0.1.95] - 2026-05-03
 
 ### Fixed

@@ -16,18 +16,12 @@ class AdminNavAlertsController extends Controller
     {
         $ordersNeedAttention = Order::query()
             ->where('kind', Order::KIND_ORDER)
-            ->where(function ($q) {
-                $q->whereIn('status', [
-                    Order::STATUS_PENDING,
-                    Order::STATUS_AWAITING_PAYMENT,
-                    Order::STATUS_AWAITING_INSTALLATION_PRICE,
-                    Order::STATUS_INSTALLATION_PENDING,
-                ])
-                    ->orWhere(function ($q2) {
-                        $q2->where('installation_requested', true)
-                            ->where('installation_status', Order::INSTALLATION_PENDING);
-                    });
-            })
+            ->whereIn('status', [
+                Order::STATUS_PENDING,
+                Order::STATUS_AWAITING_PAYMENT,
+                Order::STATUS_AWAITING_INSTALLATION_PRICE,
+                Order::STATUS_INSTALLATION_PENDING,
+            ])
             ->exists();
 
         $personalizedNeedAttention = PersonalizedSolution::query()

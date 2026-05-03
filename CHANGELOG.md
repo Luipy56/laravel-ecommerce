@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.112] - 2026-05-04
+
+### Changed
+
+- **Albarán (delivery note) PDF/HTML view (`resources/views/pdf/delivery_note.blade.php`):** Reworked as a proper proof-of-delivery document. Now uses an `ALB-{year}-{order_id}` document number, drops the price / unit-price / line-total / shipping / installation / total columns (delivery notes have no fiscal value), shows a quantity-only line table with a "Total units" footer, and adds a recipient signature block (signature line + date) plus a free-form delivery-remarks box. A prominent "no fiscal validity" banner explains the document's purpose and points at the separate invoice for VAT.
+- **Factura (invoice) PDF/HTML view (`resources/views/pdf/invoice.blade.php`):** Reworked as a Spanish legal invoice. Adds an `FAC-{year}-{order_id}` invoice number, the issue date (paid date when available), an "ISSUER" panel with brand name + tax ID (NIF/CIF) + fiscal address, a "BILL TO" panel with the client name, identification (DNI / NIE / CIF) and email/phone, an IVA breakdown row (taxable base, VAT amount, total with VAT) computed from a configurable `INVOICE_VAT_RATE_PERCENT` (default 21 %), a payment block (method, paid-at, gateway reference) shown only when a successful payment exists, a "PAID" stamp in the header, and a legal-validity notice for accounting / VAT-deduction purposes.
+
+### Added
+
+- **Issuer fiscal config** in `config/mail.php` under `mail.brand`: `tax_id` (NIF/CIF/VAT), `fiscal_address` (multiline registered address) and `vat_rate_percent` (default 21). Wired to env vars `MAIL_BRAND_TAX_ID`, `MAIL_BRAND_FISCAL_ADDRESS`, `INVOICE_VAT_RATE_PERCENT` and documented in `.env.example`. Stored product prices are treated as VAT-inclusive (Spanish B2C standard); the invoice deducts the base from the grand total using the configured rate.
+- **i18n keys for invoice + delivery note** in `lang/ca.json` / `lang/es.json` / `lang/en.json` (`shop.invoice_number_label`, `shop.invoice_issue_date`, `shop.invoice_tax_id`, `shop.invoice_fiscal_address`, `shop.invoice_taxable_base`, `shop.invoice_vat_label`, `shop.invoice_total_with_vat`, `shop.invoice_vat_included_note`, `shop.invoice_payment_*`, `shop.invoice_legal_notice`, `shop.delivery_note_title`, `shop.delivery_note_subtitle`, `shop.delivery_note_no_fiscal_value`, `shop.delivery_note_signature_label`, `shop.delivery_note_signature_hint`, `shop.delivery_note_total_units`, `shop.delivery_note_carrier_notes`, `shop.delivery_note_footer`, `shop.delivery_note_received_on`, `shop.delivery_note_ship_to`). The previously broken `__('shop.delivery_note_*')` calls (which fell through to the literal key string) now resolve in all three locales.
+
+### Fixed
+
+- **N+1 on invoice render:** `OrderController@invoice` now eager-loads the `payments` relation alongside lines/addresses/client; the new invoice template reads it for the "PAID" stamp and the payment block.
+
+## [0.1.108] - 2026-05-04
+
+### Removed
+
+- **i18n:** Dropped unused `checkout.payment.bizum` (ca / es / en). Checkout only exposes `card` and `paypal` methods in the UI; Bizum is included under the Stripe card flow. **`admin.orders.payment_bizum` is kept** — it is still resolved when an order payment row has `payment_method` `bizum`.
+
 ## [0.1.105] - 2026-05-04
 
 ### Fixed

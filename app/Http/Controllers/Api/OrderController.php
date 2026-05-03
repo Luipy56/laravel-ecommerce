@@ -455,7 +455,7 @@ class OrderController extends Controller
             $locale = config('app.locale');
         }
         app()->setLocale($locale);
-        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
+        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses', 'payments']);
 
         $html = view('pdf.invoice', ['order' => $order])->render();
 

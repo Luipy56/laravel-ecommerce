@@ -140,17 +140,17 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
         <span>{fmt.format(localMax)}</span>
       </div>
 
-      {/* Dual-range track — px-2 so endpoint dots don't get clipped */}
-      <div className="relative h-5 flex items-center px-2">
+      {/* Dual-range track */}
+      <div className="relative h-5 flex items-center">
         {/* Background track */}
-        <div className="absolute inset-x-2 h-1.5 rounded-full bg-base-300" />
-        {/* Endpoint dots */}
-        <div className="absolute left-2 w-2.5 h-2.5 rounded-full bg-base-300 -translate-x-1/2 border-2 border-base-100 shadow-sm" />
-        <div className="absolute right-2 w-2.5 h-2.5 rounded-full bg-base-300 translate-x-1/2 border-2 border-base-100 shadow-sm" />
+        <div className="absolute inset-x-0 h-1.5 rounded-full bg-base-300" />
+        {/* Endpoint dots — slightly overflow the track edges; card p-3 gives enough room */}
+        <div className="absolute left-0 w-2.5 h-2.5 rounded-full bg-base-300 -translate-x-1/2 border-2 border-base-100 shadow-sm" />
+        <div className="absolute right-0 w-2.5 h-2.5 rounded-full bg-base-300 translate-x-1/2 border-2 border-base-100 shadow-sm" />
         {/* Filled track between thumbs */}
         <div
           className="absolute h-1.5 bg-primary"
-          style={{ left: `calc(0.5rem + ${minPct}% * (100% - 1rem) / 100)`, right: `calc(0.5rem + ${100 - maxPct}% * (100% - 1rem) / 100)` }}
+          style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
         />
         {/* Min thumb — z-10 when near the max to stay reachable */}
         <input

@@ -42,11 +42,7 @@ class AdminShopSettingsController extends Controller
             'featured_max_low_stock' => ['integer', 'min:0'],
             'featured_max_overstock' => ['integer', 'min:0'],
             'shipping_flat_eur' => ['sometimes', 'numeric', 'min:0', 'max:99999.99'],
-            'bank_transfer_iban' => ['nullable', 'string', 'max:64'],
-            'bank_transfer_beneficiary' => ['nullable', 'string', 'max:255'],
-            'bank_transfer_reference_hint' => ['nullable', 'string', 'max:500'],
-            'bizum_manual_phone' => ['nullable', 'string', 'max:80'],
-            'bizum_manual_instructions' => ['nullable', 'string', 'max:2000'],
+            'admin_list_default_period' => ['nullable', 'string', Rule::in(['week', 'month', 'year', 'all'])],
             'installation_auto_pricing' => ['sometimes', 'array'],
             'installation_auto_pricing.quote_when_merchandise_above_eur' => ['required_with:installation_auto_pricing', 'numeric', 'min:0', 'max:999999'],
             'installation_auto_pricing.tiers' => ['required_with:installation_auto_pricing', 'array', 'min:1'],
@@ -112,11 +108,9 @@ class AdminShopSettingsController extends Controller
             'featured_max_overstock' => (int) ($merged[ShopSetting::KEY_FEATURED_MAX_OVERSTOCK] ?? 0),
             'shipping_flat_eur' => round((float) ($merged[ShopSetting::KEY_SHIPPING_FLAT_EUR] ?? ShopSetting::DEFAULTS[ShopSetting::KEY_SHIPPING_FLAT_EUR]), 2),
             'installation_auto_pricing' => InstallationAutoPricing::fromMerged($merged)->toStorageArray(),
-            'bank_transfer_iban' => (string) ($merged[ShopSetting::KEY_BANK_TRANSFER_IBAN] ?? ''),
-            'bank_transfer_beneficiary' => (string) ($merged[ShopSetting::KEY_BANK_TRANSFER_BENEFICIARY] ?? ''),
-            'bank_transfer_reference_hint' => (string) ($merged[ShopSetting::KEY_BANK_TRANSFER_REFERENCE_HINT] ?? ''),
-            'bizum_manual_phone' => (string) ($merged[ShopSetting::KEY_BIZUM_MANUAL_PHONE] ?? ''),
-            'bizum_manual_instructions' => (string) ($merged[ShopSetting::KEY_BIZUM_MANUAL_INSTRUCTIONS] ?? ''),
+            'admin_list_default_period' => in_array($merged[ShopSetting::KEY_ADMIN_LIST_DEFAULT_PERIOD] ?? '', ['week', 'month', 'year', 'all'], true)
+                ? (string) $merged[ShopSetting::KEY_ADMIN_LIST_DEFAULT_PERIOD]
+                : 'week',
             'admin_index_columns' => AdminIndexColumns::normalize(is_array($storedColumns) ? $storedColumns : null),
         ];
     }
@@ -190,11 +184,7 @@ class AdminShopSettingsController extends Controller
             'featured_max_overstock' => ShopSetting::KEY_FEATURED_MAX_OVERSTOCK,
             'shipping_flat_eur' => ShopSetting::KEY_SHIPPING_FLAT_EUR,
             'installation_auto_pricing' => ShopSetting::KEY_INSTALLATION_AUTO_PRICING,
-            'bank_transfer_iban' => ShopSetting::KEY_BANK_TRANSFER_IBAN,
-            'bank_transfer_beneficiary' => ShopSetting::KEY_BANK_TRANSFER_BENEFICIARY,
-            'bank_transfer_reference_hint' => ShopSetting::KEY_BANK_TRANSFER_REFERENCE_HINT,
-            'bizum_manual_phone' => ShopSetting::KEY_BIZUM_MANUAL_PHONE,
-            'bizum_manual_instructions' => ShopSetting::KEY_BIZUM_MANUAL_INSTRUCTIONS,
+            'admin_list_default_period' => ShopSetting::KEY_ADMIN_LIST_DEFAULT_PERIOD,
         ];
         $out = [];
         foreach ($map as $requestKey => $dbKey) {

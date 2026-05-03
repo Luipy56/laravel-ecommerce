@@ -5,7 +5,120 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.112] - 2026-05-04
+
+### Changed
+
+- **Albarán (delivery note) PDF/HTML view (`resources/views/pdf/delivery_note.blade.php`):** Reworked as a proper proof-of-delivery document. Now uses an `ALB-{year}-{order_id}` document number, drops the price / unit-price / line-total / shipping / installation / total columns (delivery notes have no fiscal value), shows a quantity-only line table with a "Total units" footer, and adds a recipient signature block (signature line + date) plus a free-form delivery-remarks box. A prominent "no fiscal validity" banner explains the document's purpose and points at the separate invoice for VAT.
+- **Factura (invoice) PDF/HTML view (`resources/views/pdf/invoice.blade.php`):** Reworked as a Spanish legal invoice. Adds an `FAC-{year}-{order_id}` invoice number, the issue date (paid date when available), an "ISSUER" panel with brand name + tax ID (NIF/CIF) + fiscal address, a "BILL TO" panel with the client name, identification (DNI / NIE / CIF) and email/phone, an IVA breakdown row (taxable base, VAT amount, total with VAT) computed from a configurable `INVOICE_VAT_RATE_PERCENT` (default 21 %), a payment block (method, paid-at, gateway reference) shown only when a successful payment exists, a "PAID" stamp in the header, and a legal-validity notice for accounting / VAT-deduction purposes.
+
+### Added
+
+- **Issuer fiscal config** in `config/mail.php` under `mail.brand`: `tax_id` (NIF/CIF/VAT), `fiscal_address` (multiline registered address) and `vat_rate_percent` (default 21). Wired to env vars `MAIL_BRAND_TAX_ID`, `MAIL_BRAND_FISCAL_ADDRESS`, `INVOICE_VAT_RATE_PERCENT` and documented in `.env.example`. Stored product prices are treated as VAT-inclusive (Spanish B2C standard); the invoice deducts the base from the grand total using the configured rate.
+- **i18n keys for invoice + delivery note** in `lang/ca.json` / `lang/es.json` / `lang/en.json` (`shop.invoice_number_label`, `shop.invoice_issue_date`, `shop.invoice_tax_id`, `shop.invoice_fiscal_address`, `shop.invoice_taxable_base`, `shop.invoice_vat_label`, `shop.invoice_total_with_vat`, `shop.invoice_vat_included_note`, `shop.invoice_payment_*`, `shop.invoice_legal_notice`, `shop.delivery_note_title`, `shop.delivery_note_subtitle`, `shop.delivery_note_no_fiscal_value`, `shop.delivery_note_signature_label`, `shop.delivery_note_signature_hint`, `shop.delivery_note_total_units`, `shop.delivery_note_carrier_notes`, `shop.delivery_note_footer`, `shop.delivery_note_received_on`, `shop.delivery_note_ship_to`). The previously broken `__('shop.delivery_note_*')` calls (which fell through to the literal key string) now resolve in all three locales.
+
+### Fixed
+
+- **N+1 on invoice render:** `OrderController@invoice` now eager-loads the `payments` relation alongside lines/addresses/client; the new invoice template reads it for the "PAID" stamp and the payment block.
+
+## [0.1.108] - 2026-05-04
+
+### Removed
+
+- **i18n:** Dropped unused `checkout.payment.bizum` (ca / es / en). Checkout only exposes `card` and `paypal` methods in the UI; Bizum is included under the Stripe card flow. **`admin.orders.payment_bizum` is kept** — it is still resolved when an order payment row has `payment_method` `bizum`.
+
+## [0.1.105] - 2026-05-04
+
+### Fixed
+
+- **Storefront orders list:** Empty state no longer reused the cart message; it now shows `shop.orders.empty` (orders-specific copy in ca / es / en).
+
+## [0.1.104] - 2026-05-04
+
+### Added
+
+- **Admin shop settings:** Short one-line subtitles on collapse headers for Home, Custom solutions, and Admin list columns; “List defaults” and “Closed prices” keep their existing help lines.
+
+## [0.1.103] - 2026-05-04
+
+### Changed
+
+- **Admin shop settings:** Removed the long collapse subtitle under “Home · automatic highlights” / “Inicio · destacados automáticos”; in-section copy (limits hint, field labels) is unchanged.
+
+## [0.1.102] - 2026-05-04
+
+### Changed
+
+- **Admin shop settings:** Removed the long subtitle under “Admin list columns” / “Columnas de listas del admin”; per-table hints inside the section remain.
+
+## [0.1.99] - 2026-05-03
+
+### Removed
+
+- **Offline payments (bank transfer / Bizum manual):** Complete removal of all offline payment infrastructure — `PaymentOfflineInstructions` support class, `Payment::METHOD_BANK_TRANSFER` / `METHOD_BIZUM_MANUAL` / `GATEWAY_MANUAL` / `isOfflineCheckoutMethod()`, five `ShopSetting` keys and defaults (`bank_transfer_iban`, `bank_transfer_beneficiary`, `bank_transfer_reference_hint`, `bizum_manual_phone`, `bizum_manual_instructions`), admin settings UI section, `recordManualSettlement` admin API endpoint and route, `OfflinePaymentInstructionsBlock` React component, all related checkout/order-detail UI branches, and offline locale keys in JS and PHP i18n files. Stripe Checkout Bizum (online, via `card` method) is unaffected.
+
+## [0.1.97] - 2026-05-03
+
+### Added
+
+- **Storefront — price range filter:** New dual-handle range slider in the product list sidebar (below "Solo packs") lets shoppers set a min/max price. The slider bounds are fetched from a new `GET /api/v1/products/price-range` endpoint. When the range matches the global min/max no filter is sent; a "Cualquier precio" link resets it. The `price_min` / `price_max` params are persisted in the URL and forwarded to both product and pack queries.
+
+## [0.1.96] - 2026-05-03
+
+### Fixed
+
+- **Admin nav alert — orders:** Removed an `orWhere` clause from the `orders_need_attention` query that incorrectly triggered the sidebar dot for orders with `installation_requested=true` and `installation_status=pending` regardless of the order's main status (e.g. already-sent orders). The dot now only activates for orders whose status is `pending`, `awaiting_payment`, `awaiting_installation_price`, or `installation_pending`.
+
+## [0.1.95] - 2026-05-03
+
+### Fixed
+
+- **Locale (es/ca):** Period filter option "all time" corrected to "Todos los tiempos" (es) and "Tots els temps" (ca).
+
+## [0.1.94] - 2026-05-03
+
+### Added
+
+- **Admin Orders & Personalized Solutions — period filter:** Both list pages now include a time-range select (Last week / Last month / Last year / All time). The backend `AdminOrderController` and `AdminPersonalizedSolutionController` accept a `period` query param and apply a `created_at >=` date constraint accordingly.
+- **Admin Settings — default period:** New "List defaults" section in `/admin/settings` lets admins choose which period is pre-selected when the Orders and Personalized Solutions pages are first opened. Persisted in `shop_settings` under key `admin_list_default_period`; default is "last week".
+
+## [0.1.93] - 2026-05-03
+
+### Changed
+
+- **Admin lists (all):** Replaced prev/next pagination buttons with infinite scroll (IntersectionObserver sentinel) across all 11 admin list pages: Products, Categories, Features (both sub-lists), Variant Groups, Packs, Orders, Clients, Personalized Solutions, Admins, FAQs, and Data Explorer. New items are appended automatically as the user scrolls to the bottom; a small spinner appears while loading more.
+
+## [0.1.89] - 2026-05-03
+
+### Changed
+
+- **Client portal (personalized solution):** Removed "Ronda de mejoras: X" from the client view — it's irrelevant information for the client.
+- **Client portal (personalized solution):** Improvement request textarea now pre-fills with the client's last sent message on page load and after a successful submit, so the previous text is not lost.
+- **Admin personalized solution show:** The client's improvement feedback text is now visually highlighted with a left warning border and tinted background so it stands out as the key text to read.
+- **Locales (ca/es):** Renamed "Última petició/petición de millores/mejoras" → "... del client/cliente" to clarify it refers to the client's message.
+
+## [0.1.88] - 2026-05-03
+
+### Fixed
+
+- **Personalized solution improvement request email (500):** Laravel reserves the `$message` variable in Blade email views (injected as `Illuminate\Mail\Message`). The mailable was passing `'message' => $clientMessage` in `with: [...]`, which Laravel silently overwrote with its own mail object, causing `htmlspecialchars()` to receive an object and throw a fatal 500. Renamed the data key to `clientMessage` in the mailable and updated the blade template accordingly.
+
+## [0.1.87] - 2026-05-03
+
+### Changed
+
+- **Cursor rules (`commit-changelog-version.mdc`, `agent-task-version-bump.mdc`, `app-version-cadence.mdc`):** Ship-ready changelog bullets must use **versioned sections** **`## [X.Y.Z] - YYYY-MM-DD`** aligned with root **`package.json`** after each bump; do not accumulate long lists under **`[Unreleased]`** so operators and Admin About always tie changes to a semver.
+
+## [0.1.86] - 2026-05-03
+
+### Fixed
+
+- **PayPal "normativas internacionales" on retry:** `invoice_id` was built from the shop order ID only (`ORD-{order_id}`), so every failed attempt reused the same value. PayPal's compliance engine blocks duplicate `invoice_id` across multiple orders and returns a compliance-violation decline. Fixed by including the payment ID: `ORD-{order_id}-PAY-{payment_id}`, making each attempt unique.
+
+- **Stripe not loading:** `.env` had `STRIPE_PUBLISHABLE_KEY`/`STRIPE_SECRET_KEY` but `config/services.php` reads `STRIPE_KEY`/`STRIPE_SECRET`; renamed the variables so `StripeCredentials::areConfigured()` returns `true` and Stripe Checkout sessions can be created.
+- **Stripe excluded from checkout:** `PAYMENTS_CHECKOUT_METHODS` was set to `paypal` only; changed to `card,paypal` so the Stripe (card) option appears in the payment selector.
+- **PayPal inline buttons never rendered:** `CheckoutPage.jsx` and `OrderDetailPage.jsx` checked `c.approval_url` before `c.client_id && c.paypal_order_id && c.payment_id`; since PayPal always returns an `approve` link, the inline buttons branch was dead code and `PayPalInlineButtons` was never mounted. Swapped the branch order so the inline SDK flow is always preferred.
+- **PayPal capture missing after popup redirect:** Added capture call in the `payment=paypal_return` handler in `OrderDetailPage.jsx`; reads the `token` query param (PayPal order ID injected by PayPal on redirect), finds the matching pending payment, and calls `POST payments/paypal/capture` to complete the payment server-side.
 
 ### Added
 

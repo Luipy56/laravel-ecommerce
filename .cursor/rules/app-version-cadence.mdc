@@ -15,7 +15,7 @@ alwaysApply: true
 Bump **`package.json`** and **`package-lock.json`** together (e.g. `npm version patch --no-git-tag-version`) in the **same push series** as the work, **before** `git push` to the integration branch, when the change:
 
 - touches **storefront, admin, API, mail, payments, or database** in a way that matters to users or operators; **or**
-- adds or updates a bullet under **`CHANGELOG.md`** `[Unreleased]` for that work.
+- adds or updates a bullet under **`CHANGELOG.md`** in the **`## [X.Y.Z] - date`** section that matches the bumped **`package.json`** for that work.
 
 **Coders** should not hand off “done” without a version bump for shippable work; **committer** (or the same agent) applies it in the final commit if the feature commit did not.
 

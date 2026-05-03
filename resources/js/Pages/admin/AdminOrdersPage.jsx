@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
-import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
 
 const KINDS = ['cart', 'order', 'like'];
 const STATUSES = ['pending', 'awaiting_payment', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
@@ -38,47 +38,82 @@ export default function AdminOrdersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('orders');
+  const { defaultPeriod, isLoading: periodLoading } = useAdminListDefaultPeriod();
+  const [periodInitialized, setPeriodInitialized] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
-  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [kindFilter, setKindFilter] = useState('order');
   const [statusFilter, setStatusFilter] = useState('');
+  const [periodFilter, setPeriodFilter] = useState('week');
+  const pageRef = useRef(1);
+  const sentinelRef = useRef(null);
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
+  useEffect(() => {
+    if (!periodLoading && !periodInitialized) {
+      setPeriodFilter(defaultPeriod);
+      setPeriodInitialized(true);
+    }
+  }, [periodLoading, periodInitialized, defaultPeriod]);
+
+  const fetchOrders = useCallback(async (pageNum, reset = false) => {
+    if (reset) setLoading(true);
+    else setLoadingMore(true);
     try {
-      const params = { page, per_page: 20 };
+      const params = { page: pageNum, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
       if (kindFilter) params.kind = kindFilter;
       if (statusFilter) params.status = statusFilter;
+      if (periodFilter && periodFilter !== 'all') params.period = periodFilter;
       const { data } = await api.get('admin/orders', { params });
       if (data.success) {
-        setOrders(data.data || []);
-        setMeta(data.meta || meta);
+        const newItems = data.data || [];
+        if (reset) setOrders(newItems);
+        else setOrders((prev) => [...prev, ...newItems]);
+        const meta = data.meta || {};
+        setHasMore((meta.current_page ?? pageNum) < (meta.last_page ?? 1));
+        pageRef.current = pageNum;
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      setOrders([]);
+      if (reset) setOrders([]);
     } finally {
-      setLoading(false);
+      if (reset) setLoading(false);
+      else setLoadingMore(false);
     }
-  }, [navigate, page, searchDebounce, kindFilter, statusFilter]);
+  }, [navigate, searchDebounce, kindFilter, statusFilter, periodFilter]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [searchDebounce, kindFilter, statusFilter]);
+    if (!periodInitialized) return;
+    pageRef.current = 1;
+    fetchOrders(1, true);
+  }, [fetchOrders, periodInitialized]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (!hasMore || loadingMore || loading) return;
+        const next = pageRef.current + 1;
+        pageRef.current = next;
+        fetchOrders(next, false);
+      },
+      { rootMargin: '120px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, loadingMore, loading, fetchOrders]);
 
   const orderHeaderCell = (colId) => {
     switch (colId) {
@@ -257,6 +292,20 @@ export default function AdminOrdersPage() {
             ))}
           </select>
         </label>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.orders.filter_period')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-44"
+            value={periodFilter}
+            onChange={(e) => setPeriodFilter(e.target.value)}
+            aria-label={t('admin.orders.filter_period')}
+          >
+            <option value="week">{t('admin.settings.period_week')}</option>
+            <option value="month">{t('admin.settings.period_month')}</option>
+            <option value="year">{t('admin.settings.period_year')}</option>
+            <option value="all">{t('admin.settings.period_all')}</option>
+          </select>
+        </label>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
@@ -298,29 +347,9 @@ export default function AdminOrdersPage() {
         )}
       </div>
 
-      {meta.last_page > 1 && (
-        <div className="join flex justify-center">
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            {t('shop.pagination.prev')}
-          </button>
-          <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
-            {t('shop.pagination.page')} {page} {t('shop.pagination.of')} {meta.last_page}
-          </span>
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page >= meta.last_page}
-            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-          >
-            {t('shop.pagination.next')}
-          </button>
-        </div>
-      )}
+      <div ref={sentinelRef} className="py-2 flex justify-center" aria-hidden="true">
+        {loadingMore && <span className="loading loading-spinner loading-md" />}
+      </div>
     </div>
   );
 }

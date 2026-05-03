@@ -129,6 +129,16 @@ return [
         /** Path under public/ when logo_url is empty (see public/images/…). */
         'default_logo' => env('MAIL_BRAND_DEFAULT_LOGO', 'images/serraller_solidaria_logo_key.png'),
         'footer_contact' => env('MAIL_FOOTER_CONTACT_LINE'),
+        /*
+         * Issuer fiscal data for invoices / delivery notes (factura / albarán).
+         * tax_id: NIF/CIF/VAT identifier of the legal entity issuing the document.
+         * fiscal_address: free-form multiline address shown in the invoice header.
+         * vat_rate_percent: standard VAT (IVA) rate applied to product prices when prices
+         *     are stored as VAT-inclusive (Spanish B2C default). Default 21.
+         */
+        'tax_id' => env('MAIL_BRAND_TAX_ID'),
+        'fiscal_address' => env('MAIL_BRAND_FISCAL_ADDRESS'),
+        'vat_rate_percent' => (float) env('INVOICE_VAT_RATE_PERCENT', 21),
     ],
 
     'admin_notification_address' => env('MAIL_ADMIN_NOTIFICATION_ADDRESS'),

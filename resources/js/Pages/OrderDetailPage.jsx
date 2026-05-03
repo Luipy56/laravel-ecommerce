@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
-import OfflinePaymentInstructionsBlock from '../components/payments/OfflinePaymentInstructionsBlock';
 import { CHECKOUT_PAYMENT_METHOD_ORDER } from '../validation';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
@@ -79,8 +78,6 @@ export default function OrderDetailPage() {
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
   const [paypalReturnInfo, setPaypalReturnInfo] = useState('');
   const [payWarning, setPayWarning] = useState('');
-  const [offlineInstructionsFlash, setOfflineInstructionsFlash] = useState(null);
-
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -104,18 +101,27 @@ export default function OrderDetailPage() {
     navigate(location.pathname, { replace: true, state: {} });
   }, [location.state, location.pathname, navigate, t]);
 
+  // Handoff from CheckoutPage when PayPal is selected: render the same inline buttons block here.
+  useEffect(() => {
+    const inline = location.state?.paypalInlineCheckout;
+    if (!inline) return;
+    setInlineCheckout({
+      orderId: Number(id),
+      paypal: {
+        client_id: inline.client_id,
+        paypal_order_id: inline.paypal_order_id,
+        payment_id: inline.payment_id,
+        paypal_mode: inline.paypal_mode === 'live' ? 'live' : 'sandbox',
+      },
+    });
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state, location.pathname, navigate, id]);
+
   useEffect(() => {
     if (!order?.payment_methods_available) return;
     const m = order.payment_methods_available;
     setPaymentMethod((pm) => (m[pm] ? pm : CHECKOUT_PAYMENT_METHOD_ORDER.find((k) => m[k]) || 'card'));
   }, [order?.payment_methods_available, order?.id]);
-
-  useEffect(() => {
-    const inst = location.state?.offlinePaymentInstructions;
-    if (!inst) return;
-    setOfflineInstructionsFlash(inst);
-    navigate(location.pathname, { replace: true, state: {} });
-  }, [location.state, location.pathname, navigate]);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -133,6 +139,27 @@ export default function OrderDetailPage() {
       if (payment === 'ko') setPayError(t('shop.order.payment_return_ko'));
       if (payment === 'paypal_return') {
         setPaypalReturnInfo(t('shop.order.paypal_return_check'));
+        // PayPal redirected back after approval: token = PayPal order ID, capture server-side.
+        const paypalOrderId = sp.get('token');
+        if (paypalOrderId) {
+          try {
+            const orderRes = await api.get(`orders/${id}`);
+            const pendingPayment = orderRes.data?.data?.payments?.find(
+              (p) => p.gateway === 'paypal' && p.gateway_reference === paypalOrderId,
+            );
+            if (pendingPayment && !cancelled) {
+              const captureRes = await api.post('payments/paypal/capture', {
+                paypal_order_id: paypalOrderId,
+                payment_id: pendingPayment.id,
+              });
+              if (!cancelled && captureRes.data?.success) {
+                emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
+              }
+            }
+          } catch {
+            // capture error is non-fatal; order reload below will reflect real status
+          }
+        }
       }
       if (needsStripeConfirm) {
         try {
@@ -161,10 +188,6 @@ export default function OrderDetailPage() {
     };
   }, [user, id, navigate, t]);
 
-  useEffect(() => {
-    if (order?.has_payment) setOfflineInstructionsFlash(null);
-  }, [order?.has_payment, order?.id]);
-
   const handlePay = async (e) => {
     e.preventDefault();
     setPayError('');
@@ -190,12 +213,6 @@ export default function OrderDetailPage() {
         window.location.href = c.checkout_url;
         return;
       }
-      if (c?.gateway === 'paypal' && c.approval_url) {
-        const opened = openPayPalApprovalInNewTab(c.approval_url);
-        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
-        navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
-        return;
-      }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
         setInlineCheckout({
           orderId: Number(id),
@@ -208,8 +225,11 @@ export default function OrderDetailPage() {
         });
         return;
       }
-      if (c?.gateway === 'manual' && d.payment_instructions) {
-        setOfflineInstructionsFlash(d.payment_instructions);
+      if (c?.gateway === 'paypal' && c.approval_url) {
+        const opened = openPayPalApprovalInNewTab(c.approval_url);
+        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
+        navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
+        return;
       }
       const r = await api.get(`orders/${id}`);
       if (r.data.success) setOrder(r.data.data);
@@ -273,8 +293,6 @@ export default function OrderDetailPage() {
   const payAvail = order.payment_methods_available ?? {
     card: false,
     paypal: false,
-    bank_transfer: false,
-    bizum_manual: false,
   };
   const paymentsSimulated = !!order.payments_simulated;
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
@@ -344,8 +362,6 @@ export default function OrderDetailPage() {
           {t('shop.order.awaiting_payment_notice')}
         </div>
       )}
-
-      <OfflinePaymentInstructionsBlock instructions={offlineInstructionsFlash || order.payment_instructions} />
 
       {(shippingAddress || installationAddress) && (
         <div className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
@@ -484,17 +500,6 @@ export default function OrderDetailPage() {
           {t('checkout.payment.stripe_missing_credentials_hint')}
         </div>
       )}
-      {canPay && order.bank_transfer_missing_instructions && (
-        <div role="status" className="alert alert-info mt-4 text-sm">
-          {t('checkout.payment.bank_transfer_missing_instructions_hint')}
-        </div>
-      )}
-      {canPay && order.bizum_manual_missing_instructions && (
-        <div role="status" className="alert alert-info mt-4 text-sm">
-          {t('checkout.payment.bizum_manual_missing_instructions_hint')}
-        </div>
-      )}
-
       {canPay && (
         <form onSubmit={handlePay} className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
           <div className="card-body">

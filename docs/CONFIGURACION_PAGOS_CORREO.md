@@ -10,8 +10,6 @@ La aplicación no muestra formularios “del banco” genéricos en vacío: cada
 |---------------------|----------------|---------------------------------------------|
 | Tarjeta (etiqueta amplia: incluye Bizum y monederos donde Stripe lo permita en ES) | **Stripe Checkout** (`STRIPE_KEY` + `STRIPE_SECRET`) | Tras crear el pedido, el navegador **redirige** a la página alojada de Stripe. El pedido pasa a pagado cuando el webhook `POST /api/v1/payments/webhooks/stripe` procesa `checkout.session.completed` con firma válida (`STRIPE_WEBHOOK_SECRET`). Opcional: `STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES` (p. ej. `card,bizum`). Tras volver de Stripe con `?payment=ok&session_id=…`, el cliente autenticado puede llamar **`POST /api/v1/payments/stripe/checkout/confirm`** con `{ "session_id": "…" }` para completar el pago en servidor si el webhook va retrasado (idempotente con el webhook). |
 | PayPal              | **PayPal REST** (`PAYPAL_CLIENT_ID` + `PAYPAL_SECRET`, `PAYPAL_MODE=sandbox` o `live`) | Tras iniciar el pago, si la API devuelve enlace de aprobación, el navegador **redirige** a PayPal; si no, se muestran los Smart Payment Buttons en la tienda. La captura se confirma en el servidor (`POST /api/v1/payments/paypal/capture`) **después** de que el comprador complete el flujo en PayPal. |
-| Transferencia bancaria (`bank_transfer`) | **Ninguno (instrucciones en tienda)** | El pedido queda en **pendiente de pago** con un pago `pending`. La tienda muestra IBAN/datos configurados en **Ajustes de la botiga** (admin). Un administrador puede marcar el cobro con **`POST /api/v1/admin/orders/{order}/payments/{payment}/record-manual-settlement`**. |
-| Bizum manual (`bizum_manual`) | **Ninguno (instrucciones en tienda)** | Igual que transferencia: intención de pago registrada; el cliente sigue instrucciones publicadas; cierre manual en admin. **No** confundir con Bizum vía Stripe Checkout (sigue siendo método `card` en el modelo de pago). |
 
 Si faltan credenciales, el listado de métodos en checkout y en el pedido se acorta o queda vacío, y las peticiones `POST …/orders/.../pay` pueden responder **422** con código `payment_method_not_configured`. Los mensajes tipo “Stripe is not configured” o “PayPal is not configured” indican falta de variables en `.env`, no un fallo del navegador. Puedes comprobar OAuth de PayPal con `php artisan paypal:test-credentials` (tras configurar `PAYPAL_*`).
 
@@ -40,13 +38,34 @@ Para mostrar y aceptar **solo uno** (por ejemplo solo PayPal), define en `.env`:
 PAYMENTS_CHECKOUT_METHODS=paypal
 ```
 
-Valores válidos: `card`, `paypal`, `bank_transfer`, `bizum_manual` (separados por comas). Los métodos offline solo aparecen si están en la lista **y** hay instrucciones mínimas en ajustes (IBAN para transferencia; teléfono o texto para Bizum manual). Los tokens inválidos se ignoran; si la lista queda vacía, se usan **solo** `card` y `paypal` por defecto. Las peticiones con un método fuera de la lista reciben error de validación.
+Valores válidos: `card`, `paypal` (separados por comas). Los tokens inválidos se ignoran; si la lista queda vacía, se usan **solo** `card` y `paypal` por defecto. Las peticiones con un método fuera de la lista reciben error de validación.
 
-Ejemplo con transferencia:
+### Stripe CLI: webhooks en desarrollo local
+
+Stripe no puede enviar webhooks a `localhost`. Para recibirlos en tu máquina durante el desarrollo, usa el [Stripe CLI](https://stripe.com/docs/stripe-cli):
+
+```bash
+stripe listen \
+  --api-key sk_test_TU_STRIPE_SECRET \
+  --forward-to http://localhost:8080/api/v1/payments/webhooks/stripe \
+  --events checkout.session.completed,payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded
+```
+
+Al arrancar, el CLI imprime el webhook signing secret:
+
+```
+Ready! Your webhook signing secret is whsec_XXXX...
+```
+
+Copia ese valor en `.env`:
 
 ```env
-PAYMENTS_CHECKOUT_METHODS=card,paypal,bank_transfer
+STRIPE_WEBHOOK_SECRET=whsec_XXXX...
 ```
+
+Luego ejecuta `php artisan config:clear`. El listener debe estar corriendo mientras pruebas el checkout; si lo detienes y reinicias, el secret **no cambia** (es fijo por cuenta/CLI). Si reinicias la máquina solo tienes que volver a ejecutar el comando `stripe listen` de arriba.
+
+> **Alternativa sin CLI:** El endpoint `POST /api/v1/payments/stripe/checkout/confirm` (llamado automáticamente por `OrderDetailPage` al volver de Stripe con `?payment=ok&session_id=…`) confirma el pago directamente sin depender del webhook. En desarrollo esto suele ser suficiente sin tener el CLI corriendo.
 
 ### Desarrollo local sin PSP real
 

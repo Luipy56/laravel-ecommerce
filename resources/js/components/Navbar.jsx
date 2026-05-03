@@ -6,7 +6,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import {
   IconCart,
-  IconChevronDown,
   IconClipboardList,
   IconHeart,
   IconLogOut,
@@ -313,7 +312,6 @@ export default function Navbar() {
                     <IconUser className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <span className="truncate text-left">{user.name?.trim() || user.login_email}</span>
-                  <IconChevronDown className="h-4 w-4 shrink-0 opacity-60 hidden sm:block" aria-hidden="true" />
                 </label>
                 <div
                   tabIndex={0}

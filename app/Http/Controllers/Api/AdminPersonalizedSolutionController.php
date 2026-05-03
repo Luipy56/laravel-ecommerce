@@ -37,6 +37,18 @@ class AdminPersonalizedSolutionController extends Controller
         if ($request->has('is_active')) {
             $query->where('is_active', $request->boolean('is_active'));
         }
+        if ($request->filled('period')) {
+            $period = (string) $request->input('period');
+            $from = match ($period) {
+                'week'  => now()->subWeek(),
+                'month' => now()->subMonth(),
+                'year'  => now()->subYear(),
+                default => null,
+            };
+            if ($from !== null) {
+                $query->where('created_at', '>=', $from);
+            }
+        }
 
         $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
         $solutions = $query->paginate($perPage);

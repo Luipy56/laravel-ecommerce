@@ -12,11 +12,11 @@ const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 
 
 function getStatusBadgeClass(status) {
   switch (status) {
-    case 'pending_review': return 'badge-warning';
-    case 'reviewed': return 'badge-info';
-    case 'client_contacted': return 'badge-success';
-    case 'rejected': return 'badge-error';
-    case 'completed': return 'badge-success';
+    case 'pending_review': return 'badge-outline badge-warning';
+    case 'reviewed': return 'badge-outline badge-info';
+    case 'client_contacted': return 'badge-outline badge-success';
+    case 'rejected': return 'badge-outline badge-error';
+    case 'completed': return 'badge-outline badge-success';
     default: return 'badge-ghost';
   }
 }
@@ -295,7 +295,12 @@ export default function AdminPersonalizedSolutionShowPage() {
                   <div><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.improvement_at')}</dt><dd>{new Date(solution.improvement_feedback_at).toLocaleString()}</dd></div>
                 )}
                 {solution.improvement_feedback && (
-                  <div className="sm:col-span-2"><dt className="text-sm text-base-content/70 sr-only">{t('admin.personalized_solutions.improvement_feedback')}</dt><dd className="whitespace-pre-wrap">{solution.improvement_feedback}</dd></div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-sm text-base-content/70 sr-only">{t('admin.personalized_solutions.improvement_feedback')}</dt>
+                    <dd className="whitespace-pre-wrap rounded-lg bg-base-200 px-4 py-3 text-base font-medium">
+                      {solution.improvement_feedback}
+                    </dd>
+                  </div>
                 )}
               </dl>
             </section>

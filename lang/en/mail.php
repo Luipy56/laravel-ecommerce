@@ -33,9 +33,17 @@ return [
         'greeting' => 'Hello,',
         'body' => 'We have received your order #:id. It is still pending: we have not yet received the payment.',
         'total_due' => 'Amount due',
-        'cta' => 'Please complete the payment in the store using the link below (e.g. after PayPal, Stripe redirect, or other hosted checkout).',
+        'cta' => 'Please complete the payment in the store using the link below.',
         'button' => 'Go to order',
         'footer' => 'If you already paid, you will get the payment confirmation once the bank or payment provider finalises the charge.',
+    ],
+
+    'admin_order_payment_confirmed' => [
+        'subject'      => '[Order #:id] Payment confirmed',
+        'intro'        => 'Payment for order #:id has been confirmed.',
+        'client_email' => 'Customer:',
+        'grand_total'  => 'Total paid',
+        'button'       => 'Open in admin',
     ],
 
     'admin_order_installation_quote' => [

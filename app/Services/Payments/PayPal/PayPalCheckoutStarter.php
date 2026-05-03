@@ -44,7 +44,9 @@ class PayPalCheckoutStarter implements PaymentCheckoutStarter
         $currency = strtoupper((string) ($payment->currency ?? 'EUR'));
         $referenceId = 'payment_'.$payment->id;
         $customId = (string) $payment->id;
-        $invoiceId = 'ORD-'.$order->id;
+        // Include payment ID so each retry gets a unique invoice_id — reusing the order ID
+        // alone caused PayPal to block retries as duplicate transactions (compliance error).
+        $invoiceId = 'ORD-'.$order->id.'-PAY-'.$payment->id;
 
         $base = rtrim((string) config('app.url'), '/');
         $cancelUrl = $base.'/orders/'.$order->id.'?payment=ko';

@@ -15,7 +15,7 @@ alwaysApply: true
 
 **Clarification:** “Each prompt” means **each finished agent run that changes the tree**, not a no-op chat turn. If no files are modified, no bump.
 
-**End of user prompt / session:** When the user signals work is **done** (or the agent finishes a substantive request) and **tracked files changed**, bump patch and add **`CHANGELOG.md`** **`[Unreleased]`** bullets **in that same session** — **do not wait** for the word **commit** unless the user explicitly defers versioning. Stale **`footer.version`** / **`APP_VERSION`** confuse operators.
+**End of user prompt / session:** When the user signals work is **done** (or the agent finishes a substantive request) and **tracked files changed**, bump patch and add **`CHANGELOG.md`** bullets under **`## [X.Y.Z] - YYYY-MM-DD`** matching the new semver **in that same session** — **do not wait** for the word **commit** unless the user explicitly defers versioning. Stale **`footer.version`** / **`APP_VERSION`** confuse operators.
 
 ## What this overrides
 
@@ -23,4 +23,4 @@ Loose “docs-only may skip” habits do **not** apply to **agent-delivered** wo
 
 ## Changelog
 
-If you add bullet(s) under **`CHANGELOG.md`** `[Unreleased]`, the new **`package.json`** version must stay in sync with release practice — see **`commit-changelog-version.mdc`**.
+Ship-ready notes go under a **versioned** header (`## [X.Y.Z] - date`), not an **`[Unreleased]`** backlog — see **`commit-changelog-version.mdc`**.

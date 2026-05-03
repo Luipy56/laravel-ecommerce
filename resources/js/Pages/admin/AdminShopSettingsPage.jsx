@@ -76,17 +76,13 @@ export default function AdminShopSettingsPage() {
   const [overstockBlacklistText, setOverstockBlacklistText] = useState('');
 
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
+  const [adminListDefaultPeriod, setAdminListDefaultPeriod] = useState('week');
 
   const [featuredMaxManual, setFeaturedMaxManual] = useState(0);
   const [featuredMaxLowStock, setFeaturedMaxLowStock] = useState(0);
   const [featuredMaxOverstock, setFeaturedMaxOverstock] = useState(0);
 
   const [shippingFlatEur, setShippingFlatEur] = useState('9');
-  const [bankTransferIban, setBankTransferIban] = useState('');
-  const [bankTransferBeneficiary, setBankTransferBeneficiary] = useState('');
-  const [bankTransferReferenceHint, setBankTransferReferenceHint] = useState('');
-  const [bizumManualPhone, setBizumManualPhone] = useState('');
-  const [bizumManualInstructions, setBizumManualInstructions] = useState('');
   const [installationQuoteAbove, setInstallationQuoteAbove] = useState('1000');
   const [installationTiers, setInstallationTiers] = useState(() => defaultInstallationRows());
 
@@ -103,15 +99,11 @@ export default function AdminShopSettingsPage() {
     setOverstockBlacklistEnabled(!!d.overstock_blacklist_enabled);
     setOverstockBlacklistText(idsToText(d.overstock_blacklist_product_ids));
     setAcceptPersonalizedSolutions(d.accept_personalized_solutions !== false);
+    setAdminListDefaultPeriod(['week', 'month', 'year', 'all'].includes(d.admin_list_default_period) ? d.admin_list_default_period : 'week');
     setFeaturedMaxManual(Number(d.featured_max_manual) || 0);
     setFeaturedMaxLowStock(Number(d.featured_max_low_stock) || 0);
     setFeaturedMaxOverstock(Number(d.featured_max_overstock) || 0);
     setShippingFlatEur(String(d.shipping_flat_eur ?? '9'));
-    setBankTransferIban(String(d.bank_transfer_iban ?? ''));
-    setBankTransferBeneficiary(String(d.bank_transfer_beneficiary ?? ''));
-    setBankTransferReferenceHint(String(d.bank_transfer_reference_hint ?? ''));
-    setBizumManualPhone(String(d.bizum_manual_phone ?? ''));
-    setBizumManualInstructions(String(d.bizum_manual_instructions ?? ''));
     const { quote, tiers } = parseInstallationFromApi(d.installation_auto_pricing);
     setInstallationQuoteAbove(quote);
     setInstallationTiers(tiers);
@@ -167,15 +159,11 @@ export default function AdminShopSettingsPage() {
       overstock_blacklist_enabled: overstockBlacklistEnabled,
       overstock_blacklist_product_ids: parseIdList(overstockBlacklistText),
       accept_personalized_solutions: acceptPersonalizedSolutions,
+      admin_list_default_period: adminListDefaultPeriod,
       featured_max_manual: Math.max(0, parseInt(String(featuredMaxManual), 10) || 0),
       featured_max_low_stock: Math.max(0, parseInt(String(featuredMaxLowStock), 10) || 0),
       featured_max_overstock: Math.max(0, parseInt(String(featuredMaxOverstock), 10) || 0),
       shipping_flat_eur: ship,
-      bank_transfer_iban: bankTransferIban.trim(),
-      bank_transfer_beneficiary: bankTransferBeneficiary.trim(),
-      bank_transfer_reference_hint: bankTransferReferenceHint.trim(),
-      bizum_manual_phone: bizumManualPhone.trim(),
-      bizum_manual_instructions: bizumManualInstructions.trim(),
       installation_auto_pricing: {
         quote_when_merchandise_above_eur: quote,
         tiers,
@@ -274,7 +262,7 @@ export default function AdminShopSettingsPage() {
       <form onSubmit={handleSave} className="space-y-4 sm:space-y-6 min-w-0">
         <AdminSettingsCollapseSection
           title={t('admin.settings.section_home')}
-          subtitle={t('admin.settings.section_home_help')}
+          subtitle={t('admin.settings.section_home_subtitle')}
           defaultOpen
         >
           <div className="space-y-4 min-w-0 px-1 pb-1">
@@ -393,7 +381,10 @@ export default function AdminShopSettingsPage() {
           </div>
         </AdminSettingsCollapseSection>
 
-        <AdminSettingsCollapseSection title={t('admin.settings.section_personalized')}>
+        <AdminSettingsCollapseSection
+          title={t('admin.settings.section_personalized')}
+          subtitle={t('admin.settings.section_personalized_subtitle')}
+        >
           <div className="space-y-4 min-w-0 px-1 pb-1">
             <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
@@ -403,6 +394,27 @@ export default function AdminShopSettingsPage() {
                 onChange={(e) => setAcceptPersonalizedSolutions(e.target.checked)}
               />
               <span className="label-text min-w-0 flex-1">{t('admin.settings.accept_personalized_solutions')}</span>
+            </label>
+          </div>
+        </AdminSettingsCollapseSection>
+
+        <AdminSettingsCollapseSection
+          title={t('admin.settings.section_list_defaults')}
+          subtitle={t('admin.settings.section_list_defaults_help')}
+        >
+          <div className="space-y-4 min-w-0 px-1 pb-1">
+            <label className="form-field max-w-xs">
+              <span className="label-text">{t('admin.settings.list_default_period_label')}</span>
+              <select
+                className="select select-bordered select-sm sm:select-md w-full"
+                value={adminListDefaultPeriod}
+                onChange={(e) => setAdminListDefaultPeriod(e.target.value)}
+              >
+                <option value="week">{t('admin.settings.period_week')}</option>
+                <option value="month">{t('admin.settings.period_month')}</option>
+                <option value="year">{t('admin.settings.period_year')}</option>
+                <option value="all">{t('admin.settings.period_all')}</option>
+              </select>
             </label>
           </div>
         </AdminSettingsCollapseSection>
@@ -424,56 +436,6 @@ export default function AdminShopSettingsPage() {
                   className="input input-bordered input-sm sm:input-md w-full"
                   value={shippingFlatEur}
                   onChange={(e) => setShippingFlatEur(e.target.value)}
-                />
-              </label>
-            </div>
-
-            <div className="divider my-2">{t('admin.settings.offline_payments_section')}</div>
-            <div>
-              <p className="text-sm font-medium">{t('admin.settings.offline_payments_title')}</p>
-              <p className="text-xs text-base-content/60 mt-1">{t('admin.settings.offline_payments_help')}</p>
-              <label className="form-field w-full max-w-xl mt-3">
-                <span className="label-text">{t('admin.settings.bank_transfer_iban')}</span>
-                <input
-                  type="text"
-                  className="input input-bordered input-sm sm:input-md w-full font-mono"
-                  value={bankTransferIban}
-                  onChange={(e) => setBankTransferIban(e.target.value)}
-                  autoComplete="off"
-                />
-              </label>
-              <label className="form-field w-full max-w-xl mt-2">
-                <span className="label-text">{t('admin.settings.bank_transfer_beneficiary')}</span>
-                <input
-                  type="text"
-                  className="input input-bordered input-sm sm:input-md w-full"
-                  value={bankTransferBeneficiary}
-                  onChange={(e) => setBankTransferBeneficiary(e.target.value)}
-                />
-              </label>
-              <label className="form-field w-full max-w-xl mt-2">
-                <span className="label-text">{t('admin.settings.bank_transfer_reference_hint')}</span>
-                <textarea
-                  className="textarea textarea-bordered w-full text-sm min-h-[4rem]"
-                  value={bankTransferReferenceHint}
-                  onChange={(e) => setBankTransferReferenceHint(e.target.value)}
-                />
-              </label>
-              <label className="form-field w-full max-w-xl mt-2">
-                <span className="label-text">{t('admin.settings.bizum_manual_phone')}</span>
-                <input
-                  type="text"
-                  className="input input-bordered input-sm sm:input-md w-full"
-                  value={bizumManualPhone}
-                  onChange={(e) => setBizumManualPhone(e.target.value)}
-                />
-              </label>
-              <label className="form-field w-full max-w-xl mt-2">
-                <span className="label-text">{t('admin.settings.bizum_manual_instructions')}</span>
-                <textarea
-                  className="textarea textarea-bordered w-full text-sm min-h-[5rem]"
-                  value={bizumManualInstructions}
-                  onChange={(e) => setBizumManualInstructions(e.target.value)}
                 />
               </label>
             </div>
@@ -564,7 +526,7 @@ export default function AdminShopSettingsPage() {
 
         <AdminSettingsCollapseSection
           title={t('admin.settings.index_columns_title')}
-          subtitle={t('admin.settings.index_columns_help')}
+          subtitle={t('admin.settings.index_columns_subtitle')}
         >
           <div className="space-y-6 min-w-0 px-1 pb-1">
             {ADMIN_INDEX_TABLE_ORDER.map((tableId) => {

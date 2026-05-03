@@ -203,10 +203,6 @@ export default function AdminOrderShowPage() {
   const [installationAmount, setInstallationAmount] = useState('');
   const [installationSubmitting, setInstallationSubmitting] = useState(false);
   const [installationModalError, setInstallationModalError] = useState('');
-  const [manualSettleOpen, setManualSettleOpen] = useState(false);
-  const [manualSettleNote, setManualSettleNote] = useState('');
-  const [manualSettleError, setManualSettleError] = useState('');
-  const [manualSettleSubmitting, setManualSettleSubmitting] = useState(false);
 
   const fetchOrder = useCallback(async () => {
     if (!id) return;
@@ -251,42 +247,6 @@ export default function AdminOrderShowPage() {
   const showSetInstallationPrice =
     isOrder && order.installation_requested && order.status === 'awaiting_installation_price';
   const { products: productLines, packs: packLines } = partitionOrderLines(order.lines);
-
-  const isOfflineAdminPaymentMethod = (m) => m === 'bank_transfer' || m === 'bizum_manual';
-  const pendingOfflinePayment = [...(order.payments || [])]
-    .filter((p) => p.status === 'pending' && isOfflineAdminPaymentMethod(p.payment_method))
-    .sort((a, b) => Number(b.id) - Number(a.id))[0];
-  const canRecordManualSettlement = isOrder && order.status === 'awaiting_payment' && !!pendingOfflinePayment;
-
-  const handleManualSettlementOpen = () => {
-    setManualSettleError('');
-    setManualSettleNote('');
-    setManualSettleOpen(true);
-  };
-
-  const handleManualSettlementSubmit = async (e) => {
-    e.preventDefault();
-    if (!pendingOfflinePayment) return;
-    setManualSettleError('');
-    setManualSettleSubmitting(true);
-    try {
-      const { data } = await api.post(
-        `admin/orders/${order.id}/payments/${pendingOfflinePayment.id}/record-manual-settlement`,
-        { note: manualSettleNote.trim() || undefined }
-      );
-      if (data.success) {
-        showSuccess(t('common.saved'));
-        setManualSettleOpen(false);
-        await fetchOrder();
-      } else {
-        setManualSettleError(data.message || t('common.error'));
-      }
-    } catch (err) {
-      setManualSettleError(err.response?.data?.message || t('common.error'));
-    } finally {
-      setManualSettleSubmitting(false);
-    }
-  };
 
   const handleInstallationModalOpen = () => {
     setInstallationModalError('');
@@ -377,11 +337,6 @@ export default function AdminOrderShowPage() {
           {showSetInstallationPrice && (
             <button type="button" className="btn btn-secondary btn-sm shrink-0" onClick={handleInstallationModalOpen}>
               {t('admin.orders.set_installation_price')}
-            </button>
-          )}
-          {canRecordManualSettlement && (
-            <button type="button" className="btn btn-accent btn-sm shrink-0" onClick={handleManualSettlementOpen}>
-              {t('admin.orders.record_manual_settlement')}
             </button>
           )}
           {isOrder && (
@@ -536,44 +491,6 @@ export default function AdminOrderShowPage() {
         {t('admin.orders.created_at')}: {order.created_at ? new Date(order.created_at).toLocaleString() : ''}
         {order.updated_at && <> · {t('admin.orders.updated_at')}: {new Date(order.updated_at).toLocaleString()}</>}
       </div>
-
-      <dialog
-        className={`modal ${manualSettleOpen ? 'modal-open' : ''}`}
-        aria-label={t('admin.orders.record_manual_settlement')}
-      >
-        <div className="modal-box max-w-md">
-          <h3 className="font-bold text-lg">{t('admin.orders.record_manual_settlement')}</h3>
-          <p className="text-sm text-base-content/70 py-2">{t('admin.orders.record_manual_settlement_hint')}</p>
-          <form onSubmit={handleManualSettlementSubmit} className="space-y-4">
-            {manualSettleError ? (
-              <div role="alert" className="alert alert-error text-sm">{manualSettleError}</div>
-            ) : null}
-            <label className="form-field w-full">
-              <span className="form-label">{t('admin.orders.manual_settlement_note')}</span>
-              <textarea
-                className="textarea textarea-bordered w-full text-sm min-h-[4rem]"
-                value={manualSettleNote}
-                onChange={(e) => setManualSettleNote(e.target.value)}
-                maxLength={500}
-              />
-            </label>
-            <div className="modal-action">
-              <button type="button" className="btn btn-ghost" onClick={() => setManualSettleOpen(false)}>
-                {t('common.cancel')}
-              </button>
-              <button type="submit" className="btn btn-primary" disabled={manualSettleSubmitting}>
-                {manualSettleSubmitting ? t('common.loading') : t('common.save')}
-              </button>
-            </div>
-          </form>
-        </div>
-        <button
-          type="button"
-          className="modal-backdrop"
-          aria-label={t('common.close')}
-          onClick={() => setManualSettleOpen(false)}
-        />
-      </dialog>
 
       {/* Installation price (awaiting quote) */}
       <dialog

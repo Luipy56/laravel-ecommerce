@@ -10,7 +10,6 @@ import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { emitAppToast } from '../toastEvents';
 import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
-import OfflinePaymentInstructionsBlock from '../components/payments/OfflinePaymentInstructionsBlock';
 import { CHECKOUT_PAYMENT_METHOD_ORDER, checkoutFormSchema, parseWithZod } from '../validation';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
 
@@ -44,8 +43,6 @@ export default function CheckoutPage() {
     local_checkout_needs_debug: false,
     paypal_missing_credentials: false,
     stripe_missing_credentials: false,
-    bank_transfer_missing_instructions: false,
-    bizum_manual_missing_instructions: false,
     paypal_mode: undefined,
     checkout_demo_skip_payment_allowed: false,
   });
@@ -84,20 +81,16 @@ export default function CheckoutPage() {
             local_checkout_needs_debug: !!d.local_checkout_needs_debug,
             paypal_missing_credentials: !!d.paypal_missing_credentials,
             stripe_missing_credentials: !!d.stripe_missing_credentials,
-            bank_transfer_missing_instructions: !!d.bank_transfer_missing_instructions,
-            bizum_manual_missing_instructions: !!d.bizum_manual_missing_instructions,
             paypal_mode: d.paypal_mode === 'live' ? 'live' : d.paypal_mode === 'sandbox' ? 'sandbox' : undefined,
             checkout_demo_skip_payment_allowed: !!d.checkout_demo_skip_payment_allowed,
           });
         } else {
-          setPayMethods({ card: false, paypal: false, bank_transfer: false, bizum_manual: false });
+          setPayMethods({ card: false, paypal: false });
           setPayConfigMeta({
             simulated: false,
             local_checkout_needs_debug: false,
             paypal_missing_credentials: false,
             stripe_missing_credentials: false,
-            bank_transfer_missing_instructions: false,
-            bizum_manual_missing_instructions: false,
             paypal_mode: undefined,
             checkout_demo_skip_payment_allowed: false,
           });
@@ -105,14 +98,12 @@ export default function CheckoutPage() {
       })
       .catch(() => {
         setPayConfigLoadError(true);
-        setPayMethods({ card: false, paypal: false, bank_transfer: false, bizum_manual: false });
+        setPayMethods({ card: false, paypal: false });
         setPayConfigMeta({
           simulated: false,
           local_checkout_needs_debug: false,
           paypal_missing_credentials: false,
           stripe_missing_credentials: false,
-          bank_transfer_missing_instructions: false,
-          bizum_manual_missing_instructions: false,
           paypal_mode: undefined,
           checkout_demo_skip_payment_allowed: false,
         });
@@ -206,31 +197,27 @@ export default function CheckoutPage() {
       }
 
       const c = d.payment_checkout;
-      if (c?.gateway === 'manual' && d.payment_instructions) {
-        navigate(`/orders/${d.id}`, { state: { offlinePaymentInstructions: d.payment_instructions } });
-        return;
-      }
-
       if (c?.gateway === 'stripe' && c.checkout_url) {
         window.location.href = c.checkout_url;
+        return;
+      }
+      if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
+        navigate('/orders/' + d.id, {
+          state: {
+            paypalInlineCheckout: {
+              client_id: c.client_id,
+              paypal_order_id: c.paypal_order_id,
+              payment_id: c.payment_id,
+              paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
+            },
+          },
+        });
         return;
       }
       if (c?.gateway === 'paypal' && c.approval_url) {
         const opened = openPayPalApprovalInNewTab(c.approval_url);
         if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
         navigate('/orders/' + d.id, { state: { paypalHostedWindow: true } });
-        return;
-      }
-      if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
-        setActiveCheckout({
-          orderId: d.id,
-          paypal: {
-            client_id: c.client_id,
-            paypal_order_id: c.paypal_order_id,
-            payment_id: c.payment_id,
-            paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
-          },
-        });
         return;
       }
 
@@ -429,12 +416,6 @@ export default function CheckoutPage() {
                   )}
                   {payMethodsReady && !payConfigLoadError && payConfigMeta.stripe_missing_credentials && (
                     <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.stripe_missing_credentials_hint')}</p>
-                  )}
-                  {payMethodsReady && !payConfigLoadError && payConfigMeta.bank_transfer_missing_instructions && (
-                    <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.bank_transfer_missing_instructions_hint')}</p>
-                  )}
-                  {payMethodsReady && !payConfigLoadError && payConfigMeta.bizum_manual_missing_instructions && (
-                    <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.bizum_manual_missing_instructions_hint')}</p>
                   )}
                   <label className="form-field w-full">
                     <span className="form-label">{t('checkout.payment_method')}</span>

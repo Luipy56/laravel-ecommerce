@@ -49,20 +49,11 @@ class ShopSetting extends Model
      */
     public const KEY_INSTALLATION_AUTO_PRICING = 'installation_auto_pricing';
 
-    /** IBAN shown to customers who choose bank transfer at checkout (string). */
-    public const KEY_BANK_TRANSFER_IBAN = 'bank_transfer_iban';
-
-    /** Account holder name for bank transfer instructions. */
-    public const KEY_BANK_TRANSFER_BENEFICIARY = 'bank_transfer_beneficiary';
-
-    /** Optional hint for payment reference / concept (string). */
-    public const KEY_BANK_TRANSFER_REFERENCE_HINT = 'bank_transfer_reference_hint';
-
-    /** Phone or alias for manual Bizum instructions. */
-    public const KEY_BIZUM_MANUAL_PHONE = 'bizum_manual_phone';
-
-    /** Optional extra lines for manual Bizum (string). */
-    public const KEY_BIZUM_MANUAL_INSTRUCTIONS = 'bizum_manual_instructions';
+    /**
+     * Default time period filter for admin order/solution lists.
+     * Allowed values: 'week', 'month', 'year', 'all'.
+     */
+    public const KEY_ADMIN_LIST_DEFAULT_PERIOD = 'admin_list_default_period';
 
     /**
      * @var array<string, mixed>
@@ -89,11 +80,7 @@ class ShopSetting extends Model
                 ['max_merchandise_eur' => 1000, 'fee_eur' => 180],
             ],
         ],
-        self::KEY_BANK_TRANSFER_IBAN => '',
-        self::KEY_BANK_TRANSFER_BENEFICIARY => '',
-        self::KEY_BANK_TRANSFER_REFERENCE_HINT => '',
-        self::KEY_BIZUM_MANUAL_PHONE => '',
-        self::KEY_BIZUM_MANUAL_INSTRUCTIONS => '',
+        self::KEY_ADMIN_LIST_DEFAULT_PERIOD => 'week',
     ];
 
     public static function shippingFlatEur(): float

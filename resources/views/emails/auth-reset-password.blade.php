@@ -12,10 +12,9 @@
 
     <p style="margin: 16px 0 0; font-size: 14px; color: #52525b;">{{ __('mail.reset_password.expiry', ['minutes' => $expireMinutes], $mailLocale) }}</p>
 
-    <div style="margin: 24px 0 0; padding: 14px 16px; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 10px;">
-        <p style="margin: 0 0 8px; font-size: 12px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.02em;">{{ __('mail.reset_password.link_fallback_label', [], $mailLocale) }}</p>
-        <p style="margin: 0; font-size: 13px; word-break: break-all; color: #18181b;"><a href="{{ $actionUrl }}" style="color: #F75211;">{{ $actionUrl }}</a></p>
-    </div>
+    <hr style="margin: 28px 0 0; border: none; border-top: 1px solid #e4e4e7;" />
+    <p style="margin: 12px 0 4px; font-size: 11px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.06em;">{{ __('mail.reset_password.link_fallback_label', [], $mailLocale) }}</p>
+    <p style="margin: 0; font-size: 12px; word-break: break-all;"><a href="{{ $actionUrl }}" style="color: #F75211;">{{ $actionUrl }}</a></p>
 
     <p style="margin: 24px 0 0; font-size: 14px; color: #52525b;">{{ __('mail.reset_password.line2', [], $mailLocale) }}</p>
 @endsection

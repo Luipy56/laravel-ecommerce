@@ -94,7 +94,7 @@ See **`agents/tasks/README.md`** for filename pattern and statuses.
 
 ## Committer (this repo)
 
-- Update **`CHANGELOG.md`** under **`[Unreleased]`** (Keep a Changelog).
+- Update **`CHANGELOG.md`** under **`## [X.Y.Z] - YYYY-MM-DD`** matching bumped **`package.json`** (see **`commit-changelog-version.mdc`**; avoid **`[Unreleased]`** backlogs).
 - Version: root **`package.json`** and **`package-lock.json`** (see **`.cursor/rules/commit-changelog-version.mdc`**).
 - **No** application source edits in this role.
 - **Push** the integration branch; merge to **`master`** only per the branching table above.

@@ -38,6 +38,14 @@ return [
         'footer' => 'If you already paid, you will get the payment confirmation once the bank or payment provider finalises the charge.',
     ],
 
+    'admin_order_payment_confirmed' => [
+        'subject'      => '[Order #:id] Payment confirmed',
+        'intro'        => 'Payment for order #:id has been confirmed.',
+        'client_email' => 'Customer:',
+        'grand_total'  => 'Total paid',
+        'button'       => 'Open in admin',
+    ],
+
     'admin_order_installation_quote' => [
         'subject' => '[Order #:id] Installation quote requested',
         'intro' => 'A new order with installation above the automatic tier was created (quote required). Order #:id.',

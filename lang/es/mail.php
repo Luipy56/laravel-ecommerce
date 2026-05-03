@@ -38,6 +38,14 @@ return [
         'footer' => 'Si ya ha pagado, recibirá pronto la confirmación cuando el banco o la pasarela la registre.',
     ],
 
+    'admin_order_payment_confirmed' => [
+        'subject'      => '[Pedido #:id] Pago confirmado',
+        'intro'        => 'Se ha confirmado el pago del pedido #:id.',
+        'client_email' => 'Cliente:',
+        'grand_total'  => 'Total pagado',
+        'button'       => 'Abrir en el panel',
+    ],
+
     'admin_order_installation_quote' => [
         'subject' => '[Pedido #:id] Solicitud de presupuesto de instalación',
         'intro' => 'Se ha creado un pedido con instalación por encima del tope automático (hace falta presupuesto). Pedido #:id.',

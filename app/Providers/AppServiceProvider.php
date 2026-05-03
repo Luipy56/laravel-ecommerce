@@ -14,6 +14,7 @@ use App\Events\PersonalizedSolutionSubmitted;
 use App\Listeners\SendInstallationPriceAssignedEmail;
 use App\Listeners\SendOrderInstallationQuoteRequestAdminEmail;
 use App\Listeners\SendOrderInstallationQuoteRequestEmail;
+use App\Listeners\SendOrderPaymentConfirmedAdminEmail;
 use App\Listeners\SendOrderPaymentConfirmationEmail;
 use App\Listeners\SendOrderPaymentPendingAdminEmail;
 use App\Listeners\SendOrderPaymentPendingEmail;
@@ -107,6 +108,7 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(InstallationPriceWasAssigned::class, SendInstallationPriceAssignedEmail::class);
         Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmationEmail::class);
+        Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmedAdminEmail::class);
         Event::listen(OrderInstallationQuoteRequested::class, SendOrderInstallationQuoteRequestEmail::class);
         Event::listen(OrderInstallationQuoteRequested::class, SendOrderInstallationQuoteRequestAdminEmail::class);
         Event::listen(OrderPlacedPaymentPending::class, SendOrderPaymentPendingEmail::class);

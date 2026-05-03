@@ -38,6 +38,14 @@ return [
         'footer' => 'Si ja ha completat el pagament, en breu rebrà la confirmació quan el banc o la passarel·la l'hagin registrat.',
     ],
 
+    'admin_order_payment_confirmed' => [
+        'subject'      => '[Comanda #:id] Pagament confirmat',
+        'intro'        => 'S'ha confirmat el pagament de la comanda #:id.',
+        'client_email' => 'Client:',
+        'grand_total'  => 'Total pagat',
+        'button'       => 'Obrir al panell',
+    ],
+
     'admin_order_installation_quote' => [
         'subject' => '[Comanda #:id] Sol·licitud de pressupost d'instal·lació',
         'intro' => 'S'ha creat una comanda amb instal·lació al damunt del màxim autòmat (cal pressupost). Comanda #:id.',

@@ -101,30 +101,31 @@ export default function AdminLayout() {
     }
   };
 
-  const { primaryNavItems, secondaryNavItems } = useMemo(() => {
-    const dashboard = { to: '/admin', labelKey: 'admin.nav.dashboard', alertKey: null };
-    const primarySource = [
-      { to: '/admin/admins', labelKey: 'admin.nav.admins', alertKey: null },
-      { to: '/admin/categories', labelKey: 'admin.nav.categories', alertKey: null },
-      { to: '/admin/products', labelKey: 'admin.nav.products', alertKey: null },
-      { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups', alertKey: null },
-      { to: '/admin/clients', labelKey: 'admin.nav.clients', alertKey: null },
+  const { dashboardItem, operationsItems, catalogItems, systemItems } = useMemo(() => {
+    const operationsSource = [
       { to: '/admin/orders', labelKey: 'admin.nav.orders', alertKey: 'orders' },
       { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions', alertKey: 'personalized_solutions' },
+    ];
+    const catalogSource = [
+      { to: '/admin/admins', labelKey: 'admin.nav.admins', alertKey: null },
+      { to: '/admin/categories', labelKey: 'admin.nav.categories', alertKey: null },
+      { to: '/admin/clients', labelKey: 'admin.nav.clients', alertKey: null },
       { to: '/admin/features', labelKey: 'admin.nav.features', alertKey: null },
       { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
-    ];
-    const primarySorted = [...primarySource].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey)));
-    const secondarySource = [
-      { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
-      { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
-      { to: '/admin/faqs', labelKey: 'admin.nav.faqs', alertKey: null },
-      { to: '/admin/about', labelKey: 'admin.nav.about', alertKey: null },
-      { to: '/', labelKey: 'admin.back_to_shop', alertKey: null },
+      { to: '/admin/products', labelKey: 'admin.nav.products', alertKey: null },
+      { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups', alertKey: null },
     ];
     return {
-      primaryNavItems: [dashboard, ...primarySorted],
-      secondaryNavItems: secondarySource,
+      dashboardItem: { to: '/admin', labelKey: 'admin.nav.dashboard', alertKey: null },
+      operationsItems: [...operationsSource].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey))),
+      catalogItems: [...catalogSource].sort((a, b) => t(a.labelKey).localeCompare(t(b.labelKey))),
+      systemItems: [
+        { to: '/admin/settings', labelKey: 'admin.nav.settings', alertKey: null },
+        { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
+        { to: '/admin/faqs', labelKey: 'admin.nav.faqs', alertKey: null },
+        { to: '/admin/about', labelKey: 'admin.nav.about', alertKey: null },
+        { to: '/', labelKey: 'admin.back_to_shop', alertKey: null },
+      ],
     };
   }, [t]);
 
@@ -266,20 +267,37 @@ export default function AdminLayout() {
             </span>
           </div>
 
-          {/* primary nav */}
+          {/* nav */}
           <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label={t('admin.nav.dashboard')}>
             <ul className="flex flex-col gap-0.5 relative">
-              {primaryNavItems.map(renderNavMenuItem)}
+              {renderNavMenuItem(dashboardItem)}
             </ul>
 
-            <div className="my-3 px-1" aria-hidden="true">
+            <div className="mt-4 mb-1.5 px-1">
               <p className="px-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/35">
-                {t('admin.nav.section_system', 'System')}
+                {t('admin.nav.section_operations')}
               </p>
             </div>
-
             <ul className="flex flex-col gap-0.5 relative">
-              {secondaryNavItems.map(renderNavMenuItem)}
+              {operationsItems.map(renderNavMenuItem)}
+            </ul>
+
+            <div className="mt-4 mb-1.5 px-1">
+              <p className="px-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/35">
+                {t('admin.nav.section_catalog')}
+              </p>
+            </div>
+            <ul className="flex flex-col gap-0.5 relative">
+              {catalogItems.map(renderNavMenuItem)}
+            </ul>
+
+            <div className="mt-4 mb-1.5 px-1">
+              <p className="px-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/35">
+                {t('admin.nav.section_system')}
+              </p>
+            </div>
+            <ul className="flex flex-col gap-0.5 relative">
+              {systemItems.map(renderNavMenuItem)}
             </ul>
           </nav>
 

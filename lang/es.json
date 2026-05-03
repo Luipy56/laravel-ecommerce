@@ -13,7 +13,6 @@
     "common.close": "Cerrar",
     "common.yes": "Sí",
     "common.no": "No",
-
     "auth.failed": "Las credenciales no coinciden con nuestros registros.",
     "auth.login": "Iniciar sesión",
     "auth.logout": "Cerrar sesión",
@@ -21,7 +20,6 @@
     "auth.password": "Contraseña",
     "auth.remember": "Recordarme",
     "auth.forgot_password": "¿Olvidaste la contraseña?",
-
     "shop.home": "Inicio",
     "shop.products": "Productos",
     "shop.cart": "Carrito",
@@ -84,7 +82,6 @@
     "shop.payment.stripe_session_forbidden": "Esta sesión de pago no corresponde a tu cuenta.",
     "shop.payment.stripe_confirm_pending": "El pago aún no consta como completado en Stripe. Espera unos momentos o revisa el estado del pago.",
     "shop.checkout_stripe_product": "Pedido #:id",
-
     "shop.order.timeline.placed": "Pedido registrado",
     "shop.order.timeline.payment_received": "Pago registrado",
     "shop.order.timeline.installation_quote_pending": "Esperando presupuesto de instalación",
@@ -92,15 +89,12 @@
     "shop.order.timeline.current": "Estado actual",
     "shop.order.timeline.shipping_scheduled": "Envío programado",
     "shop.order.status_timeline_title": "Historial del estado",
-
     "client_portal.solution_not_found": "No se encontró esta solicitud o ya no es válida.",
     "client_portal.admin_notify_no_email": "No hay un correo válido para enviar la notificación.",
-
     "validation.required": "Este campo es obligatorio.",
     "validation.email": "El correo electrónico no es válido.",
     "validation.min": "El valor debe tener al menos :min caracteres.",
     "validation.max": "El valor no puede superar :max caracteres.",
-
     "admin.data_explorer.errors.invalid_table": "La tabla seleccionada no está disponible.",
     "admin.data_explorer.errors.invalid_column": "La columna del filtro no es válida.",
     "admin.data_explorer.errors.invalid_operator": "El operador del filtro no es válido.",
@@ -110,9 +104,5 @@
     "admin.data_explorer.errors.invalid_metric": "La métrica debe ser count, sum o avg.",
     "shop.personalized_solutions_disabled": "En este momento no aceptamos nuevas solicitudes de solución personalizada.",
     "shop.personalized_solution_too_soon": "Hemos recibido la misma solicitud hace un momento. Espera unos segundos antes de volver a enviar.",
-    "admin.personalized_solutions.patch_requires_body": "Envía al menos el texto de resolución o un estado.",
-    "admin.orders.manual_settlement_invalid": "Esta acción solo aplica a pedidos reales.",
-    "admin.orders.manual_settlement_wrong_status": "El pedido debe estar en espera de pago.",
-    "admin.orders.manual_settlement_payment_not_pending": "El pago no está pendiente.",
-    "admin.orders.manual_settlement_not_offline": "Solo se pueden registrar manualmente pagos por transferencia o Bizum manual."
+    "admin.personalized_solutions.patch_requires_body": "Envía al menos el texto de resolución o un estado."
 }

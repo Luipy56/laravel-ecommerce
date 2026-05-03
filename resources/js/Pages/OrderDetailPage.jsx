@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
-import OfflinePaymentInstructionsBlock from '../components/payments/OfflinePaymentInstructionsBlock';
 import { CHECKOUT_PAYMENT_METHOD_ORDER } from '../validation';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
@@ -79,8 +78,6 @@ export default function OrderDetailPage() {
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
   const [paypalReturnInfo, setPaypalReturnInfo] = useState('');
   const [payWarning, setPayWarning] = useState('');
-  const [offlineInstructionsFlash, setOfflineInstructionsFlash] = useState(null);
-
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -109,13 +106,6 @@ export default function OrderDetailPage() {
     const m = order.payment_methods_available;
     setPaymentMethod((pm) => (m[pm] ? pm : CHECKOUT_PAYMENT_METHOD_ORDER.find((k) => m[k]) || 'card'));
   }, [order?.payment_methods_available, order?.id]);
-
-  useEffect(() => {
-    const inst = location.state?.offlinePaymentInstructions;
-    if (!inst) return;
-    setOfflineInstructionsFlash(inst);
-    navigate(location.pathname, { replace: true, state: {} });
-  }, [location.state, location.pathname, navigate]);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -229,9 +219,6 @@ export default function OrderDetailPage() {
         navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
         return;
       }
-      if (c?.gateway === 'manual' && d.payment_instructions) {
-        setOfflineInstructionsFlash(d.payment_instructions);
-      }
       const r = await api.get(`orders/${id}`);
       if (r.data.success) setOrder(r.data.data);
     } catch (err) {
@@ -294,8 +281,6 @@ export default function OrderDetailPage() {
   const payAvail = order.payment_methods_available ?? {
     card: false,
     paypal: false,
-    bank_transfer: false,
-    bizum_manual: false,
   };
   const paymentsSimulated = !!order.payments_simulated;
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
@@ -365,8 +350,6 @@ export default function OrderDetailPage() {
           {t('shop.order.awaiting_payment_notice')}
         </div>
       )}
-
-      <OfflinePaymentInstructionsBlock instructions={offlineInstructionsFlash || order.payment_instructions} />
 
       {(shippingAddress || installationAddress) && (
         <div className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
@@ -505,17 +488,6 @@ export default function OrderDetailPage() {
           {t('checkout.payment.stripe_missing_credentials_hint')}
         </div>
       )}
-      {canPay && order.bank_transfer_missing_instructions && (
-        <div role="status" className="alert alert-info mt-4 text-sm">
-          {t('checkout.payment.bank_transfer_missing_instructions_hint')}
-        </div>
-      )}
-      {canPay && order.bizum_manual_missing_instructions && (
-        <div role="status" className="alert alert-info mt-4 text-sm">
-          {t('checkout.payment.bizum_manual_missing_instructions_hint')}
-        </div>
-      )}
-
       {canPay && (
         <form onSubmit={handlePay} className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
           <div className="card-body">

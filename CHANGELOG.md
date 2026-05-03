@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.99] - 2026-05-03
+
+### Removed
+
+- **Offline payments (bank transfer / Bizum manual):** Complete removal of all offline payment infrastructure — `PaymentOfflineInstructions` support class, `Payment::METHOD_BANK_TRANSFER` / `METHOD_BIZUM_MANUAL` / `GATEWAY_MANUAL` / `isOfflineCheckoutMethod()`, five `ShopSetting` keys and defaults (`bank_transfer_iban`, `bank_transfer_beneficiary`, `bank_transfer_reference_hint`, `bizum_manual_phone`, `bizum_manual_instructions`), admin settings UI section, `recordManualSettlement` admin API endpoint and route, `OfflinePaymentInstructionsBlock` React component, all related checkout/order-detail UI branches, and offline locale keys in JS and PHP i18n files. Stripe Checkout Bizum (online, via `card` method) is unaffected.
+
 ## [0.1.97] - 2026-05-03
 
 ### Added

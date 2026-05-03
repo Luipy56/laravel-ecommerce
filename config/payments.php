@@ -27,16 +27,15 @@ return [
 
     /*
     | Comma-separated payment_method keys exposed on the storefront and accepted by checkout/pay.
-    | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal,
-    | bank_transfer, bizum_manual (offline: configure IBAN / Bizum text in admin shop settings).
+    | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal.
     |
-    | Omitted or empty string in .env → card, paypal, bank_transfer, bizum_manual are allowed
-    | (then filtered by credentials for PSP methods and by configured instructions for offline).
+    | Omitted or empty string in .env → card and paypal are allowed
+    | (then filtered by PSP credentials).
     |
     | Invalid tokens are ignored; if the list is empty after parsing, defaults apply.
     */
     'checkout_method_keys' => (function () {
-        $valid = ['card', 'paypal', 'bank_transfer', 'bizum_manual'];
+        $valid = ['card', 'paypal'];
         $defaults = ['card', 'paypal'];
         $raw = env('PAYMENTS_CHECKOUT_METHODS');
         if ($raw === null || trim((string) $raw) === '') {

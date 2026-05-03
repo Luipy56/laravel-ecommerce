@@ -13,7 +13,6 @@
     "common.close": "Tancar",
     "common.yes": "Sí",
     "common.no": "No",
-
     "auth.failed": "Les credencials no coincideixen amb els nostres registres.",
     "auth.login": "Iniciar sessió",
     "auth.logout": "Tancar sessió",
@@ -21,7 +20,6 @@
     "auth.password": "Contrasenya",
     "auth.remember": "Recorda'm",
     "auth.forgot_password": "Has oblidat la contrasenya?",
-
     "shop.home": "Inici",
     "shop.products": "Productes",
     "shop.cart": "Cistella",
@@ -84,7 +82,6 @@
     "shop.payment.stripe_session_forbidden": "Aquesta sessió de pagament no correspon al teu compte.",
     "shop.payment.stripe_confirm_pending": "El pagament encara no consta com a completat a Stripe. Espera uns moments o revisa l'estat del pagament.",
     "shop.checkout_stripe_product": "Comanda #:id",
-
     "shop.order.timeline.placed": "Comanda registrada",
     "shop.order.timeline.payment_received": "Pagament registrat",
     "shop.order.timeline.installation_quote_pending": "Esperant pressupost d’instal·lació",
@@ -92,15 +89,12 @@
     "shop.order.timeline.current": "Estat actual",
     "shop.order.timeline.shipping_scheduled": "Enviament programat",
     "shop.order.status_timeline_title": "Historial de l’estat",
-
     "client_portal.solution_not_found": "No s’ha trobat aquesta sol·licitud o ja no és vàlida.",
     "client_portal.admin_notify_no_email": "No hi ha un correu vàlid per enviar la notificació.",
-
     "validation.required": "Aquest camp és obligatori.",
     "validation.email": "El correu electrònic no és vàlid.",
     "validation.min": "El valor ha de tenir com a mínim :min caràcters.",
     "validation.max": "El valor no pot superar :max caràcters.",
-
     "admin.data_explorer.errors.invalid_table": "La taula seleccionada no està disponible.",
     "admin.data_explorer.errors.invalid_column": "La columna del filtre no és vàlida.",
     "admin.data_explorer.errors.invalid_operator": "L'operador del filtre no és vàlid.",
@@ -110,9 +104,5 @@
     "admin.data_explorer.errors.invalid_metric": "La mètrica ha de ser count, sum o avg.",
     "shop.personalized_solutions_disabled": "En aquests moments no acceptem noves sol·licituds de solució personalitzada.",
     "shop.personalized_solution_too_soon": "Hem rebut la mateixa sol·licitud fa un moment. Espera uns segons abans de tornar a enviar.",
-    "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat.",
-    "admin.orders.manual_settlement_invalid": "Aquesta acció només aplica a comandes reals.",
-    "admin.orders.manual_settlement_wrong_status": "La comanda ha d'estar en estat d'espera de pagament.",
-    "admin.orders.manual_settlement_payment_not_pending": "El pagament no està pendent.",
-    "admin.orders.manual_settlement_not_offline": "Només es poden registrar manualment pagaments per transferència o Bizum manual."
+    "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat."
 }

@@ -104,9 +104,5 @@
     "admin.data_explorer.errors.invalid_metric": "The metric must be count, sum, or avg.",
     "shop.personalized_solutions_disabled": "We are not accepting new custom solution requests at the moment.",
     "shop.personalized_solution_too_soon": "We just received the same request. Please wait a few seconds before sending again.",
-    "admin.personalized_solutions.patch_requires_body": "Send at least a resolution text or a status value.",
-    "admin.orders.manual_settlement_invalid": "This action only applies to real orders.",
-    "admin.orders.manual_settlement_wrong_status": "The order must be awaiting payment.",
-    "admin.orders.manual_settlement_payment_not_pending": "The payment is not pending.",
-    "admin.orders.manual_settlement_not_offline": "Only bank transfer or manual Bizum payments can be recorded manually."
+    "admin.personalized_solutions.patch_requires_body": "Send at least a resolution text or a status value."
 }

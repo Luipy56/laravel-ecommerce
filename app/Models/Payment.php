@@ -31,18 +31,9 @@ class Payment extends Model
 
     public const GATEWAY_PAYPAL = 'paypal';
 
-    /** Recorded when an operator marks an offline payment as received. */
-    public const GATEWAY_MANUAL = 'manual';
-
     public const METHOD_CARD = 'card';
 
     public const METHOD_PAYPAL = 'paypal';
-
-    /** Bank transfer: order stays awaiting_payment until admin records settlement. */
-    public const METHOD_BANK_TRANSFER = 'bank_transfer';
-
-    /** Bizum P2P / manual instructions (not Stripe Checkout Bizum). */
-    public const METHOD_BIZUM_MANUAL = 'bizum_manual';
 
     /** Internal-only when CHECKOUT_DEMO_SKIP_PAYMENT is enabled (storefront demo; not a real PSP). */
     public const METHOD_CHECKOUT_DEMO_SKIP = 'checkout_demo_skip';
@@ -82,12 +73,6 @@ class Payment extends Model
     public function isSuccessful(): bool
     {
         return $this->status === self::STATUS_SUCCEEDED && $this->paid_at !== null;
-    }
-
-    /** @param  non-empty-string  $method */
-    public static function isOfflineCheckoutMethod(string $method): bool
-    {
-        return in_array($method, [self::METHOD_BANK_TRANSFER, self::METHOD_BIZUM_MANUAL], true);
     }
 
     public function scopeSuccessful($query)

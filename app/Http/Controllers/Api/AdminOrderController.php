@@ -9,7 +9,6 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\ShopSetting;
 use App\Models\OrderLine;
-use App\Services\Payments\PaymentCompletionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -285,61 +284,4 @@ class AdminOrderController extends Controller
         ]);
     }
 
-    public function recordManualSettlement(Request $request, Order $order, Payment $payment, PaymentCompletionService $completion): JsonResponse
-    {
-        if ((int) $payment->order_id !== (int) $order->id) {
-            abort(404);
-        }
-        if ($order->kind !== Order::KIND_ORDER) {
-            return response()->json([
-                'success' => false,
-                'message' => __('admin.orders.manual_settlement_invalid'),
-            ], 422);
-        }
-        if ($order->status !== Order::STATUS_AWAITING_PAYMENT) {
-            return response()->json([
-                'success' => false,
-                'message' => __('admin.orders.manual_settlement_wrong_status'),
-            ], 422);
-        }
-        if ($payment->status !== Payment::STATUS_PENDING) {
-            return response()->json([
-                'success' => false,
-                'message' => __('admin.orders.manual_settlement_payment_not_pending'),
-            ], 422);
-        }
-        if (! Payment::isOfflineCheckoutMethod($payment->payment_method)) {
-            return response()->json([
-                'success' => false,
-                'message' => __('admin.orders.manual_settlement_not_offline'),
-            ], 422);
-        }
-
-        $validated = $request->validate([
-            'note' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        $admin = $request->user('admin');
-        $meta = array_filter([
-            'recorded_via' => 'admin_manual_settlement',
-            'note' => $validated['note'] ?? null,
-            'admin_id' => $admin?->id,
-        ], fn ($v) => $v !== null && $v !== '');
-
-        $completion->markSucceeded($payment, [
-            'gateway' => Payment::GATEWAY_MANUAL,
-            'metadata' => $meta,
-        ]);
-
-        $order->refresh();
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'order_id' => $order->id,
-                'status' => $order->status,
-                'has_payment' => $order->hasSuccessfulPayment(),
-            ],
-        ]);
-    }
 }

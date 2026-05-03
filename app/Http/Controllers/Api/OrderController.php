@@ -11,7 +11,6 @@ use App\Models\OrderAddress;
 use App\Models\Payment;
 use App\Models\ShopSetting;
 use App\Support\InstallationAutoPricing;
-use App\Support\PaymentOfflineInstructions;
 use App\Services\Payments\PaymentCheckoutService;
 use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
@@ -96,11 +95,7 @@ class OrderController extends Controller
                 }
             }
 
-            $needsAwaitingPayment = in_array($resolvedPaymentMethod, [
-                Payment::METHOD_PAYPAL,
-                Payment::METHOD_BANK_TRANSFER,
-                Payment::METHOD_BIZUM_MANUAL,
-            ], true);
+            $needsAwaitingPayment = $resolvedPaymentMethod === Payment::METHOD_PAYPAL;
             $initialStatus = $awaitingInstallationQuote
                 ? Order::STATUS_AWAITING_INSTALLATION_PRICE
                 : ($needsAwaitingPayment ? Order::STATUS_AWAITING_PAYMENT : Order::STATUS_PENDING);
@@ -176,11 +171,6 @@ class OrderController extends Controller
                     $paymentError = $e->getMessage();
                 }
                 $paymentCheckout = ['gateway' => 'simulated', 'simulated' => true];
-            } elseif ($payment && Payment::isOfflineCheckoutMethod($resolvedPaymentMethod)) {
-                $paymentCheckout = [
-                    'gateway' => Payment::GATEWAY_MANUAL,
-                    'offline_payment_method' => $resolvedPaymentMethod,
-                ];
             } elseif ($payment) {
                 try {
                     $paymentCheckout = $paymentCheckoutService->start($payment);
@@ -194,15 +184,6 @@ class OrderController extends Controller
         }
 
         $cart->refresh()->load('payments');
-
-        $paymentInstructions = null;
-        if (! $awaitingInstallationQuote && ! $demoSkipActive && isset($resolvedPaymentMethod)
-            && Payment::isOfflineCheckoutMethod((string) $resolvedPaymentMethod)) {
-            $paymentInstructions = PaymentOfflineInstructions::paymentInstructionsForMethod(
-                (string) $resolvedPaymentMethod,
-                ShopSetting::allMerged()
-            );
-        }
 
         $mailLocale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
         if ($awaitingInstallationQuote) {
@@ -235,7 +216,6 @@ class OrderController extends Controller
                 'has_payment' => $cart->hasSuccessfulPayment(),
                 'payment_checkout' => $paymentCheckout,
                 'payment_error' => $paymentError,
-                'payment_instructions' => $paymentInstructions,
             ],
         ], 201);
     }
@@ -276,11 +256,7 @@ class OrderController extends Controller
                 'status' => Payment::STATUS_PENDING,
                 'currency' => 'EUR',
             ]);
-            if (in_array($validated['payment_method'], [
-                Payment::METHOD_PAYPAL,
-                Payment::METHOD_BANK_TRANSFER,
-                Payment::METHOD_BIZUM_MANUAL,
-            ], true)) {
+            if ($validated['payment_method'] === Payment::METHOD_PAYPAL) {
                 $order->update(['status' => Order::STATUS_AWAITING_PAYMENT]);
             }
         });
@@ -299,11 +275,6 @@ class OrderController extends Controller
                 ], 422);
             }
             $paymentCheckout = ['gateway' => 'simulated', 'simulated' => true];
-        } elseif (Payment::isOfflineCheckoutMethod($payment->payment_method)) {
-            $paymentCheckout = [
-                'gateway' => Payment::GATEWAY_MANUAL,
-                'offline_payment_method' => $payment->payment_method,
-            ];
         } else {
             try {
                 $paymentCheckout = $paymentCheckoutService->start($payment);
@@ -318,13 +289,6 @@ class OrderController extends Controller
 
         $order->refresh()->load(['lines', 'payments']);
 
-        $paymentInstructions = Payment::isOfflineCheckoutMethod($payment->payment_method)
-            ? PaymentOfflineInstructions::paymentInstructionsForMethod(
-                $payment->payment_method,
-                ShopSetting::allMerged()
-            )
-            : null;
-
         return response()->json([
             'success' => true,
             'data' => [
@@ -333,7 +297,6 @@ class OrderController extends Controller
                 'grand_total' => $order->grand_total,
                 'has_payment' => $order->hasSuccessfulPayment(),
                 'payment_checkout' => $paymentCheckout,
-                'payment_instructions' => $paymentInstructions,
             ],
         ]);
     }
@@ -419,20 +382,7 @@ class OrderController extends Controller
         $order->load(['lines.product', 'lines.pack', 'addresses', 'payments']);
 
         $payMethods = PaymentCheckoutService::paymentMethodsAvailability();
-        $anyPayMethod = $payMethods['card'] || $payMethods['paypal'] || $payMethods['bank_transfer'] || $payMethods['bizum_manual'];
-
-        $paymentInstructionsShow = null;
-        if ($order->status === Order::STATUS_AWAITING_PAYMENT && ! $order->hasSuccessfulPayment()) {
-            $pendingOffline = $order->payments->sortByDesc('id')->first(
-                fn (Payment $p) => $p->status === Payment::STATUS_PENDING && Payment::isOfflineCheckoutMethod($p->payment_method)
-            );
-            if ($pendingOffline) {
-                $paymentInstructionsShow = PaymentOfflineInstructions::paymentInstructionsForMethod(
-                    $pendingOffline->payment_method,
-                    ShopSetting::allMerged()
-                );
-            }
-        }
+        $anyPayMethod = $payMethods['card'] || $payMethods['paypal'];
 
         $lines = $order->lines->map(fn ($l) => [
             'id' => $l->id,
@@ -468,15 +418,10 @@ class OrderController extends Controller
                 'payment_methods_available' => [
                     'card' => $payMethods['card'],
                     'paypal' => $payMethods['paypal'],
-                    'bank_transfer' => $payMethods['bank_transfer'],
-                    'bizum_manual' => $payMethods['bizum_manual'],
                 ],
                 'payments_simulated' => $payMethods['simulated'],
                 'paypal_missing_credentials' => PaymentCheckoutService::paypalMissingCredentialsForStorefront(),
                 'stripe_missing_credentials' => PaymentCheckoutService::stripeMissingCredentialsForStorefront(),
-                'bank_transfer_missing_instructions' => PaymentCheckoutService::bankTransferMissingInstructionsForStorefront(),
-                'bizum_manual_missing_instructions' => PaymentCheckoutService::bizumManualMissingInstructionsForStorefront(),
-                'payment_instructions' => $paymentInstructionsShow,
                 'local_checkout_needs_debug' => app()->environment('local') && ! $payMethods['simulated'] && ! $anyPayMethod,
                 'payments' => $order->payments->map(fn (Payment $p) => [
                     'id' => $p->id,

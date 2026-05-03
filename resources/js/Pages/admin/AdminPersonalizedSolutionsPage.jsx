@@ -9,11 +9,11 @@ const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 
 
 function getStatusBadgeClass(status) {
   switch (status) {
-    case 'pending_review': return 'badge-warning';
-    case 'reviewed': return 'badge-info';
-    case 'client_contacted': return 'badge-success';
-    case 'rejected': return 'badge-error';
-    case 'completed': return 'badge-success';
+    case 'pending_review': return 'badge-outline badge-warning';
+    case 'reviewed': return 'badge-outline badge-info';
+    case 'client_contacted': return 'badge-outline badge-success';
+    case 'rejected': return 'badge-outline badge-error';
+    case 'completed': return 'badge-outline badge-success';
     default: return 'badge-ghost';
   }
 }

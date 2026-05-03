@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
   "name": "e-commerce",
-  "version": "0.1.110",
+  "version": "0.1.111",
   "private": true,
   "type": "module",
   "scripts": {

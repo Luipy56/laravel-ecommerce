@@ -33,7 +33,7 @@ return [
         'greeting' => 'Hola,',
         'body' => 'Hemos recibido tu pedido #:id. Sigue pendiente: aún no hemos recibido el pago.',
         'total_due' => 'Total a pagar',
-        'cta' => 'Completa el pago desde la tienda con el siguiente enlace (necesario si usas PayPal, tarjeta con redirección u otro método externo).',
+        'cta' => 'Completa el pago desde la tienda con el siguiente enlace.',
         'button' => 'Ir al pedido',
         'footer' => 'Si ya has pagado, recibirás pronto la confirmación cuando el banco o la pasarela la registre.',
     ],

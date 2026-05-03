@@ -33,7 +33,7 @@ return [
         'greeting' => 'Hola,',
         'body' => 'Hem rebut la teva comanda #:id. La comanda queda pendent: encara no hem rebut el pagament.',
         'total_due' => 'Total a pagar',
-        'cta' => 'Completa el pagament des de la botiga amb l’enllaç següent (necessari si s’ha obert PayPal, Stripe o un altre pagament a part).',
+        'cta' => 'Completa el pagament des de la botiga amb l’enllaç següent.',
         'button' => 'Anar a la comanda',
         'footer' => 'Si ja has completat el pagament, en breu rebràs la confirmació quan el banc o la passarel·la l’hagin registrat.',
     ],

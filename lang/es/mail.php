@@ -2,18 +2,18 @@
 
 return [
     'layout' => [
-        'footer_default' => 'Mensaje automático; por favor no respondas directamente.',
-        'manage_preferences' => 'Gestiona tus datos con el enlace seguro',
+        'footer_default' => 'Mensaje automático; por favor no responda directamente.',
+        'manage_preferences' => 'Gestione sus datos con el enlace seguro',
     ],
 
     'installation_price' => [
         'subject' => 'Presupuesto de instalación para el pedido #:id',
         'greeting' => 'Hola,',
-        'body' => 'Hemos definido el precio de instalación para tu pedido #:id. A continuación tienes el desglose.',
+        'body' => 'Hemos definido el precio de instalación para su pedido #:id. A continuación tiene el desglose.',
         'products_subtotal' => 'Subtotal productos',
         'installation_fee' => 'Instalación',
         'total_due' => 'Total a pagar',
-        'cta' => 'Puedes revisar el pedido y completar el pago desde la tienda.',
+        'cta' => 'Puede revisar el pedido y completar el pago desde la tienda.',
         'button' => 'Ir al pedido',
         'footer' => 'Gracias por confiar en nosotros.',
     ],
@@ -21,21 +21,21 @@ return [
     'order_payment_confirmed' => [
         'subject' => 'Pago confirmado · pedido #:id',
         'greeting' => 'Hola,',
-        'body' => 'Hemos registrado correctamente el pago de tu pedido #:id.',
+        'body' => 'Hemos registrado correctamente el pago de su pedido #:id.',
         'total_paid' => 'Total pagado',
-        'cta' => 'Puedes consultar el detalle del pedido cuando quieras.',
+        'cta' => 'Puede consultar el detalle del pedido cuando quiera.',
         'button' => 'Ver el pedido',
-        'footer' => 'Gracias por tu compra.',
+        'footer' => 'Gracias por su compra.',
     ],
 
     'order_payment_pending' => [
         'subject' => 'Pedido #:id registrado · pago pendiente',
         'greeting' => 'Hola,',
-        'body' => 'Hemos recibido tu pedido #:id. Sigue pendiente: aún no hemos recibido el pago.',
+        'body' => 'Hemos recibido su pedido #:id. Sigue pendiente: aún no hemos recibido el pago.',
         'total_due' => 'Total a pagar',
         'cta' => 'Completa el pago desde la tienda con el siguiente enlace.',
         'button' => 'Ir al pedido',
-        'footer' => 'Si ya has pagado, recibirás pronto la confirmación cuando el banco o la pasarela la registre.',
+        'footer' => 'Si ya ha pagado, recibirá pronto la confirmación cuando el banco o la pasarela la registre.',
     ],
 
     'admin_order_installation_quote' => [
@@ -56,10 +56,10 @@ return [
     ],
 
     'order_installation_quote' => [
-        'subject' => 'Hemos recibido tu solicitud de instalación · pedido #:id',
+        'subject' => 'Hemos recibido su solicitud de instalación · pedido #:id',
         'greeting' => 'Hola,',
-        'body' => 'Hemos recibido tu pedido #:id con solicitud de instalación.',
-        'next_steps' => 'Te enviaremos un correo cuando tengamos el presupuesto de instalación. Mientras tanto puedes seguir el estado desde la tienda.',
+        'body' => 'Hemos recibido su pedido #:id con solicitud de instalación.',
+        'next_steps' => 'Le enviaremos un correo cuando tengamos el presupuesto de instalación. Mientras tanto puede seguir el estado desde la tienda.',
         'button' => 'Ver el pedido',
         'footer' => 'Gracias por confiar en nosotros.',
     ],
@@ -67,23 +67,23 @@ return [
     'personalized_solution' => [
         'subject' => 'Solicitud personalizada recibida · n.º :id',
         'greeting' => 'Hola,',
-        'body' => 'Hemos recibido tu solicitud de solución personalizada (referencia #:id). Nuestro equipo la revisará y se pondrá en contacto contigo si necesita más información.',
+        'body' => 'Hemos recibido su solicitud de solución personalizada (referencia #:id). Nuestro equipo la revisará y se pondrá en contacto con usted si necesita más información.',
         'footer' => 'Gracias por contactarnos.',
-        'preview_heading' => 'Resumen de tu solicitud',
+        'preview_heading' => 'Resumen de su solicitud',
         'preview_description' => 'Descripción del problema',
         'preview_phone' => 'Teléfono',
         'preview_address' => 'Dirección y notas de entrega',
         'preview_attachments' => 'Archivos adjuntos',
-        'preview_truncated' => 'La descripción es muy larga; en el gestor de la solicitud podrás leer el texto completo.',
-        'portal_intro' => 'Puedes hacer seguimiento de la solicitud y actualizar tus datos con este enlace seguro (sin iniciar sesión):',
+        'preview_truncated' => 'La descripción es muy larga; en el gestor de la solicitud podrá leer el texto completo.',
+        'portal_intro' => 'Puede hacer seguimiento de la solicitud y actualizar sus datos con este enlace seguro (sin iniciar sesión):',
         'portal_button' => 'Abrir el gestor de la solicitud',
     ],
 
     'personalized_solution_resolved' => [
-        'subject' => 'Solución personalizada · novedad sobre tu trámite #:id',
+        'subject' => 'Solución personalizada · novedad sobre su trámite #:id',
         'greeting' => 'Hola,',
-        'body' => 'Hay una novedad sobre tu solicitud #:id.',
-        'cta' => 'Puedes revisar los detalles y responder desde el gestor.',
+        'body' => 'Hay una novedad sobre su solicitud #:id.',
+        'cta' => 'Puede revisar los detalles y responder desde el gestor.',
         'button' => 'Ver la solicitud',
     ],
 
@@ -96,30 +96,30 @@ return [
     ],
 
     'verify_email' => [
-        'subject' => 'Verifica tu correo',
+        'subject' => 'Verifique su correo',
         'greeting' => 'Hola,',
-        'body' => 'Haz clic en el botón siguiente para confirmar tu dirección de correo y activar la cuenta.',
+        'body' => 'Haga clic en el botón siguiente para confirmar su dirección de correo y activar la cuenta.',
         'button' => 'Verificar correo',
         'link_fallback_label' => 'Si el botón no funciona',
-        'line2' => 'Si no creaste una cuenta, puedes ignorar este mensaje.',
+        'line2' => 'Si no creó una cuenta, puede ignorar este mensaje.',
     ],
 
     'reset_password' => [
         'subject' => 'Recuperar contraseña',
         'greeting' => 'Hola,',
-        'body' => 'Hemos recibido una solicitud para restablecer la contraseña de tu cuenta. Haz clic en el botón para elegir una contraseña nueva.',
+        'body' => 'Hemos recibido una solicitud para restablecer la contraseña de su cuenta. Haga clic en el botón para elegir una contraseña nueva.',
         'button' => 'Restablecer contraseña',
         'expiry' => 'Este enlace caduca en :minutes minutos.',
         'link_fallback_label' => 'Si el botón no funciona',
-        'line2' => 'Si no solicitaste cambiar la contraseña, ignora este correo.',
+        'line2' => 'Si no solicitó cambiar la contraseña, ignore este correo.',
     ],
 
     'order_shipped' => [
-        'subject' => 'Tu pedido #:id va en camino',
+        'subject' => 'Su pedido #:id va en camino',
         'greeting' => 'Hola,',
-        'body' => 'Tu pedido #:id ha pasado a estado de envío.',
+        'body' => 'Su pedido #:id ha pasado a estado de envío.',
         'shipping_date_label' => 'Fecha de envío prevista',
-        'cta' => 'Puedes revisar el detalle y el estado desde la tienda.',
+        'cta' => 'Puede revisar el detalle y el estado desde la tienda.',
         'button' => 'Ver el pedido',
         'footer' => 'Gracias por confiar en nosotros.',
     ],

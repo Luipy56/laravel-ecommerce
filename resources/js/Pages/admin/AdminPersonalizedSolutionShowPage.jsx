@@ -297,7 +297,7 @@ export default function AdminPersonalizedSolutionShowPage() {
                 {solution.improvement_feedback && (
                   <div className="sm:col-span-2">
                     <dt className="text-sm text-base-content/70 sr-only">{t('admin.personalized_solutions.improvement_feedback')}</dt>
-                    <dd className="whitespace-pre-wrap rounded-lg border-l-4 border-warning bg-warning/10 px-4 py-3 text-base font-medium">
+                    <dd className="whitespace-pre-wrap rounded-lg bg-base-200 px-4 py-3 text-base font-medium">
                       {solution.improvement_feedback}
                     </dd>
                   </div>

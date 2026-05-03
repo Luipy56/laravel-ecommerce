@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.88] - 2026-05-03
+
+### Fixed
+
+- **Personalized solution improvement request email (500):** Laravel reserves the `$message` variable in Blade email views (injected as `Illuminate\Mail\Message`). The mailable was passing `'message' => $clientMessage` in `with: [...]`, which Laravel silently overwrote with its own mail object, causing `htmlspecialchars()` to receive an object and throw a fatal 500. Renamed the data key to `clientMessage` in the mailable and updated the blade template accordingly.
+
+## [0.1.87] - 2026-05-03
+
+### Changed
+
+- **Cursor rules (`commit-changelog-version.mdc`, `agent-task-version-bump.mdc`, `app-version-cadence.mdc`):** Ship-ready changelog bullets must use **versioned sections** **`## [X.Y.Z] - YYYY-MM-DD`** aligned with root **`package.json`** after each bump; do not accumulate long lists under **`[Unreleased]`** so operators and Admin About always tie changes to a semver.
+
+## [0.1.86] - 2026-05-03
 
 ### Fixed
 

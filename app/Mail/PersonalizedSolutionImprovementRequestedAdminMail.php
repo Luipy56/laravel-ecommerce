@@ -34,7 +34,7 @@ class PersonalizedSolutionImprovementRequestedAdminMail extends Mailable
             html: 'emails.personalized-solution-improvement-admin',
             with: [
                 'solution' => $this->solution,
-                'message' => $this->clientMessage,
+                'clientMessage' => $this->clientMessage,
                 'adminUrl' => url('/admin/personalized-solutions/'.$this->solution->id),
             ],
         );

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.97] - 2026-05-03
+
+### Added
+
+- **Storefront — price range filter:** New dual-handle range slider in the product list sidebar (below "Solo packs") lets shoppers set a min/max price. The slider bounds are fetched from a new `GET /api/v1/products/price-range` endpoint. When the range matches the global min/max no filter is sent; a "Cualquier precio" link resets it. The `price_min` / `price_max` params are persisted in the URL and forwarded to both product and pack queries.
+
 ## [0.1.96] - 2026-05-03
 
 ### Fixed

@@ -295,6 +295,8 @@
   "shop.order.stripe_confirm_ok": "Pagament confirmat.",
   "shop.categories": "Categories",
   "shop.categories.all": "Tots",
+  "shop.filters.price": "Preu",
+  "shop.filters.price_any": "Qualsevol preu",
   "shop.filters.features": "Característiques",
   "shop.filters.packs_only": "Només packs",
   "shop.featured": "Destacats",

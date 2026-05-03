@@ -164,6 +164,12 @@ class ProductController extends Controller
                     });
             });
         }
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (float) $request->input('price_min'));
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (float) $request->input('price_max'));
+        }
 
         return $query;
     }
@@ -191,6 +197,12 @@ class ProductController extends Controller
                             });
                     });
             });
+        }
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (float) $request->input('price_min'));
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (float) $request->input('price_max'));
         }
 
         return $query;
@@ -351,6 +363,29 @@ class ProductController extends Controller
             'meta' => [
                 'engine' => $result['engine'],
                 'suggest' => false,
+            ],
+        ]);
+    }
+
+    /**
+     * Global min/max price across all active products and packs.
+     * Used by the storefront price-range filter to set slider bounds.
+     */
+    public function priceRange(): JsonResponse
+    {
+        $productMin = Product::query()->active()->min('price');
+        $productMax = Product::query()->active()->max('price');
+        $packMin = Pack::query()->active()->min('price');
+        $packMax = Pack::query()->active()->max('price');
+
+        $min = min(array_filter([$productMin, $packMin], fn ($v) => $v !== null)) ?: 0;
+        $max = max(array_filter([$productMax, $packMax], fn ($v) => $v !== null)) ?: 0;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'min' => (float) floor((float) $min),
+                'max' => (float) ceil((float) $max),
             ],
         ]);
     }

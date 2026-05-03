@@ -58,6 +58,7 @@ Route::get('categories', [CategoryController::class, 'index']);
 Route::get('features', [FeatureController::class, 'index']);
 Route::get('products', [ProductController::class, 'index']);
 Route::get('products/featured', [ProductController::class, 'featured']);
+Route::get('products/price-range', [ProductController::class, 'priceRange']);
 Route::get('products/search', [ProductController::class, 'search'])
     ->middleware('throttle:60,1');
 Route::get('products/{product}', [ProductController::class, 'show']);
@@ -171,8 +172,6 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('orders', [AdminOrderController::class, 'index']);
     Route::get('orders/{order}', [AdminOrderController::class, 'show']);
     Route::put('orders/{order}', [AdminOrderController::class, 'update']);
-    Route::post('orders/{order}/payments/{payment}/record-manual-settlement', [AdminOrderController::class, 'recordManualSettlement'])
-        ->middleware('throttle:30,1');
     Route::apiResource('admins', AdminAdminController::class);
     Route::get('personalized-solutions', [AdminPersonalizedSolutionController::class, 'index']);
     Route::get('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'show']);

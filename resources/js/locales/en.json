@@ -295,6 +295,8 @@
   "shop.order.stripe_confirm_ok": "Payment confirmed.",
   "shop.categories": "Categories",
   "shop.categories.all": "All",
+  "shop.filters.price": "Price",
+  "shop.filters.price_any": "Any price",
   "shop.filters.features": "Characteristics",
   "shop.filters.packs_only": "Packs only",
   "shop.featured": "Featured",

@@ -30,8 +30,11 @@ class AdminNavAlertsController extends Controller
             })
             ->exists();
 
+        $finalStatuses = [PersonalizedSolution::STATUS_REJECTED, PersonalizedSolution::STATUS_COMPLETED];
+
         $personalizedNeedAttention = PersonalizedSolution::query()
             ->where('is_active', true)
+            ->whereNotIn('status', $finalStatuses)
             ->where(function ($q) {
                 $q->where('status', PersonalizedSolution::STATUS_PENDING_REVIEW)
                     ->orWhere(function ($q2) {

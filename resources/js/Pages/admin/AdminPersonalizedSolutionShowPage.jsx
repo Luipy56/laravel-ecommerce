@@ -295,7 +295,12 @@ export default function AdminPersonalizedSolutionShowPage() {
                   <div><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.improvement_at')}</dt><dd>{new Date(solution.improvement_feedback_at).toLocaleString()}</dd></div>
                 )}
                 {solution.improvement_feedback && (
-                  <div className="sm:col-span-2"><dt className="text-sm text-base-content/70 sr-only">{t('admin.personalized_solutions.improvement_feedback')}</dt><dd className="whitespace-pre-wrap">{solution.improvement_feedback}</dd></div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-sm text-base-content/70 sr-only">{t('admin.personalized_solutions.improvement_feedback')}</dt>
+                    <dd className="whitespace-pre-wrap rounded-lg border-l-4 border-warning bg-warning/10 px-4 py-3 text-base font-medium">
+                      {solution.improvement_feedback}
+                    </dd>
+                  </div>
                 )}
               </dl>
             </section>

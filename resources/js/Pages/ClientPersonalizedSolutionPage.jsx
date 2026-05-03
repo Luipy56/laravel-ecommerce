@@ -61,6 +61,7 @@ export default function ClientPersonalizedSolutionPage() {
             address_postal_code: d.address_postal_code ?? '',
             address_note: d.address_note ?? '',
           });
+          setImprovement(d.improvement_feedback ?? '');
           setNotFound(false);
         } else setNotFound(true);
       })
@@ -104,7 +105,7 @@ export default function ClientPersonalizedSolutionPage() {
       });
       if (data.success && data.data) {
         setData(data.data);
-        setImprovement('');
+        setImprovement(data.data.improvement_feedback ?? '');
         showToast({ message: t('common.success'), type: 'success' });
       }
     } catch (err) {
@@ -161,11 +162,6 @@ export default function ClientPersonalizedSolutionPage() {
         <div className="card-body space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`badge ${statusBadgeClass(data.status)}`}>{statusLabel}</span>
-            {data.iterations_count > 0 && (
-              <span className="text-sm text-base-content/70">
-                {t('shop.client_portal.iterations')}: {data.iterations_count}
-              </span>
-            )}
           </div>
           {data.problem_description && (
             <section>

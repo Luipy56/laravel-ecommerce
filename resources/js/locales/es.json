@@ -684,7 +684,7 @@
   "admin.personalized_solutions.attachments_images": "Imágenes",
   "admin.personalized_solutions.attachments_files": "Otros archivos",
   "admin.personalized_solutions.iterations": "Ronda de mejoras",
-  "admin.personalized_solutions.improvement_feedback": "Última petición de mejoras",
+  "admin.personalized_solutions.improvement_feedback": "Última petición de mejoras del cliente",
   "admin.personalized_solutions.improvement_at": "Fecha de la petición",
   "admin.personalized_solutions.portal_url": "Enlace vista cliente",
   "admin.personalized_solutions.clear_improvement": "Borrar la petición de mejoras al guardar",

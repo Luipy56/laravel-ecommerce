@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.89] - 2026-05-03
+
+### Changed
+
+- **Client portal (personalized solution):** Removed "Ronda de mejoras: X" from the client view — it's irrelevant information for the client.
+- **Client portal (personalized solution):** Improvement request textarea now pre-fills with the client's last sent message on page load and after a successful submit, so the previous text is not lost.
+- **Admin personalized solution show:** The client's improvement feedback text is now visually highlighted with a left warning border and tinted background so it stands out as the key text to read.
+- **Locales (ca/es):** Renamed "Última petició/petición de millores/mejoras" → "... del client/cliente" to clarify it refers to the client's message.
+
 ## [0.1.88] - 2026-05-03
 
 ### Fixed

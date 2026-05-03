@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
-import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
 
 const KINDS = ['cart', 'order', 'like'];
 const STATUSES = ['pending', 'awaiting_payment', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
@@ -38,6 +38,8 @@ export default function AdminOrdersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('orders');
+  const { defaultPeriod, isLoading: periodLoading } = useAdminListDefaultPeriod();
+  const [periodInitialized, setPeriodInitialized] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -46,8 +48,16 @@ export default function AdminOrdersPage() {
   const [searchDebounce, setSearchDebounce] = useState('');
   const [kindFilter, setKindFilter] = useState('order');
   const [statusFilter, setStatusFilter] = useState('');
+  const [periodFilter, setPeriodFilter] = useState('week');
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    if (!periodLoading && !periodInitialized) {
+      setPeriodFilter(defaultPeriod);
+      setPeriodInitialized(true);
+    }
+  }, [periodLoading, periodInitialized, defaultPeriod]);
 
   const fetchOrders = useCallback(async (pageNum, reset = false) => {
     if (reset) setLoading(true);
@@ -57,6 +67,7 @@ export default function AdminOrdersPage() {
       if (searchDebounce) params.search = searchDebounce;
       if (kindFilter) params.kind = kindFilter;
       if (statusFilter) params.status = statusFilter;
+      if (periodFilter && periodFilter !== 'all') params.period = periodFilter;
       const { data } = await api.get('admin/orders', { params });
       if (data.success) {
         const newItems = data.data || [];
@@ -73,12 +84,13 @@ export default function AdminOrdersPage() {
       if (reset) setLoading(false);
       else setLoadingMore(false);
     }
-  }, [navigate, searchDebounce, kindFilter, statusFilter]);
+  }, [navigate, searchDebounce, kindFilter, statusFilter, periodFilter]);
 
   useEffect(() => {
+    if (!periodInitialized) return;
     pageRef.current = 1;
     fetchOrders(1, true);
-  }, [fetchOrders]);
+  }, [fetchOrders, periodInitialized]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
@@ -278,6 +290,20 @@ export default function AdminOrdersPage() {
             {STATUSES.map((s) => (
               <option key={s} value={s}>{t(`admin.orders.status_${s}`)}</option>
             ))}
+          </select>
+        </label>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.orders.filter_period')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-44"
+            value={periodFilter}
+            onChange={(e) => setPeriodFilter(e.target.value)}
+            aria-label={t('admin.orders.filter_period')}
+          >
+            <option value="week">{t('admin.settings.period_week')}</option>
+            <option value="month">{t('admin.settings.period_month')}</option>
+            <option value="year">{t('admin.settings.period_year')}</option>
+            <option value="all">{t('admin.settings.period_all')}</option>
           </select>
         </label>
       </div>

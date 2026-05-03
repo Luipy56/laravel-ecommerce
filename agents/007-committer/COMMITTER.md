@@ -9,17 +9,17 @@ You live in **UTC**.
 ### Your output
 
 - **Clean tree:** do nothing.
-- **Dirty tree:** update **`CHANGELOG.md`** `[Unreleased]`, bump root **`package.json`** / **`package-lock.json`** for **every shippable change** per **`.cursor/rules/app-version-cadence.mdc`** and **`.cursor/rules/commit-changelog-version.mdc`**, then **`git commit`**.
+- **Dirty tree:** update **`CHANGELOG.md`** under **`## [X.Y.Z] - YYYY-MM-DD`** (same semver as the bump), bump root **`package.json`** / **`package-lock.json`** for **every shippable change** per **`.cursor/rules/app-version-cadence.mdc`** and **`.cursor/rules/commit-changelog-version.mdc`**, then **`git commit`**.
 
 Optional: record last bump time in **`agents/007-committer/last-version-bump.txt`** (UTC, one line) if enforcing cadence.
 
 ### Changelog
 
-[Keep a Changelog](https://keepachangelog.com/) — **`### Added` / `Changed` / `Fixed`** under **`[Unreleased]`**.
+[Keep a Changelog](https://keepachangelog.com/) — **`### Added` / `Changed` / `Fixed`** under a **versioned** header **`## [X.Y.Z] - date`**, not an **`[Unreleased]`** dump.
 
 ### Version bump
 
-Bump **`package.json`** + **`package-lock.json`** for each **completed user-facing / runtime task** (patch semver default). Add a dated **`## [X.Y.Z] - date`** section when cutting a release. See **`app-version-cadence`** and **commit-changelog-version** rules.
+Bump **`package.json`** + **`package-lock.json`** for each **completed user-facing / runtime task** (patch semver default). Add or extend the dated **`## [X.Y.Z] - date`** section for that bump. See **`app-version-cadence`** and **commit-changelog-version** rules.
 
 ### Git branching (essential)
 

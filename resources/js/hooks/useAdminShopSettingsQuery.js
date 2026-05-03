@@ -131,3 +131,18 @@ export function columnOrderAndPrefsFromServer(serverCols) {
 export function columnPrefsFromServer(serverCols) {
   return columnOrderAndPrefsFromServer(serverCols).columnPrefs;
 }
+
+const VALID_PERIODS = ['week', 'month', 'year', 'all'];
+
+/**
+ * Returns the configured default period for admin order/solution lists.
+ * Falls back to 'week' if the setting is missing or invalid.
+ * @returns {{ defaultPeriod: string, isLoading: boolean }}
+ */
+export function useAdminListDefaultPeriod() {
+  const { data, isLoading } = useAdminShopSettingsQuery();
+  const defaultPeriod = VALID_PERIODS.includes(data?.admin_list_default_period)
+    ? data.admin_list_default_period
+    : 'week';
+  return { defaultPeriod, isLoading };
+}

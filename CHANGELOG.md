@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.94] - 2026-05-03
+
+### Added
+
+- **Admin Orders & Personalized Solutions — period filter:** Both list pages now include a time-range select (Last week / Last month / Last year / All time). The backend `AdminOrderController` and `AdminPersonalizedSolutionController` accept a `period` query param and apply a `created_at >=` date constraint accordingly.
+- **Admin Settings — default period:** New "List defaults" section in `/admin/settings` lets admins choose which period is pre-selected when the Orders and Personalized Solutions pages are first opened. Persisted in `shop_settings` under key `admin_list_default_period`; default is "last week".
+
 ## [0.1.93] - 2026-05-03
 
 ### Changed

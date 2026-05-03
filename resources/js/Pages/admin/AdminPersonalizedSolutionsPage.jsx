@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
-import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
 
 const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 'completed'];
 
@@ -22,6 +22,8 @@ export default function AdminPersonalizedSolutionsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('personalized_solutions');
+  const { defaultPeriod, isLoading: periodLoading } = useAdminListDefaultPeriod();
+  const [periodInitialized, setPeriodInitialized] = useState(false);
   const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -30,8 +32,16 @@ export default function AdminPersonalizedSolutionsPage() {
   const [searchDebounce, setSearchDebounce] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [activeFilter, setActiveFilter] = useState('1');
+  const [periodFilter, setPeriodFilter] = useState('week');
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
+
+  useEffect(() => {
+    if (!periodLoading && !periodInitialized) {
+      setPeriodFilter(defaultPeriod);
+      setPeriodInitialized(true);
+    }
+  }, [periodLoading, periodInitialized, defaultPeriod]);
 
   const fetchSolutions = useCallback(async (pageNum, reset = false) => {
     if (reset) setLoading(true);
@@ -41,6 +51,7 @@ export default function AdminPersonalizedSolutionsPage() {
       if (searchDebounce) params.search = searchDebounce;
       if (statusFilter) params.status = statusFilter;
       if (activeFilter !== '') params.is_active = activeFilter === '1';
+      if (periodFilter && periodFilter !== 'all') params.period = periodFilter;
       const { data } = await api.get('admin/personalized-solutions', { params });
       if (data.success) {
         const newItems = data.data || [];
@@ -57,12 +68,13 @@ export default function AdminPersonalizedSolutionsPage() {
       if (reset) setLoading(false);
       else setLoadingMore(false);
     }
-  }, [navigate, searchDebounce, statusFilter, activeFilter]);
+  }, [navigate, searchDebounce, statusFilter, activeFilter, periodFilter]);
 
   useEffect(() => {
+    if (!periodInitialized) return;
     pageRef.current = 1;
     fetchSolutions(1, true);
-  }, [fetchSolutions]);
+  }, [fetchSolutions, periodInitialized]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
@@ -205,6 +217,20 @@ export default function AdminPersonalizedSolutionsPage() {
             <option value="">{t('shop.categories.all')}</option>
             <option value="1">{t('common.yes')}</option>
             <option value="0">{t('common.no')}</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.personalized_solutions.filter_period')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-44"
+            value={periodFilter}
+            onChange={(e) => setPeriodFilter(e.target.value)}
+            aria-label={t('admin.personalized_solutions.filter_period')}
+          >
+            <option value="week">{t('admin.settings.period_week')}</option>
+            <option value="month">{t('admin.settings.period_month')}</option>
+            <option value="year">{t('admin.settings.period_year')}</option>
+            <option value="all">{t('admin.settings.period_all')}</option>
           </select>
         </label>
       </div>

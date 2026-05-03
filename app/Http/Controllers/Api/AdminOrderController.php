@@ -48,6 +48,18 @@ class AdminOrderController extends Controller
                 ->where('installation_requested', true)
                 ->where('installation_status', Order::INSTALLATION_PENDING);
         }
+        if ($request->filled('period')) {
+            $period = (string) $request->input('period');
+            $from = match ($period) {
+                'week'  => now()->subWeek(),
+                'month' => now()->subMonth(),
+                'year'  => now()->subYear(),
+                default => null,
+            };
+            if ($from !== null) {
+                $query->where('created_at', '>=', $from);
+            }
+        }
 
         $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
         $orders = $query->paginate($perPage);

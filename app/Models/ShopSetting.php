@@ -65,6 +65,12 @@ class ShopSetting extends Model
     public const KEY_BIZUM_MANUAL_INSTRUCTIONS = 'bizum_manual_instructions';
 
     /**
+     * Default time period filter for admin order/solution lists.
+     * Allowed values: 'week', 'month', 'year', 'all'.
+     */
+    public const KEY_ADMIN_LIST_DEFAULT_PERIOD = 'admin_list_default_period';
+
+    /**
      * @var array<string, mixed>
      */
     public const DEFAULTS = [
@@ -94,6 +100,7 @@ class ShopSetting extends Model
         self::KEY_BANK_TRANSFER_REFERENCE_HINT => '',
         self::KEY_BIZUM_MANUAL_PHONE => '',
         self::KEY_BIZUM_MANUAL_INSTRUCTIONS => '',
+        self::KEY_ADMIN_LIST_DEFAULT_PERIOD => 'week',
     ];
 
     public static function shippingFlatEur(): float

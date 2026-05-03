@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Stripe not loading:** `.env` had `STRIPE_PUBLISHABLE_KEY`/`STRIPE_SECRET_KEY` but `config/services.php` reads `STRIPE_KEY`/`STRIPE_SECRET`; renamed the variables so `StripeCredentials::areConfigured()` returns `true` and Stripe Checkout sessions can be created.
+- **Stripe excluded from checkout:** `PAYMENTS_CHECKOUT_METHODS` was set to `paypal` only; changed to `card,paypal` so the Stripe (card) option appears in the payment selector.
+- **PayPal inline buttons never rendered:** `CheckoutPage.jsx` and `OrderDetailPage.jsx` checked `c.approval_url` before `c.client_id && c.paypal_order_id && c.payment_id`; since PayPal always returns an `approve` link, the inline buttons branch was dead code and `PayPalInlineButtons` was never mounted. Swapped the branch order so the inline SDK flow is always preferred.
+- **PayPal capture missing after popup redirect:** Added capture call in the `payment=paypal_return` handler in `OrderDetailPage.jsx`; reads the `token` query param (PayPal order ID injected by PayPal on redirect), finds the matching pending payment, and calls `POST payments/paypal/capture` to complete the payment server-side.
+
 ### Added
 
 - **Storefront favorites:** Authenticated clients can favorite products and packs via **`POST /api/v1/favorites/toggle`**, list IDs with **`GET /api/v1/favorites/ids`**, list items with **`GET /api/v1/favorites`**, and remove a line with **`DELETE /api/v1/favorites/lines/{orderLine}`** (favorites stored as a dedicated **`orders.kind = like`** basket). React: **`FavoritesPage`**, **`FavoriteToggle`**, **`useFavoriteIdsQuery`**, nav link from **`Layout`**.

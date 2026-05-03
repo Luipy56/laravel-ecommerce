@@ -215,12 +215,6 @@ export default function CheckoutPage() {
         window.location.href = c.checkout_url;
         return;
       }
-      if (c?.gateway === 'paypal' && c.approval_url) {
-        const opened = openPayPalApprovalInNewTab(c.approval_url);
-        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
-        navigate('/orders/' + d.id, { state: { paypalHostedWindow: true } });
-        return;
-      }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
         setActiveCheckout({
           orderId: d.id,
@@ -231,6 +225,12 @@ export default function CheckoutPage() {
             paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
           },
         });
+        return;
+      }
+      if (c?.gateway === 'paypal' && c.approval_url) {
+        const opened = openPayPalApprovalInNewTab(c.approval_url);
+        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
+        navigate('/orders/' + d.id, { state: { paypalHostedWindow: true } });
         return;
       }
 

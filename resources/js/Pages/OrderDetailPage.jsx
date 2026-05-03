@@ -133,6 +133,27 @@ export default function OrderDetailPage() {
       if (payment === 'ko') setPayError(t('shop.order.payment_return_ko'));
       if (payment === 'paypal_return') {
         setPaypalReturnInfo(t('shop.order.paypal_return_check'));
+        // PayPal redirected back after approval: token = PayPal order ID, capture server-side.
+        const paypalOrderId = sp.get('token');
+        if (paypalOrderId) {
+          try {
+            const orderRes = await api.get(`orders/${id}`);
+            const pendingPayment = orderRes.data?.data?.payments?.find(
+              (p) => p.gateway === 'paypal' && p.gateway_reference === paypalOrderId,
+            );
+            if (pendingPayment && !cancelled) {
+              const captureRes = await api.post('payments/paypal/capture', {
+                paypal_order_id: paypalOrderId,
+                payment_id: pendingPayment.id,
+              });
+              if (!cancelled && captureRes.data?.success) {
+                emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
+              }
+            }
+          } catch {
+            // capture error is non-fatal; order reload below will reflect real status
+          }
+        }
       }
       if (needsStripeConfirm) {
         try {
@@ -190,12 +211,6 @@ export default function OrderDetailPage() {
         window.location.href = c.checkout_url;
         return;
       }
-      if (c?.gateway === 'paypal' && c.approval_url) {
-        const opened = openPayPalApprovalInNewTab(c.approval_url);
-        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
-        navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
-        return;
-      }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
         setInlineCheckout({
           orderId: Number(id),
@@ -206,6 +221,12 @@ export default function OrderDetailPage() {
             paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
           },
         });
+        return;
+      }
+      if (c?.gateway === 'paypal' && c.approval_url) {
+        const opened = openPayPalApprovalInNewTab(c.approval_url);
+        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
+        navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
         return;
       }
       if (c?.gateway === 'manual' && d.payment_instructions) {

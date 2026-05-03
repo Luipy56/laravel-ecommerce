@@ -159,6 +159,7 @@ export default function AdminLayout() {
 
   const renderNavMenuItem = (item) => {
     const { to, labelKey, alertKey } = item;
+    const active = isActive(to);
     const showAttentionDot =
       alertKey === 'orders'
         ? navAlerts.orders
@@ -173,11 +174,19 @@ export default function AdminLayout() {
       <li key={to === '/' ? 'back-to-shop' : to}>
         <Link
           to={to}
-          className={`rounded-lg flex items-center justify-between gap-2 ${isActive(to) ? 'bg-base-200/60 border-l-2 border-l-primary -ml-px' : ''}`}
+          className={[
+            'flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-colors duration-150',
+            active
+              ? 'bg-primary/10 font-semibold text-primary'
+              : 'font-normal text-base-content/65 hover:bg-base-200/70 hover:text-base-content',
+          ].join(' ')}
           onClick={closeDrawer}
-          aria-current={isActive(to) ? 'page' : undefined}
+          aria-current={active ? 'page' : undefined}
           aria-label={linkAria}
         >
+          {active && (
+            <span className="absolute left-0 h-5 w-0.5 rounded-r bg-primary" aria-hidden="true" />
+          )}
           <span className="min-w-0 flex-1">{t(labelKey)}</span>
           {showAttentionDot ? (
             <span
@@ -244,21 +253,43 @@ export default function AdminLayout() {
       <div className="drawer-side z-30">
         <label htmlFor="admin-drawer" aria-label={t('common.close')} className="drawer-overlay" />
         <aside className="bg-base-100 w-64 max-w-[min(100vw,16rem)] min-h-full flex flex-col border-r border-base-200">
-          <div className="p-4 border-b border-base-200">
-            <span className="font-bold text-lg text-base-content">{t('home.hero.title')}</span>
-            <span className="block text-sm text-base-content/70">
+          {/* top accent line — same brand gradient as storefront drawer */}
+          <div className="header-gradient-line h-1 shrink-0" aria-hidden="true" />
+
+          {/* brand header */}
+          <div className="px-4 pb-4 pt-3 border-b border-base-200 bg-gradient-to-b from-base-200/40 to-base-100">
+            <span className="block font-bold text-base leading-tight tracking-tight text-base-content">
+              {t('home.hero.title')}
+            </span>
+            <span className="mt-0.5 block text-xs font-medium tracking-wide text-base-content/45 uppercase">
               {t('admin.sidebar.subtitle', { version: APP_VERSION })}
             </span>
           </div>
-          <ul className="menu p-4 flex-1">
-            {primaryNavItems.map(renderNavMenuItem)}
-            <li className="!min-h-0 !p-0 !py-0 list-none pointer-events-none my-2" aria-hidden="true">
-              <hr className="m-0 w-full border-0 border-t border-base-300" />
-            </li>
-            {secondaryNavItems.map(renderNavMenuItem)}
-          </ul>
-          <div className="p-4 border-t border-base-200">
-            <button type="button" className="btn btn-ghost btn-block justify-start" onClick={handleLogout}>
+
+          {/* primary nav */}
+          <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label={t('admin.nav.dashboard')}>
+            <ul className="flex flex-col gap-0.5 relative">
+              {primaryNavItems.map(renderNavMenuItem)}
+            </ul>
+
+            <div className="my-3 px-1" aria-hidden="true">
+              <p className="px-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/35">
+                {t('admin.nav.section_system', 'System')}
+              </p>
+            </div>
+
+            <ul className="flex flex-col gap-0.5 relative">
+              {secondaryNavItems.map(renderNavMenuItem)}
+            </ul>
+          </nav>
+
+          {/* logout footer */}
+          <div className="shrink-0 border-t border-base-200 bg-gradient-to-t from-base-200/30 to-base-100 px-2 py-3">
+            <button
+              type="button"
+              className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-base-content/55 transition-colors duration-150 hover:bg-error/8 hover:text-error"
+              onClick={handleLogout}
+            >
               {t('admin.nav.logout')}
             </button>
           </div>

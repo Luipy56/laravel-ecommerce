@@ -37,7 +37,7 @@ export default function OrdersPage() {
     <div className="mx-auto w-full min-w-0 max-w-3xl">
       <PageTitle>{t('shop.orders')}</PageTitle>
       {orders.length === 0 ? (
-        <p>{t('shop.cart.empty')}</p>
+        <p>{t('shop.orders.empty')}</p>
       ) : (
         <ul className="space-y-4">
           {orders.map((o) => {

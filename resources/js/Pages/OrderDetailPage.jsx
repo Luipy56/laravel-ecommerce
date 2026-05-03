@@ -188,10 +188,6 @@ export default function OrderDetailPage() {
     };
   }, [user, id, navigate, t]);
 
-  useEffect(() => {
-    if (order?.has_payment) setOfflineInstructionsFlash(null);
-  }, [order?.has_payment, order?.id]);
-
   const handlePay = async (e) => {
     e.preventDefault();
     setPayError('');

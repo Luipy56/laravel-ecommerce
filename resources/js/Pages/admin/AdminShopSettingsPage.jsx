@@ -262,7 +262,7 @@ export default function AdminShopSettingsPage() {
       <form onSubmit={handleSave} className="space-y-4 sm:space-y-6 min-w-0">
         <AdminSettingsCollapseSection
           title={t('admin.settings.section_home')}
-          subtitle={t('admin.settings.section_home_help')}
+          subtitle={t('admin.settings.section_home_subtitle')}
           defaultOpen
         >
           <div className="space-y-4 min-w-0 px-1 pb-1">
@@ -381,7 +381,10 @@ export default function AdminShopSettingsPage() {
           </div>
         </AdminSettingsCollapseSection>
 
-        <AdminSettingsCollapseSection title={t('admin.settings.section_personalized')}>
+        <AdminSettingsCollapseSection
+          title={t('admin.settings.section_personalized')}
+          subtitle={t('admin.settings.section_personalized_subtitle')}
+        >
           <div className="space-y-4 min-w-0 px-1 pb-1">
             <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
               <input
@@ -523,7 +526,7 @@ export default function AdminShopSettingsPage() {
 
         <AdminSettingsCollapseSection
           title={t('admin.settings.index_columns_title')}
-          subtitle={t('admin.settings.index_columns_help')}
+          subtitle={t('admin.settings.index_columns_subtitle')}
         >
           <div className="space-y-6 min-w-0 px-1 pb-1">
             {ADMIN_INDEX_TABLE_ORDER.map((tableId) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,7 +10,6 @@ import ScrollToTop from './ScrollToTop';
 import CookieConsentBanner from './CookieConsentBanner';
 import {
   IconCart,
-  IconChevronDown,
   IconClipboardList,
   IconGrid,
   IconHeart,
@@ -56,51 +55,15 @@ export default function Layout() {
   const { pathname } = useLocation();
   const { user, loading: authLoading } = useAuth();
   const [locale, setLocale] = useState(i18n.language);
-  const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
-  const localeMenuRef = useRef(null);
-  const localeTriggerRef = useRef(null);
 
   useEffect(() => {
     setLocale(i18n.language);
   }, [i18n.language]);
 
-  /** daisyUI 5 keeps the panel on :focus-within; .dropdown-close forces it shut — blur so focus does not stick inside. */
-  useEffect(() => {
-    if (localeMenuOpen) return;
-    const root = localeMenuRef.current;
-    const ae = document.activeElement;
-    if (root && ae instanceof HTMLElement && root.contains(ae)) {
-      ae.blur();
-    } else {
-      localeTriggerRef.current?.blur();
-    }
-  }, [localeMenuOpen]);
-
-  useEffect(() => {
-    if (!localeMenuOpen) return;
-    /** Capture: run before target handlers so we only react to true “outside” taps (avoids fighting the close button). */
-    const onPointerDownCapture = (e) => {
-      if (!localeMenuRef.current || !(e.target instanceof Node)) return;
-      if (!localeMenuRef.current.contains(e.target)) {
-        setLocaleMenuOpen(false);
-      }
-    };
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') setLocaleMenuOpen(false);
-    };
-    document.addEventListener('pointerdown', onPointerDownCapture, true);
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDownCapture, true);
-      document.removeEventListener('keydown', onKeyDown);
-    };
-  }, [localeMenuOpen]);
-
   const handleLocale = (lng) => {
     i18n.changeLanguage(lng);
     setLocale(lng);
     localStorage.setItem('locale', lng);
-    setLocaleMenuOpen(false);
   };
 
   const isProductsArea =
@@ -215,6 +178,35 @@ export default function Layout() {
 
             <hr className="my-3 shrink-0 border-0 border-t border-base-200" />
 
+            <div className="mb-3 px-1">
+              <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
+                {t('common.language')}
+              </p>
+              <div className="flex gap-1.5" role="group" aria-label={t('common.language')}>
+                {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
+                  const selected = locale === code;
+                  return (
+                    <button
+                      key={code}
+                      type="button"
+                      role="option"
+                      aria-selected={selected}
+                      onClick={() => handleLocale(code)}
+                      className={[
+                        'flex-1 rounded-lg py-2 text-xs font-semibold tabular-nums transition-all duration-150',
+                        selected
+                          ? 'bg-primary text-primary-content shadow-sm'
+                          : 'bg-base-200 text-base-content/60 hover:bg-base-300 hover:text-base-content',
+                      ].join(' ')}
+                    >
+                      {localeCode(code)}
+                      <span className="sr-only"> — {label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {authLoading ? (
               <div className="flex justify-center py-2" aria-busy="true" aria-label={t('common.loading')}>
                 <span className="loading loading-spinner loading-sm text-primary" />
@@ -297,65 +289,7 @@ export default function Layout() {
               </ul>
             )}
 
-            <div className="mt-auto border-t border-base-200 bg-gradient-to-b from-base-100 to-base-200/50 px-3 pb-4 pt-4">
-              <div
-                ref={localeMenuRef}
-                className={`dropdown dropdown-bottom mb-4 w-full min-w-0 ${localeMenuOpen ? 'dropdown-open' : 'dropdown-close'}`}
-              >
-                <button
-                  ref={localeTriggerRef}
-                  type="button"
-                  className="btn btn-outline btn-sm h-auto min-h-10 w-full shrink-0 justify-between gap-2 border-base-300 px-3 py-2 font-normal normal-case"
-                  aria-expanded={localeMenuOpen}
-                  aria-haspopup="listbox"
-                  aria-label={t('common.language')}
-                  onClick={() => setLocaleMenuOpen((o) => !o)}
-                >
-                  <span className="min-w-0 truncate text-left text-sm text-base-content">
-                    {t('common.language')}
-                    <span className="mx-1.5 text-base-content/40" aria-hidden>
-                      ·
-                    </span>
-                    <span className="font-semibold tabular-nums text-primary">{localeCode(locale)}</span>
-                  </span>
-                  <IconChevronDown
-                    className={`h-4 w-4 shrink-0 text-base-content/70 transition-transform duration-200 ${localeMenuOpen ? 'rotate-180' : ''}`}
-                    aria-hidden="true"
-                  />
-                </button>
-                <div className="dropdown-content z-[70] mt-1 w-full min-w-[12rem] max-w-full">
-                  <div className="card card-border border border-base-300 bg-base-100 p-2 shadow-xl">
-                    <ul className="menu menu-sm max-h-60 flex-nowrap overflow-y-auto p-0" role="listbox" aria-label={t('common.language')}>
-                      {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
-                        const selected = locale === code;
-                        return (
-                          <li key={code} role="none">
-                            <button
-                              type="button"
-                              role="option"
-                              aria-selected={selected}
-                              className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left active:bg-base-200 ${
-                                selected
-                                  ? 'bg-gradient-to-r from-primary/15 to-secondary/10 font-medium text-primary'
-                                  : 'hover:bg-base-200'
-                              }`}
-                              onClick={() => handleLocale(code)}
-                            >
-                              <span>{label}</span>
-                              {selected ? (
-                                <span className="text-xs font-bold text-primary tabular-nums" aria-hidden>
-                                  ✓
-                                </span>
-                              ) : null}
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
+            <div className="mt-auto border-t border-base-200 px-3 pb-4 pt-4">
               <p className="text-sm font-semibold leading-tight text-base-content">{t('shop.brand_name')}</p>
               <p className="mt-1 text-xs leading-snug text-base-content/65">{t('footer.tagline')}</p>
             </div>

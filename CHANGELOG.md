@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.93] - 2026-05-03
+
+### Changed
+
+- **Admin lists (all):** Replaced prev/next pagination buttons with infinite scroll (IntersectionObserver sentinel) across all 11 admin list pages: Products, Categories, Features (both sub-lists), Variant Groups, Packs, Orders, Clients, Personalized Solutions, Admins, FAQs, and Data Explorer. New items are appended automatically as the user scrolls to the bottom; a small spinner appears while loading more.
+
 ## [0.1.89] - 2026-05-03
 
 ### Changed

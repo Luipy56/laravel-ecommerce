@@ -65,6 +65,26 @@ function mapCatalogFromResponse(r) {
   return { items, pagination };
 }
 
+const THUMB_CLS =
+  'absolute inset-x-0 w-full h-full appearance-none bg-transparent ' +
+  'pointer-events-none ' +
+  '[&::-webkit-slider-thumb]:pointer-events-auto ' +
+  '[&::-webkit-slider-thumb]:appearance-none ' +
+  '[&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:h-[18px] ' +
+  '[&::-webkit-slider-thumb]:rounded-full ' +
+  '[&::-webkit-slider-thumb]:bg-primary ' +
+  '[&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-base-100 ' +
+  '[&::-webkit-slider-thumb]:shadow-md ' +
+  '[&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:active:cursor-grabbing ' +
+  '[&::-webkit-slider-runnable-track]:opacity-0 ' +
+  '[&::-moz-range-thumb]:pointer-events-auto ' +
+  '[&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:h-[18px] ' +
+  '[&::-moz-range-thumb]:rounded-full ' +
+  '[&::-moz-range-thumb]:bg-primary ' +
+  '[&::-moz-range-thumb]:border-[3px] [&::-moz-range-thumb]:border-base-100 ' +
+  '[&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab ' +
+  '[&::-moz-range-track]:opacity-0';
+
 /** Dual-handle range slider for price filtering. */
 function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }) {
   const { t } = useTranslation();
@@ -120,16 +140,19 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
         <span>{fmt.format(localMax)}</span>
       </div>
 
-      {/* Dual-range track */}
-      <div className="relative h-5 flex items-center">
+      {/* Dual-range track — px-2 so endpoint dots don't get clipped */}
+      <div className="relative h-5 flex items-center px-2">
         {/* Background track */}
-        <div className="absolute inset-x-0 h-1.5 rounded-full bg-base-300" />
+        <div className="absolute inset-x-2 h-1.5 rounded-full bg-base-300" />
+        {/* Endpoint dots */}
+        <div className="absolute left-2 w-2.5 h-2.5 rounded-full bg-base-300 -translate-x-1/2 border-2 border-base-100 shadow-sm" />
+        <div className="absolute right-2 w-2.5 h-2.5 rounded-full bg-base-300 translate-x-1/2 border-2 border-base-100 shadow-sm" />
         {/* Filled track between thumbs */}
         <div
-          className="absolute h-1.5 rounded-full bg-primary"
-          style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
+          className="absolute h-1.5 bg-primary"
+          style={{ left: `calc(0.5rem + ${minPct}% * (100% - 1rem) / 100)`, right: `calc(0.5rem + ${100 - maxPct}% * (100% - 1rem) / 100)` }}
         />
-        {/* Min thumb */}
+        {/* Min thumb — z-10 when near the max to stay reachable */}
         <input
           type="range"
           min={globalMin}
@@ -137,7 +160,7 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
           step={1}
           value={localMin}
           onChange={handleMinChange}
-          className="absolute inset-x-0 w-full appearance-none bg-transparent cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-base-100 [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-runnable-track]:opacity-0 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-base-100 [&::-moz-range-thumb]:shadow [&::-moz-range-track]:opacity-0"
+          className={`${THUMB_CLS} ${minPct >= 95 ? 'z-10' : 'z-[3]'}`}
           aria-label="Precio mínimo"
         />
         {/* Max thumb */}
@@ -148,7 +171,7 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
           step={1}
           value={localMax}
           onChange={handleMaxChange}
-          className="absolute inset-x-0 w-full appearance-none bg-transparent cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-base-100 [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-runnable-track]:opacity-0 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-base-100 [&::-moz-range-thumb]:shadow [&::-moz-range-track]:opacity-0"
+          className={`${THUMB_CLS} z-[4]`}
           aria-label="Precio máximo"
         />
       </div>

@@ -48,6 +48,33 @@ Ejemplo con transferencia:
 PAYMENTS_CHECKOUT_METHODS=card,paypal,bank_transfer
 ```
 
+### Stripe CLI: webhooks en desarrollo local
+
+Stripe no puede enviar webhooks a `localhost`. Para recibirlos en tu máquina durante el desarrollo, usa el [Stripe CLI](https://stripe.com/docs/stripe-cli):
+
+```bash
+stripe listen \
+  --api-key sk_test_TU_STRIPE_SECRET \
+  --forward-to http://localhost:8080/api/v1/payments/webhooks/stripe \
+  --events checkout.session.completed,payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded
+```
+
+Al arrancar, el CLI imprime el webhook signing secret:
+
+```
+Ready! Your webhook signing secret is whsec_XXXX...
+```
+
+Copia ese valor en `.env`:
+
+```env
+STRIPE_WEBHOOK_SECRET=whsec_XXXX...
+```
+
+Luego ejecuta `php artisan config:clear`. El listener debe estar corriendo mientras pruebas el checkout; si lo detienes y reinicias, el secret **no cambia** (es fijo por cuenta/CLI). Si reinicias la máquina solo tienes que volver a ejecutar el comando `stripe listen` de arriba.
+
+> **Alternativa sin CLI:** El endpoint `POST /api/v1/payments/stripe/checkout/confirm` (llamado automáticamente por `OrderDetailPage` al volver de Stripe con `?payment=ok&session_id=…`) confirma el pago directamente sin depender del webhook. En desarrollo esto suele ser suficiente sin tener el CLI corriendo.
+
 ### Desarrollo local sin PSP real
 
 Con **`APP_ENV=local`**, **`APP_DEBUG=true`** y **sin** variable `PAYMENTS_ALLOW_SIMULATED` en `.env`, el proyecto **activa por defecto** el modo que permite **simular** pagos (`config/payments.php`). La simulación se aplica **solo a métodos que no tienen credenciales reales** en `.env` (p. ej. tarjeta sin Stripe). **PayPal no se simula nunca:** hace falta `PAYPAL_CLIENT_ID` y `PAYPAL_SECRET` para que aparezca en el checkout y para abrir el widget del SDK; sin ellos el método PayPal no se ofrece aunque el resto esté en modo desarrollo simulado.

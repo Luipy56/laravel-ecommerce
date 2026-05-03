@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.105] - 2026-05-04
+
+### Fixed
+
+- **Storefront orders list:** Empty state no longer reused the cart message; it now shows `shop.orders.empty` (orders-specific copy in ca / es / en).
+
+## [0.1.104] - 2026-05-04
+
+### Added
+
+- **Admin shop settings:** Short one-line subtitles on collapse headers for Home, Custom solutions, and Admin list columns; “List defaults” and “Closed prices” keep their existing help lines.
+
+## [0.1.103] - 2026-05-04
+
+### Changed
+
+- **Admin shop settings:** Removed the long collapse subtitle under “Home · automatic highlights” / “Inicio · destacados automáticos”; in-section copy (limits hint, field labels) is unchanged.
+
+## [0.1.102] - 2026-05-04
+
+### Changed
+
+- **Admin shop settings:** Removed the long subtitle under “Admin list columns” / “Columnas de listas del admin”; per-table hints inside the section remain.
+
 ## [0.1.99] - 2026-05-03
 
 ### Removed
@@ -66,6 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.86] - 2026-05-03
 
 ### Fixed
+
+- **PayPal "normativas internacionales" on retry:** `invoice_id` was built from the shop order ID only (`ORD-{order_id}`), so every failed attempt reused the same value. PayPal's compliance engine blocks duplicate `invoice_id` across multiple orders and returns a compliance-violation decline. Fixed by including the payment ID: `ORD-{order_id}-PAY-{payment_id}`, making each attempt unique.
 
 - **Stripe not loading:** `.env` had `STRIPE_PUBLISHABLE_KEY`/`STRIPE_SECRET_KEY` but `config/services.php` reads `STRIPE_KEY`/`STRIPE_SECRET`; renamed the variables so `StripeCredentials::areConfigured()` returns `true` and Stripe Checkout sessions can be created.
 - **Stripe excluded from checkout:** `PAYMENTS_CHECKOUT_METHODS` was set to `paypal` only; changed to `card,paypal` so the Stripe (card) option appears in the payment selector.

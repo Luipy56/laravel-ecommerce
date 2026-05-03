@@ -202,13 +202,14 @@ export default function CheckoutPage() {
         return;
       }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
-        setActiveCheckout({
-          orderId: d.id,
-          paypal: {
-            client_id: c.client_id,
-            paypal_order_id: c.paypal_order_id,
-            payment_id: c.payment_id,
-            paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
+        navigate('/orders/' + d.id, {
+          state: {
+            paypalInlineCheckout: {
+              client_id: c.client_id,
+              paypal_order_id: c.paypal_order_id,
+              payment_id: c.payment_id,
+              paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
+            },
           },
         });
         return;

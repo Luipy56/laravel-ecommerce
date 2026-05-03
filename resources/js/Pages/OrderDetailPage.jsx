@@ -101,6 +101,22 @@ export default function OrderDetailPage() {
     navigate(location.pathname, { replace: true, state: {} });
   }, [location.state, location.pathname, navigate, t]);
 
+  // Handoff from CheckoutPage when PayPal is selected: render the same inline buttons block here.
+  useEffect(() => {
+    const inline = location.state?.paypalInlineCheckout;
+    if (!inline) return;
+    setInlineCheckout({
+      orderId: Number(id),
+      paypal: {
+        client_id: inline.client_id,
+        paypal_order_id: inline.paypal_order_id,
+        payment_id: inline.payment_id,
+        paypal_mode: inline.paypal_mode === 'live' ? 'live' : 'sandbox',
+      },
+    });
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state, location.pathname, navigate, id]);
+
   useEffect(() => {
     if (!order?.payment_methods_available) return;
     const m = order.payment_methods_available;

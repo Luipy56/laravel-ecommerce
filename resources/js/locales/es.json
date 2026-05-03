@@ -729,7 +729,7 @@
   "admin.settings.period_week": "Última semana",
   "admin.settings.period_month": "Último mes",
   "admin.settings.period_year": "Último año",
-  "admin.settings.period_all": "Todo el tiempo",
+  "admin.settings.period_all": "Todos los tiempos",
   "admin.orders.filter_period": "Período",
   "admin.personalized_solutions.filter_period": "Período",
   "admin.settings.recalculate_trending": "Recalcular Destacados",

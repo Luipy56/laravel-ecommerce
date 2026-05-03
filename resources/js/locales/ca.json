@@ -729,7 +729,7 @@
   "admin.settings.period_week": "Última setmana",
   "admin.settings.period_month": "Últim mes",
   "admin.settings.period_year": "Últim any",
-  "admin.settings.period_all": "Tot el temps",
+  "admin.settings.period_all": "Tots els temps",
   "admin.orders.filter_period": "Període",
   "admin.personalized_solutions.filter_period": "Període",
   "admin.settings.recalculate_trending": "Recalcular destacats",

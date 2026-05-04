@@ -37,7 +37,7 @@ export default function OrdersPage() {
     <div className="mx-auto w-full min-w-0 max-w-3xl">
       <PageTitle>{t('shop.orders')}</PageTitle>
       {orders.length === 0 ? (
-        <p>{t('shop.cart.empty')}</p>
+        <p>{t('shop.orders.empty')}</p>
       ) : (
         <ul className="space-y-4">
           {orders.map((o) => {
@@ -67,14 +67,24 @@ export default function OrdersPage() {
                         {t('common.detail')}
                       </Link>
                       {o.has_payment ? (
-                        <a
-                          href={`/api/v1/orders/${o.id}/invoice?locale=${i18n.language || 'ca'}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-ghost btn-sm w-full sm:w-auto"
-                        >
-                          {t('shop.invoice')}
-                        </a>
+                        <>
+                          <a
+                            href={`/api/v1/orders/${o.id}/delivery-note?locale=${i18n.language || 'ca'}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-ghost btn-sm w-full sm:w-auto"
+                          >
+                            {t('shop.delivery_note')}
+                          </a>
+                          <a
+                            href={`/api/v1/orders/${o.id}/invoice?locale=${i18n.language || 'ca'}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-ghost btn-sm w-full sm:w-auto"
+                          >
+                            {t('shop.invoice')}
+                          </a>
+                        </>
                       ) : null}
                     </div>
                   </div>

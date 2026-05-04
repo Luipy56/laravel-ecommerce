@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
@@ -8,17 +8,19 @@ import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQ
 export default function AdminFeaturesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible: isVisibleFeatureType } = useAdminIndexColumnVisibility('feature_types');
-  const { isVisible: isVisibleFeature } = useAdminIndexColumnVisibility('features');
+  const { orderedVisibleColumnIds: orderedFeatureTypeCols } = useAdminIndexColumnVisibility('feature_types');
+  const { orderedVisibleColumnIds: orderedFeatureCols } = useAdminIndexColumnVisibility('features');
 
   // Feature types (tipos de características) – first list
   const [featureTypesList, setFeatureTypesList] = useState([]);
   const [loadingTypes, setLoadingTypes] = useState(true);
-  const [metaTypes, setMetaTypes] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
-  const [pageTypes, setPageTypes] = useState(1);
+  const [loadingMoreTypes, setLoadingMoreTypes] = useState(false);
+  const [hasMoreTypes, setHasMoreTypes] = useState(false);
   const [searchTypes, setSearchTypes] = useState('');
   const [searchDebounceTypes, setSearchDebounceTypes] = useState('');
   const [activeFilterTypes, setActiveFilterTypes] = useState('');
+  const pageTypesRef = useRef(1);
+  const sentinelTypesRef = useRef(null);
 
   // Feature names for the "filter by type" dropdown in the second list
   const [featureNamesForSelect, setFeatureNamesForSelect] = useState([]);
@@ -26,12 +28,14 @@ export default function AdminFeaturesPage() {
   // Features (características) – second list
   const [features, setFeatures] = useState([]);
   const [loadingFeatures, setLoadingFeatures] = useState(true);
-  const [metaFeatures, setMetaFeatures] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
-  const [pageFeatures, setPageFeatures] = useState(1);
+  const [loadingMoreFeatures, setLoadingMoreFeatures] = useState(false);
+  const [hasMoreFeatures, setHasMoreFeatures] = useState(false);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [typeId, setTypeId] = useState('');
   const [activeFilter, setActiveFilter] = useState('');
+  const pageFeaturesRef = useRef(1);
+  const sentinelFeaturesRef = useRef(null);
 
   const fetchFeatureNamesForSelect = useCallback(async () => {
     try {
@@ -42,64 +46,70 @@ export default function AdminFeaturesPage() {
     }
   }, []);
 
-  const fetchFeatureTypesList = useCallback(async () => {
-    setLoadingTypes(true);
+  const fetchFeatureTypesList = useCallback(async (pageNum, reset = false) => {
+    if (reset) setLoadingTypes(true);
+    else setLoadingMoreTypes(true);
     try {
-      const params = { page: pageTypes, per_page: 20 };
+      const params = { page: pageNum, per_page: 20 };
       if (searchDebounceTypes) params.search = searchDebounceTypes;
       if (activeFilterTypes !== '') params.is_active = activeFilterTypes === '1';
       const { data } = await api.get('admin/feature-names', { params });
       if (data.success) {
-        setFeatureTypesList(data.data || []);
-        setMetaTypes(data.meta || metaTypes);
+        const newItems = data.data || [];
+        if (reset) setFeatureTypesList(newItems);
+        else setFeatureTypesList((prev) => [...prev, ...newItems]);
+        const meta = data.meta || {};
+        setHasMoreTypes((meta.current_page ?? pageNum) < (meta.last_page ?? 1));
+        pageTypesRef.current = pageNum;
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      setFeatureTypesList([]);
+      if (reset) setFeatureTypesList([]);
     } finally {
-      setLoadingTypes(false);
+      if (reset) setLoadingTypes(false);
+      else setLoadingMoreTypes(false);
     }
-  }, [navigate, pageTypes, searchDebounceTypes, activeFilterTypes]);
+  }, [navigate, searchDebounceTypes, activeFilterTypes]);
 
-  const fetchFeatures = useCallback(async () => {
-    setLoadingFeatures(true);
+  const fetchFeatures = useCallback(async (pageNum, reset = false) => {
+    if (reset) setLoadingFeatures(true);
+    else setLoadingMoreFeatures(true);
     try {
-      const params = { page: pageFeatures, per_page: 20 };
+      const params = { page: pageNum, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
       if (typeId) params.feature_name_id = typeId;
       if (activeFilter !== '') params.is_active = activeFilter === '1';
       const { data } = await api.get('admin/features', { params });
       if (data.success) {
-        setFeatures(data.data || []);
-        setMetaFeatures(data.meta || metaFeatures);
+        const newItems = data.data || [];
+        if (reset) setFeatures(newItems);
+        else setFeatures((prev) => [...prev, ...newItems]);
+        const meta = data.meta || {};
+        setHasMoreFeatures((meta.current_page ?? pageNum) < (meta.last_page ?? 1));
+        pageFeaturesRef.current = pageNum;
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      setFeatures([]);
+      if (reset) setFeatures([]);
     } finally {
-      setLoadingFeatures(false);
+      if (reset) setLoadingFeatures(false);
+      else setLoadingMoreFeatures(false);
     }
-  }, [navigate, pageFeatures, searchDebounce, typeId, activeFilter]);
+  }, [navigate, searchDebounce, typeId, activeFilter]);
 
   useEffect(() => {
     fetchFeatureNamesForSelect();
   }, [fetchFeatureNamesForSelect]);
 
   useEffect(() => {
-    fetchFeatureTypesList();
+    pageTypesRef.current = 1;
+    fetchFeatureTypesList(1, true);
   }, [fetchFeatureTypesList]);
 
   useEffect(() => {
-    fetchFeatures();
+    pageFeaturesRef.current = 1;
+    fetchFeatures(1, true);
   }, [fetchFeatures]);
-
-  useEffect(() => {
-    setPageTypes(1);
-  }, [searchDebounceTypes, activeFilterTypes]);
-
-  useEffect(() => {
-    setPageFeatures(1);
-  }, [searchDebounce, typeId, activeFilter]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounceTypes(searchTypes.trim()), 300);
@@ -110,6 +120,142 @@ export default function AdminFeaturesPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    if (!hasMoreTypes) return;
+    const el = sentinelTypesRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (!hasMoreTypes || loadingMoreTypes || loadingTypes) return;
+        const next = pageTypesRef.current + 1;
+        pageTypesRef.current = next;
+        fetchFeatureTypesList(next, false);
+      },
+      { rootMargin: '120px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMoreTypes, loadingMoreTypes, loadingTypes, fetchFeatureTypesList]);
+
+  useEffect(() => {
+    if (!hasMoreFeatures) return;
+    const el = sentinelFeaturesRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (!hasMoreFeatures || loadingMoreFeatures || loadingFeatures) return;
+        const next = pageFeaturesRef.current + 1;
+        pageFeaturesRef.current = next;
+        fetchFeatures(next, false);
+      },
+      { rootMargin: '120px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMoreFeatures, loadingMoreFeatures, loadingFeatures, fetchFeatures]);
+
+  const featureTypeHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'name':
+        return <th key={colId}>{t('admin.features.type')}</th>;
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const featureTypeBodyCell = (colId, n) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {n.id}
+          </td>
+        );
+      case 'name':
+        return <td key={colId}>{n.name}</td>;
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {n.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const featureHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'feature_name_id':
+        return (
+          <th key={colId} className="text-end tabular-nums">
+            {t('admin.features.feature_name_id')}
+          </th>
+        );
+      case 'feature_name':
+        return <th key={colId}>{t('admin.features.type')}</th>;
+      case 'value':
+        return <th key={colId}>{t('admin.features.value')}</th>;
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const featureBodyCell = (colId, f) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {f.id}
+          </td>
+        );
+      case 'feature_name_id':
+        return (
+          <td key={colId} className="text-end tabular-nums">
+            {f.feature_name_id ?? ''}
+          </td>
+        );
+      case 'feature_name':
+        return <td key={colId}>{f.feature_name}</td>;
+      case 'value':
+        return <td key={colId}>{f.value}</td>;
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {f.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-10">
@@ -161,10 +307,7 @@ export default function AdminFeaturesPage() {
             <div className="overflow-x-auto">
               <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
                 <thead>
-                  <tr>
-                    {isVisibleFeatureType('name') ? <th>{t('admin.features.type')}</th> : null}
-                    {isVisibleFeatureType('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                  </tr>
+                  <tr>{orderedFeatureTypeCols.map((colId) => featureTypeHeaderCell(colId))}</tr>
                 </thead>
                 <tbody>
                   {featureTypesList.map((n) => (
@@ -181,8 +324,7 @@ export default function AdminFeaturesPage() {
                         }
                       }}
                     >
-                      {isVisibleFeatureType('name') ? <td>{n.name}</td> : null}
-                      {isVisibleFeatureType('is_active') ? <td className="text-center">{n.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                      {orderedFeatureTypeCols.map((colId) => featureTypeBodyCell(colId, n))}
                     </tr>
                   ))}
                 </tbody>
@@ -190,29 +332,9 @@ export default function AdminFeaturesPage() {
             </div>
           )}
         </div>
-        {metaTypes.last_page > 1 && (
-          <div className="join flex justify-center">
-            <button
-              type="button"
-              className="btn join-item btn-sm bg-base-100 border-base-300"
-              disabled={pageTypes <= 1}
-              onClick={() => setPageTypes((p) => Math.max(1, p - 1))}
-            >
-              {t('shop.pagination.prev')}
-            </button>
-            <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
-              {t('shop.pagination.page')} {pageTypes} {t('shop.pagination.of')} {metaTypes.last_page}
-            </span>
-            <button
-              type="button"
-              className="btn join-item btn-sm bg-base-100 border-base-300"
-              disabled={pageTypes >= metaTypes.last_page}
-              onClick={() => setPageTypes((p) => Math.min(metaTypes.last_page, p + 1))}
-            >
-              {t('shop.pagination.next')}
-            </button>
-          </div>
-        )}
+        <div ref={sentinelTypesRef} className="py-2 flex justify-center" aria-hidden="true">
+          {loadingMoreTypes && <span className="loading loading-spinner loading-md" />}
+        </div>
       </section>
 
       {/* Section 2: Características (valores) */}
@@ -277,11 +399,7 @@ export default function AdminFeaturesPage() {
             <div className="overflow-x-auto">
               <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
                 <thead>
-                  <tr>
-                    {isVisibleFeature('feature_name') ? <th>{t('admin.features.type')}</th> : null}
-                    {isVisibleFeature('value') ? <th>{t('admin.features.value')}</th> : null}
-                    {isVisibleFeature('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                  </tr>
+                  <tr>{orderedFeatureCols.map((colId) => featureHeaderCell(colId))}</tr>
                 </thead>
                 <tbody>
                   {features.map((f) => (
@@ -298,9 +416,7 @@ export default function AdminFeaturesPage() {
                         }
                       }}
                     >
-                      {isVisibleFeature('feature_name') ? <td>{f.feature_name}</td> : null}
-                      {isVisibleFeature('value') ? <td>{f.value}</td> : null}
-                      {isVisibleFeature('is_active') ? <td className="text-center">{f.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                      {orderedFeatureCols.map((colId) => featureBodyCell(colId, f))}
                     </tr>
                   ))}
                 </tbody>
@@ -308,29 +424,9 @@ export default function AdminFeaturesPage() {
             </div>
           )}
         </div>
-        {metaFeatures.last_page > 1 && (
-          <div className="join flex justify-center">
-            <button
-              type="button"
-              className="btn join-item btn-sm bg-base-100 border-base-300"
-              disabled={pageFeatures <= 1}
-              onClick={() => setPageFeatures((p) => Math.max(1, p - 1))}
-            >
-              {t('shop.pagination.prev')}
-            </button>
-            <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
-              {t('shop.pagination.page')} {pageFeatures} {t('shop.pagination.of')} {metaFeatures.last_page}
-            </span>
-            <button
-              type="button"
-              className="btn join-item btn-sm bg-base-100 border-base-300"
-              disabled={pageFeatures >= metaFeatures.last_page}
-              onClick={() => setPageFeatures((p) => Math.min(metaFeatures.last_page, p + 1))}
-            >
-              {t('shop.pagination.next')}
-            </button>
-          </div>
-        )}
+        <div ref={sentinelFeaturesRef} className="py-2 flex justify-center" aria-hidden="true">
+          {loadingMoreFeatures && <span className="loading loading-spinner loading-md" />}
+        </div>
       </section>
     </div>
   );

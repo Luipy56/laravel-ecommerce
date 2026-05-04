@@ -1,19 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
-import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
 
 const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 'completed'];
 
 function getStatusBadgeClass(status) {
   switch (status) {
-    case 'pending_review': return 'badge-warning';
-    case 'reviewed': return 'badge-info';
-    case 'client_contacted': return 'badge-success';
-    case 'rejected': return 'badge-error';
-    case 'completed': return 'badge-success';
+    case 'pending_review': return 'badge-outline badge-warning';
+    case 'reviewed': return 'badge-outline badge-info';
+    case 'client_contacted': return 'badge-outline badge-success';
+    case 'rejected': return 'badge-outline badge-error';
+    case 'completed': return 'badge-outline badge-success';
     default: return 'badge-ghost';
   }
 }
@@ -21,48 +21,163 @@ function getStatusBadgeClass(status) {
 export default function AdminPersonalizedSolutionsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('personalized_solutions');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('personalized_solutions');
+  const { defaultPeriod, isLoading: periodLoading } = useAdminListDefaultPeriod();
+  const [periodInitialized, setPeriodInitialized] = useState(false);
   const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
-  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [activeFilter, setActiveFilter] = useState('1');
+  const [periodFilter, setPeriodFilter] = useState('week');
+  const pageRef = useRef(1);
+  const sentinelRef = useRef(null);
 
-  const fetchSolutions = useCallback(async () => {
-    setLoading(true);
+  useEffect(() => {
+    if (!periodLoading && !periodInitialized) {
+      setPeriodFilter(defaultPeriod);
+      setPeriodInitialized(true);
+    }
+  }, [periodLoading, periodInitialized, defaultPeriod]);
+
+  const fetchSolutions = useCallback(async (pageNum, reset = false) => {
+    if (reset) setLoading(true);
+    else setLoadingMore(true);
     try {
-      const params = { page, per_page: 20 };
+      const params = { page: pageNum, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
       if (statusFilter) params.status = statusFilter;
       if (activeFilter !== '') params.is_active = activeFilter === '1';
+      if (periodFilter && periodFilter !== 'all') params.period = periodFilter;
       const { data } = await api.get('admin/personalized-solutions', { params });
       if (data.success) {
-        setSolutions(data.data || []);
-        setMeta(data.meta || meta);
+        const newItems = data.data || [];
+        if (reset) setSolutions(newItems);
+        else setSolutions((prev) => [...prev, ...newItems]);
+        const meta = data.meta || {};
+        setHasMore((meta.current_page ?? pageNum) < (meta.last_page ?? 1));
+        pageRef.current = pageNum;
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      setSolutions([]);
+      if (reset) setSolutions([]);
     } finally {
-      setLoading(false);
+      if (reset) setLoading(false);
+      else setLoadingMore(false);
     }
-  }, [navigate, page, searchDebounce, statusFilter, activeFilter]);
+  }, [navigate, searchDebounce, statusFilter, activeFilter, periodFilter]);
 
   useEffect(() => {
-    fetchSolutions();
-  }, [fetchSolutions]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [searchDebounce, statusFilter, activeFilter]);
+    if (!periodInitialized) return;
+    pageRef.current = 1;
+    fetchSolutions(1, true);
+  }, [fetchSolutions, periodInitialized]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (!hasMore || loadingMore || loading) return;
+        const next = pageRef.current + 1;
+        pageRef.current = next;
+        fetchSolutions(next, false);
+      },
+      { rootMargin: '120px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, loadingMore, loading, fetchSolutions]);
+
+  const psHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'email':
+        return <th key={colId}>{t('admin.personalized_solutions.email')}</th>;
+      case 'phone':
+        return <th key={colId}>{t('admin.personalized_solutions.phone')}</th>;
+      case 'problem_description':
+        return <th key={colId}>{t('admin.personalized_solutions.problem_description')}</th>;
+      case 'status':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.personalized_solutions.status')}
+          </th>
+        );
+      case 'created_at':
+        return <th key={colId} className="text-end">{t('admin.personalized_solutions.created_at')}</th>;
+      case 'client_login_email':
+        return <th key={colId}>{t('admin.personalized_solutions.client_login_email')}</th>;
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const psBodyCell = (colId, s) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {s.id}
+          </td>
+        );
+      case 'email':
+        return <td key={colId}>{s.email ?? ''}</td>;
+      case 'phone':
+        return <td key={colId}>{s.phone ?? ''}</td>;
+      case 'problem_description':
+        return (
+          <td key={colId} className="max-w-[200px] truncate">
+            {s.problem_description ?? ''}
+          </td>
+        );
+      case 'status':
+        return (
+          <td key={colId} className="text-center">
+            <span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>
+              {t(`admin.personalized_solutions.status_${s.status}`)}
+            </span>
+          </td>
+        );
+      case 'created_at':
+        return (
+          <td key={colId} className="text-end">
+            {s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}
+          </td>
+        );
+      case 'client_login_email':
+        return <td key={colId}>{s.client_login_email ?? ''}</td>;
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {s.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -104,6 +219,20 @@ export default function AdminPersonalizedSolutionsPage() {
             <option value="0">{t('common.no')}</option>
           </select>
         </label>
+        <label className="flex items-center gap-2 shrink-0">
+          <span className="text-sm text-base-content/70 whitespace-nowrap">{t('admin.personalized_solutions.filter_period')}</span>
+          <select
+            className="select select-bordered select-sm sm:select-md w-full sm:w-44"
+            value={periodFilter}
+            onChange={(e) => setPeriodFilter(e.target.value)}
+            aria-label={t('admin.personalized_solutions.filter_period')}
+          >
+            <option value="week">{t('admin.settings.period_week')}</option>
+            <option value="month">{t('admin.settings.period_month')}</option>
+            <option value="year">{t('admin.settings.period_year')}</option>
+            <option value="all">{t('admin.settings.period_all')}</option>
+          </select>
+        </label>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
@@ -119,14 +248,7 @@ export default function AdminPersonalizedSolutionsPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('email') ? <th>{t('admin.personalized_solutions.email')}</th> : null}
-                  {isVisible('phone') ? <th>{t('admin.personalized_solutions.phone')}</th> : null}
-                  {isVisible('problem_description') ? <th>{t('admin.personalized_solutions.problem_description')}</th> : null}
-                  {isVisible('status') ? <th className="text-center">{t('admin.personalized_solutions.status')}</th> : null}
-                  {isVisible('created_at') ? <th className="text-end">{t('admin.personalized_solutions.created_at')}</th> : null}
-                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => psHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {solutions.map((s) => (
@@ -143,14 +265,7 @@ export default function AdminPersonalizedSolutionsPage() {
                       }
                     }}
                   >
-                    {isVisible('email') ? <td>{s.email ?? ''}</td> : null}
-                    {isVisible('phone') ? <td>{s.phone ?? ''}</td> : null}
-                    {isVisible('problem_description') ? <td className="max-w-[200px] truncate">{s.problem_description ?? ''}</td> : null}
-                    {isVisible('status') ? (
-                      <td className="text-center"><span className={`badge badge-sm ${getStatusBadgeClass(s.status)}`}>{t(`admin.personalized_solutions.status_${s.status}`)}</span></td>
-                    ) : null}
-                    {isVisible('created_at') ? <td className="text-end">{s.created_at ? new Date(s.created_at).toLocaleDateString() : ''}</td> : null}
-                    {isVisible('is_active') ? <td className="text-center">{s.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                    {orderedVisibleColumnIds.map((colId) => psBodyCell(colId, s))}
                   </tr>
                 ))}
               </tbody>
@@ -159,29 +274,9 @@ export default function AdminPersonalizedSolutionsPage() {
         )}
       </div>
 
-      {meta.last_page > 1 && (
-        <div className="join flex justify-center">
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            {t('shop.pagination.prev')}
-          </button>
-          <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
-            {t('shop.pagination.page')} {page} {t('shop.pagination.of')} {meta.last_page}
-          </span>
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page >= meta.last_page}
-            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-          >
-            {t('shop.pagination.next')}
-          </button>
-        </div>
-      )}
+      <div ref={sentinelRef} className="py-2 flex justify-center" aria-hidden="true">
+        {loadingMore && <span className="loading loading-spinner loading-md" />}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
@@ -15,44 +15,107 @@ function productsLabel(products) {
 export default function AdminVariantGroupsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('variant_groups');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('variant_groups');
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
-  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
+  const pageRef = useRef(1);
+  const sentinelRef = useRef(null);
 
-  const fetchGroups = useCallback(async () => {
-    setLoading(true);
+  const fetchGroups = useCallback(async (pageNum, reset = false) => {
+    if (reset) setLoading(true);
+    else setLoadingMore(true);
     try {
-      const params = { page, per_page: 20 };
+      const params = { page: pageNum, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
       const { data } = await api.get('admin/variant-groups', { params });
       if (data.success) {
-        setGroups(data.data || []);
-        setMeta(data.meta || meta);
+        const newItems = data.data || [];
+        if (reset) setGroups(newItems);
+        else setGroups((prev) => [...prev, ...newItems]);
+        const meta = data.meta || {};
+        setHasMore((meta.current_page ?? pageNum) < (meta.last_page ?? 1));
+        pageRef.current = pageNum;
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      setGroups([]);
+      if (reset) setGroups([]);
     } finally {
-      setLoading(false);
+      if (reset) setLoading(false);
+      else setLoadingMore(false);
     }
-  }, [navigate, page, searchDebounce]);
+  }, [navigate, searchDebounce]);
 
   useEffect(() => {
-    fetchGroups();
+    pageRef.current = 1;
+    fetchGroups(1, true);
   }, [fetchGroups]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [searchDebounce]);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (!hasMore || loadingMore || loading) return;
+        const next = pageRef.current + 1;
+        pageRef.current = next;
+        fetchGroups(next, false);
+      },
+      { rootMargin: '120px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, loadingMore, loading, fetchGroups]);
+
+  const variantGroupHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'group_label':
+        return <th key={colId}>{t('admin.variant_groups.group_label')}</th>;
+      case 'products_in_group':
+        return <th key={colId}>{t('admin.variant_groups.products_in_group')}</th>;
+      default:
+        return null;
+    }
+  };
+
+  const variantGroupBodyCell = (colId, g) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {g.id}
+          </td>
+        );
+      case 'group_label':
+        return <td key={colId}>{g.name || `#${g.id}`}</td>;
+      case 'products_in_group':
+        return (
+          <td key={colId}>
+            {g.products_count === 0
+              ? ''
+              : productsLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -87,10 +150,7 @@ export default function AdminVariantGroupsPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('group_label') ? <th>{t('admin.variant_groups.group_label')}</th> : null}
-                  {isVisible('products_in_group') ? <th>{t('admin.variant_groups.products_in_group')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => variantGroupHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {groups.map((g) => (
@@ -107,14 +167,7 @@ export default function AdminVariantGroupsPage() {
                       }
                     }}
                   >
-                    {isVisible('group_label') ? <td>{g.name || `#${g.id}`}</td> : null}
-                    {isVisible('products_in_group') ? (
-                      <td>
-                        {g.products_count === 0
-                          ? ''
-                          : productsLabel(g.products) || `${g.products_count} ${t('admin.products.name').toLowerCase()}`}
-                      </td>
-                    ) : null}
+                    {orderedVisibleColumnIds.map((colId) => variantGroupBodyCell(colId, g))}
                   </tr>
                 ))}
               </tbody>
@@ -123,29 +176,9 @@ export default function AdminVariantGroupsPage() {
         )}
       </div>
 
-      {meta.last_page > 1 && (
-        <div className="join flex justify-center">
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            {t('shop.pagination.prev')}
-          </button>
-          <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
-            {t('shop.pagination.page')} {page} {t('shop.pagination.of')} {meta.last_page}
-          </span>
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page >= meta.last_page}
-            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-          >
-            {t('shop.pagination.next')}
-          </button>
-        </div>
-      )}
+      <div ref={sentinelRef} className="py-2 flex justify-center" aria-hidden="true">
+        {loadingMore && <span className="loading loading-spinner loading-md" />}
+      </div>
     </div>
   );
 }

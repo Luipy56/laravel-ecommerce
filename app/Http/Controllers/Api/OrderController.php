@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\Payment;
+use App\Models\ShopSetting;
+use App\Support\InstallationAutoPricing;
 use App\Services\Payments\PaymentCheckoutService;
 use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
@@ -29,9 +31,10 @@ class OrderController extends Controller
 
         $cart->loadMissing('lines');
         $merchandiseSubtotal = $cart->lines_subtotal;
+        $installPricing = InstallationAutoPricing::fromMerged(ShopSetting::allMerged());
         $awaitingInstallationQuote = $cart->installation_requested
-            && $merchandiseSubtotal > Order::INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR;
-        $automaticInstallationFee = Order::automaticInstallationFeeFromMerchandiseSubtotal($merchandiseSubtotal);
+            && $installPricing->quoteRequired($merchandiseSubtotal);
+        $automaticInstallationFee = $installPricing->automaticFee($merchandiseSubtotal);
 
         $checkoutMethodIn = implode(',', PaymentCheckoutService::checkoutMethodKeysFromConfig());
 
@@ -50,18 +53,18 @@ class OrderController extends Controller
             'shipping_street' => ['required', 'string', 'max:255'],
             'shipping_city' => ['required', 'string', 'max:100'],
             'shipping_province' => ['nullable', 'string', 'max:100'],
-            'shipping_postal_code' => ['required', 'string', 'max:20'],
+            'shipping_postal_code' => ['required', 'string', 'regex:/^\d{1,20}$/'],
             'shipping_note' => ['nullable', 'string'],
             'installation_street' => ['nullable', 'string', 'max:255'],
             'installation_city' => ['nullable', 'string', 'max:100'],
-            'installation_postal_code' => ['nullable', 'string', 'max:20'],
+            'installation_postal_code' => ['nullable', 'string', 'regex:/^\d{0,20}$/'],
             'installation_note' => ['nullable', 'string'],
         ];
 
         if ($cart->installation_requested) {
             $rules['installation_street'] = ['required', 'string', 'max:255'];
             $rules['installation_city'] = ['required', 'string', 'max:100'];
-            $rules['installation_postal_code'] = ['required', 'string', 'max:20'];
+            $rules['installation_postal_code'] = ['required', 'string', 'regex:/^\d{1,20}$/'];
         }
 
         $validated = $request->validate($rules);
@@ -92,16 +95,15 @@ class OrderController extends Controller
                 }
             }
 
+            $needsAwaitingPayment = $resolvedPaymentMethod === Payment::METHOD_PAYPAL;
             $initialStatus = $awaitingInstallationQuote
                 ? Order::STATUS_AWAITING_INSTALLATION_PRICE
-                : ($resolvedPaymentMethod === Payment::METHOD_PAYPAL
-                    ? Order::STATUS_AWAITING_PAYMENT
-                    : Order::STATUS_PENDING);
+                : ($needsAwaitingPayment ? Order::STATUS_AWAITING_PAYMENT : Order::STATUS_PENDING);
             $cart->update([
                 'kind' => Order::KIND_ORDER,
                 'status' => $initialStatus,
                 'order_date' => now(),
-                'shipping_price' => Order::SHIPPING_FLAT_EUR,
+                'shipping_price' => ShopSetting::shippingFlatEur(),
                 'installation_status' => $installationStatus,
                 'installation_price' => $installationPrice,
             ]);
@@ -207,7 +209,9 @@ class OrderController extends Controller
                 'installation_status' => $cart->installation_status,
                 'installation_price' => $cart->installation_price !== null ? (float) $cart->installation_price : null,
                 'lines_subtotal' => $cart->lines_subtotal,
-                'shipping_flat_eur' => Order::SHIPPING_FLAT_EUR,
+                'shipping_flat_eur' => $cart->shipping_price !== null
+                    ? (float) $cart->shipping_price
+                    : ShopSetting::shippingFlatEur(),
                 'grand_total' => $cart->grand_total,
                 'has_payment' => $cart->hasSuccessfulPayment(),
                 'payment_checkout' => $paymentCheckout,
@@ -350,7 +354,9 @@ class OrderController extends Controller
                 'installation_status' => $o->installation_status,
                 'installation_price' => $o->installation_price !== null ? (float) $o->installation_price : null,
                 'lines_subtotal' => $o->lines_subtotal,
-                'shipping_flat_eur' => Order::SHIPPING_FLAT_EUR,
+                'shipping_flat_eur' => $o->shipping_price !== null
+                    ? (float) $o->shipping_price
+                    : ShopSetting::shippingFlatEur(),
                 'grand_total' => $o->grand_total,
                 'has_payment' => $o->hasSuccessfulPayment(),
                 'can_pay' => $o->clientMayPay(),
@@ -403,7 +409,9 @@ class OrderController extends Controller
                 'lines' => $lines,
                 'addresses' => $order->addresses,
                 'lines_subtotal' => $order->lines_subtotal,
-                'shipping_flat_eur' => Order::SHIPPING_FLAT_EUR,
+                'shipping_flat_eur' => $order->shipping_price !== null
+                    ? (float) $order->shipping_price
+                    : ShopSetting::shippingFlatEur(),
                 'grand_total' => $order->grand_total,
                 'has_payment' => $order->hasSuccessfulPayment(),
                 'can_pay' => $order->clientMayPay(),
@@ -447,13 +455,41 @@ class OrderController extends Controller
             $locale = config('app.locale');
         }
         app()->setLocale($locale);
-        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
+        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses', 'payments']);
 
         $html = view('pdf.invoice', ['order' => $order])->render();
 
         return response($html, 200, [
             'Content-Type' => 'text/html',
             'Content-Disposition' => 'inline; filename="invoice-'.$order->id.'.html"',
+        ]);
+    }
+
+    public function deliveryNote(Request $request, Order $order): Response
+    {
+        if ($order->client_id !== $request->user()->id || $order->kind !== Order::KIND_ORDER) {
+            abort(404);
+        }
+        if (! $order->hasSuccessfulPayment()) {
+            abort(403);
+        }
+        $allowed = config('app.available_locales', ['ca', 'es', 'en']);
+        $locale = $request->query('locale');
+        if (! in_array($locale, $allowed, true)) {
+            $pref = $request->header('Accept-Language', '');
+            $locale = (preg_match('/^(ca|es|en)([-_]|$)/i', $pref, $m) ? strtolower($m[1]) : null) ?? config('app.locale');
+        }
+        if (! in_array($locale, $allowed, true)) {
+            $locale = config('app.locale');
+        }
+        app()->setLocale($locale);
+        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
+
+        $html = view('pdf.delivery_note', ['order' => $order])->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html',
+            'Content-Disposition' => 'inline; filename="delivery-note-'.$order->id.'.html"',
         ]);
     }
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
@@ -9,15 +9,19 @@ import PageTitle from '../components/PageTitle';
 
 const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 0 };
 
+const fmt = new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+
 /**
  * Query string for filters. When categoryInPath is true, category is only in the URL path (/categories/:id/products), not repeated here.
  */
-function buildSearchParams({ selectedCategoryId, featureIds, search, categoryInPath = false, packsOnly = false }) {
+function buildSearchParams({ selectedCategoryId, featureIds, search, categoryInPath = false, packsOnly = false, priceMin = null, priceMax = null }) {
   const next = new URLSearchParams();
   if (search) next.set('search', search);
   if (!categoryInPath && selectedCategoryId) next.set('category_id', String(selectedCategoryId));
   featureIds.forEach((id) => next.append('feature_id', id));
   if (packsOnly) next.set('packs_only', '1');
+  if (priceMin !== null) next.set('price_min', String(priceMin));
+  if (priceMax !== null) next.set('price_max', String(priceMax));
   return next;
 }
 
@@ -61,6 +65,120 @@ function mapCatalogFromResponse(r) {
   return { items, pagination };
 }
 
+/* Range inputs are fully transparent — only used for drag interaction.
+   Visual handles are React-rendered circles positioned at minPct / maxPct. */
+const THUMB_CLS =
+  'absolute inset-x-0 w-full h-full appearance-none bg-transparent ' +
+  'pointer-events-none ' +
+  '[&::-webkit-slider-thumb]:pointer-events-auto ' +
+  '[&::-webkit-slider-thumb]:appearance-none ' +
+  '[&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:h-[18px] ' +
+  '[&::-webkit-slider-thumb]:opacity-0 ' +
+  '[&::-webkit-slider-runnable-track]:opacity-0 ' +
+  '[&::-moz-range-thumb]:pointer-events-auto ' +
+  '[&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:h-[18px] ' +
+  '[&::-moz-range-thumb]:opacity-0 ' +
+  '[&::-moz-range-track]:opacity-0';
+
+/** Dual-handle range slider for price filtering. */
+function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }) {
+  const { t } = useTranslation();
+  const [localMin, setLocalMin] = useState(priceMin ?? globalMin);
+  const [localMax, setLocalMax] = useState(priceMax ?? globalMax);
+  const debounceRef = useRef(null);
+
+  // Sync local state if URL params change externally
+  useEffect(() => { setLocalMin(priceMin ?? globalMin); }, [priceMin, globalMin]);
+  useEffect(() => { setLocalMax(priceMax ?? globalMax); }, [priceMax, globalMax]);
+
+  const span = globalMax - globalMin || 1;
+  const minPct = ((localMin - globalMin) / span) * 100;
+  const maxPct = ((localMax - globalMin) / span) * 100;
+
+  const commit = useCallback((min, max) => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => onChange(min, max), 350);
+  }, [onChange]);
+
+  const handleMinChange = (e) => {
+    const v = Math.min(Number(e.target.value), localMax - 1);
+    setLocalMin(v);
+    commit(v, localMax);
+  };
+
+  const handleMaxChange = (e) => {
+    const v = Math.max(Number(e.target.value), localMin + 1);
+    setLocalMax(v);
+    commit(localMin, v);
+  };
+
+  const isFiltered = (priceMin !== null && priceMin > globalMin) || (priceMax !== null && priceMax < globalMax);
+
+  return (
+    <div className="bg-base-100 rounded-box border border-base-300 p-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-sm">{t('shop.filters.price')}</h2>
+        {isFiltered && (
+          <button
+            type="button"
+            className="text-xs text-primary hover:underline"
+            onClick={() => { setLocalMin(globalMin); setLocalMax(globalMax); onChange(null, null); }}
+          >
+            {t('shop.filters.price_any')}
+          </button>
+        )}
+      </div>
+
+      {/* Price labels */}
+      <div className="flex items-center justify-between text-sm font-medium tabular-nums">
+        <span>{fmt.format(localMin)}</span>
+        <span>{fmt.format(localMax)}</span>
+      </div>
+
+      {/* Dual-range track */}
+      <div className="relative h-5 flex items-center">
+        {/* Background track */}
+        <div className="absolute inset-x-0 h-1.5 rounded-full bg-base-300" />
+        {/* Filled track between handles */}
+        <div
+          className="absolute h-1.5 bg-primary"
+          style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
+        />
+        {/* Visual handle circles — sit at the ends of the orange line */}
+        <div
+          className="absolute w-[18px] h-[18px] rounded-full bg-primary border-[3px] border-base-100 shadow-md -translate-x-1/2 pointer-events-none z-10"
+          style={{ left: `${minPct}%` }}
+        />
+        <div
+          className="absolute w-[18px] h-[18px] rounded-full bg-primary border-[3px] border-base-100 shadow-md -translate-x-1/2 pointer-events-none z-10"
+          style={{ left: `${maxPct}%` }}
+        />
+        {/* Invisible range inputs handle all drag interaction */}
+        <input
+          type="range"
+          min={globalMin}
+          max={globalMax}
+          step={1}
+          value={localMin}
+          onChange={handleMinChange}
+          className={`${THUMB_CLS} ${minPct >= 95 ? 'z-[11]' : 'z-[3]'}`}
+          aria-label="Precio mínimo"
+        />
+        <input
+          type="range"
+          min={globalMin}
+          max={globalMax}
+          step={1}
+          value={localMax}
+          onChange={handleMaxChange}
+          className={`${THUMB_CLS} z-[4]`}
+          aria-label="Precio máximo"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function ProductListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -79,12 +197,14 @@ export default function ProductListPage() {
   const featureIds = searchParams.getAll('feature_id');
   const search = searchParams.get('search');
   const packsOnly = searchParams.get('packs_only') === '1';
+  const priceMinParam = searchParams.get('price_min') ? Number(searchParams.get('price_min')) : null;
+  const priceMaxParam = searchParams.get('price_max') ? Number(searchParams.get('price_max')) : null;
 
   const featureIdsKey = featureIds.join(',');
 
   const catalogQueryKey = useMemo(
-    () => ['products', 'catalog', selectedCategoryId ?? '', featureIdsKey, search ?? '', packsOnly ? '1' : '0'],
-    [selectedCategoryId, featureIdsKey, search, packsOnly]
+    () => ['products', 'catalog', selectedCategoryId ?? '', featureIdsKey, search ?? '', packsOnly ? '1' : '0', priceMinParam ?? '', priceMaxParam ?? ''],
+    [selectedCategoryId, featureIdsKey, search, packsOnly, priceMinParam, priceMaxParam]
   );
 
   const loadMoreSentinelRef = useRef(null);
@@ -105,6 +225,15 @@ export default function ProductListPage() {
     },
   });
 
+  const priceRangeQuery = useQuery({
+    queryKey: ['products', 'price-range'],
+    queryFn: async ({ signal }) => {
+      const r = await api.get('products/price-range', { signal });
+      return r.data.success ? r.data.data : { min: 0, max: 9999 };
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const catalogInfinite = useInfiniteQuery({
     queryKey: catalogQueryKey,
     initialPageParam: 1,
@@ -118,6 +247,8 @@ export default function ProductListPage() {
       if (selectedCategoryId) params.category_id = selectedCategoryId;
       if (featureIds.length) params.feature_ids = featureIds;
       if (search) params.search = search;
+      if (priceMinParam !== null) params.price_min = priceMinParam;
+      if (priceMaxParam !== null) params.price_max = priceMaxParam;
       const r = await api.get('products', { params, signal });
       return mapCatalogFromResponse(r);
     },
@@ -137,8 +268,8 @@ export default function ProductListPage() {
   }, [searchParams, setSearchParams]);
 
   const filterKey = useMemo(
-    () => `${selectedCategoryId ?? ''}|${featureIdsKey}|${search ?? ''}|${packsOnly ? '1' : '0'}`,
-    [selectedCategoryId, featureIdsKey, search, packsOnly]
+    () => `${selectedCategoryId ?? ''}|${featureIdsKey}|${search ?? ''}|${packsOnly ? '1' : '0'}|${priceMinParam ?? ''}|${priceMaxParam ?? ''}`,
+    [selectedCategoryId, featureIdsKey, search, packsOnly, priceMinParam, priceMaxParam]
   );
   const prevFilterKeyRef = useRef(null);
   useEffect(() => {
@@ -178,10 +309,12 @@ export default function ProductListPage() {
         search: updates.search ?? search ?? '',
         categoryInPath: isCategoryRoute,
         packsOnly: updates.packsOnly !== undefined ? updates.packsOnly : packsOnly,
+        priceMin: updates.priceMin !== undefined ? updates.priceMin : priceMinParam,
+        priceMax: updates.priceMax !== undefined ? updates.priceMax : priceMaxParam,
       });
       setSearchParams(next);
     },
-    [selectedCategoryId, featureIds, search, setSearchParams, isCategoryRoute, packsOnly]
+    [selectedCategoryId, featureIds, search, setSearchParams, isCategoryRoute, packsOnly, priceMinParam, priceMaxParam]
   );
 
   const handleAllCategories = useCallback(() => {
@@ -191,9 +324,11 @@ export default function ProductListPage() {
       search: search ?? '',
       categoryInPath: false,
       packsOnly,
+      priceMin: priceMinParam,
+      priceMax: priceMaxParam,
     });
     navigate('/products?' + next.toString());
-  }, [search, navigate, packsOnly]);
+  }, [search, navigate, packsOnly, priceMinParam, priceMaxParam]);
 
   const selectCategory = useCallback(
     (id) => {
@@ -204,10 +339,12 @@ export default function ProductListPage() {
         search: search ?? '',
         categoryInPath: true,
         packsOnly,
+        priceMin: priceMinParam,
+        priceMax: priceMaxParam,
       }).toString();
       navigate(`/categories/${sid}/products${qs ? `?${qs}` : ''}`);
     },
-    [featureIds, search, navigate, packsOnly]
+    [featureIds, search, navigate, packsOnly, priceMinParam, priceMaxParam]
   );
 
   const toggleFeature = useCallback(
@@ -219,6 +356,18 @@ export default function ProductListPage() {
       setFilters({ featureIds: next });
     },
     [featureIds, setFilters]
+  );
+
+  const handlePriceChange = useCallback(
+    (min, max) => {
+      const globalMin = priceRangeQuery.data?.min ?? 0;
+      const globalMax = priceRangeQuery.data?.max ?? 9999;
+      setFilters({
+        priceMin: min !== null && min > globalMin ? min : null,
+        priceMax: max !== null && max < globalMax ? max : null,
+      });
+    },
+    [setFilters, priceRangeQuery.data]
   );
 
   const catalogItems = useMemo(
@@ -241,23 +390,13 @@ export default function ProductListPage() {
     return Array.from(map.entries()).map(([name, list]) => ({ name, list }));
   }, [featuresList]);
 
+  const globalMin = priceRangeQuery.data?.min ?? 0;
+  const globalMax = priceRangeQuery.data?.max ?? 9999;
+  const showPriceSlider = !priceRangeQuery.isPending && globalMax > globalMin;
+
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <aside className="lg:w-64 shrink-0 space-y-6 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1">
-        <div className="bg-base-100 rounded-box border border-base-300 p-3">
-          <label className="flex items-center justify-between gap-3 cursor-pointer">
-            <span className="text-sm font-medium text-base-content">{t('shop.filters.packs_only')}</span>
-            <input
-              type="checkbox"
-              role="switch"
-              className="toggle toggle-primary toggle-sm shrink-0"
-              checked={packsOnly}
-              onChange={() => setFilters({ packsOnly: !packsOnly })}
-              aria-checked={packsOnly}
-              aria-label={t('shop.filters.packs_only')}
-            />
-          </label>
-        </div>
         <div>
           <h2 className="font-semibold mb-2">{t('shop.categories')}</h2>
           <ul className="menu bg-base-100 rounded-box border border-base-300">
@@ -283,6 +422,29 @@ export default function ProductListPage() {
             ))}
           </ul>
         </div>
+        <div className="bg-base-100 rounded-box border border-base-300 p-3">
+          <label className="flex items-center justify-between gap-3 cursor-pointer">
+            <span className="text-sm font-medium text-base-content">{t('shop.filters.packs_only')}</span>
+            <input
+              type="checkbox"
+              role="switch"
+              className="toggle toggle-primary toggle-sm shrink-0"
+              checked={packsOnly}
+              onChange={() => setFilters({ packsOnly: !packsOnly })}
+              aria-checked={packsOnly}
+              aria-label={t('shop.filters.packs_only')}
+            />
+          </label>
+        </div>
+        {showPriceSlider && (
+          <PriceRangeSlider
+            globalMin={globalMin}
+            globalMax={globalMax}
+            priceMin={priceMinParam}
+            priceMax={priceMaxParam}
+            onChange={handlePriceChange}
+          />
+        )}
         {featuresByGroup.length > 0 && (
           <div>
             <h2 className="font-semibold mb-2">{t('shop.filters.features')}</h2>

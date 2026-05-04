@@ -1,0 +1,97 @@
+# Production-oriented stack (build images, no bind-mounted source).
+# Usage:
+#   cp .env.example .env   # set APP_KEY, APP_ENV=production, APP_DEBUG=false, DB_*, etc.
+#   docker compose -f docker-compose.prod.yml build
+#   docker compose -f docker-compose.prod.yml up -d
+# Requires Docker Compose v2.17+ (additional_contexts for the nginx image).
+
+name: laravel-ecommerce-prod
+
+x-app-environment: &app-environment
+  WAIT_FOR_DB: "1"
+  TRUSTED_PROXIES: "*"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-laravel}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-laravel}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: production
+    image: ${APP_IMAGE_NAME:-laravel-ecommerce-app}:prod
+    restart: unless-stopped
+    environment: *app-environment
+    env_file:
+      - path: .env
+        required: true
+    volumes:
+      - storage_prod:/var/www/html/storage
+      - bootstrap_cache_prod:/var/www/html/bootstrap/cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile.prod
+      additional_contexts:
+        app: service:app
+    image: ${APP_IMAGE_NAME:-laravel-ecommerce-app}:nginx
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    depends_on:
+      - app
+
+  queue:
+    image: ${APP_IMAGE_NAME:-laravel-ecommerce-app}:prod
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    environment: *app-environment
+    env_file:
+      - path: .env
+        required: true
+    volumes:
+      - storage_prod:/var/www/html/storage
+      - bootstrap_cache_prod:/var/www/html/bootstrap/cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+  scheduler:
+    image: ${APP_IMAGE_NAME:-laravel-ecommerce-app}:prod
+    restart: unless-stopped
+    command: php artisan schedule:work
+    environment: *app-environment
+    env_file:
+      - path: .env
+        required: true
+    volumes:
+      - storage_prod:/var/www/html/storage
+      - bootstrap_cache_prod:/var/www/html/bootstrap/cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+volumes:
+  postgres_prod_data:
+  storage_prod:
+  bootstrap_cache_prod:

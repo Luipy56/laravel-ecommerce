@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { scrollWindowToTopOnFormError } from '../../lib/formScroll';
 import { adminProductPayloadSchema, parseWithZod } from '../../validation';
 
 const defaultProduct = {
@@ -139,6 +140,7 @@ export default function AdminProductForm({
     const parsed = parseWithZod(adminProductPayloadSchema, payload, t);
     if (!parsed.ok) {
       setClientError(parsed.firstError);
+      scrollWindowToTopOnFormError();
       return;
     }
     const toSubmit = { ...parsed.data };

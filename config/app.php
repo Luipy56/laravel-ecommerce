@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Serralleria Solidària'),
 
     /*
     |--------------------------------------------------------------------------
@@ -121,6 +121,16 @@ return [
     */
 
     'available_locales' => ['ca', 'es', 'en'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SPA redirects (email verification link lands on API then redirects here)
+    |--------------------------------------------------------------------------
+    */
+
+    'verify_email_redirect_path' => env('FRONTEND_VERIFY_REDIRECT', '/login'),
+
+    'frontend_reset_password_path' => env('FRONTEND_RESET_PASSWORD_PATH', '/reset-password'),
 
     /*
     |--------------------------------------------------------------------------

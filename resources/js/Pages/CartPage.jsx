@@ -55,10 +55,10 @@ function CartLine({ line, updateLine, removeLine, t }) {
           aria-label={t('shop.cart.include')}
         />
       </td>
-      <td className="align-middle">
+      <td className="align-middle max-w-[9rem] sm:max-w-none">
         <Link
           to={detailUrl}
-          className="flex items-center gap-3 no-underline text-base-content hover:text-primary transition-colors block"
+          className="flex items-center gap-3 no-underline text-base-content hover:text-primary transition-colors"
         >
           <figure className="mask mask-squircle w-16 h-16 shrink-0 bg-base-300 flex items-center justify-center overflow-hidden">
             <img
@@ -67,10 +67,10 @@ function CartLine({ line, updateLine, removeLine, t }) {
               className="w-full h-full object-cover"
             />
           </figure>
-          <div>
-            <p className="font-medium">{name}</p>
+          <div className="min-w-0">
+            <p className="font-medium overflow-hidden text-ellipsis whitespace-nowrap sm:whitespace-normal sm:overflow-visible">{name}</p>
             {features.length > 0 && (
-              <p className="text-sm text-base-content/70 mt-0.5">
+              <p className="text-sm text-base-content/70 mt-0.5 hidden sm:block">
                 {features.map((f) => `${f.name}: ${f.value}`).join(' · ')}
               </p>
             )}
@@ -86,29 +86,32 @@ function CartLine({ line, updateLine, removeLine, t }) {
             max={99}
             value={line.quantity}
             onChange={handleQuantityChange}
-            className="input input-bordered input-sm w-20 text-center"
+            className="input input-bordered input-sm w-16 text-center"
           />
         </div>
       </td>
-      <td className="align-middle text-center">
+      <td className="relative align-middle text-center">
         {isExtraKeysAvailable ? (
-          <div className="flex flex-col items-center gap-0.5">
-            <input
-              type="number"
-              min={0}
-              max={99}
-              value={extraKeysQty}
-              onChange={handleExtraKeysChange}
-              className="input input-bordered input-sm w-16 text-center"
-              aria-label={t('shop.cart.extra_keys')}
-            />
-            {extraKeyUnitPrice != null && (
-              <span className="text-xs text-base-content/70">{Number(extraKeyUnitPrice).toFixed(2)} €/u</span>
-            )}
+          <div className="absolute inset-0 flex items-center justify-center px-1 py-1">
+            {/* Inner box height = input only (price is position:absolute) so vertical centering anchors on the input */}
+            <div className="relative inline-block shrink-0">
+              <input
+                type="number"
+                min={0}
+                max={99}
+                value={extraKeysQty}
+                onChange={handleExtraKeysChange}
+                className="input input-bordered input-sm w-16 text-center block"
+                aria-label={t('shop.cart.extra_keys')}
+              />
+              {extraKeyUnitPrice != null && (
+                <span className="absolute left-1/2 top-full z-10 mt-0.5 -translate-x-1/2 whitespace-nowrap text-xs text-base-content/70">
+                  {Number(extraKeyUnitPrice).toFixed(2)} €/u
+                </span>
+              )}
+            </div>
           </div>
-        ) : (
-          ''
-        )}
+        ) : null}
       </td>
       <td className="align-middle text-center">
         <input

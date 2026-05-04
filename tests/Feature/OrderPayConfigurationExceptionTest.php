@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Exceptions\PaymentProviderNotConfiguredException;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderLine;
-use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -33,9 +33,10 @@ class OrderPayConfigurationExceptionTest extends TestCase
         $client = Client::query()->create([
             'type' => 'person',
             'identification' => null,
-            'login_email' => 'buyer_'.uniqid('', true).'@example.test',
+            'login_email' => 'buyer_'.uniqid('', true).'@ietf.org',
             'password' => bcrypt('password'),
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $category = ProductCategory::query()->create([

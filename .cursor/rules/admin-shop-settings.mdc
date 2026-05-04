@@ -1,6 +1,6 @@
 ---
 description: Shop settings key-value, automatic is_trending recalc, admin settings UI, public storefront flags
-globs: app/Models/ShopSetting.php,app/Services/RecalculateTrendingProducts.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,app/Support/AdminIndexColumns.php,config/admin_index_columns.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx,resources/js/config/adminIndexColumnsRegistry.js,resources/js/hooks/useAdminShopSettingsQuery.js
+globs: app/Models/ShopSetting.php,app/Support/InstallationAutoPricing.php,app/Services/RecalculateTrendingProducts.php,app/Services/TrendingStockRuleQueries.php,app/Services/HomeFeaturedProductIds.php,app/Http/Controllers/Api/AdminShopSettingsController.php,app/Http/Controllers/Api/ShopPublicSettingsController.php,app/Http/Controllers/Api/ProductController.php,app/Support/AdminIndexColumns.php,config/admin_index_columns.php,resources/js/Pages/admin/AdminShopSettingsPage.jsx,resources/js/components/admin/AdminSettingsCollapseSection.jsx,resources/js/config/adminIndexColumnsRegistry.js,resources/js/hooks/useAdminShopSettingsQuery.js
 alwaysApply: false
 ---
 
@@ -25,25 +25,37 @@ alwaysApply: false
 - **Blacklist** (when enabled for that rule): **`whereNotIn('id', …)`** on that rule’s query only; blacklisted products can still appear on the home if **`is_featured`** is manual.
 - Recalc flow: set **`is_trending = false`** on **active** products, then set **`true`** for merged matches.
 
+## Home featured listing limits (`featured_max_*`)
+
+- Keys: **`ShopSetting::KEY_FEATURED_MAX_MANUAL`**, **`KEY_FEATURED_MAX_LOW_STOCK`**, **`KEY_FEATURED_MAX_OVERSTOCK`** (integers, **`0` = no limit**). Exposed in **`GET`/`PUT admin/settings`** as **`featured_max_manual`**, **`featured_max_low_stock`**, **`featured_max_overstock`**.
+- **`GET products/featured`** is built by **`HomeFeaturedProductIds`**: (1) manual **`is_featured`** (random subset when capped); (2) low-stock **rule** + **`is_trending`**; (3) overstock **rule** + **`is_trending`**, excluding IDs that match the low-stock rule so each product counts once. Order returned: manual, then low, then over; **`TrendingStockRuleQueries`** shares rule logic with **`RecalculateTrendingProducts`**.
+- These caps affect **only** the storefront featured JSON response, not how many rows **`RecalculateTrendingProducts`** marks **`is_trending`**.
+
+## Shipping flat rate and installation auto pricing
+
+- **`ShopSetting::KEY_SHIPPING_FLAT_EUR`**: scalar EUR; **`ShopSetting::shippingFlatEur()`** for runtime reads. New checkouts persist **`orders.shipping_price`** from this default; **`Order` grand total** uses **`shipping_price`** when set, else falls back to **`shippingFlatEur()`** for legacy rows.
+- **`ShopSetting::KEY_INSTALLATION_AUTO_PRICING`**: JSON **`{ quote_when_merchandise_above_eur, tiers: [{ max_merchandise_eur, fee_eur }] }`**. **`App\Support\InstallationAutoPricing`** sorts tiers by max; **`merchandise_subtotal > quote_when…`** ⇒ manual quote; else first tier with **`subtotal <= max_merchandise_eur`** wins. **`AdminShopSettingsController`** requires strictly increasing **`max`** values and **`last max ≈ quote threshold`** (same EUR) before save.
+- **`Order::automaticInstallationFeeFromMerchandiseSubtotal($subtotal, ?array $merged)`**: optional second argument for tests without DB (**`ShopSetting::DEFAULTS`**); production omits it and uses **`ShopSetting::allMerged()`**.
+
 ## Storefront API (when touching related controllers)
 
-- **Featured / home**: one query on active products — **`where(fn ($q) { $q->where('is_featured', true)->orWhere('is_trending', true); })`** so each product appears **once**.
+- **Featured / home**: implemented via **`HomeFeaturedProductIds`** + **`ProductController@featured`** (not a single `orWhere` query).
 - **`GET shop/public-settings`**: only safe booleans (e.g. **`accept_personalized_solutions`**).
 - **`PersonalizedSolutionController@store`**: if disabled, **422** JSON with **`__('shop.personalized_solutions_disabled')`** (add keys to **`lang/ca.json`**, **`lang/es.json`**, **`lang/en.json`**).
 
 ## Admin settings page (React)
 
-- **`PageTitle`** + toolbar row; primary **Recalculate** action; form sections as **`card`** blocks; submit row **`flex justify-end`** for **Save**.
+- **`PageTitle`** + toolbar row; primary **Recalculate** action; sections in **daisyUI `collapse`** via **`AdminSettingsCollapseSection`** (independent collapses); submit row **`flex justify-end`** for **Save**.
 - All UI copy: **`admin.settings.*`** in **`resources/js/locales/ca.json`**, **`es.json`**, **`en.json`** (no hardcoded strings).
 - Do not add placeholder “more options later” cards unless explicitly requested.
 
-## Admin index column visibility (`admin_index_columns`)
+## Admin index column visibility and order (`admin_index_columns`)
 
-- Stored under **`shop_settings`** key **`ShopSetting::KEY_ADMIN_INDEX_COLUMNS`** as JSON: **`{ "table_id": ["col_id", ...] }`** (visible columns only; order follows **`config/admin_index_columns.php`** registry order).
-- **Registry:** **`config/admin_index_columns.php`** defines allowed column ids per **`table_id`**. **`App\Support\AdminIndexColumns::normalize()`** strips unknown ids and falls back to **all** columns for a table if the stored list is empty or invalid (so the UI never breaks after refactors).
+- Stored under **`shop_settings`** key **`ShopSetting::KEY_ADMIN_INDEX_COLUMNS`** as JSON: **`{ "table_id": ["col_id", ...] }`**. The array is **visible columns in display order** (first item = leftmost column). Order is **user-defined** in admin settings (drag-and-drop), not forced to match the PHP registry order.
+- **Registry:** **`config/admin_index_columns.php`** defines the **allowed** column ids per **`table_id`**. **`App\Support\AdminIndexColumns::normalize()`** dedupes and strips unknown ids, preserves **first-seen order** from storage, and falls back to **all** columns in **registry order** if the stored list is empty or invalid (so the UI never breaks after refactors).
 - **API:** **`GET`/`PUT admin/settings`** includes **`admin_index_columns`** in the shaped payload; validate nested keys in **`AdminShopSettingsController`**.
-- **React:** **`resources/js/config/adminIndexColumnsRegistry.js`** must list the **same** `table_id` and column ids (plus `labelKey` for settings checkboxes). Admin list pages use **`useAdminIndexColumnVisibility(tableId)`** from **`resources/js/hooks/useAdminShopSettingsQuery.js`**. After saving settings, **`queryClient.invalidateQueries({ queryKey: ['admin', 'shop-settings'] })`** so lists refresh.
-- **When adding/removing a list column:** update **`config/admin_index_columns.php`**, **`adminIndexColumnsRegistry.js`**, and the matching **`<th>` / `<td>`** in the admin page; existing DB values self-heal via **`normalize()`**.
+- **React:** **`resources/js/config/adminIndexColumnsRegistry.js`** must list the **same** `table_id` and column ids (plus `labelKey` for settings UI). **`useAdminIndexColumnVisibility(tableId)`** exposes **`orderedVisibleColumnIds`**; admin list pages render **`<th>` / `<td>`** by mapping that array (not a fixed registry order). Settings UI: **`AdminIndexColumnsFieldset`** (sortable list + visibility). After saving settings, **`queryClient.invalidateQueries({ queryKey: ['admin', 'shop-settings'] })`** so lists refresh.
+- **When adding/removing a list column:** update **`config/admin_index_columns.php`**, **`adminIndexColumnsRegistry.js`**, and the matching header/body cell helpers in the admin page; existing DB values self-heal via **`normalize()`**.
 
 ## Routes
 

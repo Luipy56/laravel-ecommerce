@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { useCart } from '../contexts/CartContext';
 import { IconCart, IconChevronLeft, IconChevronRight } from '../components/icons';
+import FavoriteToggle from '../components/FavoriteToggle';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
+const ZOOM_SCALE = 3.5;
+const ZOOM_PANEL_SIZE = 420;
 
 export default function PackDetailPage() {
   const { id } = useParams();
@@ -15,6 +18,39 @@ export default function PackDetailPage() {
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [zoomVisible, setZoomVisible] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 0.5, y: 0.5 });
+  const imageRef = useRef(null);
+  const galleryRef = useRef(null);
+
+  const handleZoomMove = useCallback((e) => {
+    const containerEl = galleryRef.current;
+    const imageEl = imageRef.current;
+    if (!containerEl || !imageEl) return;
+    const rect = containerEl.getBoundingClientRect();
+    const nw = imageEl.naturalWidth || 0;
+    const nh = imageEl.naturalHeight || 0;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    let x = 0.5;
+    let y = 0.5;
+    if (nw > 0 && nh > 0 && rect.width > 0 && rect.height > 0) {
+      const scale = Math.min(rect.width / nw, rect.height / nh);
+      const displayW = nw * scale;
+      const displayH = nh * scale;
+      const contentLeft = (rect.width - displayW) / 2;
+      const contentTop = (rect.height - displayH) / 2;
+      x = displayW > 0 ? (mouseX - contentLeft) / displayW : 0.5;
+      y = displayH > 0 ? (mouseY - contentTop) / displayH : 0.5;
+    } else {
+      x = rect.width > 0 ? mouseX / rect.width : 0.5;
+      y = rect.height > 0 ? mouseY / rect.height : 0.5;
+    }
+    setZoomPos({
+      x: Math.max(0, Math.min(1, x)),
+      y: Math.max(0, Math.min(1, y)),
+    });
+  }, []);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -64,11 +100,18 @@ export default function PackDetailPage() {
         </Link>
       </div>
 
-      <div className="card card-border bg-base-100 shadow-lg overflow-hidden">
+      <div className="card card-border bg-base-100 shadow-lg overflow-visible">
         <div className="flex flex-col lg:flex-row">
-          {/* Gallery — same layout as ProductDetailPage */}
-          <div className="flex flex-col lg:w-1/2 gap-3 p-4 bg-base-200/50">
-            <div className="relative flex-1 aspect-square max-h-[360px] bg-base-200 rounded-lg overflow-hidden">
+          {/* Gallery + zoom — overflow-visible so zoom panel is not clipped */}
+          <div className="flex flex-col lg:w-1/2 gap-3 p-4 bg-base-200/50 overflow-visible">
+            <div className="flex flex-col sm:flex-row gap-3">
+            <div
+              className="relative flex-1 aspect-square max-h-[360px] bg-base-200 rounded-lg"
+              onMouseEnter={() => setZoomVisible(true)}
+              onMouseLeave={() => setZoomVisible(false)}
+              onMouseMove={handleZoomMove}
+              ref={galleryRef}
+            >
               {hasMultipleImages && (
                 <>
                   <button
@@ -89,16 +132,34 @@ export default function PackDetailPage() {
                   </button>
                 </>
               )}
-              <img
-                src={mainImageUrl}
-                alt={pack.name}
-                className="object-contain w-full h-full select-none"
-                draggable={false}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = FALLBACK_IMAGE;
-                }}
-              />
+              <div className="absolute inset-0 rounded-lg overflow-hidden">
+                <img
+                  ref={imageRef}
+                  src={mainImageUrl}
+                  alt={pack.name}
+                  className="object-contain w-full h-full select-none"
+                  draggable={false}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = FALLBACK_IMAGE;
+                  }}
+                />
+              </div>
+              {/* Amazon-style zoom: panel to the right of the image */}
+              {zoomVisible && (
+                <div
+                  className="hidden lg:block absolute z-10 top-0 left-full ml-2 w-[var(--zoom-size)] h-[var(--zoom-size)] border-2 border-primary bg-base-100 shadow-xl pointer-events-none overflow-hidden rounded-lg bg-no-repeat"
+                  style={{
+                    '--zoom-size': `${ZOOM_PANEL_SIZE}px`,
+                    backgroundImage: `url(${mainImageUrl})`,
+                    backgroundSize: `${ZOOM_SCALE * 100}%`,
+                    backgroundPosition: `${100 * (0.5 - zoomPos.x * ZOOM_SCALE) / (1 - ZOOM_SCALE)}% ${100 * (0.5 - zoomPos.y * ZOOM_SCALE) / (1 - ZOOM_SCALE)}%`,
+                  }}
+                  role="img"
+                  aria-label={t('shop.product.image_zoom')}
+                />
+              )}
+            </div>
             </div>
             {hasMultipleImages && (
               <>
@@ -190,6 +251,7 @@ export default function PackDetailPage() {
                   className="input input-bordered input-sm w-20"
                 />
               </label>
+              <FavoriteToggle packId={pack.id} />
               <button
                 type="button"
                 className="btn btn-primary btn-sm gap-1.5 px-3 min-h-8 shrink-0"

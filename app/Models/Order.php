@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\InstallationAutoPricing;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -60,33 +61,27 @@ class Order extends Model
 
     public const INSTALLATION_REJECTED = 'rejected';
 
-    /** Flat shipping fee (EUR) for every confirmed order; not applied to carts/likes. */
+    /**
+     * Legacy default flat shipping (EUR); runtime uses ShopSetting::KEY_SHIPPING_FLAT_EUR.
+     */
     public const SHIPPING_FLAT_EUR = 9.0;
 
     /**
-     * Merchandise subtotal (EUR, order lines only) above this triggers a manual installation quote when installation is requested.
+     * Legacy default merchandise ceiling for automatic installation tiers; runtime uses installation_auto_pricing.
      */
     public const INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR = 1000.0;
 
     /**
      * Tiered installation fee from merchandise subtotal alone (no shipping/installation); null when a manual quote is required.
+     * Values come from shop_settings (see InstallationAutoPricing).
+     *
+     * @param  array<string, mixed>|null  $mergedShopSettings  Pass {@see ShopSetting::DEFAULTS} (or a merged array) in unit tests without a database.
      */
-    public static function automaticInstallationFeeFromMerchandiseSubtotal(float $merchandiseSubtotal): ?float
+    public static function automaticInstallationFeeFromMerchandiseSubtotal(float $merchandiseSubtotal, ?array $mergedShopSettings = null): ?float
     {
-        if ($merchandiseSubtotal <= 0) {
-            return null;
-        }
-        if ($merchandiseSubtotal > self::INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR) {
-            return null;
-        }
-        if ($merchandiseSubtotal <= 250.0) {
-            return 90.0;
-        }
-        if ($merchandiseSubtotal <= 500.0) {
-            return 120.0;
-        }
+        $merged = $mergedShopSettings ?? ShopSetting::allMerged();
 
-        return 180.0;
+        return InstallationAutoPricing::fromMerged($merged)->automaticFee($merchandiseSubtotal);
     }
 
     public function client(): BelongsTo
@@ -138,7 +133,10 @@ class Order extends Model
             $base += (float) $this->installation_price;
         }
         if ($this->kind === self::KIND_ORDER) {
-            $base += self::SHIPPING_FLAT_EUR;
+            $shipping = $this->shipping_price !== null
+                ? (float) $this->shipping_price
+                : ShopSetting::shippingFlatEur();
+            $base += $shipping;
         }
 
         return round($base, 2);

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
+import { sanitizePostalCodeDigits } from '../../lib/postalInput';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
@@ -249,9 +250,12 @@ export default function AdminPersonalizedSolutionEditPage() {
                   <span className="form-label">{t('admin.personalized_solutions.address_postal_code')} *</span>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="postal-code"
+                    pattern="[0-9]*"
                     className="input input-bordered w-full"
                     value={form.address_postal_code}
-                    onChange={(e) => update('address_postal_code', e.target.value)}
+                    onChange={(e) => update('address_postal_code', sanitizePostalCodeDigits(e.target.value))}
                     aria-label={t('admin.personalized_solutions.address_postal_code')}
                     required
                   />

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
@@ -8,15 +8,17 @@ import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQ
 export default function AdminProductsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('products');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('products');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
-  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
+  const pageRef = useRef(1);
+  const sentinelRef = useRef(null);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -27,31 +29,38 @@ export default function AdminProductsPage() {
     }
   }, []);
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
+  const fetchProducts = useCallback(async (pageNum, reset = false) => {
+    if (reset) setLoading(true);
+    else setLoadingMore(true);
     try {
-      const params = { page, per_page: 20 };
+      const params = { page: pageNum, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
       if (categoryId) params.category_id = categoryId;
       const { data } = await api.get('admin/products', { params });
       if (data.success) {
-        setProducts(data.data || []);
-        setMeta(data.meta || meta);
+        const newItems = data.data || [];
+        if (reset) setProducts(newItems);
+        else setProducts((prev) => [...prev, ...newItems]);
+        const meta = data.meta || {};
+        setHasMore((meta.current_page ?? pageNum) < (meta.last_page ?? 1));
+        pageRef.current = pageNum;
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      setProducts([]);
+      if (reset) setProducts([]);
     } finally {
-      setLoading(false);
+      if (reset) setLoading(false);
+      else setLoadingMore(false);
     }
-  }, [page, searchDebounce, categoryId, navigate]);
+  }, [searchDebounce, categoryId, navigate]);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
   useEffect(() => {
-    fetchProducts();
+    pageRef.current = 1;
+    fetchProducts(1, true);
   }, [fetchProducts]);
 
   useEffect(() => {
@@ -60,8 +69,128 @@ export default function AdminProductsPage() {
   }, [search]);
 
   useEffect(() => {
-    setPage(1);
-  }, [searchDebounce, categoryId]);
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (!hasMore || loadingMore || loading) return;
+        const next = pageRef.current + 1;
+        pageRef.current = next;
+        fetchProducts(next, false);
+      },
+      { rootMargin: '120px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, loadingMore, loading, fetchProducts]);
+
+  const productHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'code':
+        return <th key={colId}>{t('admin.products.code')}</th>;
+      case 'name':
+        return <th key={colId}>{t('admin.products.name')}</th>;
+      case 'category':
+        return <th key={colId}>{t('admin.products.category')}</th>;
+      case 'price':
+        return <th key={colId} className="text-end">{t('admin.products.price')}</th>;
+      case 'discount_percent':
+        return <th key={colId} className="text-end">{t('admin.products.discount_percent')}</th>;
+      case 'stock':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.stock')}
+          </th>
+        );
+      case 'is_featured':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_featured')}
+          </th>
+        );
+      case 'is_trending':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_trending')}
+          </th>
+        );
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const productBodyCell = (colId, p) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {p.id}
+          </td>
+        );
+      case 'code':
+        return <td key={colId}>{p.code}</td>;
+      case 'name':
+        return <td key={colId}>{p.name}</td>;
+      case 'category':
+        return <td key={colId}>{p.category?.name}</td>;
+      case 'price':
+        return (
+          <td key={colId} className="text-end tabular-nums">
+            {p.price != null ? `${Number(p.price).toFixed(2)} €` : ''}
+          </td>
+        );
+      case 'discount_percent':
+        return (
+          <td key={colId} className="text-end tabular-nums">
+            {p.discount_percent != null &&
+            p.discount_percent !== '' &&
+            Number(p.discount_percent) > 0
+              ? `${Number(p.discount_percent)}%`
+              : ''}
+          </td>
+        );
+      case 'stock':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {p.stock}
+          </td>
+        );
+      case 'is_featured':
+        return (
+          <td key={colId} className="text-center">
+            {p.is_featured ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      case 'is_trending':
+        return (
+          <td key={colId} className="text-center">
+            {p.is_trending ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {p.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -112,15 +241,7 @@ export default function AdminProductsPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('code') ? <th>{t('admin.products.code')}</th> : null}
-                  {isVisible('name') ? <th>{t('admin.products.name')}</th> : null}
-                  {isVisible('category') ? <th>{t('admin.products.category')}</th> : null}
-                  {isVisible('price') ? <th className="text-end">{t('admin.products.price')}</th> : null}
-                  {isVisible('discount_percent') ? <th className="text-end">{t('admin.products.discount_percent')}</th> : null}
-                  {isVisible('stock') ? <th className="text-center">{t('admin.products.stock')}</th> : null}
-                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => productHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {products.map((p) => (
@@ -137,23 +258,7 @@ export default function AdminProductsPage() {
                       }
                     }}
                   >
-                    {isVisible('code') ? <td>{p.code}</td> : null}
-                    {isVisible('name') ? <td>{p.name}</td> : null}
-                    {isVisible('category') ? <td>{p.category?.name}</td> : null}
-                    {isVisible('price') ? (
-                      <td className="text-end tabular-nums">{p.price != null ? Number(p.price).toFixed(2) + ' €' : ''}</td>
-                    ) : null}
-                    {isVisible('discount_percent') ? (
-                      <td className="text-end tabular-nums">
-                        {p.discount_percent != null &&
-                        p.discount_percent !== '' &&
-                        Number(p.discount_percent) > 0
-                          ? `${Number(p.discount_percent)}%`
-                          : ''}
-                      </td>
-                    ) : null}
-                    {isVisible('stock') ? <td className="text-center tabular-nums">{p.stock}</td> : null}
-                    {isVisible('is_active') ? <td className="text-center">{p.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                    {orderedVisibleColumnIds.map((colId) => productBodyCell(colId, p))}
                   </tr>
                 ))}
               </tbody>
@@ -162,29 +267,9 @@ export default function AdminProductsPage() {
         )}
       </div>
 
-      {meta.last_page > 1 && (
-        <div className="join flex justify-center">
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            {t('shop.pagination.prev')}
-          </button>
-          <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
-            {t('shop.pagination.page')} {page} {t('shop.pagination.of')} {meta.last_page}
-          </span>
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page >= meta.last_page}
-            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-          >
-            {t('shop.pagination.next')}
-          </button>
-        </div>
-      )}
+      <div ref={sentinelRef} className="py-2 flex justify-center" aria-hidden="true">
+        {loadingMore && <span className="loading loading-spinner loading-md" />}
+      </div>
     </div>
   );
 }

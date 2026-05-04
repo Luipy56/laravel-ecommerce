@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
@@ -23,11 +23,13 @@ export default function AdminDataExplorerPage() {
   const [dateColumn, setDateColumn] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [page, setPage] = useState(1);
   const [rows, setRows] = useState([]);
   const [columns, setColumns] = useState([]);
-  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 25, total: 0 });
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(false);
+  const pageRef = useRef(1);
+  const sentinelRef = useRef(null);
   const [schemaLoading, setSchemaLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -37,13 +39,12 @@ export default function AdminDataExplorerPage() {
   const [aggregateRows, setAggregateRows] = useState([]);
   const [aggregateLoading, setAggregateLoading] = useState(false);
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const perPage = 25;
 
   const selectedMeta = useMemo(
     () => schema?.tables?.find((x) => x.name === table),
     [schema, table],
   );
-
-  const perPage = meta.per_page || 25;
 
   const sortColumnDefault = useMemo(() => {
     const cols = selectedMeta?.columns || [];
@@ -95,26 +96,31 @@ export default function AdminDataExplorerPage() {
   );
 
   const loadQuery = useCallback(
-    async (pageNum) => {
+    async (pageNum, reset = false) => {
       if (!table) return;
-      setLoading(true);
+      if (reset) setLoading(true);
+      else setLoadingMore(true);
       setError('');
       try {
         const { data } = await api.post('admin/data-explorer/query', buildQueryPayload(pageNum));
         if (data.success) {
           const list = data.data || [];
-          setRows(list);
+          if (reset) setRows(list);
+          else setRows((prev) => [...prev, ...list]);
           const cols =
             selectedMeta?.columns?.length ? selectedMeta.columns : Object.keys(list[0] || {});
           setColumns(cols);
-          if (data.meta) setMeta(data.meta);
+          const meta = data.meta || {};
+          setHasMore((meta.current_page ?? pageNum) < (meta.last_page ?? 1));
+          pageRef.current = pageNum;
         }
       } catch (err) {
         if (err.response?.status === 401) navigate('/admin/login');
         setError(err.response?.data?.message || t('common.error'));
-        setRows([]);
+        if (reset) setRows([]);
       } finally {
-        setLoading(false);
+        if (reset) setLoading(false);
+        else setLoadingMore(false);
       }
     },
     [table, buildQueryPayload, selectedMeta, navigate, t],
@@ -122,11 +128,29 @@ export default function AdminDataExplorerPage() {
 
   useEffect(() => {
     if (!table || schemaLoading) return;
-    loadQuery(page);
-  }, [table, page, schemaLoading, refreshNonce, loadQuery]);
+    pageRef.current = 1;
+    loadQuery(1, true);
+  }, [table, schemaLoading, refreshNonce, loadQuery]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (!hasMore || loadingMore || loading) return;
+        const next = pageRef.current + 1;
+        pageRef.current = next;
+        loadQuery(next, false);
+      },
+      { rootMargin: '120px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, loadingMore, loading, loadQuery]);
 
   const handleApply = () => {
-    setPage(1);
     setRefreshNonce((n) => n + 1);
   };
 
@@ -207,7 +231,6 @@ export default function AdminDataExplorerPage() {
             value={table}
             onChange={(e) => {
               setTable(e.target.value);
-              setPage(1);
             }}
             disabled={schemaLoading || !schema?.tables?.length}
           >
@@ -308,29 +331,9 @@ export default function AdminDataExplorerPage() {
         )}
       </div>
 
-      {meta.last_page > 1 && (
-        <div className="join flex justify-center">
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            {t('shop.pagination.prev')}
-          </button>
-          <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
-            {t('shop.pagination.page')} {page} {t('shop.pagination.of')} {meta.last_page}
-          </span>
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page >= meta.last_page}
-            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-          >
-            {t('shop.pagination.next')}
-          </button>
-        </div>
-      )}
+      <div ref={sentinelRef} className="py-2 flex justify-center" aria-hidden="true">
+        {loadingMore && <span className="loading loading-spinner loading-md" />}
+      </div>
 
       <div className="card bg-base-100 shadow border border-base-200 p-4 space-y-4">
         <h2 className="font-semibold text-lg">{t('admin.data_explorer.aggregate_panel')}</h2>

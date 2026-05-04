@@ -1,0 +1,26 @@
+---
+description: Mandatory root package.json patch bump after every agent task that changes the repo
+alwaysApply: true
+---
+
+# Agent task → version bump (mandatory)
+
+## Policy
+
+**Any agent** (interactive session, subagent, orchestrator step, or **committer**) that **edits this repository** and **ends with commit and/or `git push`** to the integration branch must **raise the app semver** in the **same change series** so the **admin sidebar** and **storefront footer** stay truthful (`APP_VERSION` / `__APP_VERSION__` come from root **`package.json`** — see **`app-version-cadence.mdc`**).
+
+1. After **each completed task** that produced **tracked file changes** (code, locale JSON, `CHANGELOG.md`, new/changed **`.mdc`**, etc.), run **`npm version patch --no-git-tag-version`** at the repo root (updates **`package.json`** and **`package-lock.json`**).
+2. Include that bump **before** **`git push`**, ideally in the **last** commit of the task or the dedicated committer step.
+3. When the task touched **`resources/js/`** or Vite, run **`npm run build`** so embedded version strings match.
+
+**Clarification:** “Each prompt” means **each finished agent run that changes the tree**, not a no-op chat turn. If no files are modified, no bump.
+
+**End of user prompt / session:** When the user signals work is **done** (or the agent finishes a substantive request) and **tracked files changed**, bump patch and add **`CHANGELOG.md`** bullets under **`## [X.Y.Z] - YYYY-MM-DD`** matching the new semver **in that same session** — **do not wait** for the word **commit** unless the user explicitly defers versioning. Stale **`footer.version`** / **`APP_VERSION`** confuse operators.
+
+## What this overrides
+
+Loose “docs-only may skip” habits do **not** apply to **agent-delivered** work: if you **commit** a change, **bump patch** unless the only event is a **git revert** that fully restores a previous release (team discretion).
+
+## Changelog
+
+Ship-ready notes go under a **versioned** header (`## [X.Y.Z] - date`), not an **`[Unreleased]`** backlog — see **`commit-changelog-version.mdc`**.

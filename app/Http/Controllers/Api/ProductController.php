@@ -8,6 +8,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Feature;
 use App\Models\Pack;
 use App\Models\Product;
+use App\Services\HomeFeaturedProductIds;
 use App\Services\Search\CatalogProductSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -163,6 +164,12 @@ class ProductController extends Controller
                     });
             });
         }
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (float) $request->input('price_min'));
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (float) $request->input('price_max'));
+        }
 
         return $query;
     }
@@ -190,6 +197,12 @@ class ProductController extends Controller
                             });
                     });
             });
+        }
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (float) $request->input('price_min'));
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (float) $request->input('price_max'));
         }
 
         return $query;
@@ -286,19 +299,30 @@ class ProductController extends Controller
      *
      * @return JsonResponse JSON envelope with success and data as a ProductResource collection.
      */
-    public function featured(): JsonResponse
+    public function featured(HomeFeaturedProductIds $homeFeatured): JsonResponse
     {
+        $ids = $homeFeatured->orderedIds();
+        if ($ids === []) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+            ]);
+        }
+
         $products = Product::query()->active()
-            ->where(function ($q) {
-                $q->where('is_featured', true)->orWhere('is_trending', true);
-            })
+            ->whereIn('id', $ids)
             ->with(['category', 'features.featureName', 'images'])
-            ->orderBy('name')
             ->get();
+
+        $byId = $products->keyBy('id');
+        $ordered = collect($ids)
+            ->map(fn (int $id) => $byId->get($id))
+            ->filter()
+            ->values();
 
         return response()->json([
             'success' => true,
-            'data' => ProductResource::collection($products),
+            'data' => ProductResource::collection($ordered),
         ]);
     }
 
@@ -339,6 +363,32 @@ class ProductController extends Controller
             'meta' => [
                 'engine' => $result['engine'],
                 'suggest' => false,
+            ],
+        ]);
+    }
+
+    /**
+     * Global min/max price across all active products and packs.
+     * Used by the storefront price-range filter to set slider bounds.
+     */
+    public function priceRange(): JsonResponse
+    {
+        $productMin = Product::query()->active()->min('price');
+        $productMax = Product::query()->active()->max('price');
+        $packMin = Pack::query()->active()->min('price');
+        $packMax = Pack::query()->active()->max('price');
+
+        $minValues = array_filter([$productMin, $packMin], fn ($v) => $v !== null);
+        $maxValues = array_filter([$productMax, $packMax], fn ($v) => $v !== null);
+
+        $min = $minValues !== [] ? min($minValues) : 0;
+        $max = $maxValues !== [] ? max($maxValues) : 0;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'min' => (float) floor((float) $min),
+                'max' => (float) ceil((float) $max),
             ],
         ]);
     }

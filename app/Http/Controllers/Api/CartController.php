@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderLine;
+use App\Models\ShopSetting;
+use App\Support\InstallationAutoPricing;
 use App\Models\Pack;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +21,7 @@ class CartController extends Controller
     /** @return array{shipping_flat_eur: float, total_with_shipping: float} */
     private function cartShippingMeta(float $linesTotal): array
     {
-        $flat = (float) Order::SHIPPING_FLAT_EUR;
+        $flat = ShopSetting::shippingFlatEur();
 
         return [
             'shipping_flat_eur' => $flat,
@@ -39,8 +41,9 @@ class CartController extends Controller
             ];
         }
 
-        $quoteRequired = $merchandiseTotal > Order::INSTALLATION_MERCHANDISE_AUTOMATIC_MAX_EUR;
-        $fee = Order::automaticInstallationFeeFromMerchandiseSubtotal($merchandiseTotal);
+        $installPricing = InstallationAutoPricing::fromMerged(ShopSetting::allMerged());
+        $quoteRequired = $installPricing->quoteRequired($merchandiseTotal);
+        $fee = $installPricing->automaticFee($merchandiseTotal);
 
         return [
             'installation_quote_required' => $quoteRequired,

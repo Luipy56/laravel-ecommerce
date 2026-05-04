@@ -12,11 +12,11 @@ const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 
 
 function getStatusBadgeClass(status) {
   switch (status) {
-    case 'pending_review': return 'badge-warning';
-    case 'reviewed': return 'badge-info';
-    case 'client_contacted': return 'badge-success';
-    case 'rejected': return 'badge-error';
-    case 'completed': return 'badge-success';
+    case 'pending_review': return 'badge-outline badge-warning';
+    case 'reviewed': return 'badge-outline badge-info';
+    case 'client_contacted': return 'badge-outline badge-success';
+    case 'rejected': return 'badge-outline badge-error';
+    case 'completed': return 'badge-outline badge-success';
     default: return 'badge-ghost';
   }
 }
@@ -40,6 +40,7 @@ export default function AdminPersonalizedSolutionShowPage() {
   const [draftResolution, setDraftResolution] = useState('');
   const [draftStatus, setDraftStatus] = useState('pending_review');
   const resolutionDialogRef = useRef(null);
+  const notifyConfirmDialogRef = useRef(null);
 
   const fetchSolution = useCallback(async () => {
     if (!id) return;
@@ -68,6 +69,16 @@ export default function AdminPersonalizedSolutionShowPage() {
 
   const closeResolutionModal = () => {
     resolutionDialogRef.current?.close();
+  };
+
+  const openNotifyConfirmModal = () => {
+    if (!solution?.email) return;
+    notifyConfirmDialogRef.current?.showModal();
+  };
+
+  const confirmAndNotifyResolution = () => {
+    notifyConfirmDialogRef.current?.close();
+    void handleNotifyResolution();
   };
 
   const handleNotifyResolution = async () => {
@@ -147,7 +158,7 @@ export default function AdminPersonalizedSolutionShowPage() {
             type="button"
             className="btn btn-outline btn-sm shrink-0"
             disabled={notifyLoading || !solution.email}
-            onClick={handleNotifyResolution}
+            onClick={openNotifyConfirmModal}
             title={t('admin.personalized_solutions.email_client_title')}
           >
             {notifyLoading ? t('common.loading') : t('admin.personalized_solutions.email_client_short')}
@@ -156,14 +167,43 @@ export default function AdminPersonalizedSolutionShowPage() {
         </div>
       </div>
 
+      <dialog ref={notifyConfirmDialogRef} id="admin-sp-notify-confirm-modal" className="modal" aria-labelledby="admin-sp-notify-confirm-title">
+        <div className="modal-box max-w-md">
+          <h2 id="admin-sp-notify-confirm-title" className="font-semibold text-lg mb-2">
+            {t('admin.personalized_solutions.email_client_confirm_title')}
+          </h2>
+          <p className="text-sm text-base-content/80 mb-4">
+            {t('admin.personalized_solutions.email_client_confirm_body')}
+          </p>
+          <div className="modal-action flex flex-wrap items-center justify-between gap-2">
+            <form method="dialog">
+              <button type="submit" className="btn btn-ghost">{t('common.cancel')}</button>
+            </form>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={notifyLoading}
+              onClick={confirmAndNotifyResolution}
+            >
+              {notifyLoading ? t('common.loading') : t('common.confirm')}
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button type="submit" className="btn" aria-label={t('common.close')}>{t('common.close')}</button>
+        </form>
+      </dialog>
+
       <dialog ref={resolutionDialogRef} id="admin-sp-resolution-modal" className="modal">
         <div className="modal-box max-w-2xl">
-          <h2 className="font-semibold text-lg mb-4">{t('admin.personalized_solutions.resolution_modal_title')}</h2>
-          <div className="space-y-4">
-            <label className="form-control w-full">
-              <span className="label-text">{t('admin.personalized_solutions.status')}</span>
+          <h2 className="font-semibold text-lg mb-4">
+            {t('admin.personalized_solutions.resolution_modal_title')}
+          </h2>
+          <div className="flex flex-col gap-8">
+            <label className="form-control w-full max-w-md">
+              <span className="label-text text-base">{t('admin.personalized_solutions.status')}</span>
               <select
-                className="select select-bordered w-full max-w-md"
+                className="select select-bordered select-md w-full min-w-0 text-base"
                 value={draftStatus}
                 onChange={(e) => setDraftStatus(e.target.value)}
                 aria-label={t('admin.personalized_solutions.status')}
@@ -174,13 +214,13 @@ export default function AdminPersonalizedSolutionShowPage() {
               </select>
             </label>
             <label className="form-control w-full">
-              <span className="label-text">{t('admin.personalized_solutions.resolution')}</span>
+              <span className="label-text text-base">{t('admin.personalized_solutions.resolution_modal_text_label')}</span>
               <textarea
-                className="textarea textarea-bordered w-full min-h-40"
+                className="textarea textarea-bordered w-full min-h-40 text-base leading-relaxed"
                 value={draftResolution}
                 onChange={(e) => setDraftResolution(e.target.value)}
                 placeholder={t('admin.personalized_solutions.resolution_placeholder')}
-                aria-label={t('admin.personalized_solutions.resolution')}
+                aria-label={t('admin.personalized_solutions.resolution_modal_text_label')}
               />
             </label>
           </div>
@@ -188,25 +228,14 @@ export default function AdminPersonalizedSolutionShowPage() {
             <form method="dialog">
               <button type="submit" className="btn btn-ghost">{t('common.close')}</button>
             </form>
-            <div className="flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                disabled={notifyLoading || !solution.email}
-                onClick={handleNotifyResolution}
-                title={t('admin.personalized_solutions.email_client_title')}
-              >
-                {notifyLoading ? t('common.loading') : t('admin.personalized_solutions.email_client_short')}
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                disabled={resolutionSaveLoading}
-                onClick={handleSaveResolutionModal}
-              >
-                {resolutionSaveLoading ? t('common.loading') : t('common.save')}
-              </button>
-            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={resolutionSaveLoading}
+              onClick={handleSaveResolutionModal}
+            >
+              {resolutionSaveLoading ? t('common.loading') : t('common.save')}
+            </button>
           </div>
         </div>
         <form method="dialog" className="modal-backdrop">
@@ -266,7 +295,12 @@ export default function AdminPersonalizedSolutionShowPage() {
                   <div><dt className="text-sm text-base-content/70">{t('admin.personalized_solutions.improvement_at')}</dt><dd>{new Date(solution.improvement_feedback_at).toLocaleString()}</dd></div>
                 )}
                 {solution.improvement_feedback && (
-                  <div className="sm:col-span-2"><dt className="text-sm text-base-content/70 sr-only">{t('admin.personalized_solutions.improvement_feedback')}</dt><dd className="whitespace-pre-wrap">{solution.improvement_feedback}</dd></div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-sm text-base-content/70 sr-only">{t('admin.personalized_solutions.improvement_feedback')}</dt>
+                    <dd className="whitespace-pre-wrap rounded-lg bg-base-200 px-4 py-3 text-base font-medium">
+                      {solution.improvement_feedback}
+                    </dd>
+                  </div>
                 )}
               </dl>
             </section>

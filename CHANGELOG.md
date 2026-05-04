@@ -5,7 +5,287 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.114] - 2026-05-04
+
+### Fixed
+
+- **Checkout: flujo de pago PayPal inline no abandonaba la página de checkout.** Tras pulsar "Finalizar pedido" con PayPal como método de pago, el cliente ya no es redirigido a `/orders/:id`; los botones de pago de PayPal aparecen directamente en la misma página de checkout con scroll automático al panel de pago, permitiendo completar el pago sin abandonar el flujo.
+- **Checkout: pantalla "carrito vacío" tras crear pedido con pago pendiente.** Cuando el carrito se vaciaba al crear el pedido (antes de que el cliente completara el pago), la página mostraba "carrito vacío" en lugar del panel de pago inline. Ahora el guard de carrito vacío se ignora mientras haya un pago activo en proceso.
+
+### Changed
+
+- **Cart (móvil): nombre de producto truncado.** En pantallas pequeñas el nombre del producto en la tabla del carrito se trunca con elipsis (`…`) para evitar filas muy altas, y los atributos (marca, color, etc.) se ocultan en móvil. En escritorio se muestra el nombre completo con todos los atributos sin cambios.
+
+## [0.1.113] - 2026-05-04
+
+### Fixed
+
+- **`lang/ca/mail.php` PHP syntax error:** Catalan apostrophes in array string values were unescaped inside single-quoted PHP strings, causing a `ViewException` (`syntax error, unexpected identifier "enllaç"`) whenever any email view was rendered with the `ca` locale.
+- **`priceRange` API endpoint (HTTP 500):** `GET /api/v1/products/price-range` threw a `ValueError` from `min([])` / `max([])` when the database contained no active products or packs (empty test DB). Now returns `{min: 0, max: 0}` when no data is available.
+- **Admin pending-payment email not sent:** `SendOrderPaymentPendingAdminEmail` listener was accidentally de-registered from the `OrderPlacedPaymentPending` event in a previous commit. Re-registered so admin receives the notification when an order is placed with a pending payment.
+- **`CustomerTransactionalEmailTest` assertion mismatch:** Test expected `"Resumen de tu solicitud"` (informal) but the Spanish translation was updated to the formal `"Resumen de su solicitud"` in a later commit; test now matches the current translation.
+
+## [0.1.112] - 2026-05-04
+
+### Changed
+
+- **Albarán (delivery note) PDF/HTML view (`resources/views/pdf/delivery_note.blade.php`):** Reworked as a proper proof-of-delivery document. Now uses an `ALB-{year}-{order_id}` document number, drops the price / unit-price / line-total / shipping / installation / total columns (delivery notes have no fiscal value), shows a quantity-only line table with a "Total units" footer, and adds a recipient signature block (signature line + date) plus a free-form delivery-remarks box. A prominent "no fiscal validity" banner explains the document's purpose and points at the separate invoice for VAT.
+- **Factura (invoice) PDF/HTML view (`resources/views/pdf/invoice.blade.php`):** Reworked as a Spanish legal invoice. Adds an `FAC-{year}-{order_id}` invoice number, the issue date (paid date when available), an "ISSUER" panel with brand name + tax ID (NIF/CIF) + fiscal address, a "BILL TO" panel with the client name, identification (DNI / NIE / CIF) and email/phone, an IVA breakdown row (taxable base, VAT amount, total with VAT) computed from a configurable `INVOICE_VAT_RATE_PERCENT` (default 21 %), a payment block (method, paid-at, gateway reference) shown only when a successful payment exists, a "PAID" stamp in the header, and a legal-validity notice for accounting / VAT-deduction purposes.
+
+### Added
+
+- **Issuer fiscal config** in `config/mail.php` under `mail.brand`: `tax_id` (NIF/CIF/VAT), `fiscal_address` (multiline registered address) and `vat_rate_percent` (default 21). Wired to env vars `MAIL_BRAND_TAX_ID`, `MAIL_BRAND_FISCAL_ADDRESS`, `INVOICE_VAT_RATE_PERCENT` and documented in `.env.example`. Stored product prices are treated as VAT-inclusive (Spanish B2C standard); the invoice deducts the base from the grand total using the configured rate.
+- **i18n keys for invoice + delivery note** in `lang/ca.json` / `lang/es.json` / `lang/en.json` (`shop.invoice_number_label`, `shop.invoice_issue_date`, `shop.invoice_tax_id`, `shop.invoice_fiscal_address`, `shop.invoice_taxable_base`, `shop.invoice_vat_label`, `shop.invoice_total_with_vat`, `shop.invoice_vat_included_note`, `shop.invoice_payment_*`, `shop.invoice_legal_notice`, `shop.delivery_note_title`, `shop.delivery_note_subtitle`, `shop.delivery_note_no_fiscal_value`, `shop.delivery_note_signature_label`, `shop.delivery_note_signature_hint`, `shop.delivery_note_total_units`, `shop.delivery_note_carrier_notes`, `shop.delivery_note_footer`, `shop.delivery_note_received_on`, `shop.delivery_note_ship_to`). The previously broken `__('shop.delivery_note_*')` calls (which fell through to the literal key string) now resolve in all three locales.
+
+### Fixed
+
+- **N+1 on invoice render:** `OrderController@invoice` now eager-loads the `payments` relation alongside lines/addresses/client; the new invoice template reads it for the "PAID" stamp and the payment block.
+
+## [0.1.108] - 2026-05-04
+
+### Removed
+
+- **i18n:** Dropped unused `checkout.payment.bizum` (ca / es / en). Checkout only exposes `card` and `paypal` methods in the UI; Bizum is included under the Stripe card flow. **`admin.orders.payment_bizum` is kept** — it is still resolved when an order payment row has `payment_method` `bizum`.
+
+## [0.1.105] - 2026-05-04
+
+### Fixed
+
+- **Storefront orders list:** Empty state no longer reused the cart message; it now shows `shop.orders.empty` (orders-specific copy in ca / es / en).
+
+## [0.1.104] - 2026-05-04
+
+### Added
+
+- **Admin shop settings:** Short one-line subtitles on collapse headers for Home, Custom solutions, and Admin list columns; “List defaults” and “Closed prices” keep their existing help lines.
+
+## [0.1.103] - 2026-05-04
+
+### Changed
+
+- **Admin shop settings:** Removed the long collapse subtitle under “Home · automatic highlights” / “Inicio · destacados automáticos”; in-section copy (limits hint, field labels) is unchanged.
+
+## [0.1.102] - 2026-05-04
+
+### Changed
+
+- **Admin shop settings:** Removed the long subtitle under “Admin list columns” / “Columnas de listas del admin”; per-table hints inside the section remain.
+
+## [0.1.99] - 2026-05-03
+
+### Removed
+
+- **Offline payments (bank transfer / Bizum manual):** Complete removal of all offline payment infrastructure — `PaymentOfflineInstructions` support class, `Payment::METHOD_BANK_TRANSFER` / `METHOD_BIZUM_MANUAL` / `GATEWAY_MANUAL` / `isOfflineCheckoutMethod()`, five `ShopSetting` keys and defaults (`bank_transfer_iban`, `bank_transfer_beneficiary`, `bank_transfer_reference_hint`, `bizum_manual_phone`, `bizum_manual_instructions`), admin settings UI section, `recordManualSettlement` admin API endpoint and route, `OfflinePaymentInstructionsBlock` React component, all related checkout/order-detail UI branches, and offline locale keys in JS and PHP i18n files. Stripe Checkout Bizum (online, via `card` method) is unaffected.
+
+## [0.1.97] - 2026-05-03
+
+### Added
+
+- **Storefront — price range filter:** New dual-handle range slider in the product list sidebar (below "Solo packs") lets shoppers set a min/max price. The slider bounds are fetched from a new `GET /api/v1/products/price-range` endpoint. When the range matches the global min/max no filter is sent; a "Cualquier precio" link resets it. The `price_min` / `price_max` params are persisted in the URL and forwarded to both product and pack queries.
+
+## [0.1.96] - 2026-05-03
+
+### Fixed
+
+- **Admin nav alert — orders:** Removed an `orWhere` clause from the `orders_need_attention` query that incorrectly triggered the sidebar dot for orders with `installation_requested=true` and `installation_status=pending` regardless of the order's main status (e.g. already-sent orders). The dot now only activates for orders whose status is `pending`, `awaiting_payment`, `awaiting_installation_price`, or `installation_pending`.
+
+## [0.1.95] - 2026-05-03
+
+### Fixed
+
+- **Locale (es/ca):** Period filter option "all time" corrected to "Todos los tiempos" (es) and "Tots els temps" (ca).
+
+## [0.1.94] - 2026-05-03
+
+### Added
+
+- **Admin Orders & Personalized Solutions — period filter:** Both list pages now include a time-range select (Last week / Last month / Last year / All time). The backend `AdminOrderController` and `AdminPersonalizedSolutionController` accept a `period` query param and apply a `created_at >=` date constraint accordingly.
+- **Admin Settings — default period:** New "List defaults" section in `/admin/settings` lets admins choose which period is pre-selected when the Orders and Personalized Solutions pages are first opened. Persisted in `shop_settings` under key `admin_list_default_period`; default is "last week".
+
+## [0.1.93] - 2026-05-03
+
+### Changed
+
+- **Admin lists (all):** Replaced prev/next pagination buttons with infinite scroll (IntersectionObserver sentinel) across all 11 admin list pages: Products, Categories, Features (both sub-lists), Variant Groups, Packs, Orders, Clients, Personalized Solutions, Admins, FAQs, and Data Explorer. New items are appended automatically as the user scrolls to the bottom; a small spinner appears while loading more.
+
+## [0.1.89] - 2026-05-03
+
+### Changed
+
+- **Client portal (personalized solution):** Removed "Ronda de mejoras: X" from the client view — it's irrelevant information for the client.
+- **Client portal (personalized solution):** Improvement request textarea now pre-fills with the client's last sent message on page load and after a successful submit, so the previous text is not lost.
+- **Admin personalized solution show:** The client's improvement feedback text is now visually highlighted with a left warning border and tinted background so it stands out as the key text to read.
+- **Locales (ca/es):** Renamed "Última petició/petición de millores/mejoras" → "... del client/cliente" to clarify it refers to the client's message.
+
+## [0.1.88] - 2026-05-03
+
+### Fixed
+
+- **Personalized solution improvement request email (500):** Laravel reserves the `$message` variable in Blade email views (injected as `Illuminate\Mail\Message`). The mailable was passing `'message' => $clientMessage` in `with: [...]`, which Laravel silently overwrote with its own mail object, causing `htmlspecialchars()` to receive an object and throw a fatal 500. Renamed the data key to `clientMessage` in the mailable and updated the blade template accordingly.
+
+## [0.1.87] - 2026-05-03
+
+### Changed
+
+- **Cursor rules (`commit-changelog-version.mdc`, `agent-task-version-bump.mdc`, `app-version-cadence.mdc`):** Ship-ready changelog bullets must use **versioned sections** **`## [X.Y.Z] - YYYY-MM-DD`** aligned with root **`package.json`** after each bump; do not accumulate long lists under **`[Unreleased]`** so operators and Admin About always tie changes to a semver.
+
+## [0.1.86] - 2026-05-03
+
+### Fixed
+
+- **PayPal "normativas internacionales" on retry:** `invoice_id` was built from the shop order ID only (`ORD-{order_id}`), so every failed attempt reused the same value. PayPal's compliance engine blocks duplicate `invoice_id` across multiple orders and returns a compliance-violation decline. Fixed by including the payment ID: `ORD-{order_id}-PAY-{payment_id}`, making each attempt unique.
+
+- **Stripe not loading:** `.env` had `STRIPE_PUBLISHABLE_KEY`/`STRIPE_SECRET_KEY` but `config/services.php` reads `STRIPE_KEY`/`STRIPE_SECRET`; renamed the variables so `StripeCredentials::areConfigured()` returns `true` and Stripe Checkout sessions can be created.
+- **Stripe excluded from checkout:** `PAYMENTS_CHECKOUT_METHODS` was set to `paypal` only; changed to `card,paypal` so the Stripe (card) option appears in the payment selector.
+- **PayPal inline buttons never rendered:** `CheckoutPage.jsx` and `OrderDetailPage.jsx` checked `c.approval_url` before `c.client_id && c.paypal_order_id && c.payment_id`; since PayPal always returns an `approve` link, the inline buttons branch was dead code and `PayPalInlineButtons` was never mounted. Swapped the branch order so the inline SDK flow is always preferred.
+- **PayPal capture missing after popup redirect:** Added capture call in the `payment=paypal_return` handler in `OrderDetailPage.jsx`; reads the `token` query param (PayPal order ID injected by PayPal on redirect), finds the matching pending payment, and calls `POST payments/paypal/capture` to complete the payment server-side.
+
+### Added
+
+- **Storefront favorites:** Authenticated clients can favorite products and packs via **`POST /api/v1/favorites/toggle`**, list IDs with **`GET /api/v1/favorites/ids`**, list items with **`GET /api/v1/favorites`**, and remove a line with **`DELETE /api/v1/favorites/lines/{orderLine}`** (favorites stored as a dedicated **`orders.kind = like`** basket). React: **`FavoritesPage`**, **`FavoriteToggle`**, **`useFavoriteIdsQuery`**, nav link from **`Layout`**.
+
+- **Payments (PSP + offline):** Configurable **`bank_transfer`** and **`bizum_manual`** checkout methods (whitelist via **`PAYMENTS_CHECKOUT_METHODS`** / `config/payments.php`); shop settings for IBAN / Bizum instructions; checkout and **`POST orders/{id}/pay`** return **`payment_checkout.gateway`** `manual` plus **`payment_instructions`** without calling Stripe/PayPal. **`POST /api/v1/payments/stripe/checkout/confirm`** (authenticated, verified client) completes a paid Stripe Checkout session server-side (shared logic with the Stripe webhook). **`POST /api/v1/admin/orders/{order}/payments/{payment}/record-manual-settlement`** marks an offline pending payment succeeded and advances the order. Storefront: checkout/order pay UI, order detail Stripe return handling with **`session_id`**, offline instructions panel; admin shop settings and order “record manual settlement” action. API: **`GET payments/config`** and **`GET orders/{id}`** expose offline method flags and instruction hints.
+
+- **Admin · shop configuration:** Collapsible sections (daisyUI **`collapse`**); **default flat shipping (EUR)** and **automatic installation pricing** (quote threshold + editable tiers) persisted in **`shop_settings`** (`shipping_flat_eur`, `installation_auto_pricing`); cart, checkout, order totals, PDFs, and admin order updates use these values. Placeholder block for **shipping by postal code** (not implemented). **`App\Support\InstallationAutoPricing`**; **`Order::automaticInstallationFeeFromMerchandiseSubtotal`** accepts optional merged settings for unit tests without a database.
+
+- **Docker:** **`docker-compose.yml`** for local development (PostgreSQL, Nginx, PHP 8.2 FPM, Vite, queue worker, named volumes for `vendor` / `node_modules`), **`docker-compose.prod.yml`** for production builds, multi-stage **`docker/php/Dockerfile`**, **`docker/nginx/default.conf`**, **`docker/nginx/Dockerfile.prod`**, **`.dockerignore`**, and **`docker/php/docker-entrypoint.sh`**. **`config/trustedproxy.php`** wires **`TRUSTED_PROXIES`** into Laravel’s **`TrustProxies`** middleware. **`vite.config.js`** supports **`DOCKER=1`** for HMR behind the dev server.
+
+### Changed
+
+- **Order status badges (admin + storefront):** Status chips use **`badge-outline`** with semantic colors (warning / success / info / neutral) for stronger hue than soft fills while keeping an open, table-friendly look (tinted text and border, not a solid block). **`awaiting_installation_price`** stays on the warning hue (not info blue).
+
+- **Product list sidebar:** **Packs only** toggle sits **below** the **Categories** block (same **`space-y-6`** spacing as before).
+
+- **Storefront mobile drawer · account rows:** **Perfil**, **Comandes**, **Compres**, and guest **login** use the same **`drawerNavClass`** / **`drawerIconClass`** treatment as the main links (**`NavLink`** + **`IconUser`**, **`IconClipboardList`**, **`IconPackage`**, **`IconLogIn`**).
+
+- **Storefront mobile drawer:** **Perfil** / **Comandes** / **Compres** (session) and guest **login** sit directly under the main nav list, separated by a thin **`hr`**; footer strip keeps language + brand only.
+
+- **Storefront mobile drawer · locale panel:** Removed the redundant **close (X)** row inside the language card; the trigger, outside tap, and **Escape** remain sufficient.
+
+- **Storefront mobile drawer (`Layout.jsx`):** Hamburger panel restyled (brand line, header close, icon + active state on primary nav, footer with brand/tagline, account shortcuts, language control). Shared **`STOREFRONT_LANGUAGE_OPTIONS`**; daisyUI **`dropdown-close`** when the locale menu is shut so the panel does not stay open on **`:focus-within`**; blur focused controls inside the widget; outside **`pointerdown`** (capture) to dismiss.
+- **Navbar:** Below **`lg`**, hide the locale control and guest **login** (available in the mobile drawer). Navbar locale dropdown uses the same **`dropdown-open` / `dropdown-close`** pattern as the drawer; sync **`locale`** state when **`i18n.language`** changes.
+- **Navbar (logged-in user):** Desktop account menu uses a **card** panel (gradient header, avatar chip on trigger, **`IconChevronDown`**) and the same icon set as the mobile drawer (**`IconUser`**, **`IconClipboardList`**, **`IconHeart`**, **`IconPackage`**, **`IconLogOut`**) on rounded hover rows; logout separated with error styling.
+- **Icons (`icons/index.jsx`):** **`IconHome`**, **`IconGrid`**, **`IconSparkles`**, **`IconHelpCircle`** for drawer links; **`IconLogOut`** for account sign-out.
+
+### Added
+
+- **`resources/js/lib/storefrontLanguageOptions.js`:** Single source for storefront locale labels (ca / es / en) used by **Navbar** and **Layout**.
+
+### Fixed
+
+- **Transactional email sender name:** When **`APP_NAME`** was unset or still the framework default, **`MAIL_FROM_NAME="${APP_NAME}"`** (as in **`.env.example`**) resolved to **“Laravel”** in clients’ inboxes. **`config/app.php`** now defaults **`APP_NAME`** to **Serralleria Solidària**, matching **`MAIL_FROM_NAME`** / branding.
+
+- **Icons (`IconUser`, `IconHelpCircle`):** SVG **`d`** arc flags were glued to coordinates (`011-7.5`, `0118`), which broke React’s DOM parser and distorted the profile icon; paths now use explicit separators (`0 1 1 -7.5`, `0 0 1 18`, etc.).
+
+- **Password reset API:** **`POST /api/v1/reset-password`** no longer reads **`password_confirmation`** from **`validated()`** (Laravel omits it even when **`password`** uses **`confirmed`**), which caused an undefined index and HTTP **500**. The confirmation value is taken from the request body.
+
+- **Admin · index column settings:** Sortable column rows use **`items-center`** so the drag handle, checkbox, and label align vertically in **`AdminIndexColumnsFieldset`**.
+
+- **Client verification email:** Laravel routes notification mail to an `email` attribute; storefront clients only have `login_email`, so verification (and password-reset) messages were skipped. **`Client::routeNotificationForMail()`** now returns `login_email`. Registration and **resend verification** set **`MailLocale`** from **`Accept-Language`** like other transactional mail.
+
+### Added
+
+- **Cursor rules:** **`agent-verification-opt-in.mdc`** — unless the user explicitly requests verification, agents **skip** running **`php artisan test`**, **`routes:smoke`**, **`npm run build`**, **`migrate:fresh --seed`** for QA gates; **mandatory** root **`package.json`** patch bump before **`git push`** when tracked files changed (overrides default **testing-verification** / smoke execution). **`AGENTS.md`** and **`docs/agent-cursor-rules.md`** updated.
+
+- **Cursor rules:** **`agent-task-version-bump.mdc`** — mandatory root **`package.json`** patch bump after **each agent-completed task** that commits; **`app-version-cadence.mdc`** / **`commit-changelog-version.mdc`** aligned; **`docs/agent-cursor-rules.md`** inventory updated.
+
+- **Storefront auth:** `clients.email_verified_at` and `remember_token`; `Client` implements email verification and password reset; JSON routes **forgot-password**, **reset-password**, **email/resend**, signed **email/verify/{id}/{hash}**; middleware **`client.verified`** on sensitive storefront APIs; **`GET reports/summary`** with **`auth.client_or_admin`** (shop metrics for admins, scoped metrics for verified clients).
+- **FAQ:** `faqs` table, public **`GET /faqs`**, admin **`apiResource`**, storefront FAQ page and admin CRUD (ca / es / en).
+- **Delivery note (albarán):** **`GET /orders/{order}/delivery-note`** (same rules as invoice), Blade **`pdf/delivery_note`**, links on order detail and orders list.
+
+- **Storefront / admin navigation:** React routes **`/faq`**, **`/forgot-password`**, **`/reset-password`**, **`/verify-email`**, admin **`/admin/faqs`** (and new/edit); **FAQ** and **forgot password** links in navbar, footer, and login; **register** hint about the verification screen; **login** success line when opening **`/login?verified=1`** after email verification.
+
+### Changed
+
+- **Production ops:** Base URL in server **`.env`** corrected (production deployment).
+
+- **Admin · About (`/admin/about`):** Laia Martín is linked to **GitHub** (**ViperBite03**), same pattern as Yoel Berjaga’s site link.
+
+- **Transactional email addresses:** Registration, login, password reset, and personalized-solution **`POST`** validate **`login_email` / `email`** with **RFC + DNS (MX-capable domain)** via **`ValidationRules::emailDns()`**; clearer validation messages in **ca / es / en**. Does not prove a mailbox exists on third-party hosts. Feature tests use **`@ietf.org`** sample addresses because **`example.com`** / **`example.org`** publish null MX (RFC 7505).
+
+- **Cart · quantity column:** Quantity **`input`** uses **`w-16`** like extra-keys (was **`w-20`**).
+
+- **Cart line · extra keys column:** The **input** is vertically centered in the row; the **€/u** line sits **`absolute`** under the input so it does not shift the centering anchor (inner wrapper height = input only).
+
+- **Admin · shop settings (Inici):** **General** only has **max manual** featured; **max tendència** sits in **Stock baix** / **Sobrestock** blocks without redundant «(stock bajo)» / «(sobrestock)» in labels. New i18n **`admin.settings.section_general`**.
+
+- **Login page:** Primary **Iniciar sesión** / **Log in** submit uses the **brand gradient** (**`from-primary` → `to-secondary`**) and shadow like **verify-email** and the scroll FAB.
+
+- **Auth notification HTML (verify + reset):** **Verify email** and **reset password** mails use the same **branded** **`emails.layouts.transactional`** layout as other shop mail (logo, orange gradient, CTA), with copy in **`lang/*/mail.php`**; **`App\Support\FrontendPasswordResetUrl`** builds the SPA reset link.
+
+- **Forgot password:** **`auth.forgot_sent`** (ca / es / en) is now a short confirmation that a **recovery email was sent**, instead of the conditional “if the email exists…” wording.
+
+- **Register (`RegisterPage`):** Removed the global mandatory-field legend line; required fields remain marked with **`*`** on labels.
+
+- **Verify email page:** Removed the **Home / Inicio** ghost button from **`EmailVerifyPage`**; navigation to **`next`** after verification is unchanged. Primary **resend** control is **centered** in the card.
+
+- **Storefront navbar · language menu:** Replaced the plain **dropdown** with a **card** panel (title, **close** control, **gradient** highlight for the active locale, checkmark), **click-outside** and **Escape** to dismiss; trigger shows **CA/ES/EN** with clearer styling. New **`IconX`**, i18n **`common.language`**.
+
+- **Email verification UX:** Removed **`EmailVerificationBanner`**. Dedicated **`/verify-email`** page (copy, **resend** with cooldown, **poll** **`GET user`**, **`navigate`** to **`next`** when verified); **register** → **`/verify-email?next=/`**, unverified **login** → **`/verify-email?next=…`**; **`AuthContext`** **`login`** / **`register`** now return **`user`** for redirects.
+
+- **Storefront / admin forms:** On failed submit (Zod or API error), the UI scrolls so feedback is visible: **`scrollWindowToTopOnFormError()`** for full-page and drawer forms, **`scrollOpenModalBoxToTop()`** for daisyUI modals (profile address/contact). Shared helpers in **`resources/js/lib/formScroll.js`**; pattern documented in **`.cursor/rules/react-use.mdc`**.
+
+- **Admin · shop settings · index columns:** Visible columns and **column order** are configurable per table (drag-and-drop in settings); list pages render columns in **`orderedVisibleColumnIds`** order. **`AdminIndexColumns::normalize()`** preserves stored order.
+
+- **Scroll to top:** FAB uses **brand gradient** (**`from-primary` → `to-secondary`**), subtle **inset ring**, stronger shadow on hover, and **motion-safe** press feedback (still **`btn-circle`**).
+
+- **App version in SPA:** **`welcome.blade.php`** sets **`window.__LARAVEL_APP_VERSION__`** from **`config('app.version')`**; **`resources/js/config/version.js`** prefers it over Vite **`define`** so admin sidebar / footer match **`package.json`** without restarting the dev server.
+
+- **Admin layout:** Sidebar **`menu`**: first block = Panel + sorted **catalog / ops** links; second block = **Settings**, **Data explorer**, **FAQ**, **About**, **Back to shop** (horizontal rule between).
+
+- **Custom solution (`/custom-solution`):** With an active session, **email**, **phone**, and **address** fields pre-fill from **`GET /api/v1/user`** (primary contact + first saved address); empty fields only so late auth load does not overwrite user typing.
+
+- **API + storefront locale:** `Accept-Language` (ca / es / en) is sent on all **`api`** requests and middleware **`SetApiLocaleFromAcceptLanguage`** sets the app locale so **validation** messages (e.g. postal **regex**) match the UI language. Custom **`lang/*/validation.php`** entries for postal fields; **`CustomSolutionPage`** shows API errors via **`messageFromApiValidationError`** and maps **`fieldErrorsFromApiValidation`** onto inputs (red borders / hints).
+
+- **Admin / personalized solution resolution modal:** Title is a single word (**`resolution_modal_title`**); status field uses **`select-md`**, **`text-base`**, **`max-w-md`**, and **`gap-8`** before the textarea; textarea label **`resolution_modal_text_label`** (*Texto de la resolución* / …).
+
+- **Admin · shop settings:** Toggle and checkbox labels use **`w-full min-w-0`**, **`items-start`**, **`shrink-0`** on controls, and **`min-w-0 flex-1`** on **`label-text`** so long strings wrap on narrow viewports instead of overflowing the card.
+
+- **Admin · About · team:** Simplified to two lines (Yoel Berjaga as link to **ldeluipy.es**, Laia Martín); removed intro and bios; i18n names updated in **ca** / **es** / **en**.
+
+## [0.1.33] - 2026-04-30
+
+### Changed
+
+- **Postal codes (digits only):** Shared **`resources/js/lib/postalInput.js`** (`sanitizePostalCodeDigits`, `coercePostalCodeFieldValue`) used on **CustomSolution**, **Register**, **Checkout**, **Profile** addresses, **client personalized-solution** portal, and **admin personalized-solution edit**. Inputs use **`inputMode="numeric"`**, **`pattern="[0-9]*"`**, and **`autoComplete="postal-code"`** where appropriate.
+- **Zod:** **`postalCodeRequired`** / **`postalCodeLoose`** and checkout’s optional installation postal require **1–20 digits**; new i18n **`validation.postal_digits`** (ca / es / en).
+- **API:** Laravel validation uses **`regex:/^\d{1,20}$/`** (or **`^\d{0,20}$`** for nullable installation postal when installation is off) on register, personalized solutions, profile addresses, and order checkout.
+
+## [0.1.30] - 2026-04-30
+
+### Added
+
+- **Admin · About (`/admin/about`):** Sidebar entry **About / Quant a / Acerca de** with application version (**`APP_VERSION`**), development team (Luipy56, Laia Martín de la Fuente), technical stack summary (ca / es / en), and the **full repository changelog** loaded dynamically from **`CHANGELOG.md`** via **`GET /api/v1/admin/changelog`** (**`AdminAboutController`**). Markdown rendered in the SPA with **react-markdown**.
+
+### Changed
+
+- **Admin order detail (`AdminOrderShowPage`):** One desktop **table** for both Products and Packs so column widths align; header **`admin.orders.line_name`** (Nom / Nombre / Name); order total uses **`text-end`**; **Llaves iguales** shows **No** when the field does not apply (no blank cells).
+
+- **Vite dev:** `npm run dev` now sets **`LARAVEL_VITE_NO_AUTO_RELOAD=1`** with **cross-env** (Windows-safe), disabling WebSocket HMR, React Fast Refresh, and Laravel plugin full-page refresh; use **`npm run dev:hmr`** for the previous default. Added devDependency **cross-env**; **`vite.config.js`** uses explicit **`hmr: true`** when hot reload is enabled.
+
+- **Admin / personalized solution:** **Send to client** opens a **confirmation dialog** before **`POST …/notify-resolution`** (**`email_client_confirm_*`** i18n).
+
+- **Admin / personalized solution modal:** Removed the duplicate **Send to client** button from the modal footer; it remains on the detail toolbar.
+
+## [0.1.28] - 2026-04-29
+
+### Added
+
+- **Admin layout:** Sidebar subtitle under the shop title shows **Admin** and the app semver (**`admin.sidebar.subtitle`**, same source as the storefront footer: **`APP_VERSION`** / `package.json`).
+
+- **Admin settings · column visibility:** Registry (`config/admin_index_columns.php` + `adminIndexColumnsRegistry.js`) lists **all** list columns per table (IDs, product destacat/tendència, order installation/shipping/timestamps, personalized solution client login email, feature type ID, etc.). Matching `<th>` / `<td>` on admin index pages; new i18n keys under **`admin.common.*`**, **`admin.orders.column_*`**, **`admin.personalized_solutions.client_login_email`**, **`admin.features.feature_name_id`**.
+
+### Changed
+
+- **Cursor rules:** Clarify that **`footer.version`** / **`__APP_VERSION__`** come from root **`package.json`** (nothing auto-bumps per prompt); document **patch semver** on each shippable task before push and **`prod`** merge (**`app-version-cadence.mdc`**, **`commit-changelog-version.mdc`**, **`testing-verification.mdc`**).
+
+- **Admin / personalized solution modal:** Status **select** uses **`select-sm`**, **`max-w-xs`**, and **`min-w-0`** so it does not stretch full modal width; modal title (**`resolution_modal_title`**) includes a **line break** after “o” / “or”; **`h2`** uses **`whitespace-pre-line`**.
+- **Admin / personalized solution detail:** Toolbar **`admin.personalized_solutions.email_client_short`** label is **Enviar al cliente / Enviar al client / Send to client**; **`resolution_modal_open`** remains **Resolución / Resolució / Resolution**.
+- **Storefront / order detail:** Status timeline no longer lists the synthetic **`current`** step (same label as the **Estado** badge above).
+- **Storefront i18n:** **`shop.shipping_flat`** is shortened to **Envío / Enviament / Shipping** (removed flat-rate parenthetical); used on cart, checkout, and order detail totals.
+- **Storefront / order detail (`/orders/:id`):** **Estado** and **fecha** are shown in a compact **summary card** (status badge, locale-aware date). Order lines match admin: **Productes** and **Packs** sections (hidden when empty), **totals** in a separate shaded footer; new i18n keys under **`shop.order.*`**.
+- **Storefront / custom solution:** Success toast copy (**`shop.custom_solution.success`**) reminds the user to **check email** (ca / es / en).
+- **Storefront / navbar:** The **`header-gradient-line`** loading animation tracks **all in-flight `api` (axios) requests**, not only **React Query**, so cart, profile, orders, checkout, etc. show the same bar as the product catalog (respects **`prefers-reduced-motion`**).
 
 ## [0.1.25] - 2026-04-28
 

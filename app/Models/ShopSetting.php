@@ -34,6 +34,27 @@ class ShopSetting extends Model
     /** JSON object: table_id => list of visible column ids (see config/admin_index_columns.php). */
     public const KEY_ADMIN_INDEX_COLUMNS = 'admin_index_columns';
 
+    /** Home featured section: max products per group; 0 = unlimited. */
+    public const KEY_FEATURED_MAX_MANUAL = 'featured_max_manual';
+
+    public const KEY_FEATURED_MAX_LOW_STOCK = 'featured_max_low_stock';
+
+    public const KEY_FEATURED_MAX_OVERSTOCK = 'featured_max_overstock';
+
+    /** Flat shipping fee (EUR) for new orders; persisted on each order row at checkout. */
+    public const KEY_SHIPPING_FLAT_EUR = 'shipping_flat_eur';
+
+    /**
+     * JSON: quote_when_merchandise_above_eur, tiers[{max_merchandise_eur, fee_eur}] sorted ascending by max.
+     */
+    public const KEY_INSTALLATION_AUTO_PRICING = 'installation_auto_pricing';
+
+    /**
+     * Default time period filter for admin order/solution lists.
+     * Allowed values: 'week', 'month', 'year', 'all'.
+     */
+    public const KEY_ADMIN_LIST_DEFAULT_PERIOD = 'admin_list_default_period';
+
     /**
      * @var array<string, mixed>
      */
@@ -47,7 +68,27 @@ class ShopSetting extends Model
         self::KEY_OVERSTOCK_BLACKLIST_ENABLED => false,
         self::KEY_OVERSTOCK_BLACKLIST_PRODUCT_IDS => [],
         self::KEY_ACCEPT_PERSONALIZED_SOLUTIONS => true,
+        self::KEY_FEATURED_MAX_MANUAL => 0,
+        self::KEY_FEATURED_MAX_LOW_STOCK => 0,
+        self::KEY_FEATURED_MAX_OVERSTOCK => 0,
+        self::KEY_SHIPPING_FLAT_EUR => 9.0,
+        self::KEY_INSTALLATION_AUTO_PRICING => [
+            'quote_when_merchandise_above_eur' => 1000,
+            'tiers' => [
+                ['max_merchandise_eur' => 250, 'fee_eur' => 90],
+                ['max_merchandise_eur' => 500, 'fee_eur' => 120],
+                ['max_merchandise_eur' => 1000, 'fee_eur' => 180],
+            ],
+        ],
+        self::KEY_ADMIN_LIST_DEFAULT_PERIOD => 'week',
     ];
+
+    public static function shippingFlatEur(): float
+    {
+        $v = self::get(self::KEY_SHIPPING_FLAT_EUR);
+
+        return round((float) $v, 2);
+    }
 
     protected function casts(): array
     {

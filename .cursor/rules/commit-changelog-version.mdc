@@ -1,24 +1,37 @@
 ---
-description: On "commit", review changelog/README/docs and bump root package.json version when changelog has substantial changes
+description: Changelog, README/docs review on commit; bump package.json semver for each shippable task (see app-version-cadence)
 alwaysApply: true
 ---
 
 # Commit: Changelog, docs, and version bump
 
-When the user says **"commit"** (or asks to commit changes):
+See **`.cursor/rules/app-version-cadence.mdc`** for **why** the footer version does not auto-increment, and **`.cursor/rules/agent-task-version-bump.mdc`** for the **mandatory patch bump after every agent task** that commits.
+
+## Changelog shape (no silent `[Unreleased]` dumps)
+
+- **Every ship-ready changelog bullet must live under a dated, semver header** — **`## [X.Y.Z] - YYYY-MM-DD`** — where **`X.Y.Z`** matches **root `package.json`** **after** the **`npm version patch`** for that work (same task / same push series).
+- **Do not** accumulate long lists under **`## [Unreleased]`**. That section hides the version string **that** operators and Admin About rely on. If Keep a Changelog style is kept, **`[Unreleased]`** may stay **empty** or contain at most a short note that the next bump will move entries — prefer skipping **`[Unreleased]`** entirely and writing straight into **`## [next patch] - date`** once the version is known.
+- **Workflow:** bump **`package.json`** patch → immediately add bullets under **`## [X.Y.Z] - YYYY-MM-DD`** with **`X.Y.Z`** equal to the new version → operators always see **which semver** contains **which change**.
+
+Treat **prompt finished** / **task done** / **hand-off ready** the same as **before `git push`**: if the agent changed the tree, bump patch and add **`CHANGELOG.md`** bullets under the **matching version section** — **not only** when the user types **commit**.
+
+When the user says **"commit"** (or asks to commit changes), or when finishing **any shippable task** before **`git push`**:
 
 1. **Review and update** before committing:
-   - **CHANGELOG.md** — Ensure `[Unreleased]` reflects the current changes; move items to a new version section if cutting a release.
+   - **CHANGELOG.md** — Under **`## [X.Y.Z] - YYYY-MM-DD`** (same **`X.Y.Z`** as bumped **`package.json`**), add **`### Added` / `Changed` / `Fixed` / `Removed`** as appropriate. Do **not** leave ship-ready notes only under **`[Unreleased]`**.
    - **README.md** — Update if the change affects setup, usage, or documented behavior.
    - **docs/** — Scan relevant `.md` files (e.g. deployment, payments, troubleshooting) and update any that are affected.
 
-2. **Version bump** when the changelog has **substantial or important changes**:
-   - "Reasonable size" = multiple items under Unreleased, or user-visible fixes/features.
-   - Bump **`package.json`** and **`package-lock.json`** in the **repository root** (this project’s app version for the Vite/React side; align with team policy if PHP version is tracked elsewhere).
-   - Add a new **`## [X.Y.Z] - YYYY-MM-DD`** section in CHANGELOG.md with the entries being released; clear or reduce `[Unreleased]` accordingly.
+2. **Version bump (patch) — default for real work:**
+   - **Agents:** follow **`.cursor/rules/agent-task-version-bump.mdc`** — bump on **every** committed task.
+   - For **every user-visible or behavior-changing** contribution (API, React, mail, payments, migrations affecting runtime, etc.), bump **`package.json`** and **`package-lock.json`** at the **repository root** in the **same commit series** as the change (or the immediate follow-up commit before push). Use e.g. **`npm version patch --no-git-tag-version`**.
+   - If you add **any** changelog bullet for that task, treat a **patch bump as mandatory** unless the entry is explicitly docs-only noise.
+   - **`X.Y.Z` in the changelog header must equal** the bumped **`package.json`** version for that release line.
 
-3. **Footer version (mandatory for anything that ships to prod):** The storefront and admin footer show **`footer.version`** using **`APP_VERSION`** from **`resources/js/config/version.js`**. That value is **`__APP_VERSION__`**, injected at **`npm run build`** from root **`package.json`** (`vite.config.js` → `define`). **`config('app.version')`** also reads `package.json` unless **`APP_VERSION`** is set in `.env`. **Whenever you merge or release user-visible work** (especially to **`prod`** / production deploy), **always** bump the root semver in **`package.json`** and **`package-lock.json`** in the **same commit** as the changelog cut (or immediately before the deploy branch merge), so CI rebuilds assets and the footer matches the release. Skipping the bump is a release bug: prod keeps showing the old number until the next bump + front-end build.
+3. **Footer / prod alignment:** Storefront and admin show **`footer.version`** via **`APP_VERSION`** (**`resources/js/config/version.js`** ← **`__APP_VERSION__`** from **`vite.config.js`**). **`config('app.version')`** reads **`package.json`** unless **`APP_VERSION`** overrides in `.env`. **Never merge to `prod` or deploy** without ensuring the integration tip includes a semver bump **after** the last user-visible change, then **`npm run build`** in CI or locally so assets embed the new number.
 
-4. **If in doubt** whether to bump: prefer bumping when there are user-facing fixes or features; skip for trivial or internal-only tweaks unless the user asks for a release.
+4. **Exceptions:** Docs-only / rule-only / task-markdown-only edits with **no** changelog runtime entry may skip a bump (if you still document the change, use a **versioned** section when you bump).
 
-5. **Branching:** Changelog commits belong on the **integration branch** (**`agentdevelop`** by default, or **`AGENT_GIT_BRANCH`**). Promoting those commits to **`master`** follows **`.cursor/rules/git-agent-branch-workflow.mdc`** (not every “commit” implies an immediate **`master`** push).
+5. **If in doubt:** Bump patch — stale footer versions confuse operators more than an extra patch digit.
+
+6. **Branching:** Changelog and version commits belong on the **integration branch** (**`agentdevelop`** default, or **`AGENT_GIT_BRANCH`**). Promoting to **`master`** / **`prod`** follows **`.cursor/rules/git-agent-branch-workflow.mdc`**.

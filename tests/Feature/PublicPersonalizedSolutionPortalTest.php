@@ -21,12 +21,36 @@ class PublicPersonalizedSolutionPortalTest extends TestCase
         $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 
+    public function test_store_invalid_postal_validation_message_respects_accept_language(): void
+    {
+        $response = $this->postJson(
+            '/api/v1/personalized-solutions',
+            [
+                'email' => 'local_'.uniqid('', true).'@ietf.org',
+                'phone' => null,
+                'problem_description' => 'Test',
+                'address_street' => null,
+                'address_city' => null,
+                'address_province' => null,
+                'address_postal_code' => 'X1',
+                'address_note' => null,
+            ],
+            ['Accept-Language' => 'ca'],
+        );
+
+        $response->assertUnprocessable();
+        $response->assertJsonPath(
+            'message',
+            'El codi postal ha de tenir només xifres (fins a 20).',
+        );
+    }
+
     public function test_store_returns_public_token_and_public_api_allows_manage(): void
     {
         Mail::fake();
 
         $response = $this->postJson('/api/v1/personalized-solutions', [
-            'email' => 'portal_'.uniqid('', true).'@example.test',
+            'email' => 'portal_'.uniqid('', true).'@ietf.org',
             'phone' => null,
             'problem_description' => 'Custom install request',
             'address_street' => null,
@@ -46,7 +70,7 @@ class PublicPersonalizedSolutionPortalTest extends TestCase
         $show->assertJsonPath('success', true);
         $show->assertJsonPath('data.status', PersonalizedSolution::STATUS_PENDING_REVIEW);
 
-        $newEmail = 'updated_'.uniqid('', true).'@example.test';
+        $newEmail = 'updated_'.uniqid('', true).'@ietf.org';
         $patch = $this->patchJson('/api/v1/public/personalized-solutions/'.$token, [
             'email' => $newEmail,
             'phone' => '600000000',
@@ -63,10 +87,10 @@ class PublicPersonalizedSolutionPortalTest extends TestCase
     public function test_request_improvements_sends_admin_mail_when_configured(): void
     {
         Mail::fake();
-        config(['mail.admin_notification_address' => 'ops@example.test']);
+        config(['mail.admin_notification_address' => 'ops@ietf.org']);
 
         $create = $this->postJson('/api/v1/personalized-solutions', [
-            'email' => 'imp_'.uniqid('', true).'@example.test',
+            'email' => 'imp_'.uniqid('', true).'@ietf.org',
             'phone' => null,
             'problem_description' => 'Need changes',
             'address_street' => null,
@@ -100,7 +124,7 @@ class PublicPersonalizedSolutionPortalTest extends TestCase
         $this->assertNotNull($solution);
 
         $this->putJson('/api/v1/admin/personalized-solutions/'.$solution->id, [
-            'email' => $solution->email ?? 'upd@example.test',
+            'email' => $solution->email ?? 'upd@ietf.org',
             'phone' => $solution->phone,
             'address_street' => $solution->address_street,
             'address_city' => $solution->address_city,

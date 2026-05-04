@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { scrollWindowToTopOnFormError } from '../lib/formScroll';
+import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { parseWithZod, registerFormSchema } from '../validation';
 
 export default function RegisterPage() {
@@ -30,7 +32,8 @@ export default function RegisterPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    const next = coercePostalCodeFieldValue(name, value);
+    setForm((f) => ({ ...f, [name]: next }));
     if (fieldErrors[name]) {
       setFieldErrors((fe) => {
         const next = { ...fe };
@@ -48,6 +51,7 @@ export default function RegisterPage() {
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.firstError);
+      scrollWindowToTopOnFormError();
       return;
     }
     setLoading(true);
@@ -55,15 +59,17 @@ export default function RegisterPage() {
       const result = await register(parsed.data);
       if (result.success) {
         await mergeCart();
-        navigate('/');
+        navigate('/verify-email?next=/');
       } else {
         const firstError = result.errors && Object.values(result.errors).flat()[0];
         setError(firstError || result.message || t('common.error'));
+        scrollWindowToTopOnFormError();
       }
     } catch (err) {
       const data = err.response?.data;
       const firstError = data?.errors && Object.values(data.errors).flat()[0];
       setError(firstError || data?.message || t('common.error'));
+      scrollWindowToTopOnFormError();
     } finally {
       setLoading(false);
     }
@@ -75,7 +81,7 @@ export default function RegisterPage() {
     <div className="mx-auto w-full min-w-0 max-w-4xl card bg-base-100 shadow-lg">
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.register')}</h1>
-        <p className="text-sm text-base-content/70">{t('register.required_note')}</p>
+        <p className="text-sm text-base-content/70">{t('register.verify_email_hint')}</p>
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && <div className="alert alert-error text-sm">{error}</div>}
 
@@ -207,6 +213,9 @@ export default function RegisterPage() {
                 <input
                   id="register-address_postal_code"
                   name="address_postal_code"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  pattern="[0-9]*"
                   className={`input input-bordered w-full${fieldErrors.address_postal_code ? ' input-error' : ''}`}
                   value={form.address_postal_code}
                   onChange={handleChange}

@@ -33,9 +33,17 @@ return [
         'greeting' => 'Hello,',
         'body' => 'We have received your order #:id. It is still pending: we have not yet received the payment.',
         'total_due' => 'Amount due',
-        'cta' => 'Please complete the payment in the store using the link below (e.g. after PayPal, Stripe redirect, or other hosted checkout).',
+        'cta' => 'Please complete the payment in the store using the link below.',
         'button' => 'Go to order',
         'footer' => 'If you already paid, you will get the payment confirmation once the bank or payment provider finalises the charge.',
+    ],
+
+    'admin_order_payment_confirmed' => [
+        'subject'      => '[Order #:id] Payment confirmed',
+        'intro'        => 'Payment for order #:id has been confirmed.',
+        'client_email' => 'Customer:',
+        'grand_total'  => 'Total paid',
+        'button'       => 'Open in admin',
     ],
 
     'admin_order_installation_quote' => [
@@ -93,6 +101,25 @@ return [
         'email' => 'Email:',
         'message' => 'Message:',
         'button' => 'Open in admin',
+    ],
+
+    'verify_email' => [
+        'subject' => 'Verify your email',
+        'greeting' => 'Hello,',
+        'body' => 'Click the button below to confirm your email address and activate your account.',
+        'button' => 'Verify email',
+        'link_fallback_label' => 'If the button does not work',
+        'line2' => 'If you did not create an account, you can ignore this message.',
+    ],
+
+    'reset_password' => [
+        'subject' => 'Reset your password',
+        'greeting' => 'Hello,',
+        'body' => 'We received a request to reset your account password. Click the button to choose a new password.',
+        'button' => 'Reset password',
+        'expiry' => 'This link expires in :minutes minutes.',
+        'link_fallback_label' => 'If the button does not work',
+        'line2' => 'If you did not request a password reset, you can ignore this email.',
     ],
 
     'order_shipped' => [

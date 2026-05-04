@@ -77,13 +77,70 @@ Headless-style **Laravel** backend (REST API + session auth) with a **React** st
    npm run dev
    ```
 
-   Open the app URL (e.g. `http://127.0.0.1:8000`). Vite serves and hot-reloads the React bundle.
+   Open the app URL (e.g. `http://127.0.0.1:8000`). By default **`npm run dev`** runs Vite **without** WebSocket HMR / React Fast Refresh and **without** Laravel’s dev full-page refresh on PHP/Blade saves (`LARAVEL_VITE_NO_AUTO_RELOAD=1` via **cross-env**, so it works on Windows too). After editing front-end files, refresh the browser manually. For classic hot reload, use **`npm run dev:hmr`** instead.
 
 7. **Production assets**
 
    ```bash
    npm run build
    ```
+
+## Docker (development and production)
+
+Requires **Docker** and **Docker Compose v2** (v2.17+ recommended for production builds because the **nginx** image uses `additional_contexts` to copy `public/` from the PHP image).
+
+### Development (`docker-compose.yml`)
+
+Uses **PostgreSQL 16**, **PHP 8.2 FPM**, **Nginx**, a **Node** service for Vite (`npm run dev:hmr` on port **5173**), and a **queue** worker. Named volumes keep **`vendor/`** and **`node_modules/`** inside the stack so bind-mounting the repo does not wipe dependencies.
+
+1. Copy **`.env.example`** → **`.env`**, set **`APP_KEY`**, and align URLs (Compose defaults below override `.env` when unset in the shell):
+
+   - **`APP_URL`**: `http://localhost:8080` (Nginx is published on **8080** by default; override with **`HTTP_PORT`**).
+   - **`VITE_DEV_SERVER_URL`**: `http://localhost:5173` (override with **`VITE_PORT`** if you change the Vite port).
+
+2. Install PHP dependencies into the **`vendor`** volume:
+
+   ```bash
+   docker compose run --rm app composer install
+   ```
+
+3. Start the stack:
+
+   ```bash
+   docker compose up -d
+   ```
+
+4. Migrate and seed (development database only):
+
+   ```bash
+   docker compose exec app php artisan migrate --seed
+   ```
+
+5. Open **http://localhost:8080** (storefront + API). Vite HMR uses **`DOCKER=1`** and **`VITE_DOCKER_HMR_HOST`** (default **`localhost`**) — see **`vite.config.js`**.
+
+Common Artisan commands: **`docker compose exec app php artisan …`**. Compose sets **`TRUSTED_PROXIES=*`** (read via **`config/trustedproxy.php`** by Laravel’s **`TrustProxies`** middleware), **`DB_HOST=postgres`**, and **`WAIT_FOR_DB=1`** for the app and queue services.
+
+### Production (`docker-compose.prod.yml`)
+
+Builds a **multi-stage** image (`docker/php/Dockerfile`, target **`production`**) with **`composer install --no-dev`**, **`npm run build`**, and OPcache. **`.env`** is **required** (real **`APP_KEY`**, **`APP_ENV=production`**, database credentials, etc.). Data persists in named volumes for Postgres, **`storage/`**, and **`bootstrap/cache/`**.
+
+```bash
+cp .env.example .env
+# Edit .env: production values, APP_KEY, DB_*, mail, payments, etc.
+
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Services: **`app`** (php-fpm), **`nginx`** (port **80**, override with **`HTTP_PORT`**), **`queue`**, **`scheduler`**, **`postgres`**. Run migrations from your release process, for example:
+
+```bash
+docker compose -f docker-compose.prod.yml exec app php artisan migrate --force
+```
+
+Optional: set **`APP_IMAGE_NAME`** in the environment to prefix image names (default **`laravel-ecommerce-app`**).
+
+**Laravel Sail** remains available as a dev dependency (`php artisan sail:install`); the supported path in this repo is the **`docker compose`** files above.
 
 ## Verification and smoke checks
 
@@ -108,6 +165,7 @@ For checkout and payments work, see **`.cursor/rules/testing-verification.mdc`**
 | [`docs/postgresql.md`](docs/postgresql.md) | PostgreSQL setup, PHP `pdo_pgsql`, SSL, extensions, search |
 | [`docs/agent-loop.md`](docs/agent-loop.md) | Task pipeline and labels (for teams using `agents/tasks/`) |
 | [`docs/agent-cursor-rules.md`](docs/agent-cursor-rules.md) | Index of Cursor/project rules |
+| [`docker-compose.yml`](docker-compose.yml) / [`docker-compose.prod.yml`](docker-compose.prod.yml) | Docker development and production stacks (see *Docker* above) |
 
 Do **not** commit secrets, API keys, or production credentials. Use `.env` (ignored by git) and document only variable *names* and safe examples.
 

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-const PAYMENT_METHODS = z.enum(['card', 'paypal']);
+/** Order of options in checkout / pay forms (must match server `payment_method` values). */
+export const CHECKOUT_PAYMENT_METHOD_ORDER = ['card', 'paypal'];
 
 /** Optional phone: empty or international-style with at least 6 digits. */
 export const optionalPhoneString = z
@@ -20,14 +21,18 @@ export const optionalEmailString = z
   .transform((s) => s.trim())
   .refine((s) => s === '' || z.string().email().safeParse(s).success, { message: 'validation.email' });
 
-export const postalCodeRequired = z.string().trim().min(1, { message: 'validation.required' }).max(20);
+/** Numeric postal codes only (1–20 digits); aligns with storefront expectation for ES-style CP. */
+export const postalCodeRequired = z
+  .string()
+  .trim()
+  .regex(/^\d{1,20}$/, { message: 'validation.postal_digits' });
 
-/** Shipping / address postal: same rules as backend max:20. */
+/** Required shipping / installation postal when user fills the block. */
 export const postalCodeLoose = z
   .string()
   .trim()
   .min(1, { message: 'validation.required' })
-  .max(20, { message: 'validation.max_length' });
+  .regex(/^\d{1,20}$/, { message: 'validation.postal_digits' });
 
 export const loginSchema = z.object({
   login_email: requiredEmail,
@@ -71,14 +76,20 @@ export const customSolutionFormSchema = z.object({
 });
 
 /**
- * @param {{ wantsInstallation: boolean, installationQuoteRequired: boolean, checkoutDemoSkipPayment?: boolean }} opts
+ * @param {{ wantsInstallation: boolean, installationQuoteRequired: boolean, checkoutDemoSkipPayment?: boolean, allowedPaymentMethods?: string[] }} opts
  */
 export function checkoutFormSchema({
   wantsInstallation,
   installationQuoteRequired,
   checkoutDemoSkipPayment = false,
+  allowedPaymentMethods = ['card', 'paypal'],
 }) {
-  const paymentMethodField = checkoutDemoSkipPayment ? z.enum(['card', 'paypal']).optional() : PAYMENT_METHODS;
+  const allowed = [...new Set((allowedPaymentMethods || []).filter(Boolean))];
+  const paymentMethodSchema = z
+    .string()
+    .min(1, { message: 'validation.required' })
+    .refine((m) => allowed.length === 0 || allowed.includes(m), { message: 'validation.invalid' });
+  const paymentMethodField = checkoutDemoSkipPayment ? z.string().optional().nullable() : paymentMethodSchema;
   const shipping = {
     shipping_street: z.string().trim().min(1, { message: 'validation.required' }).max(255),
     shipping_city: z.string().trim().min(1, { message: 'validation.required' }).max(100),
@@ -110,12 +121,20 @@ export function checkoutFormSchema({
     });
   }
 
+  const optionalNumericPostal = z
+    .string()
+    .max(20)
+    .refine((s) => {
+      const t = s.trim();
+      return t === '' || /^\d{1,20}$/.test(t);
+    }, { message: 'validation.postal_digits' });
+
   return z.object({
     ...shipping,
     payment_method: paymentMethodField,
     installation_street: z.string().max(255),
     installation_city: z.string().max(100),
-    installation_postal_code: z.string().max(20),
+    installation_postal_code: optionalNumericPostal,
     installation_note: z.string().max(5000),
   });
 }

@@ -8,6 +8,8 @@ import { emitAppToast } from './toastEvents';
  * The meta tag token is stale after login (session regeneration), causing 419 on cart/merge.
  * Laravel sends the fresh token in the cookie with every response.
  */
+const API_UI_LOCALES = ['ca', 'es', 'en'];
+
 export const api = axios.create({
   baseURL: '/api/v1',
   withCredentials: true,
@@ -23,6 +25,43 @@ api.interceptors.request.use((config) => {
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
   }
+  const raw = typeof i18n.language === 'string' ? i18n.language.slice(0, 2) : 'ca';
+  const code = API_UI_LOCALES.includes(raw) ? raw : 'ca';
+  config.headers = config.headers ?? {};
+  config.headers['Accept-Language'] = code;
+  return config;
+});
+
+/** In-flight requests on this axios instance (storefront + admin shared client). Used for global loading UI (e.g. navbar gradient line). */
+let apiPendingCount = 0;
+const apiPendingListeners = new Set();
+
+function notifyApiPending() {
+  apiPendingListeners.forEach((fn) => fn(apiPendingCount));
+}
+
+function bumpApiPending(delta) {
+  apiPendingCount = Math.max(0, apiPendingCount + delta);
+  notifyApiPending();
+}
+
+/**
+ * Subscribe to the count of pending `api` requests. Listener is called immediately and on each change.
+ * @param {(n: number) => void} listener
+ * @returns {() => void} unsubscribe
+ */
+export function subscribeApiPending(listener) {
+  apiPendingListeners.add(listener);
+  listener(apiPendingCount);
+  return () => apiPendingListeners.delete(listener);
+}
+
+export function getApiPendingCount() {
+  return apiPendingCount;
+}
+
+api.interceptors.request.use((config) => {
+  bumpApiPending(1);
   return config;
 });
 
@@ -62,6 +101,17 @@ api.interceptors.response.use(
       // Optional: trigger logout in auth context
     }
     return Promise.reject(err);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => {
+    bumpApiPending(-1);
+    return response;
+  },
+  (error) => {
+    bumpApiPending(-1);
+    return Promise.reject(error);
   }
 );
 

@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\ShopSetting;
-use App\Support\AdminIndexColumns;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -33,7 +32,7 @@ class ShopSettingsTest extends TestCase
         ShopSetting::set(ShopSetting::KEY_ACCEPT_PERSONALIZED_SOLUTIONS, false);
 
         $this->postJson('/api/v1/personalized-solutions', [
-            'email' => 'test@example.com',
+            'email' => 'test@ietf.org',
             'phone' => null,
             'problem_description' => 'Need help',
             'address_street' => null,
@@ -61,7 +60,18 @@ class ShopSettingsTest extends TestCase
             ->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.low_stock_enabled', false)
-            ->assertJsonStructure(['data' => ['admin_index_columns' => ['products', 'orders']]]);
+            ->assertJsonPath('data.featured_max_manual', 0)
+            ->assertJsonPath('data.featured_max_low_stock', 0)
+            ->assertJsonPath('data.featured_max_overstock', 0)
+            ->assertJsonStructure([
+                'data' => [
+                    'admin_index_columns' => ['products', 'orders'],
+                    'shipping_flat_eur',
+                    'installation_auto_pricing',
+                ],
+            ])
+            ->assertJsonPath('data.shipping_flat_eur', 9)
+            ->assertJsonPath('data.installation_auto_pricing.quote_when_merchandise_above_eur', 1000);
 
         $this->putJson('/api/v1/admin/settings', [
             'low_stock_enabled' => true,
@@ -73,8 +83,14 @@ class ShopSettingsTest extends TestCase
             'overstock_blacklist_enabled' => false,
             'overstock_blacklist_product_ids' => [],
             'accept_personalized_solutions' => true,
+            'featured_max_manual' => 3,
+            'featured_max_low_stock' => 5,
+            'featured_max_overstock' => 2,
         ])->assertOk()
-            ->assertJsonPath('data.low_stock_threshold', 20);
+            ->assertJsonPath('data.low_stock_threshold', 20)
+            ->assertJsonPath('data.featured_max_manual', 3)
+            ->assertJsonPath('data.featured_max_low_stock', 5)
+            ->assertJsonPath('data.featured_max_overstock', 2);
 
         $product = Product::query()->active()->first();
         $this->assertNotNull($product);
@@ -96,6 +112,47 @@ class ShopSettingsTest extends TestCase
         $this->postJson('/api/v1/admin/settings/recalculate-trending')->assertOk();
 
         $this->assertFalse($product->fresh()->is_trending);
+    }
+
+    public function test_admin_can_update_shipping_flat_eur(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $this->putJson('/api/v1/admin/settings', [
+            'shipping_flat_eur' => 12.5,
+        ])->assertOk()
+            ->assertJsonPath('data.shipping_flat_eur', 12.5);
+
+        $this->getJson('/api/v1/admin/settings')
+            ->assertOk()
+            ->assertJsonPath('data.shipping_flat_eur', 12.5);
+    }
+
+    public function test_admin_installation_auto_pricing_rejects_mismatched_last_tier(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $this->putJson('/api/v1/admin/settings', [
+            'installation_auto_pricing' => [
+                'quote_when_merchandise_above_eur' => 1000,
+                'tiers' => [
+                    ['max_merchandise_eur' => 250, 'fee_eur' => 90],
+                    ['max_merchandise_eur' => 500, 'fee_eur' => 120],
+                ],
+            ],
+        ])->assertStatus(422);
     }
 
     public function test_admin_index_columns_persist_valid_subset(): void
@@ -153,6 +210,9 @@ class ShopSettingsTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
+        ShopSetting::set(ShopSetting::KEY_LOW_STOCK_ENABLED, true);
+        ShopSetting::set(ShopSetting::KEY_LOW_STOCK_THRESHOLD, 50);
+
         $a = Product::query()->active()->orderBy('id')->first();
         $b = Product::query()->active()->where('id', '!=', $a->id)->orderBy('id')->first();
         $this->assertNotNull($b);
@@ -166,5 +226,23 @@ class ShopSettingsTest extends TestCase
         $this->assertSame(count($ids), count(array_unique($ids)));
         $this->assertContains($a->id, $ids);
         $this->assertContains($b->id, $ids);
+    }
+
+    public function test_featured_endpoint_respects_featured_max_manual(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        ShopSetting::set(ShopSetting::KEY_FEATURED_MAX_MANUAL, 1);
+        ShopSetting::set(ShopSetting::KEY_LOW_STOCK_ENABLED, false);
+
+        $products = Product::query()->active()->orderBy('id')->take(3)->get();
+        $this->assertGreaterThanOrEqual(2, $products->count());
+        foreach ($products->take(2) as $p) {
+            $p->update(['is_featured' => true, 'is_trending' => false]);
+        }
+
+        $response = $this->getJson('/api/v1/products/featured');
+        $response->assertOk();
+        $this->assertCount(1, $response->json('data'));
     }
 }

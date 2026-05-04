@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -12,22 +12,57 @@ const appVersion =
         ? packageJson.version
         : '0.0.0';
 
-export default defineConfig({
-    define: {
-        __APP_VERSION__: JSON.stringify(appVersion),
-    },
-    plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.jsx'],
-            refresh: true,
-        }),
-        react(),
-        tailwindcss(),
-    ],
-    server: {
-        watch: {
-            ignored: ['**/storage/framework/views/**'],
+function envFlag(value) {
+    const v = String(value ?? '')
+        .trim()
+        .toLowerCase();
+    return v === '1' || v === 'true' || v === 'yes';
+}
+
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, process.cwd(), '');
+    const noAutoReload = envFlag(env.LARAVEL_VITE_NO_AUTO_RELOAD);
+    const isDocker = envFlag(env.DOCKER);
+    const hmrHost = env.VITE_DOCKER_HMR_HOST || 'localhost';
+
+    const server = isDocker
+        ? {
+              host: true,
+              port: 5173,
+              strictPort: true,
+              hmr: noAutoReload
+                  ? false
+                  : {
+                        host: hmrHost,
+                        clientPort: 5173,
+                    },
+              watch: {
+                  ignored: ['**/storage/framework/views/**'],
+                  ...(envFlag(env.CHOKIDAR_USEPOLLING) ? { usePolling: true } : {}),
+              },
+          }
+        : {
+              /** WebSocket HMR. When false, @vitejs/plugin-react skips Fast Refresh (see configResolved). */
+              hmr: noAutoReload ? false : true,
+              watch: {
+                  ignored: ['**/storage/framework/views/**'],
+              },
+          };
+
+    return {
+        define: {
+            __APP_VERSION__: JSON.stringify(appVersion),
         },
-    },
+        plugins: [
+            laravel({
+                input: ['resources/css/app.css', 'resources/js/app.jsx'],
+                /** Full-page reload when PHP/Blade/etc. change; set LARAVEL_VITE_NO_AUTO_RELOAD=1 to disable. */
+                refresh: !noAutoReload,
+            }),
+            react(),
+            tailwindcss(),
+        ],
+        server,
+    };
 });
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
@@ -8,7 +8,9 @@ import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { emitAppToast } from '../toastEvents';
-import { checkoutFormSchema, parseWithZod } from '../validation';
+import { scrollWindowToTopOnFormError } from '../lib/formScroll';
+import { coercePostalCodeFieldValue } from '../lib/postalInput';
+import { CHECKOUT_PAYMENT_METHOD_ORDER, checkoutFormSchema, parseWithZod } from '../validation';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
 
 const INITIAL_FORM = {
@@ -49,15 +51,22 @@ export default function CheckoutPage() {
   const [paypalCancelWarning, setPaypalCancelWarning] = useState('');
   /** Temporary workaround for demo: complete order without PSP when server allows (CHECKOUT_DEMO_SKIP_PAYMENT). */
   const [checkoutDemoSkipPayment, setCheckoutDemoSkipPayment] = useState(false);
+  const paymentPanelRef = useRef(null);
   const wantsInstallation = !!cart.installation_requested;
   const installationQuoteRequired = !!(wantsInstallation && cart.installation_quote_required);
   /** Must choose a PSP method (not used when awaiting a manual installation quote only). */
   const paymentRequired = !wantsInstallation || !installationQuoteRequired;
+  const allowedPaymentMethods = useMemo(() => {
+    if (payMethods === null) return ['card', 'paypal'];
+    return CHECKOUT_PAYMENT_METHOD_ORDER.filter((k) => payMethods[k]);
+  }, [payMethods]);
+
   const checkoutSchemaOpts = {
     wantsInstallation,
     installationQuoteRequired,
     checkoutDemoSkipPayment:
       !!payConfigMeta.checkout_demo_skip_payment_allowed && checkoutDemoSkipPayment,
+    allowedPaymentMethods,
   };
 
   useEffect(() => {
@@ -106,7 +115,7 @@ export default function CheckoutPage() {
     if (payMethods === null || !paymentRequired) return;
     setForm((f) => {
       if (payMethods[f.payment_method]) return f;
-      const first = ['card', 'paypal'].find((k) => payMethods[k]);
+      const first = CHECKOUT_PAYMENT_METHOD_ORDER.find((k) => payMethods[k]);
       return first ? { ...f, payment_method: first } : f;
     });
   }, [payMethods, paymentRequired]);
@@ -136,9 +145,16 @@ export default function CheckoutPage() {
     });
   }, [user?.id]);
 
+  useEffect(() => {
+    if (activeCheckout) {
+      paymentPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [activeCheckout]);
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setCheckoutFormError('');
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    setForm((f) => ({ ...f, [name]: coercePostalCodeFieldValue(name, value) }));
   };
 
   const doCheckout = useCallback(async () => {
@@ -154,6 +170,7 @@ export default function CheckoutPage() {
       if (!parsed.ok) {
         emitAppToast(parsed.firstError, 'error');
         setCheckoutFormError(parsed.firstError);
+        scrollWindowToTopOnFormError();
         return;
       }
       const payload = installationQuoteRequired ? { ...parsed.data, payment_method: null } : { ...parsed.data };
@@ -191,12 +208,6 @@ export default function CheckoutPage() {
         window.location.href = c.checkout_url;
         return;
       }
-      if (c?.gateway === 'paypal' && c.approval_url) {
-        const opened = openPayPalApprovalInNewTab(c.approval_url);
-        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
-        navigate('/orders/' + d.id, { state: { paypalHostedWindow: true } });
-        return;
-      }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
         setActiveCheckout({
           orderId: d.id,
@@ -209,6 +220,12 @@ export default function CheckoutPage() {
         });
         return;
       }
+      if (c?.gateway === 'paypal' && c.approval_url) {
+        const opened = openPayPalApprovalInNewTab(c.approval_url);
+        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
+        navigate('/orders/' + d.id, { state: { paypalHostedWindow: true } });
+        return;
+      }
 
       navigate('/orders/' + d.id);
     } catch (err) {
@@ -218,6 +235,7 @@ export default function CheckoutPage() {
           ? t('shop.payment.method_unavailable')
           : d?.message || t('common.error');
       emitAppToast(msg, 'error');
+      scrollWindowToTopOnFormError();
     } finally {
       setLoading(false);
     }
@@ -230,6 +248,9 @@ export default function CheckoutPage() {
     paymentRequired,
     checkoutDemoSkipPayment,
     payConfigMeta.checkout_demo_skip_payment_allowed,
+    allowedPaymentMethods,
+    wantsInstallation,
+    installationQuoteRequired,
     t,
   ]);
 
@@ -240,6 +261,7 @@ export default function CheckoutPage() {
     const parsed = parseWithZod(checkoutFormSchema(checkoutSchemaOpts), toValidate, t);
     if (!parsed.ok) {
       setCheckoutFormError(parsed.firstError);
+      scrollWindowToTopOnFormError();
       return;
     }
     setConfirmOpen(true);
@@ -268,7 +290,7 @@ export default function CheckoutPage() {
     wantsInstallation && cart.installation_fee_eur != null ? Number(cart.installation_fee_eur) : 0;
   const grandTotalCheckout = Number(cart.total) + shipFlat + installationFeeAmount;
 
-  if (!cart.lines?.length) {
+  if (!cart.lines?.length && !activeCheckout) {
     return (
       <div className="text-center py-8">
         <p className="mb-4">{t('shop.cart.empty')}</p>
@@ -319,7 +341,7 @@ export default function CheckoutPage() {
           </label>
           <label className="form-field w-full">
             <span className="form-label">{t('profile.postal_code')} *</span>
-            <input name="shipping_postal_code" className="input input-bordered w-full" value={form.shipping_postal_code} onChange={handleChange} required />
+            <input name="shipping_postal_code" inputMode="numeric" autoComplete="postal-code" pattern="[0-9]*" className="input input-bordered w-full" value={form.shipping_postal_code} onChange={handleChange} required />
           </label>
           <label className="form-field w-full">
             <span className="form-label">{t('checkout.note')}</span>
@@ -339,7 +361,7 @@ export default function CheckoutPage() {
               </label>
               <label className="form-field w-full">
                 <span className="form-label">{t('profile.postal_code')} *</span>
-                <input name="installation_postal_code" className="input input-bordered w-full" value={form.installation_postal_code} onChange={handleChange} required />
+                <input name="installation_postal_code" inputMode="numeric" autoComplete="postal-code" pattern="[0-9]*" className="input input-bordered w-full" value={form.installation_postal_code} onChange={handleChange} required />
               </label>
               <label className="form-field w-full">
                 <span className="form-label">{t('checkout.note')}</span>
@@ -413,8 +435,7 @@ export default function CheckoutPage() {
                       {!payMethodsReady ? (
                         <option value="">{t('common.loading')}</option>
                       ) : (
-                        ['card', 'paypal']
-                          .filter((value) => payMethods[value])
+                        CHECKOUT_PAYMENT_METHOD_ORDER.filter((value) => payMethods[value])
                           .map((value) => (
                             <option key={value} value={value}>
                               {t(`checkout.payment.${value}`)}
@@ -472,7 +493,7 @@ export default function CheckoutPage() {
       </form>
 
       {activeCheckout?.paypal && (
-        <div className="card bg-base-100 shadow border border-base-300 mt-6">
+        <div ref={paymentPanelRef} className="card bg-base-100 shadow border border-base-300 mt-6">
           <div className="card-body space-y-3">
             <h2 className="card-title text-base">{t('checkout.payment.complete_paypal')}</h2>
             <p className="text-sm text-base-content/70">{t('checkout.payment.paypal_help')}</p>

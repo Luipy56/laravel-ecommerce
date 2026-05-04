@@ -6,6 +6,8 @@ use App\Events\InstallationPriceWasAssigned;
 use App\Events\OrderShipped;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Payment;
+use App\Models\ShopSetting;
 use App\Models\OrderLine;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -44,6 +46,18 @@ class AdminOrderController extends Controller
             $query->where('kind', Order::KIND_ORDER)
                 ->where('installation_requested', true)
                 ->where('installation_status', Order::INSTALLATION_PENDING);
+        }
+        if ($request->filled('period')) {
+            $period = (string) $request->input('period');
+            $from = match ($period) {
+                'week'  => now()->subWeek(),
+                'month' => now()->subMonth(),
+                'year'  => now()->subYear(),
+                default => null,
+            };
+            if ($from !== null) {
+                $query->where('created_at', '>=', $from);
+            }
         }
 
         $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
@@ -204,8 +218,8 @@ class AdminOrderController extends Controller
         if (array_key_exists('shipping_date', $validated)) {
             $order->shipping_date = $validated['shipping_date'] ? \Carbon\Carbon::parse($validated['shipping_date']) : null;
         }
-        if ($order->kind === Order::KIND_ORDER) {
-            $order->shipping_price = Order::SHIPPING_FLAT_EUR;
+        if ($order->kind === Order::KIND_ORDER && $order->shipping_price === null) {
+            $order->shipping_price = ShopSetting::shippingFlatEur();
         }
 
         if ($order->installation_requested && $order->kind === Order::KIND_ORDER) {
@@ -269,4 +283,5 @@ class AdminOrderController extends Controller
             ],
         ]);
     }
+
 }

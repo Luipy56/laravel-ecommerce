@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
+import { sanitizePostalCodeDigits } from '../lib/postalInput';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../contexts/ToastContext';
@@ -60,6 +61,7 @@ export default function ClientPersonalizedSolutionPage() {
             address_postal_code: d.address_postal_code ?? '',
             address_note: d.address_note ?? '',
           });
+          setImprovement(d.improvement_feedback ?? '');
           setNotFound(false);
         } else setNotFound(true);
       })
@@ -103,7 +105,7 @@ export default function ClientPersonalizedSolutionPage() {
       });
       if (data.success && data.data) {
         setData(data.data);
-        setImprovement('');
+        setImprovement(data.data.improvement_feedback ?? '');
         showToast({ message: t('common.success'), type: 'success' });
       }
     } catch (err) {
@@ -160,11 +162,6 @@ export default function ClientPersonalizedSolutionPage() {
         <div className="card-body space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`badge ${statusBadgeClass(data.status)}`}>{statusLabel}</span>
-            {data.iterations_count > 0 && (
-              <span className="text-sm text-base-content/70">
-                {t('shop.client_portal.iterations')}: {data.iterations_count}
-              </span>
-            )}
           </div>
           {data.problem_description && (
             <section>
@@ -237,7 +234,18 @@ export default function ClientPersonalizedSolutionPage() {
             </label>
             <label className="form-field">
               <span className="form-label">{t('admin.personalized_solutions.address_postal_code')} *</span>
-              <input type="text" className="input input-bordered w-full" value={form.address_postal_code} onChange={(e) => setForm((f) => ({ ...f, address_postal_code: e.target.value }))} required />
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                pattern="[0-9]*"
+                className="input input-bordered w-full"
+                value={form.address_postal_code}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, address_postal_code: sanitizePostalCodeDigits(e.target.value) }))
+                }
+                required
+              />
             </label>
             <label className="form-field sm:col-span-2">
               <span className="form-label">{t('shop.custom_solution.address_note')}</span>

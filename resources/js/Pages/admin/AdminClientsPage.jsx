@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
@@ -14,48 +14,149 @@ function clientTypeLabel(type, t) {
 export default function AdminClientsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isVisible } = useAdminIndexColumnVisibility('clients');
+  const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('clients');
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
-  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [search, setSearch] = useState('');
   const [searchDebounce, setSearchDebounce] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [activeFilter, setActiveFilter] = useState('1');
+  const pageRef = useRef(1);
+  const sentinelRef = useRef(null);
 
-  const fetchClients = useCallback(async () => {
-    setLoading(true);
+  const fetchClients = useCallback(async (pageNum, reset = false) => {
+    if (reset) setLoading(true);
+    else setLoadingMore(true);
     try {
-      const params = { page, per_page: 20 };
+      const params = { page: pageNum, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
       if (typeFilter) params.type = typeFilter;
       if (activeFilter !== '') params.is_active = activeFilter === '1';
       const { data } = await api.get('admin/clients', { params });
       if (data.success) {
-        setClients(data.data || []);
-        setMeta(data.meta || meta);
+        const newItems = data.data || [];
+        if (reset) setClients(newItems);
+        else setClients((prev) => [...prev, ...newItems]);
+        const meta = data.meta || {};
+        setHasMore((meta.current_page ?? pageNum) < (meta.last_page ?? 1));
+        pageRef.current = pageNum;
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      setClients([]);
+      if (reset) setClients([]);
     } finally {
-      setLoading(false);
+      if (reset) setLoading(false);
+      else setLoadingMore(false);
     }
-  }, [navigate, page, searchDebounce, typeFilter, activeFilter]);
+  }, [navigate, searchDebounce, typeFilter, activeFilter]);
 
   useEffect(() => {
-    fetchClients();
+    pageRef.current = 1;
+    fetchClients(1, true);
   }, [fetchClients]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [searchDebounce, typeFilter, activeFilter]);
+  const clientHeaderCell = (colId) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <th key={colId} className="text-center tabular-nums">
+            {t('admin.common.column_id')}
+          </th>
+        );
+      case 'email':
+        return <th key={colId}>{t('admin.clients.email')}</th>;
+      case 'type':
+        return <th key={colId}>{t('admin.clients.filter_type')}</th>;
+      case 'identification':
+        return <th key={colId}>{t('admin.clients.identification')}</th>;
+      case 'primary_contact':
+        return <th key={colId}>{t('admin.clients.primary_contact')}</th>;
+      case 'contacts_count':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.clients.contacts_count')}
+          </th>
+        );
+      case 'addresses_count':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.clients.addresses_count')}
+          </th>
+        );
+      case 'is_active':
+        return (
+          <th key={colId} className="text-center">
+            {t('admin.products.is_active')}
+          </th>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const clientBodyCell = (colId, c) => {
+    switch (colId) {
+      case 'id':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {c.id}
+          </td>
+        );
+      case 'email':
+        return <td key={colId}>{c.login_email}</td>;
+      case 'type':
+        return <td key={colId}>{clientTypeLabel(c.type, t)}</td>;
+      case 'identification':
+        return <td key={colId}>{c.identification}</td>;
+      case 'primary_contact':
+        return <td key={colId}>{c.primary_contact_name}</td>;
+      case 'contacts_count':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {c.contacts_count ?? 0}
+          </td>
+        );
+      case 'addresses_count':
+        return (
+          <td key={colId} className="text-center tabular-nums">
+            {c.addresses_count ?? 0}
+          </td>
+        );
+      case 'is_active':
+        return (
+          <td key={colId} className="text-center">
+            {c.is_active ? t('common.yes') : t('common.no')}
+          </td>
+        );
+      default:
+        return null;
+    }
+  };
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        if (!hasMore || loadingMore || loading) return;
+        const next = pageRef.current + 1;
+        pageRef.current = next;
+        fetchClients(next, false);
+      },
+      { rootMargin: '120px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, loadingMore, loading, fetchClients]);
 
   return (
     <div className="space-y-6">
@@ -111,15 +212,7 @@ export default function AdminClientsPage() {
           <div className="overflow-x-auto">
             <table className="table table-zebra [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
               <thead>
-                <tr>
-                  {isVisible('email') ? <th>{t('admin.clients.email')}</th> : null}
-                  {isVisible('type') ? <th>{t('admin.clients.filter_type')}</th> : null}
-                  {isVisible('identification') ? <th>{t('admin.clients.identification')}</th> : null}
-                  {isVisible('primary_contact') ? <th>{t('admin.clients.primary_contact')}</th> : null}
-                  {isVisible('contacts_count') ? <th className="text-center">{t('admin.clients.contacts_count')}</th> : null}
-                  {isVisible('addresses_count') ? <th className="text-center">{t('admin.clients.addresses_count')}</th> : null}
-                  {isVisible('is_active') ? <th className="text-center">{t('admin.products.is_active')}</th> : null}
-                </tr>
+                <tr>{orderedVisibleColumnIds.map((colId) => clientHeaderCell(colId))}</tr>
               </thead>
               <tbody>
                 {clients.map((c) => (
@@ -136,13 +229,7 @@ export default function AdminClientsPage() {
                       }
                     }}
                   >
-                    {isVisible('email') ? <td>{c.login_email}</td> : null}
-                    {isVisible('type') ? <td>{clientTypeLabel(c.type, t)}</td> : null}
-                    {isVisible('identification') ? <td>{c.identification}</td> : null}
-                    {isVisible('primary_contact') ? <td>{c.primary_contact_name}</td> : null}
-                    {isVisible('contacts_count') ? <td className="text-center tabular-nums">{c.contacts_count ?? 0}</td> : null}
-                    {isVisible('addresses_count') ? <td className="text-center tabular-nums">{c.addresses_count ?? 0}</td> : null}
-                    {isVisible('is_active') ? <td className="text-center">{c.is_active ? t('common.yes') : t('common.no')}</td> : null}
+                    {orderedVisibleColumnIds.map((colId) => clientBodyCell(colId, c))}
                   </tr>
                 ))}
               </tbody>
@@ -151,29 +238,9 @@ export default function AdminClientsPage() {
         )}
       </div>
 
-      {meta.last_page > 1 && (
-        <div className="join flex justify-center">
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            {t('shop.pagination.prev')}
-          </button>
-          <span className="join-item flex items-center justify-center px-4 py-2 h-8 text-sm text-base-content bg-base-100 border border-base-300">
-            {t('shop.pagination.page')} {page} {t('shop.pagination.of')} {meta.last_page}
-          </span>
-          <button
-            type="button"
-            className="btn join-item btn-sm bg-base-100 border-base-300"
-            disabled={page >= meta.last_page}
-            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-          >
-            {t('shop.pagination.next')}
-          </button>
-        </div>
-      )}
+      <div ref={sentinelRef} className="py-2 flex justify-center" aria-hidden="true">
+        {loadingMore && <span className="loading loading-spinner loading-md" />}
+      </div>
     </div>
   );
 }

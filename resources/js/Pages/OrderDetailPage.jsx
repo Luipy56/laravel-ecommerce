@@ -1,19 +1,72 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import i18n from 'i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
+import { CHECKOUT_PAYMENT_METHOD_ORDER } from '../validation';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
 import { emitAppToast } from '../toastEvents';
+
+/** Pack lines have `pack_id` or nested `pack`; everything else is treated as product lines. */
+function partitionOrderLines(lines) {
+  const list = lines || [];
+  const packs = list.filter((l) => l.pack_id || l.pack);
+  const products = list.filter((l) => !(l.pack_id || l.pack));
+  return { products, packs };
+}
+
+function storefrontOrderStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending':
+    case 'awaiting_payment':
+    case 'awaiting_installation_price':
+    case 'installation_pending':
+      return 'badge-outline badge-warning';
+    case 'in_transit':
+    case 'sent':
+      return 'badge-outline badge-success';
+    case 'installation_confirmed':
+      return 'badge-outline badge-info';
+    default:
+      return 'badge-outline badge-neutral';
+  }
+}
+
+function StorefrontOrderLinesTable({ lines, nameHeaderKey, t }) {
+  if (lines.length === 0) return null;
+  return (
+    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+      <table className="table table-sm w-full [&_th]:text-base-content/80 [&_td]:align-middle">
+        <thead>
+          <tr className="bg-base-200/60 border-b border-base-300">
+            <th className="font-semibold">{t(nameHeaderKey)}</th>
+            <th className="text-center whitespace-nowrap font-semibold">{t('shop.quantity')}</th>
+            <th className="text-center whitespace-nowrap font-semibold">{t('shop.price')}</th>
+            <th className="text-end whitespace-nowrap font-semibold">{t('shop.total')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lines.map((l) => (
+            <tr key={l.id} className="border-b border-base-200 last:border-b-0">
+              <td className="min-w-0 max-w-[min(100vw,22rem)] sm:max-w-none">{l.product?.name ?? l.pack?.name}</td>
+              <td className="text-center tabular-nums">{l.quantity}</td>
+              <td className="text-center tabular-nums">{Number(l.unit_price).toFixed(2)} €</td>
+              <td className="text-end tabular-nums font-medium">{Number(l.line_total).toFixed(2)} €</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function OrderDetailPage() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +78,6 @@ export default function OrderDetailPage() {
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
   const [paypalReturnInfo, setPaypalReturnInfo] = useState('');
   const [payWarning, setPayWarning] = useState('');
-
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -49,28 +101,92 @@ export default function OrderDetailPage() {
     navigate(location.pathname, { replace: true, state: {} });
   }, [location.state, location.pathname, navigate, t]);
 
+  // Handoff from CheckoutPage when PayPal is selected: render the same inline buttons block here.
+  useEffect(() => {
+    const inline = location.state?.paypalInlineCheckout;
+    if (!inline) return;
+    setInlineCheckout({
+      orderId: Number(id),
+      paypal: {
+        client_id: inline.client_id,
+        paypal_order_id: inline.paypal_order_id,
+        payment_id: inline.payment_id,
+        paypal_mode: inline.paypal_mode === 'live' ? 'live' : 'sandbox',
+      },
+    });
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state, location.pathname, navigate, id]);
+
   useEffect(() => {
     if (!order?.payment_methods_available) return;
     const m = order.payment_methods_available;
-    setPaymentMethod((pm) => (m[pm] ? pm : ['card', 'paypal'].find((k) => m[k]) || 'card'));
+    setPaymentMethod((pm) => (m[pm] ? pm : CHECKOUT_PAYMENT_METHOD_ORDER.find((k) => m[k]) || 'card'));
   }, [order?.payment_methods_available, order?.id]);
 
   useEffect(() => {
     if (!user || !id) return;
     const sp = new URLSearchParams(window.location.search);
     const payment = sp.get('payment');
-    const needsRefresh = payment != null || sp.has('payment_intent') || sp.has('redirect_status');
+    const sessionId = sp.get('session_id');
+    const needsStripeConfirm = payment === 'ok' && !!sessionId;
+    const needsRefresh =
+      payment != null || sp.has('payment_intent') || sp.has('redirect_status') || needsStripeConfirm;
     if (!needsRefresh) return;
-    if (payment === 'ko') setPayError(t('shop.order.payment_return_ko'));
-    if (payment === 'paypal_return') {
-      setPaypalReturnInfo(t('shop.order.paypal_return_check'));
-    }
-    api.get(`orders/${id}`).then((r) => {
-      if (r.data.success) setOrder(r.data.data);
-    });
-    navigate(`/orders/${id}`, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- t() for ko message only; omit t to avoid effect loops
-  }, [user, id, navigate]);
+
+    let cancelled = false;
+
+    (async () => {
+      if (payment === 'ko') setPayError(t('shop.order.payment_return_ko'));
+      if (payment === 'paypal_return') {
+        setPaypalReturnInfo(t('shop.order.paypal_return_check'));
+        // PayPal redirected back after approval: token = PayPal order ID, capture server-side.
+        const paypalOrderId = sp.get('token');
+        if (paypalOrderId) {
+          try {
+            const orderRes = await api.get(`orders/${id}`);
+            const pendingPayment = orderRes.data?.data?.payments?.find(
+              (p) => p.gateway === 'paypal' && p.gateway_reference === paypalOrderId,
+            );
+            if (pendingPayment && !cancelled) {
+              const captureRes = await api.post('payments/paypal/capture', {
+                paypal_order_id: paypalOrderId,
+                payment_id: pendingPayment.id,
+              });
+              if (!cancelled && captureRes.data?.success) {
+                emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
+              }
+            }
+          } catch {
+            // capture error is non-fatal; order reload below will reflect real status
+          }
+        }
+      }
+      if (needsStripeConfirm) {
+        try {
+          const { data } = await api.post('payments/stripe/checkout/confirm', { session_id: sessionId });
+          if (!cancelled && data.success && data.data?.has_payment) {
+            emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
+          } else if (!cancelled && data?.message) {
+            emitAppToast(data.message, 'warning');
+          }
+        } catch (err) {
+          if (!cancelled) {
+            const msg = err.response?.data?.message || t('common.error');
+            emitAppToast(msg, 'error');
+          }
+        }
+      }
+      if (!cancelled) {
+        const r = await api.get(`orders/${id}`);
+        if (r.data.success) setOrder(r.data.data);
+        navigate(`/orders/${id}`, { replace: true });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, id, navigate, t]);
 
   const handlePay = async (e) => {
     e.preventDefault();
@@ -97,12 +213,6 @@ export default function OrderDetailPage() {
         window.location.href = c.checkout_url;
         return;
       }
-      if (c?.gateway === 'paypal' && c.approval_url) {
-        const opened = openPayPalApprovalInNewTab(c.approval_url);
-        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
-        navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
-        return;
-      }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
         setInlineCheckout({
           orderId: Number(id),
@@ -113,6 +223,12 @@ export default function OrderDetailPage() {
             paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
           },
         });
+        return;
+      }
+      if (c?.gateway === 'paypal' && c.approval_url) {
+        const opened = openPayPalApprovalInNewTab(c.approval_url);
+        if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
+        navigate(`/orders/${id}`, { state: { paypalHostedWindow: true } });
         return;
       }
       const r = await api.get(`orders/${id}`);
@@ -154,6 +270,7 @@ export default function OrderDetailPage() {
 
   const statusKey = `shop.status.${order.status}`;
   const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : order.status;
+  const { products: productLines, packs: packLines } = partitionOrderLines(order.lines);
   const shippingAddress = order.addresses?.find((a) => a.type === 'shipping');
   const installationAddress = order.addresses?.find((a) => a.type === 'installation');
 
@@ -173,25 +290,52 @@ export default function OrderDetailPage() {
   const showInstallationRow = order.installation_requested && order.installation_status === 'priced' && order.installation_price != null;
   const awaitingQuote = order.installation_requested && order.installation_status === 'pending' && order.status === 'awaiting_installation_price';
   const canPay = order.can_pay && !order.has_payment;
-  const payAvail = order.payment_methods_available ?? { card: false, paypal: false };
+  const payAvail = order.payment_methods_available ?? {
+    card: false,
+    paypal: false,
+  };
   const paymentsSimulated = !!order.payments_simulated;
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
 
+  const displayTimeline = (order.status_timeline || []).filter((row) => row.step !== 'current');
+
   return (
     <div className="mx-auto w-full min-w-0 max-w-3xl">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <PageTitle className="mb-0">{t('shop.order')} #{order.id}</PageTitle>
         <Link to="/orders" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
       </div>
-      <p className="text-base-content/80"><strong>{t('shop.order_status')}:</strong> {statusLabel}</p>
-      <p className="text-base-content/80"><strong>{t('shop.order_date')}:</strong> {order.order_date ? new Date(order.order_date).toLocaleString() : ''}</p>
 
-      {order.status_timeline && order.status_timeline.length > 0 && (
+      <div className="card bg-base-100 border border-base-200 shadow-sm rounded-2xl mb-4">
+        <div className="card-body py-4 px-4 sm:px-5">
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="min-w-0">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">{t('shop.order_status')}</dt>
+              <dd className="mt-2">
+                <span className={`badge ${storefrontOrderStatusBadgeClass(order.status)} badge-lg`}>{statusLabel}</span>
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">{t('shop.order_date')}</dt>
+              <dd className="mt-2 text-base text-base-content tabular-nums">
+                {order.order_date
+                  ? new Date(order.order_date).toLocaleString(i18n.language, {
+                      dateStyle: 'long',
+                      timeStyle: 'short',
+                    })
+                  : ''}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      {displayTimeline.length > 0 && (
         <div id="order-timeline" className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
           <div className="card-body py-4 space-y-3">
             <h2 className="card-title text-base">{t('shop.order.status_timeline_title')}</h2>
             <ul className="space-y-3">
-              {order.status_timeline.map((row, idx) => (
+              {displayTimeline.map((row, idx) => (
                 <li
                   key={`${row.step}-${idx}`}
                   className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-base-200 pb-3 last:border-0 last:pb-0"
@@ -244,49 +388,58 @@ export default function OrderDetailPage() {
       )}
 
       <div className="card bg-base-100 shadow border border-base-300 overflow-hidden rounded-2xl mt-4">
-        <div className="overflow-x-auto">
-          <table className="table">
-            <thead>
-              <tr className="bg-base-100 border-b border-base-300">
-                <th>{t('shop.order_product_pack')}</th>
-                <th className="text-center whitespace-nowrap">{t('shop.quantity')}</th>
-                <th className="text-center whitespace-nowrap">{t('shop.price')}</th>
-                <th className="text-right whitespace-nowrap">{t('shop.total')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.lines?.map((l) => (
-                <tr key={l.id}>
-                  <td>{l.product?.name ?? l.pack?.name}</td>
-                  <td className="text-center align-middle">{l.quantity}</td>
-                  <td className="text-center align-middle">{Number(l.unit_price).toFixed(2)} €</td>
-                  <td className="text-right align-middle">{Number(l.line_total).toFixed(2)} €</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t border-base-300">
-                <td colSpan={3} className="text-end font-medium">{t('shop.order.lines_subtotal')}</td>
-                <td className="text-right tabular-nums font-medium">{Number(linesSubtotal).toFixed(2)} €</td>
-              </tr>
-              <tr>
-                <td colSpan={3} className="text-end font-medium">{t('shop.shipping_flat')}</td>
-                <td className="text-right tabular-nums font-medium">{Number(order.shipping_flat_eur ?? 9).toFixed(2)} €</td>
-              </tr>
-              {showInstallationRow && (
-                <tr>
-                  <td colSpan={3} className="text-end font-medium">{t('shop.order.installation_fee')}</td>
-                  <td className="text-right tabular-nums font-medium">{Number(order.installation_price).toFixed(2)} €</td>
-                </tr>
+        <div className="card-body px-4 py-5 sm:px-6">
+          {productLines.length === 0 && packLines.length === 0 ? (
+            <p className="text-base-content/70 text-sm py-1">{t('shop.order.no_lines')}</p>
+          ) : (
+            <div className="space-y-8">
+              {productLines.length > 0 && (
+                <section className="space-y-3" aria-labelledby="storefront-order-lines-products-heading">
+                  <h3 id="storefront-order-lines-products-heading" className="text-base font-semibold text-base-content">
+                    {t('shop.order.lines_section_products')}
+                  </h3>
+                  <StorefrontOrderLinesTable lines={productLines} nameHeaderKey="shop.order.th_line_product" t={t} />
+                </section>
               )}
-              <tr className="bg-base-100 border-t border-base-300">
-                <td colSpan={3} className="text-end font-bold">{t('shop.total')}</td>
-                <td className="text-right py-4 text-xl font-bold text-primary tabular-nums">
-                  {Number(grandTotal).toFixed(2)} €
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+              {packLines.length > 0 && (
+                <section
+                  className={`space-y-3 ${productLines.length > 0 ? 'pt-6 border-t border-base-200' : ''}`}
+                  aria-labelledby="storefront-order-lines-packs-heading"
+                >
+                  <h3 id="storefront-order-lines-packs-heading" className="text-base font-semibold text-base-content">
+                    {t('shop.order.lines_section_packs')}
+                  </h3>
+                  <StorefrontOrderLinesTable lines={packLines} nameHeaderKey="shop.order.th_line_pack" t={t} />
+                </section>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="border-t border-base-300 bg-base-200/40 px-4 py-4 sm:px-6">
+          <div className="overflow-x-auto">
+            <table className="table table-sm w-full max-w-md ml-auto">
+              <tbody className="[&_td]:py-2">
+                <tr>
+                  <td className="text-end font-medium text-base-content/90">{t('shop.order.lines_subtotal')}</td>
+                  <td className="text-end tabular-nums font-medium w-32">{Number(linesSubtotal).toFixed(2)} €</td>
+                </tr>
+                <tr>
+                  <td className="text-end font-medium text-base-content/90">{t('shop.shipping_flat')}</td>
+                  <td className="text-end tabular-nums font-medium">{Number(order.shipping_flat_eur ?? 9).toFixed(2)} €</td>
+                </tr>
+                {showInstallationRow && (
+                  <tr>
+                    <td className="text-end font-medium text-base-content/90">{t('shop.order.installation_fee')}</td>
+                    <td className="text-end tabular-nums font-medium">{Number(order.installation_price).toFixed(2)} €</td>
+                  </tr>
+                )}
+                <tr className="border-t border-base-300">
+                  <td className="text-end font-bold pt-3 align-bottom">{t('shop.total')}</td>
+                  <td className="text-end text-xl font-bold text-primary tabular-nums pt-3">{Number(grandTotal).toFixed(2)} €</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -347,7 +500,6 @@ export default function OrderDetailPage() {
           {t('checkout.payment.stripe_missing_credentials_hint')}
         </div>
       )}
-
       {canPay && (
         <form onSubmit={handlePay} className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
           <div className="card-body">
@@ -363,8 +515,7 @@ export default function OrderDetailPage() {
                   (!anyPaymentMethod && !paymentsSimulated)
                 }
               >
-                {['card', 'paypal']
-                  .filter((value) => payAvail[value])
+                {CHECKOUT_PAYMENT_METHOD_ORDER.filter((value) => payAvail[value])
                   .map((value) => (
                     <option key={value} value={value}>
                       {t(`checkout.payment.${value}`)}
@@ -414,8 +565,11 @@ export default function OrderDetailPage() {
       )}
 
       {!canPay && order.has_payment && (
-        <div className="mt-4 flex justify-end">
-          <a href={`/api/v1/orders/${order.id}/invoice?locale=${i18n.language || 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
+        <div className="mt-4 flex flex-wrap justify-end gap-2">
+          <a href={`/api/v1/orders/${order.id}/delivery-note?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-primary btn-sm">
+            {t('shop.delivery_note')}
+          </a>
+          <a href={`/api/v1/orders/${order.id}/invoice?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
             {t('shop.invoice')}
           </a>
         </div>

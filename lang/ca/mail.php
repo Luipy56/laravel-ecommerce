@@ -126,9 +126,46 @@ return [
         'subject' => 'La seva comanda #:id està en camí',
         'greeting' => 'Hola,',
         'body' => 'La seva comanda #:id ha passat a estat d\'enviament.',
+        'delivery_estimate_today' => 'Previsió d\'arribada: avui mateix.',
+        'delivery_estimate_few_days' => 'Previsió d\'arribada: en els propers dies.',
+        'delivery_estimate_soon' => 'Previsió d\'arribada: arribarà aviat.',
         'shipping_date_label' => 'Data d\'enviament prevista',
         'cta' => 'Pot revisar el detall i l\'estat des de la botiga.',
         'button' => 'Veure la comanda',
         'footer' => 'Gràcies per confiar en nosaltres.',
+    ],
+
+    'admin_return_request_received' => [
+        'subject' => '[Devolució comanda #:id] Nova sol·licitud de devolució',
+        'intro' => 'S\'ha rebut una nova sol·licitud de devolució per a la comanda #:id.',
+        'client_email' => 'Client:',
+        'reason' => 'Motiu:',
+        'button' => 'Gestionar al panell',
+    ],
+
+    'return_request_approved' => [
+        'subject' => 'Sol·licitud de devolució aprovada · comanda #:id',
+        'greeting' => 'Hola,',
+        'body' => 'La seva sol·licitud de devolució per a la comanda #:id ha estat aprovada.',
+        'notes_label' => 'Notes:',
+        'cta' => 'El reemborsament es processarà en breu.',
+        'button' => 'Veure la comanda',
+    ],
+
+    'return_request_rejected' => [
+        'subject' => 'Sol·licitud de devolució no aprovada · comanda #:id',
+        'greeting' => 'Hola,',
+        'body' => 'Lamentem informar-li que la seva sol·licitud de devolució per a la comanda #:id no ha pogut ser aprovada.',
+        'notes_label' => 'Motiu:',
+        'button' => 'Veure la comanda',
+    ],
+
+    'return_request_refunded' => [
+        'subject' => 'Reemborsament processat · comanda #:id',
+        'greeting' => 'Hola,',
+        'body' => 'El reemborsament de la seva devolució per a la comanda #:id ha estat processat.',
+        'amount_label' => 'Import reemborsat',
+        'cta' => 'El reemborsament apareixerà al seu compte en els pròxims dies hàbils.',
+        'button' => 'Veure la comanda',
     ],
 ];

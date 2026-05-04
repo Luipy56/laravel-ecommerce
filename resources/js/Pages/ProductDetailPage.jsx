@@ -7,6 +7,7 @@ import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
 import { IconCart, IconChevronLeft, IconChevronRight, IconChevronUp } from '../components/icons';
 import FavoriteToggle from '../components/FavoriteToggle';
+import ReviewsSection from '../components/ReviewsSection';
 
 const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
@@ -391,6 +392,8 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      <ReviewsSection productId={id} />
     </div>
   );
 }

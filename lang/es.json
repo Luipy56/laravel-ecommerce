@@ -135,5 +135,7 @@
     "admin.data_explorer.errors.invalid_metric": "La métrica debe ser count, sum o avg.",
     "shop.personalized_solutions_disabled": "En este momento no aceptamos nuevas solicitudes de solución personalizada.",
     "shop.personalized_solution_too_soon": "Hemos recibido la misma solicitud hace un momento. Espera unos segundos antes de volver a enviar.",
-    "admin.personalized_solutions.patch_requires_body": "Envía al menos el texto de resolución o un estado."
+    "admin.personalized_solutions.patch_requires_body": "Envía al menos el texto de resolución o un estado.",
+    "admin.orders.notify_in_transit_mail_invalid_status": "Solo se puede enviar este correo cuando el pedido está en estado «En tránsito».",
+    "admin.orders.notify_in_transit_mail_no_client_email": "El cliente no tiene un correo válido para enviar la notificación."
 }

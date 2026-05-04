@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Scout\Searchable;
 
 /**
@@ -50,6 +51,9 @@ class Product extends Model
                 $product->description
             );
         });
+
+        static::saved(fn () => Cache::forget('sitemap.xml'));
+        static::deleted(fn () => Cache::forget('sitemap.xml'));
     }
 
     /**
@@ -104,6 +108,8 @@ class Product extends Model
             'purchase_price' => 'decimal:2',
             'weight_kg' => 'decimal:3',
             'extra_key_unit_price' => 'decimal:2',
+            'avg_rating' => 'decimal:2',
+            'reviews_count' => 'integer',
             'is_double_clutch' => 'boolean',
             'has_card' => 'boolean',
             'is_extra_keys_available' => 'boolean',
@@ -158,6 +164,11 @@ class Product extends Model
     public function orderLines(): HasMany
     {
         return $this->hasMany(OrderLine::class, 'product_id');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
     }
 
     public function scopeActive($query)

@@ -31,3 +31,24 @@ Use these components instead of duplicating markup. Keep list and behaviour cons
 - **Use for:** Confirmation before submit (e.g. CustomSolution, Checkout) or destructive actions (e.g. delete address, delete contact).
 - **Props:** `open`, `onClose`, `onConfirm`, `title`, `message`, `confirmLabel` (optional), `loading` (optional), `confirmVariant` ('primary' | 'error').
 - **Do not:** Use `window.confirm()` for user confirmations; use `ConfirmModal` instead for consistent UI and accessibility.
+
+## Admin toasts — success vs inline errors
+
+All admin pages follow this pattern for user feedback after mutations (save, approve, reject, delete, etc.):
+
+- **Success:** Use `showSuccess(t('common.saved'))` from `useAdminToast()` — shows a toast notification at the corner of the screen, consistent across all admin pages. Never show a success message as an inline alert.
+- **Errors:** Show as an inline `<div role="alert" className="alert alert-error ...">` so the user can read it in context and it persists until the next action.
+
+```jsx
+import { useAdminToast } from '../../contexts/AdminToastContext';
+
+const { showSuccess } = useAdminToast();
+
+// on success:
+showSuccess(t('common.saved'));
+
+// on error (keep as inline alert):
+setError(err?.response?.data?.message ?? t('common.error'));
+```
+
+- **Do not:** Keep a `success` state string and render `{success && <div className="alert alert-success ...">}` — this duplicates the toast infrastructure and looks inconsistent with the rest of the admin UI.

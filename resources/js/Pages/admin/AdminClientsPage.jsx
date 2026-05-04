@@ -4,6 +4,21 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { loadAdminListFilters, normalizedActiveTriState, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const CLIENTS_FILTERS_PAGE_ID = 'clients';
+
+function readPersistedClientFilters() {
+  const raw = loadAdminListFilters(CLIENTS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const type =
+    typeof raw?.type === 'string' && (raw.type === '' || raw.type === 'person' || raw.type === 'company')
+      ? raw.type
+      : '';
+  const activeRaw = normalizedActiveTriState(raw?.active);
+  const activeFilter = activeRaw === null ? '1' : activeRaw;
+  return { search, type, activeFilter };
+}
 
 function clientTypeLabel(type, t) {
   if (type === 'person') return t('admin.clients.type_person');
@@ -15,14 +30,19 @@ export default function AdminClientsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('clients');
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedClientFilters();
+  }
+  const persisted = persistedRef.current;
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [activeFilter, setActiveFilter] = useState('1');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
+  const [typeFilter, setTypeFilter] = useState(() => persisted.type);
+  const [activeFilter, setActiveFilter] = useState(() => persisted.activeFilter);
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
 
@@ -139,6 +159,10 @@ export default function AdminClientsPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    saveAdminListFilters(CLIENTS_FILTERS_PAGE_ID, { search, type: typeFilter, active: activeFilter });
+  }, [search, typeFilter, activeFilter]);
 
   useEffect(() => {
     if (!hasMore) return;

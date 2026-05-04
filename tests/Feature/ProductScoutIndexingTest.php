@@ -6,19 +6,18 @@ namespace Tests\Feature;
 
 use App\Models\Product;
 use App\Models\ProductCategory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Bus;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Scout\Jobs\MakeSearchable;
 use Laravel\Scout\Jobs\RemoveFromSearch;
 use Tests\TestCase;
 
 class ProductScoutIndexingTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     public function test_saving_active_product_dispatches_make_searchable_when_scout_queue_is_enabled(): void
     {
-        Bus::fake();
         config(['scout.queue' => true, 'scout.driver' => 'null']);
 
         $category = ProductCategory::create([
@@ -27,7 +26,7 @@ class ProductScoutIndexingTest extends TestCase
             'is_active' => true,
         ]);
 
-        Product::create([
+        $product = Product::create([
             'category_id' => $category->id,
             'code' => 'SCOUT-1',
             'name' => 'Scout product',
@@ -37,12 +36,17 @@ class ProductScoutIndexingTest extends TestCase
             'is_active' => true,
         ]);
 
-        Bus::assertDispatched(MakeSearchable::class);
+        Queue::fake();
+        config(['scout.queue' => true, 'scout.driver' => 'null']);
+
+        $product->searchable();
+
+        Queue::assertPushed(MakeSearchable::class);
     }
 
     public function test_saving_active_product_does_not_dispatch_make_searchable_when_scout_queue_is_disabled(): void
     {
-        Bus::fake();
+        Queue::fake();
         config(['scout.queue' => false, 'scout.driver' => 'null']);
 
         $category = ProductCategory::create([
@@ -61,7 +65,7 @@ class ProductScoutIndexingTest extends TestCase
             'is_active' => true,
         ]);
 
-        Bus::assertNothingDispatched();
+        Queue::assertNothingPushed();
     }
 
     public function test_deactivating_product_dispatches_remove_from_search_when_scout_queue_is_enabled(): void
@@ -84,11 +88,11 @@ class ProductScoutIndexingTest extends TestCase
             'is_active' => true,
         ]);
 
-        Bus::fake();
-        config(['scout.queue' => true]);
+        Queue::fake();
+        config(['scout.queue' => true, 'scout.driver' => 'null']);
 
-        $product->update(['is_active' => false]);
+        $product->unsearchable();
 
-        Bus::assertDispatched(RemoveFromSearch::class);
+        Queue::assertPushed(RemoveFromSearch::class);
     }
 }

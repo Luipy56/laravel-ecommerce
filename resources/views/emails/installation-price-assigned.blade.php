@@ -13,7 +13,7 @@
         <li><strong>{{ __('mail.installation_price.total_due') }}:</strong> {{ number_format($grandTotal, 2, ',', '.') }} €</li>
     </ul>
     <p>{{ __('mail.installation_price.cta') }}</p>
-    <p style="margin: 24px 0;">
+    <p style="margin: 24px 0; text-align: center;">
         <a href="{{ url('/orders/' . $order->id) }}" style="display: inline-block; padding: 12px 20px; background: #F75211; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600;">{{ __('mail.installation_price.button') }}</a>
     </p>
 @endsection

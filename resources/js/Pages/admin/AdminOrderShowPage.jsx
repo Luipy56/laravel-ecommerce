@@ -203,6 +203,10 @@ export default function AdminOrderShowPage() {
   const [installationAmount, setInstallationAmount] = useState('');
   const [installationSubmitting, setInstallationSubmitting] = useState(false);
   const [installationModalError, setInstallationModalError] = useState('');
+  const [inTransitMailModalOpen, setInTransitMailModalOpen] = useState(false);
+  const [inTransitMailEta, setInTransitMailEta] = useState('today');
+  const [inTransitMailSubmitting, setInTransitMailSubmitting] = useState(false);
+  const [inTransitMailError, setInTransitMailError] = useState('');
 
   const fetchOrder = useCallback(async () => {
     if (!id) return;
@@ -246,6 +250,7 @@ export default function AdminOrderShowPage() {
   const installationAddress = order.addresses?.find((a) => a.type === 'installation');
   const showSetInstallationPrice =
     isOrder && order.installation_requested && order.status === 'awaiting_installation_price';
+  const showInTransitCustomerMail = isOrder && order.status === 'in_transit';
   const { products: productLines, packs: packLines } = partitionOrderLines(order.lines);
 
   const handleInstallationModalOpen = () => {
@@ -281,6 +286,35 @@ export default function AdminOrderShowPage() {
       setInstallationModalError(msg);
     } finally {
       setInstallationSubmitting(false);
+    }
+  };
+
+  const handleInTransitMailModalOpen = () => {
+    setInTransitMailError('');
+    setInTransitMailEta('today');
+    setInTransitMailModalOpen(true);
+  };
+
+  const handleSendInTransitCustomerMail = async () => {
+    setInTransitMailError('');
+    setInTransitMailSubmitting(true);
+    try {
+      const { data } = await api.post(`admin/orders/${id}/notify-in-transit-mail`, {
+        delivery_eta: inTransitMailEta,
+      });
+      if (data.success) {
+        showSuccess(t('admin.orders.notify_in_transit_mail_success'));
+        setInTransitMailModalOpen(false);
+      } else {
+        setInTransitMailError(data.message || t('common.error'));
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message
+        || err.response?.data?.errors?.delivery_eta?.[0]
+        || t('common.error');
+      setInTransitMailError(msg);
+    } finally {
+      setInTransitMailSubmitting(false);
     }
   };
 
@@ -332,6 +366,11 @@ export default function AdminOrderShowPage() {
           {isOrder && shippingAddress && (
             <button type="button" className="btn btn-outline btn-sm shrink-0" onClick={() => setLabelModalOpen(true)} aria-label={t('admin.orders.shipping_label_button')}>
               {t('admin.orders.shipping_label_button')}
+            </button>
+          )}
+          {showInTransitCustomerMail && (
+            <button type="button" className="btn btn-outline btn-sm shrink-0" onClick={handleInTransitMailModalOpen}>
+              {t('admin.orders.notify_in_transit_mail_button')}
             </button>
           )}
           {showSetInstallationPrice && (
@@ -538,6 +577,51 @@ export default function AdminOrderShowPage() {
       </dialog>
 
       {/* Shipping label */}
+      {/* In-transit: notify customer by email */}
+      <dialog
+        className={`modal ${inTransitMailModalOpen ? 'modal-open' : ''}`}
+        aria-label={t('admin.orders.notify_in_transit_mail_modal_title')}
+      >
+        <div className="modal-box max-w-md">
+          <h3 className="font-bold text-lg">{t('admin.orders.notify_in_transit_mail_modal_title')}</h3>
+          <p className="text-sm text-base-content/70 py-2">{t('admin.orders.notify_in_transit_mail_modal_intro')}</p>
+          {inTransitMailError && (
+            <div role="alert" className="alert alert-error text-sm mb-3">{inTransitMailError}</div>
+          )}
+          <label className="form-control w-full">
+            <div className="label pt-0">
+              <span className="label-text">{t('admin.orders.notify_in_transit_mail_eta_label')}</span>
+            </div>
+            <select
+              className="select select-bordered w-full select-sm sm:select-md"
+              value={inTransitMailEta}
+              onChange={(e) => setInTransitMailEta(e.target.value)}
+              aria-label={t('admin.orders.notify_in_transit_mail_eta_label')}
+            >
+              <option value="today">{t('admin.orders.notify_in_transit_mail_eta_today')}</option>
+              <option value="few_days">{t('admin.orders.notify_in_transit_mail_eta_few_days')}</option>
+              <option value="unknown">{t('admin.orders.notify_in_transit_mail_eta_unknown')}</option>
+            </select>
+          </label>
+          <div className="modal-action">
+            <button type="button" className="btn btn-ghost" onClick={() => setInTransitMailModalOpen(false)}>
+              {t('common.cancel')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={inTransitMailSubmitting}
+              onClick={handleSendInTransitCustomerMail}
+            >
+              {inTransitMailSubmitting ? t('common.loading') : t('admin.orders.notify_in_transit_mail_send')}
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop" onSubmit={() => setInTransitMailModalOpen(false)}>
+          <button type="submit" aria-label={t('common.close')}>{t('common.close')}</button>
+        </form>
+      </dialog>
+
       <dialog className={`modal ${labelModalOpen ? 'modal-open' : ''}`} aria-label={t('admin.orders.shipping_label_title')}>
         <div className="modal-box max-w-md">
           <h3 className="font-bold text-lg">{t('admin.orders.shipping_label_title')} #{order.id}</h3>

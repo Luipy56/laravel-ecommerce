@@ -211,6 +211,18 @@ export function IconLogIn({ className, strokeWidth, ...rest }) {
   );
 }
 
+/** Gamepad / game controller. */
+export function IconGamepad({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path
+        strokeWidth={strokeWidth ?? 2}
+        d="M6 12h4m-2-2v4M15 13h.01M18 11h.01M4.929 4.929A10 10 0 1019.07 19.07 10 10 0 004.93 4.93zM8 8h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4a2 2 0 012-2z"
+      />
+    </IconWrapper>
+  );
+}
+
 /** Log out (door + arrow). */
 export function IconLogOut({ className, strokeWidth, ...rest }) {
   return (

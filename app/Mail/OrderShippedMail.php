@@ -14,8 +14,13 @@ class OrderShippedMail extends Mailable
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public Order $order)
-    {
+    /**
+     * @param  string|null  $deliveryEstimateKey  When set: today, few_days, or soon (friendly copy for “unknown” ETA).
+     */
+    public function __construct(
+        public Order $order,
+        public ?string $deliveryEstimateKey = null,
+    ) {
         $this->order->loadMissing(['lines', 'client', 'addresses']);
     }
 
@@ -33,6 +38,7 @@ class OrderShippedMail extends Mailable
             with: [
                 'order' => $this->order,
                 'shippingDate' => $this->order->shipping_date,
+                'deliveryEstimateKey' => $this->deliveryEstimateKey,
             ],
         );
     }

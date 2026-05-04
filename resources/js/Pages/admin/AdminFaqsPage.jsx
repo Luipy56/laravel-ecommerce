@@ -3,17 +3,33 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { loadAdminListFilters, normalizedActiveTriState, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const FAQS_FILTERS_PAGE_ID = 'faqs';
+
+function readPersistedFaqFilters() {
+  const raw = loadAdminListFilters(FAQS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const activeRaw = normalizedActiveTriState(raw?.active);
+  const activeFilter = activeRaw === null ? '' : activeRaw;
+  return { search, activeFilter };
+}
 
 export default function AdminFaqsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedFaqFilters();
+  }
+  const persisted = persistedRef.current;
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
-  const [activeFilter, setActiveFilter] = useState('');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
+  const [activeFilter, setActiveFilter] = useState(() => persisted.activeFilter);
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
 
@@ -51,6 +67,10 @@ export default function AdminFaqsPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    saveAdminListFilters(FAQS_FILTERS_PAGE_ID, { search, active: activeFilter });
+  }, [search, activeFilter]);
 
   useEffect(() => {
     if (!hasMore) return;

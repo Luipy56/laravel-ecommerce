@@ -135,5 +135,7 @@
     "admin.data_explorer.errors.invalid_metric": "La mètrica ha de ser count, sum o avg.",
     "shop.personalized_solutions_disabled": "En aquests moments no acceptem noves sol·licituds de solució personalitzada.",
     "shop.personalized_solution_too_soon": "Hem rebut la mateixa sol·licitud fa un moment. Espera uns segons abans de tornar a enviar.",
-    "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat."
+    "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat.",
+    "admin.orders.notify_in_transit_mail_invalid_status": "Només es pot enviar aquest correu quan la comanda està en estat «En trànsit».",
+    "admin.orders.notify_in_transit_mail_no_client_email": "El client no té un correu vàlid per enviar la notificació."
 }

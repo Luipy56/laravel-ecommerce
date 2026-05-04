@@ -7,6 +7,7 @@ import { useCart } from '../contexts/CartContext';
 import {
   IconCart,
   IconClipboardList,
+  IconGamepad,
   IconHeart,
   IconLogOut,
   IconMenu,
@@ -369,6 +370,26 @@ export default function Navbar() {
                           >
                             <IconPackage className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                             {t('shop.purchases')}
+                          </Link>
+                        </li>
+                        {user.email_verified ? (
+                          <li>
+                            <Link
+                              to="/my-returns"
+                              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                            >
+                              <IconClipboardList className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                              {t('shop.returns.nav_link')}
+                            </Link>
+                          </li>
+                        ) : null}
+                        <li>
+                          <Link
+                            to="/games"
+                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                          >
+                            <IconGamepad className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                            {t('games.nav_link')}
                           </Link>
                         </li>
                       </ul>

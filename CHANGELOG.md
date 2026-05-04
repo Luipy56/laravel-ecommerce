@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.116] - 2026-05-04
+
+### Added
+
+- **Minijuegos:** Se añaden 3 minijuegos de código abierto (2048, Dinosaurio corredor, Tetris) accesibles desde las páginas de error 404 y 500, y desde el menú de perfil del usuario. Los juegos se alojan localmente en `public/games/` sin dependencias externas.
+- **Componente `MiniGameEmbed`:** iframe reutilizable con estado de carga y fallback de error ("Juego no disponible") para cuando el archivo no se pueda cargar.
+- **Página `/games`:** Nueva página dedicada con selector de juego y vista embebida.
+- **Página `ErrorPage` y `ErrorBoundary`:** Captura errores de React no controlados y muestra la página de error con acceso a juegos.
+- **Vistas Blade de error:** `resources/views/errors/500.blade.php` y `404.blade.php` para errores PHP previos a la carga del SPA, con enlace a `/games`.
+- **i18n:** Claves `games.*` y `errors.server_error_*` añadidas en `ca.json`, `es.json`, `en.json`.
+
 ## [0.1.115] - 2026-05-04
 
 ### Fixed

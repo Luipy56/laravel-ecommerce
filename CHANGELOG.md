@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.138] - 2026-05-04
+
+### Fixed
+
+- `ProductScoutIndexingTest`: assert Scout `MakeSearchable` / `RemoveFromSearch` using `Queue::fake()` **after** the product row exists, then `searchable()` / `unsearchable()`; avoids `Bus::fake()` with Scout’s `dispatch()` + `PendingDispatch` (jobs never reach `Queue::fake()` when the bus is fully faked).
+
+### Changed
+
+- Transactional Blade mails: centered CTA action `<p>` wrappers (`text-align: center`) for order, installation, returns, and related templates (aligned with the transactional button layout used elsewhere).
+- Storefront/admin React: `OrderDetailPage`, `OrdersPage`; RMA admin return request pages; review moderation show page; `ReviewsSection` and `StarRating` behaviour and layout.
+- Locales `ca.json`, `es.json`, `en.json` (returns/reviews strings; complete missing English returns keys).
+- `.cursor/rules/components.mdc`: shared component / `PageTitle` guidance.
+
+## [0.1.137] - 2026-05-04
+
+### Added
+
+- English (`en.json`) translations for all 54 missing returns-feature keys: `shop.returns.*` (21 keys), `admin.nav.returns` + `admin.nav.alert_link_suffix_returns` (2 keys), and `admin.returns.*` (31 keys).
+
+## [0.1.136] - 2026-05-04
+
+### Added
+
+- **ProductReviewSeeder:** 6 ressenyes de demo per a les dues pàgines de producte principals (cilStd, escEst, spEst, cilSeg). Mix d'estats: 3 aprovades (amb compra verificada), 2 pendents, 1 rebutjada. Els agregats `avg_rating` i `reviews_count` dels productes s'actualitzen automàticament via observer en executar el seeder.
+
 ## [0.1.135] - 2026-05-04
 
 ### Added

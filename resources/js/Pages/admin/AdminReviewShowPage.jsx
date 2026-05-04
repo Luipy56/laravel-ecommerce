@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import StarRating from '../../components/StarRating';
+import { useAdminToast } from '../../contexts/AdminToastContext';
 
 const STATUS_COLORS = {
   pending: 'badge-warning',
@@ -15,12 +16,12 @@ export default function AdminReviewShowPage() {
   const { id } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { showSuccess } = useAdminToast();
 
   const [review, setReview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
 
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [adminNote, setAdminNote] = useState('');
@@ -49,7 +50,6 @@ export default function AdminReviewShowPage() {
   const updateStatus = async (status, note) => {
     setSaving(true);
     setError(null);
-    setSuccess(null);
     try {
       const { data } = await api.patch(`admin/reviews/${id}`, {
         status,
@@ -58,7 +58,7 @@ export default function AdminReviewShowPage() {
       if (data.success) {
         setReview(data.data);
         setAdminNote(data.data.admin_note ?? '');
-        setSuccess(t('common.saved'));
+        showSuccess(t('common.saved'));
         setRejectModalOpen(false);
       }
     } catch (err) {
@@ -102,13 +102,12 @@ export default function AdminReviewShowPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Link to="/admin/reviews" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.reviews.detail_title')}</PageTitle>
+        <Link to="/admin/reviews" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
       </div>
 
       {error && <div role="alert" className="alert alert-error alert-soft">{error}</div>}
-      {success && <div role="alert" className="alert alert-success alert-soft">{success}</div>}
 
       <div className="card bg-base-100 shadow border border-base-200">
         <div className="card-body space-y-4">
@@ -198,7 +197,7 @@ export default function AdminReviewShowPage() {
         {review.status !== 'approved' && (
           <button
             type="button"
-            className="btn btn-success"
+            className="btn btn-primary"
             disabled={saving}
             onClick={() => updateStatus('approved', null)}
           >

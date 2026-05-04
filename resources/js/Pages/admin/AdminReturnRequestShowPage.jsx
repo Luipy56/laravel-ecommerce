@@ -267,7 +267,7 @@ export default function AdminReturnRequestShowPage() {
           </button>
           <button
             type="button"
-            className="btn btn-success btn-sm"
+            className="btn btn-primary btn-sm"
             onClick={() => openActionModal('approve')}
             disabled={saving}
           >
@@ -319,7 +319,7 @@ export default function AdminReturnRequestShowPage() {
                 </button>
                 <button
                   type="submit"
-                  className={`btn ${actionType === 'approve' ? 'btn-success' : 'btn-error'}`}
+                  className={`btn ${actionType === 'approve' ? 'btn-primary' : 'btn-error'}`}
                   disabled={saving}
                 >
                   {saving ? <span className="loading loading-spinner loading-sm" /> : (

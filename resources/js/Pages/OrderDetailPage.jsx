@@ -315,7 +315,11 @@ export default function OrderDetailPage() {
   if (authLoading) {
     return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
   }
-  if (!user) return <Link to="/login" className="btn btn-primary">{t('auth.login')}</Link>;
+  if (!user) return (
+    <div className="flex justify-center items-center py-16 px-4">
+      <Link to={`/login?next=${encodeURIComponent(`/orders/${id}`)}`} className="btn btn-primary">{t('auth.login')}</Link>
+    </div>
+  );
   if (loading) return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
   if (!order) return <p>{t('common.error')}</p>;
 
@@ -346,7 +350,7 @@ export default function OrderDetailPage() {
   const grandTotal = order.grand_total ?? order.total ?? linesSubtotal;
   const showInstallationRow = order.installation_requested && order.installation_status === 'priced' && order.installation_price != null;
   const awaitingQuote = order.installation_requested && order.installation_status === 'pending' && order.status === 'awaiting_installation_price';
-  const canPay = order.can_pay && !order.has_payment;
+  const canPay = order.can_pay && !order.has_payment && order.status !== 'returned';
   const payAvail = order.payment_methods_available ?? {
     card: false,
     paypal: false,

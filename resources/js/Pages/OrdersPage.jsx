@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import i18n from 'i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
@@ -66,26 +65,6 @@ export default function OrdersPage() {
                       <Link to={`/orders/${o.id}`} className="btn btn-ghost btn-sm w-full sm:w-auto">
                         {t('common.detail')}
                       </Link>
-                      {o.has_payment ? (
-                        <>
-                          <a
-                            href={`/api/v1/orders/${o.id}/delivery-note?locale=${i18n.language || 'ca'}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-ghost btn-sm w-full sm:w-auto"
-                          >
-                            {t('shop.delivery_note')}
-                          </a>
-                          <a
-                            href={`/api/v1/orders/${o.id}/invoice?locale=${i18n.language || 'ca'}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-ghost btn-sm w-full sm:w-auto"
-                          >
-                            {t('shop.invoice')}
-                          </a>
-                        </>
-                      ) : null}
                     </div>
                   </div>
                 </div>

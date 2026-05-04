@@ -124,7 +124,7 @@ export default function AdminReturnRequestsPage() {
                       </span>
                     </td>
                     <td className="text-center">
-                      <span className={`badge badge-soft badge-sm ${STATUS_COLORS[rma.status] ?? 'badge-ghost'}`}>
+                      <span className={`badge badge-outline badge-sm ${STATUS_COLORS[rma.status] ?? 'badge-ghost'}`}>
                         {t(`admin.returns.status_${rma.status}`)}
                       </span>
                     </td>

@@ -119,7 +119,7 @@ function ReviewCard({ review }) {
     ? new Date(review.created_at).toLocaleDateString('ca-ES', { year: 'numeric', month: 'long', day: 'numeric' })
     : '';
   return (
-    <div className="border-t border-base-200 pt-4 first:border-t-0 first:pt-0">
+    <div className="py-3 first:pt-0 last:pb-0">
       <div className="flex items-start gap-3">
         <div className="flex-none w-9 h-9 rounded-full bg-primary/10 text-primary text-sm font-bold flex items-center justify-center">
           {review.client_initials || '?'}
@@ -180,20 +180,22 @@ export default function ReviewsSection({ productId }) {
 
       {/* Aggregate */}
       {agg && agg.reviews_count > 0 && (
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-base-200/50 rounded-lg">
-          <div className="flex flex-col items-center justify-center gap-1 sm:w-28 shrink-0">
-            <span className="text-4xl font-bold tabular-nums text-base-content">
-              {Number(agg.avg_rating).toFixed(1)}
-            </span>
-            <StarRating value={agg.avg_rating} size="sm" />
-            <span className="text-xs text-base-content/60">
-              {t('shop.reviews.total_count', { count: agg.reviews_count })}
-            </span>
-          </div>
-          <div className="flex-1 flex flex-col justify-center gap-1">
-            {[5, 4, 3, 2, 1].map((s) => (
-              <RatingBar key={s} star={s} count={agg.distribution?.[s] ?? 0} total={agg.reviews_count} />
-            ))}
+        <div className="card bg-base-100 shadow border border-base-200 mb-6">
+          <div className="card-body p-4 flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col items-center justify-center gap-1 sm:w-28 shrink-0">
+              <span className="text-4xl font-bold tabular-nums text-base-content">
+                {Number(agg.avg_rating).toFixed(1)}
+              </span>
+              <StarRating value={agg.avg_rating} size="sm" />
+              <span className="text-xs text-base-content/60">
+                {t('shop.reviews.total_count', { count: agg.reviews_count })}
+              </span>
+            </div>
+            <div className="flex-1 flex flex-col justify-center gap-1">
+              {[5, 4, 3, 2, 1].map((s) => (
+                <RatingBar key={s} star={s} count={agg.distribution?.[s] ?? 0} total={agg.reviews_count} />
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -275,8 +277,10 @@ export default function ReviewsSection({ productId }) {
       )}
 
       {reviews.length > 0 && (
-        <div className="space-y-4">
-          {reviews.map((r) => <ReviewCard key={r.id} review={r} />)}
+        <div className="card bg-base-100 shadow border border-base-200">
+          <div className="card-body p-4 divide-y divide-base-200">
+            {reviews.map((r) => <ReviewCard key={r.id} review={r} />)}
+          </div>
         </div>
       )}
 

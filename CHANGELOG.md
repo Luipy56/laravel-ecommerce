@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.114] - 2026-05-04
+
+### Fixed
+
+- **Checkout: flujo de pago PayPal inline no abandonaba la página de checkout.** Tras pulsar "Finalizar pedido" con PayPal como método de pago, el cliente ya no es redirigido a `/orders/:id`; los botones de pago de PayPal aparecen directamente en la misma página de checkout con scroll automático al panel de pago, permitiendo completar el pago sin abandonar el flujo.
+- **Checkout: pantalla "carrito vacío" tras crear pedido con pago pendiente.** Cuando el carrito se vaciaba al crear el pedido (antes de que el cliente completara el pago), la página mostraba "carrito vacío" en lugar del panel de pago inline. Ahora el guard de carrito vacío se ignora mientras haya un pago activo en proceso.
+
+### Changed
+
+- **Cart (móvil): nombre de producto truncado.** En pantallas pequeñas el nombre del producto en la tabla del carrito se trunca con elipsis (`…`) para evitar filas muy altas, y los atributos (marca, color, etc.) se ocultan en móvil. En escritorio se muestra el nombre completo con todos los atributos sin cambios.
+
 ## [0.1.113] - 2026-05-04
 
 ### Fixed

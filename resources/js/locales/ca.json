@@ -740,6 +740,8 @@
   "admin.settings.shipping_postal_not_implemented": "Encara no implementat. Aquí es podran configurar tarifes per codi postal més endavant.",
   "admin.products.is_trending_managed_by_settings": "Aquest indicador s’actualitza des de Configuració amb les regles d’estoc i «Tornar a calcular destacats automàtics».",
   "shop.custom_solution.disabled_public": "Ara mateix no acceptem noves sol·licituds de solució personalitzada.",
+  "games.prev_game": "Joc anterior",
+  "games.next_game": "Joc següent",
   "games.nav_link": "Jocs",
   "games.title": "Minijocs",
   "games.subtitle": "Tria un joc i gaudeix una estona.",

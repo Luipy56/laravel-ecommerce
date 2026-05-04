@@ -740,6 +740,8 @@
   "admin.settings.shipping_postal_not_implemented": "Not implemented yet. Rates by postal code will be configurable here later.",
   "admin.products.is_trending_managed_by_settings": "This flag is updated from Configuration using stock rules and “Recalculate automatic highlights”.",
   "shop.custom_solution.disabled_public": "We are not accepting new custom solution requests at the moment.",
+  "games.prev_game": "Previous game",
+  "games.next_game": "Next game",
   "games.nav_link": "Games",
   "games.title": "Mini Games",
   "games.subtitle": "Pick a game and have some fun.",

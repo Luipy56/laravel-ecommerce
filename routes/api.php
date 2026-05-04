@@ -36,7 +36,9 @@ use App\Http\Controllers\Api\PersonalizedSolutionController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PublicPersonalizedSolutionController;
 use App\Http\Controllers\Api\PurchasedProductsController;
+use App\Http\Controllers\Api\AdminReturnRequestController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\ReturnRequestController;
 use App\Http\Controllers\Api\ShopPublicSettingsController;
 use App\Http\Controllers\Api\StripeCheckoutConfirmController;
 use App\Http\Controllers\Api\UserController;
@@ -135,6 +137,9 @@ Route::middleware(['auth', 'client.verified'])->group(function () {
 
     Route::post('products/{product}/reviews', [ProductReviewController::class, 'store']);
     Route::get('products/{product}/reviews/mine', [ProductReviewController::class, 'mine']);
+
+    Route::get('return-requests', [ReturnRequestController::class, 'index']);
+    Route::post('orders/{order}/return-requests', [ReturnRequestController::class, 'store']);
 });
 
 Route::middleware(['auth.client_or_admin'])->group(function () {
@@ -178,6 +183,12 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('orders', [AdminOrderController::class, 'index']);
     Route::get('orders/{order}', [AdminOrderController::class, 'show']);
     Route::put('orders/{order}', [AdminOrderController::class, 'update']);
+    Route::post('orders/{order}/notify-in-transit-mail', [AdminOrderController::class, 'sendInTransitCustomerMail'])
+        ->middleware('throttle:30,1');
+    Route::get('return-requests', [AdminReturnRequestController::class, 'index']);
+    Route::get('return-requests/{rma}', [AdminReturnRequestController::class, 'show']);
+    Route::put('return-requests/{rma}', [AdminReturnRequestController::class, 'update']);
+    Route::post('return-requests/{rma}/refund', [AdminReturnRequestController::class, 'refund']);
     Route::apiResource('admins', AdminAdminController::class);
     Route::get('reviews', [AdminProductReviewController::class, 'index']);
     Route::get('reviews/{review}', [AdminProductReviewController::class, 'show']);

@@ -4,19 +4,34 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { loadAdminListFilters, normalizedDigitsId, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const PRODUCTS_FILTERS_PAGE_ID = 'products';
+
+function readPersistedProductFilters() {
+  const raw = loadAdminListFilters(PRODUCTS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const categoryId = normalizedDigitsId(raw?.category_id);
+  return { search, categoryId };
+}
 
 export default function AdminProductsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('products');
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedProductFilters();
+  }
+  const persisted = persistedRef.current;
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [categoryId, setCategoryId] = useState(() => persisted.categoryId);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
 
@@ -67,6 +82,10 @@ export default function AdminProductsPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    saveAdminListFilters(PRODUCTS_FILTERS_PAGE_ID, { search, category_id: categoryId });
+  }, [search, categoryId]);
 
   useEffect(() => {
     if (!hasMore) return;

@@ -7,6 +7,9 @@
 @section('content')
     <p>{{ __('mail.order_shipped.greeting') }}</p>
     <p>{{ __('mail.order_shipped.body', ['id' => $order->id]) }}</p>
+    @if(!empty($deliveryEstimateKey))
+        <p>{{ __('mail.order_shipped.delivery_estimate_' . $deliveryEstimateKey) }}</p>
+    @endif
     @if($shippingDate)
         <p><strong>{{ __('mail.order_shipped.shipping_date_label') }}:</strong> {{ $shippingDate->timezone(config('app.timezone'))->translatedFormat('d/m/Y') }}</p>
     @endif

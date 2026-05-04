@@ -4,6 +4,19 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import StarRating from '../../components/StarRating';
+import { loadAdminListFilters, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const REVIEWS_FILTERS_PAGE_ID = 'reviews';
+const REVIEW_STATUS_VALUES = ['', 'pending', 'approved', 'rejected'];
+
+function readPersistedReviewFilters() {
+  const raw = loadAdminListFilters(REVIEWS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const st = raw?.status;
+  const statusFilter =
+    typeof st === 'string' && REVIEW_STATUS_VALUES.includes(st) ? st : 'pending';
+  return { search, statusFilter };
+}
 
 const STATUS_COLORS = {
   pending: 'badge-warning',
@@ -14,6 +27,11 @@ const STATUS_COLORS = {
 export default function AdminReviewsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedReviewFilters();
+  }
+  const persisted = persistedRef.current;
 
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,9 +40,9 @@ export default function AdminReviewsPage() {
   const [total, setTotal] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
 
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
-  const [statusFilter, setStatusFilter] = useState('pending');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
+  const [statusFilter, setStatusFilter] = useState(() => persisted.statusFilter);
 
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
@@ -59,6 +77,10 @@ export default function AdminReviewsPage() {
   useEffect(() => {
     fetchReviews(page);
   }, [fetchReviews, page]);
+
+  useEffect(() => {
+    saveAdminListFilters(REVIEWS_FILTERS_PAGE_ID, { search, status: statusFilter });
+  }, [search, statusFilter]);
 
   const truncate = (s, n = 80) => (s && s.length > n ? `${s.slice(0, n)}…` : s ?? '');
 

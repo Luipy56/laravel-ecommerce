@@ -68,7 +68,10 @@ import AdminFaqNewPage from './Pages/admin/AdminFaqNewPage';
 import AdminFaqEditPage from './Pages/admin/AdminFaqEditPage';
 import AdminReviewsPage from './Pages/admin/AdminReviewsPage';
 import AdminReviewShowPage from './Pages/admin/AdminReviewShowPage';
+import AdminReturnRequestsPage from './Pages/admin/AdminReturnRequestsPage';
+import AdminReturnRequestShowPage from './Pages/admin/AdminReturnRequestShowPage';
 import FaqPage from './Pages/FaqPage';
+import ReturnRequestsPage from './Pages/ReturnRequestsPage';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import ResetPasswordPage from './Pages/ResetPasswordPage';
 import NotFoundPage from './Pages/NotFoundPage';
@@ -118,6 +121,7 @@ export default function App() {
                   <Route path="orders" element={<OrdersPage />} />
                   <Route path="favorites" element={<FavoritesPage />} />
                   <Route path="purchases" element={<PurchasesPage />} />
+                  <Route path="my-returns" element={<ReturnRequestsPage />} />
                   <Route path="orders/:id" element={<OrderDetailPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="custom-solution" element={<CustomSolutionPage />} />
@@ -179,6 +183,8 @@ export default function App() {
                   <Route path="personalized-solutions/:id" element={<AdminPersonalizedSolutionShowPage />} />
                   <Route path="reviews" element={<AdminReviewsPage />} />
                   <Route path="reviews/:id" element={<AdminReviewShowPage />} />
+                  <Route path="returns" element={<AdminReturnRequestsPage />} />
+                  <Route path="returns/:id" element={<AdminReturnRequestShowPage />} />
                   <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Route>
               </Routes>

@@ -55,6 +55,8 @@ class Order extends Model
 
     public const STATUS_INSTALLATION_CONFIRMED = 'installation_confirmed';
 
+    public const STATUS_RETURNED = 'returned';
+
     public const INSTALLATION_PENDING = 'pending';
 
     public const INSTALLATION_PRICED = 'priced';
@@ -102,6 +104,11 @@ class Order extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function returnRequests(): HasMany
+    {
+        return $this->hasMany(ReturnRequest::class);
     }
 
     /** Display reference for admin (e.g. invoices, links). */

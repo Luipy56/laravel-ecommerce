@@ -19,6 +19,15 @@ Enum order_status {
   sent [note: 'Shipped (with shipping date)']
   installation_pending [note: 'Shipped; installation scheduled or awaiting']
   installation_confirmed [note: 'Installation completed']
+  returned [note: 'Order returned; refund issued or in progress']
+}
+
+Enum return_request_status {
+  pending_review [note: 'Submitted by client; awaiting admin review']
+  approved [note: 'Admin approved; awaiting refund']
+  rejected [note: 'Admin rejected the return']
+  refunded [note: 'Refund issued via PSP']
+  cancelled [note: 'Cancelled by client or admin']
 }
 
 Enum payment_method {
@@ -332,4 +341,19 @@ Table PERSONALIZED_SOLUTION_ATTACHMENTS [note: 'References files on disk (this a
   content_type varchar(100) [not null]
   description text [null]
   is_active boolean [not null, default: true, note: 'Soft delete']
+}
+
+Table RETURN_REQUESTS [note: 'RMA (Return Merchandise Authorization). One open RMA per order at a time.'] {
+  id int [pk, increment]
+  order_id int [not null, ref: > ORDERS.id]
+  client_id int [not null, ref: > CLIENTS.id]
+  payment_id int [null, ref: > PAYMENTS.id, note: 'Payment to be refunded; nullOnDelete']
+  status return_request_status [not null, default: 'pending_review']
+  reason text [not null, note: 'Client-provided reason for return']
+  admin_notes text [null, note: 'Internal admin notes (shown to admin only)']
+  refund_amount decimal(10,2) [null, note: 'Actual amount refunded; set when refund is issued']
+  refunded_at timestamp [null]
+  gateway_refund_reference varchar(255) [null, note: 'PSP refund id, e.g. Stripe re_xxx']
+  created_at timestamp [null]
+  updated_at timestamp [null]
 }

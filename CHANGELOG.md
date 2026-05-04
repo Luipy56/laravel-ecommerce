@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.132] - 2026-05-04
+
+### Added
+
+- **RMA — Sistema de devolucions (Return Merchandise Authorization):** Flux complet de sol·licitud, aprovació i reemborsament de devolucions.
+  - Nova taula `return_requests` (`order_id`, `client_id`, `payment_id`, `status`, `reason`, `admin_notes`, `refund_amount`, `refunded_at`, `gateway_refund_reference`).
+  - Nou constant `Order::STATUS_RETURNED = 'returned'` i relació `Order::returnRequests()`.
+  - Model `ReturnRequest` amb constants de status i scopes (`pendingReview`, `open`).
+  - `ReturnRequestService` amb mètodes `create`, `approve`, `reject` i `issueRefund` (Stripe API + fallback manual per PayPal i altres gateways).
+  - API REST client: `GET /api/v1/return-requests`, `POST /api/v1/orders/{order}/return-requests`.
+  - API REST admin: `GET/GET/PUT /api/v1/admin/return-requests[/{rma}]`, `POST /api/v1/admin/return-requests/{rma}/refund`.
+  - 4 mails transaccionals: `ReturnRequestReceivedAdminMail` (admin), `ReturnRequestApprovedMail`, `ReturnRequestRejectedMail`, `ReturnRequestRefundedMail` (client). Registrats via Events+Listeners.
+  - `AdminNavAlertsController` ara retorna `returns_need_attention` per a sol·licituds `pending_review`.
+  - Frontend client: botó "Sol·licitar devolució" + modal a `OrderDetailPage`, nova pàgina `/my-returns` (`ReturnRequestsPage`), accés des del menú del perfil.
+  - Frontend admin: `AdminReturnRequestsPage` (`/admin/returns`) amb cerca, filtre d'estat i paginació; `AdminReturnRequestShowPage` (`/admin/returns/:id`) amb accions aprovar/rebutjar/emetre reemborsament. Afegit a la sidebar de `AdminLayout` (secció Operacions).
+  - I18n: claus `shop.returns.*`, `admin.returns.*`, `admin.nav.returns` i `shop.status.returned` a `ca.json` i `es.json`. Claus de correu a `lang/ca/mail.php` i `lang/es/mail.php`.
+  - `diagramZero.dbml` actualitzat amb taula `RETURN_REQUESTS` i nou estat `returned` a `order_status`.
+
+## [0.1.131] - 2026-05-04
+
+### Changed
+
+- **Admin:** List toolbar filters (search, type/status/active/period/category, etc.) are persisted in `localStorage` under the key `le-admin-list-filters` so choices survive navigation away from the page and full browser reloads. Applies to orders, personalized solutions, products, clients, categories, FAQs, packs, admins, variant groups, reviews, and both sections of the features page.
+
 ## [0.1.130] - 2026-05-04
 
 ### Added

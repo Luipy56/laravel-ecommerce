@@ -4,19 +4,37 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { loadAdminListFilters, normalizedActiveTriState, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const PACKS_FILTERS_PAGE_ID = 'packs';
+
+function readPersistedPackFilters() {
+  const raw = loadAdminListFilters(PACKS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const activeRaw = normalizedActiveTriState(raw?.active);
+  const activeFilter = activeRaw === null ? '1' : activeRaw;
+  const trendingRaw = normalizedActiveTriState(raw?.trending);
+  const trendingFilter = trendingRaw === null ? '' : trendingRaw;
+  return { search, activeFilter, trendingFilter };
+}
 
 export default function AdminPacksPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('packs');
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedPackFilters();
+  }
+  const persisted = persistedRef.current;
   const [packs, setPacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
-  const [activeFilter, setActiveFilter] = useState('1');
-  const [trendingFilter, setTrendingFilter] = useState('');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
+  const [activeFilter, setActiveFilter] = useState(() => persisted.activeFilter);
+  const [trendingFilter, setTrendingFilter] = useState(() => persisted.trendingFilter);
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
 
@@ -55,6 +73,10 @@ export default function AdminPacksPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    saveAdminListFilters(PACKS_FILTERS_PAGE_ID, { search, active: activeFilter, trending: trendingFilter });
+  }, [search, activeFilter, trendingFilter]);
 
   useEffect(() => {
     if (!hasMore) return;

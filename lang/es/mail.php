@@ -126,9 +126,46 @@ return [
         'subject' => 'Su pedido #:id va en camino',
         'greeting' => 'Hola,',
         'body' => 'Su pedido #:id ha pasado a estado de envío.',
+        'delivery_estimate_today' => 'Previsión de entrega: hoy mismo.',
+        'delivery_estimate_few_days' => 'Previsión de entrega: en unos días.',
+        'delivery_estimate_soon' => 'Previsión de entrega: le llegará pronto.',
         'shipping_date_label' => 'Fecha de envío prevista',
         'cta' => 'Puede revisar el detalle y el estado desde la tienda.',
         'button' => 'Ver el pedido',
         'footer' => 'Gracias por confiar en nosotros.',
+    ],
+
+    'admin_return_request_received' => [
+        'subject' => '[Devolución pedido #:id] Nueva solicitud de devolución',
+        'intro' => 'Se ha recibido una nueva solicitud de devolución para el pedido #:id.',
+        'client_email' => 'Cliente:',
+        'reason' => 'Motivo:',
+        'button' => 'Gestionar en el panel',
+    ],
+
+    'return_request_approved' => [
+        'subject' => 'Solicitud de devolución aprobada · pedido #:id',
+        'greeting' => 'Hola,',
+        'body' => 'Su solicitud de devolución para el pedido #:id ha sido aprobada.',
+        'notes_label' => 'Notas:',
+        'cta' => 'El reembolso se procesará en breve.',
+        'button' => 'Ver el pedido',
+    ],
+
+    'return_request_rejected' => [
+        'subject' => 'Solicitud de devolución no aprobada · pedido #:id',
+        'greeting' => 'Hola,',
+        'body' => 'Lamentamos informarle que su solicitud de devolución para el pedido #:id no ha podido ser aprobada.',
+        'notes_label' => 'Motivo:',
+        'button' => 'Ver el pedido',
+    ],
+
+    'return_request_refunded' => [
+        'subject' => 'Reembolso procesado · pedido #:id',
+        'greeting' => 'Hola,',
+        'body' => 'El reembolso de su devolución para el pedido #:id ha sido procesado.',
+        'amount_label' => 'Importe reembolsado',
+        'cta' => 'El reembolso aparecerá en su cuenta en los próximos días hábiles.',
+        'button' => 'Ver el pedido',
     ],
 ];

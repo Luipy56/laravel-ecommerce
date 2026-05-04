@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Events\InstallationPriceWasAssigned;
 use App\Events\OrderShipped;
 use App\Http\Controllers\Controller;
+use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\ShopSetting;
 use App\Models\OrderLine;
+use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Admin CRUD for orders (and carts). List with filters, show full detail, update status/dates.
@@ -206,6 +209,7 @@ class AdminOrderController extends Controller
                 Order::STATUS_SENT,
                 Order::STATUS_INSTALLATION_PENDING,
                 Order::STATUS_INSTALLATION_CONFIRMED,
+                Order::STATUS_RETURNED,
             ])];
         }
         $validated = $request->validate($rules);
@@ -282,6 +286,43 @@ class AdminOrderController extends Controller
                 'total' => round($order->grand_total, 2),
             ],
         ]);
+    }
+
+    /**
+     * Send the “order in transit” transactional email to the customer (manual action from admin).
+     * Only allowed when the order is a real order and status is in_transit.
+     */
+    public function sendInTransitCustomerMail(Request $request, Order $order): JsonResponse
+    {
+        if ($order->kind !== Order::KIND_ORDER || $order->status !== Order::STATUS_IN_TRANSIT) {
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.orders.notify_in_transit_mail_invalid_status'),
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'delivery_eta' => ['required', 'string', 'in:today,few_days,unknown'],
+        ]);
+
+        $estimateKey = match ($validated['delivery_eta']) {
+            'unknown' => 'soon',
+            default => $validated['delivery_eta'],
+        };
+
+        $order->loadMissing(['client', 'lines', 'addresses']);
+        $client = $order->client;
+        if (! $client?->login_email) {
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.orders.notify_in_transit_mail_no_client_email'),
+            ], 422);
+        }
+
+        $locale = MailLocale::resolve();
+        Mail::to($client->login_email)->locale($locale)->send(new OrderShippedMail($order, $estimateKey));
+
+        return response()->json(['success' => true]);
     }
 
 }

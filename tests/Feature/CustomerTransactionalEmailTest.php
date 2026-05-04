@@ -471,4 +471,56 @@ class CustomerTransactionalEmailTest extends TestCase
 
         Mail::assertSent(OrderShippedMail::class);
     }
+
+    public function test_admin_can_send_in_transit_customer_mail_with_delivery_eta(): void
+    {
+        Mail::fake();
+
+        $this->seed(DatabaseSeeder::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $response = $this->postJson('/api/v1/admin/orders/2/notify-in-transit-mail', [
+            'delivery_eta' => 'unknown',
+        ]);
+        $response->assertOk();
+
+        Mail::assertSent(OrderShippedMail::class, function (OrderShippedMail $mail) {
+            return $mail->deliveryEstimateKey === 'soon';
+        });
+
+        $sent = Mail::sent(OrderShippedMail::class, fn (OrderShippedMail $m) => $m->deliveryEstimateKey === 'soon')->first();
+        $this->assertNotNull($sent);
+        $html = $sent->render();
+        $this->assertTrue(
+            str_contains($html, 'le llegará pronto')
+                || str_contains($html, 'it will arrive soon')
+                || str_contains($html, 'Arribarà aviat'),
+            'Expected friendly “unknown ETA” copy in the email body.'
+        );
+        $this->assertStringNotContainsString('No se sabe', $html);
+    }
+
+    public function test_admin_cannot_send_in_transit_customer_mail_when_order_not_in_transit(): void
+    {
+        Mail::fake();
+
+        $this->seed(DatabaseSeeder::class);
+
+        $this->withCredentials();
+        $this->postJson('/api/v1/admin/login', [
+            'username' => 'manager',
+            'password' => 'admin',
+        ])->assertOk();
+
+        $this->postJson('/api/v1/admin/orders/1/notify-in-transit-mail', [
+            'delivery_eta' => 'today',
+        ])->assertStatus(422);
+
+        Mail::assertNotSent(OrderShippedMail::class);
+    }
 }

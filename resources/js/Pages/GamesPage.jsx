@@ -61,7 +61,6 @@ export default function GamesPage() {
               >
                 <div className="card-body items-center gap-2 py-8 text-center">
                   <h2 className="card-title text-base">{t(game.titleKey)}</h2>
-                  <p className="text-sm text-base-content/60">{t(game.descKey)}</p>
                   <div className="card-actions mt-2">
                     <span className="btn btn-primary btn-sm">{t('games.play')}</span>
                   </div>

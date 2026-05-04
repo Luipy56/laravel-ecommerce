@@ -12,10 +12,13 @@
   <style>
     .score-container:before { content: "Puntos"; }
     .best-container:before { content: "Récord"; }
-    /* Hide footer content so the game fits the iframe without scrolling */
-    .game-explanation, hr, p:last-of-type { display: none; }
-    html, body { overflow: hidden; height: 100%; }
-    .container { padding-bottom: 0; }
+    /* Remove margins so the game fills the iframe with no wasted space */
+    html, body { overflow: hidden; height: 100%; margin: 0; padding: 0; }
+    body { display: flex; align-items: center; justify-content: center; }
+    .container { width: 500px; margin: 0; }
+    .game-intro, .game-explanation, hr, p:last-of-type { display: none; }
+    .above-game { margin-bottom: 6px; }
+    .game-container { margin-top: 10px !important; }
   </style>
 </head>
 <body>

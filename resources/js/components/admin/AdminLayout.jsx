@@ -21,6 +21,7 @@ const SECTION_NAV_KEYS = {
   faqs: 'admin.nav.faqs',
   'feature-names': 'admin.nav.feature_types',
   packs: 'admin.nav.packs',
+  reviews: 'admin.nav.reviews',
 };
 
 const SECTION_NEW_KEYS = {
@@ -105,6 +106,7 @@ export default function AdminLayout() {
     const operationsSource = [
       { to: '/admin/orders', labelKey: 'admin.nav.orders', alertKey: 'orders' },
       { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions', alertKey: 'personalized_solutions' },
+      { to: '/admin/reviews', labelKey: 'admin.nav.reviews', alertKey: 'reviews' },
     ];
     const catalogSource = [
       { to: '/admin/admins', labelKey: 'admin.nav.admins', alertKey: null },
@@ -132,6 +134,7 @@ export default function AdminLayout() {
   const [navAlerts, setNavAlerts] = useState({
     orders: false,
     personalized_solutions: false,
+    reviews: false,
   });
 
   useEffect(() => {
@@ -146,10 +149,11 @@ export default function AdminLayout() {
         setNavAlerts({
           orders: Boolean(body.data.orders_need_attention),
           personalized_solutions: Boolean(body.data.personalized_solutions_need_attention),
+          reviews: Boolean(body.data.reviews_need_attention),
         });
       } catch {
         if (!cancelled) {
-          setNavAlerts({ orders: false, personalized_solutions: false });
+          setNavAlerts({ orders: false, personalized_solutions: false, reviews: false });
         }
       }
     })();
@@ -166,7 +170,9 @@ export default function AdminLayout() {
         ? navAlerts.orders
         : alertKey === 'personalized_solutions'
           ? navAlerts.personalized_solutions
-          : false;
+          : alertKey === 'reviews'
+            ? navAlerts.reviews
+            : false;
     const linkAria =
       showAttentionDot && alertKey
         ? `${t(labelKey)} · ${t(`admin.nav.alert_link_suffix_${alertKey}`)}`

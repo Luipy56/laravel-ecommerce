@@ -66,6 +66,8 @@ import AdminPersonalizedSolutionEditPage from './Pages/admin/AdminPersonalizedSo
 import AdminFaqsPage from './Pages/admin/AdminFaqsPage';
 import AdminFaqNewPage from './Pages/admin/AdminFaqNewPage';
 import AdminFaqEditPage from './Pages/admin/AdminFaqEditPage';
+import AdminReviewsPage from './Pages/admin/AdminReviewsPage';
+import AdminReviewShowPage from './Pages/admin/AdminReviewShowPage';
 import FaqPage from './Pages/FaqPage';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import ResetPasswordPage from './Pages/ResetPasswordPage';
@@ -175,6 +177,8 @@ export default function App() {
                   <Route path="personalized-solutions" element={<AdminPersonalizedSolutionsPage />} />
                   <Route path="personalized-solutions/:id/edit" element={<AdminPersonalizedSolutionEditPage />} />
                   <Route path="personalized-solutions/:id" element={<AdminPersonalizedSolutionShowPage />} />
+                  <Route path="reviews" element={<AdminReviewsPage />} />
+                  <Route path="reviews/:id" element={<AdminReviewShowPage />} />
                   <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Route>
               </Routes>

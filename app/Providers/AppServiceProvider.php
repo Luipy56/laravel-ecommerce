@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Contracts\RebuildsProductSearchText;
 use App\Contracts\Search\ElasticsearchProductCatalogSearch;
+use App\Models\ProductReview;
+use App\Observers\ProductReviewObserver;
 use App\Events\InstallationPriceWasAssigned;
 use App\Events\OrderInstallationQuoteRequested;
 use App\Events\OrderPaymentSucceeded;
@@ -105,6 +107,8 @@ class AppServiceProvider extends ServiceProvider
                 );
             });
         }
+
+        ProductReview::observe(ProductReviewObserver::class);
 
         Event::listen(InstallationPriceWasAssigned::class, SendInstallationPriceAssignedEmail::class);
         Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmationEmail::class);

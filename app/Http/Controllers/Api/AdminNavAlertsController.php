@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\PersonalizedSolution;
+use App\Models\ProductReview;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -29,11 +30,14 @@ class AdminNavAlertsController extends Controller
             ->where('status', PersonalizedSolution::STATUS_PENDING_REVIEW)
             ->exists();
 
+        $reviewsNeedAttention = ProductReview::pending()->exists();
+
         return response()->json([
             'success' => true,
             'data' => [
                 'orders_need_attention' => $ordersNeedAttention,
                 'personalized_solutions_need_attention' => $personalizedNeedAttention,
+                'reviews_need_attention' => $reviewsNeedAttention,
             ],
         ]);
     }

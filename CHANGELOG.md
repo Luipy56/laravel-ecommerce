@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.130] - 2026-05-04
+
+### Added
+
+- **Ressenyes i valoracions de productes:** Els clients que han comprat un producte poden deixar una valoració (1-5 estrelles + comentari opcional). Les ressenyes queden en estat `pending` fins que un administrador les aprova o rebutja. Només les ressenyes aprovades es mostren a la fitxa de producte.
+  - `product_reviews` table: `product_id`, `client_id`, `order_id` (compra verificada), `rating`, `comment`, `status` (pending/approved/rejected), `admin_note`.
+  - Columnes `avg_rating` i `reviews_count` denormalitzades a la taula `products`, actualitzades automàticament via `ProductReviewObserver`.
+  - API pública `GET /api/v1/products/{id}/reviews` (llista paginada + agregat de distribució).
+  - API de client autenticat `POST/GET .../reviews` per enviar i consultar la pròpia ressenya (amb verificació de compra completada).
+  - API d'admin `GET/PATCH/DELETE /api/v1/admin/reviews/{id}` per moderar.
+  - **Storefront:** `ReviewsSection` + `ReviewForm` afegits a la fitxa de producte; formulari condicionat a compra verificada; estat de ressenya pròpia visible.
+  - **Admin:** `AdminReviewsPage` (cua de moderació, filtre per estat, cerca), `AdminReviewShowPage` (detall + aprovar/rebutjar/eliminar).
+  - Alerta de punt taronja al menú lateral de l'admin quan hi ha ressenyes pendents.
+  - Component compartit `StarRating.jsx` (daisyUI `mask-star-2`).
+  - i18n afegit per `admin.reviews.*` i `shop.reviews.*` en ca/es/en.
+
+## [0.1.129] - 2026-05-04
+
+### Added
+
+- **Sitemap XML dinámico:** `GET /sitemap.xml` generado por `SitemapController` con todas las páginas estáticas (home, productos, FAQ, juegos) más URLs dinámicas para cada categoría activa (`/categories/{id}/products`) y cada producto activo (`/products/{id}`). Resultado cacheado 6 horas; cache invalidada automáticamente cuando se guarda o elimina un producto o categoría.
+- **robots.txt dinámico:** La ruta `/robots.txt` pasa por Laravel y emite la directiva `Sitemap:` con la URL absoluta correcta según `APP_URL`, para que cualquier entorno genere el valor adecuado. Se eliminó el fichero estático `public/robots.txt`.
+- **Nginx:** `docker/nginx/default.conf` actualizado para enrutar `/robots.txt` a través de PHP (`try_files $uri /index.php?$query_string`) en lugar de servirlo solo como fichero estático.
+
 ## [0.1.128] - 2026-05-04
 
 ### Added

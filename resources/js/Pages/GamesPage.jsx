@@ -44,7 +44,7 @@ export default function GamesPage() {
               className="btn btn-sm btn-ghost gap-1"
               onClick={() => setActiveGame(null)}
             >
-              ← {t('games.back_to_list')}
+              {t('games.back_to_list')}
             </button>
             <span className="text-lg font-semibold">
               {currentGame.emoji} {t(currentGame.titleKey)}

@@ -36,7 +36,7 @@ export default function NotFoundPage() {
               className="btn btn-sm btn-ghost gap-1"
               onClick={() => setActiveGame(null)}
             >
-              ← {t('games.change_game')}
+              {t('games.change_game')}
             </button>
             <span className="font-semibold">
               {currentGame.emoji} {t(currentGame.titleKey)}
@@ -64,7 +64,7 @@ export default function NotFoundPage() {
 
       <div className="mt-4 text-center pb-8">
         <Link to="/games" className="link link-primary text-sm">
-          {t('games.see_all_games')} →
+          {t('games.see_all_games')}
         </Link>
       </div>
     </div>

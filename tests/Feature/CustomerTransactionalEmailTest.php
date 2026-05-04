@@ -448,7 +448,7 @@ class CustomerTransactionalEmailTest extends TestCase
 
             return str_contains($html, 'Need a custom lock setup')
                 && str_contains($html, '08001')
-                && str_contains($html, 'Resumen de tu solicitud');
+                && str_contains($html, 'Resumen de su solicitud');
         });
     }
 

@@ -3,13 +3,13 @@
 return [
     'layout' => [
         'footer_default' => 'Missatge automàtic; si us plau no respongui directament al correu.',
-        'manage_preferences' => 'Gestioni les seves dades amb l'enllaç segur',
+        'manage_preferences' => 'Gestioni les seves dades amb l\'enllaç segur',
     ],
 
     'installation_price' => [
-        'subject' => 'Presupost d'instal·lació per a la comanda #:id',
+        'subject' => 'Presupost d\'instal·lació per a la comanda #:id',
         'greeting' => 'Hola,',
-        'body' => 'Ja hem definit el preu d'instal·lació per a la seva comanda #:id. A continuació té el desglossament.',
+        'body' => 'Ja hem definit el preu d\'instal·lació per a la seva comanda #:id. A continuació té el desglossament.',
         'products_subtotal' => 'Subtotal productes',
         'installation_fee' => 'Instal·lació',
         'total_due' => 'Total a pagar',
@@ -33,22 +33,22 @@ return [
         'greeting' => 'Hola,',
         'body' => 'Hem rebut la seva comanda #:id. La comanda queda pendent: encara no hem rebut el pagament.',
         'total_due' => 'Total a pagar',
-        'cta' => 'Completa el pagament des de la botiga amb l'enllaç següent.',
+        'cta' => 'Completa el pagament des de la botiga amb l\'enllaç següent.',
         'button' => 'Anar a la comanda',
-        'footer' => 'Si ja ha completat el pagament, en breu rebrà la confirmació quan el banc o la passarel·la l'hagin registrat.',
+        'footer' => 'Si ja ha completat el pagament, en breu rebrà la confirmació quan el banc o la passarel·la l\'hagin registrat.',
     ],
 
     'admin_order_payment_confirmed' => [
         'subject'      => '[Comanda #:id] Pagament confirmat',
-        'intro'        => 'S'ha confirmat el pagament de la comanda #:id.',
+        'intro'        => 'S\'ha confirmat el pagament de la comanda #:id.',
         'client_email' => 'Client:',
         'grand_total'  => 'Total pagat',
         'button'       => 'Obrir al panell',
     ],
 
     'admin_order_installation_quote' => [
-        'subject' => '[Comanda #:id] Sol·licitud de pressupost d'instal·lació',
-        'intro' => 'S'ha creat una comanda amb instal·lació al damunt del màxim autòmat (cal pressupost). Comanda #:id.',
+        'subject' => '[Comanda #:id] Sol·licitud de pressupost d\'instal·lació',
+        'intro' => 'S\'ha creat una comanda amb instal·lació al damunt del màxim autòmat (cal pressupost). Comanda #:id.',
         'client_email' => 'Client:',
         'grand_total' => 'Total (amb enviament)',
         'button' => 'Obrir al panell',
@@ -56,7 +56,7 @@ return [
 
     'admin_order_payment_pending' => [
         'subject' => '[Comanda #:id] Pendent de pagament',
-        'intro' => 'S'ha registrat una comanda sense confirmació de pagament (redirecció o pendent a la passarel·la). Comanda #:id.',
+        'intro' => 'S\'ha registrat una comanda sense confirmació de pagament (redirecció o pendent a la passarel·la). Comanda #:id.',
         'client_email' => 'Client:',
         'grand_total' => 'Total',
         'order_status' => 'Estat',
@@ -64,10 +64,10 @@ return [
     ],
 
     'order_installation_quote' => [
-        'subject' => 'Hem rebut la seva sol·licitud d'instal·lació · comanda #:id',
+        'subject' => 'Hem rebut la seva sol·licitud d\'instal·lació · comanda #:id',
         'greeting' => 'Hola,',
-        'body' => 'Hem rebut la seva comanda #:id amb sol·licitud d'instal·lació.',
-        'next_steps' => 'Li enviarem un correu quan tinguem el pressupost d'instal·lació. Fins llavors pot seguir l'estat des de la botiga.',
+        'body' => 'Hem rebut la seva comanda #:id amb sol·licitud d\'instal·lació.',
+        'next_steps' => 'Li enviarem un correu quan tinguem el pressupost d\'instal·lació. Fins llavors pot seguir l\'estat des de la botiga.',
         'button' => 'Veure la comanda',
         'footer' => 'Gràcies per confiar en nosaltres.',
     ],
@@ -80,7 +80,7 @@ return [
         'preview_heading' => 'Resum de la seva sol·licitud',
         'preview_description' => 'Descripció del problema',
         'preview_phone' => 'Telèfon',
-        'preview_address' => 'Adreça i notes d'entrega',
+        'preview_address' => 'Adreça i notes d\'entrega',
         'preview_attachments' => 'Fitxers adjunts',
         'preview_truncated' => 'La descripció és molt llarga; en el gestor de la sol·licitud en veurà el text complet.',
         'portal_intro' => 'Pot fer el seguiment de la sol·licitud i actualitzar les seves dades amb aquest enllaç segur (sense iniciar sessió):',
@@ -125,9 +125,9 @@ return [
     'order_shipped' => [
         'subject' => 'La seva comanda #:id està en camí',
         'greeting' => 'Hola,',
-        'body' => 'La seva comanda #:id ha passat a estat d'enviament.',
-        'shipping_date_label' => 'Data d'enviament prevista',
-        'cta' => 'Pot revisar el detall i l'estat des de la botiga.',
+        'body' => 'La seva comanda #:id ha passat a estat d\'enviament.',
+        'shipping_date_label' => 'Data d\'enviament prevista',
+        'cta' => 'Pot revisar el detall i l\'estat des de la botiga.',
         'button' => 'Veure la comanda',
         'footer' => 'Gràcies per confiar en nosaltres.',
     ],

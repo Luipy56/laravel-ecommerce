@@ -378,8 +378,11 @@ class ProductController extends Controller
         $packMin = Pack::query()->active()->min('price');
         $packMax = Pack::query()->active()->max('price');
 
-        $min = min(array_filter([$productMin, $packMin], fn ($v) => $v !== null)) ?: 0;
-        $max = max(array_filter([$productMax, $packMax], fn ($v) => $v !== null)) ?: 0;
+        $minValues = array_filter([$productMin, $packMin], fn ($v) => $v !== null);
+        $maxValues = array_filter([$productMax, $packMax], fn ($v) => $v !== null);
+
+        $min = $minValues !== [] ? min($minValues) : 0;
+        $max = $maxValues !== [] ? max($maxValues) : 0;
 
         return response()->json([
             'success' => true,

@@ -112,6 +112,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(OrderInstallationQuoteRequested::class, SendOrderInstallationQuoteRequestEmail::class);
         Event::listen(OrderInstallationQuoteRequested::class, SendOrderInstallationQuoteRequestAdminEmail::class);
         Event::listen(OrderPlacedPaymentPending::class, SendOrderPaymentPendingEmail::class);
+        Event::listen(OrderPlacedPaymentPending::class, SendOrderPaymentPendingAdminEmail::class);
         Event::listen(PersonalizedSolutionSubmitted::class, SendPersonalizedSolutionAcknowledgementEmail::class);
         Event::listen(OrderShipped::class, SendOrderShippedEmail::class);
 

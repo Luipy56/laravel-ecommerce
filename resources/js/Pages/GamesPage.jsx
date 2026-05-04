@@ -44,16 +44,13 @@ export default function GamesPage() {
 
       {currentGame ? (
         <div>
-          <div className="mb-4 flex items-center gap-3">
+          <div className="mb-4">
             <button
-              className="btn btn-sm btn-ghost gap-1"
+              className="btn btn-sm btn-ghost"
               onClick={() => setActiveGame(null)}
             >
               {t('games.back_to_list')}
             </button>
-            <span className="text-lg font-semibold">
-              {currentGame.emoji} {t(currentGame.titleKey)}
-            </span>
           </div>
           <MiniGameEmbed
             src={currentGame.src}

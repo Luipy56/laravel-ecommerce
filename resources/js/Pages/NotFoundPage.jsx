@@ -36,16 +36,13 @@ export default function NotFoundPage() {
 
       {currentGame ? (
         <div className="mt-2">
-          <div className="mb-3 flex items-center gap-3">
+          <div className="mb-3">
             <button
-              className="btn btn-sm btn-ghost gap-1"
+              className="btn btn-sm btn-ghost"
               onClick={() => setActiveGame(null)}
             >
               {t('games.change_game')}
             </button>
-            <span className="font-semibold">
-              {currentGame.emoji} {t(currentGame.titleKey)}
-            </span>
           </div>
           <MiniGameEmbed src={currentGame.src} title={t(currentGame.titleKey)} />
         </div>

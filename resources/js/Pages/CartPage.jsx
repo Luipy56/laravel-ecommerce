@@ -55,10 +55,10 @@ function CartLine({ line, updateLine, removeLine, t }) {
           aria-label={t('shop.cart.include')}
         />
       </td>
-      <td className="align-middle">
+      <td className="align-middle max-w-[9rem] sm:max-w-none">
         <Link
           to={detailUrl}
-          className="flex items-center gap-3 no-underline text-base-content hover:text-primary transition-colors block"
+          className="flex items-center gap-3 no-underline text-base-content hover:text-primary transition-colors"
         >
           <figure className="mask mask-squircle w-16 h-16 shrink-0 bg-base-300 flex items-center justify-center overflow-hidden">
             <img
@@ -67,10 +67,10 @@ function CartLine({ line, updateLine, removeLine, t }) {
               className="w-full h-full object-cover"
             />
           </figure>
-          <div>
-            <p className="font-medium">{name}</p>
+          <div className="min-w-0">
+            <p className="font-medium overflow-hidden text-ellipsis whitespace-nowrap sm:whitespace-normal sm:overflow-visible">{name}</p>
             {features.length > 0 && (
-              <p className="text-sm text-base-content/70 mt-0.5">
+              <p className="text-sm text-base-content/70 mt-0.5 hidden sm:block">
                 {features.map((f) => `${f.name}: ${f.value}`).join(' · ')}
               </p>
             )}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
@@ -51,6 +51,7 @@ export default function CheckoutPage() {
   const [paypalCancelWarning, setPaypalCancelWarning] = useState('');
   /** Temporary workaround for demo: complete order without PSP when server allows (CHECKOUT_DEMO_SKIP_PAYMENT). */
   const [checkoutDemoSkipPayment, setCheckoutDemoSkipPayment] = useState(false);
+  const paymentPanelRef = useRef(null);
   const wantsInstallation = !!cart.installation_requested;
   const installationQuoteRequired = !!(wantsInstallation && cart.installation_quote_required);
   /** Must choose a PSP method (not used when awaiting a manual installation quote only). */
@@ -144,6 +145,12 @@ export default function CheckoutPage() {
     });
   }, [user?.id]);
 
+  useEffect(() => {
+    if (activeCheckout) {
+      paymentPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [activeCheckout]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCheckoutFormError('');
@@ -202,14 +209,13 @@ export default function CheckoutPage() {
         return;
       }
       if (c?.gateway === 'paypal' && c.client_id && c.paypal_order_id && c.payment_id) {
-        navigate('/orders/' + d.id, {
-          state: {
-            paypalInlineCheckout: {
-              client_id: c.client_id,
-              paypal_order_id: c.paypal_order_id,
-              payment_id: c.payment_id,
-              paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
-            },
+        setActiveCheckout({
+          orderId: d.id,
+          paypal: {
+            client_id: c.client_id,
+            paypal_order_id: c.paypal_order_id,
+            payment_id: c.payment_id,
+            paypal_mode: c.paypal_mode === 'live' ? 'live' : 'sandbox',
           },
         });
         return;
@@ -284,7 +290,7 @@ export default function CheckoutPage() {
     wantsInstallation && cart.installation_fee_eur != null ? Number(cart.installation_fee_eur) : 0;
   const grandTotalCheckout = Number(cart.total) + shipFlat + installationFeeAmount;
 
-  if (!cart.lines?.length) {
+  if (!cart.lines?.length && !activeCheckout) {
     return (
       <div className="text-center py-8">
         <p className="mb-4">{t('shop.cart.empty')}</p>
@@ -487,7 +493,7 @@ export default function CheckoutPage() {
       </form>
 
       {activeCheckout?.paypal && (
-        <div className="card bg-base-100 shadow border border-base-300 mt-6">
+        <div ref={paymentPanelRef} className="card bg-base-100 shadow border border-base-300 mt-6">
           <div className="card-body space-y-3">
             <h2 className="card-title text-base">{t('checkout.payment.complete_paypal')}</h2>
             <p className="text-sm text-base-content/70">{t('checkout.payment.paypal_help')}</p>

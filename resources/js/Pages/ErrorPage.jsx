@@ -7,7 +7,6 @@ import MiniGameEmbed from '../components/MiniGameEmbed';
 const FEATURED_GAME = {
   id: 'dino',
   src: '/games/dino/index.html',
-  emoji: '🦕',
   titleKey: 'games.game_dino_title',
 };
 
@@ -16,7 +15,6 @@ export default function ErrorPage({ error, resetError }) {
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-2xl py-12 text-center">
-      <div className="mb-2 text-6xl">⚠️</div>
       <PageTitle>{t('errors.server_error_title')}</PageTitle>
       <p className="mb-6 text-base-content/70">{t('errors.server_error_body')}</p>
 

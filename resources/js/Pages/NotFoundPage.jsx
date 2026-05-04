@@ -5,9 +5,9 @@ import PageTitle from '../components/PageTitle';
 import MiniGameEmbed from '../components/MiniGameEmbed';
 
 const QUICK_GAMES = [
-  { id: '2048', src: '/games/2048/index.html', emoji: '🔢', titleKey: 'games.game_2048_title' },
-  { id: 'dino', src: '/games/dino/index.html', emoji: '🦕', titleKey: 'games.game_dino_title' },
-  { id: 'tetris', src: '/games/tetris/index.html', emoji: '🧩', titleKey: 'games.game_tetris_title' },
+  { id: '2048', src: '/games/2048/index.html', titleKey: 'games.game_2048_title' },
+  { id: 'dino', src: '/games/dino/index.html', titleKey: 'games.game_dino_title' },
+  { id: 'tetris', src: '/games/tetris/index.html', titleKey: 'games.game_tetris_title' },
 ];
 
 export default function NotFoundPage() {
@@ -50,7 +50,6 @@ export default function NotFoundPage() {
               className="card card-border border-base-300 bg-base-100 transition-shadow hover:shadow-md active:scale-[0.98]"
             >
               <div className="card-body items-center gap-1 py-5 text-center">
-                <span className="text-3xl">{game.emoji}</span>
                 <p className="text-sm font-semibold">{t(game.titleKey)}</p>
                 <span className="btn btn-primary btn-xs mt-1">{t('games.play')}</span>
               </div>

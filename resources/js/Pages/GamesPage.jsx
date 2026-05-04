@@ -7,21 +7,18 @@ const GAMES = [
   {
     id: '2048',
     src: '/games/2048/index.html',
-    emoji: '🔢',
     titleKey: 'games.game_2048_title',
     descKey: 'games.game_2048_desc',
   },
   {
     id: 'dino',
     src: '/games/dino/index.html',
-    emoji: '🦕',
     titleKey: 'games.game_dino_title',
     descKey: 'games.game_dino_desc',
   },
   {
     id: 'tetris',
     src: '/games/tetris/index.html',
-    emoji: '🧩',
     titleKey: 'games.game_tetris_title',
     descKey: 'games.game_tetris_desc',
   },
@@ -63,7 +60,6 @@ export default function GamesPage() {
                 className="card card-border border-base-300 bg-base-100 text-left transition-shadow hover:shadow-md active:scale-[0.98]"
               >
                 <div className="card-body items-center gap-2 py-8 text-center">
-                  <span className="text-5xl">{game.emoji}</span>
                   <h2 className="card-title text-base">{t(game.titleKey)}</h2>
                   <p className="text-sm text-base-content/60">{t(game.descKey)}</p>
                   <div className="card-actions mt-2">

@@ -16,20 +16,22 @@ class PaymentCompletionService
     {
         $shouldNotify = false;
         DB::transaction(function () use ($payment, &$shouldNotify, $extraAttributes) {
-            $payment->refresh();
-            if ($payment->status === Payment::STATUS_SUCCEEDED) {
+            // Pessimistic lock: prevents concurrent webhook + confirm-endpoint calls from
+            // both reading status=pending and both dispatching the payment-succeeded email.
+            $locked = Payment::query()->lockForUpdate()->find($payment->id);
+            if (! $locked || $locked->status === Payment::STATUS_SUCCEEDED) {
                 return;
             }
             $shouldNotify = true;
-            $payment->update(array_merge([
+            $locked->update(array_merge([
                 'status' => Payment::STATUS_SUCCEEDED,
                 'paid_at' => now(),
                 'failure_code' => null,
                 'failure_message' => null,
             ], $extraAttributes));
 
-            $payment->loadMissing('order');
-            $order = $payment->order;
+            $locked->loadMissing('order');
+            $order = $locked->order;
             if ($order && $order->kind === Order::KIND_ORDER && $order->status === Order::STATUS_AWAITING_PAYMENT) {
                 $order->update(['status' => Order::STATUS_PENDING]);
             }

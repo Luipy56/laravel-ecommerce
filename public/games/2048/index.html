@@ -12,6 +12,10 @@
   <style>
     .score-container:before { content: "Puntos"; }
     .best-container:before { content: "Récord"; }
+    /* Hide footer content so the game fits the iframe without scrolling */
+    .game-explanation, hr, p:last-of-type { display: none; }
+    html, body { overflow: hidden; height: 100%; }
+    .container { padding-bottom: 0; }
   </style>
 </head>
 <body>

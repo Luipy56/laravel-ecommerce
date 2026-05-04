@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PageTitle from '../components/PageTitle';
 import MiniGameEmbed from '../components/MiniGameEmbed';
@@ -32,11 +32,6 @@ export default function GamesPage() {
   const [activeGame, setActiveGame] = useState(null);
 
   const currentGame = GAMES.find(g => g.id === activeGame);
-
-  useEffect(() => {
-    document.body.style.overflow = activeGame ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [activeGame]);
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-4xl">

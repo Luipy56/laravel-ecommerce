@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.128] - 2026-05-04
+
+### Added
+
+- **Buscaminas:** Juego de Buscaminas (fthielke/html-minesweeper, MIT) añadido en `public/games/buscaminas/`. Cadenas de UI traducidas al español ("Nueva partida", "Minas", "Tiempo").
+- **Wordle ES:** Wordle en castellano (danielrouco/wordle) añadido en `public/games/wordle-es/`. Dependencia de Google Fonts eliminada; botón de reinicio sustituido por carácter unicode.
+- **Wordle CA:** Wordle en català (patobottos/catalan-wordle-js) añadido en `public/games/wordle-ca/`. Instrucciones reducidas para mejorar el ajuste en el iframe.
+- **Config compartido de juegos:** `resources/js/config/games.js` extrae el array `GAMES` para ser importado desde `GamesPage`, `NotFoundPage` y `ErrorPage`, eliminando la duplicación.
+- **i18n:** Claves `games.game_buscaminas_title`, `games.game_wordle_es_title`, `games.game_wordle_ca_title` añadidas en `ca.json`, `es.json`, `en.json`.
+
 ## [0.1.116] - 2026-05-04
 
 ### Added

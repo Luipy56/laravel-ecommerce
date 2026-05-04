@@ -761,6 +761,9 @@
   "games.game_dino_desc": "Help the dinosaur jump over obstacles.",
   "games.game_tetris_title": "Tetris",
   "games.game_tetris_desc": "Stack the pieces and complete rows.",
+  "games.game_buscaminas_title": "Minesweeper",
+  "games.game_wordle_es_title": "Wordle (ES)",
+  "games.game_wordle_ca_title": "Wordle (CA)",
   "errors.server_error_title": "Server Error",
   "errors.server_error_body": "An unexpected error occurred. Please try again."
 }

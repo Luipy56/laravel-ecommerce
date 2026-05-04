@@ -3,12 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageTitle from '../components/PageTitle';
 import MiniGameEmbed from '../components/MiniGameEmbed';
-
-const GAMES = [
-  { id: '2048',   src: '/games/2048/index.html',   titleKey: 'games.game_2048_title' },
-  { id: 'dino',   src: '/games/dino/index.html',   titleKey: 'games.game_dino_title' },
-  { id: 'tetris', src: '/games/tetris/index.html', titleKey: 'games.game_tetris_title' },
-];
+import { GAMES } from '../config/games';
 
 export default function NotFoundPage() {
   const { t } = useTranslation();

@@ -1,0 +1,181 @@
+body {
+    background-color: #002b37;
+    padding: 10px;
+    font-family: Raleway, Montserrat, Poppins, Rubik, Open Sans, sans-serif;
+    text-align: center;
+    overflow: hidden;
+}
+
+p {
+    font-size: 18px;
+    color: #9fa8ab;
+    font-family: Raleway, Montserrat, Poppins, Rubik, Open Sans, sans-serif;
+    word-spacing: -1px;
+}
+
+h1 {
+    font-size: 1.5em;
+    text-align: center;
+    font-family: Raleway, Montserrat, Poppins, Rubik, Open Sans, sans-serif;
+    padding: 60px 0 0 0;
+    color: #EF8354;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+a {
+    color: #BFC0C0;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+h4 {
+    font-size: 1.2em;
+    font-family: Raleway, Montserrat, Poppins, Rubik, Open Sans, sans-serif;
+    padding: 20px 0 0 0;
+    color: #EF8354;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+h5 {
+    font-size: 1em;
+    font-family: Raleway, Montserrat, Poppins, Rubik, Open Sans, sans-serif;
+    padding: 18px 0 0 0;
+    color: #EF8354;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+#titol {
+    border: 2px solid #4F5D75;
+    padding: 10px;
+}
+
+/* Layout */
+
+#graellaIntents {
+    display: flex;
+    align-items: center;
+    flex-direction: column;  
+}
+
+
+.container {
+    font-size: 20px;
+    max-height: 80px;
+    width: 15%;
+    background-color: #002b37;
+    display: grid;
+    border: 0px;
+    grid-template-columns: 0.5fr 0.5fr 0.5fr 0.5fr 0.5fr;
+    grid-gap: 10px;
+    align-items: center;
+    padding: 0px 275px 10px 275px;
+    justify-content: center;
+    text-align: center;
+}
+
+.primerIntent, .segonIntent, .tercerIntent, .quartIntent, .cinqueIntent, .siseIntent {
+    background-color: #104858;
+    height: 47px;
+    width: 47px;
+    text-transform: uppercase;
+    font-weight: 520;
+    color: #BFC0C0;
+    text-decoration: none;
+    font-size: 43px;
+    letter-spacing: 1px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 2px solid #BFC0C0;
+    text-align: center;
+    margin: 0 2px;
+}
+
+/* Button Styles */
+
+.button {
+    display: inline-flex;
+    height: 45px;
+    width: 100px;
+    border: 2px solid #BFC0C0;
+    margin: 20px 20px 20px 20px;
+    color: #BFC0C0;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: .8em;
+    letter-spacing: 1.5px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+
+.button a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+
+#spin {
+    width: 0;
+    height: 0;
+    opacity: 0;
+    left: 70px;
+    top: 20px;
+    transform: rotate(0deg);
+    background: none;
+    position: absolute;
+    transition: all .5s ease-Out;
+}
+
+.button:hover #spin {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    left: -70px;
+    top: -70px;
+    background: #BFC0C0;
+    transform: rotate(80deg);
+}
+
+.button:hover a {
+    color: #2D3142;
+}
+  
+.resultats {
+    margin-bottom: 500px;
+}
+
+#botonera {
+    align-items: center;
+    padding: 0px 50px 10px 50px;
+    
+}
+
+#teclat-pantalla {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  #teclat-pantalla div {
+    display: flex;
+  }
+  
+  .segona-filera {
+    margin: 0.5rem 0;
+  }
+  
+  .boto-teclat {
+    font-size: 0.8rem;
+    font-weight: 700;
+    width: 65px;
+    padding: 0.3rem;
+    margin: 0 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+  }

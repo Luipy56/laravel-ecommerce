@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.115] - 2026-05-04
+
+### Fixed
+
+- **Email de confirmación de pago enviado dos veces con Stripe:** `PaymentCompletionService::markSucceeded` usaba un `SELECT` normal dentro de la transacción, lo que permitía una condición de carrera entre el webhook `checkout.session.completed` de Stripe y el endpoint `/payments/stripe/checkout/confirm` llamado automáticamente al volver del checkout. Ambos leían el pago como pendiente antes de que el otro confirmara y los dos despachaban `OrderPaymentSucceeded`. Corregido usando `lockForUpdate()` (SELECT FOR UPDATE) al releer el registro, garantizando que solo uno de los dos caminos procese la transición y envíe el email.
+
 ## [0.1.114] - 2026-05-04
 
 ### Fixed

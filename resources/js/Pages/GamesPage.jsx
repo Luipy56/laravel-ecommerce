@@ -51,7 +51,6 @@ export default function GamesPage() {
         </div>
       ) : (
         <>
-          <p className="mb-6 text-base-content/70">{t('games.subtitle')}</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {GAMES.map(game => (
               <button

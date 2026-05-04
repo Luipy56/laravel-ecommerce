@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.135] - 2026-05-04
+
+### Added
+- `ReturnRequestSeeder`: seeds 4 demo return requests covering all RMA statuses (rejected, pending_review, approved, refunded). The refunded RMA also marks its order as `returned` and its payment as `refunded`.
+
+## [0.1.134] - 2026-05-04
+
+### Fixed
+
+- **Correus transaccionals:** Els botons d’acció tipus «Veure la comanda» (enllaç estil CTA taronja) queden **centrats** al cos del missatge afegint `text-align: center` al paràgraf contenidor a les plantilles Blade que encara el tenien alineat a l’esquerra.
+
+## [0.1.133] - 2026-05-04
+
+### Added
+
+- **Admin comanda en trànsit:** A la fitxa de comanda (`/admin/orders/:id`), si l’estat és «En trànsit», botó per enviar de nou el correu transaccional al client amb una previsió d’arribada (avui mateix / en pocs dies / desconegut). El modal confirma l’acció; si tria «desconegut», el correu usa text amable (p. ex. castellà «le llegará pronto»), no el literal de l’admin.
+  - API: `POST /api/v1/admin/orders/{order}/notify-in-transit-mail` amb cos `delivery_eta`: `today` \| `few_days` \| `unknown` (throttle 30/min).
+  - `OrderShippedMail` accepta un paràmetre opcional de previsió per al cos del correu; `lang/*/mail.php` amb claus `delivery_estimate_*`.
+
 ## [0.1.132] - 2026-05-04
 
 ### Added

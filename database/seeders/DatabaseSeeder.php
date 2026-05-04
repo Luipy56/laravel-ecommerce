@@ -29,9 +29,11 @@ class DatabaseSeeder extends Seeder
             OrderAddressSeeder::class,
             OrderDetailSeeder::class,
             PaymentSeeder::class,
+            ReturnRequestSeeder::class,
             HistoricalSalesSeeder::class,
             PersonalizedSolutionSeeder::class,
             PersonalizedSolutionAttachmentSeeder::class,
+            ProductReviewSeeder::class,
         ]);
     }
 }

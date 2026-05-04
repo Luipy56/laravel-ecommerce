@@ -30,7 +30,7 @@ export default function MiniGameEmbed({ src, title, className = '' }) {
 
   return (
     <div className={`relative w-full overflow-hidden rounded-box border border-base-300 bg-base-200 ${className}`}
-         style={{ minHeight: '400px' }}>
+         style={{ height: 'calc(100dvh - 160px)', minHeight: '480px' }}>
 
       {status === 'loading' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
@@ -51,8 +51,7 @@ export default function MiniGameEmbed({ src, title, className = '' }) {
         ref={iframeRef}
         src={src}
         title={title}
-        className={`w-full border-0 transition-opacity duration-300 ${status === 'ready' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        style={{ height: '500px' }}
+        className={`w-full h-full border-0 transition-opacity duration-300 ${status === 'ready' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onLoad={handleLoad}
         onError={handleError}
         sandbox="allow-scripts allow-same-origin allow-forms"

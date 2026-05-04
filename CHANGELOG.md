@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.113] - 2026-05-04
+
+### Fixed
+
+- **`lang/ca/mail.php` PHP syntax error:** Catalan apostrophes in array string values were unescaped inside single-quoted PHP strings, causing a `ViewException` (`syntax error, unexpected identifier "enllaç"`) whenever any email view was rendered with the `ca` locale.
+- **`priceRange` API endpoint (HTTP 500):** `GET /api/v1/products/price-range` threw a `ValueError` from `min([])` / `max([])` when the database contained no active products or packs (empty test DB). Now returns `{min: 0, max: 0}` when no data is available.
+- **Admin pending-payment email not sent:** `SendOrderPaymentPendingAdminEmail` listener was accidentally de-registered from the `OrderPlacedPaymentPending` event in a previous commit. Re-registered so admin receives the notification when an order is placed with a pending payment.
+- **`CustomerTransactionalEmailTest` assertion mismatch:** Test expected `"Resumen de tu solicitud"` (informal) but the Spanish translation was updated to the formal `"Resumen de su solicitud"` in a later commit; test now matches the current translation.
+
 ## [0.1.112] - 2026-05-04
 
 ### Changed

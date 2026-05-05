@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.140] - 2026-05-05
+
+### Changed
+
+- Storefront home (viewports below `sm`): featured products render in horizontal scroll strips, one strip per category (order follows the featured API); products without a category use `shop.featured_uncategorized`. Tablet and up keep the existing multi-column grid.
+
 ## [0.1.139] - 2026-05-05
 
 ### Changed

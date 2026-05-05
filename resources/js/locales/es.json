@@ -302,6 +302,7 @@
   "shop.search.try_different": "Usa palabras clave diferentes y vuelve a intentarlo.",
   "shop.no_products": "Ahora mismo no hay productos.",
   "shop.featured_empty": "Ahora mismo no hay productos destacados.",
+  "shop.featured_uncategorized": "Sin categoría",
   "validation.required": "Este campo es obligatorio.",
   "validation.email": "El correo no es válido.",
   "validation.min_length": "Mínimo {{min}} caracteres.",

@@ -198,6 +198,34 @@ class PayPalClient
     }
 
     /**
+     * Refund a previously captured PayPal payment (partial or full).
+     *
+     * @return array<string, mixed>
+     */
+    public function refundCapture(string $captureId, float $amount, string $currencyCode): array
+    {
+        $payload = [
+            'amount' => [
+                'value' => number_format($amount, 2, '.', ''),
+                'currency_code' => strtoupper($currencyCode),
+            ],
+        ];
+
+        $response = $this->authorizedJson('POST', '/v2/payments/captures/'.$captureId.'/refund', $payload);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('PayPal refund failed. HTTP '.$response->status().'.');
+        }
+
+        $data = $response->json();
+        if (! is_array($data)) {
+            throw new RuntimeException('PayPal refund returned invalid JSON.');
+        }
+
+        return $data;
+    }
+
+    /**
      * @param  array<string, mixed>|\stdClass  $json
      */
     private function authorizedJson(string $method, string $path, array|\stdClass $json = []): Response

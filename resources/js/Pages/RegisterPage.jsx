@@ -6,6 +6,8 @@ import { useCart } from '../contexts/CartContext';
 import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { parseWithZod, registerFormSchema } from '../validation';
+import GdprNotice from '../components/GdprNotice';
+import FieldHint from '../components/FieldHint';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -29,6 +31,8 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
+  const [acceptMarketing, setAcceptMarketing] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,6 +51,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
     setFieldErrors({});
+    if (!acceptPrivacy) {
+      setError(t('gdpr.accept_privacy'));
+      scrollWindowToTopOnFormError();
+      return;
+    }
     const parsed = parseWithZod(registerFormSchema, form, t);
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
@@ -56,7 +65,7 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const result = await register(parsed.data);
+      const result = await register({ ...parsed.data, accept_privacy: true, accept_marketing: acceptMarketing });
       if (result.success) {
         await mergeCart();
         navigate('/verify-email?next=/');
@@ -167,7 +176,10 @@ export default function RegisterPage() {
                 <input id="register-surname" type="text" name="surname" className="input input-bordered w-full" value={form.surname} onChange={handleChange} />
               </label>
               <label htmlFor="register-phone" className="form-field w-full">
-                <span className="form-label">{t('profile.phone')}</span>
+                <span className="form-label">
+                  {t('profile.phone')}
+                  <FieldHint text={t('gdpr.field_hint_phone')} />
+                </span>
                 <input
                   id="register-phone"
                   type="tel"
@@ -180,7 +192,10 @@ export default function RegisterPage() {
                 {fieldErrors.phone ? <p className="validator-hint text-error">{fieldErrors.phone}</p> : null}
               </label>
               <label htmlFor="register-identification" className="form-field w-full">
-                <span className="form-label">{t('register.identification')}</span>
+                <span className="form-label">
+                  {t('register.identification')}
+                  <FieldHint text={t('gdpr.field_hint_identification')} />
+                </span>
                 <input
                   id="register-identification"
                   type="text"
@@ -230,9 +245,38 @@ export default function RegisterPage() {
             </label>
           </fieldset>
 
+          <GdprNotice noticeKey="gdpr.notice_register" />
+
+          <div className="flex flex-col gap-3">
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-primary mt-0.5 shrink-0"
+                checked={acceptPrivacy}
+                onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                required
+              />
+              <span className="text-sm">
+                {t('gdpr.accept_privacy').split('[Privacy Policy]')[0]}
+                <Link to="/privacy-policy" className="link link-primary">
+                  {t('footer.privacy_policy')}
+                </Link>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-primary mt-0.5 shrink-0"
+                checked={acceptMarketing}
+                onChange={(e) => setAcceptMarketing(e.target.checked)}
+              />
+              <span className="text-sm text-base-content/80">{t('gdpr.accept_marketing')}</span>
+            </label>
+          </div>
+
           <div className="flex flex-wrap items-center justify-between gap-4">
             <Link to="/login" className="link link-primary text-sm">{t('auth.login')}</Link>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="btn btn-primary" disabled={loading || !acceptPrivacy}>
               {loading ? t('common.loading') : t('auth.register')}
             </button>
           </div>

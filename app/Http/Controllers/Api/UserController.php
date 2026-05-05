@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClientAddress;
+use App\Models\ClientConsent;
 use App\Models\ClientContact;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -219,6 +220,146 @@ class UserController extends Controller
         $contact->update(['is_active' => false]);
 
         return response()->json(['success' => true], 204);
+    }
+
+    /**
+     * GDPR Art. 20 — Data portability / DSAR export.
+     * Returns a structured JSON of all personal data held about the authenticated client.
+     */
+    public function export(Request $request): JsonResponse
+    {
+        $client = $request->user();
+        $client->load([
+            'contacts',
+            'addresses',
+            'orders.addresses',
+            'orders.payments',
+            'personalizedSolutions',
+            'consents',
+        ]);
+
+        $data = [
+            'exported_at' => now()->toIso8601String(),
+            'account' => [
+                'id' => $client->id,
+                'type' => $client->type,
+                'login_email' => $client->login_email,
+                'identification' => $client->identification,
+                'is_active' => $client->is_active,
+                'email_verified_at' => $client->email_verified_at?->toIso8601String(),
+                'created_at' => $client->created_at?->toIso8601String(),
+            ],
+            'contacts' => $client->contacts->map(fn ($c) => [
+                'name' => $c->name,
+                'surname' => $c->surname,
+                'phone' => $c->phone,
+                'phone2' => $c->phone2,
+                'email' => $c->email,
+                'is_primary' => $c->is_primary,
+            ])->values()->all(),
+            'addresses' => $client->addresses->map(fn ($a) => [
+                'type' => $a->type,
+                'label' => $a->label,
+                'street' => $a->street,
+                'city' => $a->city,
+                'province' => $a->province,
+                'postal_code' => $a->postal_code,
+            ])->values()->all(),
+            'orders' => $client->orders->map(fn ($o) => [
+                'id' => $o->id,
+                'status' => $o->status,
+                'order_date' => $o->order_date?->toIso8601String(),
+                'addresses' => $o->addresses->map(fn ($a) => [
+                    'type' => $a->type,
+                    'street' => $a->street,
+                    'city' => $a->city,
+                    'province' => $a->province,
+                    'postal_code' => $a->postal_code,
+                ])->values()->all(),
+                'payments' => $o->payments->map(fn ($p) => [
+                    'payment_method' => $p->payment_method,
+                    'status' => $p->status,
+                    'gateway' => $p->gateway,
+                ])->values()->all(),
+            ])->values()->all(),
+            'personalized_solutions' => $client->personalizedSolutions->map(fn ($s) => [
+                'status' => $s->status,
+                'email' => $s->email,
+                'phone' => $s->phone,
+                'address_street' => $s->address_street,
+                'address_city' => $s->address_city,
+                'problem_description' => $s->problem_description,
+                'created_at' => $s->created_at?->toIso8601String(),
+            ])->values()->all(),
+            'consents' => $client->consents->map(fn ($c) => [
+                'type' => $c->type,
+                'version' => $c->version,
+                'accepted' => $c->accepted,
+                'created_at' => $c->created_at?->toIso8601String(),
+            ])->values()->all(),
+        ];
+
+        return response()->json(['success' => true, 'data' => $data]);
+    }
+
+    /**
+     * GDPR Art. 17 — Right to erasure.
+     * Anonymises the client account while retaining financial / legal records
+     * (orders, payments, invoices) as required by Spanish tax law (7 years).
+     */
+    public function destroy(Request $request): JsonResponse
+    {
+        $client = $request->user();
+
+        // Anonymise personal identifiers
+        $client->update([
+            'identification' => null,
+            'login_email' => 'deleted_' . $client->id . '@deleted.invalid',
+            'is_active' => false,
+        ]);
+
+        // Soft-delete contacts (personal names / phones)
+        $client->contacts()->update(['is_active' => false, 'name' => '[deleted]', 'surname' => null, 'phone' => null, 'phone2' => null, 'email' => null]);
+
+        // Soft-delete saved addresses
+        $client->addresses()->update(['is_active' => false]);
+
+        // Anonymise custom solution personal fields (keep service record)
+        $client->personalizedSolutions()->update([
+            'email' => null,
+            'phone' => null,
+            'address_street' => null,
+            'address_city' => null,
+            'address_province' => null,
+            'address_postal_code' => null,
+            'address_note' => null,
+        ]);
+
+        // Invalidate session so the client is immediately logged out
+        \Illuminate\Support\Facades\Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json(['success' => true, 'message' => 'Your account has been anonymised.']);
+    }
+
+    /**
+     * GDPR Art. 7 — Consent management: list recorded consents for the authenticated client.
+     */
+    public function consents(Request $request): JsonResponse
+    {
+        $consents = $request->user()->consents()->orderByDesc('created_at')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $consents->map(fn ($c) => [
+                'id' => $c->id,
+                'type' => $c->type,
+                'version' => $c->version,
+                'accepted' => $c->accepted,
+                'created_at' => $c->created_at?->toIso8601String(),
+            ])->values()->all(),
+        ]);
     }
 
     private function formatAddress(ClientAddress $a): array

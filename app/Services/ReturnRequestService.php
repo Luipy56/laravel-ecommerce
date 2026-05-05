@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\ReturnRequest;
 use App\Services\Payments\PaymentCompletionService;
+use App\Services\Payments\PayPal\PayPalClient;
 use App\Services\Payments\Stripe\StripeCredentials;
 use Illuminate\Support\Facades\DB;
 use Stripe\StripeClient;
@@ -15,6 +16,7 @@ class ReturnRequestService
 {
     public function __construct(
         private readonly PaymentCompletionService $paymentCompletion,
+        private readonly PayPalClient $paypalClient,
     ) {}
 
     /**
@@ -55,9 +57,9 @@ class ReturnRequestService
     }
 
     /**
-     * Issue a refund via Stripe and mark the order as returned.
+     * Issue a refund via the payment gateway and mark the order as returned.
      *
-     * @throws PaymentProviderNotConfiguredException when Stripe is not configured
+     * @throws PaymentProviderNotConfiguredException when the gateway is not configured
      * @throws \RuntimeException when the payment cannot be identified for refund
      */
     public function issueRefund(ReturnRequest $rma, float $amount): ReturnRequest
@@ -71,7 +73,11 @@ class ReturnRequestService
             return $this->issueStripeRefund($rma, $payment, $amount);
         }
 
-        // PayPal and other gateways: mark as refunded without PSP call (manual refund workflow).
+        if ($payment->gateway === Payment::GATEWAY_PAYPAL) {
+            return $this->issuePayPalRefund($rma, $payment, $amount);
+        }
+
+        // Other gateways: mark as refunded without PSP call (manual refund workflow).
         DB::transaction(function () use ($rma, $payment, $amount): void {
             $this->paymentCompletion->markRefunded($payment);
             $rma->order()->update(['status' => Order::STATUS_RETURNED]);
@@ -114,6 +120,40 @@ class ReturnRequestService
                 'refund_amount' => $amount,
                 'refunded_at' => now(),
                 'gateway_refund_reference' => $refund->id,
+            ]);
+        });
+
+        return $rma->fresh();
+    }
+
+    private function issuePayPalRefund(ReturnRequest $rma, Payment $payment, float $amount): ReturnRequest
+    {
+        if (! PayPalClient::envCredentialsPresent()) {
+            throw new PaymentProviderNotConfiguredException('PayPal is not configured (PAYPAL_CLIENT_ID, PAYPAL_SECRET).');
+        }
+
+        $meta = $payment->metadata;
+        $captureId = is_array($meta) && isset($meta['paypal_capture_id']) && is_string($meta['paypal_capture_id'])
+            ? $meta['paypal_capture_id']
+            : null;
+
+        if ($captureId === null || $captureId === '') {
+            throw new \RuntimeException('Cannot refund via PayPal: capture ID not found. Refund this payment manually via the PayPal dashboard.');
+        }
+
+        $currency = is_string($payment->currency) && $payment->currency !== '' ? $payment->currency : 'EUR';
+        $refundData = $this->paypalClient->refundCapture($captureId, $amount, $currency);
+
+        $refundId = $refundData['id'] ?? null;
+
+        DB::transaction(function () use ($rma, $payment, $amount, $refundId): void {
+            $this->paymentCompletion->markRefunded($payment);
+            $rma->order()->update(['status' => Order::STATUS_RETURNED]);
+            $rma->update([
+                'status' => ReturnRequest::STATUS_REFUNDED,
+                'refund_amount' => $amount,
+                'refunded_at' => now(),
+                'gateway_refund_reference' => $refundId,
             ]);
         });
 

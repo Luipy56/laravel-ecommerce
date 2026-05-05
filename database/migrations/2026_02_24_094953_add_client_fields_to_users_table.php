@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained('clients');
             $table->string('name', 255)->comment('First name');
             $table->string('surname', 255)->nullable()->comment('Last name');
-            $table->string('phone', 50)->nullable();
-            $table->string('phone2', 50)->nullable();
+            $table->text('phone')->nullable()->comment('Encrypted at rest');
+            $table->text('phone2')->nullable()->comment('Encrypted at rest');
             $table->string('email', 255)->nullable()->comment('Contact email (optional)');
             $table->boolean('is_primary')->default(false)->comment('Main contact for this client');
             $table->boolean('is_active')->default(true)->comment('Soft delete');

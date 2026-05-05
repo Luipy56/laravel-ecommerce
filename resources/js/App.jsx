@@ -79,6 +79,7 @@ import SessionExpiredPage from './Pages/SessionExpiredPage';
 import GamesPage from './Pages/GamesPage';
 import ErrorPage from './Pages/ErrorPage';
 import ErrorBoundary from './components/ErrorBoundary';
+import PrivacyPolicyPage from './Pages/PrivacyPolicyPage';
 
 export default function App() {
   const queryClient = useMemo(
@@ -133,6 +134,7 @@ export default function App() {
                   <Route path="mi-solucion" element={<Navigate to="/custom-solution" replace />} />
                   <Route path="my-solution" element={<Navigate to="/custom-solution" replace />} />
                   <Route path="games" element={<GamesPage />} />
+                  <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
                   <Route path="session-expired" element={<SessionExpiredPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>

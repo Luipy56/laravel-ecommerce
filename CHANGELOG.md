@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.142] - 2026-05-05
+
+### Added
+
+- **GDPR/LOPDGDD compliance implementation** (full plan):
+  - `PrivacyPolicyPage.jsx` at `/privacy-policy` with all 10 sections (data controller, data inventory, purposes/legal basis, retention periods, recipients, security, subject rights, automated decisions, international transfers, policy changes); linked from Footer Legal nav in all 3 locales (ca/es/en).
+  - `GdprNotice` component: compact informational banner (purpose, legal basis, privacy link) added above the submit button on `RegisterPage`, `CheckoutPage`, and `CustomSolutionPage`.
+  - `FieldHint` component: daisyUI tooltip info icon on `identification`, `phone`, and address legend fields in `RegisterPage`, `ProfilePage`, and `CustomSolutionPage`.
+  - Mandatory privacy-policy acceptance checkbox and optional marketing opt-in checkbox on `RegisterPage` and `CustomSolutionPage`; submit is disabled until privacy checkbox is ticked.
+  - `client_consents` migration and `ClientConsent` model; `AuthController::register` records `privacy_policy` and optionally `marketing` consent (with IP, user agent, policy version) at registration.
+  - `encrypted` cast on `Client.identification`, `ClientContact.phone`/`phone2`, `PersonalizedSolution.problem_description`/`resolution`/`improvement_feedback`; migrations updated to use `text()` columns to accommodate ciphertext.
+  - `GET /api/v1/profile/export` — GDPR Art. 20 DSAR data portability endpoint returns full structured JSON of all client personal data.
+  - `DELETE /api/v1/profile` — GDPR Art. 17 right-to-erasure endpoint anonymises the account while retaining financial records.
+  - `GET /api/v1/profile/consents` — returns consent history for the authenticated client.
+  - `GdprPurgeCommand` (`php artisan gdpr:purge [--dry-run]`) with per-table retention rules (sessions 30 d, personalized solutions 3 y, inactive clients 5 y, order addresses 7 y, payment refs 7 y); scheduled weekly Sunday 02:00 in `routes/console.php`.
+  - `CookieConsentBanner` upgraded to v2: granular essential (always on) + analytics (opt-in) categories stored as JSON at `cookie_consent_v2`; includes privacy policy link.
+  - `docs/gdpr-compliance.md`: full compliance reference (data inventory, retention matrix, consent recording, security measures, subject rights API, purge command, dev checklist).
+  - `docs/database-security.md`: DB access control policy (least privilege, encrypted columns, backup, connection security, incident response).
+
+## [0.1.141] - 2026-05-05
+
+### Fixed
+
+- PayPal refunds now issue a real monetary refund via the PayPal REST API (`POST /v2/payments/captures/{id}/refund`) instead of only updating the database. The capture ID is persisted to `payments.metadata['paypal_capture_id']` at the moment of payment capture. `ReturnRequestService::issueRefund()` now calls `PayPalClient::refundCapture()` for PayPal payments and stores the PayPal refund ID in `return_requests.gateway_refund_reference`, matching the behaviour of Stripe refunds. Payments captured before this fix lack a capture ID and will return a clear error directing the admin to refund manually via the PayPal dashboard.
+
 ## [0.1.140] - 2026-05-05
 
 ### Changed

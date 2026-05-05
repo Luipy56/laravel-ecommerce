@@ -68,6 +68,13 @@ class PayPalPaymentController extends Controller
             ], 422);
         }
 
+        $captureId = $data['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+        if (is_string($captureId) && $captureId !== '') {
+            $payment->update([
+                'metadata' => array_merge((array) $payment->metadata, ['paypal_capture_id' => $captureId]),
+            ]);
+        }
+
         $completion->markSucceeded($payment->fresh());
 
         return response()->json([

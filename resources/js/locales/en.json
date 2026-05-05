@@ -303,6 +303,7 @@
   "shop.search.try_different": "Use different keywords and try again.",
   "shop.no_products": "Right now there are no products.",
   "shop.featured_empty": "There are no featured products right now.",
+  "shop.featured_uncategorized": "Uncategorized",
   "validation.required": "This field is required.",
   "validation.email": "The email is not valid.",
   "validation.min_length": "Minimum {{min}} characters.",

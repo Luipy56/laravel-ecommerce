@@ -302,6 +302,7 @@
   "shop.search.try_different": "Usa paraules clau diferents i torna-ho a provar.",
   "shop.no_products": "Ara mateix no hi ha productes.",
   "shop.featured_empty": "Ara mateix no hi ha productes destacats.",
+  "shop.featured_uncategorized": "Sense categoria",
   "validation.required": "Aquest camp és obligatori.",
   "validation.email": "El correu no és vàlid.",
   "validation.min_length": "Mínim {{min}} caràcters.",

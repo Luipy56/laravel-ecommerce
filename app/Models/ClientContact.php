@@ -23,6 +23,8 @@ class ClientContact extends Model
     protected function casts(): array
     {
         return [
+            'phone' => 'encrypted',
+            'phone2' => 'encrypted',
             'is_primary' => 'boolean',
             'is_active' => 'boolean',
         ];

@@ -27,7 +27,7 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->string('type', 50)->comment('Person vs company');
-            $table->string('identification', 20)->nullable()->unique()->comment('ID document (DNI, CIF or NIE); one per account');
+            $table->text('identification')->nullable()->comment('ID document (DNI, CIF or NIE); encrypted at rest. Uniqueness enforced at application layer.');
             $table->string('login_email', 255)->unique()->comment('Email for authentication');
             $table->string('password', 255);
             $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');

@@ -32,6 +32,9 @@ class PersonalizedSolution extends Model
     protected function casts(): array
     {
         return [
+            'problem_description' => 'encrypted',
+            'resolution' => 'encrypted',
+            'improvement_feedback' => 'encrypted',
             'is_active' => 'boolean',
             'improvement_feedback_at' => 'datetime',
         ];

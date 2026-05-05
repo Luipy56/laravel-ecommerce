@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import PageTitle from '../components/PageTitle';
@@ -10,6 +11,8 @@ import { fieldErrorsFromApiValidation, messageFromApiValidationError } from '../
 import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue, sanitizePostalCodeDigits } from '../lib/postalInput';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
+import GdprNotice from '../components/GdprNotice';
+import FieldHint from '../components/FieldHint';
 
 export default function CustomSolutionPage() {
   const { t } = useTranslation();
@@ -33,6 +36,8 @@ export default function CustomSolutionPage() {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [publicSettingsLoaded, setPublicSettingsLoaded] = useState(false);
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
+  const [acceptMarketing, setAcceptMarketing] = useState(false);
   const submitInFlightRef = useRef(false);
   /** Fill email / phone / address from session once per login visit (avoid clobbering edits). */
   const prefilledFromSessionRef = useRef(false);
@@ -172,6 +177,11 @@ export default function CustomSolutionPage() {
     if (newRequestsDisabled) return;
     setError('');
     setFieldErrors({});
+    if (!acceptPrivacy) {
+      setError(t('gdpr.accept_privacy'));
+      scrollWindowToTopOnFormError();
+      return;
+    }
     const parsed = parseWithZod(customSolutionFormSchema, form, t);
     if (!parsed.ok) {
       setFieldErrors(parsed.fieldErrors);
@@ -222,7 +232,10 @@ export default function CustomSolutionPage() {
               {fieldErrors.email ? <p className="validator-hint text-error">{fieldErrors.email}</p> : null}
             </label>
             <label className="form-field w-full">
-              <span className="form-label">{t('profile.phone')}</span>
+              <span className="form-label">
+                {t('profile.phone')}
+                <FieldHint text={t('gdpr.field_hint_phone')} />
+              </span>
               <input
                 type="tel"
                 name="phone"
@@ -265,7 +278,10 @@ export default function CustomSolutionPage() {
           </label>
 
           <fieldset className="form-field space-y-5 border border-base-300 rounded-lg p-4">
-            <legend className="form-label px-1">{t('shop.custom_solution.address_optional')}</legend>
+            <legend className="form-label px-1 flex items-center gap-1">
+              {t('shop.custom_solution.address_optional')}
+              <FieldHint text={t('gdpr.field_hint_address')} />
+            </legend>
             <label className="form-field w-full">
               <span className="form-label">{t('checkout.street')}</span>
               <input
@@ -335,8 +351,39 @@ export default function CustomSolutionPage() {
             </label>
           </fieldset>
 
+          <GdprNotice noticeKey="gdpr.notice_custom_solution" />
+
+          <div className="flex flex-col gap-3">
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-primary mt-0.5 shrink-0"
+                checked={acceptPrivacy}
+                onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                disabled={newRequestsDisabled}
+                required
+              />
+              <span className="text-sm">
+                {t('gdpr.accept_privacy').split('[Privacy Policy]')[0]}
+                <Link to="/privacy-policy" className="link link-primary">
+                  {t('footer.privacy_policy')}
+                </Link>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-primary mt-0.5 shrink-0"
+                checked={acceptMarketing}
+                onChange={(e) => setAcceptMarketing(e.target.checked)}
+                disabled={newRequestsDisabled}
+              />
+              <span className="text-sm text-base-content/80">{t('gdpr.accept_marketing')}</span>
+            </label>
+          </div>
+
           <div className="flex justify-end">
-            <button type="submit" className="btn btn-primary md:max-w-xs" disabled={loading || newRequestsDisabled}>
+            <button type="submit" className="btn btn-primary md:max-w-xs" disabled={loading || newRequestsDisabled || !acceptPrivacy}>
               {loading ? t('common.loading') : t('shop.custom_solution.submit')}
             </button>
           </div>

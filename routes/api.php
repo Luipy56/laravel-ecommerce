@@ -103,6 +103,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1');
 
     Route::get('profile', [UserController::class, 'show']);
+    Route::get('profile/export', [UserController::class, 'export'])->middleware('throttle:3,1');
+    Route::get('profile/consents', [UserController::class, 'consents']);
+    Route::delete('profile', [UserController::class, 'destroy']);
 });
 
 /* ------------------------ Client auth + verified email ------------------------ */

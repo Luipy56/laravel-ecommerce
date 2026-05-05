@@ -5,6 +5,166 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.144] - 2026-05-05
+
+### Fixed
+
+- **Seeders**: `UserSeeder` and `ClientContactSeeder` were using `DB::table()->insert()`, bypassing Eloquent's `encrypted` cast introduced in v0.1.142. Switched to `Client::create()` / `ClientContact::create()` so `identification`, `phone`, and `phone2` are stored as proper ciphertext; this resolves the `DecryptException: The payload is invalid` 500 error on all admin API endpoints during test runs.
+- **Tests**: `ClientEmailVerificationTest` registration payload was missing the now-required `accept_privacy: true` field, causing a 422 rejection.
+- **Tests**: `AdminPersonalizedSolutionResolutionPatchTest` was asserting the encrypted `resolution` column via `assertDatabaseHas` (raw DB query — always gets ciphertext). Replaced with a model-level assertion that decrypts via the cast.
+
+## [0.1.142] - 2026-05-05
+
+### Added
+
+- **GDPR/LOPDGDD compliance implementation** (full plan):
+  - `PrivacyPolicyPage.jsx` at `/privacy-policy` with all 10 sections (data controller, data inventory, purposes/legal basis, retention periods, recipients, security, subject rights, automated decisions, international transfers, policy changes); linked from Footer Legal nav in all 3 locales (ca/es/en).
+  - `GdprNotice` component: compact informational banner (purpose, legal basis, privacy link) added above the submit button on `RegisterPage`, `CheckoutPage`, and `CustomSolutionPage`.
+  - `FieldHint` component: daisyUI tooltip info icon on `identification`, `phone`, and address legend fields in `RegisterPage`, `ProfilePage`, and `CustomSolutionPage`.
+  - Mandatory privacy-policy acceptance checkbox and optional marketing opt-in checkbox on `RegisterPage` and `CustomSolutionPage`; submit is disabled until privacy checkbox is ticked.
+  - `client_consents` migration and `ClientConsent` model; `AuthController::register` records `privacy_policy` and optionally `marketing` consent (with IP, user agent, policy version) at registration.
+  - `encrypted` cast on `Client.identification`, `ClientContact.phone`/`phone2`, `PersonalizedSolution.problem_description`/`resolution`/`improvement_feedback`; migrations updated to use `text()` columns to accommodate ciphertext.
+  - `GET /api/v1/profile/export` — GDPR Art. 20 DSAR data portability endpoint returns full structured JSON of all client personal data.
+  - `DELETE /api/v1/profile` — GDPR Art. 17 right-to-erasure endpoint anonymises the account while retaining financial records.
+  - `GET /api/v1/profile/consents` — returns consent history for the authenticated client.
+  - `GdprPurgeCommand` (`php artisan gdpr:purge [--dry-run]`) with per-table retention rules (sessions 30 d, personalized solutions 3 y, inactive clients 5 y, order addresses 7 y, payment refs 7 y); scheduled weekly Sunday 02:00 in `routes/console.php`.
+  - `CookieConsentBanner` upgraded to v2: granular essential (always on) + analytics (opt-in) categories stored as JSON at `cookie_consent_v2`; includes privacy policy link.
+  - `docs/gdpr-compliance.md`: full compliance reference (data inventory, retention matrix, consent recording, security measures, subject rights API, purge command, dev checklist).
+  - `docs/database-security.md`: DB access control policy (least privilege, encrypted columns, backup, connection security, incident response).
+
+## [0.1.141] - 2026-05-05
+
+### Fixed
+
+- PayPal refunds now issue a real monetary refund via the PayPal REST API (`POST /v2/payments/captures/{id}/refund`) instead of only updating the database. The capture ID is persisted to `payments.metadata['paypal_capture_id']` at the moment of payment capture. `ReturnRequestService::issueRefund()` now calls `PayPalClient::refundCapture()` for PayPal payments and stores the PayPal refund ID in `return_requests.gateway_refund_reference`, matching the behaviour of Stripe refunds. Payments captured before this fix lack a capture ID and will return a clear error directing the admin to refund manually via the PayPal dashboard.
+
+## [0.1.140] - 2026-05-05
+
+### Changed
+
+- Storefront home (viewports below `sm`): featured products render in horizontal scroll strips, one strip per category (order follows the featured API); products without a category use `shop.featured_uncategorized`. Tablet and up keep the existing multi-column grid.
+
+## [0.1.139] - 2026-05-05
+
+### Changed
+
+- Patch release (no functional changes).
+
+## [0.1.138] - 2026-05-04
+
+### Fixed
+
+- `ProductScoutIndexingTest`: assert Scout `MakeSearchable` / `RemoveFromSearch` using `Queue::fake()` **after** the product row exists, then `searchable()` / `unsearchable()`; avoids `Bus::fake()` with Scout’s `dispatch()` + `PendingDispatch` (jobs never reach `Queue::fake()` when the bus is fully faked).
+
+### Changed
+
+- Transactional Blade mails: centered CTA action `<p>` wrappers (`text-align: center`) for order, installation, returns, and related templates (aligned with the transactional button layout used elsewhere).
+- Storefront/admin React: `OrderDetailPage`, `OrdersPage`; RMA admin return request pages; review moderation show page; `ReviewsSection` and `StarRating` behaviour and layout.
+- Locales `ca.json`, `es.json`, `en.json` (returns/reviews strings; complete missing English returns keys).
+- `.cursor/rules/components.mdc`: shared component / `PageTitle` guidance.
+
+### Test
+
+## [0.1.137] - 2026-05-04
+
+### Added
+
+- English (`en.json`) translations for all 54 missing returns-feature keys: `shop.returns.*` (21 keys), `admin.nav.returns` + `admin.nav.alert_link_suffix_returns` (2 keys), and `admin.returns.*` (31 keys).
+
+## [0.1.136] - 2026-05-04
+
+### Added
+
+- **ProductReviewSeeder:** 6 ressenyes de demo per a les dues pàgines de producte principals (cilStd, escEst, spEst, cilSeg). Mix d'estats: 3 aprovades (amb compra verificada), 2 pendents, 1 rebutjada. Els agregats `avg_rating` i `reviews_count` dels productes s'actualitzen automàticament via observer en executar el seeder.
+
+## [0.1.135] - 2026-05-04
+
+### Added
+- `ReturnRequestSeeder`: seeds 4 demo return requests covering all RMA statuses (rejected, pending_review, approved, refunded). The refunded RMA also marks its order as `returned` and its payment as `refunded`.
+
+## [0.1.134] - 2026-05-04
+
+### Fixed
+
+- **Correus transaccionals:** Els botons d’acció tipus «Veure la comanda» (enllaç estil CTA taronja) queden **centrats** al cos del missatge afegint `text-align: center` al paràgraf contenidor a les plantilles Blade que encara el tenien alineat a l’esquerra.
+
+## [0.1.133] - 2026-05-04
+
+### Added
+
+- **Admin comanda en trànsit:** A la fitxa de comanda (`/admin/orders/:id`), si l’estat és «En trànsit», botó per enviar de nou el correu transaccional al client amb una previsió d’arribada (avui mateix / en pocs dies / desconegut). El modal confirma l’acció; si tria «desconegut», el correu usa text amable (p. ex. castellà «le llegará pronto»), no el literal de l’admin.
+  - API: `POST /api/v1/admin/orders/{order}/notify-in-transit-mail` amb cos `delivery_eta`: `today` \| `few_days` \| `unknown` (throttle 30/min).
+  - `OrderShippedMail` accepta un paràmetre opcional de previsió per al cos del correu; `lang/*/mail.php` amb claus `delivery_estimate_*`.
+
+## [0.1.132] - 2026-05-04
+
+### Added
+
+- **RMA — Sistema de devolucions (Return Merchandise Authorization):** Flux complet de sol·licitud, aprovació i reemborsament de devolucions.
+  - Nova taula `return_requests` (`order_id`, `client_id`, `payment_id`, `status`, `reason`, `admin_notes`, `refund_amount`, `refunded_at`, `gateway_refund_reference`).
+  - Nou constant `Order::STATUS_RETURNED = 'returned'` i relació `Order::returnRequests()`.
+  - Model `ReturnRequest` amb constants de status i scopes (`pendingReview`, `open`).
+  - `ReturnRequestService` amb mètodes `create`, `approve`, `reject` i `issueRefund` (Stripe API + fallback manual per PayPal i altres gateways).
+  - API REST client: `GET /api/v1/return-requests`, `POST /api/v1/orders/{order}/return-requests`.
+  - API REST admin: `GET/GET/PUT /api/v1/admin/return-requests[/{rma}]`, `POST /api/v1/admin/return-requests/{rma}/refund`.
+  - 4 mails transaccionals: `ReturnRequestReceivedAdminMail` (admin), `ReturnRequestApprovedMail`, `ReturnRequestRejectedMail`, `ReturnRequestRefundedMail` (client). Registrats via Events+Listeners.
+  - `AdminNavAlertsController` ara retorna `returns_need_attention` per a sol·licituds `pending_review`.
+  - Frontend client: botó "Sol·licitar devolució" + modal a `OrderDetailPage`, nova pàgina `/my-returns` (`ReturnRequestsPage`), accés des del menú del perfil.
+  - Frontend admin: `AdminReturnRequestsPage` (`/admin/returns`) amb cerca, filtre d'estat i paginació; `AdminReturnRequestShowPage` (`/admin/returns/:id`) amb accions aprovar/rebutjar/emetre reemborsament. Afegit a la sidebar de `AdminLayout` (secció Operacions).
+  - I18n: claus `shop.returns.*`, `admin.returns.*`, `admin.nav.returns` i `shop.status.returned` a `ca.json` i `es.json`. Claus de correu a `lang/ca/mail.php` i `lang/es/mail.php`.
+  - `diagramZero.dbml` actualitzat amb taula `RETURN_REQUESTS` i nou estat `returned` a `order_status`.
+
+## [0.1.131] - 2026-05-04
+
+### Changed
+
+- **Admin:** List toolbar filters (search, type/status/active/period/category, etc.) are persisted in `localStorage` under the key `le-admin-list-filters` so choices survive navigation away from the page and full browser reloads. Applies to orders, personalized solutions, products, clients, categories, FAQs, packs, admins, variant groups, reviews, and both sections of the features page.
+
+## [0.1.130] - 2026-05-04
+
+### Added
+
+- **Ressenyes i valoracions de productes:** Els clients que han comprat un producte poden deixar una valoració (1-5 estrelles + comentari opcional). Les ressenyes queden en estat `pending` fins que un administrador les aprova o rebutja. Només les ressenyes aprovades es mostren a la fitxa de producte.
+  - `product_reviews` table: `product_id`, `client_id`, `order_id` (compra verificada), `rating`, `comment`, `status` (pending/approved/rejected), `admin_note`.
+  - Columnes `avg_rating` i `reviews_count` denormalitzades a la taula `products`, actualitzades automàticament via `ProductReviewObserver`.
+  - API pública `GET /api/v1/products/{id}/reviews` (llista paginada + agregat de distribució).
+  - API de client autenticat `POST/GET .../reviews` per enviar i consultar la pròpia ressenya (amb verificació de compra completada).
+  - API d'admin `GET/PATCH/DELETE /api/v1/admin/reviews/{id}` per moderar.
+  - **Storefront:** `ReviewsSection` + `ReviewForm` afegits a la fitxa de producte; formulari condicionat a compra verificada; estat de ressenya pròpia visible.
+  - **Admin:** `AdminReviewsPage` (cua de moderació, filtre per estat, cerca), `AdminReviewShowPage` (detall + aprovar/rebutjar/eliminar).
+  - Alerta de punt taronja al menú lateral de l'admin quan hi ha ressenyes pendents.
+  - Component compartit `StarRating.jsx` (daisyUI `mask-star-2`).
+  - i18n afegit per `admin.reviews.*` i `shop.reviews.*` en ca/es/en.
+
+## [0.1.129] - 2026-05-04
+
+### Added
+
+- **Sitemap XML dinámico:** `GET /sitemap.xml` generado por `SitemapController` con todas las páginas estáticas (home, productos, FAQ, juegos) más URLs dinámicas para cada categoría activa (`/categories/{id}/products`) y cada producto activo (`/products/{id}`). Resultado cacheado 6 horas; cache invalidada automáticamente cuando se guarda o elimina un producto o categoría.
+- **robots.txt dinámico:** La ruta `/robots.txt` pasa por Laravel y emite la directiva `Sitemap:` con la URL absoluta correcta según `APP_URL`, para que cualquier entorno genere el valor adecuado. Se eliminó el fichero estático `public/robots.txt`.
+- **Nginx:** `docker/nginx/default.conf` actualizado para enrutar `/robots.txt` a través de PHP (`try_files $uri /index.php?$query_string`) en lugar de servirlo solo como fichero estático.
+
+## [0.1.128] - 2026-05-04
+
+### Added
+
+- **Buscaminas:** Juego de Buscaminas (fthielke/html-minesweeper, MIT) añadido en `public/games/buscaminas/`. Cadenas de UI traducidas al español ("Nueva partida", "Minas", "Tiempo").
+- **Wordle ES:** Wordle en castellano (danielrouco/wordle) añadido en `public/games/wordle-es/`. Dependencia de Google Fonts eliminada; botón de reinicio sustituido por carácter unicode.
+- **Wordle CA:** Wordle en català (patobottos/catalan-wordle-js) añadido en `public/games/wordle-ca/`. Instrucciones reducidas para mejorar el ajuste en el iframe.
+- **Config compartido de juegos:** `resources/js/config/games.js` extrae el array `GAMES` para ser importado desde `GamesPage`, `NotFoundPage` y `ErrorPage`, eliminando la duplicación.
+- **i18n:** Claves `games.game_buscaminas_title`, `games.game_wordle_es_title`, `games.game_wordle_ca_title` añadidas en `ca.json`, `es.json`, `en.json`.
+
+## [0.1.116] - 2026-05-04
+
+### Added
+
+- **Minijuegos:** Se añaden 3 minijuegos de código abierto (2048, Dinosaurio corredor, Tetris) accesibles desde las páginas de error 404 y 500, y desde el menú de perfil del usuario. Los juegos se alojan localmente en `public/games/` sin dependencias externas.
+- **Componente `MiniGameEmbed`:** iframe reutilizable con estado de carga y fallback de error ("Juego no disponible") para cuando el archivo no se pueda cargar.
+- **Página `/games`:** Nueva página dedicada con selector de juego y vista embebida.
+- **Página `ErrorPage` y `ErrorBoundary`:** Captura errores de React no controlados y muestra la página de error con acceso a juegos.
+- **Vistas Blade de error:** `resources/views/errors/500.blade.php` y `404.blade.php` para errores PHP previos a la carga del SPA, con enlace a `/games`.
+- **i18n:** Claves `games.*` y `errors.server_error_*` añadidas en `ca.json`, `es.json`, `en.json`.
+
 ## [0.1.115] - 2026-05-04
 
 ### Fixed

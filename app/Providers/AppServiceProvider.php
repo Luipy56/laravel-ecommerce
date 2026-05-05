@@ -5,12 +5,18 @@ namespace App\Providers;
 use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Contracts\RebuildsProductSearchText;
 use App\Contracts\Search\ElasticsearchProductCatalogSearch;
+use App\Models\ProductReview;
+use App\Observers\ProductReviewObserver;
 use App\Events\InstallationPriceWasAssigned;
 use App\Events\OrderInstallationQuoteRequested;
 use App\Events\OrderPaymentSucceeded;
 use App\Events\OrderPlacedPaymentPending;
 use App\Events\OrderShipped;
 use App\Events\PersonalizedSolutionSubmitted;
+use App\Events\ReturnRequestApprovedEvent;
+use App\Events\ReturnRequestCreated;
+use App\Events\ReturnRequestRefundedEvent;
+use App\Events\ReturnRequestRejectedEvent;
 use App\Listeners\SendInstallationPriceAssignedEmail;
 use App\Listeners\SendOrderInstallationQuoteRequestAdminEmail;
 use App\Listeners\SendOrderInstallationQuoteRequestEmail;
@@ -20,6 +26,10 @@ use App\Listeners\SendOrderPaymentPendingAdminEmail;
 use App\Listeners\SendOrderPaymentPendingEmail;
 use App\Listeners\SendOrderShippedEmail;
 use App\Listeners\SendPersonalizedSolutionAcknowledgementEmail;
+use App\Listeners\SendReturnRequestApprovedEmail;
+use App\Listeners\SendReturnRequestReceivedAdminEmail;
+use App\Listeners\SendReturnRequestRefundedEmail;
+use App\Listeners\SendReturnRequestRejectedEmail;
 use App\Scout\ElasticsearchClientFactory;
 use App\Scout\ElasticsearchEngine;
 use App\Services\Payments\PaymentCheckoutService;
@@ -106,6 +116,8 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
+        ProductReview::observe(ProductReviewObserver::class);
+
         Event::listen(InstallationPriceWasAssigned::class, SendInstallationPriceAssignedEmail::class);
         Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmationEmail::class);
         Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmedAdminEmail::class);
@@ -115,6 +127,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(OrderPlacedPaymentPending::class, SendOrderPaymentPendingAdminEmail::class);
         Event::listen(PersonalizedSolutionSubmitted::class, SendPersonalizedSolutionAcknowledgementEmail::class);
         Event::listen(OrderShipped::class, SendOrderShippedEmail::class);
+        Event::listen(ReturnRequestCreated::class, SendReturnRequestReceivedAdminEmail::class);
+        Event::listen(ReturnRequestApprovedEvent::class, SendReturnRequestApprovedEmail::class);
+        Event::listen(ReturnRequestRejectedEvent::class, SendReturnRequestRejectedEmail::class);
+        Event::listen(ReturnRequestRefundedEvent::class, SendReturnRequestRefundedEmail::class);
 
         VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
             $locale = MailLocale::resolve();

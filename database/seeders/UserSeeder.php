@@ -2,18 +2,19 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     /**
      * Seeds clients table (account: person or company).
+     * Uses Eloquent so the encrypted cast on `identification` is applied correctly.
      */
     public function run(): void
     {
-        DB::table('clients')->insert([
+        $clients = [
             [
                 'type' => 'person',
                 'identification' => '12345678A',
@@ -38,6 +39,10 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'is_active' => true,
             ],
-        ]);
+        ];
+
+        foreach ($clients as $data) {
+            Client::create($data);
+        }
     }
 }

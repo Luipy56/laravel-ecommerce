@@ -4,8 +4,23 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
+import { loadAdminListFilters, normalizedActiveTriState, normalizedPeriod, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const PS_FILTERS_PAGE_ID = 'personalized_solutions';
 
 const STATUSES = ['pending_review', 'reviewed', 'client_contacted', 'rejected', 'completed'];
+
+function readPersistedPsFilters() {
+  const raw = loadAdminListFilters(PS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const statusFilter =
+    typeof raw?.status === 'string' && (raw.status === '' || STATUSES.includes(raw.status)) ? raw.status : '';
+  const activeRaw = normalizedActiveTriState(raw?.active);
+  const activeFilter = activeRaw === null ? '1' : activeRaw;
+  const period = normalizedPeriod(raw?.period);
+  const hasPersistedPeriod = period != null;
+  return { search, statusFilter, activeFilter, period, hasPersistedPeriod };
+}
 
 function getStatusBadgeClass(status) {
   switch (status) {
@@ -23,22 +38,31 @@ export default function AdminPersonalizedSolutionsPage() {
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('personalized_solutions');
   const { defaultPeriod, isLoading: periodLoading } = useAdminListDefaultPeriod();
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedPsFilters();
+  }
+  const persisted = persistedRef.current;
+  const hasPersistedPeriodRef = useRef(persisted.hasPersistedPeriod);
+
   const [periodInitialized, setPeriodInitialized] = useState(false);
   const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [activeFilter, setActiveFilter] = useState('1');
-  const [periodFilter, setPeriodFilter] = useState('week');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
+  const [statusFilter, setStatusFilter] = useState(() => persisted.statusFilter);
+  const [activeFilter, setActiveFilter] = useState(() => persisted.activeFilter);
+  const [periodFilter, setPeriodFilter] = useState(() => (persisted.hasPersistedPeriod ? persisted.period : 'week'));
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
 
   useEffect(() => {
     if (!periodLoading && !periodInitialized) {
-      setPeriodFilter(defaultPeriod);
+      if (!hasPersistedPeriodRef.current) {
+        setPeriodFilter(defaultPeriod);
+      }
       setPeriodInitialized(true);
     }
   }, [periodLoading, periodInitialized, defaultPeriod]);
@@ -80,6 +104,16 @@ export default function AdminPersonalizedSolutionsPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    if (!periodInitialized) return;
+    saveAdminListFilters(PS_FILTERS_PAGE_ID, {
+      search,
+      status: statusFilter,
+      active: activeFilter,
+      period: periodFilter,
+    });
+  }, [periodInitialized, search, statusFilter, activeFilter, periodFilter]);
 
   useEffect(() => {
     if (!hasMore) return;

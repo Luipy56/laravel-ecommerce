@@ -11,6 +11,7 @@ import CookieConsentBanner from './CookieConsentBanner';
 import {
   IconCart,
   IconClipboardList,
+  IconGamepad,
   IconGrid,
   IconHeart,
   IconHelpCircle,
@@ -273,6 +274,21 @@ export default function Layout() {
                     )}
                   </NavLink>
                 </li>
+                <li>
+                  <NavLink
+                    to="/games"
+                    end
+                    onClick={closeStorefrontDrawer}
+                    className={({ isActive }) => drawerNavClass(isActive)}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <IconGamepad className={drawerIconClass(isActive)} aria-hidden="true" />
+                        {t('games.nav_link')}
+                      </>
+                    )}
+                  </NavLink>
+                </li>
               </ul>
             ) : (
               <ul className="flex flex-col gap-1">
@@ -285,6 +301,21 @@ export default function Layout() {
                     <IconLogIn className={drawerIconClass(false)} aria-hidden="true" />
                     {t('auth.login')}
                   </Link>
+                </li>
+                <li>
+                  <NavLink
+                    to="/games"
+                    end
+                    onClick={closeStorefrontDrawer}
+                    className={({ isActive }) => drawerNavClass(isActive)}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <IconGamepad className={drawerIconClass(isActive)} aria-hidden="true" />
+                        {t('games.nav_link')}
+                      </>
+                    )}
+                  </NavLink>
                 </li>
               </ul>
             )}

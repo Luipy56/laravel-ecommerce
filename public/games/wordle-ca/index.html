@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Wordle CAT</title>
+</head>
+
+<body>
+
+    <h1><span id="titol">Wordle CAT</span></h1>
+
+    <!--     TAULER DE JOC -->
+    <section id="tauler-de-joc">
+        <div id="graellaIntents">
+            <div class="container" id="intent1">
+                <span class="primerIntent" id="F1C1" type="text" maxlength="1">&nbsp;</span>
+                <span class="primerIntent" id="F1C2" type="text" maxlength="1">&nbsp;</span>
+                <span class="primerIntent" id="F1C3" type="text" maxlength="1">&nbsp;</span>
+                <span class="primerIntent" id="F1C4" type="text" maxlength="1">&nbsp;</span>
+                <span class="primerIntent" id="F1C5" type="text" maxlength="1">&nbsp;</span>
+            </div>
+            <div class="container" id="intent2">
+                <span class="segonIntent" id="F2C1" type="text" maxlength="1">&nbsp;</span>
+                <span class="segonIntent" id="F2C2" type="text" maxlength="1">&nbsp;</span>
+                <span class="segonIntent" id="F2C3" type="text" maxlength="1">&nbsp;</span>
+                <span class="segonIntent" id="F2C4" type="text" maxlength="1">&nbsp;</span>
+                <span class="segonIntent" id="F2C5" type="text" maxlength="1">&nbsp;</span>
+            </div>
+            <div class="container" id="intent3">
+                <span class="tercerIntent" id="F3C1" type="text" maxlength="1">&nbsp;</span>
+                <span class="tercerIntent" id="F3C2" type="text" maxlength="1">&nbsp;</span>
+                <span class="tercerIntent" id="F3C3" type="text" maxlength="1">&nbsp;</span>
+                <span class="tercerIntent" id="F3C4" type="text" maxlength="1">&nbsp;</span>
+                <span class="tercerIntent" id="F3C5" type="text" maxlength="1">&nbsp;</span>
+            </div>
+            <div class="container" id="intent4">
+                <span class="quartIntent" id="F4C1" type="text" maxlength="1">&nbsp;</span>
+                <span class="quartIntent" id="F4C2" type="text" maxlength="1">&nbsp;</span>
+                <span class="quartIntent" id="F4C3" type="text" maxlength="1">&nbsp;</span>
+                <span class="quartIntent" id="F4C4" type="text" maxlength="1">&nbsp;</span>
+                <span class="quartIntent" id="F4C5" type="text" maxlength="1">&nbsp;</span>
+            </div>
+            <div class="container" id="intent5">
+                <span class="cinqueIntent" id="F5C1" type="text" maxlength="1">&nbsp;</span>
+                <span class="cinqueIntent" id="F5C2" type="text" maxlength="1">&nbsp;</span>
+                <span class="cinqueIntent" id="F5C3" type="text" maxlength="1">&nbsp;</span>
+                <span class="cinqueIntent" id="F5C4" type="text" maxlength="1">&nbsp;</span>
+                <span class="cinqueIntent" id="F5C5" type="text" maxlength="1">&nbsp;</span>
+            </div>
+            <div class="container" id="intent6">
+                <span class="siseIntent" id="F6C1" type="text" maxlength="1">&nbsp;</span>
+                <span class="siseIntent" id="F6C2" type="text" maxlength="1">&nbsp;</span>
+                <span class="siseIntent" id="F6C3" type="text" maxlength="1">&nbsp;</span>
+                <span class="siseIntent" id="F6C4" type="text" maxlength="1">&nbsp;</span>
+                <span class="siseIntent" id="F6C5" type="text" maxlength="1">&nbsp;</span>
+            </div>
+        </div>
+    </section>
+
+    <!--     TECLAT PANTALLA -->
+    <section id="teclat-en-pantalla">
+        <div id="teclat-pantalla">
+            <div class="primera-filera">
+                <button class="boto-teclat" id="Q" onclick="enviarLletra('Q')">Q</button>
+                <button class="boto-teclat" id="W" onclick="enviarLletra('W')">W</button>
+                <button class="boto-teclat" id="E" onclick="enviarLletra('E')">E</button>
+                <button class="boto-teclat" id="R" onclick="enviarLletra('R')">R</button>
+                <button class="boto-teclat" id="T" onclick="enviarLletra('T')">T</button>
+                <button class="boto-teclat" id="Y" onclick="enviarLletra('Y')">Y</button>
+                <button class="boto-teclat" id="U" onclick="enviarLletra('U')">U</button>
+                <button class="boto-teclat" id="I" onclick="enviarLletra('I')">I</button>
+                <button class="boto-teclat" id="O" onclick="enviarLletra('O')">O</button>
+                <button class="boto-teclat" id="P" onclick="enviarLletra('P')">P</button>
+            </div>
+            <div class="segona-filera">
+                <button class="boto-teclat" id="A" onclick="enviarLletra('A')">A</button>
+                <button class="boto-teclat" id="S" onclick="enviarLletra('S')">S</button>
+                <button class="boto-teclat" id="D" onclick="enviarLletra('D')">D</button>
+                <button class="boto-teclat" id="F" onclick="enviarLletra('F')">F</button>
+                <button class="boto-teclat" id="G" onclick="enviarLletra('G')">G</button>
+                <button class="boto-teclat" id="H" onclick="enviarLletra('H')">H</button>
+                <button class="boto-teclat" id="J" onclick="enviarLletra('J')">J</button>
+                <button class="boto-teclat" id="K" onclick="enviarLletra('K')">K</button>
+                <button class="boto-teclat" id="L" onclick="enviarLletra('L')">L</button>
+                <button class="boto-teclat" id="Ç" onclick="enviarLletra('Ç')">Ç</button>
+            </div>
+            <div class="tercera-filera">
+                <button class="boto-teclat" onclick="borrarLletra()">DEL</button>
+                <button class="boto-teclat" id="Z" onclick="enviarLletra('Z')">Z</button>
+                <button class="boto-teclat" id="X" onclick="enviarLletra('X')">X</button>
+                <button class="boto-teclat" id="C" onclick="enviarLletra('C')">C</button>
+                <button class="boto-teclat" id="V" onclick="enviarLletra('V')">V</button>
+                <button class="boto-teclat" id="B" onclick="enviarLletra('B')">B</button>
+                <button class="boto-teclat" id="N" onclick="enviarLletra('N')">N</button>
+                <button class="boto-teclat" id="M" onclick="enviarLletra('M')">M</button>
+                <button class="boto-teclat" onclick="revisarParaula()">ENVIAR</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- IMPRESSIÓ RESULTATS -->
+    <section id="impressions">
+        <div class="resultats">
+            <h4><span id="resultat"></span></h4>
+        </div>
+    </section>
+
+    <!-- FITXERS IMPORTATS -->
+    <script src="./arrayParaules.js"></script>
+    <script src="./main.js"></script>
+
+</body>
+
+</html>
+

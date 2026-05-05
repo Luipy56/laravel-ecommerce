@@ -15,10 +15,12 @@ use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\AdminPackController;
 use App\Http\Controllers\Api\AdminPersonalizedSolutionController;
 use App\Http\Controllers\Api\AdminProductController;
+use App\Http\Controllers\Api\AdminProductReviewController;
 use App\Http\Controllers\Api\AdminShopSettingsController;
 use App\Http\Controllers\Api\AdminVariantGroupController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ClientPasswordResetController;
 use App\Http\Controllers\Api\ClientVerificationController;
@@ -34,7 +36,9 @@ use App\Http\Controllers\Api\PersonalizedSolutionController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PublicPersonalizedSolutionController;
 use App\Http\Controllers\Api\PurchasedProductsController;
+use App\Http\Controllers\Api\AdminReturnRequestController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\ReturnRequestController;
 use App\Http\Controllers\Api\ShopPublicSettingsController;
 use App\Http\Controllers\Api\StripeCheckoutConfirmController;
 use App\Http\Controllers\Api\UserController;
@@ -62,6 +66,7 @@ Route::get('products/price-range', [ProductController::class, 'priceRange']);
 Route::get('products/search', [ProductController::class, 'search'])
     ->middleware('throttle:60,1');
 Route::get('products/{product}', [ProductController::class, 'show']);
+Route::get('products/{product}/reviews', [ProductReviewController::class, 'index']);
 Route::get('packs', [PackController::class, 'index']);
 Route::get('packs/{pack}', [PackController::class, 'show']);
 
@@ -98,6 +103,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1');
 
     Route::get('profile', [UserController::class, 'show']);
+    Route::get('profile/export', [UserController::class, 'export'])->middleware('throttle:3,1');
+    Route::get('profile/consents', [UserController::class, 'consents']);
+    Route::delete('profile', [UserController::class, 'destroy']);
 });
 
 /* ------------------------ Client auth + verified email ------------------------ */
@@ -129,6 +137,12 @@ Route::middleware(['auth', 'client.verified'])->group(function () {
     Route::get('orders/{order}', [OrderController::class, 'show']);
     Route::get('orders/{order}/invoice', [OrderController::class, 'invoice']);
     Route::get('orders/{order}/delivery-note', [OrderController::class, 'deliveryNote']);
+
+    Route::post('products/{product}/reviews', [ProductReviewController::class, 'store']);
+    Route::get('products/{product}/reviews/mine', [ProductReviewController::class, 'mine']);
+
+    Route::get('return-requests', [ReturnRequestController::class, 'index']);
+    Route::post('orders/{order}/return-requests', [ReturnRequestController::class, 'store']);
 });
 
 Route::middleware(['auth.client_or_admin'])->group(function () {
@@ -172,7 +186,17 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('orders', [AdminOrderController::class, 'index']);
     Route::get('orders/{order}', [AdminOrderController::class, 'show']);
     Route::put('orders/{order}', [AdminOrderController::class, 'update']);
+    Route::post('orders/{order}/notify-in-transit-mail', [AdminOrderController::class, 'sendInTransitCustomerMail'])
+        ->middleware('throttle:30,1');
+    Route::get('return-requests', [AdminReturnRequestController::class, 'index']);
+    Route::get('return-requests/{rma}', [AdminReturnRequestController::class, 'show']);
+    Route::put('return-requests/{rma}', [AdminReturnRequestController::class, 'update']);
+    Route::post('return-requests/{rma}/refund', [AdminReturnRequestController::class, 'refund']);
     Route::apiResource('admins', AdminAdminController::class);
+    Route::get('reviews', [AdminProductReviewController::class, 'index']);
+    Route::get('reviews/{review}', [AdminProductReviewController::class, 'show']);
+    Route::patch('reviews/{review}', [AdminProductReviewController::class, 'update']);
+    Route::delete('reviews/{review}', [AdminProductReviewController::class, 'destroy']);
     Route::get('personalized-solutions', [AdminPersonalizedSolutionController::class, 'index']);
     Route::get('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'show']);
     Route::post('personalized-solutions/{personalized_solution}/notify-resolution', [AdminPersonalizedSolutionController::class, 'notifyResolution']);

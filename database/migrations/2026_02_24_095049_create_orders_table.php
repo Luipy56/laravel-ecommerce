@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id')->constrained('clients');
             $table->string('kind', 50)->comment('cart = shopping cart; order = confirmed order; like = favorites/wishlist');
-            $table->string('status', 50)->nullable()->comment('Only when kind=order; null when cart or like');
+            $table->string('status', 50)->nullable()->comment('Only when kind=order; null when cart or like. Values: pending, awaiting_payment, awaiting_installation_price, in_transit, sent, installation_pending, installation_confirmed, returned');
             $table->timestamp('order_date')->nullable()->comment('Null while cart; set on checkout');
             $table->timestamp('shipping_date')->nullable();
             $table->decimal('shipping_price', 10, 2)->nullable()->comment('Flat shipping at checkout; default from shop_settings shipping_flat_eur; Order grand total uses this when set');

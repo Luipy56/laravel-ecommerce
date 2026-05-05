@@ -4,18 +4,34 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { loadAdminListFilters, normalizedActiveTriState, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const ADMINS_FILTERS_PAGE_ID = 'admins';
+
+function readPersistedAdminUserFilters() {
+  const raw = loadAdminListFilters(ADMINS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const activeRaw = normalizedActiveTriState(raw?.active);
+  const activeFilter = activeRaw === null ? '1' : activeRaw;
+  return { search, activeFilter };
+}
 
 export default function AdminAdminsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('admins');
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedAdminUserFilters();
+  }
+  const persisted = persistedRef.current;
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
-  const [activeFilter, setActiveFilter] = useState('1');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
+  const [activeFilter, setActiveFilter] = useState(() => persisted.activeFilter);
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
 
@@ -53,6 +69,10 @@ export default function AdminAdminsPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    saveAdminListFilters(ADMINS_FILTERS_PAGE_ID, { search, active: activeFilter });
+  }, [search, activeFilter]);
 
   useEffect(() => {
     if (!hasMore) return;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\ClientConsent;
 use App\Support\MailLocale;
 use App\Support\ValidationRules;
 use Illuminate\Http\JsonResponse;
@@ -52,7 +53,7 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', 'string', 'in:person,company'],
-            'identification' => ['nullable', 'string', 'max:20', 'unique:clients,identification'],
+            'identification' => ['nullable', 'string', 'max:20'],
             'login_email' => ['required', 'string', 'max:255', ValidationRules::emailDns(), 'unique:clients,login_email'],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'name' => ['required', 'string', 'max:255'],
@@ -62,6 +63,8 @@ class AuthController extends Controller
             'address_city' => ['nullable', 'string', 'max:100'],
             'address_province' => ['nullable', 'string', 'max:100'],
             'address_postal_code' => ['required', 'string', 'regex:/^\d{1,20}$/'],
+            'accept_privacy' => ['required', 'accepted'],
+            'accept_marketing' => ['nullable', 'boolean'],
         ]);
 
         $client = Client::create([
@@ -89,6 +92,28 @@ class AuthController extends Controller
                 'province' => $validated['address_province'] ?? null,
                 'postal_code' => $validated['address_postal_code'] ?? null,
                 'is_active' => true,
+            ]);
+        }
+
+        $policyVersion = config('app.privacy_policy_version', '2026-05-05');
+        $ip = $request->ip();
+        $ua = $request->userAgent();
+
+        $client->consents()->create([
+            'type' => 'privacy_policy',
+            'version' => $policyVersion,
+            'accepted' => true,
+            'ip_address' => $ip,
+            'user_agent' => $ua,
+        ]);
+
+        if ($request->boolean('accept_marketing')) {
+            $client->consents()->create([
+                'type' => 'marketing',
+                'version' => $policyVersion,
+                'accepted' => true,
+                'ip_address' => $ip,
+                'user_agent' => $ua,
             ]);
         }
 

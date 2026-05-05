@@ -4,6 +4,27 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { loadAdminListFilters, normalizedActiveTriState, normalizedDigitsId, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const FEATURE_TYPES_FILTERS_PAGE_ID = 'feature_types';
+const FEATURES_FILTERS_PAGE_ID = 'features';
+
+function readPersistedFeatureTypesFilters() {
+  const raw = loadAdminListFilters(FEATURE_TYPES_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const activeRaw = normalizedActiveTriState(raw?.active);
+  const activeFilterTypes = activeRaw === null ? '' : activeRaw;
+  return { search, activeFilterTypes };
+}
+
+function readPersistedFeaturesFilters() {
+  const raw = loadAdminListFilters(FEATURES_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  const typeId = normalizedDigitsId(raw?.type_id);
+  const activeRaw = normalizedActiveTriState(raw?.active);
+  const activeFilter = activeRaw === null ? '' : activeRaw;
+  return { search, typeId, activeFilter };
+}
 
 export default function AdminFeaturesPage() {
   const { t } = useTranslation();
@@ -11,14 +32,25 @@ export default function AdminFeaturesPage() {
   const { orderedVisibleColumnIds: orderedFeatureTypeCols } = useAdminIndexColumnVisibility('feature_types');
   const { orderedVisibleColumnIds: orderedFeatureCols } = useAdminIndexColumnVisibility('features');
 
+  const ftPersistedRef = useRef(undefined);
+  if (ftPersistedRef.current === undefined) {
+    ftPersistedRef.current = readPersistedFeatureTypesFilters();
+  }
+  const ftPersisted = ftPersistedRef.current;
+  const fPersistedRef = useRef(undefined);
+  if (fPersistedRef.current === undefined) {
+    fPersistedRef.current = readPersistedFeaturesFilters();
+  }
+  const fPersisted = fPersistedRef.current;
+
   // Feature types (tipos de características) – first list
   const [featureTypesList, setFeatureTypesList] = useState([]);
   const [loadingTypes, setLoadingTypes] = useState(true);
   const [loadingMoreTypes, setLoadingMoreTypes] = useState(false);
   const [hasMoreTypes, setHasMoreTypes] = useState(false);
-  const [searchTypes, setSearchTypes] = useState('');
-  const [searchDebounceTypes, setSearchDebounceTypes] = useState('');
-  const [activeFilterTypes, setActiveFilterTypes] = useState('');
+  const [searchTypes, setSearchTypes] = useState(() => ftPersisted.search);
+  const [searchDebounceTypes, setSearchDebounceTypes] = useState(() => ftPersisted.search.trim());
+  const [activeFilterTypes, setActiveFilterTypes] = useState(() => ftPersisted.activeFilterTypes);
   const pageTypesRef = useRef(1);
   const sentinelTypesRef = useRef(null);
 
@@ -30,10 +62,10 @@ export default function AdminFeaturesPage() {
   const [loadingFeatures, setLoadingFeatures] = useState(true);
   const [loadingMoreFeatures, setLoadingMoreFeatures] = useState(false);
   const [hasMoreFeatures, setHasMoreFeatures] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
-  const [typeId, setTypeId] = useState('');
-  const [activeFilter, setActiveFilter] = useState('');
+  const [search, setSearch] = useState(() => fPersisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => fPersisted.search.trim());
+  const [typeId, setTypeId] = useState(() => fPersisted.typeId);
+  const [activeFilter, setActiveFilter] = useState(() => fPersisted.activeFilter);
   const pageFeaturesRef = useRef(1);
   const sentinelFeaturesRef = useRef(null);
 
@@ -120,6 +152,21 @@ export default function AdminFeaturesPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    saveAdminListFilters(FEATURE_TYPES_FILTERS_PAGE_ID, {
+      search: searchTypes,
+      active: activeFilterTypes,
+    });
+  }, [searchTypes, activeFilterTypes]);
+
+  useEffect(() => {
+    saveAdminListFilters(FEATURES_FILTERS_PAGE_ID, {
+      search,
+      type_id: typeId,
+      active: activeFilter,
+    });
+  }, [search, typeId, activeFilter]);
 
   useEffect(() => {
     if (!hasMoreTypes) return;

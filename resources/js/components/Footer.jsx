@@ -65,6 +65,9 @@ export default function Footer() {
             >
               {t('footer.legal_link')}
             </a>
+            <Link to="/privacy-policy" className="link link-hover text-sm">
+              {t('footer.privacy_policy')}
+            </Link>
             <p className="text-xs opacity-70 mt-1">{t('footer.legal_disclaimer')}</p>
           </nav>
         </div>

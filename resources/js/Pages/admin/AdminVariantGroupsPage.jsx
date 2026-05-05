@@ -4,6 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
+import { loadAdminListFilters, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const VARIANT_GROUPS_FILTERS_PAGE_ID = 'variant_groups';
+
+function readPersistedVariantGroupFilters() {
+  const raw = loadAdminListFilters(VARIANT_GROUPS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  return { search };
+}
 
 function productsLabel(products) {
   if (!products?.length) return '';
@@ -16,12 +25,17 @@ export default function AdminVariantGroupsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('variant_groups');
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedVariantGroupFilters();
+  }
+  const persisted = persistedRef.current;
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
 
@@ -57,6 +71,10 @@ export default function AdminVariantGroupsPage() {
   useEffect(() => {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
+  }, [search]);
+
+  useEffect(() => {
+    saveAdminListFilters(VARIANT_GROUPS_FILTERS_PAGE_ID, { search });
   }, [search]);
 
   useEffect(() => {

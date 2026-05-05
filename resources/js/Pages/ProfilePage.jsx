@@ -14,6 +14,7 @@ import {
   profileContactSchema,
   profilePasswordSchema,
 } from '../validation';
+import FieldHint from '../components/FieldHint';
 
 const ADDRESS_TYPES = ['shipping', 'installation', 'other'];
 
@@ -391,7 +392,10 @@ export default function ProfilePage() {
           </div>
           <form onSubmit={handleAccountSubmit} className="space-y-4 mt-4">
             <label className="label">
-              <span className="label-text">{t('profile.identification')}</span>
+              <span className="label-text">
+                {t('profile.identification')}
+                <FieldHint text={t('gdpr.field_hint_identification')} />
+              </span>
             </label>
             <input
               type="text"
@@ -426,6 +430,10 @@ export default function ProfilePage() {
               aria-invalid={!!accountFieldErrors.surname}
             />
             {accountFieldErrors.surname ? <p className="validator-hint text-error">{accountFieldErrors.surname}</p> : null}
+            <div className="flex items-center gap-1 text-sm text-base-content/70">
+              <span>{t('profile.phone')}</span>
+              <FieldHint text={t('gdpr.field_hint_phone')} />
+            </div>
             <input
               type="tel"
               name="phone"

@@ -4,9 +4,23 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
+import { loadAdminListFilters, normalizedPeriod, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+
+const ORDERS_FILTERS_PAGE_ID = 'orders';
 
 const KINDS = ['cart', 'order', 'like'];
 const STATUSES = ['pending', 'awaiting_payment', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
+
+function readPersistedOrdersFilters() {
+  const raw = loadAdminListFilters(ORDERS_FILTERS_PAGE_ID);
+  const search = normalizedStoredSearch(raw?.search ?? '', '');
+  let kind = typeof raw?.kind === 'string' && (raw.kind === '' || KINDS.includes(raw.kind)) ? raw.kind : 'order';
+  let status = typeof raw?.status === 'string' && (raw.status === '' || STATUSES.includes(raw.status)) ? raw.status : '';
+  if (kind === 'cart' || kind === 'like') status = '';
+  const period = normalizedPeriod(raw?.period);
+  const hasPersistedPeriod = period != null;
+  return { search, kind, status, period, hasPersistedPeriod };
+}
 
 function installationStatusLabel(status, t) {
   if (status == null || status === '') return '';
@@ -39,22 +53,31 @@ export default function AdminOrdersPage() {
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('orders');
   const { defaultPeriod, isLoading: periodLoading } = useAdminListDefaultPeriod();
+  const persistedRef = useRef(undefined);
+  if (persistedRef.current === undefined) {
+    persistedRef.current = readPersistedOrdersFilters();
+  }
+  const persisted = persistedRef.current;
+  const hasPersistedPeriodRef = useRef(persisted.hasPersistedPeriod);
+
   const [periodInitialized, setPeriodInitialized] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [searchDebounce, setSearchDebounce] = useState('');
-  const [kindFilter, setKindFilter] = useState('order');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [periodFilter, setPeriodFilter] = useState('week');
+  const [search, setSearch] = useState(() => persisted.search);
+  const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
+  const [kindFilter, setKindFilter] = useState(() => persisted.kind);
+  const [statusFilter, setStatusFilter] = useState(() => persisted.status);
+  const [periodFilter, setPeriodFilter] = useState(() => (persisted.hasPersistedPeriod ? persisted.period : 'week'));
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
 
   useEffect(() => {
     if (!periodLoading && !periodInitialized) {
-      setPeriodFilter(defaultPeriod);
+      if (!hasPersistedPeriodRef.current) {
+        setPeriodFilter(defaultPeriod);
+      }
       setPeriodInitialized(true);
     }
   }, [periodLoading, periodInitialized, defaultPeriod]);
@@ -96,6 +119,16 @@ export default function AdminOrdersPage() {
     const tid = setTimeout(() => setSearchDebounce(search.trim()), 300);
     return () => clearTimeout(tid);
   }, [search]);
+
+  useEffect(() => {
+    if (!periodInitialized) return;
+    saveAdminListFilters(ORDERS_FILTERS_PAGE_ID, {
+      search,
+      kind: kindFilter,
+      status: statusFilter,
+      period: periodFilter,
+    });
+  }, [periodInitialized, search, kindFilter, statusFilter, periodFilter]);
 
   useEffect(() => {
     if (!hasMore) return;

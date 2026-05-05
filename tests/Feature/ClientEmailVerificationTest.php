@@ -37,6 +37,7 @@ class ClientEmailVerificationTest extends TestCase
             'address_city' => null,
             'address_province' => null,
             'address_postal_code' => '08001',
+            'accept_privacy' => true,
         ]);
 
         $response->assertCreated();

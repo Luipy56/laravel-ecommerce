@@ -66,11 +66,20 @@ import AdminPersonalizedSolutionEditPage from './Pages/admin/AdminPersonalizedSo
 import AdminFaqsPage from './Pages/admin/AdminFaqsPage';
 import AdminFaqNewPage from './Pages/admin/AdminFaqNewPage';
 import AdminFaqEditPage from './Pages/admin/AdminFaqEditPage';
+import AdminReviewsPage from './Pages/admin/AdminReviewsPage';
+import AdminReviewShowPage from './Pages/admin/AdminReviewShowPage';
+import AdminReturnRequestsPage from './Pages/admin/AdminReturnRequestsPage';
+import AdminReturnRequestShowPage from './Pages/admin/AdminReturnRequestShowPage';
 import FaqPage from './Pages/FaqPage';
+import ReturnRequestsPage from './Pages/ReturnRequestsPage';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import ResetPasswordPage from './Pages/ResetPasswordPage';
 import NotFoundPage from './Pages/NotFoundPage';
 import SessionExpiredPage from './Pages/SessionExpiredPage';
+import GamesPage from './Pages/GamesPage';
+import ErrorPage from './Pages/ErrorPage';
+import ErrorBoundary from './components/ErrorBoundary';
+import PrivacyPolicyPage from './Pages/PrivacyPolicyPage';
 
 export default function App() {
   const queryClient = useMemo(
@@ -94,6 +103,7 @@ export default function App() {
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
+              <ErrorBoundary fallback={(error, reset) => <ErrorPage error={error} resetError={reset} />}>
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<HomePage />} />
@@ -112,6 +122,7 @@ export default function App() {
                   <Route path="orders" element={<OrdersPage />} />
                   <Route path="favorites" element={<FavoritesPage />} />
                   <Route path="purchases" element={<PurchasesPage />} />
+                  <Route path="my-returns" element={<ReturnRequestsPage />} />
                   <Route path="orders/:id" element={<OrderDetailPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="custom-solution" element={<CustomSolutionPage />} />
@@ -122,6 +133,8 @@ export default function App() {
                   <Route path="client/personalized-solutions/:token" element={<ClientPersonalizedSolutionPage />} />
                   <Route path="mi-solucion" element={<Navigate to="/custom-solution" replace />} />
                   <Route path="my-solution" element={<Navigate to="/custom-solution" replace />} />
+                  <Route path="games" element={<GamesPage />} />
+                  <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
                   <Route path="session-expired" element={<SessionExpiredPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
@@ -170,9 +183,14 @@ export default function App() {
                   <Route path="personalized-solutions" element={<AdminPersonalizedSolutionsPage />} />
                   <Route path="personalized-solutions/:id/edit" element={<AdminPersonalizedSolutionEditPage />} />
                   <Route path="personalized-solutions/:id" element={<AdminPersonalizedSolutionShowPage />} />
+                  <Route path="reviews" element={<AdminReviewsPage />} />
+                  <Route path="reviews/:id" element={<AdminReviewShowPage />} />
+                  <Route path="returns" element={<AdminReturnRequestsPage />} />
+                  <Route path="returns/:id" element={<AdminReturnRequestShowPage />} />
                   <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Route>
               </Routes>
+              </ErrorBoundary>
             </CartProvider>
           </AuthProvider>
         </ToastProvider>

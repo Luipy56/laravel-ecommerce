@@ -12,6 +12,7 @@ import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { CHECKOUT_PAYMENT_METHOD_ORDER, checkoutFormSchema, parseWithZod } from '../validation';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
+import GdprNotice from '../components/GdprNotice';
 
 const INITIAL_FORM = {
   payment_method: 'card',
@@ -448,6 +449,8 @@ export default function CheckoutPage() {
               )}
             </>
           )}
+
+          <GdprNotice noticeKey="gdpr.notice_checkout" />
 
           <div className="flex flex-wrap items-end justify-between gap-4 mt-4">
             <div className="text-sm space-y-1">

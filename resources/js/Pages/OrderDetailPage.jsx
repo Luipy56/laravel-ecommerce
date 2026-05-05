@@ -29,8 +29,21 @@ function storefrontOrderStatusBadgeClass(status) {
       return 'badge-outline badge-success';
     case 'installation_confirmed':
       return 'badge-outline badge-info';
+    case 'returned':
+      return 'badge-outline badge-neutral';
     default:
       return 'badge-outline badge-neutral';
+  }
+}
+
+function rmaStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending_review': return 'badge-warning';
+    case 'approved': return 'badge-info';
+    case 'refunded': return 'badge-success';
+    case 'rejected': return 'badge-error';
+    case 'cancelled': return 'badge-neutral';
+    default: return 'badge-neutral';
   }
 }
 
@@ -78,6 +91,11 @@ export default function OrderDetailPage() {
   const [paypalApprovalFallbackUrl, setPaypalApprovalFallbackUrl] = useState(null);
   const [paypalReturnInfo, setPaypalReturnInfo] = useState('');
   const [payWarning, setPayWarning] = useState('');
+  const [returnModalOpen, setReturnModalOpen] = useState(false);
+  const [returnReason, setReturnReason] = useState('');
+  const [returnLoading, setReturnLoading] = useState(false);
+  const [returnError, setReturnError] = useState('');
+  const [existingRma, setExistingRma] = useState(null);
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -85,6 +103,18 @@ export default function OrderDetailPage() {
       .then((r) => { if (r.data.success) setOrder(r.data.data); })
       .catch(() => setOrder(null))
       .finally(() => setLoading(false));
+  }, [user, id]);
+
+  useEffect(() => {
+    if (!user || !id) return;
+    api.get('return-requests')
+      .then((r) => {
+        if (r.data.success) {
+          const match = (r.data.data || []).find((rma) => rma.order_id === Number(id));
+          setExistingRma(match || null);
+        }
+      })
+      .catch(() => {});
   }, [user, id]);
 
   useEffect(() => {
@@ -261,12 +291,43 @@ export default function OrderDetailPage() {
     }
   };
 
+  const handleRequestReturn = async (e) => {
+    e.preventDefault();
+    setReturnError('');
+    setReturnLoading(true);
+    try {
+      const { data } = await api.post(`orders/${id}/return-requests`, { reason: returnReason });
+      if (!data.success) {
+        setReturnError(data.message || t('common.error'));
+        return;
+      }
+      setExistingRma(data.data);
+      setReturnModalOpen(false);
+      setReturnReason('');
+      emitAppToast(t('shop.returns.success'), 'success');
+    } catch (err) {
+      setReturnError(err.response?.data?.message || t('common.error'));
+    } finally {
+      setReturnLoading(false);
+    }
+  };
+
   if (authLoading) {
     return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
   }
-  if (!user) return <Link to="/login" className="btn btn-primary">{t('auth.login')}</Link>;
+  if (!user) return (
+    <div className="flex justify-center items-center py-16 px-4">
+      <Link to={`/login?next=${encodeURIComponent(`/orders/${id}`)}`} className="btn btn-primary">{t('auth.login')}</Link>
+    </div>
+  );
   if (loading) return <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>;
   if (!order) return <p>{t('common.error')}</p>;
+
+  const RETURNABLE_STATUSES = ['sent', 'installation_confirmed'];
+  const canRequestReturn =
+    RETURNABLE_STATUSES.includes(order.status) &&
+    order.has_payment &&
+    !existingRma;
 
   const statusKey = `shop.status.${order.status}`;
   const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : order.status;
@@ -289,7 +350,7 @@ export default function OrderDetailPage() {
   const grandTotal = order.grand_total ?? order.total ?? linesSubtotal;
   const showInstallationRow = order.installation_requested && order.installation_status === 'priced' && order.installation_price != null;
   const awaitingQuote = order.installation_requested && order.installation_status === 'pending' && order.status === 'awaiting_installation_price';
-  const canPay = order.can_pay && !order.has_payment;
+  const canPay = order.can_pay && !order.has_payment && order.status !== 'returned';
   const payAvail = order.payment_methods_available ?? {
     card: false,
     paypal: false,
@@ -572,6 +633,72 @@ export default function OrderDetailPage() {
           <a href={`/api/v1/orders/${order.id}/invoice?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
             {t('shop.invoice')}
           </a>
+        </div>
+      )}
+
+      {existingRma && (
+        <div className="card bg-base-100 border border-base-200 shadow-sm rounded-2xl mt-4">
+          <div className="card-body py-4 px-4 sm:px-5">
+            <h2 className="card-title text-base">{t('shop.returns.request_return')}</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className={`badge ${rmaStatusBadgeClass(existingRma.status)}`}>
+                {t(`shop.returns.status_${existingRma.status}`) || existingRma.status}
+              </span>
+              {existingRma.refund_amount != null && (
+                <span className="text-sm text-base-content/70">
+                  {t('shop.returns.refund_amount')}: <strong>{Number(existingRma.refund_amount).toFixed(2)} €</strong>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {canRequestReturn && (
+        <div className="mt-4 flex justify-end">
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => setReturnModalOpen(true)}>
+            {t('shop.returns.request_return')}
+          </button>
+        </div>
+      )}
+
+      {returnModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-md">
+            <h3 className="font-bold text-lg mb-1">{t('shop.returns.modal_title')}</h3>
+            <p className="text-sm text-base-content/70 mb-4">
+              {t('shop.returns.modal_body', { orderId: order.id })}
+            </p>
+            <form onSubmit={handleRequestReturn} className="space-y-4">
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">{t('shop.returns.reason_label')}</legend>
+                <textarea
+                  className="textarea w-full min-h-24"
+                  placeholder={t('shop.returns.reason_placeholder')}
+                  value={returnReason}
+                  onChange={(e) => setReturnReason(e.target.value)}
+                  required
+                  minLength={10}
+                  maxLength={2000}
+                />
+              </fieldset>
+              {returnError && <div role="alert" className="alert alert-error text-sm">{returnError}</div>}
+              <div className="modal-action">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => { setReturnModalOpen(false); setReturnReason(''); setReturnError(''); }}
+                  disabled={returnLoading}
+                >
+                  {t('common.cancel')}
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={returnLoading || returnReason.length < 10}>
+                  {returnLoading ? <span className="loading loading-spinner loading-sm" /> : t('shop.returns.submit')}
+                </button>
+              </div>
+            </form>
+          </div>
+          <div className="modal-backdrop" onClick={() => { setReturnModalOpen(false); setReturnReason(''); setReturnError(''); }} />
         </div>
       )}
     </div>

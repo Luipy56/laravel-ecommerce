@@ -35,6 +35,7 @@ class Client extends Authenticatable implements CanResetPasswordContract, MustVe
     protected function casts(): array
     {
         return [
+            'identification' => 'encrypted',
             'password' => 'hashed',
             'is_active' => 'boolean',
             'email_verified_at' => 'datetime',
@@ -100,5 +101,10 @@ class Client extends Authenticatable implements CanResetPasswordContract, MustVe
     public function primaryContact(): HasMany
     {
         return $this->hasMany(ClientContact::class)->where('is_primary', true);
+    }
+
+    public function consents(): HasMany
+    {
+        return $this->hasMany(ClientConsent::class);
     }
 }

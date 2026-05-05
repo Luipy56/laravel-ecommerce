@@ -10,7 +10,7 @@
     <p style="margin-top: 16px;"><strong>{{ __('mail.admin_personalized_improvement.message') }}</strong></p>
     <p style="white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 8px;">{{ $clientMessage }}</p>
     @if(!empty($adminUrl))
-        <p style="margin: 24px 0;">
+        <p style="margin: 24px 0; text-align: center;">
             <a href="{{ $adminUrl }}" style="display: inline-block; padding: 12px 20px; background: #F75211; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600;">{{ __('mail.admin_personalized_improvement.button') }}</a>
         </p>
     @endif

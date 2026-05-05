@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.144] - 2026-05-05
+
+### Fixed
+
+- **Seeders**: `UserSeeder` and `ClientContactSeeder` were using `DB::table()->insert()`, bypassing Eloquent's `encrypted` cast introduced in v0.1.142. Switched to `Client::create()` / `ClientContact::create()` so `identification`, `phone`, and `phone2` are stored as proper ciphertext; this resolves the `DecryptException: The payload is invalid` 500 error on all admin API endpoints during test runs.
+- **Tests**: `ClientEmailVerificationTest` registration payload was missing the now-required `accept_privacy: true` field, causing a 422 rejection.
+- **Tests**: `AdminPersonalizedSolutionResolutionPatchTest` was asserting the encrypted `resolution` column via `assertDatabaseHas` (raw DB query — always gets ciphertext). Replaced with a model-level assertion that decrypts via the cast.
+
 ## [0.1.142] - 2026-05-05
 
 ### Added

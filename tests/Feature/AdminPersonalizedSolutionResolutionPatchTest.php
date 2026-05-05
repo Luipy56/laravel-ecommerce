@@ -39,11 +39,10 @@ class AdminPersonalizedSolutionResolutionPatchTest extends TestCase
             ->assertJsonPath('data.resolution', 'Proposed fix: custom hinge set.')
             ->assertJsonPath('data.status', PersonalizedSolution::STATUS_REVIEWED);
 
-        $this->assertDatabaseHas('personalized_solutions', [
-            'id' => 1,
-            'resolution' => 'Proposed fix: custom hinge set.',
-            'status' => PersonalizedSolution::STATUS_REVIEWED,
-        ]);
+        // `resolution` is encrypted in the DB; query via the model so the cast decrypts it.
+        $solution = PersonalizedSolution::findOrFail(1);
+        $this->assertSame('Proposed fix: custom hinge set.', $solution->resolution);
+        $this->assertSame(PersonalizedSolution::STATUS_REVIEWED, $solution->status);
     }
 
     public function test_patch_without_resolution_or_status_returns_422(): void

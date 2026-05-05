@@ -2,13 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
+use App\Models\ClientContact;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ClientContactSeeder extends Seeder
 {
     /**
      * Seeds client_contacts (names, phones, email per client).
+     * Uses Eloquent so the encrypted cast on `phone`/`phone2` is applied correctly.
      */
     public function run(): void
     {
@@ -19,13 +21,13 @@ class ClientContactSeeder extends Seeder
         ];
 
         foreach ($byEmail as $loginEmail => $row) {
-            $clientId = DB::table('clients')->where('login_email', $loginEmail)->value('id');
-            if ($clientId === null) {
+            $client = Client::query()->where('login_email', $loginEmail)->first();
+            if ($client === null) {
                 throw new \RuntimeException(
                     "ClientContactSeeder: no client with login_email {$loginEmail}; ensure UserSeeder runs before this seeder.",
                 );
             }
-            DB::table('client_contacts')->insert(array_merge(['client_id' => $clientId], $row));
+            ClientContact::create(array_merge(['client_id' => $client->id], $row));
         }
     }
 }

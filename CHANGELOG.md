@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.139] - 2026-05-05
+
+### Changed
+
+- Patch release (no functional changes).
+
 ## [0.1.138] - 2026-05-04
 
 ### Fixed
@@ -17,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Storefront/admin React: `OrderDetailPage`, `OrdersPage`; RMA admin return request pages; review moderation show page; `ReviewsSection` and `StarRating` behaviour and layout.
 - Locales `ca.json`, `es.json`, `en.json` (returns/reviews strings; complete missing English returns keys).
 - `.cursor/rules/components.mdc`: shared component / `PageTitle` guidance.
+
+### Test
 
 ## [0.1.137] - 2026-05-04
 

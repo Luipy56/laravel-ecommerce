@@ -4,7 +4,7 @@ import PageTitle from '../components/PageTitle';
 
 function Section({ title, children }) {
   return (
-    <section className="flex flex-col gap-3">
+    <section className="card bg-base-100 border border-base-300 p-4 sm:p-6 flex flex-col gap-3">
       <h2 className="text-lg font-semibold text-base-content">{title}</h2>
       <div className="text-sm text-base-content/80 flex flex-col gap-2">{children}</div>
     </section>

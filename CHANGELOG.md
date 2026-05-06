@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.145] - 2026-05-07
+
+### Fixed
+
+- **Cookie banner**: replaced plain checkbox + parenthetical annotations ("always active", "optional") with cleaner toggle switches; removed annotation text.
+- **Privacy policy**: wrapped each section in a card (`bg-base-100` + border) to match the visual style of other content pages.
+- **Navbar user dropdown**: menu now closes automatically when a navigation link is selected (blurs focus so daisyUI CSS dropdown collapses).
+
 ## [0.1.144] - 2026-05-05
 
 ### Fixed

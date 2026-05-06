@@ -64,19 +64,18 @@ export default function CookieConsentBanner() {
 
           {/* Granular options */}
           <div className="flex flex-col gap-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" className="checkbox checkbox-sm" checked disabled readOnly />
+            <label className="flex items-center justify-between gap-4 cursor-default select-none text-sm">
               <span className="font-medium">{t('cookies.essential_label')}</span>
-              <span className="text-base-content/60 text-xs">({t('cookies.essential_note')})</span>
+              <input type="checkbox" className="toggle toggle-sm toggle-primary opacity-60" checked disabled readOnly />
             </label>
-            <label className="flex items-center gap-2 cursor-pointer text-sm">
+            <label className="flex items-center justify-between gap-4 cursor-pointer text-sm">
+              <span>{t('cookies.analytics_label')}</span>
               <input
                 type="checkbox"
-                className="checkbox checkbox-sm checkbox-primary"
+                className="toggle toggle-sm toggle-primary"
                 checked={analyticsChecked}
                 onChange={(e) => setAnalyticsChecked(e.target.checked)}
               />
-              <span>{t('cookies.analytics_label')}</span>
             </label>
           </div>
 

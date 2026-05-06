@@ -338,6 +338,7 @@ export default function Navbar() {
                           <Link
                             to="/profile"
                             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                            onClick={() => document.activeElement?.blur()}
                           >
                             <IconUser className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                             {t('shop.profile')}
@@ -347,6 +348,7 @@ export default function Navbar() {
                           <Link
                             to="/orders"
                             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                            onClick={() => document.activeElement?.blur()}
                           >
                             <IconClipboardList className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                             {t('shop.orders')}
@@ -357,6 +359,7 @@ export default function Navbar() {
                             <Link
                               to="/favorites"
                               className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                              onClick={() => document.activeElement?.blur()}
                             >
                               <IconHeart className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                               {t('shop.favorites')}
@@ -367,6 +370,7 @@ export default function Navbar() {
                           <Link
                             to="/purchases"
                             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                            onClick={() => document.activeElement?.blur()}
                           >
                             <IconPackage className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                             {t('shop.purchases')}
@@ -377,6 +381,7 @@ export default function Navbar() {
                             <Link
                               to="/my-returns"
                               className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                              onClick={() => document.activeElement?.blur()}
                             >
                               <IconClipboardList className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                               {t('shop.returns.nav_link')}
@@ -387,6 +392,7 @@ export default function Navbar() {
                           <Link
                             to="/games"
                             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-base-content transition-colors duration-200 hover:bg-base-200 active:bg-base-300"
+                            onClick={() => document.activeElement?.blur()}
                           >
                             <IconGamepad className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                             {t('games.nav_link')}

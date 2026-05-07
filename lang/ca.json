@@ -137,5 +137,6 @@
     "shop.personalized_solution_too_soon": "Hem rebut la mateixa sol·licitud fa un moment. Espera uns segons abans de tornar a enviar.",
     "admin.personalized_solutions.patch_requires_body": "Envia com a mínim el text de resolució o un estat.",
     "admin.orders.notify_in_transit_mail_invalid_status": "Només es pot enviar aquest correu quan la comanda està en estat «En trànsit».",
-    "admin.orders.notify_in_transit_mail_no_client_email": "El client no té un correu vàlid per enviar la notificació."
+    "admin.orders.notify_in_transit_mail_no_client_email": "El client no té un correu vàlid per enviar la notificació.",
+    "admin.orders.error_decryption": "No s'han pogut llegir les dades xifrades d'aquesta comanda. Contacteu amb l'administrador del sistema."
 }

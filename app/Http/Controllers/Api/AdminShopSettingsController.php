@@ -43,6 +43,9 @@ class AdminShopSettingsController extends Controller
             'featured_max_overstock' => ['integer', 'min:0'],
             'shipping_flat_eur' => ['sometimes', 'numeric', 'min:0', 'max:99999.99'],
             'admin_list_default_period' => ['nullable', 'string', Rule::in(['week', 'month', 'year', 'all'])],
+            'terms_ca' => ['sometimes', 'nullable', 'string', 'max:65535'],
+            'terms_es' => ['sometimes', 'nullable', 'string', 'max:65535'],
+            'terms_en' => ['sometimes', 'nullable', 'string', 'max:65535'],
             'installation_auto_pricing' => ['sometimes', 'array'],
             'installation_auto_pricing.quote_when_merchandise_above_eur' => ['required_with:installation_auto_pricing', 'numeric', 'min:0', 'max:999999'],
             'installation_auto_pricing.tiers' => ['required_with:installation_auto_pricing', 'array', 'min:1'],
@@ -112,6 +115,9 @@ class AdminShopSettingsController extends Controller
                 ? (string) $merged[ShopSetting::KEY_ADMIN_LIST_DEFAULT_PERIOD]
                 : 'week',
             'admin_index_columns' => AdminIndexColumns::normalize(is_array($storedColumns) ? $storedColumns : null),
+            'terms_ca' => (string) ($merged[ShopSetting::KEY_TERMS_CA] ?? ''),
+            'terms_es' => (string) ($merged[ShopSetting::KEY_TERMS_ES] ?? ''),
+            'terms_en' => (string) ($merged[ShopSetting::KEY_TERMS_EN] ?? ''),
         ];
     }
 
@@ -185,6 +191,9 @@ class AdminShopSettingsController extends Controller
             'shipping_flat_eur' => ShopSetting::KEY_SHIPPING_FLAT_EUR,
             'installation_auto_pricing' => ShopSetting::KEY_INSTALLATION_AUTO_PRICING,
             'admin_list_default_period' => ShopSetting::KEY_ADMIN_LIST_DEFAULT_PERIOD,
+            'terms_ca' => ShopSetting::KEY_TERMS_CA,
+            'terms_es' => ShopSetting::KEY_TERMS_ES,
+            'terms_en' => ShopSetting::KEY_TERMS_EN,
         ];
         $out = [];
         foreach ($map as $requestKey => $dbKey) {

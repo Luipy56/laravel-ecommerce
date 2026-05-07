@@ -53,17 +53,22 @@ class AdminPersonalizedSolutionController extends Controller
         $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
         $solutions = $query->paginate($perPage);
 
-        $data = $solutions->getCollection()->map(fn ($s) => [
-            'id' => $s->id,
-            'email' => $s->email,
-            'phone' => $s->phone,
-            'problem_description' => $s->problem_description ? \Illuminate\Support\Str::limit($s->problem_description, 120) : null,
-            'status' => $s->status,
-            'is_active' => (bool) $s->is_active,
-            'created_at' => $s->created_at?->toIso8601String(),
-            'client_id' => $s->client_id,
-            'client_login_email' => $s->relationLoaded('client') && $s->client ? $s->client->login_email : null,
-        ])->values()->all();
+        $data = $solutions->getCollection()->map(function ($s) {
+            $desc = $s->problem_description ? \Illuminate\Support\Str::limit($s->problem_description, 120) : null;
+
+            return [
+                'id' => $s->id,
+                'email' => $s->email,
+                'phone' => $s->phone,
+                'problem_description' => $desc,
+                'status' => $s->status,
+                'is_active' => (bool) $s->is_active,
+                'created_at' => $s->created_at?->toIso8601String(),
+                'client_id' => $s->client_id,
+                'client_login_email' => $s->relationLoaded('client') && $s->client ? $s->client->login_email : null,
+                '_decryption_error' => $s->hasDecryptionErrors(),
+            ];
+        })->values()->all();
 
         return response()->json([
             'success' => true,
@@ -88,6 +93,9 @@ class AdminPersonalizedSolutionController extends Controller
             'size_bytes' => $a->size_bytes,
             'url' => $a->url,
         ])->values()->all();
+
+        $decryptionError = $personalized_solution->hasDecryptionErrors()
+            || ($personalized_solution->client?->hasDecryptionErrors() ?? false);
 
         return response()->json([
             'success' => true,
@@ -122,6 +130,7 @@ class AdminPersonalizedSolutionController extends Controller
                 'created_at' => $personalized_solution->created_at?->toIso8601String(),
                 'updated_at' => $personalized_solution->updated_at?->toIso8601String(),
                 'attachments' => $attachments,
+                '_decryption_error' => $decryptionError,
             ],
         ]);
     }

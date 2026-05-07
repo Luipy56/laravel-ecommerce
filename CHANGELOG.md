@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.149] - 2026-05-07
+
+### Added
+- `NullSafeEncrypted` custom Eloquent cast (`app/Casts/NullSafeEncrypted.php`): drop-in replacement for the built-in `'encrypted'` cast that returns `null` instead of throwing `DecryptException` when APP_KEY does not match; used for `Client.identification` and `PersonalizedSolution.problem_description/resolution/improvement_feedback`.
+- `TracksDecryptionErrors` model trait (`app/Models/Concerns/TracksDecryptionErrors.php`): records which attributes failed decryption; controllers check `hasDecryptionErrors()` to include `_decryption_error: true` in their responses.
+- `DecryptionWarningBanner` React component shown on admin pages when `_decryption_error` is true, with a clear message explaining the APP_KEY mismatch and how to fix it.
+
+### Fixed
+- `AdminOrderController::show()` now returns a full 200 response with `_decryption_error: true` instead of a 500 or 422; the order page loads with blank identification and shows the warning banner.
+- `AdminClientController` index and show: `_decryption_error` flag propagated to response.
+- `AdminPersonalizedSolutionController` index/show: manual per-field try/catch replaced with model-level `hasDecryptionErrors()`.
+- `AdminReturnRequestController`: `client._decryption_error` flag propagated.
+- All client-facing controllers (UserController, AuthController, PersonalizedSolutionController, PublicPersonalizedSolutionController) now silently get `null` instead of a 500 crash, because the model cast handles it.
+- Warning banner added to: AdminOrderShowPage, AdminClientShowPage, AdminClientsPage, AdminPersonalizedSolutionShowPage, AdminPersonalizedSolutionsPage, AdminReturnRequestShowPage.
+- Added `common.decryption_warning_title` and `common.decryption_warning_body` locale keys (ca/es/en).
+
+## [0.1.148] - 2026-05-07
+
+### Fixed
+- `GET /api/v1/admin/orders/{id}`: catches `DecryptException` on `client.identification` instead of crashing with HTTP 500 "The payload is invalid." — order now loads successfully with the field blank when the encrypted value is unreadable.
+- `GET /api/v1/admin/personalized-solutions`: per-row `DecryptException` handling so one corrupt encrypted row no longer crashes the entire list; affected rows carry `_decryption_error: true` with blank fields.
+- `AdminPersonalizedSolutionController::show()`: individual catches for `problem_description`, `resolution`, `improvement_feedback`, and `client.identification` encrypted fields.
+- Admin order show page now displays a localized, actionable error message instead of the raw cryptic "The payload is invalid." string.
+
+## [0.1.147] - 2026-05-07
+
+### Added
+
+- **Orders — visual status tracker**: new shared `OrderStatusTracker` component renders a horizontal steps chain (daisyUI `steps`, primary/orange) showing the current position in the order workflow. Steps adapt when `installation_requested` is true (adds Instal·lació node). Appears at the top of `/orders/:id` for non-finalized orders, and at the top of `/orders` for the most recent active order.
+- **Orders list — active-order banner**: `/orders` now shows a top card with the last open order's tracker and a direct link; if all orders are closed a friendly invite to browse new products is shown instead.
+
+### Changed
+
+- **Orders list (`/orders`)**: cards redesigned with bolder order number, coloured primary total, soft status badge, and full-row clickable link for better usability.
+- **Order detail (`/orders/:id`)**: old text-based status history timeline replaced by the visual tracker; non-visual status alerts (awaiting quote, awaiting payment) remain below.
+
+## [0.1.146] - 2026-05-07
+
+### Added
+
+- **Admin settings — Terms & Conditions block**: new collapse section in `/admin/settings` with three plain-text textareas (Catalan, Spanish, English) to edit the shop's terms and conditions. Content is stored in `shop_settings` under `terms_ca`, `terms_es`, `terms_en`.
+- **Storefront `/terms` page**: new public page that renders the active language's terms text (fetched from `GET shop/public-settings`); falls back to the first non-empty language. Shows a neutral message when no content has been configured.
+- **Footer link**: added "Termes i condicions / Términos y condiciones / Terms & Conditions" link in the legal footer section, alongside the existing privacy-policy link.
+
+## [0.1.145] - 2026-05-07
+
+### Fixed
+
+- **Cookie banner**: replaced plain checkbox + parenthetical annotations ("always active", "optional") with cleaner toggle switches; removed annotation text.
+- **Privacy policy**: wrapped each section in a card (`bg-base-100` + border) to match the visual style of other content pages.
+- **Navbar user dropdown**: menu now closes automatically when a navigation link is selected (blurs focus so daisyUI CSS dropdown collapses).
+
 ## [0.1.144] - 2026-05-05
 
 ### Fixed

@@ -137,5 +137,6 @@
     "shop.personalized_solution_too_soon": "We just received the same request. Please wait a few seconds before sending again.",
     "admin.personalized_solutions.patch_requires_body": "Send at least a resolution text or a status value.",
     "admin.orders.notify_in_transit_mail_invalid_status": "This email can only be sent when the order status is “In transit”.",
-    "admin.orders.notify_in_transit_mail_no_client_email": "The customer has no valid email address for this notification."
+    "admin.orders.notify_in_transit_mail_no_client_email": "The customer has no valid email address for this notification.",
+    "admin.orders.error_decryption": "Could not read the encrypted data for this order. Please contact the system administrator."
 }

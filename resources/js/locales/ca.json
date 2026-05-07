@@ -755,6 +755,13 @@
   "admin.settings.installation_tier_add": "Afegir tram",
   "admin.settings.shipping_postal_title": "Enviament per codi postal",
   "admin.settings.shipping_postal_not_implemented": "Encara no implementat. Aquí es podran configurar tarifes per codi postal més endavant.",
+  "admin.settings.section_terms": "Termes i condicions",
+  "admin.settings.section_terms_subtitle": "Text legal editable per idioma que es mostra a la pàgina /terms de la botiga.",
+  "admin.settings.terms_help": "Escriviu el contingut en text pla. Separeu paràgrafs amb una línia en blanc. Si un idioma queda buit, la pàgina mostrarà un missatge neutre.",
+  "admin.settings.terms_ca_label": "Contingut en català",
+  "admin.settings.terms_es_label": "Contingut en castellà",
+  "admin.settings.terms_en_label": "Contingut en anglès",
+  "admin.settings.terms_placeholder": "Escriviu aquí el text dels termes i condicions…",
   "admin.products.is_trending_managed_by_settings": "Aquest indicador s’actualitza des de Configuració amb les regles d’estoc i «Tornar a calcular destacats automàtics».",
   "shop.custom_solution.disabled_public": "Ara mateix no acceptem noves sol·licituds de solució personalitzada.",
   "games.prev_game": "Joc anterior",
@@ -884,8 +891,11 @@
   "admin.returns.notes_required_on_reject": "Les notes internes són obligatòries en rebutjar",
   "admin.returns.action_done": "Acció completada correctament",
 
+  "footer.terms": "Termes i condicions",
   "footer.privacy_policy": "Política de privacitat",
 
+  "terms.title": "Termes i condicions",
+  "terms.empty": "Els termes i condicions no han estat configurats encara.",
   "privacy.title": "Política de privacitat",
   "privacy.version_date": "Versió: {{date}}",
 

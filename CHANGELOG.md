@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.146] - 2026-05-07
+
+### Added
+
+- **Admin settings — Terms & Conditions block**: new collapse section in `/admin/settings` with three plain-text textareas (Catalan, Spanish, English) to edit the shop's terms and conditions. Content is stored in `shop_settings` under `terms_ca`, `terms_es`, `terms_en`.
+- **Storefront `/terms` page**: new public page that renders the active language's terms text (fetched from `GET shop/public-settings`); falls back to the first non-empty language. Shows a neutral message when no content has been configured.
+- **Footer link**: added "Termes i condicions / Términos y condiciones / Terms & Conditions" link in the legal footer section, alongside the existing privacy-policy link.
+
 ## [0.1.145] - 2026-05-07
 
 ### Fixed

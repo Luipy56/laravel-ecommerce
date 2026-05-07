@@ -56,6 +56,7 @@ class AdminClientController extends Controller
                 'contacts_count' => $c->contacts_count ?? 0,
                 'addresses_count' => $c->addresses_count ?? 0,
                 'primary_contact_name' => $primary ? trim($primary->name . ' ' . ($primary->surname ?? '')) : null,
+                '_decryption_error' => $c->hasDecryptionErrors(),
             ];
         })->values()->all();
 
@@ -86,6 +87,7 @@ class AdminClientController extends Controller
                 'identification' => $client->identification,
                 'login_email' => $client->login_email,
                 'is_active' => (bool) $client->is_active,
+                '_decryption_error' => $client->hasDecryptionErrors(),
                 'contacts' => $client->contacts->map(fn ($c) => [
                     'id' => $c->id,
                     'name' => $c->name,

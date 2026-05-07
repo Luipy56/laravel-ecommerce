@@ -5,6 +5,7 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 import { useToast } from '../../contexts/ToastContext';
+import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
 
 const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
 
@@ -141,6 +142,7 @@ export default function AdminPersonalizedSolutionShowPage() {
 
   return (
     <div className="space-y-6">
+      {solution._decryption_error && <DecryptionWarningBanner />}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">
           {t('admin.personalized_solutions.title')} #{solution.id}

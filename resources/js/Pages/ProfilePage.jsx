@@ -5,6 +5,7 @@ import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
+import DecryptionWarningBanner from '../components/admin/DecryptionWarningBanner';
 import { scrollOpenModalBoxToTop, scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import {
@@ -374,6 +375,7 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto w-full min-w-0 max-w-2xl space-y-8 pb-12">
       <PageTitle>{t('shop.profile')}</PageTitle>
+      {profile._decryption_error && <DecryptionWarningBanner variant="client" />}
       {saved && (
         <div role="alert" className="alert alert-app-success">
           {t('common.success')}

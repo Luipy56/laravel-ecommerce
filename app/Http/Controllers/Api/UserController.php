@@ -29,6 +29,7 @@ class UserController extends Controller
                 'login_email' => $client->login_email,
                 'type' => $client->type,
                 'identification' => $client->identification,
+                '_decryption_error' => $client->hasDecryptionErrors(),
                 'name' => $primary?->name,
                 'surname' => $primary?->surname,
                 'phone' => $primary?->phone,

@@ -55,6 +55,13 @@ class ShopSetting extends Model
      */
     public const KEY_ADMIN_LIST_DEFAULT_PERIOD = 'admin_list_default_period';
 
+    /** Editable terms & conditions plain text, per language. */
+    public const KEY_TERMS_CA = 'terms_ca';
+
+    public const KEY_TERMS_ES = 'terms_es';
+
+    public const KEY_TERMS_EN = 'terms_en';
+
     /**
      * @var array<string, mixed>
      */

@@ -17,6 +17,9 @@ class ShopPublicSettingsController extends Controller
                     ShopSetting::KEY_ACCEPT_PERSONALIZED_SOLUTIONS,
                     true
                 ),
+                'terms_ca' => (string) (ShopSetting::get(ShopSetting::KEY_TERMS_CA) ?? ''),
+                'terms_es' => (string) (ShopSetting::get(ShopSetting::KEY_TERMS_ES) ?? ''),
+                'terms_en' => (string) (ShopSetting::get(ShopSetting::KEY_TERMS_EN) ?? ''),
             ],
         ]);
     }

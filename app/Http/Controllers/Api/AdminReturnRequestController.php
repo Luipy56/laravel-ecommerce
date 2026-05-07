@@ -148,6 +148,7 @@ class AdminReturnRequestController extends Controller
                     'id' => $order->client->id,
                     'login_email' => $order->client->login_email,
                     'identification' => $order->client->identification,
+                    '_decryption_error' => $order->client->hasDecryptionErrors(),
                 ] : null,
                 'lines' => ($order->relationLoaded('lines') ? $order->lines : collect())->map(fn ($l) => [
                     'id' => $l->id,

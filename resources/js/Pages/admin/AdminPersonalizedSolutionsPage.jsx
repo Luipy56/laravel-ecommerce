@@ -5,6 +5,7 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
 import { loadAdminListFilters, normalizedActiveTriState, normalizedPeriod, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
 
 const PS_FILTERS_PAGE_ID = 'personalized_solutions';
 
@@ -213,9 +214,12 @@ export default function AdminPersonalizedSolutionsPage() {
     }
   };
 
+  const hasDecryptionError = solutions.some((s) => s._decryption_error);
+
   return (
     <div className="space-y-6">
       <PageTitle>{t('admin.personalized_solutions.title')}</PageTitle>
+      {hasDecryptionError && <DecryptionWarningBanner />}
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <input

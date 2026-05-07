@@ -53,17 +53,28 @@ class AdminPersonalizedSolutionController extends Controller
         $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
         $solutions = $query->paginate($perPage);
 
-        $data = $solutions->getCollection()->map(fn ($s) => [
-            'id' => $s->id,
-            'email' => $s->email,
-            'phone' => $s->phone,
-            'problem_description' => $s->problem_description ? \Illuminate\Support\Str::limit($s->problem_description, 120) : null,
-            'status' => $s->status,
-            'is_active' => (bool) $s->is_active,
-            'created_at' => $s->created_at?->toIso8601String(),
-            'client_id' => $s->client_id,
-            'client_login_email' => $s->relationLoaded('client') && $s->client ? $s->client->login_email : null,
-        ])->values()->all();
+        $data = $solutions->getCollection()->map(function ($s) {
+            $decryptionError = false;
+            $problemDescription = null;
+            try {
+                $problemDescription = $s->problem_description ? \Illuminate\Support\Str::limit($s->problem_description, 120) : null;
+            } catch (\Illuminate\Contracts\Encryption\DecryptException) {
+                $decryptionError = true;
+            }
+
+            return [
+                'id' => $s->id,
+                'email' => $s->email,
+                'phone' => $s->phone,
+                'problem_description' => $problemDescription,
+                'status' => $s->status,
+                'is_active' => (bool) $s->is_active,
+                'created_at' => $s->created_at?->toIso8601String(),
+                'client_id' => $s->client_id,
+                'client_login_email' => $s->relationLoaded('client') && $s->client ? $s->client->login_email : null,
+                '_decryption_error' => $decryptionError,
+            ];
+        })->values()->all();
 
         return response()->json([
             'success' => true,
@@ -89,6 +100,27 @@ class AdminPersonalizedSolutionController extends Controller
             'url' => $a->url,
         ])->values()->all();
 
+        $clientIdentification = null;
+        if ($personalized_solution->client) {
+            try {
+                $clientIdentification = $personalized_solution->client->identification;
+            } catch (\Illuminate\Contracts\Encryption\DecryptException) {
+                $clientIdentification = null;
+            }
+        }
+
+        $decryptionError = false;
+        $problemDescription = null;
+        $resolution = null;
+        $improvementFeedback = null;
+        try {
+            $problemDescription = $personalized_solution->problem_description;
+            $resolution = $personalized_solution->resolution;
+            $improvementFeedback = $personalized_solution->improvement_feedback;
+        } catch (\Illuminate\Contracts\Encryption\DecryptException) {
+            $decryptionError = true;
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -97,7 +129,7 @@ class AdminPersonalizedSolutionController extends Controller
                 'client' => $personalized_solution->client ? [
                     'id' => $personalized_solution->client->id,
                     'login_email' => $personalized_solution->client->login_email,
-                    'identification' => $personalized_solution->client->identification,
+                    'identification' => $clientIdentification,
                 ] : null,
                 'order_id' => $personalized_solution->order_id,
                 'order' => $personalized_solution->order ? [
@@ -111,17 +143,18 @@ class AdminPersonalizedSolutionController extends Controller
                 'address_province' => $personalized_solution->address_province,
                 'address_postal_code' => $personalized_solution->address_postal_code,
                 'address_note' => $personalized_solution->address_note,
-                'problem_description' => $personalized_solution->problem_description,
-                'resolution' => $personalized_solution->resolution,
+                'problem_description' => $problemDescription,
+                'resolution' => $resolution,
                 'status' => $personalized_solution->status,
                 'iterations_count' => (int) $personalized_solution->iterations_count,
-                'improvement_feedback' => $personalized_solution->improvement_feedback,
+                'improvement_feedback' => $improvementFeedback,
                 'improvement_feedback_at' => $personalized_solution->improvement_feedback_at?->toIso8601String(),
                 'portal_url' => $personalized_solution->public_token ? $personalized_solution->portalUrl() : null,
                 'is_active' => (bool) $personalized_solution->is_active,
                 'created_at' => $personalized_solution->created_at?->toIso8601String(),
                 'updated_at' => $personalized_solution->updated_at?->toIso8601String(),
                 'attachments' => $attachments,
+                '_decryption_error' => $decryptionError,
             ],
         ]);
     }

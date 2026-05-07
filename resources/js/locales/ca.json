@@ -664,6 +664,7 @@
   "admin.orders.notify_in_transit_mail_eta_unknown": "Es desconeix",
   "admin.orders.notify_in_transit_mail_send": "Enviar correu",
   "admin.orders.notify_in_transit_mail_success": "S'ha enviat el correu al client.",
+  "admin.orders.error_decryption": "No s'han pogut llegir les dades xifrades d'aquesta comanda. Contacteu amb l'administrador del sistema.",
   "admin.nav.personalized_solutions": "Solucions personalitzades",
   "admin.personalized_solutions.title": "Solucions personalitzades",
   "admin.personalized_solutions.edit": "Editar sol·licitud",

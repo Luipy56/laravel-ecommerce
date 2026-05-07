@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.148] - 2026-05-07
+
+### Fixed
+- `GET /api/v1/admin/orders/{id}`: catches `DecryptException` on `client.identification` instead of crashing with HTTP 500 "The payload is invalid." — order now loads successfully with the field blank when the encrypted value is unreadable.
+- `GET /api/v1/admin/personalized-solutions`: per-row `DecryptException` handling so one corrupt encrypted row no longer crashes the entire list; affected rows carry `_decryption_error: true` with blank fields.
+- `AdminPersonalizedSolutionController::show()`: individual catches for `problem_description`, `resolution`, `improvement_feedback`, and `client.identification` encrypted fields.
+- Admin order show page now displays a localized, actionable error message instead of the raw cryptic "The payload is invalid." string.
+
 ## [0.1.147] - 2026-05-07
 
 ### Added

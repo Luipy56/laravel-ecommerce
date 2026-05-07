@@ -664,6 +664,7 @@
   "admin.orders.notify_in_transit_mail_eta_unknown": "No se sabe",
   "admin.orders.notify_in_transit_mail_send": "Enviar correo",
   "admin.orders.notify_in_transit_mail_success": "Se ha enviado el correo al cliente.",
+  "admin.orders.error_decryption": "No se han podido leer los datos cifrados de este pedido. Contacte con el administrador del sistema.",
   "admin.nav.personalized_solutions": "Soluciones personalizadas",
   "admin.personalized_solutions.title": "Soluciones personalizadas",
   "admin.personalized_solutions.edit": "Editar solicitud",

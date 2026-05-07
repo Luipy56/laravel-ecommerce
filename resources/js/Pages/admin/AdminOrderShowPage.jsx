@@ -216,6 +216,8 @@ export default function AdminOrderShowPage() {
       else setLoadError(t('common.error'));
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
+      else if (err.response?.data?.error_code === 'DECRYPTION_ERROR')
+        setLoadError(t('admin.orders.error_decryption'));
       else setLoadError(err.response?.data?.message || t('common.error'));
     } finally {
       setLoaded(true);

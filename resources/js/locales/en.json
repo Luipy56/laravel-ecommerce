@@ -665,6 +665,7 @@
   "admin.orders.notify_in_transit_mail_eta_unknown": "Unknown",
   "admin.orders.notify_in_transit_mail_send": "Send email",
   "admin.orders.notify_in_transit_mail_success": "The email has been sent to the customer.",
+  "admin.orders.error_decryption": "Could not read the encrypted data for this order. Please contact the system administrator.",
   "admin.nav.personalized_solutions": "Custom solutions",
   "admin.personalized_solutions.title": "Custom solutions",
   "admin.personalized_solutions.edit": "Edit request",

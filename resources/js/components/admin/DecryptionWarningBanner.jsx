@@ -3,11 +3,16 @@ import { useTranslation } from 'react-i18next';
 
 /**
  * Shows a warning banner when one or more encrypted fields could not be decrypted.
- * This happens when APP_KEY in .env does not match the key used to encrypt the data.
- * The affected fields will appear blank/empty.
+ *
+ * variant="admin"  (default) — technical message mentioning APP_KEY, for admin/developer pages.
+ * variant="client"           — user-friendly message with no technical details, for client pages.
  */
-export default function DecryptionWarningBanner() {
+export default function DecryptionWarningBanner({ variant = 'admin' }) {
   const { t } = useTranslation();
+
+  const bodyKey = variant === 'client'
+    ? 'common.decryption_warning_body_client'
+    : 'common.decryption_warning_body';
 
   return (
     <div role="alert" className="alert alert-warning text-sm">
@@ -16,7 +21,7 @@ export default function DecryptionWarningBanner() {
       </svg>
       <div>
         <p className="font-semibold">{t('common.decryption_warning_title')}</p>
-        <p>{t('common.decryption_warning_body')}</p>
+        <p>{t(bodyKey)}</p>
       </div>
     </div>
   );

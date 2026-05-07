@@ -13,6 +13,7 @@
   "common.error": "An error has occurred.",
   "common.decryption_warning_title": "Encrypted data unreadable (wrong APP_KEY)",
   "common.decryption_warning_body": "Some fields are blank because the APP_KEY in this environment does not match the key used to encrypt the data. To fix this: set APP_KEY in .env to the same value as the environment where the data was originally stored.",
+  "common.decryption_warning_body_client": "Some fields cannot be displayed at this time. Please contact us to review your account details.",
   "common.confirm": "Confirm",
   "common.close": "Close",
   "common.language": "Language",

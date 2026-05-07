@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.147] - 2026-05-07
+
+### Added
+
+- **Orders — visual status tracker**: new shared `OrderStatusTracker` component renders a horizontal steps chain (daisyUI `steps`, primary/orange) showing the current position in the order workflow. Steps adapt when `installation_requested` is true (adds Instal·lació node). Appears at the top of `/orders/:id` for non-finalized orders, and at the top of `/orders` for the most recent active order.
+- **Orders list — active-order banner**: `/orders` now shows a top card with the last open order's tracker and a direct link; if all orders are closed a friendly invite to browse new products is shown instead.
+
+### Changed
+
+- **Orders list (`/orders`)**: cards redesigned with bolder order number, coloured primary total, soft status badge, and full-row clickable link for better usability.
+- **Order detail (`/orders/:id`)**: old text-based status history timeline replaced by the visual tracker; non-visual status alerts (awaiting quote, awaiting payment) remain below.
+
 ## [0.1.146] - 2026-05-07
 
 ### Added

@@ -79,6 +79,20 @@ class AdminClientController extends Controller
             'addresses' => fn ($q) => $q->orderBy('type')->orderBy('id'),
         ]);
 
+        $contactsData = $client->contacts->map(fn ($c) => [
+            'id' => $c->id,
+            'name' => $c->name,
+            'surname' => $c->surname,
+            'phone' => $c->phone,
+            'phone2' => $c->phone2,
+            'email' => $c->email,
+            'is_primary' => (bool) $c->is_primary,
+            'is_active' => (bool) $c->is_active,
+        ])->values()->all();
+
+        $decryptionError = $client->hasDecryptionErrors()
+            || $client->contacts->contains(fn ($c) => $c->hasDecryptionErrors());
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -87,17 +101,8 @@ class AdminClientController extends Controller
                 'identification' => $client->identification,
                 'login_email' => $client->login_email,
                 'is_active' => (bool) $client->is_active,
-                '_decryption_error' => $client->hasDecryptionErrors(),
-                'contacts' => $client->contacts->map(fn ($c) => [
-                    'id' => $c->id,
-                    'name' => $c->name,
-                    'surname' => $c->surname,
-                    'phone' => $c->phone,
-                    'phone2' => $c->phone2,
-                    'email' => $c->email,
-                    'is_primary' => (bool) $c->is_primary,
-                    'is_active' => (bool) $c->is_active,
-                ])->values()->all(),
+                '_decryption_error' => $decryptionError,
+                'contacts' => $contactsData,
                 'addresses' => $client->addresses->map(fn ($a) => [
                     'id' => $a->id,
                     'type' => $a->type,

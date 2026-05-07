@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Casts\NullSafeEncrypted;
+use App\Models\Concerns\TracksDecryptionErrors;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ClientContact extends Model
 {
+    use TracksDecryptionErrors;
     protected $table = 'client_contacts';
 
     protected $fillable = [
@@ -23,8 +26,8 @@ class ClientContact extends Model
     protected function casts(): array
     {
         return [
-            'phone' => 'encrypted',
-            'phone2' => 'encrypted',
+            'phone' => NullSafeEncrypted::class,
+            'phone2' => NullSafeEncrypted::class,
             'is_primary' => 'boolean',
             'is_active' => 'boolean',
         ];

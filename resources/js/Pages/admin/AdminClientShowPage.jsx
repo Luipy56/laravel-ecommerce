@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { IconChevronDown, IconChevronRight } from '../../components/icons';
+import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
 
 function clientTypeLabel(type, t) {
   if (type === 'person') return t('admin.clients.type_person');
@@ -68,6 +69,7 @@ export default function AdminClientShowPage() {
 
   return (
     <div className="space-y-6">
+      {client._decryption_error && <DecryptionWarningBanner />}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.clients.ficha')}</PageTitle>
         <Link to="/admin/clients" className="btn btn-ghost btn-sm shrink-0">

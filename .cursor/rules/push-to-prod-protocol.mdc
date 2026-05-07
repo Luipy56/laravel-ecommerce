@@ -1,0 +1,48 @@
+---
+description: Protocol "push a prod" — run tests, fix errors, commit, push branch, merge to prod, push prod
+alwaysApply: true
+---
+
+# Protocol "push a prod"
+
+When the user asks to execute the **"push a prod"** protocol, follow these steps **in order** without skipping any:
+
+## Steps
+
+1. **Run all tests**
+   ```bash
+   php artisan test
+   ```
+   All tests must pass (exit code 0).
+
+2. **If there are errors** — fix them, then go back to step 1 until all tests pass.
+
+3. **Commit everything**
+   - Bump the patch version: `npm version patch --no-git-tag-version`
+   - Update `CHANGELOG.md` under the new versioned header
+   - Stage and commit all pending changes on the integration branch (`agentdevelop` or `AGENT_GIT_BRANCH`)
+
+4. **Push the integration branch**
+   ```bash
+   git push origin agentdevelop
+   ```
+
+5. **Merge into `prod`**
+   ```bash
+   git checkout prod
+   git pull --rebase --autostash origin prod
+   git merge --no-ff agentdevelop
+   ```
+
+6. **Push `prod` and wait for confirmation**
+   ```bash
+   git push origin prod
+   ```
+   Then **stop and ask the user** to confirm that the GitHub Actions workflow completed successfully before doing anything else.
+
+## Rules
+
+- Never skip the test phase, even if the user says it is not necessary.
+- Never push `prod` without a passing test run.
+- After pushing `prod`, always wait for explicit user confirmation that CI/Actions passed before marking the task done.
+- Switch back to the integration branch after the merge: `git checkout agentdevelop`.

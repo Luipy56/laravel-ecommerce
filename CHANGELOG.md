@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.149] - 2026-05-07
+
+### Added
+- `NullSafeEncrypted` custom Eloquent cast (`app/Casts/NullSafeEncrypted.php`): drop-in replacement for the built-in `'encrypted'` cast that returns `null` instead of throwing `DecryptException` when APP_KEY does not match; used for `Client.identification` and `PersonalizedSolution.problem_description/resolution/improvement_feedback`.
+- `TracksDecryptionErrors` model trait (`app/Models/Concerns/TracksDecryptionErrors.php`): records which attributes failed decryption; controllers check `hasDecryptionErrors()` to include `_decryption_error: true` in their responses.
+- `DecryptionWarningBanner` React component shown on admin pages when `_decryption_error` is true, with a clear message explaining the APP_KEY mismatch and how to fix it.
+
+### Fixed
+- `AdminOrderController::show()` now returns a full 200 response with `_decryption_error: true` instead of a 500 or 422; the order page loads with blank identification and shows the warning banner.
+- `AdminClientController` index and show: `_decryption_error` flag propagated to response.
+- `AdminPersonalizedSolutionController` index/show: manual per-field try/catch replaced with model-level `hasDecryptionErrors()`.
+- `AdminReturnRequestController`: `client._decryption_error` flag propagated.
+- All client-facing controllers (UserController, AuthController, PersonalizedSolutionController, PublicPersonalizedSolutionController) now silently get `null` instead of a 500 crash, because the model cast handles it.
+- Warning banner added to: AdminOrderShowPage, AdminClientShowPage, AdminClientsPage, AdminPersonalizedSolutionShowPage, AdminPersonalizedSolutionsPage, AdminReturnRequestShowPage.
+- Added `common.decryption_warning_title` and `common.decryption_warning_body` locale keys (ca/es/en).
+
 ## [0.1.148] - 2026-05-07
 
 ### Fixed

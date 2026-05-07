@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { emitAppToast } from '../../toastEvents';
+import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
 
 const STATUS_COLORS = {
   pending_review: 'badge-warning',
@@ -118,8 +119,11 @@ export default function AdminReturnRequestShowPage() {
   const order = rma.order;
   const payment = rma.payment;
 
+  const hasDecryptionError = order?.client?._decryption_error ?? false;
+
   return (
     <div className="space-y-6 max-w-3xl">
+      {hasDecryptionError && <DecryptionWarningBanner />}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.returns.detail_title', { id: rma.id })}</PageTitle>
         <Link to="/admin/returns" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>

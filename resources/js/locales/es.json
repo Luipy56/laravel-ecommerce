@@ -11,6 +11,8 @@
   "common.loading": "Cargando...",
   "common.success": "Operación realizada correctamente.",
   "common.error": "Se ha producido un error.",
+  "common.decryption_warning_title": "Datos cifrados ilegibles (APP_KEY incorrecta)",
+  "common.decryption_warning_body": "Algunos campos aparecen vacíos porque la clave APP_KEY de la aplicación no coincide con la que cifró los datos. Para solucionarlo: configure APP_KEY en el fichero .env con la misma clave que el entorno original.",
   "common.confirm": "Confirmar",
   "common.close": "Cerrar",
   "common.language": "Idioma",

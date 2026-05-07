@@ -11,6 +11,8 @@
   "common.loading": "Carregant...",
   "common.success": "Operació realitzada correctament.",
   "common.error": "S'ha produït un error.",
+  "common.decryption_warning_title": "Dades xifrades il·legibles (APP_KEY incorrecta)",
+  "common.decryption_warning_body": "Alguns camps apareixen buits perquè la clau APP_KEY de l'aplicació no coincideix amb la que va xifrar les dades. Per solucionar-ho: configureu APP_KEY al fitxer .env perquè coincideixi amb la clau de l'entorn original.",
   "common.confirm": "Confirmar",
   "common.close": "Tancar",
   "common.language": "Idioma",

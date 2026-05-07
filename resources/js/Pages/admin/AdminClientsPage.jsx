@@ -5,6 +5,7 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 import { loadAdminListFilters, normalizedActiveTriState, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
+import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
 
 const CLIENTS_FILTERS_PAGE_ID = 'clients';
 
@@ -182,9 +183,12 @@ export default function AdminClientsPage() {
     return () => obs.disconnect();
   }, [hasMore, loadingMore, loading, fetchClients]);
 
+  const hasDecryptionError = clients.some((c) => c._decryption_error);
+
   return (
     <div className="space-y-6">
       <PageTitle>{t('admin.clients.title')}</PageTitle>
+      {hasDecryptionError && <DecryptionWarningBanner />}
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <input

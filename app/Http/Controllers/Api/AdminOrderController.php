@@ -102,106 +102,92 @@ class AdminOrderController extends Controller
 
     public function show(Order $order): JsonResponse
     {
-        try {
-            $order->load([
-                'client:id,login_email,identification',
-                'lines.product:id,name,code',
-                'lines.product.images',
-                'lines.pack:id,name,contains_keys',
-                'lines.pack.images',
-                'addresses',
-                'payments',
-            ]);
+        $order->load([
+            'client:id,login_email,identification',
+            'lines.product:id,name,code',
+            'lines.product.images',
+            'lines.pack:id,name,contains_keys',
+            'lines.pack.images',
+            'addresses',
+            'payments',
+        ]);
 
-            $lines = $order->lines->map(function (OrderLine $l) {
-                $imageUrl = null;
-                if ($l->product && $l->product->relationLoaded('images') && $l->product->images->isNotEmpty()) {
-                    $imageUrl = $l->product->images->first()->url;
-                } elseif ($l->pack && $l->pack->relationLoaded('images') && $l->pack->images->isNotEmpty()) {
-                    $imageUrl = $l->pack->images->first()->url;
-                }
-
-                return [
-                    'id' => $l->id,
-                    'product_id' => $l->product_id,
-                    'pack_id' => $l->pack_id,
-                    'product' => $l->product ? ['id' => $l->product->id, 'name' => $l->product->name, 'code' => $l->product->code] : null,
-                    'pack' => $l->pack ? ['id' => $l->pack->id, 'name' => $l->pack->name, 'contains_keys' => (bool) $l->pack->contains_keys] : null,
-                    'keys_all_same' => (bool) ($l->keys_all_same ?? false),
-                    'image_url' => $imageUrl,
-                    'quantity' => $l->quantity,
-                    'unit_price' => (float) $l->unit_price,
-                    'offer' => (float) ($l->offer ?? 0),
-                    'extra_keys_qty' => (int) ($l->extra_keys_qty ?? 0),
-                    'extra_key_unit_price' => $l->extra_key_unit_price !== null ? (float) $l->extra_key_unit_price : null,
-                    'line_total' => (float) $l->line_total,
-                ];
-            })->values()->all();
-
-            $order->loadMissing('lines');
-            $total = $order->grand_total;
-
-            $identificationValue = null;
-            if ($order->client) {
-                try {
-                    $identificationValue = $order->client->identification;
-                } catch (\Illuminate\Contracts\Encryption\DecryptException) {
-                    $identificationValue = null;
-                }
+        $lines = $order->lines->map(function (OrderLine $l) {
+            $imageUrl = null;
+            if ($l->product && $l->product->relationLoaded('images') && $l->product->images->isNotEmpty()) {
+                $imageUrl = $l->product->images->first()->url;
+            } elseif ($l->pack && $l->pack->relationLoaded('images') && $l->pack->images->isNotEmpty()) {
+                $imageUrl = $l->pack->images->first()->url;
             }
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'id' => $order->id,
-                    'kind' => $order->kind,
-                    'status' => $order->status,
-                    'client' => $order->client ? [
-                        'id' => $order->client->id,
-                        'login_email' => $order->client->login_email,
-                        'identification' => $identificationValue,
-                    ] : null,
-                    'order_date' => $order->order_date?->toIso8601String(),
-                    'shipping_date' => $order->shipping_date?->toIso8601String(),
-                    'shipping_price' => $order->shipping_price !== null ? (float) $order->shipping_price : null,
-                    'installation_requested' => (bool) $order->installation_requested,
-                    'installation_status' => $order->installation_status,
-                    'installation_price' => $order->installation_price !== null ? (float) $order->installation_price : null,
-                    'lines_subtotal' => $order->lines_subtotal,
-                    'lines' => $lines,
-                    'addresses' => $order->addresses->map(fn ($a) => [
-                        'id' => $a->id,
-                        'type' => $a->type,
-                        'street' => $a->street,
-                        'city' => $a->city,
-                        'province' => $a->province,
-                        'postal_code' => $a->postal_code,
-                        'note' => $a->note,
-                    ])->values()->all(),
-                    'payments' => $order->payments->map(fn ($p) => [
-                        'id' => $p->id,
-                        'amount' => (float) $p->amount,
-                        'currency' => $p->currency,
-                        'status' => $p->status,
-                        'gateway' => $p->gateway,
-                        'payment_method' => $p->payment_method,
-                        'gateway_reference' => $p->gateway_reference,
-                        'failure_code' => $p->failure_code,
-                        'failure_message' => $p->failure_message,
-                        'paid_at' => $p->paid_at?->toIso8601String(),
-                    ])->values()->all(),
-                    'total' => round($total, 2),
-                    'created_at' => $order->created_at?->toIso8601String(),
-                    'updated_at' => $order->updated_at?->toIso8601String(),
-                ],
-            ]);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException) {
-            return response()->json([
-                'success'    => false,
-                'message'    => __('admin.orders.error_decryption'),
-                'error_code' => 'DECRYPTION_ERROR',
-            ], 422);
-        }
+            return [
+                'id' => $l->id,
+                'product_id' => $l->product_id,
+                'pack_id' => $l->pack_id,
+                'product' => $l->product ? ['id' => $l->product->id, 'name' => $l->product->name, 'code' => $l->product->code] : null,
+                'pack' => $l->pack ? ['id' => $l->pack->id, 'name' => $l->pack->name, 'contains_keys' => (bool) $l->pack->contains_keys] : null,
+                'keys_all_same' => (bool) ($l->keys_all_same ?? false),
+                'image_url' => $imageUrl,
+                'quantity' => $l->quantity,
+                'unit_price' => (float) $l->unit_price,
+                'offer' => (float) ($l->offer ?? 0),
+                'extra_keys_qty' => (int) ($l->extra_keys_qty ?? 0),
+                'extra_key_unit_price' => $l->extra_key_unit_price !== null ? (float) $l->extra_key_unit_price : null,
+                'line_total' => (float) $l->line_total,
+            ];
+        })->values()->all();
+
+        $order->loadMissing('lines');
+        $total = $order->grand_total;
+
+        $decryptionError = $order->client?->hasDecryptionErrors() ?? false;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $order->id,
+                'kind' => $order->kind,
+                'status' => $order->status,
+                'client' => $order->client ? [
+                    'id' => $order->client->id,
+                    'login_email' => $order->client->login_email,
+                    'identification' => $order->client->identification,
+                ] : null,
+                'order_date' => $order->order_date?->toIso8601String(),
+                'shipping_date' => $order->shipping_date?->toIso8601String(),
+                'shipping_price' => $order->shipping_price !== null ? (float) $order->shipping_price : null,
+                'installation_requested' => (bool) $order->installation_requested,
+                'installation_status' => $order->installation_status,
+                'installation_price' => $order->installation_price !== null ? (float) $order->installation_price : null,
+                'lines_subtotal' => $order->lines_subtotal,
+                'lines' => $lines,
+                'addresses' => $order->addresses->map(fn ($a) => [
+                    'id' => $a->id,
+                    'type' => $a->type,
+                    'street' => $a->street,
+                    'city' => $a->city,
+                    'province' => $a->province,
+                    'postal_code' => $a->postal_code,
+                    'note' => $a->note,
+                ])->values()->all(),
+                'payments' => $order->payments->map(fn ($p) => [
+                    'id' => $p->id,
+                    'amount' => (float) $p->amount,
+                    'currency' => $p->currency,
+                    'status' => $p->status,
+                    'gateway' => $p->gateway,
+                    'payment_method' => $p->payment_method,
+                    'gateway_reference' => $p->gateway_reference,
+                    'failure_code' => $p->failure_code,
+                    'failure_message' => $p->failure_message,
+                    'paid_at' => $p->paid_at?->toIso8601String(),
+                ])->values()->all(),
+                'total' => round($total, 2),
+                'created_at' => $order->created_at?->toIso8601String(),
+                'updated_at' => $order->updated_at?->toIso8601String(),
+                '_decryption_error' => $decryptionError,
+            ],
+        ]);
     }
 
     public function update(Request $request, Order $order): JsonResponse

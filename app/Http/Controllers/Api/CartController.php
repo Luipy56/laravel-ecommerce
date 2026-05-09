@@ -10,8 +10,10 @@ use App\Models\ShopSetting;
 use App\Support\InstallationAutoPricing;
 use App\Models\Pack;
 use App\Models\Product;
+use App\Services\Payments\PaymentCompletionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
@@ -402,6 +404,26 @@ class CartController extends Controller
     public function removeLine(Request $request, string $line): JsonResponse
     {
         return $this->updateLine($request->merge(['quantity' => 0]), $line);
+    }
+
+    /**
+     * Abandon an in-flight PSP checkout (e.g. user returned from Stripe/PayPal cancel URL).
+     */
+    public function cancelPendingCheckout(Request $request, PaymentCompletionService $paymentCompletionService): JsonResponse
+    {
+        $client = $request->user();
+        $cart = Order::query()
+            ->where('client_id', $client->id)
+            ->where('kind', Order::KIND_CART)
+            ->first();
+        if ($cart === null || ! $cart->hasOpenPspCheckoutPayment()) {
+            return $this->showDbCart($client);
+        }
+        DB::transaction(function () use ($paymentCompletionService, $cart): void {
+            $paymentCompletionService->revertDeferredCheckoutOnCart($cart->fresh());
+        });
+
+        return $this->showDbCart($client);
     }
 
     public function merge(Request $request): JsonResponse

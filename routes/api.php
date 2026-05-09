@@ -119,6 +119,7 @@ Route::middleware(['auth', 'client.verified'])->group(function () {
     Route::delete('profile/contacts/{id}', [UserController::class, 'destroyContact']);
 
     Route::post('cart/merge', [CartController::class, 'merge']); // merge session cart into DB on login
+    Route::post('cart/cancel-pending-checkout', [CartController::class, 'cancelPendingCheckout']);
 
     Route::get('favorites/ids', [FavoriteController::class, 'ids']);
     Route::get('favorites', [FavoriteController::class, 'index']);

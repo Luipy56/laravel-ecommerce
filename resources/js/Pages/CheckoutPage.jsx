@@ -165,6 +165,11 @@ export default function CheckoutPage() {
 
     (async () => {
       if (payment === 'ko') {
+        try {
+          await api.post('cart/cancel-pending-checkout');
+        } catch {
+          // non-fatal; cart may already be clean
+        }
         emitAppToast(t('shop.order.payment_return_ko'), 'warning');
         await fetchCart();
         if (!cancelled) navigate('/checkout', { replace: true });

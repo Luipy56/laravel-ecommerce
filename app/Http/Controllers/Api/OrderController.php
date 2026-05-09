@@ -12,6 +12,7 @@ use App\Models\Payment;
 use App\Models\ShopSetting;
 use App\Support\InstallationAutoPricing;
 use App\Services\Payments\PaymentCheckoutService;
+use App\Services\Payments\PaymentCompletionService;
 use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ use Throwable;
 
 class OrderController extends Controller
 {
-    public function checkout(Request $request, PaymentCheckoutService $paymentCheckoutService): JsonResponse
+    public function checkout(Request $request, PaymentCheckoutService $paymentCheckoutService, PaymentCompletionService $paymentCompletionService): JsonResponse
     {
         $client = $request->user();
         $cart = Order::where('client_id', $client->id)->where('kind', Order::KIND_CART)->with('lines')->first();
@@ -83,7 +84,13 @@ class OrderController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote, $automaticInstallationFee, $resolvedPaymentMethod) {
+        $deferOrderKind = PaymentCheckoutService::shouldDeferOrderKindUntilPaymentConfirmed(
+            $awaitingInstallationQuote,
+            $demoSkipActive,
+            $resolvedPaymentMethod,
+        );
+
+        DB::transaction(function () use ($cart, $validated, $awaitingInstallationQuote, $automaticInstallationFee, $resolvedPaymentMethod, $deferOrderKind) {
             $installationPrice = null;
             $installationStatus = null;
             if ($cart->installation_requested) {
@@ -99,14 +106,22 @@ class OrderController extends Controller
             $initialStatus = $awaitingInstallationQuote
                 ? Order::STATUS_AWAITING_INSTALLATION_PRICE
                 : ($needsAwaitingPayment ? Order::STATUS_AWAITING_PAYMENT : Order::STATUS_PENDING);
-            $cart->update([
-                'kind' => Order::KIND_ORDER,
-                'status' => $initialStatus,
-                'order_date' => now(),
-                'shipping_price' => ShopSetting::shippingFlatEur(),
-                'installation_status' => $installationStatus,
-                'installation_price' => $installationPrice,
-            ]);
+            if ($deferOrderKind) {
+                $cart->update([
+                    'shipping_price' => ShopSetting::shippingFlatEur(),
+                    'installation_status' => $installationStatus,
+                    'installation_price' => $installationPrice,
+                ]);
+            } else {
+                $cart->update([
+                    'kind' => Order::KIND_ORDER,
+                    'status' => $initialStatus,
+                    'order_date' => now(),
+                    'shipping_price' => ShopSetting::shippingFlatEur(),
+                    'installation_status' => $installationStatus,
+                    'installation_price' => $installationPrice,
+                ]);
+            }
 
             $cart->addresses()->create([
                 'type' => OrderAddress::TYPE_SHIPPING,
@@ -139,7 +154,7 @@ class OrderController extends Controller
 
             if (! $awaitingInstallationQuote) {
                 $cart->load('lines');
-                $total = $cart->grand_total;
+                $total = $deferOrderKind ? $cart->amountDueForCheckoutPayment() : $cart->grand_total;
                 $cart->payments()->create([
                     'amount' => $total,
                     'payment_method' => $resolvedPaymentMethod,
@@ -153,6 +168,7 @@ class OrderController extends Controller
 
         $paymentCheckout = null;
         $paymentError = null;
+        $payment = null;
         if (! $awaitingInstallationQuote) {
             $payment = $cart->payments()->latest()->first();
             if ($demoSkipActive && $payment) {
@@ -183,6 +199,12 @@ class OrderController extends Controller
             }
         }
 
+        if ($deferOrderKind && $payment && $paymentError !== null) {
+            DB::transaction(function () use ($paymentCompletionService, $cart): void {
+                $paymentCompletionService->revertDeferredCheckoutOnCart($cart->fresh());
+            });
+        }
+
         $cart->refresh()->load('payments');
 
         $mailLocale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
@@ -191,7 +213,7 @@ class OrderController extends Controller
                 $cart->fresh(['client', 'lines.product', 'lines.pack', 'addresses']),
                 $mailLocale
             );
-        } elseif (! $cart->hasSuccessfulPayment()) {
+        } elseif (! $deferOrderKind && ! $cart->hasSuccessfulPayment()) {
             OrderPlacedPaymentPending::dispatch(
                 $cart->fresh(['client', 'lines.product', 'lines.pack', 'addresses', 'payments']),
                 $mailLocale
@@ -202,6 +224,7 @@ class OrderController extends Controller
             'success' => true,
             'data' => [
                 'id' => $cart->id,
+                'checkout_deferred' => $deferOrderKind,
                 'status' => $cart->status,
                 'order_date' => $cart->order_date?->toIso8601String(),
                 'awaiting_installation_quote' => $awaitingInstallationQuote,
@@ -212,7 +235,9 @@ class OrderController extends Controller
                 'shipping_flat_eur' => $cart->shipping_price !== null
                     ? (float) $cart->shipping_price
                     : ShopSetting::shippingFlatEur(),
-                'grand_total' => $cart->grand_total,
+                'grand_total' => $deferOrderKind
+                    ? $cart->amountDueForCheckoutPayment()
+                    : $cart->grand_total,
                 'has_payment' => $cart->hasSuccessfulPayment(),
                 'payment_checkout' => $paymentCheckout,
                 'payment_error' => $paymentError,

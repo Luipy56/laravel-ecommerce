@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.152] - 2026-05-09
+
+### Changed
+- Checkout with real Stripe or PayPal no longer converts the cart row to `kind=order` until payment succeeds (`PaymentCompletionService::markSucceeded`). Addresses and a pending payment are stored on the cart during PSP checkout; failed/canceled PSP flows revert the cart (clear addresses, remove incomplete payments, reset checkout-only shipping/installation pricing fields).
+- `OrderPlacedPaymentPending` emails are not sent when checkout is deferred to the PSP; payment-confirmed emails still send after success.
+- Stripe and PayPal return/cancel URLs use `/checkout` when the order is still a cart; `CheckoutPage` confirms Stripe sessions and captures PayPal returns without requiring `/orders/{id}` first.
+- Cart API includes `payments` for logged-in users; cart line/installation/merge mutations return 422 while a PSP checkout payment is open (`shop.cart.psp_checkout_in_progress`).
 
 ## [0.1.149] - 1997-04-25
 

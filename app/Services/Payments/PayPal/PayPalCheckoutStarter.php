@@ -3,6 +3,7 @@
 namespace App\Services\Payments\PayPal;
 
 use App\Contracts\Payments\PaymentCheckoutStarter;
+use App\Models\Order;
 use App\Models\Payment;
 use App\Services\Payments\PaymentCheckoutService;
 use RuntimeException;
@@ -49,8 +50,11 @@ class PayPalCheckoutStarter implements PaymentCheckoutStarter
         $invoiceId = 'ORD-'.$order->id.'-PAY-'.$payment->id;
 
         $base = rtrim((string) config('app.url'), '/');
-        $cancelUrl = $base.'/orders/'.$order->id.'?payment=ko';
-        $returnUrl = $base.'/orders/'.$order->id.'?payment=paypal_return';
+        $returnPath = $order->kind === Order::KIND_CART
+            ? '/checkout'
+            : '/orders/'.$order->id;
+        $cancelUrl = $base.$returnPath.'?payment=ko';
+        $returnUrl = $base.$returnPath.'?payment=paypal_return';
 
         $created = $this->client->createOrder(
             $amount,

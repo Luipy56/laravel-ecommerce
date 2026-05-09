@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuth();
   const { cart, fetchCart } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [form, setForm] = useState(INITIAL_FORM);
@@ -152,6 +153,83 @@ export default function CheckoutPage() {
     }
   }, [activeCheckout]);
 
+  /** Stripe / PayPal return URLs point here when checkout was deferred (kind=cart until paid). */
+  useEffect(() => {
+    if (!user) return;
+    const sp = new URLSearchParams(location.search);
+    const payment = sp.get('payment');
+    const sessionId = sp.get('session_id');
+    if (payment == null && !sessionId) return;
+
+    let cancelled = false;
+
+    (async () => {
+      if (payment === 'ko') {
+        emitAppToast(t('shop.order.payment_return_ko'), 'warning');
+        await fetchCart();
+        if (!cancelled) navigate('/checkout', { replace: true });
+        return;
+      }
+      if (payment === 'ok' && sessionId) {
+        try {
+          const { data } = await api.post('payments/stripe/checkout/confirm', { session_id: sessionId });
+          if (!cancelled && data.success && data.data?.has_payment) {
+            emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
+            const oid = data.data?.order?.id;
+            if (oid) {
+              navigate(`/orders/${oid}`, { replace: true });
+              return;
+            }
+          } else if (!cancelled && data?.message) {
+            emitAppToast(data.message, 'warning');
+          }
+        } catch (err) {
+          if (!cancelled) {
+            emitAppToast(err.response?.data?.message || t('common.error'), 'error');
+          }
+        }
+        if (!cancelled) {
+          await fetchCart();
+          navigate('/checkout', { replace: true });
+        }
+        return;
+      }
+      if (payment === 'paypal_return') {
+        const paypalOrderId = sp.get('token');
+        if (paypalOrderId) {
+          try {
+            const cartRes = await api.get('cart');
+            const pendingPayment = cartRes.data?.data?.payments?.find(
+              (p) => p.gateway === 'paypal' && p.gateway_reference === paypalOrderId,
+            );
+            if (pendingPayment && !cancelled) {
+              const captureRes = await api.post('payments/paypal/capture', {
+                paypal_order_id: paypalOrderId,
+                payment_id: pendingPayment.id,
+              });
+              if (!cancelled && captureRes.data?.success) {
+                emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
+                const oid = cartRes.data?.data?.id;
+                if (oid) navigate(`/orders/${oid}`, { replace: true });
+                return;
+              }
+            }
+          } catch {
+            // non-fatal
+          }
+        }
+        if (!cancelled) {
+          await fetchCart();
+          navigate('/checkout', { replace: true });
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, location.search, navigate, fetchCart, t]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCheckoutFormError('');
@@ -195,6 +273,11 @@ export default function CheckoutPage() {
       }
 
       if (d.payment_error) {
+        if (d.checkout_deferred) {
+          emitAppToast(String(d.payment_error), 'error');
+          await fetchCart();
+          return;
+        }
         navigate('/orders/' + d.id, { state: { paymentErrorFromCheckout: d.payment_error } });
         return;
       }
@@ -224,11 +307,17 @@ export default function CheckoutPage() {
       if (c?.gateway === 'paypal' && c.approval_url) {
         const opened = openPayPalApprovalInNewTab(c.approval_url);
         if (!opened) setPaypalApprovalFallbackUrl(c.approval_url);
-        navigate('/orders/' + d.id, { state: { paypalHostedWindow: true } });
+        if (d.checkout_deferred) {
+          emitAppToast(t('shop.order.paypal_window_hint'), 'info');
+        } else {
+          navigate('/orders/' + d.id, { state: { paypalHostedWindow: true } });
+        }
         return;
       }
 
-      navigate('/orders/' + d.id);
+      if (!d.checkout_deferred) {
+        navigate('/orders/' + d.id);
+      }
     } catch (err) {
       const d = err.response?.data;
       const msg =

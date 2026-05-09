@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderLine;
+use App\Models\Payment;
 use App\Models\ShopSetting;
 use App\Support\InstallationAutoPricing;
 use App\Models\Pack;
@@ -65,10 +66,19 @@ class CartController extends Controller
         $cart = Order::query()
             ->where('client_id', $client->id)
             ->where('kind', Order::KIND_CART)
-            ->with(['lines.product.images', 'lines.product.features.featureName', 'lines.pack.images'])
+            ->with(['lines.product.images', 'lines.product.features.featureName', 'lines.pack.images', 'payments'])
             ->first();
         $lines = $cart ? $this->formatLines($cart->lines) : [];
         $total = $cart ? $cart->lines->sum(fn ($l) => $l->line_total) : 0;
+        $paymentsPayload = $cart
+            ? $cart->payments->map(fn (Payment $p) => [
+                'id' => $p->id,
+                'status' => $p->status,
+                'gateway' => $p->gateway,
+                'gateway_reference' => $p->gateway_reference,
+                'payment_method' => $p->payment_method,
+            ])->values()->all()
+            : [];
 
         return response()->json([
             'success' => true,
@@ -77,8 +87,23 @@ class CartController extends Controller
                 'lines' => $lines,
                 'total' => round($total, 2),
                 'installation_requested' => (bool) ($cart?->installation_requested ?? false),
+                'payments' => $paymentsPayload,
             ], $this->installationCartMeta((bool) ($cart?->installation_requested ?? false), (float) $total), $this->cartShippingMeta((float) $total)),
         ]);
+    }
+
+    /** @return JsonResponse|null 422 response when cart must not change during PSP checkout */
+    private function jsonIfCartPspLocked(?Order $cart): ?JsonResponse
+    {
+        if ($cart && $cart->hasOpenPspCheckoutPayment()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('shop.cart.psp_checkout_in_progress'),
+                'code' => 'cart_psp_checkout_locked',
+            ], 422);
+        }
+
+        return null;
     }
 
     private function showSessionCart(Request $request): JsonResponse
@@ -146,6 +171,7 @@ class CartController extends Controller
                 'lines' => $lines,
                 'total' => round($total, 2),
                 'installation_requested' => $installationRequested,
+                'payments' => [],
             ], $this->installationCartMeta($installationRequested, (float) $total), $this->cartShippingMeta((float) $total)),
         ]);
     }
@@ -194,6 +220,10 @@ class CartController extends Controller
                 ['client_id' => $request->user()->id, 'kind' => Order::KIND_CART],
                 ['status' => null]
             );
+            $cart->load('payments');
+            if ($locked = $this->jsonIfCartPspLocked($cart)) {
+                return $locked;
+            }
             $cart->update([
                 'installation_requested' => $validated['installation_requested'],
                 'installation_status' => null,
@@ -235,6 +265,10 @@ class CartController extends Controller
             ['client_id' => $client->id, 'kind' => Order::KIND_CART],
             ['status' => null]
         );
+        $cart->load('payments');
+        if ($locked = $this->jsonIfCartPspLocked($cart)) {
+            return $locked;
+        }
 
         $productId = $validated['product_id'] ?? null;
         $packId = $validated['pack_id'] ?? null;
@@ -255,10 +289,17 @@ class CartController extends Controller
             ]);
         }
 
-        $cart->load(['lines.product.images', 'lines.product.features.featureName', 'lines.pack']);
+        $cart->load(['lines.product.images', 'lines.product.features.featureName', 'lines.pack', 'payments']);
         $lines = $this->formatLines($cart->lines);
         $total = $cart->lines->sum(fn ($l) => $l->line_total);
         $installationRequested = (bool) $cart->installation_requested;
+        $paymentsPayload = $cart->payments->map(fn (Payment $p) => [
+            'id' => $p->id,
+            'status' => $p->status,
+            'gateway' => $p->gateway,
+            'gateway_reference' => $p->gateway_reference,
+            'payment_method' => $p->payment_method,
+        ])->values()->all();
 
         return response()->json([
             'success' => true,
@@ -268,6 +309,7 @@ class CartController extends Controller
                 'lines' => $lines,
                 'total' => round($total, 2),
                 'installation_requested' => $installationRequested,
+                'payments' => $paymentsPayload,
             ], $this->installationCartMeta($installationRequested, (float) $total), $this->cartShippingMeta((float) $total)),
         ]);
     }
@@ -304,9 +346,12 @@ class CartController extends Controller
         $quantity = (int) $validated['quantity'];
 
         if ($request->user()) {
-            $orderLine = OrderLine::with(['product', 'pack'])->find($line);
+            $orderLine = OrderLine::with(['product', 'pack', 'order.payments'])->find($line);
             if (! $orderLine || $orderLine->order->client_id !== $request->user()->id || $orderLine->order->kind !== Order::KIND_CART) {
                 return response()->json(['success' => false, 'message' => 'Line not found.'], 404);
+            }
+            if ($locked = $this->jsonIfCartPspLocked($orderLine->order)) {
+                return $locked;
             }
             if ($quantity === 0) {
                 $orderLine->delete();
@@ -371,6 +416,10 @@ class CartController extends Controller
             ['client_id' => $client->id, 'kind' => Order::KIND_CART],
             ['status' => null]
         );
+        $cart->load('payments');
+        if ($locked = $this->jsonIfCartPspLocked($cart)) {
+            return $locked;
+        }
 
         foreach ($sessionLines as $item) {
             $productId = $item['product_id'] ?? null;

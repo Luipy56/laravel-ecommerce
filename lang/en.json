@@ -25,6 +25,7 @@
     "shop.cart": "Cart",
     "shop.cart.add": "Add to cart",
     "shop.cart.empty": "The cart is empty.",
+    "shop.cart.psp_checkout_in_progress": "You have a payment in progress. Complete it or wait for it to expire before changing your cart.",
     "shop.favorites.specify_one": "Send either product_id or pack_id, not both and not neither.",
     "shop.favorites.product_unavailable": "This product is not available or is inactive.",
     "shop.favorites.pack_unavailable": "This pack is not available or is inactive.",

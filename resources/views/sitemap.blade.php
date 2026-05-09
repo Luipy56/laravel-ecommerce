@@ -27,7 +27,9 @@
     @foreach ($categories as $category)
     <url>
         <loc>{{ url('/categories/' . $category->id . '/products') }}</loc>
+        @if($category->updated_at)
         <lastmod>{{ $category->updated_at->toAtomString() }}</lastmod>
+        @endif
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
@@ -37,7 +39,9 @@
     @foreach ($products as $product)
     <url>
         <loc>{{ url('/products/' . $product->id) }}</loc>
+        @if($product->updated_at)
         <lastmod>{{ $product->updated_at->toAtomString() }}</lastmod>
+        @endif
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>

@@ -215,7 +215,8 @@ class CheckoutPaymentConfigTest extends TestCase
         $response = $this->postJson('/api/v1/orders/checkout', $payload);
 
         $response->assertCreated();
-        $response->assertJsonPath('data.status', 'awaiting_payment');
+        $response->assertJsonPath('data.checkout_deferred', true);
+        $response->assertJsonPath('data.status', null);
         $response->assertJsonPath('data.payment_checkout.gateway', 'paypal');
         $response->assertJsonPath('data.payment_checkout.paypal_order_id', 'SANDBOX_ORDER_X');
         $response->assertJsonPath('data.payment_checkout.paypal_mode', 'sandbox');
@@ -440,6 +441,30 @@ class CheckoutPaymentConfigTest extends TestCase
         $response = $this->postJson('/api/v1/orders/checkout', $payload);
 
         $response->assertStatus(422);
+    }
+
+    public function test_cancel_pending_checkout_reverts_open_psp_payment_on_cart(): void
+    {
+        $client = $this->makeClientWithCart();
+        $cart = Order::query()->where('client_id', $client->id)->where('kind', Order::KIND_CART)->first();
+        $this->assertNotNull($cart);
+        $cart->update(['shipping_price' => ShopSetting::shippingFlatEur()]);
+        Payment::query()->create([
+            'order_id' => $cart->id,
+            'amount' => 34.00,
+            'payment_method' => Payment::METHOD_CARD,
+            'status' => Payment::STATUS_REQUIRES_ACTION,
+            'gateway' => Payment::GATEWAY_STRIPE,
+            'currency' => 'EUR',
+            'gateway_reference' => 'cs_test_cancel',
+        ]);
+
+        $this->actingAs($client, 'web');
+        $response = $this->postJson('/api/v1/cart/cancel-pending-checkout');
+        $response->assertOk();
+        $this->assertSame(0, Payment::query()->where('order_id', $cart->id)->count());
+        $cart->refresh();
+        $this->assertNull($cart->shipping_price);
     }
 
     public function test_checkout_demo_skip_payment_flag_ignored_when_config_disabled(): void

@@ -192,6 +192,7 @@
   "shop.cart.add": "Añadir al carrito",
   "shop.cart.added": "Añadido al carrito",
   "shop.cart.empty": "El carrito está vacío.",
+  "shop.cart.psp_checkout_in_progress": "Tiene un pago pendiente. Complételo o espere a que caduque antes de modificar el carrito.",
   "shop.cart.include": "Incluir en el pedido",
   "shop.cart.request_installation": "Solicitar instalación",
   "shop.cart.installation_quote_hint": "Instalación: tarifas por tramos hasta 1.000 € de productos; por encima, presupuesto personalizado.",

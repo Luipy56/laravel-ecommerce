@@ -122,15 +122,36 @@ class PaymentCheckoutService
      */
     public static function shouldSimulateCheckoutForPayment(Payment $payment): bool
     {
-        if ($payment->payment_method === Payment::METHOD_PAYPAL) {
+        return self::shouldSimulateCheckoutForPaymentMethod($payment->payment_method);
+    }
+
+    /** Same rules as {@see shouldSimulateCheckoutForPayment} before a {@see Payment} row exists. */
+    public static function shouldSimulateCheckoutForPaymentMethod(string $method): bool
+    {
+        if ($method === Payment::METHOD_PAYPAL) {
             return false;
         }
-        if ($payment->payment_method === Payment::METHOD_CHECKOUT_DEMO_SKIP) {
+        if ($method === Payment::METHOD_CHECKOUT_DEMO_SKIP) {
             return false;
         }
 
         return self::allowSimulatedPayments()
-            && ! self::methodHasRealProviderCredentials($payment->payment_method);
+            && ! self::methodHasRealProviderCredentials($method);
+    }
+
+    /**
+     * Real PSP redirect/capture will complete after the HTTP response; keep kind=cart until payment succeeds.
+     */
+    public static function shouldDeferOrderKindUntilPaymentConfirmed(
+        bool $awaitingInstallationQuote,
+        bool $demoSkipActive,
+        ?string $resolvedPaymentMethod,
+    ): bool {
+        if ($awaitingInstallationQuote || $demoSkipActive || $resolvedPaymentMethod === null) {
+            return false;
+        }
+
+        return ! self::shouldSimulateCheckoutForPaymentMethod($resolvedPaymentMethod);
     }
 
     /**

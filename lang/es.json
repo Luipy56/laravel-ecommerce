@@ -25,6 +25,7 @@
     "shop.cart": "Carrito",
     "shop.cart.add": "Añadir al carrito",
     "shop.cart.empty": "El carrito está vacío.",
+    "shop.cart.psp_checkout_in_progress": "Tiene un pago pendiente. Complételo o espere a que caduque antes de modificar el carrito.",
     "shop.favorites.specify_one": "Envía product_id o pack_id, no ambos ni ninguno.",
     "shop.favorites.product_unavailable": "Este producto no está disponible o está inactivo.",
     "shop.favorites.pack_unavailable": "Este pack no está disponible o está inactivo.",

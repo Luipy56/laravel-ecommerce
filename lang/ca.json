@@ -25,6 +25,7 @@
     "shop.cart": "Cistella",
     "shop.cart.add": "Afegir a la cistella",
     "shop.cart.empty": "La cistella està buida.",
+    "shop.cart.psp_checkout_in_progress": "Teniu un pagament pendent. Completeu-lo o espereu que expiri abans de modificar la cistella.",
     "shop.favorites.specify_one": "Envia product_id o pack_id, no tots dos ni cap.",
     "shop.favorites.product_unavailable": "Aquest producte no està disponible o està inactiu.",
     "shop.favorites.pack_unavailable": "Aquest pack no està disponible o està inactiu.",

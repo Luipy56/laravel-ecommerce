@@ -18,6 +18,7 @@ use App\Models\OrderLine;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Services\Payments\PaymentCompletionService;
 use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -143,7 +144,7 @@ class CustomerTransactionalEmailTest extends TestCase
         });
     }
 
-    public function test_checkout_with_stripe_not_simulated_sends_payment_pending_mails(): void
+    public function test_checkout_with_stripe_not_simulated_defers_order_and_sends_no_pending_mails(): void
     {
         Mail::fake();
 
@@ -197,14 +198,30 @@ class CustomerTransactionalEmailTest extends TestCase
 
         $response->assertCreated();
         $response->assertJsonPath('data.has_payment', false);
+        $response->assertJsonPath('data.checkout_deferred', true);
+        $response->assertJsonPath('data.status', null);
 
-        Mail::assertSent(OrderPaymentPendingMail::class, function (OrderPaymentPendingMail $mail) use ($client) {
+        $orderId = (int) $response->json('data.id');
+        $this->assertDatabaseHas('orders', [
+            'id' => $orderId,
+            'kind' => Order::KIND_CART,
+        ]);
+
+        Mail::assertNotSent(OrderPaymentPendingMail::class);
+        Mail::assertNotSent(OrderPaymentPendingAdminMail::class);
+        Mail::assertNotSent(OrderPaymentConfirmedMail::class);
+
+        $payment = Payment::query()->where('order_id', $orderId)->first();
+        $this->assertNotNull($payment);
+        $this->app->make(PaymentCompletionService::class)->markSucceeded($payment);
+
+        Mail::assertSent(OrderPaymentConfirmedMail::class, function (OrderPaymentConfirmedMail $mail) use ($client) {
             return $mail->hasTo($client->login_email);
         });
-        Mail::assertNotSent(OrderPaymentConfirmedMail::class);
-        Mail::assertSent(OrderPaymentPendingAdminMail::class, function (OrderPaymentPendingAdminMail $mail) use ($admin) {
-            return $mail->hasTo($admin);
-        });
+        $this->assertDatabaseHas('orders', [
+            'id' => $orderId,
+            'kind' => Order::KIND_ORDER,
+        ]);
     }
 
     public function test_checkout_with_simulated_card_sends_payment_confirmation_mail(): void

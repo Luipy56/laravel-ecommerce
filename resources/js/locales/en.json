@@ -192,6 +192,7 @@
   "shop.cart.add": "Add to cart",
   "shop.cart.added": "Added to cart",
   "shop.cart.empty": "The cart is empty.",
+  "shop.cart.psp_checkout_in_progress": "You have a payment in progress. Complete it or wait for it to expire before changing your cart.",
   "shop.cart.include": "Include in the order",
   "shop.cart.request_installation": "Request installation",
   "shop.cart.installation_quote_hint": "Installation: rates for sections up to €1,000 of products; Above, personalized quote.",

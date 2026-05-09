@@ -192,6 +192,7 @@
   "shop.cart.add": "Afegir a la cistella",
   "shop.cart.added": "Afegit a la cistella",
   "shop.cart.empty": "La cistella està buida.",
+  "shop.cart.psp_checkout_in_progress": "Teniu un pagament pendent. Completeu-lo o espereu que expiri abans de modificar la cistella.",
   "shop.cart.include": "Incloure en la comanda",
   "shop.cart.request_installation": "Sol·licitar instal·lació",
   "shop.cart.installation_quote_hint": "Instal·lació: tarifes per franges fins a 1.000 € de productes; per sobre, pressupost personalitzat.",

@@ -4,6 +4,7 @@ namespace App\Services\Payments\Stripe;
 
 use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Exceptions\PaymentProviderNotConfiguredException;
+use App\Models\Order;
 use App\Models\Payment;
 use RuntimeException;
 use Stripe\Checkout\Session as StripeCheckoutSession;
@@ -37,8 +38,11 @@ class StripeCheckoutStarter implements PaymentCheckoutStarter
         }
 
         $baseUrl = rtrim((string) config('app.url'), '/');
-        $successUrl = $baseUrl.'/orders/'.$order->id.'?payment=ok&session_id={CHECKOUT_SESSION_ID}';
-        $cancelUrl = $baseUrl.'/orders/'.$order->id.'?payment=ko';
+        $returnPath = $order->kind === Order::KIND_CART
+            ? '/checkout'
+            : '/orders/'.$order->id;
+        $successUrl = $baseUrl.$returnPath.'?payment=ok&session_id={CHECKOUT_SESSION_ID}';
+        $cancelUrl = $baseUrl.$returnPath.'?payment=ko';
 
         if ($payment->gateway === Payment::GATEWAY_STRIPE
             && is_string($payment->gateway_reference)

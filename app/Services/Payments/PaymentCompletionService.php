@@ -23,6 +23,16 @@ class PaymentCompletionService
                 return;
             }
             $shouldNotify = true;
+            $locked->loadMissing('order');
+            $order = $locked->order;
+            if ($order && $order->kind === Order::KIND_CART) {
+                $order->update([
+                    'kind' => Order::KIND_ORDER,
+                    'order_date' => now(),
+                    'status' => Order::STATUS_PENDING,
+                ]);
+            }
+
             $locked->update(array_merge([
                 'status' => Payment::STATUS_SUCCEEDED,
                 'paid_at' => now(),
@@ -59,11 +69,16 @@ class PaymentCompletionService
             if ($payment->status === Payment::STATUS_SUCCEEDED) {
                 return;
             }
+            $payment->loadMissing('order');
+            $order = $payment->order;
             $payment->update([
                 'status' => Payment::STATUS_FAILED,
                 'failure_code' => $code,
                 'failure_message' => $message,
             ]);
+            if ($order && $order->kind === Order::KIND_CART) {
+                $this->revertDeferredCheckoutOnCart($order);
+            }
         });
     }
 
@@ -74,10 +89,32 @@ class PaymentCompletionService
             if ($payment->status === Payment::STATUS_SUCCEEDED) {
                 return;
             }
+            $payment->loadMissing('order');
+            $order = $payment->order;
             $payment->update([
                 'status' => Payment::STATUS_CANCELED,
             ]);
+            if ($order && $order->kind === Order::KIND_CART) {
+                $this->revertDeferredCheckoutOnCart($order);
+            }
         });
+    }
+
+    /**
+     * After an aborted PSP checkout, restore the cart so the client can retry from /checkout.
+     */
+    public function revertDeferredCheckoutOnCart(Order $cart): void
+    {
+        if ($cart->kind !== Order::KIND_CART) {
+            return;
+        }
+        $cart->addresses()->delete();
+        $cart->payments()->where('status', '!=', Payment::STATUS_SUCCEEDED)->delete();
+        $cart->update([
+            'shipping_price' => null,
+            'installation_status' => null,
+            'installation_price' => null,
+        ]);
     }
 
     public function markRefunded(Payment $payment): void

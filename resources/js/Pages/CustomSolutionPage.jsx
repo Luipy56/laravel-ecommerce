@@ -11,7 +11,6 @@ import { fieldErrorsFromApiValidation, messageFromApiValidationError } from '../
 import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue, sanitizePostalCodeDigits } from '../lib/postalInput';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
-import GdprNotice from '../components/GdprNotice';
 import FieldHint from '../components/FieldHint';
 
 export default function CustomSolutionPage() {
@@ -351,29 +350,27 @@ export default function CustomSolutionPage() {
             </label>
           </fieldset>
 
-          <GdprNotice noticeKey="gdpr.notice_custom_solution" />
-
           <div className="flex flex-col gap-3">
-            <label className="flex items-start gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                className="checkbox checkbox-primary mt-0.5 shrink-0"
+                className="checkbox checkbox-primary shrink-0"
                 checked={acceptPrivacy}
                 onChange={(e) => setAcceptPrivacy(e.target.checked)}
                 disabled={newRequestsDisabled}
                 required
               />
               <span className="text-sm">
-                {t('gdpr.accept_privacy').split('[Privacy Policy]')[0]}
-                <Link to="/privacy-policy" className="link link-primary">
+                {t('gdpr.accept_privacy_prefix')}{' '}
+                <Link to="/privacy-policy" className="link link-primary" onClick={() => window.scrollTo(0, 0)}>
                   {t('footer.privacy_policy')}
                 </Link>
               </span>
             </label>
-            <label className="flex items-start gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                className="checkbox checkbox-primary mt-0.5 shrink-0"
+                className="checkbox checkbox-primary shrink-0"
                 checked={acceptMarketing}
                 onChange={(e) => setAcceptMarketing(e.target.checked)}
                 disabled={newRequestsDisabled}

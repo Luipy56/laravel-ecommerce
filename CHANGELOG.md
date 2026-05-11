@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.159] - 2026-05-11
+
+### Changed
+- SCSS visual merge: replaced Tailwind utility classes with SCSS BEM styles on **HomePage**, **ProductListPage**, and **ProductCard** (hero with gradient fallback, catalog sidebar, fluid product grid, price slider, category tags).
+- Shared `_fluid.scss` partial with responsive `fluid()` SCSS function used by all three component SCSS files.
+- Product card `.cart-btn` and `.product-card__pack-badge` reference `var(--color-primary-light)`.
+- Homepage full-bleed background image (`home-bg.jpg`, fixed attachment).
+- Section dividers (`border-top`) and consistent bold font-weight + letter-spacing on `.section-title`.
+- Register and Custom Solution pages: privacy checkboxes vertically centered, fixed missing space before "Política de privacidad" link, removed `GdprNotice` blocks, privacy link scrolls to top.
+- Agent version-bump rule clarified: bump per prompt-response turn, not per plan.
+
+### Added
+- `--color-primary-light: #ffb300` theme token in daisyUI `serralleria` theme; `.btn-primary-light` utility class.
+- Hero banner image (`public/images/hero.jpg`) and homepage background image (`public/images/home-bg.jpg`).
+- Editable number inputs on price range slider (replace static labels) with currency suffix.
+- `shop.filters.clear`, `shop.filters.price_min`, `shop.filters.price_max`, `gdpr.accept_privacy_prefix` i18n keys (ca, es, en).
+
+### Fixed
+- Navbar-to-hero gap: `.home-page` negative margin extended to fully cancel `<main>` padding (top and bottom).
+- Slider-btn (trending section arrow) scrolls to top when navigating to `/products`.
+- Clear-filters button resets **all** filters (category, features, packs, price) and moved to top of sidebar.
+- `shop_settings.value` column made nullable to prevent SQL integrity constraint error when saving empty textareas.
+- Product card footer pinned to bottom via flex column layout with `margin-top: auto`.
+- Catalog page top padding reduced for large screens.
+- Hero image contained with `overflow: hidden`.
+
+### Removed
+- `/test` preview routes and `resources/js/test/` directory.
+
 ## [0.1.154] - 2026-05-09
 
 ### Fixed

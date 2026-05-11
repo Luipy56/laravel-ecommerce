@@ -1,3 +1,4 @@
+import './ProductCard.scss';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -53,40 +54,37 @@ export default function ProductCard({ product, pack }) {
 
   return (
     <div
-      className="card card-border bg-base-100 shadow transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer relative"
+      className={`product-card${isPack ? ' product-card--pack' : ''}`}
       draggable
       onDragStart={handleDragStart}
     >
-      <Link to={detailUrl} className="block rounded-box overflow-hidden">
-        <figure className="h-40 bg-base-200 relative">
+      <Link to={detailUrl}>
+        <div className="product-card__image">
           {isPack && (
-            <span className="badge badge-primary badge-sm absolute top-2 left-2 z-10">
-              {t('shop.pack')}
-            </span>
+            <span className="product-card__pack-badge">{t('shop.pack')}</span>
           )}
           {!isPack && product.discount_percent > 0 && (
-            <span className="badge badge-error badge-sm absolute top-2 right-12 z-10 font-bold">
+            <span className="product-card__discount-badge">
               −{Math.round(Number(product.discount_percent))}%
             </span>
           )}
-          <div className="absolute top-2 right-2 z-20">
+          <div className="product-card__favorite">
             <FavoriteToggle productId={isPack ? undefined : product.id} packId={isPack ? pack.id : undefined} />
           </div>
           <img
             src={imageUrl}
             alt={name}
-            className="object-cover w-full h-full"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = FALLBACK_IMAGE;
             }}
           />
-        </figure>
-        <div className="card-body p-4 flex flex-col">
-          <h3 className="card-title text-base line-clamp-2">{name}</h3>
+        </div>
+        <div className="product-card__info">
+          <h3>{name}</h3>
           {isPack ? (
             packProductNames.length > 0 && (
-              <ul className="text-sm text-base-content/80 space-y-0.5 mt-1 line-clamp-2" aria-label={t('shop.product.specifications')}>
+              <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
                 {packProductNames.map((productName, i) => (
                   <li key={i}>{productName}</li>
                 ))}
@@ -94,11 +92,11 @@ export default function ProductCard({ product, pack }) {
             )
           ) : (
             product.features?.length > 0 && (
-              <ul className="text-sm text-base-content/80 space-y-0.5 mt-1 line-clamp-2" aria-label={t('shop.product.specifications')}>
+              <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
                 {product.features.slice(0, 2).map((f, i) => (
                   <li key={f.id ?? i}>
                     {(f.type ?? f.name) != null && String(f.type ?? f.name).trim() !== '' ? (
-                      <span><span className="font-medium">{f.type ?? f.name}:</span> {f.value ?? ''}</span>
+                      <span><span className="product-card__feature-label">{f.type ?? f.name}:</span> {f.value ?? ''}</span>
                     ) : (
                       <span>{f.value ?? ''}</span>
                     )}
@@ -107,23 +105,24 @@ export default function ProductCard({ product, pack }) {
               </ul>
             )
           )}
-          <div className="flex flex-col items-start gap-0.5 mt-auto pt-2 pr-12">
-            {!isPack && product.formattedListPrice && (
-              <span className="text-sm text-base-content/60 line-through tabular-nums">{product.formattedListPrice}</span>
-            )}
-            <span className="text-primary font-semibold tabular-nums">{formattedPrice}</span>
+          <div className="product-card__footer">
+            <div className="product-card__prices">
+              {!isPack && product.formattedListPrice && (
+                <span className="product-card__old-price">{product.formattedListPrice}</span>
+              )}
+              <span className="price">{formattedPrice}</span>
+            </div>
+            <button
+              type="button"
+              className="cart-btn"
+              onClick={handleAdd}
+              aria-label={t('shop.cart.add')}
+            >
+              <IconCart className="h-4 w-4" aria-hidden="true" />
+            </button>
           </div>
         </div>
       </Link>
-      <button
-        type="button"
-        className="btn btn-primary btn-sm gap-1.5 px-3 min-h-8 shrink-0 absolute bottom-4 right-4 z-10"
-        onClick={handleAdd}
-        aria-label={t('shop.cart.add')}
-      >
-        <IconCart className="h-4 w-4 shrink-0" aria-hidden="true" />
-        <span className="text-sm font-bold leading-none" aria-hidden="true">+</span>
-      </button>
     </div>
   );
 }

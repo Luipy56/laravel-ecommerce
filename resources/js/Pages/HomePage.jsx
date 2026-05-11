@@ -1,5 +1,5 @@
 import './HomePage.scss';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -56,6 +56,10 @@ export default function HomePage() {
   const featuredByCategory = useMemo(() => groupFeaturedProductsByCategory(featured), [featured]);
   const loading = categoriesQuery.isPending || featuredQuery.isPending;
 
+  useEffect(() => {
+    document.title = t('shop.brand_name');
+  }, [t]);
+
   return (
     <div className="home-page">
       <section className={`hero${heroImageFailed ? ' hero--gradient' : ''}`}>
@@ -86,7 +90,7 @@ export default function HomePage() {
             <h2 className="section-title">{t('shop.categories')}</h2>
             <div className="categories__list">
               {categories.map((c) => (
-                <Link key={c.id} to={`/categories/${c.id}/products`} className="tag">
+                <Link key={c.id} to={`/categories/${c.id}/products`} className="tag" onClick={() => window.scrollTo(0, 0)}>
                   {c.name}
                 </Link>
               ))}
@@ -100,12 +104,12 @@ export default function HomePage() {
           <div className="section-header">
             <h2 className="section-title">{t('shop.featured')}</h2>
             <Link to="/products" className="slider-btn" aria-label={t('shop.featured')} onClick={() => window.scrollTo(0, 0)}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6" /></svg>
             </Link>
           </div>
 
           {loading ? (
-            <div className="trending__loading">
+            <div className="trending__loading" role="status" aria-label={t('common.loading')}>
               <span className="loading loading-spinner loading-lg" />
             </div>
           ) : featured.length === 0 ? (

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.164] - 2026-05-11
+
+### Fixed
+- SEO: added `<title>`, meta description, canonical, Open Graph, and Twitter Card tags to the Blade shell (`welcome.blade.php`).
+- Accessibility: corrected invalid ARIA roles in drawer language selector (`role="group"` + `role="option"` to `role="radiogroup"` + `role="radio"`).
+- Accessibility: added `aria-hidden` to decorative SVG chevron and `role="status"` to loading spinner on HomePage.
+- HomePage sets `document.title` on mount so Lighthouse reads a proper page title.
+
 ## [0.1.160] - 2026-05-11
 
 ### Changed

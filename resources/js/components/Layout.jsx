@@ -80,7 +80,7 @@ export default function Layout() {
         className="drawer-toggle"
         aria-hidden="true"
       />
-      <div className="drawer-content flex min-h-screen flex-col bg-base-200">
+      <div className="drawer-content flex min-h-screen flex-col bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
         <Navbar />
         <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
           <Outlet />
@@ -183,15 +183,15 @@ export default function Layout() {
               <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
                 {t('common.language')}
               </p>
-              <div className="flex gap-1.5" role="group" aria-label={t('common.language')}>
+              <div className="flex gap-1.5" role="radiogroup" aria-label={t('common.language')}>
                 {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
                   const selected = locale === code;
                   return (
                     <button
                       key={code}
                       type="button"
-                      role="option"
-                      aria-selected={selected}
+                      role="radio"
+                      aria-checked={selected}
                       onClick={() => handleLocale(code)}
                       className={[
                         'flex-1 rounded-lg py-2 text-xs font-semibold tabular-nums transition-all duration-150',

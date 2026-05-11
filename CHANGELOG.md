@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.160] - 2026-05-11
+
+### Changed
+- Product card price text, cart button, and pack badge/outline now use `--color-primary` (#fb5412) instead of `--color-primary-light` (#ffb300 yellow). Unified brand color across cards.
+- `--color-primary-light` CSS variable updated to match `--color-primary` value; `.btn-primary-light` class now resolves to primary.
+
 ## [0.1.159] - 2026-05-11
 
 ### Changed

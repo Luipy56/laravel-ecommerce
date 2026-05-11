@@ -48,7 +48,7 @@
   flex-direction: column;
 
   &--pack {
-    outline: 2px solid var(--color-primary-light, #ffb300);
+    outline: 2px solid var(--color-primary, #fb5412);
     outline-offset: -2px;
   }
 
@@ -74,7 +74,7 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    background: var(--color-primary-light, #ffb300);
+    background: var(--color-primary, #fb5412);
     color: white;
     font-size: 11px;
     font-weight: 700;
@@ -159,7 +159,7 @@
   }
 
   .price {
-    color: #f0a000;
+    color: var(--color-primary, #fb5412);
     font-weight: 700;
     font-size: fluid(14, 16);
     font-variant-numeric: tabular-nums;
@@ -170,7 +170,7 @@
     height: fluid(36, 42);
     border-radius: 12px;
     border: none;
-    background: var(--color-primary-light, #ffb300);
+    background: var(--color-primary, #fb5412);
     color: white;
     cursor: pointer;
     display: flex;
@@ -179,6 +179,6 @@
     flex-shrink: 0;
     transition: background 0.15s;
 
-    &:hover { background: #e6a200; }
+    &:hover { background: color-mix(in oklab, var(--color-primary, #fb5412) 85%, black); }
   }
 }

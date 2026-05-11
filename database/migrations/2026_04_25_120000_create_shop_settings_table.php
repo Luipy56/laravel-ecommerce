@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('shop_settings', function (Blueprint $table) {
             $table->id();
             $table->string('key', 128)->unique()->comment('Setting key');
-            $table->json('value')->comment('JSON-encoded scalar or array');
+            $table->json('value')->nullable()->comment('JSON-encoded scalar or array');
             $table->timestamps();
         });
     }

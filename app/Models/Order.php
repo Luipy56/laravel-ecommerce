@@ -149,6 +149,40 @@ class Order extends Model
         return round($base, 2);
     }
 
+    /**
+     * Amount to charge at PSP checkout: merchandise + priced installation + shipping.
+     * Uses persisted {@see $shipping_price} when set (e.g. during checkout), otherwise shop flat rate.
+     * Does not depend on {@see $kind} so it matches {@see getGrandTotalAttribute} after shipping is stored on a cart.
+     */
+    public function amountDueForCheckoutPayment(): float
+    {
+        $base = (float) $this->lines_subtotal;
+        if ($this->installation_requested
+            && $this->installation_status === self::INSTALLATION_PRICED
+            && $this->installation_price !== null) {
+            $base += (float) $this->installation_price;
+        }
+        $shipping = $this->shipping_price !== null
+            ? (float) $this->shipping_price
+            : ShopSetting::shippingFlatEur();
+
+        return round($base + $shipping, 2);
+    }
+
+    /**
+     * True when the cart has an in-flight PSP checkout (lines must not change until resolved).
+     */
+    public function hasOpenPspCheckoutPayment(): bool
+    {
+        if ($this->kind !== self::KIND_CART) {
+            return false;
+        }
+
+        return $this->payments()
+            ->whereIn('status', [Payment::STATUS_PENDING, Payment::STATUS_REQUIRES_ACTION, Payment::STATUS_PROCESSING])
+            ->exists();
+    }
+
     public function hasSuccessfulPayment(): bool
     {
         return $this->payments()->successful()->exists();

@@ -86,6 +86,10 @@ export default function AdminShopSettingsPage() {
   const [installationQuoteAbove, setInstallationQuoteAbove] = useState('1000');
   const [installationTiers, setInstallationTiers] = useState(() => defaultInstallationRows());
 
+  const [termsCa, setTermsCa] = useState('');
+  const [termsEs, setTermsEs] = useState('');
+  const [termsEn, setTermsEn] = useState('');
+
   const [columnPrefs, setColumnPrefs] = useState({});
   const [columnOrder, setColumnOrder] = useState({});
 
@@ -107,6 +111,9 @@ export default function AdminShopSettingsPage() {
     const { quote, tiers } = parseInstallationFromApi(d.installation_auto_pricing);
     setInstallationQuoteAbove(quote);
     setInstallationTiers(tiers);
+    setTermsCa(String(d.terms_ca ?? ''));
+    setTermsEs(String(d.terms_es ?? ''));
+    setTermsEn(String(d.terms_en ?? ''));
     const { columnPrefs: cp, columnOrder: co } = columnOrderAndPrefsFromServer(d.admin_index_columns);
     setColumnPrefs(cp);
     setColumnOrder(co);
@@ -169,6 +176,9 @@ export default function AdminShopSettingsPage() {
         tiers,
       },
       admin_index_columns: buildAdminIndexColumnsPayload(columnPrefs, columnOrder),
+      terms_ca: termsCa,
+      terms_es: termsEs,
+      terms_en: termsEn,
     };
   };
 
@@ -520,6 +530,54 @@ export default function AdminShopSettingsPage() {
               <div role="status" className="alert alert-info text-sm mt-2">
                 <span>{t('admin.settings.shipping_postal_not_implemented')}</span>
               </div>
+            </div>
+          </div>
+        </AdminSettingsCollapseSection>
+
+        <AdminSettingsCollapseSection
+          title={t('admin.settings.section_terms')}
+          subtitle={t('admin.settings.section_terms_subtitle')}
+        >
+          <div className="space-y-6 min-w-0 px-1 pb-1">
+            <p className="text-sm text-base-content/70">{t('admin.settings.terms_help')}</p>
+
+            <div className="flex flex-col gap-1">
+              <label className="label-text font-medium text-sm" htmlFor="terms-ca">
+                {t('admin.settings.terms_ca_label')}
+              </label>
+              <textarea
+                id="terms-ca"
+                className="textarea textarea-bordered w-full font-mono text-sm min-h-40"
+                value={termsCa}
+                onChange={(e) => setTermsCa(e.target.value)}
+                placeholder={t('admin.settings.terms_placeholder')}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="label-text font-medium text-sm" htmlFor="terms-es">
+                {t('admin.settings.terms_es_label')}
+              </label>
+              <textarea
+                id="terms-es"
+                className="textarea textarea-bordered w-full font-mono text-sm min-h-40"
+                value={termsEs}
+                onChange={(e) => setTermsEs(e.target.value)}
+                placeholder={t('admin.settings.terms_placeholder')}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="label-text font-medium text-sm" htmlFor="terms-en">
+                {t('admin.settings.terms_en_label')}
+              </label>
+              <textarea
+                id="terms-en"
+                className="textarea textarea-bordered w-full font-mono text-sm min-h-40"
+                value={termsEn}
+                onChange={(e) => setTermsEn(e.target.value)}
+                placeholder={t('admin.settings.terms_placeholder')}
+              />
             </div>
           </div>
         </AdminSettingsCollapseSection>

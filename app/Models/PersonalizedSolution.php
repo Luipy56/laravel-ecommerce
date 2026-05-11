@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Casts\NullSafeEncrypted;
+use App\Models\Concerns\TracksDecryptionErrors;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PersonalizedSolution extends Model
 {
+    use TracksDecryptionErrors;
     protected $table = 'personalized_solutions';
 
     protected $fillable = [
@@ -32,9 +35,9 @@ class PersonalizedSolution extends Model
     protected function casts(): array
     {
         return [
-            'problem_description' => 'encrypted',
-            'resolution' => 'encrypted',
-            'improvement_feedback' => 'encrypted',
+            'problem_description' => NullSafeEncrypted::class,
+            'resolution' => NullSafeEncrypted::class,
+            'improvement_feedback' => NullSafeEncrypted::class,
             'is_active' => 'boolean',
             'improvement_feedback_at' => 'datetime',
         ];

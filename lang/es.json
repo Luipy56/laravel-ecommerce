@@ -25,6 +25,7 @@
     "shop.cart": "Carrito",
     "shop.cart.add": "Añadir al carrito",
     "shop.cart.empty": "El carrito está vacío.",
+    "shop.cart.psp_checkout_in_progress": "Tiene un pago pendiente. Complételo o espere a que caduque antes de modificar el carrito.",
     "shop.favorites.specify_one": "Envía product_id o pack_id, no ambos ni ninguno.",
     "shop.favorites.product_unavailable": "Este producto no está disponible o está inactivo.",
     "shop.favorites.pack_unavailable": "Este pack no está disponible o está inactivo.",
@@ -137,5 +138,6 @@
     "shop.personalized_solution_too_soon": "Hemos recibido la misma solicitud hace un momento. Espera unos segundos antes de volver a enviar.",
     "admin.personalized_solutions.patch_requires_body": "Envía al menos el texto de resolución o un estado.",
     "admin.orders.notify_in_transit_mail_invalid_status": "Solo se puede enviar este correo cuando el pedido está en estado «En tránsito».",
-    "admin.orders.notify_in_transit_mail_no_client_email": "El cliente no tiene un correo válido para enviar la notificación."
+    "admin.orders.notify_in_transit_mail_no_client_email": "El cliente no tiene un correo válido para enviar la notificación.",
+    "admin.orders.error_decryption": "No se han podido leer los datos cifrados de este pedido. Contacte con el administrador del sistema."
 }

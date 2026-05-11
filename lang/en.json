@@ -25,6 +25,7 @@
     "shop.cart": "Cart",
     "shop.cart.add": "Add to cart",
     "shop.cart.empty": "The cart is empty.",
+    "shop.cart.psp_checkout_in_progress": "You have a payment in progress. Complete it or wait for it to expire before changing your cart.",
     "shop.favorites.specify_one": "Send either product_id or pack_id, not both and not neither.",
     "shop.favorites.product_unavailable": "This product is not available or is inactive.",
     "shop.favorites.pack_unavailable": "This pack is not available or is inactive.",
@@ -137,5 +138,6 @@
     "shop.personalized_solution_too_soon": "We just received the same request. Please wait a few seconds before sending again.",
     "admin.personalized_solutions.patch_requires_body": "Send at least a resolution text or a status value.",
     "admin.orders.notify_in_transit_mail_invalid_status": "This email can only be sent when the order status is “In transit”.",
-    "admin.orders.notify_in_transit_mail_no_client_email": "The customer has no valid email address for this notification."
+    "admin.orders.notify_in_transit_mail_no_client_email": "The customer has no valid email address for this notification.",
+    "admin.orders.error_decryption": "Could not read the encrypted data for this order. Please contact the system administrator."
 }

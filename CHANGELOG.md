@@ -5,6 +5,107 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.160] - 2026-05-11
+
+### Changed
+- Product card price text, cart button, and pack badge/outline now use `--color-primary` (#fb5412) instead of `--color-primary-light` (#ffb300 yellow). Unified brand color across cards.
+- `--color-primary-light` CSS variable updated to match `--color-primary` value; `.btn-primary-light` class now resolves to primary.
+
+## [0.1.159] - 2026-05-11
+
+### Changed
+- SCSS visual merge: replaced Tailwind utility classes with SCSS BEM styles on **HomePage**, **ProductListPage**, and **ProductCard** (hero with gradient fallback, catalog sidebar, fluid product grid, price slider, category tags).
+- Shared `_fluid.scss` partial with responsive `fluid()` SCSS function used by all three component SCSS files.
+- Product card `.cart-btn` and `.product-card__pack-badge` reference `var(--color-primary-light)`.
+- Homepage full-bleed background image (`home-bg.jpg`, fixed attachment).
+- Section dividers (`border-top`) and consistent bold font-weight + letter-spacing on `.section-title`.
+- Register and Custom Solution pages: privacy checkboxes vertically centered, fixed missing space before "Política de privacidad" link, removed `GdprNotice` blocks, privacy link scrolls to top.
+- Agent version-bump rule clarified: bump per prompt-response turn, not per plan.
+
+### Added
+- `--color-primary-light: #ffb300` theme token in daisyUI `serralleria` theme; `.btn-primary-light` utility class.
+- Hero banner image (`public/images/hero.jpg`) and homepage background image (`public/images/home-bg.jpg`).
+- Editable number inputs on price range slider (replace static labels) with currency suffix.
+- `shop.filters.clear`, `shop.filters.price_min`, `shop.filters.price_max`, `gdpr.accept_privacy_prefix` i18n keys (ca, es, en).
+
+### Fixed
+- Navbar-to-hero gap: `.home-page` negative margin extended to fully cancel `<main>` padding (top and bottom).
+- Slider-btn (trending section arrow) scrolls to top when navigating to `/products`.
+- Clear-filters button resets **all** filters (category, features, packs, price) and moved to top of sidebar.
+- `shop_settings.value` column made nullable to prevent SQL integrity constraint error when saving empty textareas.
+- Product card footer pinned to bottom via flex column layout with `margin-top: auto`.
+- Catalog page top padding reduced for large screens.
+- Hero image contained with `overflow: hidden`.
+
+### Removed
+- `/test` preview routes and `resources/js/test/` directory.
+
+## [0.1.154] - 2026-05-09
+
+### Fixed
+- Sitemap XML no longer calls `toAtomString()` on a null `updated_at` (omit `lastmod` when missing) so `/sitemap.xml` does not return HTTP 500 after `routes:smoke`.
+
+## [0.1.153] - 2026-05-09
+
+### Added
+- `POST /api/v1/cart/cancel-pending-checkout` (verified clients): clears deferred PSP checkout state when the buyer returns via cancel URL; `CheckoutPage` calls it on `?payment=ko`.
+
+## [0.1.152] - 2026-05-09
+
+### Changed
+- Checkout with real Stripe or PayPal no longer converts the cart row to `kind=order` until payment succeeds (`PaymentCompletionService::markSucceeded`). Addresses and a pending payment are stored on the cart during PSP checkout; failed/canceled PSP flows revert the cart (clear addresses, remove incomplete payments, reset checkout-only shipping/installation pricing fields).
+- `OrderPlacedPaymentPending` emails are not sent when checkout is deferred to the PSP; payment-confirmed emails still send after success.
+- Stripe and PayPal return/cancel URLs use `/checkout` when the order is still a cart; `CheckoutPage` confirms Stripe sessions and captures PayPal returns without requiring `/orders/{id}` first.
+- Cart API includes `payments` for logged-in users; cart line/installation/merge mutations return 422 while a PSP checkout payment is open (`shop.cart.psp_checkout_in_progress`).
+
+## [0.1.149] - 1997-04-25
+
+- `Olga`
+
+## [0.1.149] - 2026-05-07
+
+### Added
+- `NullSafeEncrypted` custom Eloquent cast (`app/Casts/NullSafeEncrypted.php`): drop-in replacement for the built-in `'encrypted'` cast that returns `null` instead of throwing `DecryptException` when APP_KEY does not match; used for `Client.identification` and `PersonalizedSolution.problem_description/resolution/improvement_feedback`.
+- `TracksDecryptionErrors` model trait (`app/Models/Concerns/TracksDecryptionErrors.php`): records which attributes failed decryption; controllers check `hasDecryptionErrors()` to include `_decryption_error: true` in their responses.
+- `DecryptionWarningBanner` React component shown on admin pages when `_decryption_error` is true, with a clear message explaining the APP_KEY mismatch and how to fix it.
+
+### Fixed
+- `AdminOrderController::show()` now returns a full 200 response with `_decryption_error: true` instead of a 500 or 422; the order page loads with blank identification and shows the warning banner.
+- `AdminClientController` index and show: `_decryption_error` flag propagated to response.
+- `AdminPersonalizedSolutionController` index/show: manual per-field try/catch replaced with model-level `hasDecryptionErrors()`.
+- `AdminReturnRequestController`: `client._decryption_error` flag propagated.
+- All client-facing controllers (UserController, AuthController, PersonalizedSolutionController, PublicPersonalizedSolutionController) now silently get `null` instead of a 500 crash, because the model cast handles it.
+- Warning banner added to: AdminOrderShowPage, AdminClientShowPage, AdminClientsPage, AdminPersonalizedSolutionShowPage, AdminPersonalizedSolutionsPage, AdminReturnRequestShowPage.
+- Added `common.decryption_warning_title` and `common.decryption_warning_body` locale keys (ca/es/en).
+
+## [0.1.148] - 2026-05-07
+
+### Fixed
+- `GET /api/v1/admin/orders/{id}`: catches `DecryptException` on `client.identification` instead of crashing with HTTP 500 "The payload is invalid." — order now loads successfully with the field blank when the encrypted value is unreadable.
+- `GET /api/v1/admin/personalized-solutions`: per-row `DecryptException` handling so one corrupt encrypted row no longer crashes the entire list; affected rows carry `_decryption_error: true` with blank fields.
+- `AdminPersonalizedSolutionController::show()`: individual catches for `problem_description`, `resolution`, `improvement_feedback`, and `client.identification` encrypted fields.
+- Admin order show page now displays a localized, actionable error message instead of the raw cryptic "The payload is invalid." string.
+
+## [0.1.147] - 2026-05-07
+
+### Added
+
+- **Orders — visual status tracker**: new shared `OrderStatusTracker` component renders a horizontal steps chain (daisyUI `steps`, primary/orange) showing the current position in the order workflow. Steps adapt when `installation_requested` is true (adds Instal·lació node). Appears at the top of `/orders/:id` for non-finalized orders, and at the top of `/orders` for the most recent active order.
+- **Orders list — active-order banner**: `/orders` now shows a top card with the last open order's tracker and a direct link; if all orders are closed a friendly invite to browse new products is shown instead.
+
+### Changed
+
+- **Orders list (`/orders`)**: cards redesigned with bolder order number, coloured primary total, soft status badge, and full-row clickable link for better usability.
+- **Order detail (`/orders/:id`)**: old text-based status history timeline replaced by the visual tracker; non-visual status alerts (awaiting quote, awaiting payment) remain below.
+
+## [0.1.146] - 2026-05-07
+
+### Added
+
+- **Admin settings — Terms & Conditions block**: new collapse section in `/admin/settings` with three plain-text textareas (Catalan, Spanish, English) to edit the shop's terms and conditions. Content is stored in `shop_settings` under `terms_ca`, `terms_es`, `terms_en`.
+- **Storefront `/terms` page**: new public page that renders the active language's terms text (fetched from `GET shop/public-settings`); falls back to the first non-empty language. Shows a neutral message when no content has been configured.
+- **Footer link**: added "Termes i condicions / Términos y condiciones / Terms & Conditions" link in the legal footer section, alongside the existing privacy-policy link.
+
 ## [0.1.145] - 2026-05-07
 
 ### Fixed

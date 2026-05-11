@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
+import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
 
 const PLACEHOLDER_IMAGE = '/images/dummy.jpg';
 
@@ -356,6 +357,7 @@ export default function AdminOrderShowPage() {
 
   return (
     <div className="space-y-6">
+      {order._decryption_error && <DecryptionWarningBanner />}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">
           {t('admin.orders.title')} #{order.id}

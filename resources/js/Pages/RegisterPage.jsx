@@ -6,7 +6,6 @@ import { useCart } from '../contexts/CartContext';
 import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { parseWithZod, registerFormSchema } from '../validation';
-import GdprNotice from '../components/GdprNotice';
 import FieldHint from '../components/FieldHint';
 
 export default function RegisterPage() {
@@ -245,28 +244,26 @@ export default function RegisterPage() {
             </label>
           </fieldset>
 
-          <GdprNotice noticeKey="gdpr.notice_register" />
-
           <div className="flex flex-col gap-3">
-            <label className="flex items-start gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                className="checkbox checkbox-primary mt-0.5 shrink-0"
+                className="checkbox checkbox-primary shrink-0"
                 checked={acceptPrivacy}
                 onChange={(e) => setAcceptPrivacy(e.target.checked)}
                 required
               />
               <span className="text-sm">
-                {t('gdpr.accept_privacy').split('[Privacy Policy]')[0]}
-                <Link to="/privacy-policy" className="link link-primary">
+                {t('gdpr.accept_privacy_prefix')}{' '}
+                <Link to="/privacy-policy" className="link link-primary" onClick={() => window.scrollTo(0, 0)}>
                   {t('footer.privacy_policy')}
                 </Link>
               </span>
             </label>
-            <label className="flex items-start gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                className="checkbox checkbox-primary mt-0.5 shrink-0"
+                className="checkbox checkbox-primary shrink-0"
                 checked={acceptMarketing}
                 onChange={(e) => setAcceptMarketing(e.target.checked)}
               />

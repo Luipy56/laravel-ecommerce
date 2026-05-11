@@ -140,6 +140,8 @@ class AdminOrderController extends Controller
         $order->loadMissing('lines');
         $total = $order->grand_total;
 
+        $decryptionError = $order->client?->hasDecryptionErrors() ?? false;
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -183,6 +185,7 @@ class AdminOrderController extends Controller
                 'total' => round($total, 2),
                 'created_at' => $order->created_at?->toIso8601String(),
                 'updated_at' => $order->updated_at?->toIso8601String(),
+                '_decryption_error' => $decryptionError,
             ],
         ]);
     }

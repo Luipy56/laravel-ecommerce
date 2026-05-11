@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import './HomePage.scss';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -31,6 +32,7 @@ function groupFeaturedProductsByCategory(products) {
 
 export default function HomePage() {
   const { t } = useTranslation();
+  const [heroImageFailed, setHeroImageFailed] = useState(false);
 
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
@@ -55,76 +57,90 @@ export default function HomePage() {
   const loading = categoriesQuery.isPending || featuredQuery.isPending;
 
   return (
-    <div className="space-y-10">
-      <section className="hero hero-gradient rounded-box text-primary-content min-h-[200px] sm:min-h-[240px]">
-        <div className="hero-content flex flex-col items-center text-center max-w-2xl px-4 py-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-2">
-            {t('home.hero.title')}
-          </h1>
-          <p className="text-primary-content/90 text-base sm:text-lg">
-            {t('home.hero.tagline')}
-          </p>
+    <div className="home-page">
+      <section className={`hero${heroImageFailed ? ' hero--gradient' : ''}`}>
+        {!heroImageFailed && (
+          <img
+            src="/images/hero.jpg"
+            alt=""
+            className="hero__image"
+            onError={() => setHeroImageFailed(true)}
+          />
+        )}
+        <div className="hero__overlay">
+          <div className="page-container">
+            <div className="hero__content">
+              <h1>{t('home.hero.title')}</h1>
+              <p>{t('home.hero.tagline')}</p>
+              <Link to="/products" className="primary-btn">
+                {t('home.hero.cta_products')}
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {categories.length > 0 && (
-        <section>
-          <h2 className="text-xl font-semibold mb-3">{t('shop.categories')}</h2>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                to={`/categories/${c.id}/products`}
-                className="btn btn-outline btn-sm"
-              >
-                {c.name}
-              </Link>
-            ))}
+        <section className="categories section">
+          <div className="page-container">
+            <h2 className="section-title">{t('shop.categories')}</h2>
+            <div className="categories__list">
+              {categories.map((c) => (
+                <Link key={c.id} to={`/categories/${c.id}/products`} className="tag">
+                  {c.name}
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
-      <section>
-        <h2 className="text-xl font-semibold mb-4">{t('shop.featured')}</h2>
-        {loading ? (
-          <div className="flex justify-center py-12"><span className="loading loading-spinner loading-lg" /></div>
-        ) : featured.length === 0 ? (
-          <p className="text-base-content/70 py-8">{t('shop.featured_empty')}</p>
-        ) : (
-          <>
-            <div className="space-y-8 sm:hidden">
-              {featuredByCategory.map((group) => (
-                <section
-                  key={group.key}
-                  className="min-w-0"
-                  aria-labelledby={`home-featured-cat-${group.key}`}
-                >
-                  <h3
-                    id={`home-featured-cat-${group.key}`}
-                    className="text-base font-semibold mb-3 text-base-content"
+      <section className="trending section">
+        <div className="page-container">
+          <div className="section-header">
+            <h2 className="section-title">{t('shop.featured')}</h2>
+            <Link to="/products" className="slider-btn" aria-label={t('shop.featured')} onClick={() => window.scrollTo(0, 0)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="trending__loading">
+              <span className="loading loading-spinner loading-lg" />
+            </div>
+          ) : featured.length === 0 ? (
+            <p className="trending__empty">{t('shop.featured_empty')}</p>
+          ) : (
+            <>
+              <div className="trending__categories">
+                {featuredByCategory.map((group) => (
+                  <div
+                    key={group.key}
+                    className="trending__category-group"
+                    aria-labelledby={`home-featured-cat-${group.key}`}
                   >
-                    {group.categoryName ?? t('shop.featured_uncategorized')}
-                  </h3>
-                  <div className="flex flex-row gap-4 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 scroll-pl-4">
-                    {group.products.map((product) => (
-                      <div
-                        key={product.id}
-                        className="w-[min(82vw,20rem)] shrink-0 snap-start min-w-0"
-                      >
-                        <ProductCard product={product} />
-                      </div>
-                    ))}
+                    <h3
+                      id={`home-featured-cat-${group.key}`}
+                      className="trending__category-title"
+                    >
+                      {group.categoryName ?? t('shop.featured_uncategorized')}
+                    </h3>
+                    <div className="products-row products-row--scroll">
+                      {group.products.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
                   </div>
-                </section>
-              ))}
-            </div>
-            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featured.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </>
-        )}
+                ))}
+              </div>
+              <div className="products-grid">
+                {featured.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </section>
     </div>
   );

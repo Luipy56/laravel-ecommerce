@@ -17,6 +17,7 @@
   --color-secondary-content: #fff;
   --color-accent: #fb5412;
   --color-accent-content: #fff;
+  --color-primary-light: #fb5412;
   --color-neutral: oklch(45% 0.04 240);
   --color-neutral-content: oklch(98% 0.01 240);
   --color-info: oklch(70% 0.2 220);
@@ -151,6 +152,17 @@ select.select.select-bordered:focus,
 
 .animate-slide-in-toast {
   animation: slide-in-toast 0.25s ease-out;
+}
+
+/* Primary-light button variant (now uses primary) */
+.btn-primary-light {
+  background-color: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+.btn-primary-light:hover {
+  background-color: color-mix(in oklab, var(--color-primary) 85%, black);
+  border-color: color-mix(in oklab, var(--color-primary) 85%, black);
 }
 
 /* Floating success feedback: brand orange (primary), not semantic green */

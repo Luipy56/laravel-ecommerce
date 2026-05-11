@@ -24,6 +24,7 @@ function cartStateFromApi(data) {
     installation_fee_eur: data.installation_fee_eur ?? null,
     shipping_flat_eur: ship,
     total_with_shipping: data.total_with_shipping ?? total + ship,
+    payments: data.payments || [],
   };
 }
 
@@ -38,6 +39,7 @@ export function CartProvider({ children }) {
       installation_fee_eur: null,
       shipping_flat_eur: 9,
       total_with_shipping: 9,
+      payments: [],
     }),
   );
   const [loading, setLoading] = useState(false);
@@ -60,6 +62,7 @@ export function CartProvider({ children }) {
             installation_fee_eur: null,
             shipping_flat_eur: 9,
             total_with_shipping: 9,
+            payments: [],
           }),
         );
       }

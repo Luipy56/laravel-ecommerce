@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Casts\NullSafeEncrypted;
+use App\Models\Concerns\TracksDecryptionErrors;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
@@ -15,6 +17,7 @@ class Client extends Authenticatable implements CanResetPasswordContract, MustVe
     use CanResetPassword;
     use MustVerifyEmail;
     use Notifiable;
+    use TracksDecryptionErrors;
 
     protected $table = 'clients';
 
@@ -35,7 +38,7 @@ class Client extends Authenticatable implements CanResetPasswordContract, MustVe
     protected function casts(): array
     {
         return [
-            'identification' => 'encrypted',
+            'identification' => NullSafeEncrypted::class,
             'password' => 'hashed',
             'is_active' => 'boolean',
             'email_verified_at' => 'datetime',

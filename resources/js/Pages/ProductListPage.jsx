@@ -1,3 +1,4 @@
+import './ProductListPage.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,9 +12,6 @@ const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 
 
 const fmt = new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
-/**
- * Query string for filters. When categoryInPath is true, category is only in the URL path (/categories/:id/products), not repeated here.
- */
 function buildSearchParams({ selectedCategoryId, featureIds, search, categoryInPath = false, packsOnly = false, priceMin = null, priceMax = null }) {
   const next = new URLSearchParams();
   if (search) next.set('search', search);
@@ -65,29 +63,12 @@ function mapCatalogFromResponse(r) {
   return { items, pagination };
 }
 
-/* Range inputs are fully transparent — only used for drag interaction.
-   Visual handles are React-rendered circles positioned at minPct / maxPct. */
-const THUMB_CLS =
-  'absolute inset-x-0 w-full h-full appearance-none bg-transparent ' +
-  'pointer-events-none ' +
-  '[&::-webkit-slider-thumb]:pointer-events-auto ' +
-  '[&::-webkit-slider-thumb]:appearance-none ' +
-  '[&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:h-[18px] ' +
-  '[&::-webkit-slider-thumb]:opacity-0 ' +
-  '[&::-webkit-slider-runnable-track]:opacity-0 ' +
-  '[&::-moz-range-thumb]:pointer-events-auto ' +
-  '[&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:h-[18px] ' +
-  '[&::-moz-range-thumb]:opacity-0 ' +
-  '[&::-moz-range-track]:opacity-0';
-
-/** Dual-handle range slider for price filtering. */
 function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }) {
   const { t } = useTranslation();
   const [localMin, setLocalMin] = useState(priceMin ?? globalMin);
   const [localMax, setLocalMax] = useState(priceMax ?? globalMax);
   const debounceRef = useRef(null);
 
-  // Sync local state if URL params change externally
   useEffect(() => { setLocalMin(priceMin ?? globalMin); }, [priceMin, globalMin]);
   useEffect(() => { setLocalMax(priceMax ?? globalMax); }, [priceMax, globalMax]);
 
@@ -115,45 +96,62 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
   const isFiltered = (priceMin !== null && priceMin > globalMin) || (priceMax !== null && priceMax < globalMax);
 
   return (
-    <div className="bg-base-100 rounded-box border border-base-300 p-3 space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-sm">{t('shop.filters.price')}</h2>
+    <div className="sidebar-block">
+      <div className="sidebar-block__header">
+        <h4>{t('shop.filters.price')}</h4>
         {isFiltered && (
           <button
             type="button"
-            className="text-xs text-primary hover:underline"
+            className="sidebar-block__clear"
             onClick={() => { setLocalMin(globalMin); setLocalMax(globalMax); onChange(null, null); }}
           >
             {t('shop.filters.price_any')}
           </button>
         )}
       </div>
-
-      {/* Price labels */}
-      <div className="flex items-center justify-between text-sm font-medium tabular-nums">
-        <span>{fmt.format(localMin)}</span>
-        <span>{fmt.format(localMax)}</span>
+      <div className="price-inputs">
+        <label className="price-input">
+          <input
+            type="number"
+            min={globalMin}
+            max={globalMax}
+            value={localMin}
+            onChange={(e) => {
+              const v = Math.max(globalMin, Math.min(Number(e.target.value) || globalMin, localMax - 1));
+              setLocalMin(v);
+              commit(v, localMax);
+            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+            aria-label={t('shop.filters.price_min')}
+          />
+          <span>€</span>
+        </label>
+        <span className="price-inputs__separator">–</span>
+        <label className="price-input">
+          <input
+            type="number"
+            min={globalMin}
+            max={globalMax}
+            value={localMax}
+            onChange={(e) => {
+              const v = Math.min(globalMax, Math.max(Number(e.target.value) || globalMax, localMin + 1));
+              setLocalMax(v);
+              commit(localMin, v);
+            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+            aria-label={t('shop.filters.price_max')}
+          />
+          <span>€</span>
+        </label>
       </div>
-
-      {/* Dual-range track */}
-      <div className="relative h-5 flex items-center">
-        {/* Background track */}
-        <div className="absolute inset-x-0 h-1.5 rounded-full bg-base-300" />
-        {/* Filled track between handles */}
+      <div className="price-slider">
+        <div className="price-slider__track" />
         <div
-          className="absolute h-1.5 bg-primary"
+          className="price-slider__fill"
           style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
         />
-        {/* Visual handle circles — sit at the ends of the orange line */}
-        <div
-          className="absolute w-[18px] h-[18px] rounded-full bg-primary border-[3px] border-base-100 shadow-md -translate-x-1/2 pointer-events-none z-10"
-          style={{ left: `${minPct}%` }}
-        />
-        <div
-          className="absolute w-[18px] h-[18px] rounded-full bg-primary border-[3px] border-base-100 shadow-md -translate-x-1/2 pointer-events-none z-10"
-          style={{ left: `${maxPct}%` }}
-        />
-        {/* Invisible range inputs handle all drag interaction */}
+        <div className="price-slider__thumb" style={{ left: `${minPct}%` }} />
+        <div className="price-slider__thumb" style={{ left: `${maxPct}%` }} />
         <input
           type="range"
           min={globalMin}
@@ -161,8 +159,8 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
           step={1}
           value={localMin}
           onChange={handleMinChange}
-          className={`${THUMB_CLS} ${minPct >= 95 ? 'z-[11]' : 'z-[3]'}`}
-          aria-label="Precio mínimo"
+          className={`price-slider__input${minPct >= 95 ? ' price-slider__input--top' : ''}`}
+          aria-label={t('shop.filters.price_min')}
         />
         <input
           type="range"
@@ -171,8 +169,8 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
           step={1}
           value={localMax}
           onChange={handleMaxChange}
-          className={`${THUMB_CLS} z-[4]`}
-          aria-label="Precio máximo"
+          className="price-slider__input"
+          aria-label={t('shop.filters.price_max')}
         />
       </div>
     </div>
@@ -330,6 +328,19 @@ export default function ProductListPage() {
     navigate('/products?' + next.toString());
   }, [search, navigate, packsOnly, priceMinParam, priceMaxParam]);
 
+  const handleClearAllFilters = useCallback(() => {
+    const next = buildSearchParams({
+      selectedCategoryId: null,
+      featureIds: [],
+      search: search ?? '',
+      categoryInPath: false,
+      packsOnly: false,
+      priceMin: null,
+      priceMax: null,
+    });
+    navigate('/products?' + next.toString());
+  }, [search, navigate]);
+
   const selectCategory = useCallback(
     (id) => {
       const sid = String(id);
@@ -360,11 +371,11 @@ export default function ProductListPage() {
 
   const handlePriceChange = useCallback(
     (min, max) => {
-      const globalMin = priceRangeQuery.data?.min ?? 0;
-      const globalMax = priceRangeQuery.data?.max ?? 9999;
+      const gMin = priceRangeQuery.data?.min ?? 0;
+      const gMax = priceRangeQuery.data?.max ?? 9999;
       setFilters({
-        priceMin: min !== null && min > globalMin ? min : null,
-        priceMax: max !== null && max < globalMax ? max : null,
+        priceMin: min !== null && min > gMin ? min : null,
+        priceMax: max !== null && max < gMax ? max : null,
       });
     },
     [setFilters, priceRangeQuery.data]
@@ -394,132 +405,139 @@ export default function ProductListPage() {
   const globalMax = priceRangeQuery.data?.max ?? 9999;
   const showPriceSlider = !priceRangeQuery.isPending && globalMax > globalMin;
 
+  const hasActiveFilters = selectedCategoryId !== null || featureIds.length > 0 || packsOnly || priceMinParam !== null || priceMaxParam !== null;
+
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
-      <aside className="lg:w-64 shrink-0 space-y-6 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1">
-        <div>
-          <h2 className="font-semibold mb-2">{t('shop.categories')}</h2>
-          <ul className="menu bg-base-100 rounded-box border border-base-300">
-            <li>
-              <button type="button" onClick={handleAllCategories} className={selectedCategoryId == null ? 'active' : ''}>
-                {t('shop.categories.all')}
+    <div className="catalog-page">
+      <section className="catalog section">
+        <div className="page-container catalog-layout">
+          <aside className="sidebar">
+            {hasActiveFilters && (
+              <button type="button" className="clear-btn" onClick={handleClearAllFilters}>
+                {t('shop.filters.clear')}
               </button>
-            </li>
-            {categoriesList.map((c) => (
-              <li key={c.id}>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="shop-catalog-category"
-                    className="radio radio-sm"
-                    checked={selectedCategoryId === String(c.id)}
-                    onChange={() => selectCategory(c.id)}
-                    aria-label={c.name}
-                  />
-                  <span>{c.name}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="bg-base-100 rounded-box border border-base-300 p-3">
-          <label className="flex items-center justify-between gap-3 cursor-pointer">
-            <span className="text-sm font-medium text-base-content">{t('shop.filters.packs_only')}</span>
-            <input
-              type="checkbox"
-              role="switch"
-              className="toggle toggle-primary toggle-sm shrink-0"
-              checked={packsOnly}
-              onChange={() => setFilters({ packsOnly: !packsOnly })}
-              aria-checked={packsOnly}
-              aria-label={t('shop.filters.packs_only')}
-            />
-          </label>
-        </div>
-        {showPriceSlider && (
-          <PriceRangeSlider
-            globalMin={globalMin}
-            globalMax={globalMax}
-            priceMin={priceMinParam}
-            priceMax={priceMaxParam}
-            onChange={handlePriceChange}
-          />
-        )}
-        {featuresByGroup.length > 0 && (
-          <div>
-            <h2 className="font-semibold mb-2">{t('shop.filters.features')}</h2>
-            <div className="space-y-3">
-              {featuresByGroup.map(({ name, list }) => (
-                <div key={name} className="bg-base-100 rounded-box border border-base-300 p-3">
-                  <p className="text-sm font-medium text-base-content/80 mb-2">{name}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {list.map((f) => (
-                      <label key={f.id} className="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-xs"
-                          checked={featureIds.includes(String(f.id))}
-                          onChange={() => toggleFeature(f.id)}
-                          aria-label={f.value}
-                        />
-                        <span className="text-sm">{f.value}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </aside>
-      <div className="flex-1">
-        <PageTitle className="mb-4">{search ? t('common.search') + ': ' + search : t('shop.products')}</PageTitle>
-        {loadingInitial ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-lg" />
-          </div>
-        ) : catalogItems.length === 0 ? (
-          search ? (
-            <div className="rounded-box bg-base-200/60 p-6 sm:p-8 text-center">
-              <p className="text-lg font-medium text-base-content mb-2">
-                {t('shop.search.no_results', { query: search })}
-              </p>
-              <ul className="text-base-content/80 text-left list-disc list-inside max-w-md mx-auto space-y-1 mt-4">
-                <li>{t('shop.search.check_spelling')}</li>
-                <li>{t('shop.search.try_different')}</li>
-              </ul>
-            </div>
-          ) : (
-            <p className="text-base-content/70">{t('shop.no_products')}</p>
-          )
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {catalogItems.map(({ type, item }) => (
-                <ProductCard
-                  key={type === 'product' ? `p-${item.id}` : `k-${item.id}`}
-                  product={type === 'product' ? item : undefined}
-                  pack={type === 'pack' ? item : undefined}
-                />
-              ))}
-            </div>
-            {catalogInfinite.hasNextPage ? (
-              <div
-                ref={loadMoreSentinelRef}
-                className="flex justify-center py-8 min-h-[3rem]"
-                aria-live="polite"
-                aria-busy={catalogInfinite.isFetchingNextPage}
-              >
-                {catalogInfinite.isFetchingNextPage ? (
-                  <span className="loading loading-spinner loading-md" />
-                ) : (
-                  <span className="sr-only">{t('shop.catalog.scroll_for_more')}</span>
-                )}
+            )}
+
+            <div className="sidebar-block">
+              <h4>{t('shop.categories')}</h4>
+              <div className="filters-tags">
+                <button
+                  type="button"
+                  className={`tag${selectedCategoryId === null ? ' active' : ''}`}
+                  onClick={handleAllCategories}
+                >
+                  {t('shop.categories.all')}
+                </button>
+                {categoriesList.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`tag${selectedCategoryId === String(c.id) ? ' active' : ''}`}
+                    onClick={() => selectCategory(c.id)}
+                  >
+                    {c.name}
+                  </button>
+                ))}
               </div>
-            ) : null}
-          </>
-        )}
-      </div>
+            </div>
+
+            <div className="sidebar-block">
+              <label className="toggle-label">
+                <span>{t('shop.filters.packs_only')}</span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={packsOnly}
+                  onChange={() => setFilters({ packsOnly: !packsOnly })}
+                  aria-checked={packsOnly}
+                  aria-label={t('shop.filters.packs_only')}
+                />
+              </label>
+            </div>
+
+            {showPriceSlider && (
+              <PriceRangeSlider
+                globalMin={globalMin}
+                globalMax={globalMax}
+                priceMin={priceMinParam}
+                priceMax={priceMaxParam}
+                onChange={handlePriceChange}
+              />
+            )}
+
+            {featuresByGroup.map(({ name, list }) => (
+              <div key={name} className="sidebar-block">
+                <h4>{name}</h4>
+                <div className="checkbox-list">
+                  {list.map((f) => (
+                    <label key={f.id}>
+                      <input
+                        type="checkbox"
+                        checked={featureIds.includes(String(f.id))}
+                        onChange={() => toggleFeature(f.id)}
+                        aria-label={f.value}
+                      />
+                      {f.value}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </aside>
+
+          <div className="catalog-content">
+            <PageTitle className="catalog-title">
+              {search ? `${t('common.search')}: ${search}` : t('shop.products')}
+            </PageTitle>
+
+            {loadingInitial ? (
+              <div className="catalog-loading">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            ) : catalogItems.length === 0 ? (
+              search ? (
+                <div className="catalog-empty">
+                  <p className="catalog-empty__title">
+                    {t('shop.search.no_results', { query: search })}
+                  </p>
+                  <ul className="catalog-empty__tips">
+                    <li>{t('shop.search.check_spelling')}</li>
+                    <li>{t('shop.search.try_different')}</li>
+                  </ul>
+                </div>
+              ) : (
+                <p className="catalog-empty__text">{t('shop.no_products')}</p>
+              )
+            ) : (
+              <>
+                <div className="products-grid">
+                  {catalogItems.map(({ type, item }) => (
+                    <ProductCard
+                      key={type === 'product' ? `p-${item.id}` : `k-${item.id}`}
+                      product={type === 'product' ? item : undefined}
+                      pack={type === 'pack' ? item : undefined}
+                    />
+                  ))}
+                </div>
+                {catalogInfinite.hasNextPage && (
+                  <div
+                    ref={loadMoreSentinelRef}
+                    className="catalog-sentinel"
+                    aria-live="polite"
+                    aria-busy={catalogInfinite.isFetchingNextPage}
+                  >
+                    {catalogInfinite.isFetchingNextPage ? (
+                      <span className="loading loading-spinner loading-md" />
+                    ) : (
+                      <span className="sr-only">{t('shop.catalog.scroll_for_more')}</span>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

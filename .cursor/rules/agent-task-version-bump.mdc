@@ -13,13 +13,13 @@ alwaysApply: true
 2. Include that bump **before** **`git push`**, ideally in the **last** commit of the task or the dedicated committer step.
 3. When the task touched **`resources/js/`** or Vite, run **`npm run build`** so embedded version strings match.
 
-**Clarification:** “Each prompt” means **each finished agent run that changes the tree**, not a no-op chat turn. If no files are modified, no bump.
+**Clarification — per-prompt, not per-plan:** "Each prompt" means **each user message that the agent responds to with file changes** — not once per plan or multi-prompt task, but **once per prompt-response turn**. If the user sends 5 messages and the agent edits files in 4 of them, that is **4 separate patch bumps**. If no files are modified in a turn, no bump.
 
-**End of user prompt / session:** When the user signals work is **done** (or the agent finishes a substantive request) and **tracked files changed**, bump patch and add **`CHANGELOG.md`** bullets under **`## [X.Y.Z] - YYYY-MM-DD`** matching the new semver **in that same session** — **do not wait** for the word **commit** unless the user explicitly defers versioning. Stale **`footer.version`** / **`APP_VERSION`** confuse operators.
+**End of user prompt / session:** When the agent finishes responding to a user message and **tracked files changed**, bump patch **in that same response** — **do not wait** for the word **commit** or the next prompt. Stale **`footer.version`** / **`APP_VERSION`** confuse operators.
 
 ## What this overrides
 
-Loose “docs-only may skip” habits do **not** apply to **agent-delivered** work: if you **commit** a change, **bump patch** unless the only event is a **git revert** that fully restores a previous release (team discretion).
+Loose "docs-only may skip" habits do **not** apply to **agent-delivered** work: if you **commit** a change, **bump patch** unless the only event is a **git revert** that fully restores a previous release (team discretion).
 
 ## Changelog
 

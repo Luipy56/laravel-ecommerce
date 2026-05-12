@@ -23,7 +23,7 @@ class ProductReviewController extends Controller
 
         $reviews = ProductReview::query()
             ->where('product_id', $product->id)
-            ->approved()
+            ->published()
             ->with(['client.contacts'])
             ->orderByDesc('created_at')
             ->paginate($perPage);
@@ -31,7 +31,7 @@ class ProductReviewController extends Controller
         // Distribution: count per star level (1-5)
         $distribution = ProductReview::query()
             ->where('product_id', $product->id)
-            ->approved()
+            ->published()
             ->selectRaw('rating, COUNT(*) as cnt')
             ->groupBy('rating')
             ->pluck('cnt', 'rating')
@@ -83,8 +83,6 @@ class ProductReviewController extends Controller
             $existing->update([
                 'rating' => $validated['rating'],
                 'comment' => $validated['comment'] ?? null,
-                'status' => ProductReview::STATUS_PENDING,
-                'admin_note' => null,
                 'order_id' => $orderId ?? $existing->order_id,
             ]);
             $review = $existing->fresh();
@@ -95,7 +93,7 @@ class ProductReviewController extends Controller
                 'order_id' => $orderId,
                 'rating' => $validated['rating'],
                 'comment' => $validated['comment'] ?? null,
-                'status' => ProductReview::STATUS_PENDING,
+                'status' => ProductReview::STATUS_PUBLISHED,
             ]);
         }
 

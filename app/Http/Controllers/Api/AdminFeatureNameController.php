@@ -93,4 +93,53 @@ class AdminFeatureNameController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Return all feature names with their nested features.
+     * Supports search (matches feature name or feature value) and is_active filter.
+     */
+    public function indexWithFeatures(Request $request): JsonResponse
+    {
+        $query = FeatureName::query()->with(['features' => fn ($q) => $q->orderBy('value')]);
+
+        if ($request->filled('search')) {
+            $term = '%' . $request->string('search')->trim() . '%';
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', $term)
+                    ->orWhereHas('features', fn ($sub) => $sub->where('value', 'like', $term));
+            });
+        }
+        if ($request->has('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
+        $names = $query->orderBy('name')->get();
+
+        $data = $names->map(fn (FeatureName $n) => [
+            'id' => $n->id,
+            'name' => $n->name,
+            'is_active' => (bool) $n->is_active,
+            'features' => $n->features->map(fn ($f) => [
+                'id' => $f->id,
+                'value' => $f->value,
+                'is_active' => (bool) $f->is_active,
+            ])->values()->all(),
+        ])->values()->all();
+
+        return response()->json(['success' => true, 'data' => $data]);
+    }
+
+    public function toggle(FeatureName $featureName): JsonResponse
+    {
+        $featureName->update(['is_active' => !$featureName->is_active]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $featureName->id,
+                'name' => $featureName->name,
+                'is_active' => (bool) $featureName->is_active,
+            ],
+        ]);
+    }
 }

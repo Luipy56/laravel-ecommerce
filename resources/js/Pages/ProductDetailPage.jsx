@@ -5,9 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
-import { IconCart, IconChevronLeft, IconChevronRight, IconChevronUp } from '../components/icons';
+import { IconCart, IconChevronLeft, IconChevronRight, IconChevronUp, IconWarning } from '../components/icons';
 import FavoriteToggle from '../components/FavoriteToggle';
 import ReviewsSection from '../components/ReviewsSection';
+import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
 
 const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
@@ -24,6 +25,7 @@ export default function ProductDetailPage() {
   const imageRef = useRef(null);
   const galleryRef = useRef(null);
   const { addLine } = useCart();
+  const { data: publicSettings } = usePublicShopSettings();
 
   const productQuery = useQuery({
     queryKey: ['product', 'detail', id],
@@ -230,6 +232,16 @@ export default function ProductDetailPage() {
               )}
             </div>
 
+            {publicSettings?.show_low_stock_badge &&
+              publicSettings.low_stock_threshold > 0 &&
+              product.stock != null &&
+              Number(product.stock) <= publicSettings.low_stock_threshold && (
+              <div className="alert alert-warning alert-soft text-sm py-2 mt-2" role="status">
+                <IconWarning className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span>{t('shop.product.low_stock_warning')}</span>
+              </div>
+            )}
+
             {hasVariants && (
               <div className="mt-3" role="group" aria-label={t('shop.product.variant')}>
                 <div
@@ -310,7 +322,7 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {(product.features?.length > 0 || product.weight_kg != null || product.is_double_clutch || product.has_card || product.security_level || product.competitor_url) && (
+            {(product.features?.length > 0 || product.weight_kg != null || product.is_double_clutch || product.has_card || product.security_level) && (
               <div className="mt-3">
                 <h2 className="text-sm font-semibold text-base-content/80">{t('shop.product.specifications')}</h2>
                 <ul className="mt-1 space-y-0.5 list-none p-0 m-0">
@@ -339,18 +351,6 @@ export default function ProductDetailPage() {
                     <li className="text-sm text-base-content/80">
                       <span className="font-medium">{t('shop.product.security_level')}:</span>{' '}
                       {t(`shop.product.security_level.${product.security_level}`)}
-                    </li>
-                  )}
-                  {product.competitor_url && (
-                    <li className="text-sm text-base-content/80">
-                      <a
-                        href={product.competitor_url}
-                        className="link link-primary"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {t('shop.product.competitor_link')}
-                      </a>
                     </li>
                   )}
                 </ul>

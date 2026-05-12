@@ -14,6 +14,9 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
+        $catIds = DB::table('product_categories')
+            ->pluck('id', 'code');
+
         $now = now();
         $base = [
             'variant_group_id' => null,
@@ -39,7 +42,7 @@ class ProductSeeder extends Seeder
         $products = [];
 
         $cil = array_merge($base, [
-            'category_id' => 1,
+            'category_id' => $catIds['cilindros'],
             'is_extra_keys_available' => false,
             'extra_key_unit_price' => null,
             'has_card' => true,
@@ -125,7 +128,7 @@ class ProductSeeder extends Seeder
             'has_card' => true,
         ]);
 
-        $esc = array_merge($base, ['category_id' => 2, 'is_double_clutch' => false, 'has_card' => false]);
+        $esc = array_merge($base, ['category_id' => $catIds['escudo'], 'is_double_clutch' => false, 'has_card' => false]);
 
         // code, name, stock, security_level, price, purchase_price|null, has_card
         $escudos = [
@@ -161,7 +164,7 @@ class ProductSeeder extends Seeder
         }
 
         $products[] = array_merge($base, [
-            'category_id' => 3,
+            'category_id' => $catIds['segundo-cerrojo'],
             'code' => 'SP-MC-EZC-OFR',
             'name' => 'Oferta segundo cerrojo M&C Ezcurra',
             'description' => 'Cerrojo Ezcurra con cilindro M&C.',
@@ -173,7 +176,7 @@ class ProductSeeder extends Seeder
             'is_double_clutch' => false,
         ]);
         $products[] = array_merge($base, [
-            'category_id' => 3,
+            'category_id' => $catIds['segundo-cerrojo'],
             'code' => 'SP-MC-SAG',
             'name' => 'Segundo cerrojo SAG con M&C',
             'description' => 'Cerrojo Sag con cilindro M&C.',

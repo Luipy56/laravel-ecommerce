@@ -105,6 +105,16 @@ class AdminFeatureController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function toggle(Feature $feature): JsonResponse
+    {
+        $feature->update(['is_active' => !$feature->is_active]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->featureToArray($feature->fresh()->load('featureName')),
+        ]);
+    }
+
     private function featureToArray(Feature $f): array
     {
         return [

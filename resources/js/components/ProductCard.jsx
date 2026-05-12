@@ -6,6 +6,7 @@ import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
 import { IconCart } from './icons';
 import FavoriteToggle from './FavoriteToggle';
+import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
@@ -17,8 +18,15 @@ const FALLBACK_IMAGE = '/images/dummy.jpg';
 export default function ProductCard({ product, pack }) {
   const { t } = useTranslation();
   const { addLine } = useCart();
+  const { data: publicSettings } = usePublicShopSettings();
 
   const isPack = Boolean(pack);
+  const isLowStock =
+    !isPack &&
+    publicSettings?.show_low_stock_badge &&
+    publicSettings.low_stock_threshold > 0 &&
+    product.stock != null &&
+    Number(product.stock) <= publicSettings.low_stock_threshold;
   const detailUrl = isPack ? `/packs/${pack.id}` : `/products/${product.id}`;
 
   const handleAdd = (e) => {
@@ -66,6 +74,11 @@ export default function ProductCard({ product, pack }) {
           {!isPack && product.discount_percent > 0 && (
             <span className="product-card__discount-badge">
               −{Math.round(Number(product.discount_percent))}%
+            </span>
+          )}
+          {isLowStock && (
+            <span className="product-card__low-stock-badge">
+              {t('shop.product.low_stock')}
             </span>
           )}
           <div className="product-card__favorite">

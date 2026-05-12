@@ -107,7 +107,7 @@ export default function AdminLayout() {
     const operationsSource = [
       { to: '/admin/orders', labelKey: 'admin.nav.orders', alertKey: 'orders' },
       { to: '/admin/personalized-solutions', labelKey: 'admin.nav.personalized_solutions', alertKey: 'personalized_solutions' },
-      { to: '/admin/reviews', labelKey: 'admin.nav.reviews', alertKey: 'reviews' },
+      { to: '/admin/reviews', labelKey: 'admin.nav.reviews', alertKey: null },
       { to: '/admin/returns', labelKey: 'admin.nav.returns', alertKey: 'returns' },
     ];
     const catalogSource = [
@@ -136,7 +136,6 @@ export default function AdminLayout() {
   const [navAlerts, setNavAlerts] = useState({
     orders: false,
     personalized_solutions: false,
-    reviews: false,
     returns: false,
   });
 
@@ -152,12 +151,11 @@ export default function AdminLayout() {
         setNavAlerts({
           orders: Boolean(body.data.orders_need_attention),
           personalized_solutions: Boolean(body.data.personalized_solutions_need_attention),
-          reviews: Boolean(body.data.reviews_need_attention),
           returns: Boolean(body.data.returns_need_attention),
         });
       } catch {
         if (!cancelled) {
-          setNavAlerts({ orders: false, personalized_solutions: false, reviews: false, returns: false });
+          setNavAlerts({ orders: false, personalized_solutions: false, returns: false });
         }
       }
     })();
@@ -212,7 +210,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="drawer lg:drawer-open min-h-screen bg-base-200">
+    <div className="drawer lg:drawer-open min-h-screen bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
       <input id="admin-drawer" type="checkbox" className="drawer-toggle" aria-label={t('common.menu')} />
       <div className="drawer-content flex min-w-0 flex-col">
         <header className="sticky top-0 z-10 bg-base-100 border-b border-base-200 shrink-0">

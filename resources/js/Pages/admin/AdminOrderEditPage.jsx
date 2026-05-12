@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
+import { useAdminShopSettingsQuery } from '../../hooks/useAdminShopSettingsQuery';
 
 const STATUSES = ['pending', 'awaiting_payment', 'awaiting_installation_price', 'in_transit', 'sent', 'installation_pending', 'installation_confirmed'];
 const INSTALL_STATUSES = ['pending', 'priced', 'rejected'];
@@ -22,11 +23,13 @@ export default function AdminOrderEditPage() {
   const navigate = useNavigate();
   const { showSuccess } = useAdminToast();
   const { id } = useParams();
+  const { data: shopSettings } = useAdminShopSettingsQuery();
   const [status, setStatus] = useState('pending');
   const [shippingDate, setShippingDate] = useState('');
   const [installationRequested, setInstallationRequested] = useState(false);
   const [installationPrice, setInstallationPrice] = useState('');
   const [installationStatus, setInstallationStatus] = useState('pending');
+  const [hasPaid, setHasPaid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -48,6 +51,7 @@ export default function AdminOrderEditPage() {
         setInstallationRequested(!!o.installation_requested);
         setInstallationPrice(o.installation_price != null ? String(o.installation_price) : '');
         setInstallationStatus(o.installation_status || 'pending');
+        setHasPaid(!!o.has_payment);
       } else setLoadError(t('common.error'));
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
@@ -142,7 +146,9 @@ export default function AdminOrderEditPage() {
                 aria-label={t('admin.orders.shipping_date')}
               />
             </label>
-            <p className="text-sm text-base-content/70">{t('admin.orders.shipping_fixed_hint')}</p>
+            <p className="text-sm text-base-content/70">
+              {t('admin.orders.shipping_fixed_hint', { amount: Number(shopSettings?.shipping_flat_eur ?? 9).toFixed(2).replace('.', ',') })}
+            </p>
 
             {installationRequested && (
               <div className="space-y-4 pt-2 border-t border-base-200">
@@ -153,6 +159,7 @@ export default function AdminOrderEditPage() {
                     className="select select-bordered w-full max-w-md"
                     value={installationStatus}
                     onChange={(e) => setInstallationStatus(e.target.value)}
+                    disabled={hasPaid}
                     aria-label={t('admin.orders.installation_status_label')}
                   >
                     {INSTALL_STATUSES.map((s) => (
@@ -161,7 +168,7 @@ export default function AdminOrderEditPage() {
                   </select>
                 </label>
                 <label className="form-field">
-                  <span className="form-label">{t('admin.orders.installation_fee_label')} (€)</span>
+                  <span className="form-label">{t('admin.orders.installation_fee_label')}</span>
                   <input
                     type="number"
                     step="0.01"
@@ -169,6 +176,7 @@ export default function AdminOrderEditPage() {
                     className="input input-bordered w-full max-w-xs"
                     value={installationPrice}
                     onChange={(e) => setInstallationPrice(e.target.value)}
+                    disabled={hasPaid}
                     placeholder="0.00"
                     aria-label={t('admin.orders.installation_fee_label')}
                   />

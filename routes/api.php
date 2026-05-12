@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\AdminFeatureController;
 use App\Http\Controllers\Api\AdminFeatureNameController;
 use App\Http\Controllers\Api\AdminNavAlertsController;
 use App\Http\Controllers\Api\AdminOrderController;
+use App\Http\Controllers\Api\AdminSendEmailController;
 use App\Http\Controllers\Api\AdminPackController;
 use App\Http\Controllers\Api\AdminPersonalizedSolutionController;
 use App\Http\Controllers\Api\AdminProductController;
@@ -59,6 +60,7 @@ Route::get('email/verify/{id}/{hash}', [ClientVerificationController::class, 've
     ->name('verification.verify');
 
 Route::get('categories', [CategoryController::class, 'index']);
+Route::get('categories/with-first-product', [CategoryController::class, 'withFirstProduct']);
 Route::get('features', [FeatureController::class, 'index']);
 Route::get('products', [ProductController::class, 'index']);
 Route::get('products/featured', [ProductController::class, 'featured']);
@@ -171,10 +173,13 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::apiResource('faqs', AdminFaqController::class);
     Route::apiResource('categories', AdminCategoryController::class);
     Route::get('feature-names', [AdminFeatureNameController::class, 'index']);
+    Route::get('feature-names-with-features', [AdminFeatureNameController::class, 'indexWithFeatures']);
     Route::post('feature-names', [AdminFeatureNameController::class, 'store']);
     Route::get('feature-names/{featureName}', [AdminFeatureNameController::class, 'show']);
     Route::put('feature-names/{featureName}', [AdminFeatureNameController::class, 'update']);
+    Route::patch('feature-names/{featureName}/toggle', [AdminFeatureNameController::class, 'toggle']);
     Route::apiResource('features', AdminFeatureController::class);
+    Route::patch('features/{feature}/toggle', [AdminFeatureController::class, 'toggle']);
     Route::apiResource('products', AdminProductController::class);
     Route::post('products/{product}/images', [AdminProductController::class, 'storeImages']);
     Route::delete('products/{product}/images/{productImage}', [AdminProductController::class, 'destroyImage']);
@@ -189,6 +194,8 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::put('orders/{order}', [AdminOrderController::class, 'update']);
     Route::post('orders/{order}/notify-in-transit-mail', [AdminOrderController::class, 'sendInTransitCustomerMail'])
         ->middleware('throttle:30,1');
+    Route::get('orders/{order}/invoice', [AdminOrderController::class, 'invoice']);
+    Route::get('orders/{order}/delivery-note', [AdminOrderController::class, 'deliveryNote']);
     Route::get('return-requests', [AdminReturnRequestController::class, 'index']);
     Route::get('return-requests/{rma}', [AdminReturnRequestController::class, 'show']);
     Route::put('return-requests/{rma}', [AdminReturnRequestController::class, 'update']);
@@ -196,7 +203,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::apiResource('admins', AdminAdminController::class);
     Route::get('reviews', [AdminProductReviewController::class, 'index']);
     Route::get('reviews/{review}', [AdminProductReviewController::class, 'show']);
-    Route::patch('reviews/{review}', [AdminProductReviewController::class, 'update']);
+    Route::patch('reviews/{review}/toggle-visibility', [AdminProductReviewController::class, 'toggleVisibility']);
     Route::delete('reviews/{review}', [AdminProductReviewController::class, 'destroy']);
     Route::get('personalized-solutions', [AdminPersonalizedSolutionController::class, 'index']);
     Route::get('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'show']);
@@ -204,4 +211,5 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::patch('personalized-solutions/{personalized_solution}/resolution', [AdminPersonalizedSolutionController::class, 'patchResolution']);
     Route::put('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'update']);
     Route::delete('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'destroy']);
+    Route::post('send-email', AdminSendEmailController::class)->middleware('throttle:10,1');
 });

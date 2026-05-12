@@ -35,8 +35,8 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->comment('Disable without deleting');
             // Plain text (not citext): value is maintained in PHP for parity across SQLite/MySQL/PostgreSQL; pg_trgm GIN index on PostgreSQL only.
             $table->text('search_text')->nullable()->comment('Normalized name+code+description for full-text style search');
-            $table->decimal('avg_rating', 3, 2)->nullable()->comment('Denormalized average of approved product_reviews.rating; null when no approved reviews');
-            $table->unsignedInteger('reviews_count')->default(0)->comment('Denormalized count of approved product_reviews');
+            $table->decimal('avg_rating', 3, 2)->nullable()->comment('Denormalized average of published product_reviews.rating; null when no published reviews');
+            $table->unsignedInteger('reviews_count')->default(0)->comment('Denormalized count of published product_reviews');
             $table->timestamps();
         });
 

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\PersonalizedSolution;
-use App\Models\ProductReview;
 use App\Models\ReturnRequest;
 use Illuminate\Http\JsonResponse;
 
@@ -18,23 +17,18 @@ class AdminNavAlertsController extends Controller
     {
         $ordersNeedAttention = Order::query()
             ->where('kind', Order::KIND_ORDER)
-            ->whereIn('status', [
-                Order::STATUS_PENDING,
-                Order::STATUS_AWAITING_PAYMENT,
-                Order::STATUS_AWAITING_INSTALLATION_PRICE,
-                Order::STATUS_INSTALLATION_PENDING,
-            ])
+            ->where(fn ($q) => $q
+                ->where('status', 'like', '%pending%')
+                ->orWhere('status', 'awaiting_installation_price'))
             ->exists();
 
         $personalizedNeedAttention = PersonalizedSolution::query()
             ->where('is_active', true)
-            ->where('status', PersonalizedSolution::STATUS_PENDING_REVIEW)
+            ->where('status', 'like', '%pending%')
             ->exists();
 
-        $reviewsNeedAttention = ProductReview::pending()->exists();
-
         $returnsNeedAttention = ReturnRequest::query()
-            ->where('status', ReturnRequest::STATUS_PENDING_REVIEW)
+            ->where('status', 'like', '%pending%')
             ->exists();
 
         return response()->json([
@@ -42,7 +36,6 @@ class AdminNavAlertsController extends Controller
             'data' => [
                 'orders_need_attention' => $ordersNeedAttention,
                 'personalized_solutions_need_attention' => $personalizedNeedAttention,
-                'reviews_need_attention' => $reviewsNeedAttention,
                 'returns_need_attention' => $returnsNeedAttention,
             ],
         ]);

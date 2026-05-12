@@ -5,6 +5,7 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
+import SendEmailModal from '../../components/admin/SendEmailModal';
 
 const PLACEHOLDER_IMAGE = '/images/dummy.jpg';
 
@@ -29,6 +30,15 @@ function lineDisplayName(line) {
   if (line.product) return line.product.name + (line.product.code ? ` (${line.product.code})` : '');
   if (line.pack) return line.pack.name;
   return '';
+}
+
+function summariseLines(lines, { maxItems = 2, maxChars = 40, separator = ' · ' } = {}) {
+  const all = (lines || []).map((l) => {
+    const raw = `${lineDisplayName(l)} × ${l.quantity}`;
+    return raw.length > maxChars ? raw.slice(0, maxChars - 1) + '…' : raw;
+  });
+  if (all.length <= maxItems) return all.join(separator);
+  return all.slice(0, maxItems).join(separator) + separator + '…';
 }
 
 function lineTargetUrl(line) {
@@ -192,7 +202,7 @@ function OrderLinesMobileCards({ lines, t }) {
 }
 
 export default function AdminOrderShowPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { showSuccess } = useAdminToast();
   const { id } = useParams();
@@ -204,6 +214,7 @@ export default function AdminOrderShowPage() {
   const [installationAmount, setInstallationAmount] = useState('');
   const [installationSubmitting, setInstallationSubmitting] = useState(false);
   const [installationModalError, setInstallationModalError] = useState('');
+  const [sendEmailModalOpen, setSendEmailModalOpen] = useState(false);
   const [inTransitMailModalOpen, setInTransitMailModalOpen] = useState(false);
   const [inTransitMailEta, setInTransitMailEta] = useState('today');
   const [inTransitMailSubmitting, setInTransitMailSubmitting] = useState(false);
@@ -322,7 +333,7 @@ export default function AdminOrderShowPage() {
   const handlePrintLabel = () => {
     if (!shippingAddress) return;
     const addressLines = [shippingAddress.street, shippingAddress.city, shippingAddress.province, shippingAddress.postal_code].filter(Boolean).join(', ');
-    const linesSummary = (order.lines || []).map((l) => `${lineDisplayName(l)} × ${l.quantity}`).join('\n');
+    const linesSummary = summariseLines(order.lines, { separator: '\n' });
     const orderDateStr = order.order_date ? new Date(order.order_date).toLocaleDateString() : '';
     const doc = `
 <!DOCTYPE html>
@@ -363,8 +374,13 @@ export default function AdminOrderShowPage() {
           {t('admin.orders.title')} #{order.id}
           <span className="ml-2 badge badge-ghost text-sm font-normal">{t(`admin.orders.kind_${order.kind}`)}</span>
         </PageTitle>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link to="/admin/orders" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+          {order.client?.login_email && (
+            <button type="button" className="btn btn-outline btn-sm shrink-0" onClick={() => setSendEmailModalOpen(true)}>
+              {t('admin.send_email.button')}
+            </button>
+          )}
           {isOrder && shippingAddress && (
             <button type="button" className="btn btn-outline btn-sm shrink-0" onClick={() => setLabelModalOpen(true)} aria-label={t('admin.orders.shipping_label_button')}>
               {t('admin.orders.shipping_label_button')}
@@ -533,6 +549,24 @@ export default function AdminOrderShowPage() {
         {order.updated_at && <> · {t('admin.orders.updated_at')}: {new Date(order.updated_at).toLocaleString()}</>}
       </div>
 
+      {isOrder && (
+        <div className="flex flex-wrap gap-3">
+          <a href={`/api/v1/admin/orders/${id}/delivery-note?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
+            {t('admin.orders.delivery_note_button')}
+          </a>
+          <a href={`/api/v1/admin/orders/${id}/invoice?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
+            {t('admin.orders.invoice_button')}
+          </a>
+        </div>
+      )}
+
+      <SendEmailModal
+        recipientEmail={order.client?.login_email}
+        defaultSubject={t('admin.send_email.default_subject_order', { id: order.id })}
+        isOpen={sendEmailModalOpen}
+        onClose={() => setSendEmailModalOpen(false)}
+      />
+
       {/* Installation price (awaiting quote) */}
       <dialog
         className={`modal ${installationModalOpen ? 'modal-open' : ''}`}
@@ -635,7 +669,7 @@ export default function AdminOrderShowPage() {
                 <p className="mt-1">{[shippingAddress.street, shippingAddress.city, shippingAddress.province, shippingAddress.postal_code].filter(Boolean).join(', ')}</p>
                 {shippingAddress.note && <p className="mt-2 text-base-content/70">{shippingAddress.note}</p>}
                 <p className="mt-3 text-base-content/70">{t('admin.orders.order_date')}: {order.order_date ? new Date(order.order_date).toLocaleDateString() : ''}</p>
-                <p className="mt-1 font-mono text-xs">{(order.lines || []).map((l) => `${lineDisplayName(l)} × ${l.quantity}`).join(' · ') || ''}</p>
+                <p className="mt-1 font-mono text-xs">{summariseLines(order.lines)}</p>
               </div>
             </div>
           )}

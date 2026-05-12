@@ -233,12 +233,6 @@ export default function ReviewsSection({ productId }) {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <StarRating value={myReview.rating} size="xs" />
-                          {myReview.status === 'pending' && (
-                            <span className="badge badge-warning badge-soft badge-xs">{t('shop.reviews.status_pending')}</span>
-                          )}
-                          {myReview.status === 'rejected' && (
-                            <span className="badge badge-error badge-soft badge-xs">{t('shop.reviews.status_rejected')}</span>
-                          )}
                         </div>
                         {myReview.comment && (
                           <p className="text-sm text-base-content/80">{myReview.comment}</p>

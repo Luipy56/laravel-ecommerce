@@ -194,21 +194,29 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
                 {grouped.map(({ name: catName, list }) => (
                   <div key={catName || 'unnamed'}>
                     <p className="text-sm font-medium text-base-content/80 mb-2">{catName || ''}</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                       {list.map((p) => (
-                        <label
+                        <div
                           key={p.id}
-                          className="label cursor-pointer gap-2 bg-base-100 px-3 py-2 rounded-lg border border-base-300"
+                          role="button"
+                          tabIndex={0}
+                          className="flex items-start gap-2 bg-base-100 px-3 py-2 rounded-lg border border-base-300 cursor-pointer select-none min-h-16"
+                          onClick={() => toggleProduct(p.id)}
+                          onDoubleClick={() => window.open(`/admin/products/${p.id}`, '_blank')}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleProduct(p.id); } }}
                         >
                           <input
                             type="checkbox"
-                            className="checkbox checkbox-sm"
+                            className="checkbox checkbox-sm mt-0.5 shrink-0"
                             checked={productIds.includes(p.id)}
-                            onChange={() => toggleProduct(p.id)}
+                            readOnly
                             aria-label={p.name}
                           />
-                          <span className="label-text text-sm">{p.name}{p.code ? ` (${p.code})` : ''}</span>
-                        </label>
+                          <div className="min-w-0 overflow-hidden">
+                            <span className="text-sm font-semibold leading-tight block truncate" title={`${p.name}${p.code ? ` (${p.code})` : ''}`}>{p.name}{p.code ? ` (${p.code})` : ''}</span>
+                            {p.price != null && <span className="text-xs text-base-content/50 block">{Number(p.price).toFixed(2)} €</span>}
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>

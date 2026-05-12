@@ -67,7 +67,7 @@ export default function AdminFeatureEditPage() {
     return (
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Link to="/admin/features" className="btn btn-ghost btn-sm">
+          <Link to={`/admin/features/${id}`} className="btn btn-ghost btn-sm">
             {t('common.back')}
           </Link>
         </div>

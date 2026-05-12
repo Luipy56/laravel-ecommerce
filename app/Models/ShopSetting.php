@@ -29,6 +29,9 @@ class ShopSetting extends Model
 
     public const KEY_OVERSTOCK_BLACKLIST_PRODUCT_IDS = 'overstock_blacklist_product_ids';
 
+    /** Show a "low stock" badge on product cards in the storefront. */
+    public const KEY_SHOW_LOW_STOCK_BADGE = 'show_low_stock_badge';
+
     public const KEY_ACCEPT_PERSONALIZED_SOLUTIONS = 'accept_personalized_solutions';
 
     /** JSON object: table_id => list of visible column ids (see config/admin_index_columns.php). */
@@ -49,12 +52,6 @@ class ShopSetting extends Model
      */
     public const KEY_INSTALLATION_AUTO_PRICING = 'installation_auto_pricing';
 
-    /**
-     * Default time period filter for admin order/solution lists.
-     * Allowed values: 'week', 'month', 'year', 'all'.
-     */
-    public const KEY_ADMIN_LIST_DEFAULT_PERIOD = 'admin_list_default_period';
-
     /** Editable terms & conditions plain text, per language. */
     public const KEY_TERMS_CA = 'terms_ca';
 
@@ -74,6 +71,7 @@ class ShopSetting extends Model
         self::KEY_OVERSTOCK_THRESHOLD => 100,
         self::KEY_OVERSTOCK_BLACKLIST_ENABLED => false,
         self::KEY_OVERSTOCK_BLACKLIST_PRODUCT_IDS => [],
+        self::KEY_SHOW_LOW_STOCK_BADGE => false,
         self::KEY_ACCEPT_PERSONALIZED_SOLUTIONS => true,
         self::KEY_FEATURED_MAX_MANUAL => 0,
         self::KEY_FEATURED_MAX_LOW_STOCK => 0,
@@ -87,7 +85,6 @@ class ShopSetting extends Model
                 ['max_merchandise_eur' => 1000, 'fee_eur' => 180],
             ],
         ],
-        self::KEY_ADMIN_LIST_DEFAULT_PERIOD => 'week',
     ];
 
     public static function shippingFlatEur(): float
@@ -122,7 +119,7 @@ class ShopSetting extends Model
     {
         static::query()->updateOrCreate(
             ['key' => $key],
-            ['value' => $value]
+            ['value' => $value ?? '']
         );
     }
 

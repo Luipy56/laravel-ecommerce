@@ -9,7 +9,8 @@ use Illuminate\Database\Seeder;
 class ProductReviewSeeder extends Seeder
 {
     /**
-     * Seeds product_reviews with a realistic mix of statuses.
+     * Seeds product_reviews. All reviews go live immediately (published).
+     * One is hidden by admin to demonstrate moderation.
      *
      * Verified-purchase links follow real order_lines:
      *  - client 1 (maria.garcia) → order 1 (pending)   → cilStd
@@ -39,7 +40,7 @@ class ProductReviewSeeder extends Seeder
                 'order_id' => 1,
                 'rating' => 5,
                 'comment' => 'Excel·lent producte. La qualitat és molt bona i va arribar en perfectes condicions. Molt recomanable.',
-                'status' => ProductReview::STATUS_APPROVED,
+                'status' => ProductReview::STATUS_PUBLISHED,
                 'admin_note' => null,
                 'created_at' => $now->copy()->subDays(4),
                 'updated_at' => $now->copy()->subDays(4),
@@ -54,7 +55,7 @@ class ProductReviewSeeder extends Seeder
                 'order_id' => 2,
                 'rating' => 4,
                 'comment' => 'Bona qualitat preu. Fàcil de muntar. Li trec una estrella perquè el manual podria ser més detallat.',
-                'status' => ProductReview::STATUS_APPROVED,
+                'status' => ProductReview::STATUS_PUBLISHED,
                 'admin_note' => null,
                 'created_at' => $now->copy()->subDays(6),
                 'updated_at' => $now->copy()->subDays(6),
@@ -69,14 +70,14 @@ class ProductReviewSeeder extends Seeder
                 'order_id' => 5,
                 'rating' => 5,
                 'comment' => 'Molt satisfet. Enviament ràpid i el producte és exactament el que buscava. Repetiré.',
-                'status' => ProductReview::STATUS_APPROVED,
+                'status' => ProductReview::STATUS_PUBLISHED,
                 'admin_note' => null,
                 'created_at' => $now->copy()->subDays(1),
                 'updated_at' => $now->copy()->subDays(1),
             ];
         }
 
-        // --- client 2, cilSeg: pending (no verified order in confirmed statuses → order_id null) ---
+        // --- client 2, cilSeg: published (no verified order → order_id null) ---
         if ($cilSeg) {
             $reviews[] = [
                 'product_id' => $cilSeg->id,
@@ -84,14 +85,14 @@ class ProductReviewSeeder extends Seeder
                 'order_id' => null,
                 'rating' => 3,
                 'comment' => 'El producte compleix, però el temps d\'espera va ser més llarg del previst.',
-                'status' => ProductReview::STATUS_PENDING,
+                'status' => ProductReview::STATUS_PUBLISHED,
                 'admin_note' => null,
                 'created_at' => $now->copy()->subDays(2),
                 'updated_at' => $now->copy()->subDays(2),
             ];
         }
 
-        // --- client 3, cilStd: pending, no comment ---
+        // --- client 3, cilStd: published, no comment ---
         if ($cilStd) {
             $reviews[] = [
                 'product_id' => $cilStd->id,
@@ -99,14 +100,14 @@ class ProductReviewSeeder extends Seeder
                 'order_id' => null,
                 'rating' => 4,
                 'comment' => null,
-                'status' => ProductReview::STATUS_PENDING,
+                'status' => ProductReview::STATUS_PUBLISHED,
                 'admin_note' => null,
                 'created_at' => $now->copy()->subDays(1),
                 'updated_at' => $now->copy()->subDays(1),
             ];
         }
 
-        // --- client 3, escEst: rejected (spam/inappropriate) ---
+        // --- client 3, escEst: hidden by admin (spam/inappropriate) ---
         if ($escEst) {
             $reviews[] = [
                 'product_id' => $escEst->id,
@@ -114,8 +115,8 @@ class ProductReviewSeeder extends Seeder
                 'order_id' => null,
                 'rating' => 1,
                 'comment' => 'Enllaç de spam eliminat per l\'admin.',
-                'status' => ProductReview::STATUS_REJECTED,
-                'admin_note' => 'Ressenya rebutjada per contingut inapropiat.',
+                'status' => ProductReview::STATUS_HIDDEN,
+                'admin_note' => 'Ressenya amagada per contingut inapropiat.',
                 'created_at' => $now->copy()->subDays(3),
                 'updated_at' => $now->copy()->subDays(3),
             ];
@@ -129,7 +130,7 @@ class ProductReviewSeeder extends Seeder
                 'order_id' => null,
                 'rating' => 5,
                 'comment' => 'Producte de qualitat. Molt recomanable.',
-                'status' => ProductReview::STATUS_APPROVED,
+                'status' => ProductReview::STATUS_PUBLISHED,
                 'admin_note' => null,
                 'created_at' => $now,
                 'updated_at' => $now,

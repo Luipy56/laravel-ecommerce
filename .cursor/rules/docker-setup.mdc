@@ -1,0 +1,62 @@
+---
+description: Docker dev stack for laravel-ecommerce — services, ports, and how to run Artisan/npm inside containers
+alwaysApply: true
+---
+
+# Docker dev stack
+
+Project name: `laravel-ecommerce` (`name:` in `docker-compose.yml`).
+
+## Services
+
+| Service    | Image / build                        | Role                              |
+|------------|--------------------------------------|-----------------------------------|
+| `postgres`  | `postgres:16-alpine`                | Database (PostgreSQL 16)          |
+| `app`       | `docker/php/Dockerfile` → `development` | PHP 8.2-FPM, runs Laravel         |
+| `nginx`     | `nginx:1.27-alpine`                 | Reverse proxy → `app:9000`        |
+| `node`      | `node:22-bookworm-slim`             | Vite HMR dev server               |
+| `queue`     | same build as `app`                 | `php artisan queue:work`          |
+
+## URLs (dev)
+
+- App: **http://localhost:8080** (`HTTP_PORT` env, default `8080`)
+- Vite HMR: **http://localhost:5173** (`VITE_PORT`, default `5173`)
+
+## First-time setup
+
+```bash
+docker compose run --rm app composer install
+docker compose up -d
+docker compose exec app php artisan migrate --seed
+```
+
+## Day-to-day commands
+
+```bash
+# Start / stop
+docker compose up -d
+docker compose down
+
+# Artisan (always exec into app, not locally)
+docker compose exec app php artisan migrate
+docker compose exec app php artisan migrate:fresh --seed
+docker compose exec app php artisan test
+docker compose exec app php artisan routes:smoke
+
+# npm (exec into node service)
+docker compose exec node npm run build
+docker compose exec node npm ci
+
+# Logs
+docker compose logs -f app
+docker compose logs -f queue
+```
+
+## Key rules
+
+- **Never run `php artisan` or `composer` locally** when the stack is up — always `docker compose exec app`.
+- **Never run commands that affect other Docker projects** on this machine.
+- Code is bind-mounted at `/var/www/html`; `vendor` and `node_modules` live in named volumes (`vendor_data`, `node_modules_data`) — do not delete them carelessly.
+- DB credentials default: host `postgres`, db/user/pass `laravel`/`postgres`/`postgres` (override via `.env`).
+- `WAIT_FOR_DB=1` in `app` and `queue` means they wait for Postgres health before starting php-fpm.
+- Production image: `docker-compose.prod.yml` + `docker/nginx/Dockerfile.prod`. Never use prod compose for local dev.

@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\SetApiLocaleFromAcceptLanguage::class);
         $middleware->validateCsrfTokens(except: [
-            'api/v1/payments/webhooks/*',
+            'api/*',
         ]);
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,

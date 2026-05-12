@@ -59,7 +59,7 @@ export default function AdminFeatureNameEditPage() {
     return (
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Link to="/admin/features" className="btn btn-ghost btn-sm">
+          <Link to={`/admin/feature-names/${id}`} className="btn btn-ghost btn-sm">
             {t('common.back')}
           </Link>
         </div>
@@ -80,7 +80,7 @@ export default function AdminFeatureNameEditPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.feature_types.edit')}</PageTitle>
-        <Link to="/admin/features" className="btn btn-ghost btn-sm shrink-0">
+        <Link to={`/admin/feature-names/${id}`} className="btn btn-ghost btn-sm shrink-0">
           {t('common.back')}
         </Link>
       </div>
@@ -113,7 +113,7 @@ export default function AdminFeatureNameEditPage() {
               <span className="label-text">{t('admin.products.is_active')}</span>
             </label>
             <div className="flex justify-between gap-2 pt-4">
-              <Link to="/admin/features" className="btn btn-ghost">
+              <Link to={`/admin/feature-names/${id}`} className="btn btn-ghost">
                 {t('common.back')}
               </Link>
               <button type="submit" className="btn btn-primary" disabled={loading}>

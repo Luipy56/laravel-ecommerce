@@ -6,6 +6,18 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
 import ProductCard from '../components/ProductCard';
+import useDragScroll from '../hooks/useDragScroll';
+
+function ScrollRow({ children }) {
+  const { scrollRef, wrapperRef } = useDragScroll();
+  return (
+    <div ref={wrapperRef} className="scroll-row-wrapper">
+      <div ref={scrollRef} className="products-row products-row--scroll">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 /** Preserves featured order; categories appear in first-seen order. */
 function groupFeaturedProductsByCategory(products) {
@@ -35,10 +47,14 @@ export default function HomePage() {
   const [heroImageFailed, setHeroImageFailed] = useState(false);
 
   const categoriesQuery = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['categories', 'with-first-product'],
     queryFn: async ({ signal }) => {
-      const r = await api.get('categories', { signal });
-      return r.data.success ? r.data.data || [] : [];
+      const r = await api.get('categories/with-first-product', { signal });
+      if (!r.data.success) return [];
+      return (r.data.data || []).map((row) => ({
+        category: row.category,
+        product: Product.fromApi(row.product),
+      }));
     },
   });
 
@@ -51,7 +67,7 @@ export default function HomePage() {
     },
   });
 
-  const categories = categoriesQuery.data ?? [];
+  const categoryRows = categoriesQuery.data ?? [];
   const featured = featuredQuery.data ?? [];
   const featuredByCategory = useMemo(() => groupFeaturedProductsByCategory(featured), [featured]);
   const loading = categoriesQuery.isPending || featuredQuery.isPending;
@@ -75,7 +91,18 @@ export default function HomePage() {
           <div className="page-container">
             <div className="hero__content">
               <h1>{t('home.hero.title')}</h1>
-              <p>{t('home.hero.tagline')}</p>
+              <div className="hero__tagline">
+                <span className="hero__tagline-prefix">{t('home.hero.tagline_prefix')}</span>
+                <span className="text-rotate hero__rotating">
+                  <span>
+                    <span>{t('home.hero.tagline_w1')}</span>
+                    <span>{t('home.hero.tagline_w2')}</span>
+                    <span>{t('home.hero.tagline_w3')}</span>
+                    <span>{t('home.hero.tagline_w4')}</span>
+                    <span>{t('home.hero.tagline_w5')}</span>
+                  </span>
+                </span>
+              </div>
               <Link to="/products" className="primary-btn">
                 {t('home.hero.cta_products')}
               </Link>
@@ -84,15 +111,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {categories.length > 0 && (
+      {categoryRows.length > 0 && (
         <section className="categories section">
           <div className="page-container">
             <h2 className="section-title">{t('shop.categories')}</h2>
-            <div className="categories__list">
-              {categories.map((c) => (
-                <Link key={c.id} to={`/categories/${c.id}/products`} className="tag" onClick={() => window.scrollTo(0, 0)}>
-                  {c.name}
-                </Link>
+            <div className="categories__cards">
+              {categoryRows.map(({ category, product }) => (
+                <div key={category.id} className="categories__card-wrapper">
+                  <ProductCard product={product} />
+                  <Link
+                    to={`/categories/${category.id}/products`}
+                    className="categories__card-label"
+                  >
+                    {category.name}
+                  </Link>
+                </div>
               ))}
             </div>
           </div>
@@ -103,7 +136,7 @@ export default function HomePage() {
         <div className="page-container">
           <div className="section-header">
             <h2 className="section-title">{t('shop.featured')}</h2>
-            <Link to="/products" className="slider-btn" aria-label={t('shop.featured')} onClick={() => window.scrollTo(0, 0)}>
+            <Link to="/products" className="slider-btn" aria-label={t('shop.featured')}>
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6" /></svg>
             </Link>
           </div>
@@ -115,34 +148,27 @@ export default function HomePage() {
           ) : featured.length === 0 ? (
             <p className="trending__empty">{t('shop.featured_empty')}</p>
           ) : (
-            <>
-              <div className="trending__categories">
-                {featuredByCategory.map((group) => (
-                  <div
-                    key={group.key}
-                    className="trending__category-group"
-                    aria-labelledby={`home-featured-cat-${group.key}`}
+            <div className="trending__categories">
+              {featuredByCategory.map((group) => (
+                <div
+                  key={group.key}
+                  className="trending__category-group"
+                  aria-labelledby={`home-featured-cat-${group.key}`}
+                >
+                  <h3
+                    id={`home-featured-cat-${group.key}`}
+                    className="trending__category-title"
                   >
-                    <h3
-                      id={`home-featured-cat-${group.key}`}
-                      className="trending__category-title"
-                    >
-                      {group.categoryName ?? t('shop.featured_uncategorized')}
-                    </h3>
-                    <div className="products-row products-row--scroll">
-                      {group.products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="products-grid">
-                {featured.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </>
+                    {group.categoryName ?? t('shop.featured_uncategorized')}
+                  </h3>
+                  <ScrollRow>
+                    {group.products.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </ScrollRow>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </section>

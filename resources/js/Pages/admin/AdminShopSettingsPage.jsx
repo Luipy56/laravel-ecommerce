@@ -18,20 +18,6 @@ import {
   columnOrderAndPrefsFromServer,
 } from '../../hooks/useAdminShopSettingsQuery';
 
-function parseIdList(text) {
-  const parts = String(text || '')
-    .split(/[\s,;]+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const ids = parts.map((p) => parseInt(p, 10)).filter((n) => Number.isFinite(n) && n > 0);
-  return [...new Set(ids)];
-}
-
-function idsToText(ids) {
-  if (!Array.isArray(ids) || ids.length === 0) return '';
-  return ids.join(', ');
-}
-
 function defaultInstallationRows() {
   return [
     { max_merchandise_eur: '250', fee_eur: '90' },
@@ -67,16 +53,12 @@ export default function AdminShopSettingsPage() {
 
   const [lowStockEnabled, setLowStockEnabled] = useState(false);
   const [lowStockThreshold, setLowStockThreshold] = useState(10);
-  const [lowStockBlacklistEnabled, setLowStockBlacklistEnabled] = useState(false);
-  const [lowStockBlacklistText, setLowStockBlacklistText] = useState('');
+  const [showLowStockBadge, setShowLowStockBadge] = useState(false);
 
   const [overstockEnabled, setOverstockEnabled] = useState(false);
   const [overstockThreshold, setOverstockThreshold] = useState(100);
-  const [overstockBlacklistEnabled, setOverstockBlacklistEnabled] = useState(false);
-  const [overstockBlacklistText, setOverstockBlacklistText] = useState('');
 
   const [acceptPersonalizedSolutions, setAcceptPersonalizedSolutions] = useState(true);
-  const [adminListDefaultPeriod, setAdminListDefaultPeriod] = useState('week');
 
   const [featuredMaxManual, setFeaturedMaxManual] = useState(0);
   const [featuredMaxLowStock, setFeaturedMaxLowStock] = useState(0);
@@ -96,14 +78,10 @@ export default function AdminShopSettingsPage() {
   const applyPayload = useCallback((d) => {
     setLowStockEnabled(!!d.low_stock_enabled);
     setLowStockThreshold(Number(d.low_stock_threshold) || 0);
-    setLowStockBlacklistEnabled(!!d.low_stock_blacklist_enabled);
-    setLowStockBlacklistText(idsToText(d.low_stock_blacklist_product_ids));
+    setShowLowStockBadge(!!d.show_low_stock_badge);
     setOverstockEnabled(!!d.overstock_enabled);
     setOverstockThreshold(Number(d.overstock_threshold) || 0);
-    setOverstockBlacklistEnabled(!!d.overstock_blacklist_enabled);
-    setOverstockBlacklistText(idsToText(d.overstock_blacklist_product_ids));
     setAcceptPersonalizedSolutions(d.accept_personalized_solutions !== false);
-    setAdminListDefaultPeriod(['week', 'month', 'year', 'all'].includes(d.admin_list_default_period) ? d.admin_list_default_period : 'week');
     setFeaturedMaxManual(Number(d.featured_max_manual) || 0);
     setFeaturedMaxLowStock(Number(d.featured_max_low_stock) || 0);
     setFeaturedMaxOverstock(Number(d.featured_max_overstock) || 0);
@@ -159,14 +137,10 @@ export default function AdminShopSettingsPage() {
     return {
       low_stock_enabled: lowStockEnabled,
       low_stock_threshold: Math.max(0, parseInt(String(lowStockThreshold), 10) || 0),
-      low_stock_blacklist_enabled: lowStockBlacklistEnabled,
-      low_stock_blacklist_product_ids: parseIdList(lowStockBlacklistText),
+      show_low_stock_badge: showLowStockBadge,
       overstock_enabled: overstockEnabled,
       overstock_threshold: Math.max(0, parseInt(String(overstockThreshold), 10) || 0),
-      overstock_blacklist_enabled: overstockBlacklistEnabled,
-      overstock_blacklist_product_ids: parseIdList(overstockBlacklistText),
       accept_personalized_solutions: acceptPersonalizedSolutions,
-      admin_list_default_period: adminListDefaultPeriod,
       featured_max_manual: Math.max(0, parseInt(String(featuredMaxManual), 10) || 0),
       featured_max_low_stock: Math.max(0, parseInt(String(featuredMaxLowStock), 10) || 0),
       featured_max_overstock: Math.max(0, parseInt(String(featuredMaxOverstock), 10) || 0),
@@ -315,19 +289,10 @@ export default function AdminShopSettingsPage() {
               <input
                 type="checkbox"
                 className="toggle toggle-primary shrink-0"
-                checked={lowStockBlacklistEnabled}
-                onChange={(e) => setLowStockBlacklistEnabled(e.target.checked)}
+                checked={showLowStockBadge}
+                onChange={(e) => setShowLowStockBadge(e.target.checked)}
               />
-              <span className="label-text min-w-0 flex-1">{t('admin.settings.blacklist_enabled')}</span>
-            </label>
-            <label className="form-field w-full max-w-xl">
-              <span className="label-text">{t('admin.settings.blacklist_ids_hint')}</span>
-              <textarea
-                className="textarea textarea-bordered w-full font-mono text-sm min-h-[4.5rem]"
-                value={lowStockBlacklistText}
-                onChange={(e) => setLowStockBlacklistText(e.target.value)}
-                placeholder="1, 2, 3"
-              />
+              <span className="label-text min-w-0 flex-1">{t('admin.settings.show_low_stock_badge')}</span>
             </label>
             <label className="form-field max-w-xs">
               <span className="label-text">{t('admin.settings.featured_max_low_stock')}</span>
@@ -360,24 +325,6 @@ export default function AdminShopSettingsPage() {
                 onChange={(e) => setOverstockThreshold(e.target.value)}
               />
             </label>
-            <label className="label w-full min-w-0 cursor-pointer items-start justify-start gap-3">
-              <input
-                type="checkbox"
-                className="toggle toggle-primary shrink-0"
-                checked={overstockBlacklistEnabled}
-                onChange={(e) => setOverstockBlacklistEnabled(e.target.checked)}
-              />
-              <span className="label-text min-w-0 flex-1">{t('admin.settings.overstock_blacklist_enabled')}</span>
-            </label>
-            <label className="form-field w-full max-w-xl">
-              <span className="label-text">{t('admin.settings.blacklist_ids_hint')}</span>
-              <textarea
-                className="textarea textarea-bordered w-full font-mono text-sm min-h-[4.5rem]"
-                value={overstockBlacklistText}
-                onChange={(e) => setOverstockBlacklistText(e.target.value)}
-                placeholder="1, 2, 3"
-              />
-            </label>
             <label className="form-field max-w-xs">
               <span className="label-text">{t('admin.settings.featured_max_overstock')}</span>
               <input
@@ -404,27 +351,6 @@ export default function AdminShopSettingsPage() {
                 onChange={(e) => setAcceptPersonalizedSolutions(e.target.checked)}
               />
               <span className="label-text min-w-0 flex-1">{t('admin.settings.accept_personalized_solutions')}</span>
-            </label>
-          </div>
-        </AdminSettingsCollapseSection>
-
-        <AdminSettingsCollapseSection
-          title={t('admin.settings.section_list_defaults')}
-          subtitle={t('admin.settings.section_list_defaults_help')}
-        >
-          <div className="space-y-4 min-w-0 px-1 pb-1">
-            <label className="form-field max-w-xs">
-              <span className="label-text">{t('admin.settings.list_default_period_label')}</span>
-              <select
-                className="select select-bordered select-sm sm:select-md w-full"
-                value={adminListDefaultPeriod}
-                onChange={(e) => setAdminListDefaultPeriod(e.target.value)}
-              >
-                <option value="week">{t('admin.settings.period_week')}</option>
-                <option value="month">{t('admin.settings.period_month')}</option>
-                <option value="year">{t('admin.settings.period_year')}</option>
-                <option value="all">{t('admin.settings.period_all')}</option>
-              </select>
             </label>
           </div>
         </AdminSettingsCollapseSection>

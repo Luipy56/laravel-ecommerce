@@ -13,6 +13,7 @@ use App\Models\OrderLine;
 use App\Support\MailLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -326,6 +327,57 @@ class AdminOrderController extends Controller
         Mail::to($client->login_email)->locale($locale)->send(new OrderShippedMail($order, $estimateKey));
 
         return response()->json(['success' => true]);
+    }
+
+    public function invoice(Request $request, Order $order): Response
+    {
+        if ($order->kind !== Order::KIND_ORDER) {
+            abort(404);
+        }
+
+        $locale = $this->resolveDocLocale($request);
+        app()->setLocale($locale);
+        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses', 'payments']);
+
+        $html = view('pdf.invoice', ['order' => $order])->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html',
+            'Content-Disposition' => 'inline; filename="invoice-'.$order->id.'.html"',
+        ]);
+    }
+
+    public function deliveryNote(Request $request, Order $order): Response
+    {
+        if ($order->kind !== Order::KIND_ORDER) {
+            abort(404);
+        }
+
+        $locale = $this->resolveDocLocale($request);
+        app()->setLocale($locale);
+        $order->load(['lines.product', 'lines.pack', 'addresses', 'client.contacts', 'client.addresses']);
+
+        $html = view('pdf.delivery_note', ['order' => $order])->render();
+
+        return response($html, 200, [
+            'Content-Type' => 'text/html',
+            'Content-Disposition' => 'inline; filename="delivery-note-'.$order->id.'.html"',
+        ]);
+    }
+
+    private function resolveDocLocale(Request $request): string
+    {
+        $allowed = config('app.available_locales', ['ca', 'es', 'en']);
+        $locale = $request->query('locale');
+        if (in_array($locale, $allowed, true)) {
+            return $locale;
+        }
+        $pref = $request->header('Accept-Language', '');
+        if (preg_match('/^(ca|es|en)([-_]|$)/i', $pref, $m)) {
+            return strtolower($m[1]);
+        }
+
+        return config('app.locale');
     }
 
 }

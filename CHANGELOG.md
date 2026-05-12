@@ -5,6 +5,182 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.206] - 2026-05-12
+
+### Added
+- Admin: send custom email modal (admin can email clients from the admin panel).
+- Public shop settings API: new `usePublicShopSettings` hook for storefront.
+- Drag-scroll hook (`useDragScroll`) for horizontal scrollable UI elements.
+- Product reviews: full CRUD with publishing workflow (pending/published/rejected), client authorship, denormalized rating on products.
+- Shop settings seeder with default configuration values.
+
+### Changed
+- CSRF: exempt all `api/*` routes from CSRF token verification (SPA session-cookie auth relies on SameSite cookies + CORS).
+- Product review model: `approved` status renamed to `published`; observer and resource updated accordingly.
+- ProductSeeder: category IDs now resolved dynamically by code instead of hardcoded numeric IDs.
+- DatabaseSeeder: reset PostgreSQL auto-increment sequences before seeding to prevent FK violations when tests use `RefreshDatabase` with transaction rollback.
+- Admin layout, order pages, review pages, feature pages, shop settings page: UI and i18n improvements across all three locales (ca, es, en).
+- Footer: updated with public shop settings integration.
+- HomePage, ProductDetailPage, CheckoutPage, OrdersPage, RegisterPage: various UI refinements.
+- Navigation setter: improved route handling.
+- ProductCard: styling updates (SCSS and component).
+
+### Fixed
+- Test suite: 58 test failures resolved (CSRF 419 on API routes, PostgreSQL sequence drift causing seeder FK violations).
+
+## [0.1.201] - 2026-05-12
+
+### Changed
+- Admin pack form: product name in grid cards is now truncated with ellipsis when it overflows; full name visible on hover via tooltip.
+
+## [0.1.202] - 2026-05-12
+
+### Changed
+- Admin order detail: moved delivery note and invoice buttons to the bottom of the page instead of the toolbar.
+
+## [0.1.199] - 2026-05-12
+
+### Added
+- Admin order detail: delivery note (albarán) and invoice (factura) buttons that open the existing Blade-rendered documents in a new tab.
+- Admin API routes: `GET admin/orders/{order}/invoice` and `GET admin/orders/{order}/delivery-note`, reusing the same templates as the client-facing endpoints without ownership/payment restrictions.
+- New i18n keys for button labels (ca, es, en).
+
+## [0.1.196] - 2026-05-12
+
+### Changed
+- Admin pack form: product selection uses a responsive grid (1/2/3 columns) with fixed-height cards instead of a free-flow flex row.
+- Each product card now shows the name in bold with the price below in smaller gray text.
+- Double-clicking a product card opens its admin detail page in a new tab.
+
+## [0.1.198] - 2026-05-12
+
+### Changed
+- Admin features page: removed all toggle switches; is_active now shown as text (Sí/No) in the values table.
+- Feature-name header: only the chevron arrow expands/collapses; clicking the name navigates to the detail/edit view.
+- Feature value rows are clickable to navigate to the value detail view.
+- Added `common.expand` / `common.collapse` i18n keys (ca, es, en).
+
+## [0.1.195] - 2026-05-12
+
+### Changed
+- Admin features page: replaced double-list layout with collapsible feature-name sections, each containing a values table with inline toggle switches for is_active.
+- Added API endpoints: GET `admin/feature-names-with-features` (nested response), PATCH `admin/feature-names/{id}/toggle`, PATCH `admin/features/{id}/toggle`.
+- Added `IconPencil` and fixed `IconChevronDown` (now a proper angle chevron) in shared icons.
+- New i18n keys for the features manager UI (ca, es, en).
+
+## [0.1.194] - 2026-05-12
+
+### Changed
+- Admin edit page: password field now requires confirmation (double input) and includes an eye toggle to show/hide the password.
+- Added `IconEye` and `IconEyeOff` to the shared icons library.
+
+## [0.1.190] - 2026-05-12
+
+### Changed
+- FAQ seeder expanded from 1 entry to 9 realistic trilingual questions covering orders, payment, shipping, returns, accounts, product selection, installation, data privacy, and international shipping (last one seeded as inactive).
+
+## [0.1.185] - 2026-05-12
+
+### Fixed
+- Product card image container now uses a fixed 4:3 aspect ratio with object-fit cover, so cards align consistently regardless of image dimensions (e.g. wide GIFs no longer compress the card height).
+
+## [0.1.186] - 2026-05-12
+
+### Changed
+- Custom Solution page process steps redesigned: replaced orange gradient numbered circles with icon squares connected by a vertical line; step copy rewritten to be conversational and business-specific (no need to have everything figured out, case-by-case assessment, proposal by email in a few days).
+
+## [0.1.184] - 2026-05-12
+
+### Changed
+- Custom Solution page redesigned with a two-column layout: left column shows a hero title, subtitle, and three numbered process steps (with brand orange gradient circles) explaining what the client does, what the team does, and how the client is contacted; right column keeps the existing form with a new overline label and updated submit button label.
+- New locale keys added in ca/es/en for the hero copy, process step titles and descriptions, form overline label, and submit button label.
+
+## [0.1.183] - 2026-05-12
+
+### Added
+- `ShopSettingSeeder` with default Terms & Conditions content in ca, es, en (10 sections: scope, products & prices, payment, shipping, withdrawal, warranties, liability, disputes, modifications).
+
+### Fixed
+- `/terms` page showed "not configured" because `shop_settings` had no seeded terms rows. Seeder now populates them on `migrate:fresh --seed`.
+
+## [0.1.182] - 2026-05-12
+
+### Added
+- Admin custom email: "Send email" button on Order, Return, Personalized Solution, and Client detail pages opens a modal where the admin writes a free-text message sent to the customer using the existing transactional email template (logo + gradient band).
+- New `AdminCustomMail` Mailable, `AdminSendEmailController`, and shared `SendEmailModal` React component.
+- `IconMail` icon added to the icons library.
+- i18n keys for the send-email feature in ca, es, en.
+
+## [0.1.180] - 2026-05-12
+
+### Fixed
+- Admin edit pages "Volver" (back) button now navigates to the resource show page instead of the list index (products, features, feature names, packs, variant groups, categories).
+
+## [0.1.179] - 2026-05-12
+
+### Added
+- GIF support for product and pack images: animated GIFs now work in uploads, thumbnails, detail galleries, zoom panels, and product cards.
+- GIF fixture (`seeder-gif-1.gif`) added to seeder fixtures so development data includes animated images.
+
+### Changed
+- ProductImageSeeder and PackImageSeeder now auto-detect file format (jpg, png, gif, webp) instead of hardcoding JPEG, storing the correct MIME type and extension.
+
+## [0.1.177] - 2026-05-12
+
+### Changed
+- Hero section redesigned: left-aligned layout, heavier h1 (weight 800), left-to-right dark gradient overlay for better text legibility.
+- Tagline split into a static prefix line (small, 78% opacity) + a large rotating orange word using daisyUI `text-rotate` (pure CSS, 5 words, 2 s each).
+- Added `home.hero.tagline_prefix` and `home.hero.tagline_w1–w5` i18n keys for ca, es, en.
+
+
+
+### Changed
+- Footer redesigned: 4-column layout (brand, navigation, contact, social) matching the reference design.
+- Added "Segueix-nos / Síguenos / Follow us" social media section with circular icon buttons: Facebook, Instagram, X (Twitter), LinkedIn, YouTube — using real Serralleria Solidaria profile URLs.
+- Added 5 brand SVG icons (filled) to `icons/index.jsx`: `IconFacebook`, `IconInstagram`, `IconXTwitter`, `IconLinkedIn`, `IconYouTube`.
+- Added company address (Carrer Diputació 426, Barcelona) to brand column.
+- Legal links (privacy, terms) moved into the navigation column; external site link moved to social column.
+- Added `footer.social` i18n key (ca, es, en).
+
+
+
+### Changed
+- Privacy Policy page expanded into a combined Legal Notice & Privacy Policy page (Avís Legal i Política de Privacitat), now compliant with both LSSI-CE and GDPR.
+- Section 1 (Data Controller) updated with full real company data: NIF B-67344291302, registered address (Carrer Diputació 426, Barcelona), representative, and phone.
+- Added four new sections sourced from the reference legal notice: Terms of Use (§11), Links Policy (§12), Intellectual and Industrial Property (§13), and Applicable Law & Jurisdiction (§14).
+- Page title and footer link label updated across all three locales (ca, es, en).
+- Added `common.legal_notice` i18n key (ca, es, en) for the section divider.
+
+## [0.1.181] - 2026-05-12
+
+### Added
+- Product detail page (`/products/:id`): shows a warning alert ("Quedan pocas unidades disponibles") when the low stock badge setting is enabled and the product stock is at or below the configured threshold.
+- New `IconWarning` icon in the shared icons file.
+- i18n keys `shop.product.low_stock_warning` (ca, es, en).
+
+## [0.1.178] - 2026-05-12
+
+### Removed
+- Admin settings UI: removed blacklist controls (toggle + product IDs textarea) from both the Low Stock and Overstock sections. Backend keys remain for backward compatibility but are no longer exposed in the admin form.
+
+## [0.1.174] - 2026-05-12
+
+### Added
+- Low stock badge on product cards: new admin setting (`show_low_stock_badge`) to display a warning badge on storefront product cards when stock is at or below the configured threshold.
+- Public settings API now exposes `show_low_stock_badge` and `low_stock_threshold` for the storefront.
+- New `usePublicShopSettings` React hook for cached access to public shop settings.
+- i18n keys for badge text and admin toggle label (ca, es, en).
+
+## [0.1.173] - 2026-05-12
+
+### Changed
+- Reviews no longer require admin approval. Client reviews are published immediately and visible to all users.
+- Admin review workflow simplified: approve/reject/reset replaced with hide/show toggle. Admins can hide inappropriate reviews or delete them entirely.
+- Migration: `product_reviews.status` values changed from `pending|approved|rejected` to `published|hidden` (default `published`).
+- Removed reviews pending-moderation alert badge from admin sidebar navigation.
+- Storefront: removed "pending approval" and "rejected" status badges from the user's own review display.
+- Updated all locale keys (ca, es, en) to reflect new published/hidden statuses and hide/show actions.
+
 ## [0.1.165] - 2026-05-11
 
 ### Fixed

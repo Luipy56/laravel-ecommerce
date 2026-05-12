@@ -39,12 +39,12 @@ function storefrontOrderStatusBadgeClass(status) {
 
 function rmaStatusBadgeClass(status) {
   switch (status) {
-    case 'pending_review': return 'badge-warning';
-    case 'approved': return 'badge-info';
-    case 'refunded': return 'badge-success';
-    case 'rejected': return 'badge-error';
-    case 'cancelled': return 'badge-neutral';
-    default: return 'badge-neutral';
+    case 'pending_review': return 'badge-outline badge-warning';
+    case 'approved': return 'badge-outline badge-info';
+    case 'refunded': return 'badge-outline badge-success';
+    case 'rejected': return 'badge-outline badge-error';
+    case 'cancelled': return 'badge-outline badge-neutral';
+    default: return 'badge-outline badge-neutral';
   }
 }
 
@@ -330,9 +330,12 @@ export default function OrderDetailPage() {
     order.has_payment &&
     !existingRma;
 
+  const REVIEWABLE_STATUSES = ['sent', 'installation_pending', 'installation_confirmed'];
   const statusKey = `shop.status.${order.status}`;
   const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : order.status;
   const { products: productLines, packs: packLines } = partitionOrderLines(order.lines);
+  const firstProductId = productLines[0]?.product?.id ?? productLines[0]?.product_id;
+  const canReview = REVIEWABLE_STATUSES.includes(order.status) && firstProductId;
   const shippingAddress = order.addresses?.find((a) => a.type === 'shipping');
   const installationAddress = order.addresses?.find((a) => a.type === 'installation');
 
@@ -600,21 +603,36 @@ export default function OrderDetailPage() {
         </form>
       )}
 
-      {!canPay && order.has_payment && (
-        <div className="mt-4 flex flex-wrap justify-end gap-2">
-          <a href={`/api/v1/orders/${order.id}/delivery-note?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-primary btn-sm">
-            {t('shop.delivery_note')}
-          </a>
-          <a href={`/api/v1/orders/${order.id}/invoice?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
-            {t('shop.invoice')}
-          </a>
+      {(canReview || (!canPay && order.has_payment) || canRequestReturn) && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {canReview && (
+            <Link to={`/products/${firstProductId}`} className="btn btn-outline btn-primary btn-sm">
+              {t('shop.reviews.leave_review')}
+            </Link>
+          )}
+          <div className="flex-1" />
+          {canRequestReturn && (
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => setReturnModalOpen(true)}>
+              {t('shop.returns.request_return')}
+            </button>
+          )}
+          {!canPay && order.has_payment && (
+            <>
+              <a href={`/api/v1/orders/${order.id}/delivery-note?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-primary btn-sm">
+                {t('shop.delivery_note')}
+              </a>
+              <a href={`/api/v1/orders/${order.id}/invoice?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
+                {t('shop.invoice')}
+              </a>
+            </>
+          )}
         </div>
       )}
 
       {existingRma && (
         <div className="card bg-base-100 border border-base-200 shadow-sm rounded-2xl mt-4">
           <div className="card-body py-4 px-4 sm:px-5">
-            <h2 className="card-title text-base">{t('shop.returns.request_return')}</h2>
+            <h2 className="card-title text-base">{t('shop.returns.return_request_title')}</h2>
             <div className="flex flex-wrap items-center gap-3">
               <span className={`badge ${rmaStatusBadgeClass(existingRma.status)}`}>
                 {t(`shop.returns.status_${existingRma.status}`) || existingRma.status}
@@ -626,14 +644,6 @@ export default function OrderDetailPage() {
               )}
             </div>
           </div>
-        </div>
-      )}
-
-      {canRequestReturn && (
-        <div className="mt-4 flex justify-end">
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => setReturnModalOpen(true)}>
-            {t('shop.returns.request_return')}
-          </button>
         </div>
       )}
 

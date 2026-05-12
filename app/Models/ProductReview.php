@@ -9,11 +9,9 @@ class ProductReview extends Model
 {
     protected $table = 'product_reviews';
 
-    public const STATUS_PENDING = 'pending';
+    public const STATUS_PUBLISHED = 'published';
 
-    public const STATUS_APPROVED = 'approved';
-
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_HIDDEN = 'hidden';
 
     protected $fillable = [
         'product_id',
@@ -48,13 +46,13 @@ class ProductReview extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function scopeApproved($query)
+    public function scopePublished($query)
     {
-        return $query->where('status', self::STATUS_APPROVED);
+        return $query->where('status', self::STATUS_PUBLISHED);
     }
 
-    public function scopePending($query)
+    public function scopeHidden($query)
     {
-        return $query->where('status', self::STATUS_PENDING);
+        return $query->where('status', self::STATUS_HIDDEN);
     }
 }

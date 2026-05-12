@@ -36,7 +36,7 @@ function drawerNavClass(isActive) {
   return [
     'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors duration-200',
     isActive
-      ? 'bg-primary text-primary-content shadow-md'
+      ? 'text-white shadow-md [background:linear-gradient(to_right,#F75211,#8B2400)]'
       : 'text-base-content hover:bg-base-200 active:bg-base-300',
   ].join(' ');
 }

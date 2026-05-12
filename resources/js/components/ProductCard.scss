@@ -1,65 +1,79 @@
 @use "../styles/fluid" as *;
 
-// ─── Scroll row wrapper (fade edges) ────────────────────────────────────────
+// ─── Scroll row wrapper (fade edges, mobile only) ───────────────────────────
 .scroll-row-wrapper {
   position: relative;
-  margin-inline: fluid(-16, -24);
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 10px;
-    width: 48px;
-    z-index: 2;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
+  @media (max-width: 767px) {
+    margin-inline: fluid(-16, -24);
 
-    @media (max-width: 1265px) { display: none; }
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 10px;
+      width: 48px;
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    &::before {
+      left: 0;
+      background: linear-gradient(to right, rgba(245, 245, 245, 0.85), transparent);
+    }
+
+    &::after {
+      right: 0;
+      background: linear-gradient(to left, rgba(245, 245, 245, 0.85), transparent);
+    }
+
+    &.at-start::before { opacity: 0; }
+    &.at-end::after { opacity: 0; }
   }
-
-  &::before {
-    left: 0;
-    background: linear-gradient(to right, rgba(245, 245, 245, 0.85), transparent);
-  }
-
-  &::after {
-    right: 0;
-    background: linear-gradient(to left, rgba(245, 245, 245, 0.85), transparent);
-  }
-
-  &.at-start::before { opacity: 0; }
-  &.at-end::after { opacity: 0; }
 }
 
-// ─── Row (mobile carousel) ──────────────────────────────────────────────────
+// ─── Row ─────────────────────────────────────────────────────────────────────
 .products-row {
   display: flex;
   gap: fluid(16, 24);
 
   &--scroll {
-    overflow-x: auto;
-    padding-bottom: 10px;
-    padding-inline: fluid(16, 24);
-    cursor: grab;
-    user-select: none;
-    -webkit-user-select: none;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+    // Mobile: horizontal carousel
+    @media (max-width: 767px) {
+      overflow-x: auto;
+      padding-bottom: 10px;
+      padding-inline: fluid(16, 24);
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 
-    &::-webkit-scrollbar { height: 6px; }
-    &::-webkit-scrollbar-track { background: transparent; }
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: 3px;
+      &::-webkit-scrollbar { height: 6px; }
+      &::-webkit-scrollbar-track { background: transparent; }
+      &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 3px;
 
-      &:hover { background: rgba(0, 0, 0, 0.3); }
+        &:hover { background: rgba(0, 0, 0, 0.3); }
+      }
+
+      .product-card {
+        flex-shrink: 0;
+        width: clamp(200px, 55vw, 260px);
+      }
     }
 
-    .product-card {
-      flex-shrink: 0;
-      width: clamp(200px, 55vw, 260px);
+    // Desktop: wrap into a grid-like flow
+    @media (min-width: 768px) {
+      flex-wrap: wrap;
+
+      .product-card {
+        flex: 1 1 200px;
+        max-width: 260px;
+      }
     }
   }
 }

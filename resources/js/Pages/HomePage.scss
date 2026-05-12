@@ -105,33 +105,23 @@
 }
 
 // ─── Categories ──────────────────────────────────────────────────────────────
-.categories__cards {
+.categories__list {
   display: flex;
-  justify-content: center;
-  gap: fluid(16, 28);
+  gap: fluid(10, 16);
   flex-wrap: wrap;
-}
 
-.categories__card-wrapper {
-  flex: 0 0 clamp(180px, 40vw, 260px);
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  .tag {
+    padding: fluid(7, 10) fluid(14, 20);
+    border-radius: 10px;
+    border: 1px solid #d6a282;
+    background: white;
+    color: #c84d0f;
+    text-decoration: none;
+    font-size: fluid(13, 15);
+    transition: background 0.15s;
 
-  .product-card { flex: 1; }
-}
-
-.categories__card-label {
-  display: block;
-  text-align: center;
-  margin-top: fluid(8, 12);
-  font-size: fluid(14, 16);
-  font-weight: 600;
-  color: #c84d0f;
-  text-decoration: none;
-  transition: color 0.15s;
-
-  &:hover { color: #882200; }
+    &:hover { background: #fff3ec; }
+  }
 }
 
 // ─── Trending ────────────────────────────────────────────────────────────────

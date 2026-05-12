@@ -47,14 +47,10 @@ export default function HomePage() {
   const [heroImageFailed, setHeroImageFailed] = useState(false);
 
   const categoriesQuery = useQuery({
-    queryKey: ['categories', 'with-first-product'],
+    queryKey: ['categories'],
     queryFn: async ({ signal }) => {
-      const r = await api.get('categories/with-first-product', { signal });
-      if (!r.data.success) return [];
-      return (r.data.data || []).map((row) => ({
-        category: row.category,
-        product: Product.fromApi(row.product),
-      }));
+      const r = await api.get('categories', { signal });
+      return r.data.success ? r.data.data || [] : [];
     },
   });
 
@@ -67,10 +63,10 @@ export default function HomePage() {
     },
   });
 
-  const categoryRows = categoriesQuery.data ?? [];
+  const categories = categoriesQuery.data ?? [];
   const featured = featuredQuery.data ?? [];
   const featuredByCategory = useMemo(() => groupFeaturedProductsByCategory(featured), [featured]);
-  const loading = categoriesQuery.isPending || featuredQuery.isPending;
+  const loading = featuredQuery.isPending;
 
   useEffect(() => {
     document.title = t('shop.brand_name');
@@ -111,21 +107,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {categoryRows.length > 0 && (
+      {categories.length > 0 && (
         <section className="categories section">
           <div className="page-container">
             <h2 className="section-title">{t('shop.categories')}</h2>
-            <div className="categories__cards">
-              {categoryRows.map(({ category, product }) => (
-                <div key={category.id} className="categories__card-wrapper">
-                  <ProductCard product={product} />
-                  <Link
-                    to={`/categories/${category.id}/products`}
-                    className="categories__card-label"
-                  >
-                    {category.name}
-                  </Link>
-                </div>
+            <div className="categories__list">
+              {categories.map((c) => (
+                <Link key={c.id} to={`/categories/${c.id}/products`} className="tag">
+                  {c.name}
+                </Link>
               ))}
             </div>
           </div>

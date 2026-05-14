@@ -195,58 +195,60 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Spacer: taller on mobile due to search row */}
-      <div className="h-24 lg:h-16 flex-shrink-0" aria-hidden="true" />
+      {/* Spacer: mobile = main row + search row + gradient (~8rem); lg+ single row + gradient */}
+      <div className="min-h-[8rem] shrink-0 lg:min-h-[4.25rem]" aria-hidden="true" />
       <header
         className="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-out bg-base-100 shadow-lg"
         style={{ transform: visible ? 'translateY(0)' : 'translateY(-100%)' }}
       >
-        {/* Main row: no overlap; start can shrink, end stays fixed */}
-        <div className="navbar min-h-0 flex-nowrap gap-1 sm:gap-2 px-2 sm:px-4">
-          <div className="navbar-start min-w-0 flex-1 flex items-center flex-nowrap gap-1 sm:gap-2">
+        <div className="flex min-h-14 w-full min-w-0 flex-nowrap items-center gap-1 px-2 py-1 sm:min-h-16 sm:gap-2 sm:px-4 sm:py-1">
+          <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
             <label htmlFor="drawer-nav" className="btn btn-ghost btn-square btn-sm shrink-0 lg:hidden" aria-label={t('common.menu')}>
               <IconMenu className="h-6 w-6" />
             </label>
             <Link
               to="/"
-              className="btn btn-ghost text-lg sm:text-xl min-w-0 px-1 sm:px-2 truncate shrink-0"
+              className="btn btn-ghost max-w-[40vw] shrink truncate px-1 text-base sm:max-w-[12rem] sm:px-2 sm:text-xl"
               title={t('shop.brand_name')}
             >
               <span className="truncate">{t('shop.brand_name')}</span>
             </Link>
             <Link
               to="/products"
-              className={`btn btn-ghost hidden sm:inline-flex shrink-0${productsNavActive ? ' btn-active' : ''}`}
+              className={`btn btn-ghost hidden shrink-0 sm:inline-flex${productsNavActive ? ' btn-active' : ''}`}
             >
               {t('shop.products')}
             </Link>
             <Link
               to="/products?packs_only=1"
-              className={`btn btn-ghost hidden sm:inline-flex shrink-0${packsNavActive ? ' btn-active' : ''}`}
+              className={`btn btn-ghost hidden shrink-0 sm:inline-flex${packsNavActive ? ' btn-active' : ''}`}
             >
               {t('shop.filters.packs_only')}
             </Link>
-            <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex shrink-0">
+            <Link to="/custom-solution" className="btn btn-ghost hidden shrink-0 lg:inline-flex">
               {t('shop.custom_solution')}
             </Link>
-            <Link to="/faq" className="btn btn-ghost hidden md:inline-flex shrink-0">
+            <Link to="/faq" className="btn btn-ghost hidden shrink-0 xl:inline-flex">
               {t('shop.faq.nav')}
             </Link>
-            <form onSubmit={handleSearch} className="join hidden lg:flex shrink-0 min-w-0">
+            <form
+              onSubmit={handleSearch}
+              className="join ml-0 hidden min-w-0 flex-1 basis-0 lg:ml-1 lg:flex lg:max-w-md xl:max-w-lg"
+            >
               <input
                 type="search"
-                className="input input-bordered join-item w-36 xl:w-48 input-sm min-w-0"
+                className="input input-bordered join-item input-sm min-w-0 w-full flex-1 basis-0"
                 placeholder={t('shop.search_placeholder')}
                 value={searchQ}
                 onChange={handleSearchInputChange}
                 aria-label={t('shop.search_placeholder')}
               />
-              <button type="submit" className="btn btn-primary join-item btn-sm">
+              <button type="submit" className="btn btn-primary join-item btn-sm shrink-0">
                 {t('common.search')}
               </button>
             </form>
           </div>
-          <div className="navbar-end gap-1 sm:gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <div
               ref={localeMenuRef}
               className={`dropdown dropdown-end hidden lg:inline-block ${localeMenuOpen ? 'dropdown-open' : 'dropdown-close'}`}
@@ -326,7 +328,7 @@ export default function Navbar() {
               <div className="dropdown dropdown-end">
                 <label
                   tabIndex={0}
-                  className="btn btn-ghost btn-sm max-w-[8rem] sm:max-w-none gap-1.5 border border-transparent px-2 hover:border-base-300 normal-case"
+                  className="btn btn-ghost btn-sm max-w-[6rem] gap-1.5 border border-transparent px-2 hover:border-base-300 normal-case sm:max-w-[8rem] lg:max-w-[10rem] xl:max-w-none"
                 >
                   <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <IconUser className="h-4 w-4" aria-hidden="true" />

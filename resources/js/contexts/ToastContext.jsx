@@ -53,7 +53,7 @@ function toastPlacementClass(pathname) {
   if (isAdminShell) {
     return 'toast toast-end toast-top z-[100] fixed right-4 top-[calc(3.75rem+0.25rem)] max-w-[100vw] sm:right-6';
   }
-  return 'toast toast-end toast-top z-[100] fixed right-4 top-[calc(6rem+0.25rem)] max-w-[100vw] sm:right-6 lg:top-[calc(4rem+0.25rem)]';
+  return 'toast toast-end toast-top z-[100] fixed right-4 top-[calc(8rem+0.25rem)] max-w-[100vw] sm:right-6 lg:top-[calc(4.25rem+0.25rem)]';
 }
 
 function ToastViewport({ items, onDismiss }) {

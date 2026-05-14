@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.215] - 2026-05-14
+
+### Fixed
+- **Storefront header:** replaced daisyUI **`navbar-start` / `navbar-end`** (fixed **50%** width each) with a plain **flex** row so left content cannot paint over language, cart, and account; desktop search uses **`flex-1 min-w-0`** with a **max-width** cap instead of a fixed width; **FAQ** and **custom solution** links show from **xl** / **lg** respectively to reduce crowding; spacer height matches the two-row mobile header (**~8rem**); catalog sticky sidebar and toasts use matching offsets by breakpoint.
+
 ## [0.1.214] - 2026-05-14
 
 ### Fixed

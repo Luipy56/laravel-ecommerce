@@ -208,10 +208,10 @@ export default function Navbar() {
             </label>
             <Link
               to="/"
-              className="btn btn-ghost max-w-[40vw] shrink truncate px-1 text-base sm:max-w-[12rem] sm:px-2 sm:text-xl"
+              className="btn btn-ghost shrink-0 whitespace-nowrap px-1 text-base sm:px-2 sm:text-xl"
               title={t('shop.brand_name')}
             >
-              <span className="truncate">{t('shop.brand_name')}</span>
+              {t('shop.brand_name')}
             </Link>
             <Link
               to="/products"

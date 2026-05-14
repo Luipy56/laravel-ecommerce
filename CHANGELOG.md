@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.216] - 2026-05-14
+
+### Fixed
+- **Storefront navbar:** home / brand link shows the **full company name** (no `truncate` or max-width cap); **`shrink-0`** + **`whitespace-nowrap`** so the label is not ellipsized by the flex row.
+
 ## [0.1.215] - 2026-05-14
 
 ### Fixed

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useApiPendingCount from '../hooks/useApiPendingCount';
 import { useAuth } from '../contexts/AuthContext';
+import { useStorefrontNavbarVisibility } from '../contexts/StorefrontNavbarVisibilityContext';
 import { useCart } from '../contexts/CartContext';
 import {
   IconCart,
@@ -53,13 +54,20 @@ export default function Navbar() {
   const [locale, setLocale] = useState(i18n.language);
   const localeCode = (lng) => (lng === 'ca' ? 'CA' : lng === 'es' ? 'ES' : 'EN');
   const [searchQ, setSearchQ] = useState('');
-  const [visible, setVisible] = useState(true);
+  const { visible, setNavbarVisible } = useStorefrontNavbarVisibility();
   const lastScrollY = useRef(0);
   const debounceTimerRef = useRef(null);
   const hasUserEditedSearchRef = useRef(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const localeMenuRef = useRef(null);
   const localeTriggerRef = useRef(null);
+
+  const packsOnlyInUrl = useMemo(
+    () => new URLSearchParams(location.search).get('packs_only') === '1',
+    [location.search]
+  );
+  const productsNavActive = location.pathname === '/products' && !packsOnlyInUrl;
+  const packsNavActive = location.pathname === '/products' && packsOnlyInUrl;
 
   // Sync search input with URL when on product list (so clearing + Enter updates list)
   useEffect(() => {
@@ -90,17 +98,17 @@ export default function Navbar() {
     const handleScroll = () => {
       const y = window.scrollY;
       if (y <= SCROLL_THRESHOLD) {
-        setVisible(true);
+        setNavbarVisible(true);
       } else {
         const delta = y - lastScrollY.current;
-        if (delta > SCROLL_DELTA) setVisible(false);
-        else if (delta < -SCROLL_DELTA) setVisible(true);
+        if (delta > SCROLL_DELTA) setNavbarVisible(false);
+        else if (delta < -SCROLL_DELTA) setNavbarVisible(true);
       }
       lastScrollY.current = y;
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [setNavbarVisible]);
 
   const handleLocale = (lng) => {
     i18n.changeLanguage(lng);
@@ -206,7 +214,18 @@ export default function Navbar() {
             >
               <span className="truncate">{t('shop.brand_name')}</span>
             </Link>
-            <Link to="/products" className="btn btn-ghost hidden sm:inline-flex shrink-0">{t('shop.products')}</Link>
+            <Link
+              to="/products"
+              className={`btn btn-ghost hidden sm:inline-flex shrink-0${productsNavActive ? ' btn-active' : ''}`}
+            >
+              {t('shop.products')}
+            </Link>
+            <Link
+              to="/products?packs_only=1"
+              className={`btn btn-ghost hidden sm:inline-flex shrink-0${packsNavActive ? ' btn-active' : ''}`}
+            >
+              {t('shop.filters.packs_only')}
+            </Link>
             <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex shrink-0">
               {t('shop.custom_solution')}
             </Link>

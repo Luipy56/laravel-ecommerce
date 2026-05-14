@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.211] - 2026-05-14
+
+### Added
+- Storefront navbar and mobile drawer: direct link to the catalog filtered with **`packs_only=1`** (`/products?packs_only=1`), reusing **`shop.filters.packs_only`** for labels.
+
+### Changed
+- Product catalog sidebar: **`position: sticky`** `top` and **`max-height`** follow navbar show/hide (via **`StorefrontNavbarVisibilityContext`**) so the filter column does not keep a large empty gap at the top when the header slides away on scroll down; transitions match the navbar transform duration.
+
 ## [0.1.210] - 2026-05-12
 
 ### Changed

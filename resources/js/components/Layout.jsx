@@ -79,7 +79,7 @@ export default function Layout() {
   }, [pathname, location.search]);
 
   return (
-    <div className="drawer">
+    <div className="drawer overflow-x-hidden">
       <input
         id={STOREFRONT_DRAWER_ID}
         type="checkbox"

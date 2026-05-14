@@ -208,7 +208,7 @@ export default function Navbar() {
             </label>
             <Link
               to="/"
-              className="btn btn-ghost min-w-0 max-w-[min(12rem,calc(100vw-8.5rem))] shrink px-1 text-base normal-case sm:max-w-[14rem] sm:px-2 sm:text-xl md:max-w-none"
+              className="btn btn-ghost min-w-0 shrink max-w-[9rem] px-1 text-base normal-case sm:max-w-[14rem] sm:px-2 sm:text-xl md:max-w-none"
               title={t('shop.brand_name')}
             >
               <span className="truncate">{t('shop.brand_name')}</span>
@@ -328,12 +328,12 @@ export default function Navbar() {
               <div className="dropdown dropdown-end">
                 <label
                   tabIndex={0}
-                  className="btn btn-ghost btn-sm max-w-[6rem] gap-1.5 border border-transparent px-2 hover:border-base-300 normal-case sm:max-w-[8rem] lg:max-w-[10rem] xl:max-w-none"
+                  className="btn btn-ghost btn-sm gap-1.5 border border-transparent px-2 hover:border-base-300 normal-case"
                 >
                   <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <IconUser className="h-4 w-4" aria-hidden="true" />
                   </span>
-                  <span className="truncate text-left">{user.name?.trim() || user.login_email}</span>
+                  <span className="hidden truncate text-left sm:inline-block max-w-[5rem] lg:max-w-[8rem] xl:max-w-none">{user.name?.trim() || user.login_email}</span>
                 </label>
                 <div
                   tabIndex={0}

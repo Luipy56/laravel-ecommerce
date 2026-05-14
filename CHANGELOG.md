@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.238] - 2026-05-15
+
+### Fixed
+- **Mobile responsiveness:** Added `overflow-x: hidden` to `html, body` in `app.css` and to the daisyUI `drawer` root wrapper in `Layout.jsx` — eliminates lateral (horizontal) scroll on all pages including `/profile`.
+- **Navbar mobile:** User dropdown button now shows icon-only on xs screens (`< sm`); username text visible from `sm` breakpoint up — prevents navbar cramping on narrow viewports.
+- **Navbar brand link:** Removed `calc(100vw-8.5rem)` (which could produce a 1 px overflow from scrollbar-width difference) in favour of a simple `max-w-[9rem] sm:max-w-[14rem]` with `shrink`.
+
+## [0.1.237] - 2026-05-15
+
+### Changed
+- **PackDetailPage:** "Volver" link matches **ProductDetailPage** — `flex justify-end mb-4`, `btn btn-ghost btn-sm` text only (no chevron, no muted text classes); loading and error states include the same back row.
+
+## [0.1.233] - 2026-05-15
+
+### Changed
+- **ProductPreviewModal:** increased modal width from `max-w-4xl` (56 rem) to `max-w-[68rem]` (~22% wider); cart button now uses `btn btn-primary btn-square rounded-xl` — same orange square style as the product-card cart buttons, independent of the SCSS import.
+
+## [0.1.232] - 2026-05-15
+
+### Changed
+- **ProductPreviewModal:** enlarged to `max-w-4xl` (was `max-w-2xl`); image panel widened to 50% with square crop (`aspect-square`); action row reordered — "Veure més informació" button is now smaller (`btn-sm btn-outline`) on the left, cart button uses the same square card style (`cart-btn`) on the right.
+- **SearchDemoProductSeeder:** replaced developer test note with a proper Catalan product description for `SEARCH-DEMO-MIX-3030-K1`; updated live product in the database accordingly.
+
+## [0.1.231] - 2026-05-15
+
+### Added
+- **Product preview modal:** clicking a product or pack card now opens an intermediate modal (slides up from the bottom on mobile, centered on desktop) showing the large image, name, price, low-stock warning, description, and full features/pack contents. A primary "View more info" button navigates to the existing detail page; add-to-cart is also available directly from the modal.
+- **i18n:** added `shop.product.view_more_info` key to `ca`, `es`, and `en` locale files.
+
+### Changed
+- **ProductCard:** replaced direct `<Link>` navigation with a modal-trigger click; favourite toggle and cart button still work independently with their own `stopPropagation`.
+
 ## [0.1.230] - 2026-05-14
 
 ### Added

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.240] - 2026-05-15
+
+### Fixed
+- **npm ci / CI:** regenerated `package-lock.json` with `npm install` so it matches `package.json` (adds `sass-embedded@1.99.0` and required optional platform packages and transitive deps). `npm ci` was failing in GitHub Actions with “Missing: sass-embedded@1.99.0 from lock file”.
+
 ## [0.1.239] - 2026-05-15
 
 ### Added

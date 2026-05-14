@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.230] - 2026-05-14
+
+### Added
+- **Pack reviews:** new `pack_reviews` table, `PackReview` model, `PackReviewController` and `PackReviewResource`; storefront routes `GET/POST packs/{pack}/reviews` and `GET packs/{pack}/reviews/mine` mirroring the product reviews API.
+- **Pack detail page:** savings block showing how much the customer saves vs buying each product individually; product mini-cards inside "Contingut del pack" with thumbnail, name, code, and unit price; `ReviewsSection` wired at the bottom with pack-level reviews.
+- **i18n:** added `shop.pack.savings` and `shop.pack.original_total` keys to `ca`, `es`, and `en` locale files.
+
+### Changed
+- **ReviewsSection:** generalized to accept either `productId` or `packId` prop; derives API path and React Query keys dynamically; existing product usage unchanged.
+- **PackResource:** items now expose `product.price` and `product.image_url` (first active image).
+- **PackController:** eager-loads `items.product.images` to support thumbnails without N+1.
+- **PackDetailPage:** complete visual redesign — larger price, Pack/contains-keys badges, savings alert, product mini-cards block, improved add-to-cart row.
+
+## [0.1.229] - 2026-05-14
+
+### Changed
+- **ProductCard:** tarjetas más grandes (base mínima 240 px, máx 320 px en grid y carrusel); zona de información más compacta (padding reducido, título a 1 línea, features a 1 línea, espaciados menores).
+
+## [0.1.228] - 2026-05-14
+
+### Changed
+- **ProductCard:** revertido al diseño original (imagen + bloque de info debajo); la imagen ahora ocupa el ancho completo de la tarjeta sin padding interior (a sangre con los bordes redondeados superiores); eliminados overlay, bottom-sheet y clases del experimento anterior.
+
+## [0.1.227] - 2026-05-14
+
+### Changed
+- **ProductCard:** botón de carrito solo con icono (sin texto visible), más compacto; se mantiene `aria-label` para accesibilidad.
+
+## [0.1.226] - 2026-05-14
+
+### Fixed
+- **ProductCard:** `aspect-ratio` del bloque de imagen cambiado de `1/1` a `3/4` (retrato) para que la imagen del producto sea visible (~55% de la tarjeta); padding del panel y botón ligeramente reducidos para mayor compacidad.
+
 ## [0.1.225] - 2026-05-14
 
 ### Fixed

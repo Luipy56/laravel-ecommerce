@@ -201,6 +201,8 @@
   "shop.catalog.scroll_for_more": "Desplázate hacia abajo para cargar más productos.",
   "shop.pack": "Pack",
   "shop.pack.contents": "Contenido del pack",
+  "shop.pack.savings": "Ahorras {{amount}} respecto a los precios individuales",
+  "shop.pack.original_total": "Precio sin pack",
   "shop.cart": "Carrito",
   "shop.cart.add": "Añadir al carrito",
   "shop.cart.added": "Añadido al carrito",

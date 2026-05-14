@@ -62,7 +62,7 @@
 
       .product-card {
         flex-shrink: 0;
-        width: clamp(200px, 55vw, 260px);
+        width: clamp(240px, 60vw, 320px);
       }
     }
 
@@ -71,8 +71,8 @@
       flex-wrap: wrap;
 
       .product-card {
-        flex: 1 1 200px;
-        max-width: 260px;
+        flex: 1 1 240px;
+        max-width: 320px;
       }
     }
   }
@@ -81,7 +81,7 @@
 // ─── Grid (desktop / catalog) ────────────────────────────────────────────────
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: fluid(16, 28);
 }
 
@@ -117,8 +117,8 @@
     color: inherit;
   }
 
+  // Image bleeds to card edges — no padding, rounded top corners only
   &__image {
-    padding: fluid(10, 14);
     position: relative;
     overflow: hidden;
 
@@ -127,7 +127,6 @@
       aspect-ratio: 4 / 3;
       object-fit: cover;
       display: block;
-      border-radius: 10px;
       transition: transform 0.35s ease;
     }
   }
@@ -183,17 +182,17 @@
   }
 
   &__info {
-    padding: fluid(12, 16);
+    padding: fluid(8, 10) fluid(12, 14);
     display: flex;
     flex-direction: column;
     flex: 1;
   }
 
   h3 {
-    font-size: fluid(14, 16);
-    margin-bottom: fluid(6, 10);
+    font-size: fluid(13, 15);
+    margin-bottom: fluid(2, 4);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -201,15 +200,15 @@
   &__features {
     list-style: none;
     padding: 0;
-    margin: fluid(4, 6) 0 0;
+    margin: fluid(2, 3) 0 0;
     color: #777;
-    font-size: fluid(12, 14);
+    font-size: fluid(11, 12);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
 
-    li + li { margin-top: 2px; }
+    li + li { margin-top: 1px; }
   }
 
   &__feature-label {
@@ -218,10 +217,10 @@
 
   &__footer {
     margin-top: auto;
-    padding-top: fluid(12, 18);
+    padding-top: fluid(6, 8);
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
   }
 
   &__prices {
@@ -240,7 +239,7 @@
   .price {
     color: var(--color-primary, #fb5412);
     font-weight: 700;
-    font-size: fluid(14, 16);
+    font-size: fluid(13, 15);
     font-variant-numeric: tabular-nums;
   }
 

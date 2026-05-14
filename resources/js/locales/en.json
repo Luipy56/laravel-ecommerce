@@ -201,6 +201,8 @@
   "shop.catalog.scroll_for_more": "Scroll down to load more products.",
   "shop.pack": "Pack",
   "shop.pack.contents": "Package content",
+  "shop.pack.savings": "Save {{amount}} vs individual prices",
+  "shop.pack.original_total": "Price without pack",
   "shop.cart": "Cart",
   "shop.cart.add": "Add to cart",
   "shop.cart.added": "Added to cart",

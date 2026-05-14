@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PackController;
+use App\Http\Controllers\Api\PackReviewController;
 use App\Http\Controllers\Api\PaymentConfigController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\PayPalPaymentController;
@@ -71,6 +72,7 @@ Route::get('products/{product}', [ProductController::class, 'show']);
 Route::get('products/{product}/reviews', [ProductReviewController::class, 'index']);
 Route::get('packs', [PackController::class, 'index']);
 Route::get('packs/{pack}', [PackController::class, 'show']);
+Route::get('packs/{pack}/reviews', [PackReviewController::class, 'index']);
 
 Route::get('payments/config', [PaymentConfigController::class, 'show']);
 
@@ -143,6 +145,9 @@ Route::middleware(['auth', 'client.verified'])->group(function () {
 
     Route::post('products/{product}/reviews', [ProductReviewController::class, 'store']);
     Route::get('products/{product}/reviews/mine', [ProductReviewController::class, 'mine']);
+
+    Route::post('packs/{pack}/reviews', [PackReviewController::class, 'store']);
+    Route::get('packs/{pack}/reviews/mine', [PackReviewController::class, 'mine']);
 
     Route::get('return-requests', [ReturnRequestController::class, 'index']);
     Route::post('orders/{order}/return-requests', [ReturnRequestController::class, 'store']);

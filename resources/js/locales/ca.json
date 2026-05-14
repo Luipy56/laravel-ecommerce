@@ -201,6 +201,8 @@
   "shop.catalog.scroll_for_more": "Desplaça't cap avall per carregar més productes.",
   "shop.pack": "Pack",
   "shop.pack.contents": "Contingut del pack",
+  "shop.pack.savings": "Estalvies {{amount}} respecte als preus individuals",
+  "shop.pack.original_total": "Preu sense pack",
   "shop.cart": "Cistella",
   "shop.cart.add": "Afegir a la cistella",
   "shop.cart.added": "Afegit a la cistella",

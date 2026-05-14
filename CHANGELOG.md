@@ -5,6 +5,162 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.239] - 2026-05-15
+
+### Added
+- **ProductPreviewModal:** new `ProductPreviewModal.jsx` component opened from **ProductCard** (bottom sheet on small viewports, centered modal on larger screens).
+
+### Changed
+- **ProductCard:** card activation opens the preview modal; pack tiles show a Pack badge and up to two contained product names; **ProductCard.scss** trimmed to match.
+- **PackDetailPage:** loading and error states use the same max-width layout and “Back” row as the loaded page; savings callout uses primary accent; add-to-cart uses the compact icon control with `aria-label` for screen readers.
+- **i18n:** shorter `shop.pack.savings` string in `ca`, `es`, and `en`; added `shop.product.view_more_info` in all three locales.
+- **SearchDemoProductSeeder:** Catalan retail description for demo SKU `SEARCH-DEMO-MIX-3030-K1` (replaces internal search-testing copy).
+
+## [0.1.238] - 2026-05-15
+
+### Fixed
+- **Mobile responsiveness:** Added `overflow-x: hidden` to `html, body` in `app.css` and to the daisyUI `drawer` root wrapper in `Layout.jsx` — eliminates lateral (horizontal) scroll on all pages including `/profile`.
+- **Navbar mobile:** User dropdown button now shows icon-only on xs screens (`< sm`); username text visible from `sm` breakpoint up — prevents navbar cramping on narrow viewports.
+- **Navbar brand link:** Removed `calc(100vw-8.5rem)` (which could produce a 1 px overflow from scrollbar-width difference) in favour of a simple `max-w-[9rem] sm:max-w-[14rem]` with `shrink`.
+
+## [0.1.237] - 2026-05-15
+
+### Changed
+- **PackDetailPage:** "Volver" link matches **ProductDetailPage** — `flex justify-end mb-4`, `btn btn-ghost btn-sm` text only (no chevron, no muted text classes); loading and error states include the same back row.
+
+## [0.1.233] - 2026-05-15
+
+### Changed
+- **ProductPreviewModal:** increased modal width from `max-w-4xl` (56 rem) to `max-w-[68rem]` (~22% wider); cart button now uses `btn btn-primary btn-square rounded-xl` — same orange square style as the product-card cart buttons, independent of the SCSS import.
+
+## [0.1.232] - 2026-05-15
+
+### Changed
+- **ProductPreviewModal:** enlarged to `max-w-4xl` (was `max-w-2xl`); image panel widened to 50% with square crop (`aspect-square`); action row reordered — "Veure més informació" button is now smaller (`btn-sm btn-outline`) on the left, cart button uses the same square card style (`cart-btn`) on the right.
+- **SearchDemoProductSeeder:** replaced developer test note with a proper Catalan product description for `SEARCH-DEMO-MIX-3030-K1`; updated live product in the database accordingly.
+
+## [0.1.231] - 2026-05-15
+
+### Added
+- **Product preview modal:** clicking a product or pack card now opens an intermediate modal (slides up from the bottom on mobile, centered on desktop) showing the large image, name, price, low-stock warning, description, and full features/pack contents. A primary "View more info" button navigates to the existing detail page; add-to-cart is also available directly from the modal.
+- **i18n:** added `shop.product.view_more_info` key to `ca`, `es`, and `en` locale files.
+
+### Changed
+- **ProductCard:** replaced direct `<Link>` navigation with a modal-trigger click; favourite toggle and cart button still work independently with their own `stopPropagation`.
+
+## [0.1.230] - 2026-05-14
+
+### Added
+- **Pack reviews:** new `pack_reviews` table, `PackReview` model, `PackReviewController` and `PackReviewResource`; storefront routes `GET/POST packs/{pack}/reviews` and `GET packs/{pack}/reviews/mine` mirroring the product reviews API.
+- **Pack detail page:** savings block showing how much the customer saves vs buying each product individually; product mini-cards inside "Contingut del pack" with thumbnail, name, code, and unit price; `ReviewsSection` wired at the bottom with pack-level reviews.
+- **i18n:** added `shop.pack.savings` and `shop.pack.original_total` keys to `ca`, `es`, and `en` locale files.
+
+### Changed
+- **ReviewsSection:** generalized to accept either `productId` or `packId` prop; derives API path and React Query keys dynamically; existing product usage unchanged.
+- **PackResource:** items now expose `product.price` and `product.image_url` (first active image).
+- **PackController:** eager-loads `items.product.images` to support thumbnails without N+1.
+- **PackDetailPage:** complete visual redesign — larger price, Pack/contains-keys badges, savings alert, product mini-cards block, improved add-to-cart row.
+
+## [0.1.229] - 2026-05-14
+
+### Changed
+- **ProductCard:** tarjetas más grandes (base mínima 240 px, máx 320 px en grid y carrusel); zona de información más compacta (padding reducido, título a 1 línea, features a 1 línea, espaciados menores).
+
+## [0.1.228] - 2026-05-14
+
+### Changed
+- **ProductCard:** revertido al diseño original (imagen + bloque de info debajo); la imagen ahora ocupa el ancho completo de la tarjeta sin padding interior (a sangre con los bordes redondeados superiores); eliminados overlay, bottom-sheet y clases del experimento anterior.
+
+## [0.1.227] - 2026-05-14
+
+### Changed
+- **ProductCard:** botón de carrito solo con icono (sin texto visible), más compacto; se mantiene `aria-label` para accesibilidad.
+
+## [0.1.226] - 2026-05-14
+
+### Fixed
+- **ProductCard:** `aspect-ratio` del bloque de imagen cambiado de `1/1` a `3/4` (retrato) para que la imagen del producto sea visible (~55% de la tarjeta); padding del panel y botón ligeramente reducidos para mayor compacidad.
+
+## [0.1.225] - 2026-05-14
+
+### Fixed
+- Removed erroneous `overflow-x-clip`, `min-w-0 max-w-full` overrides on `.drawer` and `drawer-content` in `Layout.jsx` that introduced a right-side gap on the homepage and product list page; restored original clean drawer/main structure.
+- Removed `html { overflow-x: clip }` and `.drawer.storefront-drawer` grid override from `app.css` that were not needed and conflicted with page layout.
+- Restored `.home-page` and `.catalog-page` SCSS to their original margin-only state, removing `min-width`/`max-width`/`overflow-x` additions that were superfluous.
+
+## [0.1.224] - 2026-05-14
+
+### Changed
+- **ProductCard:** nuevo diseño tipo *overlay*: imagen cuadrada (`aspect-ratio: 1`) que ocupa toda la tarjeta; panel inferior (`__details`) con ancho 90% y radio asimétrico arriba-derecha; al hover la tarjeta se oscurece y el panel se expande al 100% sin bordes redondeados; grilla 2 columnas para nombre y precio; botón de carrito con texto y icono; tokens del tema para colores y sombras; soporte `prefers-reduced-motion`.
+
+## [0.1.223] - 2026-05-15
+
+### Fixed
+- **Storefront drawer:** daisyUI’s default **`max-content` + `auto`** drawer grid reserved width for the off-canvas **`drawer-side`** (intrinsic aside width) even when closed, so **`main` stayed narrower than the viewport** (right gutter on home and `/products`). Added **`storefront-drawer`** with **`grid-template-columns: 0 minmax(0, 1fr)`** so **`drawer-content` spans the full width**; the mobile drawer still uses **`position: fixed`**.
+
+## [0.1.222] - 2026-05-14
+
+### Fixed
+- **Storefront layout:** `main` no longer uses Tailwind **`container mx-auto`**, so home hero / trending and the catalog page span the same width as the navbar and page background (removed the persistent side gutter from the container max-width cap).
+
+## [0.1.220] - 2026-05-14
+
+### Fixed
+- **Storefront mobile:** background image uses **scroll** attachment on small viewports (fixed attachment breaks on many mobile browsers); **horizontal overflow** clipped at `html` and storefront **drawer** shell; navbar **brand truncates** on narrow widths, **Products/Packs** links show from **md**; cart uses **stacked line cards** below **md** (table with horizontal scroll from **md** up); **profile** cards, contact/address rows, and modals tightened for ~320–400px; **order detail** tables and totals block avoid **100vw** width traps; **home** and **catalog** pages use **min-width / overflow-x clip** so negative margins cannot widen the document; toasts use **`max-w-[min(100%,100dvw)]`** instead of raw **100vw**.
+
+## [0.1.219] - 2026-05-14
+
+### Changed
+- **ProductCard:** storefront product/pack tiles use a **square image** with a **bottom sheet** (name + price grid, features, cart CTA), **hover dim overlay**, and panel **width 90% → 100%** with asymmetric top-right radius; theme tokens for borders and muted text; **prefers-reduced-motion** trims transitions; catalog row/grid min widths tuned for the new aspect ratio.
+
+## [0.1.218] - 2026-05-14
+
+### Fixed
+- **Login (`?verified=1`):** email-verified toast no longer appears twice in dev (React 18 **StrictMode** double `useEffect`); one module-level gate per visit, and **`verified`** is stripped from the URL with **`replace`** while preserving other query params (e.g. **`next`**).
+
+## [0.1.217] - 2026-05-14
+
+### Changed
+- **i18n (`shop.filters.packs_only`):** storefront nav, drawer, and catalog filter label shortened to **“Packs”** in **ca**, **es**, and **en** (was “Només packs” / “Solo packs” / “Packs only”).
+
+## [0.1.216] - 2026-05-14
+
+### Fixed
+- **Storefront navbar:** home / brand link shows the **full company name** (no `truncate` or max-width cap); **`shrink-0`** + **`whitespace-nowrap`** so the label is not ellipsized by the flex row.
+
+## [0.1.215] - 2026-05-14
+
+### Fixed
+- **Storefront header:** replaced daisyUI **`navbar-start` / `navbar-end`** (fixed **50%** width each) with a plain **flex** row so left content cannot paint over language, cart, and account; desktop search uses **`flex-1 min-w-0`** with a **max-width** cap instead of a fixed width; **FAQ** and **custom solution** links show from **xl** / **lg** respectively to reduce crowding; spacer height matches the two-row mobile header (**~8rem**); catalog sticky sidebar and toasts use matching offsets by breakpoint.
+
+## [0.1.214] - 2026-05-14
+
+### Fixed
+- **Profile:** saving account, password, addresses, or contacts while the login email is still unverified no longer leaves an uncaught Axios **403**; the UI shows a translated warning and a link to **`/verify-email`** (returns to **`/profile`** after confirmation).
+
+## [0.1.213] - 2026-05-14
+
+### Changed
+- **Login (`?verified=1`):** “email verified” feedback uses the global top-end toast with brand orange (`.alert-app-success`) instead of an inline green `alert-success` in the form.
+
+## [0.1.212] - 2026-05-14
+
+### Added
+- **Storefront footer:** invisible left hit area on the gradient bar linking to **`/admin`**, with translated **`footer.admin_access_aria`** (ca / es / en).
+
+### Changed
+- **Docker Compose (dev):** nginx mounts **`default.dev.conf`** (Vite proxy upstream to `node:5173`); **`VITE_DEV_SERVER_URL`** defaults to **`http://localhost:${HTTP_PORT}`** so the browser loads dev assets through nginx; nginx **`depends_on`** **`node`**; **`VITE_DOCKER_PUBLISHED_PORT`** / **`HTTP_PORT`** passed into the **`node`** service for HMR.
+- **Vite (Docker dev):** **`server.origin`**, **`allowedHosts: true`**, **`cors: true`**, and HMR **`clientPort`** aligned with the host-mapped Vite port; WebSocket HMR uses **`ws`** with explicit container **`port`** vs browser **`clientPort`**.
+- **docker/nginx/default.conf:** comment clarifying prod vs dev mount; **`.cursor/rules/docker-setup.mdc`:** URLs and nginx/Vite roles updated.
+
+## [0.1.211] - 2026-05-14
+
+### Added
+- Storefront navbar and mobile drawer: direct link to the catalog filtered with **`packs_only=1`** (`/products?packs_only=1`), reusing **`shop.filters.packs_only`** for labels.
+
+### Changed
+- Product catalog sidebar: **`position: sticky`** `top` and **`max-height`** follow navbar show/hide (via **`StorefrontNavbarVisibilityContext`**) so the filter column does not keep a large empty gap at the top when the header slides away on scroll down; transitions match the navbar transform duration.
+
 ## [0.1.210] - 2026-05-12
 
 ### Changed

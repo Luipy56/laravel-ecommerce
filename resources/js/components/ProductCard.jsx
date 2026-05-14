@@ -1,24 +1,25 @@
 import './ProductCard.scss';
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
 import { IconCart } from './icons';
 import FavoriteToggle from './FavoriteToggle';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
+import ProductPreviewModal from './ProductPreviewModal';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
 /**
  * Shared card for products and packs in list and featured grids.
- * Accepts either `product` or `pack`. Whole card links to detail; add button adds to cart.
+ * Accepts either `product` or `pack`. Clicking the card opens a preview modal;
+ * "View more info" inside the modal navigates to the detail page.
  * Packs show a "Pack" badge and at least 2 product names from the pack.
  */
 export default function ProductCard({ product, pack }) {
   const { t } = useTranslation();
   const { addLine } = useCart();
   const { data: publicSettings } = usePublicShopSettings();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const isPack = Boolean(pack);
   const isLowStock =
@@ -45,12 +46,23 @@ export default function ProductCard({ product, pack }) {
     e.dataTransfer.effectAllowed = 'copy';
   };
 
+  const openModal = () => setModalOpen(true);
+
+  const handleCardKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openModal();
+    }
+  };
+
   const name = isPack ? pack.name : product.name;
   const imageUrl = isPack
     ? (pack.primaryImageUrl ?? pack.images?.[0]?.url ?? FALLBACK_IMAGE)
     : product.primaryImageUrl;
   const formattedPrice = isPack
-    ? (pack.formattedPrice ?? (pack.price != null ? new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(Number(pack.price)) : ''))
+    ? (pack.formattedPrice ?? (pack.price != null
+        ? new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(Number(pack.price))
+        : ''))
     : product.formattedPrice;
 
   const packProductNames = isPack && Array.isArray(pack.items)
@@ -61,12 +73,17 @@ export default function ProductCard({ product, pack }) {
     : [];
 
   return (
-    <div
-      className={`product-card${isPack ? ' product-card--pack' : ''}`}
-      draggable
-      onDragStart={handleDragStart}
-    >
-      <Link to={detailUrl}>
+    <>
+      <div
+        className={`product-card${isPack ? ' product-card--pack' : ''}`}
+        role="button"
+        tabIndex={0}
+        onClick={openModal}
+        onKeyDown={handleCardKeyDown}
+        draggable
+        onDragStart={handleDragStart}
+        aria-label={name}
+      >
         <div className="product-card__image">
           {isPack && (
             <span className="product-card__pack-badge">{t('shop.pack')}</span>
@@ -81,8 +98,16 @@ export default function ProductCard({ product, pack }) {
               {t('shop.product.low_stock')}
             </span>
           )}
-          <div className="product-card__favorite">
-            <FavoriteToggle productId={isPack ? undefined : product.id} packId={isPack ? pack.id : undefined} />
+          {/* stopPropagation so favorite toggle doesn't open the modal */}
+          <div
+            className="product-card__favorite"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <FavoriteToggle
+              productId={isPack ? undefined : product.id}
+              packId={isPack ? pack.id : undefined}
+            />
           </div>
           <img
             src={imageUrl}
@@ -109,7 +134,10 @@ export default function ProductCard({ product, pack }) {
                 {product.features.slice(0, 2).map((f, i) => (
                   <li key={f.id ?? i}>
                     {(f.type ?? f.name) != null && String(f.type ?? f.name).trim() !== '' ? (
-                      <span><span className="product-card__feature-label">{f.type ?? f.name}:</span> {f.value ?? ''}</span>
+                      <span>
+                        <span className="product-card__feature-label">{f.type ?? f.name}:</span>{' '}
+                        {f.value ?? ''}
+                      </span>
                     ) : (
                       <span>{f.value ?? ''}</span>
                     )}
@@ -135,7 +163,16 @@ export default function ProductCard({ product, pack }) {
             </button>
           </div>
         </div>
-      </Link>
-    </div>
+      </div>
+
+      {modalOpen && (
+        <ProductPreviewModal
+          product={isPack ? undefined : product}
+          pack={isPack ? pack : undefined}
+          detailUrl={detailUrl}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
+    </>
   );
 }

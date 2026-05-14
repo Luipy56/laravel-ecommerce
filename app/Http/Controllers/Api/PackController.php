@@ -11,7 +11,7 @@ class PackController extends Controller
 {
     public function index(): JsonResponse
     {
-        $packs = Pack::query()->active()->with(['items.product', 'images'])->orderBy('name')->get();
+        $packs = Pack::query()->active()->with(['items.product.images', 'images'])->orderBy('name')->get();
 
         return response()->json([
             'success' => true,
@@ -24,7 +24,7 @@ class PackController extends Controller
         if (! $pack->is_active) {
             abort(404);
         }
-        $pack->load(['items.product', 'images']);
+        $pack->load(['items.product.images', 'images']);
 
         return response()->json([
             'success' => true,

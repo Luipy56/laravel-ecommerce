@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import { StorefrontNavbarVisibilityProvider } from '../contexts/StorefrontNavbarVisibilityContext';
 import { STOREFRONT_LANGUAGE_OPTIONS } from '../lib/storefrontLanguageOptions';
 import Navbar from './Navbar';
 import CartWidget from './CartWidget';
@@ -72,24 +73,31 @@ export default function Layout() {
     pathname.startsWith('/products/') ||
     /^\/categories\/[^/]+\/products$/.test(pathname);
 
+  const packsOnlyActive = useMemo(() => {
+    if (pathname !== '/products') return false;
+    return new URLSearchParams(location.search).get('packs_only') === '1';
+  }, [pathname, location.search]);
+
   return (
-    <div className="drawer">
+    <div className="drawer overflow-x-hidden">
       <input
         id={STOREFRONT_DRAWER_ID}
         type="checkbox"
         className="drawer-toggle"
         aria-hidden="true"
       />
-      <div className="drawer-content flex min-h-screen flex-col bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
-        <Navbar />
-        <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
-          <Outlet />
-        </main>
-        <Footer />
-        <CartWidget />
-        <ScrollToTop />
-        <CookieConsentBanner />
-      </div>
+      <StorefrontNavbarVisibilityProvider>
+        <div className="drawer-content flex min-h-screen flex-col bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
+          <Navbar />
+          <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
+            <Outlet />
+          </main>
+          <Footer />
+          <CartWidget />
+          <ScrollToTop />
+          <CookieConsentBanner />
+        </div>
+      </StorefrontNavbarVisibilityProvider>
       <div className="drawer-side z-[60] lg:hidden">
         <label htmlFor={STOREFRONT_DRAWER_ID} aria-label={t('common.close')} className="drawer-overlay" />
         <aside className="flex min-h-full w-[min(100vw,20rem)] max-w-[min(100vw,20rem)] flex-col border-r border-base-300 bg-base-100 shadow-2xl">
@@ -126,11 +134,22 @@ export default function Layout() {
                 <Link
                   to="/products"
                   onClick={closeStorefrontDrawer}
-                  className={drawerNavClass(isProductsArea)}
-                  aria-current={isProductsArea ? 'page' : undefined}
+                  className={drawerNavClass(isProductsArea && !packsOnlyActive)}
+                  aria-current={isProductsArea && !packsOnlyActive ? 'page' : undefined}
                 >
-                  <IconGrid className={drawerIconClass(isProductsArea)} aria-hidden="true" />
+                  <IconGrid className={drawerIconClass(isProductsArea && !packsOnlyActive)} aria-hidden="true" />
                   {t('shop.products')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/products?packs_only=1"
+                  onClick={closeStorefrontDrawer}
+                  className={drawerNavClass(packsOnlyActive)}
+                  aria-current={packsOnlyActive ? 'page' : undefined}
+                >
+                  <IconPackage className={drawerIconClass(packsOnlyActive)} aria-hidden="true" />
+                  {t('shop.filters.packs_only')}
                 </Link>
               </li>
               <li>

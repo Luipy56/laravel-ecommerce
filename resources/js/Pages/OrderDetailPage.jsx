@@ -51,20 +51,20 @@ function rmaStatusBadgeClass(status) {
 function StorefrontOrderLinesTable({ lines, nameHeaderKey, t }) {
   if (lines.length === 0) return null;
   return (
-    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-      <table className="table table-sm w-full [&_th]:text-base-content/80 [&_td]:align-middle">
+    <div className="min-w-0 max-w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+      <table className="table table-sm w-full min-w-0 [&_th]:text-base-content/80 [&_td]:align-middle">
         <thead>
-          <tr className="bg-base-200/60 border-b border-base-300">
+          <tr className="border-b border-base-300 bg-base-200/60">
             <th className="font-semibold">{t(nameHeaderKey)}</th>
-            <th className="text-center whitespace-nowrap font-semibold">{t('shop.quantity')}</th>
-            <th className="text-center whitespace-nowrap font-semibold">{t('shop.price')}</th>
-            <th className="text-end whitespace-nowrap font-semibold">{t('shop.total')}</th>
+            <th className="whitespace-nowrap text-center font-semibold">{t('shop.quantity')}</th>
+            <th className="whitespace-nowrap text-center font-semibold">{t('shop.price')}</th>
+            <th className="whitespace-nowrap text-end font-semibold">{t('shop.total')}</th>
           </tr>
         </thead>
         <tbody>
           {lines.map((l) => (
             <tr key={l.id} className="border-b border-base-200 last:border-b-0">
-              <td className="min-w-0 max-w-[min(100vw,22rem)] sm:max-w-none">{l.product?.name ?? l.pack?.name}</td>
+              <td className="min-w-0 break-words">{l.product?.name ?? l.pack?.name}</td>
               <td className="text-center tabular-nums">{l.quantity}</td>
               <td className="text-center tabular-nums">{Number(l.unit_price).toFixed(2)} €</td>
               <td className="text-end tabular-nums font-medium">{Number(l.line_total).toFixed(2)} €</td>
@@ -366,8 +366,8 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      <div className="card bg-base-100 border border-base-200 shadow-sm rounded-2xl mb-4">
-        <div className="card-body py-4 px-4 sm:px-5">
+      <div className="card min-w-0 max-w-full border border-base-200 bg-base-100 shadow-sm rounded-2xl mb-4">
+        <div className="card-body min-w-0 max-w-full px-4 py-4 sm:px-5">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div className="min-w-0">
               <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">{t('shop.order_status')}</dt>
@@ -403,19 +403,19 @@ export default function OrderDetailPage() {
       )}
 
       {(shippingAddress || installationAddress) && (
-        <div className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
-          <div className="card-body">
+        <div className="card min-w-0 max-w-full border border-base-300 bg-base-100 shadow rounded-2xl mt-4">
+          <div className="card-body min-w-0 max-w-full">
             <h2 className="card-title text-base">{t('shop.order_addresses')}</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 min-w-0 sm:grid-cols-2">
               {shippingAddress && (
-                <div>
+                <div className="min-w-0">
                   <h3 className="text-sm font-semibold text-base-content/70">{t('shop.order_address_shipping')}</h3>
                   <p className="whitespace-pre-wrap">{formatAddress(shippingAddress)}</p>
                   {shippingAddress.note && <p className="text-sm text-base-content/70 mt-1">{shippingAddress.note}</p>}
                 </div>
               )}
               {installationAddress && (
-                <div>
+                <div className="min-w-0">
                   <h3 className="text-sm font-semibold text-base-content/70">{t('shop.order_address_installation')}</h3>
                   <p className="whitespace-pre-wrap">{formatAddress(installationAddress)}</p>
                   {installationAddress.note && <p className="text-sm text-base-content/70 mt-1">{installationAddress.note}</p>}
@@ -426,8 +426,8 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      <div className="card bg-base-100 shadow border border-base-300 overflow-hidden rounded-2xl mt-4">
-        <div className="card-body px-4 py-5 sm:px-6">
+      <div className="card min-w-0 max-w-full overflow-hidden border border-base-300 bg-base-100 shadow rounded-2xl mt-4">
+        <div className="card-body min-w-0 max-w-full px-4 py-5 sm:px-6">
           {productLines.length === 0 && packLines.length === 0 ? (
             <p className="text-base-content/70 text-sm py-1">{t('shop.order.no_lines')}</p>
           ) : (
@@ -455,8 +455,8 @@ export default function OrderDetailPage() {
           )}
         </div>
         <div className="border-t border-base-300 bg-base-200/40 px-4 py-4 sm:px-6">
-          <div className="overflow-x-auto">
-            <table className="table table-sm w-full max-w-md ml-auto">
+          <div className="min-w-0 max-w-full overflow-x-auto">
+            <table className="table table-sm ml-0 w-full max-w-full sm:ml-auto sm:max-w-md">
               <tbody className="[&_td]:py-2">
                 <tr>
                   <td className="text-end font-medium text-base-content/90">{t('shop.order.lines_subtotal')}</td>

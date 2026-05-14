@@ -20,7 +20,7 @@ function RatingBar({ star, count, total }) {
   );
 }
 
-function ReviewForm({ productId, existing, onSuccess }) {
+function ReviewForm({ entityType, entityId, queryKeyPrefix, existing, onSuccess }) {
   const { t } = useTranslation();
   const [rating, setRating] = useState(existing?.rating ?? 0);
   const [hovered, setHovered] = useState(0);
@@ -29,11 +29,10 @@ function ReviewForm({ productId, existing, onSuccess }) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (payload) => api.post(`products/${productId}/reviews`, payload),
+    mutationFn: (payload) => api.post(`${entityType}/${entityId}/reviews`, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['product-reviews', productId] });
-      queryClient.invalidateQueries({ queryKey: ['product-reviews-mine', productId] });
-      queryClient.invalidateQueries({ queryKey: ['product', 'detail', String(productId)] });
+      queryClient.invalidateQueries({ queryKey: [queryKeyPrefix, entityId] });
+      queryClient.invalidateQueries({ queryKey: [`${queryKeyPrefix}-mine`, entityId] });
       setError(null);
       onSuccess?.();
     },
@@ -85,11 +84,11 @@ function ReviewForm({ productId, existing, onSuccess }) {
       </fieldset>
 
       <div>
-        <label htmlFor={`review-comment-${productId}`} className="text-sm font-medium text-base-content block mb-1">
+        <label htmlFor={`review-comment-${entityId}`} className="text-sm font-medium text-base-content block mb-1">
           {t('shop.reviews.comment')} <span className="text-base-content/50 font-normal">({t('common.optional')})</span>
         </label>
         <textarea
-          id={`review-comment-${productId}`}
+          id={`review-comment-${entityId}`}
           className="textarea textarea-bordered w-full text-sm"
           rows={3}
           maxLength={2000}
@@ -141,30 +140,39 @@ function ReviewCard({ review }) {
   );
 }
 
-export default function ReviewsSection({ productId }) {
+/**
+ * Generic reviews section. Pass either `productId` or `packId`.
+ * Existing usage: <ReviewsSection productId={id} />
+ * Pack usage:     <ReviewsSection packId={id} />
+ */
+export default function ReviewsSection({ productId, packId }) {
   const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
 
+  const entityType = packId != null ? 'packs' : 'products';
+  const entityId = packId ?? productId;
+  const queryKeyPrefix = packId != null ? 'pack-reviews' : 'product-reviews';
+
   const reviewsQuery = useQuery({
-    queryKey: ['product-reviews', productId, page],
+    queryKey: [queryKeyPrefix, entityId, page],
     queryFn: async ({ signal }) => {
-      const r = await api.get(`products/${productId}/reviews`, { params: { page, per_page: 5 }, signal });
+      const r = await api.get(`${entityType}/${entityId}/reviews`, { params: { page, per_page: 5 }, signal });
       return r.data;
     },
-    enabled: !!productId,
+    enabled: !!entityId,
     staleTime: 30_000,
   });
 
   const mineQuery = useQuery({
-    queryKey: ['product-reviews-mine', productId],
+    queryKey: [`${queryKeyPrefix}-mine`, entityId],
     queryFn: async ({ signal }) => {
-      const r = await api.get(`products/${productId}/reviews/mine`, { signal });
+      const r = await api.get(`${entityType}/${entityId}/reviews/mine`, { signal });
       return r.data;
     },
-    enabled: !!productId && !!user,
+    enabled: !!entityId && !!user,
     staleTime: 30_000,
   });
 
@@ -225,7 +233,9 @@ export default function ReviewsSection({ productId }) {
                     </div>
                     {showForm ? (
                       <ReviewForm
-                        productId={productId}
+                        entityType={entityType}
+                        entityId={entityId}
+                        queryKeyPrefix={queryKeyPrefix}
                         existing={myReview}
                         onSuccess={() => setShowForm(false)}
                       />
@@ -244,9 +254,11 @@ export default function ReviewsSection({ productId }) {
                   <>
                     <h3 className="font-medium text-sm mb-2">{t('shop.reviews.write_review')}</h3>
                     <ReviewForm
-                      productId={productId}
+                      entityType={entityType}
+                      entityId={entityId}
+                      queryKeyPrefix={queryKeyPrefix}
                       onSuccess={() => {
-                        queryClient.invalidateQueries({ queryKey: ['product-reviews', productId] });
+                        queryClient.invalidateQueries({ queryKey: [queryKeyPrefix, entityId] });
                       }}
                     />
                   </>

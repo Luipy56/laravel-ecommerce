@@ -35,9 +35,10 @@
 
   @media (min-width: 768px) {
     position: sticky;
-    top: 6rem;
-    max-height: calc(100vh - 7rem);
+    top: var(--catalog-sidebar-top, 8rem);
+    max-height: var(--catalog-sidebar-max-h, calc(100vh - 9rem));
     overflow-y: auto;
+    transition: top 0.3s ease-out, max-height 0.3s ease-out;
   }
 }
 

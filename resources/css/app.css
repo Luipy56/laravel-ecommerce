@@ -1,4 +1,9 @@
 @import 'tailwindcss';
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
 @plugin 'daisyui' {
   themes: serralleria --default;
 }
@@ -53,7 +58,14 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center top;
-  background-attachment: fixed;
+  /* scroll: reliable on mobile; fixed breaks or hides on many touch browsers */
+  background-attachment: scroll;
+}
+
+@media (min-width: 1024px) {
+  .storefront-bg {
+    background-attachment: fixed;
+  }
 }
 
 /* Brand gradient (client area): #F75211 → #8B2400 */

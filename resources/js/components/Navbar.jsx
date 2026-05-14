@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useApiPendingCount from '../hooks/useApiPendingCount';
 import { useAuth } from '../contexts/AuthContext';
+import { useStorefrontNavbarVisibility } from '../contexts/StorefrontNavbarVisibilityContext';
 import { useCart } from '../contexts/CartContext';
 import {
   IconCart,
@@ -53,13 +54,20 @@ export default function Navbar() {
   const [locale, setLocale] = useState(i18n.language);
   const localeCode = (lng) => (lng === 'ca' ? 'CA' : lng === 'es' ? 'ES' : 'EN');
   const [searchQ, setSearchQ] = useState('');
-  const [visible, setVisible] = useState(true);
+  const { visible, setNavbarVisible } = useStorefrontNavbarVisibility();
   const lastScrollY = useRef(0);
   const debounceTimerRef = useRef(null);
   const hasUserEditedSearchRef = useRef(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const localeMenuRef = useRef(null);
   const localeTriggerRef = useRef(null);
+
+  const packsOnlyInUrl = useMemo(
+    () => new URLSearchParams(location.search).get('packs_only') === '1',
+    [location.search]
+  );
+  const productsNavActive = location.pathname === '/products' && !packsOnlyInUrl;
+  const packsNavActive = location.pathname === '/products' && packsOnlyInUrl;
 
   // Sync search input with URL when on product list (so clearing + Enter updates list)
   useEffect(() => {
@@ -90,17 +98,17 @@ export default function Navbar() {
     const handleScroll = () => {
       const y = window.scrollY;
       if (y <= SCROLL_THRESHOLD) {
-        setVisible(true);
+        setNavbarVisible(true);
       } else {
         const delta = y - lastScrollY.current;
-        if (delta > SCROLL_DELTA) setVisible(false);
-        else if (delta < -SCROLL_DELTA) setVisible(true);
+        if (delta > SCROLL_DELTA) setNavbarVisible(false);
+        else if (delta < -SCROLL_DELTA) setNavbarVisible(true);
       }
       lastScrollY.current = y;
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [setNavbarVisible]);
 
   const handleLocale = (lng) => {
     i18n.changeLanguage(lng);
@@ -187,47 +195,60 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Spacer: taller on mobile due to search row */}
-      <div className="h-24 lg:h-16 flex-shrink-0" aria-hidden="true" />
+      {/* Spacer: mobile = main row + search row + gradient (~8rem); lg+ single row + gradient */}
+      <div className="min-h-[8rem] shrink-0 lg:min-h-[4.25rem]" aria-hidden="true" />
       <header
-        className="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-out bg-base-100 shadow-lg"
+        className="fixed top-0 left-0 right-0 z-50 w-full max-w-full min-w-0 transition-transform duration-300 ease-out bg-base-100 shadow-lg"
         style={{ transform: visible ? 'translateY(0)' : 'translateY(-100%)' }}
       >
-        {/* Main row: no overlap; start can shrink, end stays fixed */}
-        <div className="navbar min-h-0 flex-nowrap gap-1 sm:gap-2 px-2 sm:px-4">
-          <div className="navbar-start min-w-0 flex-1 flex items-center flex-nowrap gap-1 sm:gap-2">
+        <div className="flex min-h-14 w-full min-w-0 max-w-full flex-nowrap items-center gap-1 px-2 py-1 sm:min-h-16 sm:gap-2 sm:px-4 sm:py-1">
+          <div className="flex min-w-0 max-w-full flex-1 items-center gap-1 sm:gap-2">
             <label htmlFor="drawer-nav" className="btn btn-ghost btn-square btn-sm shrink-0 lg:hidden" aria-label={t('common.menu')}>
               <IconMenu className="h-6 w-6" />
             </label>
             <Link
               to="/"
-              className="btn btn-ghost text-lg sm:text-xl min-w-0 px-1 sm:px-2 truncate shrink-0"
+              className="btn btn-ghost min-w-0 shrink max-w-[9rem] px-1 text-base normal-case sm:max-w-[14rem] sm:px-2 sm:text-xl md:max-w-none"
               title={t('shop.brand_name')}
             >
               <span className="truncate">{t('shop.brand_name')}</span>
             </Link>
-            <Link to="/products" className="btn btn-ghost hidden sm:inline-flex shrink-0">{t('shop.products')}</Link>
-            <Link to="/custom-solution" className="btn btn-ghost hidden sm:inline-flex shrink-0">
+            <Link
+              to="/products"
+              className={`btn btn-ghost hidden shrink-0 md:inline-flex${productsNavActive ? ' btn-active' : ''}`}
+            >
+              {t('shop.products')}
+            </Link>
+            <Link
+              to="/products?packs_only=1"
+              className={`btn btn-ghost hidden shrink-0 md:inline-flex${packsNavActive ? ' btn-active' : ''}`}
+            >
+              {t('shop.filters.packs_only')}
+            </Link>
+            <Link to="/custom-solution" className="btn btn-ghost hidden shrink-0 lg:inline-flex">
               {t('shop.custom_solution')}
             </Link>
-            <Link to="/faq" className="btn btn-ghost hidden md:inline-flex shrink-0">
+            <Link to="/faq" className="btn btn-ghost hidden shrink-0 xl:inline-flex">
               {t('shop.faq.nav')}
             </Link>
-            <form onSubmit={handleSearch} className="join hidden lg:flex shrink-0 min-w-0">
+            <form
+              onSubmit={handleSearch}
+              className="join ml-0 hidden min-w-0 flex-1 basis-0 lg:ml-1 lg:flex lg:max-w-md xl:max-w-lg"
+            >
               <input
                 type="search"
-                className="input input-bordered join-item w-36 xl:w-48 input-sm min-w-0"
+                className="input input-bordered join-item input-sm min-w-0 w-full flex-1 basis-0"
                 placeholder={t('shop.search_placeholder')}
                 value={searchQ}
                 onChange={handleSearchInputChange}
                 aria-label={t('shop.search_placeholder')}
               />
-              <button type="submit" className="btn btn-primary join-item btn-sm">
+              <button type="submit" className="btn btn-primary join-item btn-sm shrink-0">
                 {t('common.search')}
               </button>
             </form>
           </div>
-          <div className="navbar-end gap-1 sm:gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <div
               ref={localeMenuRef}
               className={`dropdown dropdown-end hidden lg:inline-block ${localeMenuOpen ? 'dropdown-open' : 'dropdown-close'}`}
@@ -307,12 +328,12 @@ export default function Navbar() {
               <div className="dropdown dropdown-end">
                 <label
                   tabIndex={0}
-                  className="btn btn-ghost btn-sm max-w-[8rem] sm:max-w-none gap-1.5 border border-transparent px-2 hover:border-base-300 normal-case"
+                  className="btn btn-ghost btn-sm gap-1.5 border border-transparent px-2 hover:border-base-300 normal-case"
                 >
                   <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <IconUser className="h-4 w-4" aria-hidden="true" />
                   </span>
-                  <span className="truncate text-left">{user.name?.trim() || user.login_email}</span>
+                  <span className="hidden truncate text-left sm:inline-block max-w-[5rem] lg:max-w-[8rem] xl:max-w-none">{user.name?.trim() || user.login_email}</span>
                 </label>
                 <div
                   tabIndex={0}
@@ -421,11 +442,11 @@ export default function Navbar() {
           </div>
         </div>
         {/* Mobile/tablet: search in its own row */}
-        <div className="lg:hidden border-t border-base-200 px-2 py-2 sm:px-4">
-          <form onSubmit={handleSearch} className="flex gap-2 w-full">
+        <div className="w-full min-w-0 max-w-full border-t border-base-200 px-2 py-2 sm:px-4 lg:hidden">
+          <form onSubmit={handleSearch} className="flex w-full min-w-0 max-w-full gap-2">
             <input
               type="search"
-              className="input input-bordered input-sm flex-1 min-w-0"
+              className="input input-bordered input-sm min-w-0 flex-1"
               placeholder={t('shop.search_placeholder')}
               value={searchQ}
               onChange={handleSearchInputChange}

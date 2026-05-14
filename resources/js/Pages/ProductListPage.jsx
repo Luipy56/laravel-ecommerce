@@ -2,6 +2,7 @@ import './ProductListPage.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useStorefrontNavbarVisibility } from '../contexts/StorefrontNavbarVisibilityContext';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
@@ -179,6 +180,17 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
 
 export default function ProductListPage() {
   const { t } = useTranslation();
+  const { visible: navbarVisible } = useStorefrontNavbarVisibility();
+  const [isLgUp, setIsLgUp] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const sync = () => setIsLgUp(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { id: categoryIdFromRoute } = useParams();
@@ -411,7 +423,17 @@ export default function ProductListPage() {
     <div className="catalog-page">
       <section className="catalog section">
         <div className="page-container catalog-layout">
-          <aside className="sidebar">
+          <aside
+            className="sidebar"
+            style={{
+              '--catalog-sidebar-top': navbarVisible ? (isLgUp ? '4.25rem' : '8rem') : '1rem',
+              '--catalog-sidebar-max-h': navbarVisible
+                ? isLgUp
+                  ? 'calc(100vh - 5.25rem)'
+                  : 'calc(100vh - 9rem)'
+                : 'calc(100vh - 2rem)',
+            }}
+          >
             {hasActiveFilters && (
               <button type="button" className="clear-btn" onClick={handleClearAllFilters}>
                 {t('shop.filters.clear')}

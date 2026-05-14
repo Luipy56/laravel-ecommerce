@@ -73,6 +73,7 @@
   "auth.verify_email_resend": "Reenviar correu de confirmació",
   "auth.verify_email_cooldown": "Espera {{seconds}} s per reenviar",
   "auth.verify_email_auto_notice": "Quan confirmis el correu, et redirigirem automàticament.",
+  "auth.verify_email_required_to_save": "Has de confirmar el correu abans de poder desar aquests canvis.",
   "register.account_type": "Tipus de compte",
   "register.type_person": "Persona",
   "register.type_company": "Empresa",

@@ -8,6 +8,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import DecryptionWarningBanner from '../components/admin/DecryptionWarningBanner';
 import { scrollOpenModalBoxToTop, scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
+import { isEmailNotVerifiedError, profileMutationErrorMessage } from '../lib/apiErrors';
 import {
   parseWithZod,
   profileAccountSchema,
@@ -72,6 +73,30 @@ export default function ProfilePage() {
   const [contactSaving, setContactSaving] = useState(false);
   const [contactFieldErrors, setContactFieldErrors] = useState({});
 
+  /** API error banner: message + optional link to /verify-email */
+  const [accountSubmitBanner, setAccountSubmitBanner] = useState(null);
+  const [passwordSubmitBanner, setPasswordSubmitBanner] = useState(null);
+  const [addressSubmitBanner, setAddressSubmitBanner] = useState(null);
+  const [contactSubmitBanner, setContactSubmitBanner] = useState(null);
+
+  const verifyEmailProfileHref = `/verify-email?next=${encodeURIComponent('/profile')}`;
+
+  const mutationBanner = (banner) => {
+    if (!banner) return null;
+    return (
+      <div role="alert" className="alert alert-warning text-sm">
+        <div className="flex flex-col gap-2">
+          <span>{banner.message}</span>
+          {banner.verifyLink ? (
+            <Link to={verifyEmailProfileHref} className="link link-primary self-start">
+              {t('auth.verify_email_page_title')}
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    );
+  };
+
   const fetchProfile = useCallback(async () => {
     const r = await api.get('profile');
     if (r.data.success && r.data.data) {
@@ -100,6 +125,7 @@ export default function ProfilePage() {
 
   const handleAccountChange = (e) => {
     const { name, value } = e.target;
+    setAccountSubmitBanner(null);
     setAccountForm((f) => ({ ...f, [name]: value }));
     if (accountFieldErrors[name]) {
       setAccountFieldErrors((fe) => {
@@ -113,6 +139,7 @@ export default function ProfilePage() {
   const handleAccountSubmit = async (e) => {
     e.preventDefault();
     setAccountFieldErrors({});
+    setAccountSubmitBanner(null);
     const parsed = parseWithZod(profileAccountSchema, accountForm, t);
     if (!parsed.ok) {
       setAccountFieldErrors(parsed.fieldErrors);
@@ -128,7 +155,14 @@ export default function ProfilePage() {
         phone: parsed.data.phone,
       });
       await fetchProfile();
+      setAccountSubmitBanner(null);
       setSaved(true);
+    } catch (err) {
+      setAccountSubmitBanner({
+        message: profileMutationErrorMessage(err, t),
+        verifyLink: isEmailNotVerifiedError(err),
+      });
+      scrollWindowToTopOnFormError();
     } finally {
       setAccountSaving(false);
     }
@@ -136,6 +170,7 @@ export default function ProfilePage() {
 
   const handlePasswordChange = (e) => {
     const { name } = e.target;
+    setPasswordSubmitBanner(null);
     setPasswordForm((f) => ({ ...f, [name]: e.target.value }));
     if (passwordFieldErrors[name]) {
       setPasswordFieldErrors((fe) => {
@@ -149,6 +184,7 @@ export default function ProfilePage() {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setPasswordFieldErrors({});
+    setPasswordSubmitBanner(null);
     const parsed = parseWithZod(profilePasswordSchema, passwordForm, t);
     if (!parsed.ok) {
       setPasswordFieldErrors(parsed.fieldErrors);
@@ -165,7 +201,14 @@ export default function ProfilePage() {
         password_confirmation: parsed.data.password_confirmation,
       });
       setPasswordForm({ password: '', password_confirmation: '' });
+      setPasswordSubmitBanner(null);
       setSaved(true);
+    } catch (err) {
+      setPasswordSubmitBanner({
+        message: profileMutationErrorMessage(err, t),
+        verifyLink: isEmailNotVerifiedError(err),
+      });
+      scrollWindowToTopOnFormError();
     } finally {
       setPasswordSaving(false);
     }
@@ -173,6 +216,7 @@ export default function ProfilePage() {
 
   const openAddressModal = (addr = null) => {
     setAddressFieldErrors({});
+    setAddressSubmitBanner(null);
     if (addr) {
       setAddressModal({ id: addr.id });
       setAddressForm({
@@ -200,6 +244,7 @@ export default function ProfilePage() {
 
   const handleAddressFormChange = (e) => {
     const { name, value, type, checked } = e.target;
+    setAddressSubmitBanner(null);
     const nextVal =
       type === 'checkbox' ? checked : coercePostalCodeFieldValue(name, value);
     setAddressForm((f) => ({
@@ -218,6 +263,7 @@ export default function ProfilePage() {
   const handleAddressSubmit = async (e) => {
     e.preventDefault();
     setAddressFieldErrors({});
+    setAddressSubmitBanner(null);
     const parsed = parseWithZod(profileAddressSchema, addressForm, t);
     if (!parsed.ok) {
       setAddressFieldErrors(parsed.fieldErrors);
@@ -233,7 +279,14 @@ export default function ProfilePage() {
       }
       await fetchProfile();
       setAddressModal(null);
+      setAddressSubmitBanner(null);
       setSaved(true);
+    } catch (err) {
+      setAddressSubmitBanner({
+        message: profileMutationErrorMessage(err, t),
+        verifyLink: isEmailNotVerifiedError(err),
+      });
+      scrollOpenModalBoxToTop();
     } finally {
       setAddressSaving(false);
     }
@@ -260,6 +313,7 @@ export default function ProfilePage() {
 
   const openContactModal = (contact = null) => {
     setContactFieldErrors({});
+    setContactSubmitBanner(null);
     if (contact) {
       setContactModal({ id: contact.id });
       setContactForm({
@@ -285,6 +339,7 @@ export default function ProfilePage() {
 
   const handleContactFormChange = (e) => {
     const { name, value, type, checked } = e.target;
+    setContactSubmitBanner(null);
     setContactForm((f) => ({
       ...f,
       [name]: type === 'checkbox' ? checked : value,
@@ -301,6 +356,7 @@ export default function ProfilePage() {
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setContactFieldErrors({});
+    setContactSubmitBanner(null);
     const parsed = parseWithZod(profileContactSchema, contactForm, t);
     if (!parsed.ok) {
       setContactFieldErrors(parsed.fieldErrors);
@@ -316,7 +372,14 @@ export default function ProfilePage() {
       }
       await fetchProfile();
       setContactModal(null);
+      setContactSubmitBanner(null);
       setSaved(true);
+    } catch (err) {
+      setContactSubmitBanner({
+        message: profileMutationErrorMessage(err, t),
+        verifyLink: isEmailNotVerifiedError(err),
+      });
+      scrollOpenModalBoxToTop();
     } finally {
       setContactSaving(false);
     }
@@ -386,6 +449,7 @@ export default function ProfilePage() {
       <section className="card bg-base-100 shadow">
         <div className="card-body">
           <h2 className="card-title text-lg">{t('profile.account_data')}</h2>
+          {mutationBanner(accountSubmitBanner)}
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-sm">
               <span className="text-base-content/70">{t('profile.email')}: </span>
@@ -560,6 +624,7 @@ export default function ProfilePage() {
       <section className="card bg-base-100 shadow">
         <div className="card-body">
           <h2 className="card-title text-lg">{t('profile.change_password')}</h2>
+          {mutationBanner(passwordSubmitBanner)}
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <input
               type="password"
@@ -598,6 +663,7 @@ export default function ProfilePage() {
           <h3 className="font-bold text-lg">
             {addressModal?.id ? t('profile.edit_address') : t('profile.add_address')}
           </h3>
+          {mutationBanner(addressSubmitBanner)}
           <form onSubmit={handleAddressSubmit} className="space-y-3 mt-4">
             <label className="label">
               <span className="label-text">{t('profile.address_type')}</span>
@@ -706,6 +772,7 @@ export default function ProfilePage() {
           <h3 className="font-bold text-lg">
             {contactModal?.id ? t('profile.edit_contact') : t('profile.add_contact')}
           </h3>
+          {mutationBanner(contactSubmitBanner)}
           <form onSubmit={handleContactSubmit} className="space-y-3 mt-4">
             <input
               type="text"

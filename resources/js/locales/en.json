@@ -73,6 +73,7 @@
   "auth.verify_email_resend": "Resend confirmation email",
   "auth.verify_email_cooldown": "Wait {{seconds}} s to resend",
   "auth.verify_email_auto_notice": "When your email is confirmed, we will take you to the next screen automatically.",
+  "auth.verify_email_required_to_save": "You must confirm your email before you can save these changes.",
   "register.account_type": "Account type",
   "register.type_person": "Individual",
   "register.type_company": "Company",

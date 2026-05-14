@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.214] - 2026-05-14
+
+### Fixed
+- **Profile:** saving account, password, addresses, or contacts while the login email is still unverified no longer leaves an uncaught Axios **403**; the UI shows a translated warning and a link to **`/verify-email`** (returns to **`/profile`** after confirmation).
+
+## [0.1.213] - 2026-05-14
+
+### Changed
+- **Login (`?verified=1`):** “email verified” feedback uses the global top-end toast with brand orange (`.alert-app-success`) instead of an inline green `alert-success` in the form.
+
 ## [0.1.212] - 2026-05-14
 
 ### Added

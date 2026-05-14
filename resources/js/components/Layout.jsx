@@ -79,7 +79,7 @@ export default function Layout() {
   }, [pathname, location.search]);
 
   return (
-    <div className="drawer min-w-0 max-w-full">
+    <div className="drawer storefront-drawer min-w-0 max-w-full">
       <input
         id={STOREFRONT_DRAWER_ID}
         type="checkbox"

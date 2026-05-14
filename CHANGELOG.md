@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.223] - 2026-05-15
+
+### Fixed
+- **Storefront drawer:** daisyUI’s default **`max-content` + `auto`** drawer grid reserved width for the off-canvas **`drawer-side`** (intrinsic aside width) even when closed, so **`main` stayed narrower than the viewport** (right gutter on home and `/products`). Added **`storefront-drawer`** with **`grid-template-columns: 0 minmax(0, 1fr)`** so **`drawer-content` spans the full width**; the mobile drawer still uses **`position: fixed`**.
+
 ## [0.1.222] - 2026-05-14
 
 ### Fixed

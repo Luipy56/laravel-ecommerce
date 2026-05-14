@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.217] - 2026-05-14
+
+### Changed
+- **i18n (`shop.filters.packs_only`):** storefront nav, drawer, and catalog filter label shortened to **“Packs”** in **ca**, **es**, and **en** (was “Només packs” / “Solo packs” / “Packs only”).
+
 ## [0.1.216] - 2026-05-14
 
 ### Fixed

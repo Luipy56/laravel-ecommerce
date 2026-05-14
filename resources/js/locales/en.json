@@ -327,7 +327,7 @@
   "shop.filters.price_min": "Minimum price",
   "shop.filters.price_max": "Maximum price",
   "shop.filters.features": "Characteristics",
-  "shop.filters.packs_only": "Packs only",
+  "shop.filters.packs_only": "Packs",
   "shop.filters.clear": "Clear filters",
   "shop.featured": "Featured",
   "shop.custom_solution": "Custom solution",

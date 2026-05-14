@@ -2,6 +2,9 @@
 
 .home-page {
   margin: -2rem -1rem -1.5rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .page-container {

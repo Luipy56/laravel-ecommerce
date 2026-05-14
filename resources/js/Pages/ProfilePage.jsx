@@ -446,14 +446,14 @@ export default function ProfilePage() {
       )}
 
       {/* Account data */}
-      <section className="card bg-base-100 shadow">
-        <div className="card-body">
+      <section className="card min-w-0 max-w-full bg-base-100 shadow">
+        <div className="card-body min-w-0 max-w-full">
           <h2 className="card-title text-lg">{t('profile.account_data')}</h2>
           {mutationBanner(accountSubmitBanner)}
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm">
+          <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
+            <span className="min-w-0 max-w-full break-words text-sm">
               <span className="text-base-content/70">{t('profile.email')}: </span>
-              <span className="text-base-content font-medium">{profile.login_email}</span>
+              <span className="font-medium text-base-content">{profile.login_email}</span>
             </span>
           </div>
           <form onSubmit={handleAccountSubmit} className="space-y-4 mt-4">
@@ -521,40 +521,45 @@ export default function ProfilePage() {
 
       {/* Company: contacts list */}
       {isCompany && (
-        <section className="card bg-base-100 shadow">
-          <div className="card-body">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+        <section className="card min-w-0 max-w-full bg-base-100 shadow">
+          <div className="card-body min-w-0 max-w-full">
+            <div className="flex flex-col gap-2 min-[400px]:flex-row min-[400px]:flex-wrap min-[400px]:items-center min-[400px]:justify-between">
               <h2 className="card-title text-lg">{t('profile.contacts')}</h2>
-              <button type="button" className="btn btn-sm btn-primary" onClick={() => openContactModal()}>
+              <button type="button" className="btn btn-sm btn-primary w-full shrink-0 min-[400px]:w-auto" onClick={() => openContactModal()}>
                 {t('profile.add_contact')}
               </button>
             </div>
             {profile.contacts?.length ? (
               <ul className="space-y-3">
                 {profile.contacts.map((c) => (
-                  <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 p-3 bg-base-200 rounded-lg">
-                    <div>
-                      <span className="font-medium">{c.name} {c.surname}</span>
+                  <li
+                    key={c.id}
+                    className="flex flex-col gap-3 rounded-lg bg-base-200 p-3 min-[480px]:flex-row min-[480px]:flex-wrap min-[480px]:items-center min-[480px]:justify-between"
+                  >
+                    <div className="min-w-0 max-w-full flex-1">
+                      <span className="font-medium break-words">
+                        {c.name} {c.surname}
+                      </span>
                       {c.is_primary && (
-                        <span className="badge badge-sm badge-primary ml-2">{t('profile.primary_contact')}</span>
+                        <span className="badge badge-sm badge-primary ml-2 align-middle">{t('profile.primary_contact')}</span>
                       )}
-                      <div className="text-sm text-base-content/70">
+                      <div className="mt-1 break-words text-sm text-base-content/70">
                         {c.phone && <span>{c.phone}</span>}
                         {c.phone2 && <span> · {c.phone2}</span>}
                         {c.email && <span> · {c.email}</span>}
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex w-full shrink-0 flex-col gap-2 min-[480px]:w-auto min-[480px]:flex-row">
                       <button
                         type="button"
-                        className="btn btn-sm btn-outline btn-neutral"
+                        className="btn btn-sm btn-outline btn-neutral w-full min-[480px]:w-auto"
                         onClick={() => openContactModal(c)}
                       >
                         {t('common.edit')}
                       </button>
                       <button
                         type="button"
-                        className="btn btn-sm btn-ghost text-error hover:bg-error/10"
+                        className="btn btn-sm btn-ghost w-full text-error hover:bg-error/10 min-[480px]:w-auto"
                         onClick={() => handleDeleteContact(c.id)}
                       >
                         {t('profile.delete')}
@@ -571,41 +576,44 @@ export default function ProfilePage() {
       )}
 
       {/* Addresses */}
-      <section className="card bg-base-100 shadow">
-        <div className="card-body">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+      <section className="card min-w-0 max-w-full bg-base-100 shadow">
+        <div className="card-body min-w-0 max-w-full">
+          <div className="flex flex-col gap-2 min-[400px]:flex-row min-[400px]:flex-wrap min-[400px]:items-center min-[400px]:justify-between">
             <h2 className="card-title text-lg">{t('profile.addresses')}</h2>
-            <button type="button" className="btn btn-sm btn-primary" onClick={() => openAddressModal()}>
+            <button type="button" className="btn btn-sm btn-primary w-full shrink-0 min-[400px]:w-auto" onClick={() => openAddressModal()}>
               {t('profile.add_address')}
             </button>
           </div>
             {profile.addresses?.length ? (
             <ul className="space-y-3">
               {profile.addresses.map((addr) => (
-                <li key={addr.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-base-200 rounded-lg border border-base-300/50">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap gap-2 items-center">
+                <li
+                  key={addr.id}
+                  className="flex flex-col gap-3 rounded-lg border border-base-300/50 bg-base-200 p-4 min-[480px]:flex-row min-[480px]:items-center"
+                >
+                  <div className="min-w-0 max-w-full flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="badge badge-outline badge-sm">{addressTypeLabel(addr.type)}</span>
                       {addr.is_primary && (
                         <span className="badge badge-sm badge-primary">{t('profile.primary_address')}</span>
                       )}
-                      {addr.label && <span className="text-sm font-medium">{addr.label}</span>}
+                      {addr.label && <span className="break-words text-sm font-medium">{addr.label}</span>}
                     </div>
-                    <p className="text-sm mt-1.5 text-base-content">
+                    <p className="mt-1.5 break-words text-sm text-base-content">
                       {[addr.street, addr.postal_code, addr.city, addr.province].filter(Boolean).join(', ')}
                     </p>
                   </div>
-                  <div className="flex gap-2 shrink-0">
+                  <div className="flex w-full shrink-0 flex-col gap-2 min-[480px]:w-auto min-[480px]:flex-row">
                     <button
                       type="button"
-                      className="btn btn-sm btn-outline btn-neutral"
+                      className="btn btn-sm btn-outline btn-neutral w-full min-[480px]:w-auto"
                       onClick={() => openAddressModal(addr)}
                     >
                       {t('common.edit')}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-sm btn-ghost text-error hover:bg-error/10"
+                      className="btn btn-sm btn-ghost w-full text-error hover:bg-error/10 min-[480px]:w-auto"
                       onClick={() => handleDeleteAddress(addr.id)}
                     >
                       {t('profile.delete')}
@@ -621,8 +629,8 @@ export default function ProfilePage() {
       </section>
 
       {/* Change password */}
-      <section className="card bg-base-100 shadow">
-        <div className="card-body">
+      <section className="card min-w-0 max-w-full bg-base-100 shadow">
+        <div className="card-body min-w-0 max-w-full">
           <h2 className="card-title text-lg">{t('profile.change_password')}</h2>
           {mutationBanner(passwordSubmitBanner)}
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -659,7 +667,7 @@ export default function ProfilePage() {
 
       {/* Address modal */}
       <dialog className={`modal ${addressModal !== null ? 'modal-open' : ''}`}>
-        <div className="modal-box">
+        <div className="modal-box w-[calc(100%-2rem)] max-w-lg max-h-[min(90dvh,40rem)] overflow-y-auto">
           <h3 className="font-bold text-lg">
             {addressModal?.id ? t('profile.edit_address') : t('profile.add_address')}
           </h3>
@@ -768,7 +776,7 @@ export default function ProfilePage() {
 
       {/* Contact modal (company only) */}
       <dialog className={`modal ${contactModal !== null ? 'modal-open' : ''}`}>
-        <div className="modal-box">
+        <div className="modal-box w-[calc(100%-2rem)] max-w-lg max-h-[min(90dvh,40rem)] overflow-y-auto">
           <h3 className="font-bold text-lg">
             {contactModal?.id ? t('profile.edit_contact') : t('profile.add_contact')}
           </h3>

@@ -139,6 +139,153 @@ function CartLine({ line, updateLine, removeLine, t }) {
   );
 }
 
+/** Stacked layout for viewports below `md` — avoids wide table horizontal scroll. */
+function CartLineMobile({ line, updateLine, removeLine, t }) {
+  const isProduct = !!line.product;
+  const isPack = !!line.pack;
+  const packContainsKeys = !!line.pack?.contains_keys;
+  const canChooseKeysDifferent = isPack && packContainsKeys;
+  const keysAllSame = !!line.keys_all_same;
+  const name = line.product?.name ?? line.pack?.name;
+  const imageUrl = line.product?.image_url ?? line.pack?.image_url ?? '/images/dummy.jpg';
+  const isIncluded = line.is_included !== false;
+  const isExtraKeysAvailable = !!line.product?.is_extra_keys_available;
+  const extraKeyUnitPrice = line.product?.extra_key_unit_price ?? null;
+  const extraKeysQty = line.extra_keys_qty ?? 0;
+  const features = line.product?.features ?? [];
+
+  const handleIncludeChange = () => {
+    updateLine(line.id, { quantity: line.quantity, included: !isIncluded });
+  };
+
+  const handleQuantityChange = (e) => {
+    const v = parseInt(e.target.value, 10);
+    if (!Number.isNaN(v)) updateLine(line.id, Math.max(0, Math.min(99, v)));
+  };
+
+  const handleExtraKeysChange = (e) => {
+    const v = parseInt(e.target.value, 10);
+    if (!Number.isNaN(v)) {
+      updateLine(line.id, {
+        quantity: line.quantity,
+        extra_keys_qty: Math.max(0, Math.min(99, v)),
+      });
+    }
+  };
+
+  const handleKeysAllDifferentChange = () => {
+    if (!canChooseKeysDifferent) return;
+    updateLine(line.id, { quantity: line.quantity, keys_all_same: !keysAllSame });
+  };
+
+  const detailUrl = isProduct ? `/products/${line.product.id}` : `/packs/${line.pack.id}`;
+
+  return (
+    <div
+      className={`border-b border-base-300 p-4 last:border-b-0${isIncluded ? '' : ' opacity-60 saturate-0'}`}
+    >
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <label className="flex cursor-pointer items-center gap-2">
+          <input
+            type="checkbox"
+            className="checkbox checkbox-sm checkbox-primary"
+            checked={isIncluded}
+            onChange={handleIncludeChange}
+            aria-label={t('shop.cart.include')}
+          />
+          <span className="text-sm text-base-content/80">{t('shop.cart.include')}</span>
+        </label>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm btn-circle shrink-0"
+          onClick={() => removeLine(line.id)}
+          aria-label={t('common.delete')}
+        >
+          ✕
+        </button>
+      </div>
+      <Link
+        to={detailUrl}
+        className="mb-3 flex min-w-0 max-w-full gap-3 no-underline text-base-content transition-colors hover:text-primary"
+      >
+        <figure className="mask mask-squircle flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden bg-base-300">
+          <img
+            src={imageUrl}
+            alt={name ? t('shop.cart.line_image_alt', { name }) : ''}
+            className="h-full w-full object-cover"
+          />
+        </figure>
+        <div className="min-w-0 flex-1">
+          <p className="font-medium break-words">{name}</p>
+          {features.length > 0 ? (
+            <p className="mt-1 text-sm text-base-content/70">
+              {features.map((f) => `${f.name}: ${f.value}`).join(' · ')}
+            </p>
+          ) : null}
+        </div>
+      </Link>
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+        <dt className="text-base-content/70">{t('shop.price')}</dt>
+        <dd className="text-end tabular-nums">{Number(line.unit_price).toFixed(2)} €</dd>
+        <dt className="text-base-content/70">{t('shop.quantity')}</dt>
+        <dd className="flex justify-end">
+          <input
+            type="number"
+            min={1}
+            max={99}
+            value={line.quantity}
+            onChange={handleQuantityChange}
+            className="input input-bordered input-sm w-16 text-center"
+          />
+        </dd>
+        {isExtraKeysAvailable ? (
+          <>
+            <dt className="text-base-content/70">{t('shop.cart.extra_keys')}</dt>
+            <dd className="flex flex-col items-end gap-0.5">
+              <input
+                type="number"
+                min={0}
+                max={99}
+                value={extraKeysQty}
+                onChange={handleExtraKeysChange}
+                className="input input-bordered input-sm w-16 text-center"
+                aria-label={t('shop.cart.extra_keys')}
+              />
+              {extraKeyUnitPrice != null ? (
+                <span className="text-xs text-base-content/70 tabular-nums">
+                  {Number(extraKeyUnitPrice).toFixed(2)} €/u
+                </span>
+              ) : null}
+            </dd>
+          </>
+        ) : null}
+        {canChooseKeysDifferent || isPack ? (
+          <>
+            <dt className="min-w-0 text-base-content/70">{t('shop.cart.keys_all_same')}</dt>
+            <dd className="flex justify-end">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-sm checkbox-primary"
+                checked={keysAllSame}
+                onChange={handleKeysAllDifferentChange}
+                disabled={!canChooseKeysDifferent}
+                aria-label={t('shop.cart.keys_all_same')}
+                title={!canChooseKeysDifferent ? t('shop.cart.keys_all_same_only_packs') : undefined}
+              />
+            </dd>
+          </>
+        ) : null}
+        <dt className="col-span-2 mt-1 border-t border-base-300 pt-2 text-base font-medium text-base-content">
+          {t('shop.total')}
+        </dt>
+        <dd className="col-span-2 text-end text-base font-semibold tabular-nums text-primary">
+          {Number(line.line_total).toFixed(2)} €
+        </dd>
+      </dl>
+    </div>
+  );
+}
+
 export default function CartPage() {
   const { t } = useTranslation();
   const { cart, loading, updateLine, removeLine, setInstallationRequested } = useCart();
@@ -191,8 +338,8 @@ export default function CartPage() {
         <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
       </div>
 
-      <div className="card bg-base-100 shadow border border-base-300 rounded-2xl mb-4 p-4">
-        <label className="flex flex-wrap items-center gap-3 cursor-pointer">
+      <div className="card mb-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow">
+        <label className="flex min-w-0 max-w-full cursor-pointer flex-wrap items-center gap-3">
           <input
             type="checkbox"
             className="checkbox checkbox-primary checkbox-sm shrink-0"
@@ -201,8 +348,11 @@ export default function CartPage() {
             disabled={installSaving}
             aria-label={t('shop.cart.request_installation')}
           />
-          <span className="font-medium">{t('shop.cart.request_installation')}</span>
-          <span className="tooltip tooltip-bottom shrink-0 max-w-[min(100vw-2rem,24rem)] whitespace-normal text-left inline-block" data-tip={installationTooltip}>
+          <span className="min-w-0 max-w-full flex-1 font-medium">{t('shop.cart.request_installation')}</span>
+          <span
+            className="tooltip tooltip-bottom inline-block max-w-full shrink-0 whitespace-normal text-left"
+            data-tip={installationTooltip}
+          >
             <button
               type="button"
               className="btn btn-ghost btn-xs btn-circle font-serif italic"
@@ -214,18 +364,31 @@ export default function CartPage() {
         </label>
       </div>
 
-      <div className="card bg-base-100 shadow border border-base-300 overflow-hidden rounded-2xl">
-        <div className="overflow-x-auto">
+      <div className="card overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow">
+        <div className="md:hidden">
+          {cart.lines.map((line) => (
+            <CartLineMobile
+              key={line.id}
+              line={line}
+              updateLine={updateLine}
+              removeLine={removeLine}
+              t={t}
+            />
+          ))}
+        </div>
+        <div className="hidden min-w-0 max-w-full overflow-x-auto md:block">
           <table className="table">
             <thead>
-              <tr className="bg-base-100 border-b border-base-300">
+              <tr className="border-b border-base-300 bg-base-100">
                 <th className="w-12 text-center" aria-label={t('shop.cart.include')} />
                 <th>{t('shop.products')}</th>
-                <th className="text-center whitespace-nowrap">{t('shop.price')}</th>
-                <th className="text-center whitespace-nowrap">{t('shop.quantity')}</th>
-                <th className="text-center whitespace-nowrap">{t('shop.cart.extra_keys')}</th>
-                <th className="text-center whitespace-nowrap" title={t('shop.cart.keys_all_same_tooltip')}>{t('shop.cart.keys_all_same')}</th>
-                <th className="text-right whitespace-nowrap">{t('shop.total')}</th>
+                <th className="whitespace-nowrap text-center">{t('shop.price')}</th>
+                <th className="whitespace-nowrap text-center">{t('shop.quantity')}</th>
+                <th className="whitespace-nowrap text-center">{t('shop.cart.extra_keys')}</th>
+                <th className="whitespace-nowrap text-center" title={t('shop.cart.keys_all_same_tooltip')}>
+                  {t('shop.cart.keys_all_same')}
+                </th>
+                <th className="whitespace-nowrap text-right">{t('shop.total')}</th>
                 <th className="w-12 text-center" />
               </tr>
             </thead>

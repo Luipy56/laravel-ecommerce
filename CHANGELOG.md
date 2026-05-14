@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.220] - 2026-05-14
+
+### Fixed
+- **Storefront mobile:** background image uses **scroll** attachment on small viewports (fixed attachment breaks on many mobile browsers); **horizontal overflow** clipped at `html` and storefront **drawer** shell; navbar **brand truncates** on narrow widths, **Products/Packs** links show from **md**; cart uses **stacked line cards** below **md** (table with horizontal scroll from **md** up); **profile** cards, contact/address rows, and modals tightened for ~320–400px; **order detail** tables and totals block avoid **100vw** width traps; **home** and **catalog** pages use **min-width / overflow-x clip** so negative margins cannot widen the document; toasts use **`max-w-[min(100%,100dvw)]`** instead of raw **100vw**.
+
+## [0.1.219] - 2026-05-14
+
+### Changed
+- **ProductCard:** storefront product/pack tiles use a **square image** with a **bottom sheet** (name + price grid, features, cart CTA), **hover dim overlay**, and panel **width 90% → 100%** with asymmetric top-right radius; theme tokens for borders and muted text; **prefers-reduced-motion** trims transitions; catalog row/grid min widths tuned for the new aspect ratio.
+
+## [0.1.218] - 2026-05-14
+
+### Fixed
+- **Login (`?verified=1`):** email-verified toast no longer appears twice in dev (React 18 **StrictMode** double `useEffect`); one module-level gate per visit, and **`verified`** is stripped from the URL with **`replace`** while preserving other query params (e.g. **`next`**).
+
 ## [0.1.217] - 2026-05-14
 
 ### Changed

@@ -79,7 +79,7 @@ export default function Layout() {
   }, [pathname, location.search]);
 
   return (
-    <div className="drawer">
+    <div className="drawer min-w-0 max-w-full">
       <input
         id={STOREFRONT_DRAWER_ID}
         type="checkbox"
@@ -87,9 +87,9 @@ export default function Layout() {
         aria-hidden="true"
       />
       <StorefrontNavbarVisibilityProvider>
-        <div className="drawer-content flex min-h-screen flex-col bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
+        <div className="drawer-content flex min-h-screen min-w-0 max-w-full flex-col overflow-x-clip bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
           <Navbar />
-          <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
+          <main className="container mx-auto w-full min-w-0 max-w-full flex-1 px-4 py-6">
             <Outlet />
           </main>
           <Footer />

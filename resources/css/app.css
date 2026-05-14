@@ -53,7 +53,19 @@
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center top;
-  background-attachment: fixed;
+  /* scroll: reliable on mobile; fixed breaks or hides on many touch browsers */
+  background-attachment: scroll;
+}
+
+@media (min-width: 1024px) {
+  .storefront-bg {
+    background-attachment: fixed;
+  }
+}
+
+/* Prevent stray horizontal page scroll from wide flex children (navbar, tables). */
+html {
+  overflow-x: clip;
 }
 
 /* Brand gradient (client area): #F75211 → #8B2400 */

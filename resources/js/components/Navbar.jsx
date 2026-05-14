@@ -215,13 +215,13 @@ export default function Navbar() {
             </Link>
             <Link
               to="/products"
-              className={`btn btn-ghost hidden shrink-0 md:inline-flex${productsNavActive ? ' btn-active' : ''}`}
+              className={`btn btn-ghost hidden shrink-0 sm:inline-flex${productsNavActive ? ' btn-active' : ''}`}
             >
               {t('shop.products')}
             </Link>
             <Link
               to="/products?packs_only=1"
-              className={`btn btn-ghost hidden shrink-0 md:inline-flex${packsNavActive ? ' btn-active' : ''}`}
+              className={`btn btn-ghost hidden shrink-0 sm:inline-flex${packsNavActive ? ' btn-active' : ''}`}
             >
               {t('shop.filters.packs_only')}
             </Link>

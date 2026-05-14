@@ -21,7 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **i18n:** shorter `shop.pack.savings` string in `ca`, `es`, and `en`; added `shop.product.view_more_info` in all three locales.
 - **SearchDemoProductSeeder:** Catalan retail description for demo SKU `SEARCH-DEMO-MIX-3030-K1` (replaces internal search-testing copy).
 
-## [0.1.238] - 2026-05-15
+## [0.1.241] - 2026-05-15
+
+### Fixed
+- **Navbar:** Restore Products and Packs buttons at `sm:inline-flex` (640 px+); commit `6af9d33` had accidentally moved them to `md:inline-flex` (768 px+), hiding them on tablet-sized and narrow laptop screens.
+
+
 
 ### Fixed
 - **Mobile responsiveness:** Added `overflow-x: hidden` to `html, body` in `app.css` and to the daisyUI `drawer` root wrapper in `Layout.jsx` — eliminates lateral (horizontal) scroll on all pages including `/profile`.

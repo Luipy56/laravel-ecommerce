@@ -1,36 +1,11 @@
 @use "../styles/fluid" as *;
 
-// ─── Scroll row wrapper (fade edges, mobile only) ───────────────────────────
+// ─── Scroll row wrapper ──────────────────────────────────────────────────────
 .scroll-row-wrapper {
   position: relative;
 
   @media (max-width: 767px) {
     margin-inline: fluid(-16, -24);
-
-    &::before,
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 10px;
-      width: 48px;
-      z-index: 2;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-
-    &::before {
-      left: 0;
-      background: linear-gradient(to right, rgba(245, 245, 245, 0.85), transparent);
-    }
-
-    &::after {
-      right: 0;
-      background: linear-gradient(to left, rgba(245, 245, 245, 0.85), transparent);
-    }
-
-    &.at-start::before { opacity: 0; }
-    &.at-end::after { opacity: 0; }
   }
 }
 

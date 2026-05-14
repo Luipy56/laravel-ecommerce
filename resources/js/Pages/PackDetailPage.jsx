@@ -114,13 +114,31 @@ export default function PackDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-16">
-        <span className="loading loading-spinner loading-lg" />
+      <div className="mx-auto w-full min-w-0 max-w-6xl px-2 sm:px-4">
+        <div className="flex justify-end mb-4">
+          <Link to="/products" className="btn btn-ghost btn-sm">
+            {t('common.back')}
+          </Link>
+        </div>
+        <div className="flex justify-center py-12" aria-live="polite" aria-busy="true">
+          <span className="loading loading-spinner loading-lg" />
+        </div>
       </div>
     );
   }
   if (!pack) {
-    return <p className="text-error text-center py-12">{t('common.error')}</p>;
+    return (
+      <div className="mx-auto w-full min-w-0 max-w-6xl px-2 sm:px-4">
+        <div className="flex justify-end mb-4">
+          <Link to="/products" className="btn btn-ghost btn-sm">
+            {t('common.back')}
+          </Link>
+        </div>
+        <p className="text-error" role="alert">
+          {t('common.error')}
+        </p>
+      </div>
+    );
   }
 
   const imageUrls = pack.images?.length > 0
@@ -146,10 +164,9 @@ export default function PackDetailPage() {
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-6xl px-2 sm:px-4 pb-12">
-      {/* Back link */}
-      <div className="flex justify-start mb-4 pt-2">
-        <Link to="/products" className="btn btn-ghost btn-sm gap-1 text-base-content/60 hover:text-base-content">
-          <IconChevronLeft className="h-4 w-4" />
+      {/* Back link — same as ProductDetailPage */}
+      <div className="flex justify-end mb-4">
+        <Link to="/products" className="btn btn-ghost btn-sm">
           {t('common.back')}
         </Link>
       </div>
@@ -282,7 +299,7 @@ export default function PackDetailPage() {
                 )}
               </div>
               {hasSavings && (
-                <div className="inline-flex items-center gap-1.5 bg-success/10 text-success border border-success/20 rounded-lg px-3 py-1.5 w-fit">
+                <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 rounded-lg px-3 py-1.5 w-fit">
                   <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                   </svg>
@@ -348,11 +365,12 @@ export default function PackDetailPage() {
               <FavoriteToggle packId={pack.id} />
               <button
                 type="button"
-                className="btn btn-primary gap-2 flex-1 sm:flex-none sm:min-w-40"
+                className="btn btn-primary btn-sm gap-1.5 px-3 min-h-8 shrink-0"
                 onClick={handleAdd}
+                aria-label={t('shop.cart.add')}
               >
                 <IconCart className="h-4 w-4 shrink-0" aria-hidden="true" />
-                {t('shop.cart.add')}
+                <span className="text-sm font-bold leading-none" aria-hidden="true">+</span>
               </button>
             </div>
           </div>

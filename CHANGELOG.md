@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.239] - 2026-05-15
+
+### Added
+- **ProductPreviewModal:** new `ProductPreviewModal.jsx` component opened from **ProductCard** (bottom sheet on small viewports, centered modal on larger screens).
+
+### Changed
+- **ProductCard:** card activation opens the preview modal; pack tiles show a Pack badge and up to two contained product names; **ProductCard.scss** trimmed to match.
+- **PackDetailPage:** loading and error states use the same max-width layout and “Back” row as the loaded page; savings callout uses primary accent; add-to-cart uses the compact icon control with `aria-label` for screen readers.
+- **i18n:** shorter `shop.pack.savings` string in `ca`, `es`, and `en`; added `shop.product.view_more_info` in all three locales.
+- **SearchDemoProductSeeder:** Catalan retail description for demo SKU `SEARCH-DEMO-MIX-3030-K1` (replaces internal search-testing copy).
+
 ## [0.1.238] - 2026-05-15
 
 ### Fixed

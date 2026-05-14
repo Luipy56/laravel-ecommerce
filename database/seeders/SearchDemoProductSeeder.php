@@ -54,7 +54,7 @@ class SearchDemoProductSeeder extends Seeder
             [
                 'code' => 'SEARCH-DEMO-MIX-3030-K1',
                 'name' => 'Cilindro 30x30 mm níquel mix query',
-                'description' => 'Use q=cilindro 3030 k1 style mixed queries on PostgreSQL.',
+                'description' => 'Cilindre de seguretat de dimensions 30x30 mm amb acabat níquel. Compatible amb perfil K1.',
                 'price' => 29.99,
                 'stock' => 2,
             ],

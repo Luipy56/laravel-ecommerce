@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.225] - 2026-05-14
+
+### Fixed
+- Removed erroneous `overflow-x-clip`, `min-w-0 max-w-full` overrides on `.drawer` and `drawer-content` in `Layout.jsx` that introduced a right-side gap on the homepage and product list page; restored original clean drawer/main structure.
+- Removed `html { overflow-x: clip }` and `.drawer.storefront-drawer` grid override from `app.css` that were not needed and conflicted with page layout.
+- Restored `.home-page` and `.catalog-page` SCSS to their original margin-only state, removing `min-width`/`max-width`/`overflow-x` additions that were superfluous.
+
+## [0.1.224] - 2026-05-14
+
+### Changed
+- **ProductCard:** nuevo diseño tipo *overlay*: imagen cuadrada (`aspect-ratio: 1`) que ocupa toda la tarjeta; panel inferior (`__details`) con ancho 90% y radio asimétrico arriba-derecha; al hover la tarjeta se oscurece y el panel se expande al 100% sin bordes redondeados; grilla 2 columnas para nombre y precio; botón de carrito con texto y icono; tokens del tema para colores y sombras; soporte `prefers-reduced-motion`.
+
 ## [0.1.223] - 2026-05-15
 
 ### Fixed

@@ -79,7 +79,7 @@ export default function Layout() {
   }, [pathname, location.search]);
 
   return (
-    <div className="drawer storefront-drawer min-w-0 max-w-full">
+    <div className="drawer">
       <input
         id={STOREFRONT_DRAWER_ID}
         type="checkbox"
@@ -87,10 +87,9 @@ export default function Layout() {
         aria-hidden="true"
       />
       <StorefrontNavbarVisibilityProvider>
-        <div className="drawer-content flex min-h-screen min-w-0 max-w-full flex-col overflow-x-clip bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
+        <div className="drawer-content flex min-h-screen flex-col bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
           <Navbar />
-          {/* Full-width main: avoid `container` here — it capped content narrower than the navbar/footer and caused a persistent right gutter on home/catalog. */}
-          <main className="w-full min-w-0 max-w-full flex-1 px-4 py-6">
+          <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
             <Outlet />
           </main>
           <Footer />

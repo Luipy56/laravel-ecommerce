@@ -63,21 +63,6 @@
   }
 }
 
-/* Prevent stray horizontal page scroll from wide flex children (navbar, tables). */
-html {
-  overflow-x: clip;
-}
-
-/*
-  daisyUI drawer uses `grid-auto-columns: max-content auto` so the first track sizes
-  to the off-canvas `drawer-side` (e.g. aside `min(100vw,20rem)`), stealing width from
-  `drawer-content` even when the panel is closed → visible gutter next to full-width navbar.
-  Collapse the first track; `drawer-side` stays `position: fixed` and still opens correctly.
-*/
-.drawer.storefront-drawer {
-  grid-template-columns: 0 minmax(0, 1fr);
-}
-
 /* Brand gradient (client area): #F75211 → #8B2400 */
 .header-gradient-line {
   background: linear-gradient(to right, #F75211, #8B2400);

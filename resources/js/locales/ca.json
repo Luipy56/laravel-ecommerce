@@ -364,6 +364,7 @@
   "footer.legal_disclaimer": "Adherits a la Junta Arbitral de Consum de Catalunya.",
   "footer.copyright": "© {{year}} Serralleria Solidària. Tots els drets reservats.",
   "footer.version": "Versió {{version}}",
+  "footer.admin_access_aria": "Àrea d’administració",
   "home.hero.title": "Serralleria Solidària",
   "home.hero.tagline": "Materials i solucions de serralleria al teu abast.",
   "home.hero.tagline_prefix": "Materials i solucions de serralleria",

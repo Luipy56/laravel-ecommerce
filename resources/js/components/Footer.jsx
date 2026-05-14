@@ -127,7 +127,12 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="header-gradient-line w-full border-t border-base-300 py-3 text-white">
+      <div className="header-gradient-line relative w-full border-t border-base-300 py-3 text-white">
+        <Link
+          to="/admin"
+          className="absolute inset-y-0 left-0 z-10 w-16 max-w-[30%] min-w-10 cursor-default bg-transparent text-transparent select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/55"
+          aria-label={t('footer.admin_access_aria')}
+        />
         <div className="container mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs opacity-60 shrink-0">
             {t('footer.version', { version: APP_VERSION })}

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.212] - 2026-05-14
+
+### Added
+- **Storefront footer:** invisible left hit area on the gradient bar linking to **`/admin`**, with translated **`footer.admin_access_aria`** (ca / es / en).
+
+### Changed
+- **Docker Compose (dev):** nginx mounts **`default.dev.conf`** (Vite proxy upstream to `node:5173`); **`VITE_DEV_SERVER_URL`** defaults to **`http://localhost:${HTTP_PORT}`** so the browser loads dev assets through nginx; nginx **`depends_on`** **`node`**; **`VITE_DOCKER_PUBLISHED_PORT`** / **`HTTP_PORT`** passed into the **`node`** service for HMR.
+- **Vite (Docker dev):** **`server.origin`**, **`allowedHosts: true`**, **`cors: true`**, and HMR **`clientPort`** aligned with the host-mapped Vite port; WebSocket HMR uses **`ws`** with explicit container **`port`** vs browser **`clientPort`**.
+- **docker/nginx/default.conf:** comment clarifying prod vs dev mount; **`.cursor/rules/docker-setup.mdc`:** URLs and nginx/Vite roles updated.
+
 ## [0.1.211] - 2026-05-14
 
 ### Added

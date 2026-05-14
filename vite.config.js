@@ -24,17 +24,34 @@ export default defineConfig(({ mode }) => {
     const noAutoReload = envFlag(env.LARAVEL_VITE_NO_AUTO_RELOAD);
     const isDocker = envFlag(env.DOCKER);
     const hmrHost = env.VITE_DOCKER_HMR_HOST || 'localhost';
+    /** Host port mapped to Vite in Docker (compose `VITE_PORT`, default 5173). WebSocket HMR uses this; HTTP modules still use `VITE_DEV_SERVER_URL` (nginx :8080). */
+    const vitePublishedOnHost = isDocker
+        ? Number(env.VITE_DOCKER_PUBLISHED_PORT || env.VITE_PORT || 5173)
+        : 5173;
+    const devPublicOrigin = isDocker
+        ? (env.VITE_DEV_SERVER_URL ||
+            `http://${hmrHost}:${env.HTTP_PORT || '8080'}`)
+        : undefined;
 
     const server = isDocker
         ? {
+              origin: devPublicOrigin,
               host: true,
+              /** Allow requests when the browser uses Host: localhost:8080 and nginx proxies to :5173. */
+              allowedHosts: true,
+              /** Let the page on :8080 talk to the dev server / WS on the published Vite port. */
+              cors: true,
               port: 5173,
               strictPort: true,
               hmr: noAutoReload
                   ? false
                   : {
+                        protocol: 'ws',
                         host: hmrHost,
-                        clientPort: 5173,
+                        /** Inside the container Vite always listens here. */
+                        port: 5173,
+                        /** Browser opens ws://host:thisPort (compose host mapping `VITE_PORT`). */
+                        clientPort: vitePublishedOnHost,
                     },
               watch: {
                   ignored: ['**/storage/framework/views/**'],

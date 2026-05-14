@@ -13,14 +13,15 @@ Project name: `laravel-ecommerce` (`name:` in `docker-compose.yml`).
 |------------|--------------------------------------|-----------------------------------|
 | `postgres`  | `postgres:16-alpine`                | Database (PostgreSQL 16)          |
 | `app`       | `docker/php/Dockerfile` → `development` | PHP 8.2-FPM, runs Laravel         |
-| `nginx`     | `nginx:1.27-alpine`                 | Reverse proxy → `app:9000`        |
+| `nginx`     | `nginx:1.27-alpine`                 | Reverse proxy → `app:9000`; dev proxies Vite HTTP (`/@…`, `/resources/`, … → `node:5173`) |
 | `node`      | `node:22-bookworm-slim`             | Vite HMR dev server               |
 | `queue`     | same build as `app`                 | `php artisan queue:work`          |
 
 ## URLs (dev)
 
-- App: **http://localhost:8080** (`HTTP_PORT` env, default `8080`)
-- Vite HMR: **http://localhost:5173** (`VITE_PORT`, default `5173`)
+- App (HTML, PHP, API): **http://localhost:8080** (`HTTP_PORT`, default `8080`).
+- Vite **HTTP** modules (`/@vite/`, `/resources/`, …): same origin **8080** via nginx → `node:5173`.
+- Vite **HMR WebSocket**: **ws://localhost:{VITE_PORT}** (default **5173**) direct to the published `node` port (not through nginx). If you remap `VITE_PORT`, HMR follows that host port.
 
 ## First-time setup
 

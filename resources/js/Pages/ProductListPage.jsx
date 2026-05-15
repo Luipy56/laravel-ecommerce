@@ -327,19 +327,6 @@ export default function ProductListPage() {
     [selectedCategoryId, featureIds, search, setSearchParams, isCategoryRoute, packsOnly, priceMinParam, priceMaxParam]
   );
 
-  const handleAllCategories = useCallback(() => {
-    const next = buildSearchParams({
-      selectedCategoryId: null,
-      featureIds: [],
-      search: search ?? '',
-      categoryInPath: false,
-      packsOnly,
-      priceMin: priceMinParam,
-      priceMax: priceMaxParam,
-    });
-    navigate('/products?' + next.toString());
-  }, [search, navigate, packsOnly, priceMinParam, priceMaxParam]);
-
   const handleClearAllFilters = useCallback(() => {
     const next = buildSearchParams({
       selectedCategoryId: null,
@@ -356,6 +343,19 @@ export default function ProductListPage() {
   const selectCategory = useCallback(
     (id) => {
       const sid = String(id);
+      if (selectedCategoryId === sid) {
+        // clicking the active category deselects it
+        const next = buildSearchParams({
+          selectedCategoryId: null,
+          featureIds: [],
+          search: search ?? '',
+          packsOnly,
+          priceMin: priceMinParam,
+          priceMax: priceMaxParam,
+        });
+        navigate('/products?' + next.toString());
+        return;
+      }
       const qs = buildSearchParams({
         selectedCategoryId: null,
         featureIds,
@@ -367,7 +367,7 @@ export default function ProductListPage() {
       }).toString();
       navigate(`/categories/${sid}/products${qs ? `?${qs}` : ''}`);
     },
-    [featureIds, search, navigate, packsOnly, priceMinParam, priceMaxParam]
+    [selectedCategoryId, featureIds, search, navigate, packsOnly, priceMinParam, priceMaxParam]
   );
 
   const toggleFeature = useCallback(
@@ -443,13 +443,6 @@ export default function ProductListPage() {
             <div className="sidebar-block">
               <h4>{t('shop.categories')}</h4>
               <div className="filters-tags">
-                <button
-                  type="button"
-                  className={`tag${selectedCategoryId === null ? ' active' : ''}`}
-                  onClick={handleAllCategories}
-                >
-                  {t('shop.categories.all')}
-                </button>
                 {categoriesList.map((c) => (
                   <button
                     key={c.id}

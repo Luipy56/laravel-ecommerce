@@ -41,13 +41,13 @@
       }
     }
 
-    // Desktop: wrap into a grid-like flow
+    // Desktop: wrap into a grid-like flow — fixed width so cards are consistent
+    // regardless of how many items are in a row (no flex-grow)
     @media (min-width: 768px) {
       flex-wrap: wrap;
 
       .product-card {
-        flex: 1 1 240px;
-        max-width: 320px;
+        flex: 0 0 clamp(240px, 23%, 320px);
       }
     }
   }

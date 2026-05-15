@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.245] - 2026-05-15
+
+### Fixed
+- **Changelog:** removed duplicate `## [0.1.241]` block; merged navbar and mobile storefront notes under a single `[0.1.241]` heading.
+
+## [0.1.244] - 2026-05-15
+
+### Changed
+- **Catalog sidebar categories:** removed the "Todos" button; category tags now toggle — clicking an already-active category deselects it and resets to the full product list.
+
+## [0.1.243] - 2026-05-15
+
+### Fixed
+- **Catalog sidebar sticky:** replaced `overflow-x: hidden` with `overflow-x: clip` on the drawer root in `Layout.jsx`. The `hidden` value coerces `overflow-y` to `auto`, creating a new scroll container that broke `position: sticky` on the filter sidebar. `clip` clips content identically but does not create a scroll container, so the sidebar now correctly follows the user again while accounting for the hide/show navbar offset.
+
+## [0.1.242] - 2026-05-15
+
+### Fixed
+- **Home page product cards:** removed `flex-grow` from scroll-row desktop layout so all cards render at a consistent width regardless of how many items are in a row.
+
+## [0.1.241] - 2026-05-15
+
+### Fixed
+- **Navbar:** Restore Products and Packs buttons at `sm:inline-flex` (640 px+); commit `6af9d33` had accidentally moved them to `md:inline-flex` (768 px+), hiding them on tablet-sized and narrow laptop screens.
+- **Mobile responsiveness:** Added `overflow-x: hidden` to `html, body` in `app.css` and to the daisyUI `drawer` root wrapper in `Layout.jsx` — eliminates lateral (horizontal) scroll on all pages including `/profile`.
+- **Navbar mobile:** User dropdown button now shows icon-only on xs screens (`< sm`); username text visible from `sm` breakpoint up — prevents navbar cramping on narrow viewports.
+- **Navbar brand link:** Removed `calc(100vw-8.5rem)` (which could produce a 1 px overflow from scrollbar-width difference) in favour of a simple `max-w-[9rem] sm:max-w-[14rem]` with `shrink`.
+
 ## [0.1.240] - 2026-05-15
 
 ### Fixed
@@ -20,18 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PackDetailPage:** loading and error states use the same max-width layout and “Back” row as the loaded page; savings callout uses primary accent; add-to-cart uses the compact icon control with `aria-label` for screen readers.
 - **i18n:** shorter `shop.pack.savings` string in `ca`, `es`, and `en`; added `shop.product.view_more_info` in all three locales.
 - **SearchDemoProductSeeder:** Catalan retail description for demo SKU `SEARCH-DEMO-MIX-3030-K1` (replaces internal search-testing copy).
-
-## [0.1.241] - 2026-05-15
-
-### Fixed
-- **Navbar:** Restore Products and Packs buttons at `sm:inline-flex` (640 px+); commit `6af9d33` had accidentally moved them to `md:inline-flex` (768 px+), hiding them on tablet-sized and narrow laptop screens.
-
-
-
-### Fixed
-- **Mobile responsiveness:** Added `overflow-x: hidden` to `html, body` in `app.css` and to the daisyUI `drawer` root wrapper in `Layout.jsx` — eliminates lateral (horizontal) scroll on all pages including `/profile`.
-- **Navbar mobile:** User dropdown button now shows icon-only on xs screens (`< sm`); username text visible from `sm` breakpoint up — prevents navbar cramping on narrow viewports.
-- **Navbar brand link:** Removed `calc(100vw-8.5rem)` (which could produce a 1 px overflow from scrollbar-width difference) in favour of a simple `max-w-[9rem] sm:max-w-[14rem]` with `shrink`.
 
 ## [0.1.237] - 2026-05-15
 

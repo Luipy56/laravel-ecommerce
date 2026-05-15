@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Services\Search;
 
 use App\Models\Product;
+use App\Support\CatalogLocale;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * PostgreSQL-first product search over normalized {@see Product::$search_text}.
+ * PostgreSQL-first product search over {@see ProductTranslation::search_text} for the active UI locale.
  * Typo tolerance uses pg_trgm; other drivers use case-insensitive token LIKE only.
  */
 final class ProductSearchService
@@ -28,8 +29,9 @@ final class ProductSearchService
     /**
      * @return Collection<int, Product>
      */
-    public function search(string $query): Collection
+    public function search(string $query, ?string $locale = null): Collection
     {
+        $locale = CatalogLocale::normalize($locale ?? app()->getLocale());
         $normalized = $this->normalizeQuery($query);
         if ($normalized === '') {
             return collect();
@@ -43,8 +45,8 @@ final class ProductSearchService
         $tokenSlots = $this->synonyms->expandTokenSlots($tokens);
 
         return match (DB::getDriverName()) {
-            'pgsql' => $this->searchPostgres($normalized, $tokenSlots),
-            default => $this->searchLikeFallback($normalized, $tokenSlots),
+            'pgsql' => $this->searchPostgres($normalized, $tokenSlots, $locale),
+            default => $this->searchLikeFallback($normalized, $tokenSlots, $locale),
         };
     }
 
@@ -64,10 +66,10 @@ final class ProductSearchService
     }
 
     /**
-     * @param  list<list<string>>  $tokenSlots  OR within each slot, AND across slots
+     * @param  list<list<string>>  $tokenSlots
      * @return Collection<int, Product>
      */
-    private function searchPostgres(string $normalizedFull, array $tokenSlots): Collection
+    private function searchPostgres(string $normalizedFull, array $tokenSlots, string $locale): Collection
     {
         $limit = (int) ($this->config['limit'] ?? 50);
         $wsMin = (float) ($this->config['word_similarity_threshold'] ?? 0.35);
@@ -85,12 +87,13 @@ final class ProductSearchService
                 if ($token === '') {
                     continue;
                 }
-                $orParts[] = '(search_text ILIKE ? OR word_similarity(?, search_text) >= ? OR similarity(search_text, ?) >= ?)';
+                $orParts[] = '(pt.search_text ILIKE ? OR word_similarity(?, pt.search_text) >= ? OR similarity(pt.search_text, ?) >= ? OR products.code ILIKE ?)';
                 $bindings[] = '%'.$this->escapeIlikePattern($token).'%';
                 $bindings[] = $token;
                 $bindings[] = $wsMin;
                 $bindings[] = $token;
                 $bindings[] = $simMin;
+                $bindings[] = '%'.$this->escapeIlikePattern($token).'%';
             }
             if ($orParts === []) {
                 continue;
@@ -105,18 +108,23 @@ final class ProductSearchService
         $whereTokens = implode(' AND ', $tokenWheres);
 
         $sql = <<<SQL
-SELECT id,
-    (CASE WHEN search_text = ? THEN 1000 ELSE 0 END)
-    + (CASE WHEN search_text ILIKE ? THEN 800 ELSE 0 END)
-    + (CASE WHEN search_text ILIKE ? THEN 400 ELSE 0 END)
-    + (100 * COALESCE(word_similarity(?, search_text), 0)::double precision)
-    + (50 * COALESCE(similarity(search_text, ?), 0)::double precision)
+SELECT products.id,
+    (CASE WHEN pt.search_text = ? THEN 1000 ELSE 0 END)
+    + (CASE WHEN pt.search_text ILIKE ? THEN 800 ELSE 0 END)
+    + (CASE WHEN pt.search_text ILIKE ? THEN 400 ELSE 0 END)
+    + (100 * COALESCE(word_similarity(?, pt.search_text), 0)::double precision)
+    + (50 * COALESCE(similarity(pt.search_text, ?), 0)::double precision)
+    + (CASE WHEN products.code ILIKE ? THEN 200 ELSE 0 END)
     AS search_rank
 FROM products
-WHERE is_active = true
-AND search_text IS NOT NULL
+INNER JOIN product_translations pt ON pt.product_id = products.id AND pt.locale = ?
+WHERE products.is_active = true
+AND (
+    (pt.search_text IS NOT NULL AND pt.search_text <> '')
+    OR (products.code ILIKE ?)
+)
 AND ({$whereTokens})
-ORDER BY search_rank DESC, id ASC
+ORDER BY search_rank DESC, products.id ASC
 LIMIT ?
 SQL;
 
@@ -126,6 +134,9 @@ SQL;
             $containsPattern,
             $normalizedFull,
             $normalizedFull,
+            $containsPattern,
+            $locale,
+            $containsPattern,
         ];
 
         $allBindings = array_merge($headBindings, $bindings, [$limit]);
@@ -140,27 +151,38 @@ SQL;
      * @param  list<list<string>>  $tokenSlots
      * @return Collection<int, Product>
      */
-    private function searchLikeFallback(string $normalizedFull, array $tokenSlots): Collection
+    private function searchLikeFallback(string $normalizedFull, array $tokenSlots, string $locale): Collection
     {
         $limit = (int) ($this->config['limit'] ?? 50);
 
-        $q = Product::query()->active()->whereNotNull('search_text');
+        $q = Product::query()->active()
+            ->join('product_translations as pt', function ($join) use ($locale): void {
+                $join->on('pt.product_id', '=', 'products.id')->where('pt.locale', '=', $locale);
+            })
+            ->where(function ($outer) use ($normalizedFull): void {
+                $outer->whereNotNull('pt.search_text')->where('pt.search_text', '!=', '')
+                    ->orWhere('products.code', 'like', '%'.$this->escapeLike($normalizedFull).'%');
+            })
+            ->select('products.*');
 
         foreach ($tokenSlots as $variants) {
             $variants = array_values(array_filter($variants, fn (string $t): bool => $t !== ''));
             if ($variants === []) {
                 continue;
             }
-            $q->where(function ($sub) use ($variants): void {
+            $q->where(function ($sub) use ($variants, $normalizedFull): void {
                 foreach ($variants as $token) {
-                    $sub->orWhereRaw('instr(search_text, ?) > 0', [$token]);
+                    $sub->orWhere(function ($x) use ($token, $normalizedFull): void {
+                        $x->whereRaw('instr(pt.search_text, ?) > 0', [$token])
+                            ->orWhere('products.code', 'like', '%'.$this->escapeLike($token).'%');
+                    });
                 }
             });
         }
 
         $esc = fn (string $s): string => $this->escapeLike($s);
         $q->orderByRaw(
-            'CASE WHEN search_text = ? THEN 0 WHEN search_text LIKE ? ESCAPE ? THEN 1 WHEN search_text LIKE ? ESCAPE ? THEN 2 ELSE 3 END',
+            'CASE WHEN pt.search_text = ? THEN 0 WHEN pt.search_text LIKE ? ESCAPE ? THEN 1 WHEN pt.search_text LIKE ? ESCAPE ? THEN 2 ELSE 3 END',
             [
                 $normalizedFull,
                 $esc($normalizedFull).'%',
@@ -169,7 +191,7 @@ SQL;
                 '\\',
             ]
         );
-        $q->orderBy('id');
+        $q->orderBy('products.id');
 
         return $q->limit($limit)->get();
     }
@@ -189,7 +211,7 @@ SQL;
             return collect();
         }
 
-        $products = Product::query()->whereIn('id', $ids)->get()->keyBy('id');
+        $products = Product::query()->whereIn('id', $ids)->with('translations')->get()->keyBy('id');
 
         return collect($ids)
             ->map(fn (int $id) => $products->get($id))

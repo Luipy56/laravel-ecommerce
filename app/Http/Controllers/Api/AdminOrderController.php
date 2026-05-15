@@ -105,9 +105,9 @@ class AdminOrderController extends Controller
     {
         $order->load([
             'client:id,login_email,identification',
-            'lines.product:id,name,code',
+            'lines.product.translations',
             'lines.product.images',
-            'lines.pack:id,name,contains_keys',
+            'lines.pack.translations',
             'lines.pack.images',
             'addresses',
             'payments',

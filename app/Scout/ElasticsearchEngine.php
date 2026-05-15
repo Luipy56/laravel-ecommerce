@@ -176,6 +176,11 @@ final class ElasticsearchEngine extends Engine
         $must = [];
         $filter = [];
 
+        $loc = app()->getLocale();
+        if (! in_array($loc, ['ca', 'es', 'en'], true)) {
+            $loc = 'ca';
+        }
+
         $q = trim((string) $builder->query);
         if ($q !== '') {
             $must[] = [
@@ -183,10 +188,10 @@ final class ElasticsearchEngine extends Engine
                     'query' => $q,
                     'type' => 'best_fields',
                     'fields' => [
-                        'name^2',
+                        'name_'.$loc.'^2',
                         'code^2',
-                        'search_text',
-                        'description',
+                        'search_text_'.$loc,
+                        'description_'.$loc,
                     ],
                 ],
             ];

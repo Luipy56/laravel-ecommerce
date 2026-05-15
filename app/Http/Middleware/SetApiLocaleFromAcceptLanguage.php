@@ -15,11 +15,16 @@ class SetApiLocaleFromAcceptLanguage
     {
         if ($request->is('api/*')) {
             $allowed = config('app.available_locales', ['ca', 'es', 'en']);
-            $pref = $request->header('Accept-Language', '');
-            if (preg_match('/^(ca|es|en)([-_;]|$)/i', $pref, $m)) {
-                $loc = strtolower($m[1]);
-                if (in_array($loc, $allowed, true)) {
-                    app()->setLocale($loc);
+            $qLocale = $request->query('locale');
+            if (is_string($qLocale) && in_array(strtolower($qLocale), $allowed, true)) {
+                app()->setLocale(strtolower($qLocale));
+            } else {
+                $pref = $request->header('Accept-Language', '');
+                if (preg_match('/^(ca|es|en)([-_;]|$)/i', $pref, $m)) {
+                    $loc = strtolower($m[1]);
+                    if (in_array($loc, $allowed, true)) {
+                        app()->setLocale($loc);
+                    }
                 }
             }
         }

@@ -6,6 +6,7 @@ import { IconCart } from './icons';
 import FavoriteToggle from './FavoriteToggle';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
 import ProductPreviewModal from './ProductPreviewModal';
+import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
@@ -131,18 +132,21 @@ export default function ProductCard({ product, pack }) {
           ) : (
             product.features?.length > 0 && (
               <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
-                {product.features.slice(0, 2).map((f, i) => (
-                  <li key={f.id ?? i}>
-                    {(f.type ?? f.name) != null && String(f.type ?? f.name).trim() !== '' ? (
-                      <span>
-                        <span className="product-card__feature-label">{f.type ?? f.name}:</span>{' '}
-                        {f.value ?? ''}
-                      </span>
-                    ) : (
-                      <span>{f.value ?? ''}</span>
-                    )}
-                  </li>
-                ))}
+                {product.features.slice(0, 2).map((f, i) => {
+                  const typeLabel = catalogFeatureTypeLabel(f, t);
+                  return (
+                    <li key={f.id ?? i}>
+                      {typeLabel ? (
+                        <span>
+                          <span className="product-card__feature-label">{typeLabel}:</span>{' '}
+                          {f.value ?? ''}
+                        </span>
+                      ) : (
+                        <span>{f.value ?? ''}</span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )
           )}

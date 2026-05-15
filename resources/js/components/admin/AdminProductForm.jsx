@@ -4,12 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { scrollWindowToTopOnFormError } from '../../lib/formScroll';
 import { adminProductPayloadSchema, parseWithZod } from '../../validation';
 
+const emptyLocaleSlice = () => ({ name: '', description: '' });
+
 const defaultProduct = {
   category_id: '',
   variant_group_id: '',
   code: '',
   name: '',
   description: '',
+  translations: { es: emptyLocaleSlice(), en: emptyLocaleSlice() },
   price: 0,
   discount_percent: '',
   purchase_price: '',
@@ -53,12 +56,19 @@ export default function AdminProductForm({
   const { t } = useTranslation();
   const [form, setForm] = useState(() => {
     if (product) {
+      const tr = product.translations || {};
+      const es = tr.es || {};
+      const en = tr.en || {};
       return {
         category_id: product.category_id ?? '',
         variant_group_id: product.variant_group_id ?? '',
         code: product.code ?? '',
         name: product.name ?? '',
         description: product.description ?? '',
+        translations: {
+          es: { name: es.name ?? '', description: es.description ?? '' },
+          en: { name: en.name ?? '', description: en.description ?? '' },
+        },
         price: product.price ?? 0,
         discount_percent: product.discount_percent != null && product.discount_percent !== '' ? String(product.discount_percent) : '',
         purchase_price: product.purchase_price ?? '',
@@ -85,6 +95,17 @@ export default function AdminProductForm({
   const update = (key, value) => {
     setClientError('');
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const updateTranslation = (locale, field, value) => {
+    setClientError('');
+    setForm((prev) => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [locale]: { ...prev.translations[locale], [field]: value },
+      },
+    }));
   };
 
   const handleFileSelect = (e) => {
@@ -121,6 +142,16 @@ export default function AdminProductForm({
       code: form.code || null,
       name: form.name,
       description: form.description || null,
+      translations: {
+        es: {
+          name: (form.translations?.es?.name ?? '').trim(),
+          description: (form.translations?.es?.description ?? '').trim() || null,
+        },
+        en: {
+          name: (form.translations?.en?.name ?? '').trim(),
+          description: (form.translations?.en?.description ?? '').trim() || null,
+        },
+      },
       price: Number(form.price),
       discount_percent:
         form.discount_percent !== '' && form.discount_percent != null ? Number(form.discount_percent) : null,
@@ -214,6 +245,7 @@ export default function AdminProductForm({
           required
           aria-label={t('admin.products.name')}
         />
+        <span className="text-xs text-base-content/70">{t('admin.products.primary_locale_catalan_hint')}</span>
       </label>
 
       <label className="form-field">
@@ -226,6 +258,59 @@ export default function AdminProductForm({
           aria-label={t('admin.products.description')}
         />
       </label>
+
+      <div className="rounded-box border border-base-300 bg-base-200/40 p-4 space-y-4">
+        <p className="text-sm font-medium">{t('admin.products.translations_optional_section')}</p>
+        <p className="text-xs text-base-content/70">{t('admin.products.translations_optional_help')}</p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-base-content/80">{t('admin.products.locale_es')}</p>
+            <label className="form-field">
+              <span className="form-label">{t('admin.products.name')}</span>
+              <input
+                type="text"
+                className="input input-bordered w-full"
+                value={form.translations.es.name}
+                onChange={(e) => updateTranslation('es', 'name', e.target.value)}
+                aria-label={`${t('admin.products.locale_es')} · ${t('admin.products.name')}`}
+              />
+            </label>
+            <label className="form-field">
+              <span className="form-label">{t('admin.products.description')}</span>
+              <textarea
+                className="textarea textarea-bordered w-full"
+                rows={3}
+                value={form.translations.es.description}
+                onChange={(e) => updateTranslation('es', 'description', e.target.value)}
+                aria-label={`${t('admin.products.locale_es')} · ${t('admin.products.description')}`}
+              />
+            </label>
+          </div>
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-base-content/80">{t('admin.products.locale_en')}</p>
+            <label className="form-field">
+              <span className="form-label">{t('admin.products.name')}</span>
+              <input
+                type="text"
+                className="input input-bordered w-full"
+                value={form.translations.en.name}
+                onChange={(e) => updateTranslation('en', 'name', e.target.value)}
+                aria-label={`${t('admin.products.locale_en')} · ${t('admin.products.name')}`}
+              />
+            </label>
+            <label className="form-field">
+              <span className="form-label">{t('admin.products.description')}</span>
+              <textarea
+                className="textarea textarea-bordered w-full"
+                rows={3}
+                value={form.translations.en.description}
+                onChange={(e) => updateTranslation('en', 'description', e.target.value)}
+                aria-label={`${t('admin.products.locale_en')} · ${t('admin.products.description')}`}
+              />
+            </label>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <label className="form-field">

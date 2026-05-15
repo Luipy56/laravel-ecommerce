@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductCategory;
+use App\Support\CatalogLocale;
+use App\Support\CatalogTranslationSync;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,12 +16,14 @@ class AdminCategoryController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = ProductCategory::query()->orderBy('name');
+        $query = ProductCategory::query()->with('translations')->orderByTranslatedName();
 
         if ($request->filled('search')) {
-            $term = '%' . $request->string('search')->trim() . '%';
-            $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', $term)->orWhere('code', 'like', $term);
+            $term = '%'.$request->string('search')->trim().'%';
+            $loc = CatalogLocale::normalize(app()->getLocale());
+            $query->where(function ($q) use ($term, $loc) {
+                $q->where('code', 'like', $term)
+                    ->orWhereHas('translations', fn ($t) => $t->where('locale', $loc)->where('name', 'like', $term));
             });
         }
         if ($request->filled('is_active')) {
@@ -27,7 +31,7 @@ class AdminCategoryController extends Controller
         }
 
         $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
-        $categories = $query->paginate($perPage, ['id', 'code', 'name', 'is_active']);
+        $categories = $query->paginate($perPage);
         $data = $categories->getCollection()->map(fn (ProductCategory $c) => [
             'id' => $c->id,
             'code' => $c->code,
@@ -53,14 +57,30 @@ class AdminCategoryController extends Controller
             'code' => ['nullable', 'string', 'max:50', 'unique:product_categories,code'],
             'name' => ['required', 'string', 'max:255'],
             'is_active' => ['boolean'],
+            'translations' => ['nullable', 'array'],
         ]);
         $validated['is_active'] = $validated['is_active'] ?? true;
-        $cat = ProductCategory::create($validated);
-        return response()->json(['success' => true, 'data' => $this->categoryToArray($cat)], 201);
+        $cat = ProductCategory::create([
+            'code' => $validated['code'] ?? null,
+            'is_active' => $validated['is_active'],
+        ]);
+        $by = ['ca' => ['name' => $validated['name']]];
+        if (is_array($request->input('translations'))) {
+            foreach ($request->input('translations') as $loc => $payload) {
+                if (in_array((string) $loc, CatalogLocale::SUPPORTED, true) && is_array($payload)) {
+                    $by[(string) $loc] = array_merge($by[(string) $loc] ?? [], $payload);
+                }
+            }
+        }
+        CatalogTranslationSync::syncCategoryTranslations($cat, $by);
+
+        return response()->json(['success' => true, 'data' => $this->categoryToArray($cat->fresh()->load('translations'))], 201);
     }
 
     public function show(ProductCategory $category): JsonResponse
     {
+        $category->load('translations');
+
         return response()->json([
             'success' => true,
             'data' => $this->categoryToArray($category),
@@ -70,17 +90,32 @@ class AdminCategoryController extends Controller
     public function update(Request $request, ProductCategory $category): JsonResponse
     {
         $validated = $request->validate([
-            'code' => ['nullable', 'string', 'max:50', 'unique:product_categories,code,' . $category->id],
+            'code' => ['nullable', 'string', 'max:50', 'unique:product_categories,code,'.$category->id],
             'name' => ['required', 'string', 'max:255'],
             'is_active' => ['boolean'],
+            'translations' => ['nullable', 'array'],
         ]);
-        $category->update($validated);
-        return response()->json(['success' => true, 'data' => $this->categoryToArray($category->fresh())]);
+        $category->update([
+            'code' => $validated['code'] ?? $category->code,
+            'is_active' => $validated['is_active'] ?? $category->is_active,
+        ]);
+        $by = ['ca' => ['name' => $validated['name']]];
+        if (is_array($request->input('translations'))) {
+            foreach ($request->input('translations') as $loc => $payload) {
+                if (in_array((string) $loc, CatalogLocale::SUPPORTED, true) && is_array($payload)) {
+                    $by[(string) $loc] = array_merge($by[(string) $loc] ?? [], $payload);
+                }
+            }
+        }
+        CatalogTranslationSync::syncCategoryTranslations($category, $by);
+
+        return response()->json(['success' => true, 'data' => $this->categoryToArray($category->fresh()->load('translations'))]);
     }
 
     public function destroy(ProductCategory $category): JsonResponse
     {
         $category->update(['is_active' => false]);
+
         return response()->json(['success' => true]);
     }
 
@@ -91,6 +126,9 @@ class AdminCategoryController extends Controller
             'code' => $c->code,
             'name' => $c->name,
             'is_active' => (bool) $c->is_active,
+            'translations' => $c->relationLoaded('translations')
+                ? $c->translations->keyBy('locale')->map(fn ($t) => ['name' => $t->name])->all()
+                : [],
         ];
     }
 }

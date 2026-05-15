@@ -8,37 +8,55 @@ use Illuminate\Support\Facades\DB;
 class FeatureSeeder extends Seeder
 {
     /**
-     * Feature values in Spanish (Castilian) for the catalog from the product list spreadsheet.
-     * feature_name_id: 1 Marca, 2 Color, 3 Tipo de llave, 4 Medida, 5 Medida interna, 6 Medida externa.
+     * Feature rows (per distinct value) with translations; values match Spanish catalog copy used by ProductFeatureSeeder.
+     *
+     * @param  array<string, string>  $valuesByLocale  keys ca|es|en
      */
+    private function insertFeatureWithTranslations(string $featureNameCode, array $valuesByLocale, \Illuminate\Support\Carbon $now): void
+    {
+        $fnId = (int) DB::table('feature_names')->where('code', $featureNameCode)->value('id');
+        if ($fnId === 0) {
+            return;
+        }
+        $es = $valuesByLocale['es'] ?? '';
+        $ca = $valuesByLocale['ca'] ?? $es;
+        $en = $valuesByLocale['en'] ?? $es;
+        $fid = DB::table('features')->insertGetId([
+            'feature_name_id' => $fnId,
+            'is_active' => true,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        foreach (['ca' => $ca, 'es' => $es, 'en' => $en] as $loc => $val) {
+            DB::table('feature_translations')->insert([
+                'feature_id' => $fid,
+                'locale' => $loc,
+                'value' => $val,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+    }
+
     public function run(): void
     {
-        $features = [
-            // 1 Marca
-            ['feature_name_id' => 1, 'value' => 'Securemme', 'is_active' => true],
-            ['feature_name_id' => 1, 'value' => 'M&C', 'is_active' => true],
-            ['feature_name_id' => 1, 'value' => 'Keso', 'is_active' => true],
-            ['feature_name_id' => 1, 'value' => 'Abus', 'is_active' => true],
-            ['feature_name_id' => 1, 'value' => 'DMC', 'is_active' => true],
-            ['feature_name_id' => 1, 'value' => 'Disec', 'is_active' => true],
-            // 2 Color
-            ['feature_name_id' => 2, 'value' => 'Plata', 'is_active' => true],
-            ['feature_name_id' => 2, 'value' => 'Dorado', 'is_active' => true],
-            // 3 Tipo de llave
-            ['feature_name_id' => 3, 'value' => 'Puntos copiables', 'is_active' => true],
-            ['feature_name_id' => 3, 'value' => 'Puntos no copiables', 'is_active' => true],
-            ['feature_name_id' => 3, 'value' => 'Elemento móvil', 'is_active' => true],
-            ['feature_name_id' => 3, 'value' => 'Codificación magnética', 'is_active' => true],
-            // 5 Medida interna
-            ['feature_name_id' => 5, 'value' => '30mm', 'is_active' => true],
-            ['feature_name_id' => 5, 'value' => '32mm', 'is_active' => true],
-            ['feature_name_id' => 5, 'value' => '40mm', 'is_active' => true],
-            // 6 Medida externa
-            ['feature_name_id' => 6, 'value' => '30mm', 'is_active' => true],
-            ['feature_name_id' => 6, 'value' => '32mm', 'is_active' => true],
-            ['feature_name_id' => 6, 'value' => '40mm', 'is_active' => true],
-        ];
+        $now = now();
+        $same = fn (string $v): array => ['es' => $v, 'ca' => $v, 'en' => $v];
 
-        DB::table('features')->insert($features);
+        foreach (['Securemme', 'M&C', 'Keso', 'Abus', 'DMC', 'Disec'] as $brand) {
+            $this->insertFeatureWithTranslations('brand', $same($brand), $now);
+        }
+        foreach (['Plata', 'Dorado'] as $color) {
+            $this->insertFeatureWithTranslations('color', $same($color), $now);
+        }
+        foreach (['Puntos copiables', 'Puntos no copiables', 'Elemento móvil', 'Codificación magnética'] as $kt) {
+            $this->insertFeatureWithTranslations('key_type', $same($kt), $now);
+        }
+        foreach (['30mm', '32mm', '40mm'] as $mm) {
+            $this->insertFeatureWithTranslations('inner_measure', $same($mm), $now);
+        }
+        foreach (['30mm', '32mm', '40mm'] as $mm) {
+            $this->insertFeatureWithTranslations('outer_measure', $same($mm), $now);
+        }
     }
 }

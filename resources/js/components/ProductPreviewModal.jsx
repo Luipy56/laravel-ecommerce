@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import { IconX, IconCart, IconWarning } from './icons';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
+import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
@@ -152,18 +153,21 @@ export default function ProductPreviewModal({ product, pack, detailUrl, onClose 
                     {t('shop.product.specifications')}
                   </p>
                   <ul className="list-none p-0 m-0 space-y-1">
-                    {product.features.map((f, i) => (
-                      <li key={f.id ?? i} className="text-sm text-base-content/80">
-                        {(f.type ?? f.name) != null && String(f.type ?? f.name).trim() !== '' ? (
-                          <>
-                            <span className="font-medium">{f.type ?? f.name}:</span>{' '}
-                            {f.value ?? ''}
-                          </>
-                        ) : (
-                          f.value ?? ''
-                        )}
-                      </li>
-                    ))}
+                    {product.features.map((f, i) => {
+                      const typeLabel = catalogFeatureTypeLabel(f, t);
+                      return (
+                        <li key={f.id ?? i} className="text-sm text-base-content/80">
+                          {typeLabel ? (
+                            <>
+                              <span className="font-medium">{typeLabel}:</span>{' '}
+                              {f.value ?? ''}
+                            </>
+                          ) : (
+                            f.value ?? ''
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}

@@ -54,7 +54,7 @@ function localeCode(lng) {
 
 export default function Layout() {
   const { t, i18n } = useTranslation();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const { user, loading: authLoading } = useAuth();
   const [locale, setLocale] = useState(i18n.language);
 
@@ -75,11 +75,11 @@ export default function Layout() {
 
   const packsOnlyActive = useMemo(() => {
     if (pathname !== '/products') return false;
-    return new URLSearchParams(location.search).get('packs_only') === '1';
-  }, [pathname, location.search]);
+    return new URLSearchParams(search).get('packs_only') === '1';
+  }, [pathname, search]);
 
   return (
-    <div className="drawer overflow-x-clip">
+    <div className="drawer">
       <input
         id={STOREFRONT_DRAWER_ID}
         type="checkbox"

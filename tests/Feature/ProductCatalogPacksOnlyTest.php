@@ -6,8 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\Pack;
 use App\Models\PackItem;
-use App\Models\Product;
-use App\Models\ProductCategory;
+use App\Support\CatalogTranslationSync;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,38 +16,23 @@ class ProductCatalogPacksOnlyTest extends TestCase
 
     public function test_packs_only_returns_only_pack_rows_with_pagination(): void
     {
-        $category = ProductCategory::create([
-            'code' => 'cat-packs-only',
-            'name' => 'Cat packs only',
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('cat-packs-only', 'Cat packs only');
 
-        $product = Product::create([
-            'category_id' => $category->id,
-            'code' => 'PROD-PACK',
-            'name' => 'Product in pack',
-            'description' => null,
-            'price' => 10.00,
-            'stock' => 5,
-            'is_active' => true,
-        ]);
-
-        Product::create([
-            'category_id' => $category->id,
-            'code' => 'PROD-SOLO',
-            'name' => 'Product solo',
-            'description' => null,
-            'price' => 5.00,
-            'stock' => 2,
-            'is_active' => true,
-        ]);
+        $product = $this->createProductForTests($category->id, 'PROD-PACK', 'Product in pack', null, ['price' => 10, 'stock' => 5]);
+        $this->createProductForTests($category->id, 'PROD-SOLO', 'Product solo', null, ['price' => 5, 'stock' => 2]);
 
         for ($i = 1; $i <= 12; $i++) {
+            $name = sprintf('Pack %02d', $i);
             $pack = Pack::create([
-                'name' => sprintf('Pack %02d', $i),
-                'description' => null,
                 'price' => 20.00,
                 'is_active' => true,
+                'is_trending' => false,
+                'contains_keys' => false,
+            ]);
+            CatalogTranslationSync::syncPackTranslations($pack, [
+                'ca' => ['name' => $name, 'description' => null],
+                'es' => ['name' => $name, 'description' => null],
+                'en' => ['name' => $name, 'description' => null],
             ]);
             PackItem::create([
                 'pack_id' => $pack->id,

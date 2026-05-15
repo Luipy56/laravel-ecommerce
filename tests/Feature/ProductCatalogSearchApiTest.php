@@ -6,7 +6,7 @@ namespace Tests\Feature;
 
 use App\Contracts\Search\ElasticsearchProductCatalogSearch;
 use App\Models\Product;
-use App\Models\ProductCategory;
+use App\Support\CatalogTranslationSync;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
@@ -29,21 +29,8 @@ class ProductCatalogSearchApiTest extends TestCase
     {
         config(['scout.driver' => 'null']);
 
-        $category = ProductCategory::create([
-            'code' => 'cat-api',
-            'name' => 'API category',
-            'is_active' => true,
-        ]);
-
-        Product::create([
-            'category_id' => $category->id,
-            'code' => 'API-SEARCH-1',
-            'name' => 'Martillo demo product',
-            'description' => null,
-            'price' => 10.00,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('cat-api', 'API category');
+        $this->createProductForTests($category->id, 'API-SEARCH-1', 'Martillo demo product');
 
         $response = $this->getJson('/api/v1/products/search?q=martillo');
 
@@ -65,22 +52,22 @@ class ProductCatalogSearchApiTest extends TestCase
             'scout.elasticsearch.hosts' => ['http://127.0.0.1:9200'],
         ]);
 
-        $category = ProductCategory::create([
-            'code' => 'cat-es',
-            'name' => 'ES category',
-            'is_active' => true,
-        ]);
-
+        $category = $this->createProductCategoryForTests('cat-es', 'ES category');
         $product = Product::withoutSyncingToSearch(function () use ($category) {
-            return Product::create([
+            $p = Product::create([
                 'category_id' => $category->id,
                 'code' => 'ES-1',
-                'name' => 'Elasticsearch listed product',
-                'description' => null,
                 'price' => 5.00,
                 'stock' => 1,
                 'is_active' => true,
             ]);
+            CatalogTranslationSync::syncProductTranslations($p, [
+                'ca' => ['name' => 'Elasticsearch listed product', 'description' => null],
+                'es' => ['name' => 'Elasticsearch listed product', 'description' => null],
+                'en' => ['name' => 'Elasticsearch listed product', 'description' => null],
+            ]);
+
+            return $p->fresh(['translations']);
         });
 
         $this->mock(ElasticsearchProductCatalogSearch::class, function ($mock) use ($product) {
@@ -104,22 +91,22 @@ class ProductCatalogSearchApiTest extends TestCase
             'scout.elasticsearch.hosts' => ['http://127.0.0.1:9200'],
         ]);
 
-        $category = ProductCategory::create([
-            'code' => 'cat-fb',
-            'name' => 'Fallback category',
-            'is_active' => true,
-        ]);
-
+        $category = $this->createProductCategoryForTests('cat-fb', 'Fallback category');
         Product::withoutSyncingToSearch(function () use ($category) {
-            return Product::create([
+            $p = Product::create([
                 'category_id' => $category->id,
                 'code' => 'FB-1',
-                'name' => 'Fallback hammer unique',
-                'description' => null,
                 'price' => 3.00,
                 'stock' => 1,
                 'is_active' => true,
             ]);
+            CatalogTranslationSync::syncProductTranslations($p, [
+                'ca' => ['name' => 'Fallback hammer unique', 'description' => null],
+                'es' => ['name' => 'Fallback hammer unique', 'description' => null],
+                'en' => ['name' => 'Fallback hammer unique', 'description' => null],
+            ]);
+
+            return $p;
         });
 
         $this->mock(ElasticsearchProductCatalogSearch::class, function ($mock) {
@@ -142,21 +129,8 @@ class ProductCatalogSearchApiTest extends TestCase
     {
         config(['scout.driver' => 'null']);
 
-        $category = ProductCategory::create([
-            'code' => 'cat-sg',
-            'name' => 'Suggest category',
-            'is_active' => true,
-        ]);
-
-        Product::create([
-            'category_id' => $category->id,
-            'code' => 'SG-1',
-            'name' => 'Suggestable wrench',
-            'description' => null,
-            'price' => 2.00,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('cat-sg', 'Suggest category');
+        $this->createProductForTests($category->id, 'SG-1', 'Suggestable wrench', null, ['price' => 2, 'stock' => 1]);
 
         $response = $this->getJson('/api/v1/products/search?q=suggestable&suggest=1');
 

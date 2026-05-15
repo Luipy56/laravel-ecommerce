@@ -6,8 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\Feature;
 use App\Models\FeatureName;
-use App\Models\Product;
-use App\Models\ProductCategory;
+use App\Support\CatalogTranslationSync;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,34 +16,25 @@ class ProductCatalogFeatureFilterTest extends TestCase
 
     public function test_same_characteristic_values_are_ored(): void
     {
-        $category = ProductCategory::create([
-            'code' => 'cat-ff1',
-            'name' => 'FF category',
-            'is_active' => true,
+        $category = $this->createProductCategoryForTests('cat-ff1', 'FF category');
+        $marca = FeatureName::create(['code' => 't_brand', 'is_active' => true]);
+        CatalogTranslationSync::syncFeatureNameTranslations($marca, [
+            'ca' => ['name' => 'Marca'],
+            'es' => ['name' => 'Marca'],
+            'en' => ['name' => 'Brand'],
         ]);
-        $marca = FeatureName::create(['name' => 'Marca', 'is_active' => true]);
-        $fAbus = Feature::create(['feature_name_id' => $marca->id, 'value' => 'Abus', 'is_active' => true]);
-        $fDisec = Feature::create(['feature_name_id' => $marca->id, 'value' => 'Disec', 'is_active' => true]);
+        $fAbus = Feature::create(['feature_name_id' => $marca->id, 'is_active' => true]);
+        CatalogTranslationSync::syncFeatureTranslations($fAbus, [
+            'ca' => ['value' => 'Abus'], 'es' => ['value' => 'Abus'], 'en' => ['value' => 'Abus'],
+        ]);
+        $fDisec = Feature::create(['feature_name_id' => $marca->id, 'is_active' => true]);
+        CatalogTranslationSync::syncFeatureTranslations($fDisec, [
+            'ca' => ['value' => 'Disec'], 'es' => ['value' => 'Disec'], 'en' => ['value' => 'Disec'],
+        ]);
 
-        $p1 = Product::create([
-            'category_id' => $category->id,
-            'code' => 'P-ABUS',
-            'name' => 'Only Abus',
-            'description' => null,
-            'price' => 1.0,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $p1 = $this->createProductForTests($category->id, 'P-ABUS', 'Only Abus');
         $p1->features()->sync([$fAbus->id]);
-        $p2 = Product::create([
-            'category_id' => $category->id,
-            'code' => 'P-DISEC',
-            'name' => 'Only Disec',
-            'description' => null,
-            'price' => 1.0,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $p2 = $this->createProductForTests($category->id, 'P-DISEC', 'Only Disec');
         $p2->features()->sync([$fDisec->id]);
 
         $response = $this->getJson(
@@ -57,36 +47,28 @@ class ProductCatalogFeatureFilterTest extends TestCase
 
     public function test_different_characteristic_groups_use_and(): void
     {
-        $category = ProductCategory::create([
-            'code' => 'cat-ff2',
-            'name' => 'FF2 category',
-            'is_active' => true,
+        $category = $this->createProductCategoryForTests('cat-ff2', 'FF2 category');
+        $marca = FeatureName::create(['code' => 't_brand2', 'is_active' => true]);
+        $color = FeatureName::create(['code' => 't_color', 'is_active' => true]);
+        CatalogTranslationSync::syncFeatureNameTranslations($marca, [
+            'ca' => ['name' => 'Marca'], 'es' => ['name' => 'Marca'], 'en' => ['name' => 'Brand'],
         ]);
-        $marca = FeatureName::create(['name' => 'Marca', 'is_active' => true]);
-        $color = FeatureName::create(['name' => 'Color', 'is_active' => true]);
-        $fAbus = Feature::create(['feature_name_id' => $marca->id, 'value' => 'Abus', 'is_active' => true]);
-        $fPlata = Feature::create(['feature_name_id' => $color->id, 'value' => 'Plata', 'is_active' => true]);
+        CatalogTranslationSync::syncFeatureNameTranslations($color, [
+            'ca' => ['name' => 'Color'], 'es' => ['name' => 'Color'], 'en' => ['name' => 'Colour'],
+        ]);
+        $fAbus = Feature::create(['feature_name_id' => $marca->id, 'is_active' => true]);
+        CatalogTranslationSync::syncFeatureTranslations($fAbus, [
+            'ca' => ['value' => 'Abus'], 'es' => ['value' => 'Abus'], 'en' => ['value' => 'Abus'],
+        ]);
+        $fPlata = Feature::create(['feature_name_id' => $color->id, 'is_active' => true]);
+        CatalogTranslationSync::syncFeatureTranslations($fPlata, [
+            'ca' => ['value' => 'Plata'], 'es' => ['value' => 'Plata'], 'en' => ['value' => 'Silver'],
+        ]);
 
-        $pAbusOnly = Product::create([
-            'category_id' => $category->id,
-            'code' => 'P-A',
-            'name' => 'Abus no Plata',
-            'description' => null,
-            'price' => 1.0,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $pAbusOnly = $this->createProductForTests($category->id, 'P-A', 'Abus no Plata');
         $pAbusOnly->features()->sync([$fAbus->id]);
 
-        $pBoth = Product::create([
-            'category_id' => $category->id,
-            'code' => 'P-AP',
-            'name' => 'Abus y Plata',
-            'description' => null,
-            'price' => 1.0,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $pBoth = $this->createProductForTests($category->id, 'P-AP', 'Abus y Plata');
         $pBoth->features()->sync([$fAbus->id, $fPlata->id]);
 
         $response = $this->getJson(

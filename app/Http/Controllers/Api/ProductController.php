@@ -9,6 +9,7 @@ use App\Models\Feature;
 use App\Models\Pack;
 use App\Models\Product;
 use App\Services\HomeFeaturedProductIds;
+use App\Support\CatalogLocale;
 use App\Services\Search\CatalogProductSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class ProductController extends Controller
     private function indexPacksOnly(Request $request, int $perPage): JsonResponse
     {
         $query = $this->buildPackQuery($request);
-        $packs = $query->with(['items.product', 'images'])->orderBy('name')->paginate($perPage);
+        $packs = $query->with(['items.product.translations', 'images'])->orderByTranslatedName()->paginate($perPage);
 
         $data = $packs->getCollection()->map(fn (Pack $pack) => [
             'type' => 'pack',
@@ -75,7 +76,7 @@ class ProductController extends Controller
     private function indexProductsOnly(Request $request, int $perPage): JsonResponse
     {
         $query = $this->buildProductQuery($request);
-        $products = $query->with(['category', 'features.featureName', 'images'])->orderBy('name')->paginate($perPage);
+        $products = $query->with(['category.translations', 'features.featureName.translations', 'translations', 'images'])->orderByTranslatedName()->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -97,8 +98,8 @@ class ProductController extends Controller
         $productQuery = $this->buildProductQuery($request);
         $packQuery = $this->buildPackQuery($request);
 
-        $productRows = $productQuery->get(['id', 'name'])->map(fn ($p) => ['type' => 'product', 'id' => $p->id, 'name' => $p->name]);
-        $packRows = $packQuery->get(['id', 'name'])->map(fn ($p) => ['type' => 'pack', 'id' => $p->id, 'name' => $p->name]);
+        $productRows = $productQuery->with('translations')->get()->map(fn (Product $p) => ['type' => 'product', 'id' => $p->id, 'name' => $p->name ?? '']);
+        $packRows = $packQuery->with('translations')->get()->map(fn (Pack $p) => ['type' => 'pack', 'id' => $p->id, 'name' => $p->name ?? '']);
 
         $merged = $productRows->concat($packRows)->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
         $total = $merged->count();
@@ -109,12 +110,12 @@ class ProductController extends Controller
         $packIds = $slice->where('type', 'pack')->pluck('id')->all();
 
         $productsById = Product::query()->active()
-            ->with(['category', 'features.featureName', 'images'])
+            ->with(['category.translations', 'features.featureName.translations', 'translations', 'images'])
             ->whereIn('id', $productIds)
             ->get()
             ->keyBy('id');
         $packsById = Pack::query()->active()
-            ->with(['items.product', 'images'])
+            ->with(['items.product.translations', 'images', 'translations'])
             ->whereIn('id', $packIds)
             ->get()
             ->keyBy('id');
@@ -153,14 +154,21 @@ class ProductController extends Controller
         }
         $this->applyFeatureGroupFiltersToProductQuery($query, $request);
         if ($request->filled('search')) {
-            $term = $request->search;
-            $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', "%{$term}%")
-                    ->orWhere('description', 'like', "%{$term}%")
-                    ->orWhere('code', 'like', "%{$term}%")
-                    ->orWhereHas('features', function ($f) use ($term) {
-                        $f->where('value', 'like', "%{$term}%")
-                            ->orWhereHas('featureName', fn ($n) => $n->where('name', 'like', "%{$term}%"));
+            $term = (string) $request->search;
+            $loc = CatalogLocale::normalize(app()->getLocale());
+            $like = '%'.addcslashes($term, '%_\\').'%';
+            $query->where(function ($q) use ($like, $loc, $term): void {
+                $q->where('products.code', 'like', $like)
+                    ->orWhereHas('translations', function ($t) use ($like, $loc): void {
+                        $t->where('locale', $loc)->where(function ($x) use ($like): void {
+                            $x->where('name', 'like', $like)
+                                ->orWhere('description', 'like', $like)
+                                ->orWhere('search_text', 'like', $like);
+                        });
+                    })
+                    ->orWhereHas('features', function ($f) use ($like, $loc): void {
+                        $f->whereHas('translations', fn ($ft) => $ft->where('locale', $loc)->where('value', 'like', $like))
+                            ->orWhereHas('featureName.translations', fn ($nt) => $nt->where('locale', $loc)->where('name', 'like', $like));
                     });
             });
         }
@@ -183,17 +191,27 @@ class ProductController extends Controller
         }
         $this->applyFeatureGroupFiltersToPackQuery($query, $request);
         if ($request->filled('search')) {
-            $term = $request->search;
-            $query->where(function ($q) use ($term) {
-                $q->where('packs.name', 'like', "%{$term}%")
-                    ->orWhere('packs.description', 'like', "%{$term}%")
-                    ->orWhereHas('items.product', function ($p) use ($term) {
-                        $p->where('name', 'like', "%{$term}%")
-                            ->orWhere('description', 'like', "%{$term}%")
-                            ->orWhere('code', 'like', "%{$term}%")
-                            ->orWhereHas('features', function ($f) use ($term) {
-                                $f->where('value', 'like', "%{$term}%")
-                                    ->orWhereHas('featureName', fn ($n) => $n->where('name', 'like', "%{$term}%"));
+            $term = (string) $request->search;
+            $loc = CatalogLocale::normalize(app()->getLocale());
+            $like = '%'.addcslashes($term, '%_\\').'%';
+            $query->where(function ($q) use ($like, $loc): void {
+                $q->whereHas('translations', function ($t) use ($like, $loc): void {
+                    $t->where('locale', $loc)->where(function ($x) use ($like): void {
+                        $x->where('name', 'like', $like)->orWhere('description', 'like', $like)->orWhere('search_text', 'like', $like);
+                    });
+                })
+                    ->orWhereHas('items.product', function ($p) use ($like, $loc): void {
+                        $p->where('products.code', 'like', $like)
+                            ->orWhereHas('translations', function ($pt) use ($like, $loc): void {
+                                $pt->where('locale', $loc)->where(function ($x) use ($like): void {
+                                    $x->where('name', 'like', $like)
+                                        ->orWhere('description', 'like', $like)
+                                        ->orWhere('search_text', 'like', $like);
+                                });
+                            })
+                            ->orWhereHas('features', function ($f) use ($like, $loc): void {
+                                $f->whereHas('translations', fn ($ft) => $ft->where('locale', $loc)->where('value', 'like', $like))
+                                    ->orWhereHas('featureName.translations', fn ($nt) => $nt->where('locale', $loc)->where('name', 'like', $like));
                             });
                     });
             });
@@ -311,7 +329,7 @@ class ProductController extends Controller
 
         $products = Product::query()->active()
             ->whereIn('id', $ids)
-            ->with(['category', 'features.featureName', 'images'])
+            ->with(['category.translations', 'features.featureName.translations', 'translations', 'images'])
             ->get();
 
         $byId = $products->keyBy('id');
@@ -355,7 +373,7 @@ class ProductController extends Controller
         }
 
         $products = $result['products'];
-        $products->loadMissing(['category', 'images']);
+        $products->loadMissing(['category.translations', 'translations', 'images']);
 
         return response()->json([
             'success' => true,
@@ -407,10 +425,11 @@ class ProductController extends Controller
             abort(404);
         }
         $product->load([
-            'category',
-            'features.featureName',
+            'category.translations',
+            'translations',
+            'features.featureName.translations',
             'images',
-            'variantGroup.products' => fn ($q) => $q->active()->orderBy('name')->with(['images', 'features.featureName']),
+            'variantGroup.products' => fn ($q) => $q->active()->orderByTranslatedName()->with(['images', 'features.featureName.translations', 'translations']),
         ]);
 
         return response()->json([

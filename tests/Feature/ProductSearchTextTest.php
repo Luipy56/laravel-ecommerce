@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Product;
-use App\Models\ProductCategory;
+use App\Models\ProductTranslation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -15,49 +15,42 @@ class ProductSearchTextTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_product_saving_sets_normalized_search_text(): void
+    public function test_product_translation_saving_sets_normalized_search_text(): void
     {
-        $category = ProductCategory::create([
-            'code' => 't',
-            'name' => 'Test category',
-            'is_active' => true,
-        ]);
-
+        $category = $this->createProductCategoryForTests('t', 'Test category');
         $product = Product::create([
             'category_id' => $category->id,
             'code' => 'X-ÁB',
-            'name' => 'Cilindro  Café',
-            'description' => 'Niño',
             'price' => 10.00,
             'stock' => 1,
             'is_active' => true,
         ]);
+        $t = new ProductTranslation([
+            'locale' => 'ca',
+            'name' => 'Cilindro  Café',
+            'description' => 'Niño',
+        ]);
+        $t->product()->associate($product);
+        $t->save();
 
-        $product->refresh();
+        $t->refresh();
         $expected = Product::normalizeSearchText('Cilindro  Café', 'X-ÁB', 'Niño');
-        $this->assertSame($expected, $product->search_text);
-        $this->assertStringContainsString('cilindro', $product->search_text);
-        $this->assertStringContainsString('x-ab', $product->search_text);
+        $this->assertSame($expected, $t->search_text);
+        $this->assertStringContainsString('cilindro', (string) $t->search_text);
+        $this->assertStringContainsString('x-ab', (string) $t->search_text);
         if (extension_loaded('intl')) {
-            $this->assertStringContainsString('cafe', $product->search_text);
-            $this->assertStringContainsString('nino', $product->search_text);
+            $this->assertStringContainsString('cafe', (string) $t->search_text);
+            $this->assertStringContainsString('nino', (string) $t->search_text);
         }
     }
 
     public function test_rebuild_search_text_command_updates_rows(): void
     {
-        $category = ProductCategory::create([
-            'code' => 't2',
-            'name' => 'Cat 2',
-            'is_active' => true,
-        ]);
-
-        DB::table('products')->insert([
+        $category = $this->createProductCategoryForTests('t2', 'Cat 2');
+        $pid = DB::table('products')->insertGetId([
             'category_id' => $category->id,
             'variant_group_id' => null,
             'code' => 'RAW-1',
-            'name' => 'Raw Name É',
-            'description' => null,
             'price' => 1.00,
             'discount_percent' => null,
             'purchase_price' => null,
@@ -72,42 +65,38 @@ class ProductSearchTextTest extends TestCase
             'is_featured' => false,
             'is_trending' => false,
             'is_active' => true,
-            'search_text' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('product_translations')->insert([
+            'product_id' => $pid,
+            'locale' => 'ca',
+            'name' => 'Raw Name É',
+            'description' => null,
+            'search_text' => 'stale-wrong',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         Artisan::call('products:rebuild-search-text');
 
-        $row = DB::table('products')->where('code', 'RAW-1')->first();
-        $this->assertNotNull($row);
-        $this->assertSame(Product::normalizeSearchText('Raw Name É', 'RAW-1', null), $row->search_text);
+        $st = DB::table('product_translations')->where('product_id', $pid)->where('locale', 'ca')->value('search_text');
+        $this->assertSame(Product::normalizeSearchText('Raw Name É', 'RAW-1', null), $st);
     }
 
     public function test_rebuild_search_text_stale_only_updates_mismatched_rows(): void
     {
-        $category = ProductCategory::create([
-            'code' => 't3',
-            'name' => 'Cat 3',
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('t3', 'Cat 3');
+        $ok = $this->createProductForTests($category->id, 'STALE-OK', 'Already normalized', null, ['price' => 1, 'stock' => 1]);
+        $okCa = $ok->translations->firstWhere('locale', 'ca');
+        $this->assertNotNull($okCa);
+        $expectedOk = Product::normalizeSearchText('Already normalized', 'STALE-OK', null);
+        $this->assertSame($expectedOk, $okCa->search_text);
 
-        $ok = Product::create([
-            'category_id' => $category->id,
-            'code' => 'STALE-OK',
-            'name' => 'Already normalized',
-            'description' => null,
-            'price' => 1.00,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
-
-        DB::table('products')->insert([
+        $badPid = DB::table('products')->insertGetId([
             'category_id' => $category->id,
             'variant_group_id' => null,
             'code' => 'STALE-BAD',
-            'name' => 'Needs rebuild',
-            'description' => null,
             'price' => 2.00,
             'discount_percent' => null,
             'purchase_price' => null,
@@ -122,6 +111,14 @@ class ProductSearchTextTest extends TestCase
             'is_featured' => false,
             'is_trending' => false,
             'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('product_translations')->insert([
+            'product_id' => $badPid,
+            'locale' => 'ca',
+            'name' => 'Needs rebuild',
+            'description' => null,
             'search_text' => 'wrong',
             'created_at' => now(),
             'updated_at' => now(),
@@ -129,14 +126,10 @@ class ProductSearchTextTest extends TestCase
 
         Artisan::call('products:rebuild-search-text', ['--stale' => true]);
 
-        $ok->refresh();
-        $bad = DB::table('products')->where('code', 'STALE-BAD')->first();
-        $this->assertNotNull($bad);
-        $this->assertSame(Product::normalizeSearchText('Needs rebuild', 'STALE-BAD', null), $bad->search_text);
-        $this->assertSame(
-            Product::normalizeSearchText('Already normalized', 'STALE-OK', null),
-            $ok->search_text
-        );
+        $okCa2 = $ok->fresh()->translations->firstWhere('locale', 'ca');
+        $this->assertSame($expectedOk, $okCa2?->search_text);
+        $badSt = DB::table('product_translations')->where('product_id', $badPid)->where('locale', 'ca')->value('search_text');
+        $this->assertSame(Product::normalizeSearchText('Needs rebuild', 'STALE-BAD', null), $badSt);
     }
 
     public function test_postgresql_search_text_trgm_index_exists_when_using_pgsql(): void
@@ -147,9 +140,9 @@ class ProductSearchTextTest extends TestCase
 
         $row = DB::selectOne(
             'select 1 as ok from pg_indexes where schemaname = current_schema() and tablename = ? and indexname = ?',
-            ['products', 'idx_products_search_text_trgm']
+            ['product_translations', 'idx_product_translations_search_text_trgm']
         );
-        $this->assertNotNull($row, 'GIN(trgm) index on products.search_text should exist');
+        $this->assertNotNull($row, 'GIN(trgm) index on product_translations.search_text should exist');
     }
 
     public function test_postgresql_extensions_exist_when_using_pgsql(): void

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { catalogFeatureTypeLabel } from '../../lib/catalogFeatureTypeLabel';
 
 export default function AdminProductShowPage() {
   const { t } = useTranslation();
@@ -109,9 +110,16 @@ export default function AdminProductShowPage() {
             <div className="mt-4 pt-4 border-t border-base-300">
               <dt className="text-sm text-base-content/70 mb-1">{t('admin.products.features')}</dt>
               <dd className="flex flex-wrap gap-2">
-                {product.features.map((f) => (
-                  <span key={f.id} className="badge badge-outline badge-neutral">{f.type}: {f.value}</span>
-                ))}
+                {product.features.map((f) => {
+                  const typeLabel = catalogFeatureTypeLabel(
+                    { type: f.type, feature_name_code: f.feature_name_code },
+                    t
+                  );
+                  const text = typeLabel ? `${typeLabel}: ${f.value ?? ''}` : String(f.value ?? '');
+                  return (
+                    <span key={f.id} className="badge badge-outline badge-neutral">{text}</span>
+                  );
+                })}
               </dd>
             </div>
           )}

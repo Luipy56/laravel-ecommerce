@@ -16,8 +16,6 @@ use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\OrderLine;
 use App\Models\Payment;
-use App\Models\Product;
-use App\Models\ProductCategory;
 use App\Services\Payments\PaymentCompletionService;
 use App\Services\Payments\Stripe\StripeCheckoutStarter;
 use Database\Seeders\DatabaseSeeder;
@@ -48,19 +46,10 @@ class CustomerTransactionalEmailTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        $category = ProductCategory::query()->create([
-            'code' => 'cat_'.uniqid(),
-            'name' => 'Category',
-            'is_active' => true,
-        ]);
-
-        $product = Product::query()->create([
-            'category_id' => $category->id,
-            'code' => 'p_'.uniqid(),
-            'name' => 'Product',
+        $category = $this->createProductCategoryForTests('cat_'.uniqid(), 'Category');
+        $product = $this->createProductForTests($category->id, 'p_'.uniqid(), 'Product', null, [
             'price' => 25.00,
             'stock' => 10,
-            'is_active' => true,
         ]);
 
         $cart = Order::query()->create([

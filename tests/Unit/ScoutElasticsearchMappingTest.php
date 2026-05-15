@@ -15,8 +15,9 @@ class ScoutElasticsearchMappingTest extends TestCase
 
         $this->assertIsArray($def);
         $this->assertSame('completion', $def['mappings']['properties']['suggest']['type']);
-        $this->assertSame('text', $def['mappings']['properties']['name']['type']);
-        $this->assertSame('standard', $def['mappings']['properties']['name']['analyzer']);
+        $this->assertSame('text', $def['mappings']['properties']['name_ca']['type']);
+        $this->assertSame('standard', $def['mappings']['properties']['name_ca']['analyzer']);
+        $this->assertSame('text', $def['mappings']['properties']['search_text_es']['type']);
     }
 
     public function test_synonym_overlay_switches_text_fields_to_product_synonym_analyzer(): void
@@ -29,7 +30,7 @@ class ScoutElasticsearchMappingTest extends TestCase
         ]);
         $merged = array_replace_recursive($base, $dict->elasticsearchIndexOverlay());
 
-        $this->assertSame('product_synonym', $merged['mappings']['properties']['search_text']['analyzer']);
+        $this->assertSame('product_synonym', $merged['mappings']['properties']['search_text_ca']['analyzer']);
         $this->assertSame('completion', $merged['mappings']['properties']['suggest']['type']);
     }
 }

@@ -88,6 +88,14 @@ final class SearchSynonymDictionary
             return [];
         }
 
+        $props = [];
+        foreach (['ca', 'es', 'en'] as $loc) {
+            $props['name_'.$loc] = ['type' => 'text', 'analyzer' => 'product_synonym'];
+            $props['description_'.$loc] = ['type' => 'text', 'analyzer' => 'product_synonym'];
+            $props['search_text_'.$loc] = ['type' => 'text', 'analyzer' => 'product_synonym'];
+        }
+        $props['code'] = ['type' => 'text', 'analyzer' => 'product_synonym'];
+
         return [
             'settings' => [
                 'analysis' => [
@@ -106,12 +114,7 @@ final class SearchSynonymDictionary
                 ],
             ],
             'mappings' => [
-                'properties' => [
-                    'name' => ['type' => 'text', 'analyzer' => 'product_synonym'],
-                    'code' => ['type' => 'text', 'analyzer' => 'product_synonym'],
-                    'description' => ['type' => 'text', 'analyzer' => 'product_synonym'],
-                    'search_text' => ['type' => 'text', 'analyzer' => 'product_synonym'],
-                ],
+                'properties' => $props,
             ],
         ];
     }

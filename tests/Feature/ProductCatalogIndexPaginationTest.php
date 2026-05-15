@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Models\Product;
-use App\Models\ProductCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,22 +13,16 @@ class ProductCatalogIndexPaginationTest extends TestCase
 
     public function test_mixed_catalog_supports_page_parameter_for_infinite_scroll_clients(): void
     {
-        $category = ProductCategory::create([
-            'code' => 'cat-page',
-            'name' => 'Pagination category',
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('cat-page', 'Pagination category');
 
         for ($i = 1; $i <= 18; $i++) {
-            Product::create([
-                'category_id' => $category->id,
-                'code' => sprintf('PAGE-%02d', $i),
-                'name' => sprintf('Catalog item %02d', $i),
-                'description' => null,
-                'price' => 1.00,
-                'stock' => 1,
-                'is_active' => true,
-            ]);
+            $this->createProductForTests(
+                $category->id,
+                sprintf('PAGE-%02d', $i),
+                sprintf('Catalog item %02d', $i),
+                null,
+                ['price' => 1, 'stock' => 1]
+            );
         }
 
         $r1 = $this->getJson('/api/v1/products?include_packs=1&per_page=10&page=1');

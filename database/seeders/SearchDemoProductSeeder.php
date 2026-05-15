@@ -39,38 +39,73 @@ class SearchDemoProductSeeder extends Seeder
         $rows = [
             [
                 'code' => 'SEARCH-DEMO-TYPO',
-                'name' => 'Cilindro demostración typo',
-                'description' => 'Fixture for typo-tolerant search (e.g. cilimdro).',
                 'price' => 9.99,
                 'stock' => 5,
+                'locales' => [
+                    'ca' => ['name' => 'Cilindre demostració typo', 'description' => 'Fixture for typo-tolerant search (e.g. cilimdro).'],
+                    'es' => ['name' => 'Cilindro demostración typo', 'description' => 'Fixture for typo-tolerant search (e.g. cilimdro).'],
+                    'en' => ['name' => 'Demo cylinder typo', 'description' => 'Fixture for typo-tolerant search (e.g. cilimdro).'],
+                ],
             ],
             [
                 'code' => 'SEARCH-DEMO-K1-PARTIAL',
-                'name' => 'Cilindro partial SKU demo',
-                'description' => 'Code contains K1 for partial token tests.',
                 'price' => 19.99,
                 'stock' => 3,
+                'locales' => [
+                    'ca' => ['name' => 'Cilindre partial SKU demo', 'description' => 'Code contains K1 for partial token tests.'],
+                    'es' => ['name' => 'Cilindro partial SKU demo', 'description' => 'Code contains K1 for partial token tests.'],
+                    'en' => ['name' => 'Partial SKU demo cylinder', 'description' => 'Code contains K1 for partial token tests.'],
+                ],
             ],
             [
                 'code' => 'SEARCH-DEMO-MIX-3030-K1',
-                'name' => 'Cilindro 30x30 mm níquel mix query',
-                'description' => 'Cilindre de seguretat de dimensions 30x30 mm amb acabat níquel. Compatible amb perfil K1.',
                 'price' => 29.99,
                 'stock' => 2,
+                'locales' => [
+                    'ca' => [
+                        'name' => 'Cilindre 30x30 mm níquel mix query',
+                        'description' => 'Cilindre de seguretat 30x30 mm. Text únic català UNIQCA_DEMOCA_X7 per proves de cerca per locale.',
+                    ],
+                    'es' => [
+                        'name' => 'Cilindro 30x30 mm níquel mix query',
+                        'description' => 'Cilindro de seguridad de dimensiones 30x30 mm con acabado níquel. Compatible con perfil K1.',
+                    ],
+                    'en' => [
+                        'name' => 'Cylinder 30x30 mm nickel mix query',
+                        'description' => '30x30 mm security cylinder, nickel finish. K1 profile compatible.',
+                    ],
+                ],
             ],
         ];
 
         foreach ($rows as $row) {
+            $locales = $row['locales'];
+            unset($row['locales']);
             $merged = array_merge($base, $row);
-            $merged['search_text'] = Product::normalizeSearchText(
-                $merged['name'],
-                $merged['code'],
-                $merged['description'] ?? null
-            );
             DB::table('products')->updateOrInsert(
                 ['code' => $merged['code']],
                 $merged
             );
+            $pid = (int) DB::table('products')->where('code', $merged['code'])->value('id');
+            if ($pid === 0) {
+                continue;
+            }
+            foreach (['ca', 'es', 'en'] as $loc) {
+                $nv = $locales[$loc];
+                $nm = $nv['name'] ?? '';
+                $dc = $nv['description'] ?? null;
+                $st = Product::normalizeSearchText($nm, $merged['code'], is_string($dc) ? $dc : null);
+                DB::table('product_translations')->updateOrInsert(
+                    ['product_id' => $pid, 'locale' => $loc],
+                    [
+                        'name' => $nm,
+                        'description' => is_string($dc) ? $dc : null,
+                        'search_text' => $st,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]
+                );
+            }
         }
     }
 }

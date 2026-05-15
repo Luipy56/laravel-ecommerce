@@ -57,7 +57,7 @@ class SearchSynonymDictionaryTest extends TestCase
         );
         $this->assertSame(
             'product_synonym',
-            $overlay['mappings']['properties']['search_text']['analyzer']
+            $overlay['mappings']['properties']['search_text_ca']['analyzer']
         );
     }
 

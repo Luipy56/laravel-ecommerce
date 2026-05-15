@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Product;
-use App\Models\ProductCategory;
 use App\Services\Search\ProductSearchService;
 use App\Services\Search\SearchSynonymDictionary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,21 +17,12 @@ class ProductSearchServiceTest extends TestCase
 
     public function test_partial_k1_matches_relevant_sku_style_field(): void
     {
-        $category = ProductCategory::create([
-            'code' => 'sc1',
-            'name' => 'Cylinders',
-            'is_active' => true,
-        ]);
-
-        Product::create([
-            'category_id' => $category->id,
-            'code' => '192 evoK1C 3030 N',
-            'name' => 'Cilindro 30x30 mm níquel Securemme K1',
-            'description' => null,
-            'price' => 26.50,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('sc1', 'Cylinders');
+        $this->createProductForTests(
+            $category->id,
+            '192 evoK1C 3030 N',
+            'Cilindro 30x30 mm níquel Securemme K1'
+        );
 
         $service = new ProductSearchService;
         $hits = $service->search('k1');
@@ -47,27 +37,14 @@ class ProductSearchServiceTest extends TestCase
             $this->markTestSkipped('Trigram typo tolerance is implemented for PostgreSQL only.');
         }
 
-        $category = ProductCategory::create([
-            'code' => 'sc2',
-            'name' => 'Cylinders',
-            'is_active' => true,
-        ]);
-
-        Product::create([
-            'category_id' => $category->id,
-            'code' => 'TYPO-1',
-            'name' => 'Cilindro de prueba',
-            'description' => null,
-            'price' => 10.00,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('sc2', 'Cylinders');
+        $this->createProductForTests($category->id, 'TYPO-1', 'Cilindro de prueba');
 
         $service = new ProductSearchService;
         $hits = $service->search('cilimdro');
 
         $this->assertGreaterThanOrEqual(1, $hits->count());
-        $match = $hits->first(fn (Product $p) => str_contains(mb_strtolower($p->name, 'UTF-8'), 'cilindro'));
+        $match = $hits->first(fn (Product $p) => str_contains(mb_strtolower((string) $p->name, 'UTF-8'), 'cilindro'));
         $this->assertNotNull($match);
     }
 
@@ -77,31 +54,9 @@ class ProductSearchServiceTest extends TestCase
             $this->markTestSkipped('Ranking smoke test targets PostgreSQL trigram + ILIKE scoring.');
         }
 
-        $category = ProductCategory::create([
-            'code' => 'sc3',
-            'name' => 'Cylinders',
-            'is_active' => true,
-        ]);
-
-        Product::create([
-            'category_id' => $category->id,
-            'code' => '192 evoK1C 3030 L',
-            'name' => 'Cilindro 30x30 mm latón Securemme K1',
-            'description' => null,
-            'price' => 26.50,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
-
-        Product::create([
-            'category_id' => $category->id,
-            'code' => '192 evoK1C 3030 N',
-            'name' => 'Cilindro 30x30 mm níquel Securemme K1',
-            'description' => null,
-            'price' => 26.50,
-            'stock' => 2,
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('sc3', 'Cylinders');
+        $this->createProductForTests($category->id, '192 evoK1C 3030 L', 'Cilindro 30x30 mm latón Securemme K1');
+        $this->createProductForTests($category->id, '192 evoK1C 3030 N', 'Cilindro 30x30 mm níquel Securemme K1');
 
         $service = new ProductSearchService;
         $hits = $service->search('cilindro 3030 k1');
@@ -113,7 +68,7 @@ class ProductSearchServiceTest extends TestCase
         $first = $hits->first();
         $this->assertNotNull($first);
         $this->assertStringContainsString('3030', (string) $first->code);
-        $this->assertStringContainsString('k1', mb_strtolower((string) $first->search_text, 'UTF-8'));
+        $this->assertStringContainsString('k1', mb_strtolower((string) $first->translations->firstWhere('locale', 'ca')?->search_text, 'UTF-8'));
     }
 
     public function test_empty_query_returns_no_results(): void
@@ -126,21 +81,8 @@ class ProductSearchServiceTest extends TestCase
 
     public function test_synonym_group_matches_alternate_term_in_catalog(): void
     {
-        $category = ProductCategory::create([
-            'code' => 'syn1',
-            'name' => 'Hardware',
-            'is_active' => true,
-        ]);
-
-        Product::create([
-            'category_id' => $category->id,
-            'code' => 'GIZ-1',
-            'name' => 'Super gizmo accessory',
-            'description' => null,
-            'price' => 5.00,
-            'stock' => 1,
-            'is_active' => true,
-        ]);
+        $category = $this->createProductCategoryForTests('syn1', 'Hardware');
+        $this->createProductForTests($category->id, 'GIZ-1', 'Super gizmo accessory');
 
         $dict = new SearchSynonymDictionary([
             'enabled' => true,

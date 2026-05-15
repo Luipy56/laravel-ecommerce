@@ -41,11 +41,16 @@ class AdminProductResource extends JsonResource
                 'feature_name_id' => $f->feature_name_id,
                 'value' => $f->value,
                 'type' => $f->featureName?->name,
+                'feature_name_code' => $f->featureName?->code,
             ])),
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => [
                 'id' => $img->id,
                 'url' => $img->url,
             ])),
+            'translations' => $this->whenLoaded('translations', fn () => $this->translations
+                ->keyBy('locale')
+                ->map(fn ($t) => ['name' => $t->name, 'description' => $t->description])
+                ->all()),
         ];
     }
 }

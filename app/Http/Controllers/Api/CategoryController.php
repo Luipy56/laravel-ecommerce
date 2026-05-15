@@ -17,7 +17,7 @@ class CategoryController extends Controller
         if ($request->boolean('with_inactive')) {
             $query = ProductCategory::query();
         }
-        $categories = $query->orderBy('name')->get();
+        $categories = $query->orderByTranslatedName()->with('translations')->get();
 
         return response()->json([
             'success' => true,
@@ -33,14 +33,15 @@ class CategoryController extends Controller
     {
         $categories = ProductCategory::query()->active()
             ->whereHas('products', fn ($q) => $q->active())
-            ->orderBy('name')
+            ->orderByTranslatedName()
+            ->with('translations')
             ->get();
 
         $data = $categories->map(function (ProductCategory $category) {
             $product = $category->products()
                 ->active()
-                ->with(['images', 'category', 'features.featureName'])
-                ->orderBy('name')
+                ->with(['images', 'category.translations', 'features.featureName.translations', 'translations'])
+                ->orderByTranslatedName()
                 ->first();
 
             return [

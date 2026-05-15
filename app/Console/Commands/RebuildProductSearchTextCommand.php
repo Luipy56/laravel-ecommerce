@@ -11,7 +11,7 @@ class RebuildProductSearchTextCommand extends Command
                             {--stale : Only rows where search_text is null or does not match normalized fields}
                             {--chunk=100 : Number of records per database chunk}';
 
-    protected $description = 'Recompute products.search_text from name, code, and description (for bulk DB changes that skipped Eloquent)';
+    protected $description = 'Recompute product_translations.search_text from name, code, and description per locale (for bulk DB changes that skipped Eloquent)';
 
     public function handle(RebuildsProductSearchText $rebuildsProductSearchText): int
     {
@@ -19,7 +19,7 @@ class RebuildProductSearchTextCommand extends Command
         $n = $this->option('stale')
             ? $rebuildsProductSearchText->rebuildStale($chunk)
             : $rebuildsProductSearchText->rebuildAll($chunk);
-        $this->info("Updated {$n} product(s).");
+        $this->info("Updated {$n} product translation row(s).");
 
         return self::SUCCESS;
     }

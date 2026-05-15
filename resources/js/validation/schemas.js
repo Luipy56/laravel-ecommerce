@@ -177,6 +177,11 @@ export const profileContactSchema = z.object({
 
 const securityLevels = z.enum(['standard', 'high', 'very_high']);
 
+const adminProductLocaleSliceSchema = z.object({
+  name: z.string().max(255),
+  description: z.string().nullable(),
+});
+
 /** Validates API payload built in AdminProductForm before submit. */
 export const adminProductPayloadSchema = z.object({
   category_id: z.number().int().positive({ message: 'validation.invalid' }),
@@ -184,6 +189,10 @@ export const adminProductPayloadSchema = z.object({
   code: z.string().max(50).nullable(),
   name: z.string().trim().min(1, { message: 'validation.required' }).max(255),
   description: z.string().nullable(),
+  translations: z.object({
+    es: adminProductLocaleSliceSchema,
+    en: adminProductLocaleSliceSchema,
+  }),
   price: z.number().finite().min(0, { message: 'validation.number_min' }),
   discount_percent: z.number().finite().min(0).max(100).nullable(),
   purchase_price: z.number().finite().min(0).nullable(),

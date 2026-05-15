@@ -44,6 +44,10 @@ class AdminPackResource extends JsonResource
                 'id' => $img->id,
                 'url' => $img->url,
             ])),
+            'translations' => $this->whenLoaded('translations', fn () => $this->translations
+                ->keyBy('locale')
+                ->map(fn ($t) => ['name' => $t->name, 'description' => $t->description])
+                ->all()),
         ];
     }
 }

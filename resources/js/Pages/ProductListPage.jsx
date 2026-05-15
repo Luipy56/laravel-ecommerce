@@ -6,6 +6,7 @@ import { useStorefrontNavbarVisibility } from '../contexts/StorefrontNavbarVisib
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
+import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 import ProductCard from '../components/ProductCard';
 import PageTitle from '../components/PageTitle';
 
@@ -406,12 +407,23 @@ export default function ProductListPage() {
   const featuresByGroup = useMemo(() => {
     const map = new Map();
     for (const f of featuresList) {
-      const name = f.feature_name || '';
-      if (!map.has(name)) map.set(name, []);
-      map.get(name).push(f);
+      const groupKey = String(f.feature_name_id ?? f.id);
+      if (!map.has(groupKey)) {
+        map.set(groupKey, { list: [], heading: '' });
+      }
+      const entry = map.get(groupKey);
+      entry.list.push(f);
+      const lbl = catalogFeatureTypeLabel(
+        { type: f.feature_name, feature_name_code: f.feature_name_code },
+        t
+      );
+      if (lbl && !entry.heading) entry.heading = lbl;
     }
-    return Array.from(map.entries()).map(([name, list]) => ({ name, list }));
-  }, [featuresList]);
+    return Array.from(map.values()).map(({ list, heading }) => ({
+      name: heading || t('shop.filters.feature_group'),
+      list,
+    }));
+  }, [featuresList, t]);
 
   const globalMin = priceRangeQuery.data?.min ?? 0;
   const globalMax = priceRangeQuery.data?.max ?? 9999;
@@ -481,7 +493,7 @@ export default function ProductListPage() {
             )}
 
             {featuresByGroup.map(({ name, list }) => (
-              <div key={name} className="sidebar-block">
+              <div key={list[0]?.feature_name_id ?? list[0]?.id ?? name} className="sidebar-block">
                 <h4>{name}</h4>
                 <div className="checkbox-list">
                   {list.map((f) => (

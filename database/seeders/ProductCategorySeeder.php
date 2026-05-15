@@ -2,20 +2,52 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class ProductCategorySeeder extends Seeder
 {
     /**
-     * Demo categories in Spanish (Castilian).
+     * Demo categories with translations (ca, es, en).
      */
     public function run(): void
     {
-        DB::table('product_categories')->insert([
-            ['code' => 'cilindros', 'name' => 'Cilindros', 'is_active' => true],
-            ['code' => 'escudo', 'name' => 'Escudo', 'is_active' => true],
-            ['code' => 'segundo-cerrojo', 'name' => 'Segundo cerrojo', 'is_active' => true],
-        ]);
+        $now = now();
+        $defs = [
+            'cilindros' => [
+                'ca' => 'Cilindres',
+                'es' => 'Cilindros',
+                'en' => 'Cylinders',
+            ],
+            'escudo' => [
+                'ca' => 'Escut',
+                'es' => 'Escudo',
+                'en' => 'Shield',
+            ],
+            'segundo-cerrojo' => [
+                'ca' => 'Segon pestell',
+                'es' => 'Segundo cerrojo',
+                'en' => 'Secondary lock',
+            ],
+        ];
+
+        foreach ($defs as $code => $labels) {
+            $id = DB::table('product_categories')->insertGetId([
+                'code' => $code,
+                'is_active' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+            foreach (['ca', 'es', 'en'] as $loc) {
+                DB::table('product_category_translations')->insert([
+                    'product_category_id' => $id,
+                    'locale' => $loc,
+                    'name' => $labels[$loc],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+        }
     }
 }

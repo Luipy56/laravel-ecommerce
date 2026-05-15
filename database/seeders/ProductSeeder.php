@@ -188,16 +188,45 @@ class ProductSeeder extends Seeder
             'is_double_clutch' => false,
         ]);
 
+        $i18n = [];
         foreach ($products as &$row) {
-            $row['search_text'] = Product::normalizeSearchText(
-                $row['name'] ?? null,
-                $row['code'] ?? null,
-                $row['description'] ?? null
-            );
+            $code = (string) $row['code'];
+            $name = $row['name'] ?? null;
+            $desc = $row['description'] ?? null;
+            $i18n[$code] = [
+                'es' => ['name' => $name, 'description' => $desc],
+                'ca' => ['name' => $name, 'description' => $desc],
+                'en' => ['name' => $name, 'description' => $desc],
+            ];
+            unset($row['name'], $row['description']);
         }
         unset($row);
 
         DB::table('products')->insert($products);
+
+        foreach ($i18n as $code => $locales) {
+            $pid = (int) DB::table('products')->where('code', $code)->value('id');
+            if ($pid === 0) {
+                continue;
+            }
+            foreach (['ca', 'es', 'en'] as $loc) {
+                $nv = $locales[$loc];
+                $nm = $nv['name'] ?? null;
+                $dc = $nv['description'] ?? null;
+                $nameStr = is_string($nm) ? $nm : null;
+                $descStr = is_string($dc) ? $dc : null;
+                $st = Product::normalizeSearchText($nameStr, $code, $descStr);
+                DB::table('product_translations')->insert([
+                    'product_id' => $pid,
+                    'locale' => $loc,
+                    'name' => $nameStr,
+                    'description' => $descStr,
+                    'search_text' => $st,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+        }
     }
 
     private static function securemmeDescription(bool $doubleClutch): string

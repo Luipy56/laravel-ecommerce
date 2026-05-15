@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.250] - 2026-05-16
+
+### Fixed
+- **Models:** `FeatureName`, `Pack`, `Product`, and `ProductCategory` `translatedName()` / `translatedField()` now fall back to the legacy direct column (e.g. `feature_names.name`, `packs.name`, `products.name`) when no translation rows exist, so feature-type labels and entity names display correctly on legacy databases that have not yet had `catalog:backfill-legacy-translations` applied.
+
+## [0.1.249] - 2026-05-16
+
+### Fixed
+- **API:** `GET /api/v1/features` no longer returns 500 when `feature_names.code` column is absent on legacy databases — removed column-constrained eager load (`featureName:id,code`) that caused `undefined column` errors; simplified to `featureName.translations` load.
+- **API:** `GET /api/v1/admin/stats/low-stock`, `GET /api/v1/reports/summary`, and `GET /api/v1/admin/orders/:id` no longer return 500 on freshly migrated PostgreSQL databases — replaced direct `products.name` / `packs.name` column selects (column removed from schema in favour of translations) with `->with('translations')` eager loads and accessor-based name resolution.
+
+## [0.1.248] - 2026-05-15
+
+### Added
+- **Config:** `config/catalog_feature_name_labels.php` supplies default labels per locale for known `feature_names.code` values; `catalog:backfill-legacy-translations` uses it when translation rows are empty.
+- **API:** `feature_name_code` on public product features, admin product features, storefront `GET /api/v1/features`, and admin feature payloads.
+
+### Changed
+- **CLI:** `catalog:backfill-legacy-translations` can add a nullable `feature_names.code` on legacy databases, backfill from a legacy `name` column when present, then fill missing `feature_name_translations` from the config map.
+- **Storefront layout:** `html`/`body` use `overflow-x: clip` instead of `hidden`; storefront drawer no longer uses `overflow-x-clip` so the catalog filter sidebar can stick to the viewport while scrolling.
+
+### Fixed
+- **API:** `FeatureController` eager-loads `featureName` with `code` and `translations` (not the removed `name` column) and orders filter values with `orderByTranslatedValue`.
+- **React:** Product detail, cards, preview modal, product list filter groups, and admin product/feature views avoid orphan `": value"` lines when the feature dimension label is missing; optional `shop.feature_label.*` i18n fallback by code.
+
+## [0.1.247] - 2026-05-15
+
+### Added
+- **CLI:** `php artisan catalog:backfill-legacy-translations` copies legacy `name` / `description` / `value` columns (when they still exist on parent tables) into `*_translations` for `ca`, `es`, and `en`, then runs `products:rebuild-search-text`. Use `--dry-run` to count rows only. Skips `feature_names` when the `code` column is missing (schema must be aligned first).
+
+### Fixed
+- **Deploy:** After `php artisan migrate` adds translation tables to an older PostgreSQL database, run the backfill command so storefront APIs (`/api/v1/categories`, `/api/v1/products/featured`, etc.) resolve names from translations instead of returning null.
+
+## [0.1.246] - 2026-05-15
+
+### Added
+- **Admin products:** optional Spanish and English name and description fields (Zod + API `translations`); Catalan remains the primary required fields for the catalog.
+
+### Changed
+- **Schema diagram:** `trash/diagramZero.dbml` updated for `*_translations` tables and removal of monolingual translatable columns from parent catalog tables.
+
+### Fixed
+- **ProductTranslation / Scout:** do not call `Product::searchable()` when Scout syncing is disabled for `Product` (for example inside `Product::withoutSyncingToSearch`), so tests can mock the Elasticsearch catalog adapter without a live cluster.
+- **Tests:** `PurchasedProductsTest`, `OrderPayConfigurationExceptionTest`, `CheckoutPaymentConfigTest`, and `CustomerTransactionalEmailTest` use `TestCase` catalog helpers for the translation schema.
+
 ## [0.1.245] - 2026-05-15
 
 ### Fixed

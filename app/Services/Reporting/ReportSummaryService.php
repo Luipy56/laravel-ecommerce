@@ -169,7 +169,7 @@ class ReportSummaryService
 
         return $lines->map(fn ($l) => [
             'product_id' => $l->product_id,
-            'name' => $products->get($l->product_id)?->name ?? '-',
+            'name' => $products->get($l->product_id)?->name ?? '',
             'quantity' => (int) $l->qty,
         ])->values()->all();
     }
@@ -179,7 +179,15 @@ class ReportSummaryService
      */
     public function lowStockBlock(): array
     {
-        return Product::query()->where('is_active', true)->orderBy('stock')->limit(10)->get(['id', 'name', 'stock', 'code'])->values()->all();
+        return Product::query()
+            ->where('is_active', true)
+            ->with('translations')
+            ->orderBy('stock')
+            ->limit(10)
+            ->get(['id', 'stock', 'code'])
+            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'stock' => $p->stock, 'code' => $p->code])
+            ->values()
+            ->all();
     }
 
     /**

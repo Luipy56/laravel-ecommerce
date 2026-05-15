@@ -9,6 +9,7 @@ import { IconCart, IconChevronLeft, IconChevronRight, IconChevronUp, IconWarning
 import FavoriteToggle from '../components/FavoriteToggle';
 import ReviewsSection from '../components/ReviewsSection';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
+import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 
 const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
@@ -326,11 +327,20 @@ export default function ProductDetailPage() {
               <div className="mt-3">
                 <h2 className="text-sm font-semibold text-base-content/80">{t('shop.product.specifications')}</h2>
                 <ul className="mt-1 space-y-0.5 list-none p-0 m-0">
-                  {product.features?.map((f, i) => (
-                    <li key={`f-${i}`} className="text-sm text-base-content/80">
-                      <span className="font-medium">{f.type}:</span> {f.value}
-                    </li>
-                  ))}
+                  {product.features?.map((f, i) => {
+                    const typeLabel = catalogFeatureTypeLabel(f, t);
+                    return (
+                      <li key={`f-${i}`} className="text-sm text-base-content/80">
+                        {typeLabel ? (
+                          <>
+                            <span className="font-medium">{typeLabel}:</span> {f.value ?? ''}
+                          </>
+                        ) : (
+                          <span>{f.value ?? ''}</span>
+                        )}
+                      </li>
+                    );
+                  })}
                   {product.weight_kg != null && (
                     <li className="text-sm text-base-content/80">
                       <span className="font-medium">{t('shop.product.weight')}:</span>{' '}

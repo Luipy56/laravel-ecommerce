@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AdminProductResource;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Support\CatalogLocale;
+use App\Support\CatalogTranslationSync;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,16 +16,17 @@ class AdminProductController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = max(1, min(100, (int) $request->get('per_page', 20)));
-        $query = Product::query()->with(['category'])->orderBy('name');
+        $query = Product::query()->with(['category.translations', 'translations'])->orderByTranslatedName();
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->get('category_id'));
         }
         if ($request->filled('search')) {
-            $term = $request->get('search');
-            $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', '%'.$term.'%')
-                    ->orWhere('code', 'like', '%'.$term.'%');
+            $term = '%'.$request->get('search').'%';
+            $loc = CatalogLocale::normalize(app()->getLocale());
+            $query->where(function ($q) use ($term, $loc) {
+                $q->where('code', 'like', $term)
+                    ->orWhereHas('translations', fn ($t) => $t->where('locale', $loc)->where('name', 'like', $term));
             });
         }
         if ($request->has('is_active')) {
@@ -62,6 +65,7 @@ class AdminProductController extends Controller
             'code' => ['nullable', 'string', 'max:50', 'unique:products,code'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'translations' => ['nullable', 'array'],
             'price' => ['required', 'numeric', 'min:0'],
             'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'purchase_price' => ['nullable', 'numeric', 'min:0'],
@@ -90,11 +94,20 @@ class AdminProductController extends Controller
             'is_active' => true,
             'discount_percent' => null,
         ];
-        $row = array_merge($defaults, collect($validated)->except(['feature_ids', 'images'])->all());
+        $row = array_merge($defaults, collect($validated)->except(['feature_ids', 'images', 'name', 'description', 'translations'])->all());
         if (! array_key_exists('discount_percent', $row) || $row['discount_percent'] === '' || $row['discount_percent'] === null) {
             $row['discount_percent'] = null;
         }
         $product = Product::create($row);
+        $byLocale = ['ca' => ['name' => $validated['name'], 'description' => $validated['description'] ?? null]];
+        if (is_array($request->input('translations'))) {
+            foreach ($request->input('translations') as $loc => $payload) {
+                if (in_array((string) $loc, CatalogLocale::SUPPORTED, true) && is_array($payload)) {
+                    $byLocale[(string) $loc] = array_merge($byLocale[(string) $loc] ?? [], $payload);
+                }
+            }
+        }
+        CatalogTranslationSync::syncProductTranslations($product, $byLocale);
         $product->features()->sync($validated['feature_ids'] ?? []);
 
         if ($request->hasFile('images')) {
@@ -103,7 +116,7 @@ class AdminProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => new AdminProductResource($product->load(['category', 'features.featureName', 'images'])),
+            'data' => new AdminProductResource($product->load(['category.translations', 'features.featureName.translations', 'translations', 'images'])),
         ], 201);
     }
 
@@ -118,7 +131,7 @@ class AdminProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => new AdminProductResource($product->load(['category', 'features.featureName', 'images'])),
+            'data' => new AdminProductResource($product->load(['category.translations', 'features.featureName.translations', 'translations', 'images'])),
         ]);
     }
 
@@ -153,7 +166,7 @@ class AdminProductController extends Controller
 
     public function show(Product $product): JsonResponse
     {
-        $product->load(['category', 'features.featureName', 'images']);
+        $product->load(['category.translations', 'features.featureName.translations', 'translations', 'images']);
 
         return response()->json([
             'success' => true,
@@ -179,6 +192,7 @@ class AdminProductController extends Controller
             'code' => ['nullable', 'string', 'max:50', 'unique:products,code,'.$product->id],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'translations' => ['nullable', 'array'],
             'price' => ['required', 'numeric', 'min:0'],
             'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'purchase_price' => ['nullable', 'numeric', 'min:0'],
@@ -196,12 +210,21 @@ class AdminProductController extends Controller
             'feature_ids.*' => ['integer', 'exists:features,id'],
         ]);
 
-        $product->update(collect($validated)->except('feature_ids')->all());
+        $product->update(collect($validated)->except(['feature_ids', 'name', 'description', 'translations'])->all());
+        $byLocale = ['ca' => ['name' => $validated['name'], 'description' => $validated['description'] ?? null]];
+        if (is_array($request->input('translations'))) {
+            foreach ($request->input('translations') as $loc => $payload) {
+                if (in_array((string) $loc, CatalogLocale::SUPPORTED, true) && is_array($payload)) {
+                    $byLocale[(string) $loc] = array_merge($byLocale[(string) $loc] ?? [], $payload);
+                }
+            }
+        }
+        CatalogTranslationSync::syncProductTranslations($product, $byLocale);
         $product->features()->sync($validated['feature_ids'] ?? []);
 
         return response()->json([
             'success' => true,
-            'data' => new AdminProductResource($product->fresh()->load(['category', 'features.featureName', 'images'])),
+            'data' => new AdminProductResource($product->fresh()->load(['category.translations', 'features.featureName.translations', 'translations', 'images'])),
         ]);
     }
 

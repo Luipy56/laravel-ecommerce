@@ -70,6 +70,12 @@ class ProductCategory extends Model
             }
         }
 
+        // Fallback to legacy name column when no translation rows exist yet
+        $legacy = $this->attributes['name'] ?? null;
+        if ($legacy !== null && trim((string) $legacy) !== '') {
+            return (string) $legacy;
+        }
+
         return null;
     }
 

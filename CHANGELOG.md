@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.250] - 2026-05-16
+
+### Fixed
+- **Models:** `FeatureName`, `Pack`, `Product`, and `ProductCategory` `translatedName()` / `translatedField()` now fall back to the legacy direct column (e.g. `feature_names.name`, `packs.name`, `products.name`) when no translation rows exist, so feature-type labels and entity names display correctly on legacy databases that have not yet had `catalog:backfill-legacy-translations` applied.
+
 ## [0.1.249] - 2026-05-16
 
 ### Fixed

@@ -94,6 +94,12 @@ class Pack extends Model
             }
         }
 
+        // Fallback to legacy column when no translation rows exist yet
+        $legacy = $this->attributes[$field] ?? null;
+        if ($legacy !== null && trim((string) $legacy) !== '') {
+            return (string) $legacy;
+        }
+
         return null;
     }
 

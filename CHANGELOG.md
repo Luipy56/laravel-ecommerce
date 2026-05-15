@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.246] - 2026-05-15
+
+### Added
+- **Frontend style refactor (branch: refactor-style):** Complete visual overhaul of all client-facing pages adopting the `rubenserra/cerrajeria-front` design system with the project's orange primary (`#fb5412`).
+- Imported rubenserra SCSS (`resources/js/scss/`) — layout, components, pages — with hardcoded `#DA7606` replaced by `var(--color-primary)`.
+- Added `react-icons` dependency for consistent icon usage across the new UI.
+- `Layout.jsx` rewritten with `shop-layout` structure (sticky topbar + main + footer).
+- `Navbar.jsx` rewritten with daisyUI drawer, `bg-white/90 backdrop-blur-sm` topbar, and `react-icons/hi2` icons.
+- `Footer.jsx` rewritten with dark-background 4-column grid (brand, links, contact, social).
+- `HomePage.jsx` rewritten: hero with orbit animation, feature strip, featured products grid, rotating promo banner, categories grid, and contact CTA.
+- `ProductCard.jsx` rewritten with rubenserra BEM markup (`product-card__media`, `product-card__body`, etc.).
+- `ProductListPage.jsx` rewritten: rubenserra `products-page` layout with filter modal (categories + features) and products grid.
+- `LoginPage.jsx` and `RegisterPage.jsx` adapted with `auth-page`/`auth-card`/`auth-field` BEM classes and password visibility toggle.
+- `ForgotPasswordPage.jsx` adapted with auth-card layout.
+- Light-touch SCSS import added to `CartPage`, `CheckoutPage`, `FaqPage`, `ProfilePage`, `OrdersPage`, `ProductDetailPage`, and other client pages.
+- `--color-base-400`, `--color-base-500`, `--color-auth-border`, `--color-auth-focus` CSS variables added to `app.css` theme.
+
 ## [0.1.245] - 2026-05-15
 
 ### Fixed

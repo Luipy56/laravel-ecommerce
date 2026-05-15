@@ -1,0 +1,34 @@
+@use 'sass:math';
+
+@function px-to-rem($px) {
+  @return calc($px / 16) * 1rem;
+}
+
+@function rem-to-px($rem) {
+  @return $rem * 16 * 1px;
+}
+
+@function str-to-upper($str) {
+  @return to-upper-case($str);
+}
+
+@function str-to-lower($str) {
+  @return to-lower-case($str);
+}
+
+@function str-concat($str1, $str2) {
+  @return $str1 + $str2;
+}
+
+@function map-get-safe($map, $key, $default: null) {
+  @if map-has-key($map, $key) {
+    @return map-get($map, $key);
+  }
+  @return $default;
+}
+
+@function clamp-px($min, $value, $max) {
+  @if $value < $min { @return $min * 1px; }
+  @if $value > $max { @return $max * 1px; }
+  @return $value * 1px;
+}

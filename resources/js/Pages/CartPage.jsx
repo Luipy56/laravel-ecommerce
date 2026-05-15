@@ -1,8 +1,10 @@
+import '../scss/main_shop.scss'
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import PageTitle from '../components/PageTitle';
+import { HiArrowLeft } from 'react-icons/hi2';
 
 function CartLine({ line, updateLine, removeLine, t }) {
   const isProduct = !!line.product;
@@ -310,33 +312,55 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <span className="loading loading-spinner loading-lg" />
+      <div className="cart-page">
+        <div className="cart-page__container flex justify-center py-12">
+          <span className="loading loading-spinner loading-lg" />
+        </div>
       </div>
     );
   }
 
   if (!cart.lines?.length) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-5xl">
-        <div className="mb-4">
-          <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
-        </div>
-        <div className="text-center py-12">
-          <p className="text-xl text-base-content/70 mb-4">{t('shop.cart.empty')}</p>
-        <Link to="/products" className="btn btn-primary">
-          {t('shop.products')}
-        </Link>
+      <div className="cart-page">
+        <div className="cart-page__container">
+          <Link to="/products" className="cart-page__back text-primary">
+            <HiArrowLeft className="cart-page__back-icon" aria-hidden="true" />
+            {t('nav.back_home', 'Tornar a l\'inici')}
+          </Link>
+          <div className="cart-page__header">
+            <div>
+              <p className="cart-page__eyebrow text-primary">{t('shop.cart', 'Carret')}</p>
+              <h1 className="cart-page__title">{t('shop.cart', 'El teu carret')}</h1>
+            </div>
+          </div>
+          <div className="text-center py-12 simple-container">
+            <p className="text-xl text-base-400 mb-4">{t('shop.cart.empty', 'El carret és buit')}</p>
+            <Link to="/products" className="btn btn-primary">
+              {t('shop.products', 'Veure productes')}
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-5xl">
-      <div className="mb-4">
-        <PageTitle className="mb-0">{t('shop.cart')}</PageTitle>
-      </div>
+    <div className="cart-page">
+      <div className="cart-page__container">
+        <Link to="/products" className="cart-page__back text-primary">
+          <HiArrowLeft className="cart-page__back-icon" aria-hidden="true" />
+          {t('nav.back_home', 'Continuar comprant')}
+        </Link>
+        <div className="cart-page__header">
+          <div>
+            <p className="cart-page__eyebrow text-primary">{t('shop.cart', 'Carret')}</p>
+            <h1 className="cart-page__title">{t('shop.cart', 'El teu carret')}</h1>
+          </div>
+          <span className="cart-page__count text-base-400">
+            {cart.lines.length} {t('shop.cart.items', 'articles')}
+          </span>
+        </div>
 
       <div className="card mb-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow">
         <label className="flex min-w-0 max-w-full cursor-pointer flex-wrap items-center gap-3">
@@ -437,6 +461,7 @@ export default function CartPage() {
             </Link>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

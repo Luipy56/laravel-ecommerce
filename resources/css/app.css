@@ -4,6 +4,10 @@ html, body {
   overflow-x: hidden;
   max-width: 100%;
 }
+
+html {
+  overflow-y: scroll;
+}
 @plugin 'daisyui' {
   themes: serralleria --default;
 }
@@ -49,6 +53,11 @@ html, body {
 @theme {
   --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji';
+  --color-base-400: #737373;
+  --color-base-500: #F6F6F6;
+  --color-auth-border: #CFCFCF;
+  --color-auth-focus: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  --color-auth-error-border: rgba(198, 42, 42, 0.24);
 }
 
 /* Storefront background: shared across all client pages.

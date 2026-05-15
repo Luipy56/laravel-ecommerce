@@ -1,0 +1,217 @@
+@use '../mixins' as m;
+
+.shop-topbar {
+
+  &__brand {
+    flex: 1;
+  }
+
+  &__logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 1rem;
+    flex: none;
+  }
+
+  &__avatar-letter {
+    font-size: 1.125rem;
+  }
+
+  &__menu {
+    z-index: 1;
+    li {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  &__menu-link {
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding-top: 0;
+    padding-bottom: 0;
+    @include m.transition-base;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 0.2rem;
+      color: var(--color-primary);
+    }
+
+    &:hover {
+      background-color: transparent;
+      color: var(--color-primary);
+      transform: translateY(-0.125rem);
+    }
+  }
+
+  &__admin-link {
+    transition: filter 0.2s ease;
+
+    &:hover {
+      filter: brightness(0.95);
+    }
+  }
+
+  &__logout {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top-width: 1px;
+  }
+}
+
+.shop-tobar-end {
+  @include m.flex-between;
+  gap: clamp(1.5rem, 2vw, 2.5rem);
+
+  &__icon {
+    cursor: pointer;
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+  &__icon:hover {
+    color: var(--color-primary);
+    transition:color 150ms ease-in-out;
+
+  }
+
+  &__dropdown-button {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.shop-topbar__logo:focus-visible,
+.shop-tobar-end .btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 0.2rem;
+}
+
+.shop-search-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(1rem, 3vh, 2rem) clamp(0.75rem, 3vw, 1.5rem) 2rem;
+  overflow-y: auto;
+}
+
+.shop-search-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.72)),
+    radial-gradient(circle at top, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 45%);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.24s ease;
+}
+
+.shop-search-modal__panel {
+  position: relative;
+  width: min(100%, 52rem);
+  max-width: calc(100vw - 1.5rem);
+  z-index: 1;
+  opacity: 0;
+  transform: translateY(2.5rem);
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+}
+
+.shop-search-modal__close {
+  margin-left: auto;
+  margin-bottom: 0.75rem;
+  display: flex;
+}
+
+.shop-search-modal__content {
+  width: 100%;
+
+  .search-bar-wrapper {
+    min-width: 0;
+  }
+
+  .search-bar-input-container {
+    min-height: 4.5rem;
+    padding: 0.9rem 1rem;
+    border-radius: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 20px 60px rgba(20, 20, 20, 0.12);
+  }
+
+  .search-bar-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 1rem;
+  }
+
+  .search-bar-input {
+    font-size: clamp(1rem, 1vw + 0.9rem, 1.2rem);
+  }
+
+  .search-dropdown {
+    margin-top: 0.65rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 24px 80px rgba(20, 20, 20, 0.16);
+  }
+}
+
+.shop-search-modal--open {
+  .shop-search-modal__backdrop {
+    opacity: 1;
+  }
+
+  .shop-search-modal__panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shop-search-modal--closing {
+  .shop-search-modal__backdrop {
+    opacity: 0;
+  }
+
+  .shop-search-modal__panel {
+    opacity: 0;
+    transform: translateY(2.5rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .shop-topbar {
+    padding: 0 0.5rem 0 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .shop-search-modal {
+    padding-top: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .shop-search-modal__panel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .shop-search-modal__content {
+    .search-bar-input-container {
+      min-height: 4rem;
+      padding: 0.8rem 1rem;
+      border-radius: 1.4rem;
+    }
+  }
+}
+
+@media (min-width: 641px) and (max-width: 767px) {
+  .shop-search-modal__panel {
+    width: min(100%, 40rem);
+  }
+}

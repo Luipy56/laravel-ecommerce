@@ -1,0 +1,202 @@
+@use '../mixins' as m;
+@use '../functions' as f;
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-width: 1px;
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  cursor: pointer;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+
+  &__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  &__image,
+  &__empty {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s ease;
+  }
+
+  &__image {
+    object-fit: cover;
+  }
+
+  &__empty {
+    @include m.flex-center;
+  }
+
+  &__empty-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  &__actions {
+    position: absolute;
+    inset: 0;
+    @include m.flex-center;
+    gap: 1.75rem;
+    opacity: 0;
+    transform: translateY(2rem);
+    transition: all 0.7s ease;
+  }
+
+  &__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 0;
+    border-radius: 5rem;
+    cursor: pointer;
+    transition: all 0.5s ease;
+  }
+
+  &__action--view {
+    padding: 0.5rem 0.75rem;
+    background: var(--color-base-100);
+    color: var(--color-base-content);
+  }
+
+  &__action-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  &__action-text {
+    font-size: f.px-to-rem(14);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  &__body {
+    padding: 1.5rem;
+  }
+
+  &__name {
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    color: #000;
+    transition: color 0.2s ease;
+  }
+
+  &__link {
+    margin-top: 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    opacity: 0.9;
+    transition: gap 0.2s ease, opacity 0.2s ease;
+  }
+
+  &__link-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:hover,
+  &:active,
+  &:focus-within {
+    border-color: color-mix(in srgb, var(--color-primary) 50%, var(--color-base-300));
+    box-shadow: 0 1rem 2.5rem rgb(10 13 16 / 0.12);
+    transform: translateY(-0.35rem);
+
+    .category-card__name {
+      color: var(--color-primary);
+    }
+
+    .category-card__link {
+      gap: 0.65rem;
+      opacity: 1;
+    }
+
+    .category-card__image,
+    .category-card__empty {
+      transform: scale(1.1);
+    }
+
+    .category-card__actions {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.category-card-skeleton {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-base-300) 45%, var(--color-base-100));
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+
+  &__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  &__actions {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  &__action {
+    width: 8.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.5rem;
+  }
+
+  &__line {
+    height: 1rem;
+    border-radius: 9999px;
+  }
+
+  &__line--title {
+    height: 1.6rem;
+    width: min(70%, 12rem);
+  }
+
+  &__line--link {
+    width: min(52%, 9rem);
+  }
+}
+
+@media (max-width: 639px) {
+  .category-card__action--view {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-card,
+  .category-card__image,
+  .category-card__empty,
+  .category-card__actions,
+  .category-card__action,
+  .category-card__link {
+    transition: none;
+  }
+}

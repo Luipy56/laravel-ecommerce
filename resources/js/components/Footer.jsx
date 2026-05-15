@@ -1,158 +1,86 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { APP_VERSION } from '../config/version';
-import {
-  IconFacebook,
-  IconInstagram,
-  IconLinkedIn,
-  IconXTwitter,
-  IconYouTube,
-} from './icons';
-
-const SOCIAL_LINKS = [
-  {
-    key: 'facebook',
-    href: 'https://www.facebook.com/serralleriasolidaria',
-    Icon: IconFacebook,
-    label: 'Facebook',
-  },
-  {
-    key: 'instagram',
-    href: 'https://www.instagram.com/serralleriasolidaria',
-    Icon: IconInstagram,
-    label: 'Instagram',
-  },
-  {
-    key: 'x',
-    href: 'https://x.com/serralleriasolidaria',
-    Icon: IconXTwitter,
-    label: 'X (Twitter)',
-  },
-  {
-    key: 'linkedin',
-    href: 'https://www.linkedin.com/company/serralleria-solidaria',
-    Icon: IconLinkedIn,
-    label: 'LinkedIn',
-  },
-  {
-    key: 'youtube',
-    href: 'https://www.youtube.com/@serralleriasolidaria',
-    Icon: IconYouTube,
-    label: 'YouTube',
-  },
-];
+import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa'
 
 export default function Footer() {
-  const { t } = useTranslation();
-  const year = new Date().getFullYear();
+  const { t } = useTranslation()
+  const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="footer w-full bg-base-100 text-base-content mt-auto border-t border-base-content/10" role="contentinfo">
-      <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-
-          {/* Brand */}
-          <aside className="flex flex-col gap-4 lg:col-span-1">
-            <Link to="/" className="inline-flex items-center gap-2" aria-label={t('shop.brand_name')}>
-              <img
-                src="/images/serraller_solidaria_logo.png"
-                alt={t('shop.brand_logo_alt')}
-                className="h-12 w-auto object-contain"
-              />
-            </Link>
-            <p className="text-sm leading-relaxed opacity-70 max-w-xs">{t('footer.tagline')}</p>
-            <div className="flex flex-col gap-1 text-sm opacity-80">
-              <span>Carrer Diputació, 426, 4rt 2ª</span>
-              <span>08013 Barcelona</span>
-            </div>
-          </aside>
-
-          {/* Navigation */}
-          <nav className="flex flex-col gap-2" aria-label={t('footer.explore')}>
-            <h6 className="footer-title text-base">{t('footer.explore')}</h6>
-            <Link to="/" className="link link-hover text-sm">{t('shop.home')}</Link>
-            <Link to="/products" className="link link-hover text-sm">{t('shop.products')}</Link>
-            <Link to="/custom-solution" className="link link-hover text-sm">{t('shop.custom_solution')}</Link>
-            <Link to="/faq" className="link link-hover text-sm">{t('shop.faq.nav')}</Link>
-            <Link to="/privacy-policy" className="link link-hover text-sm">{t('footer.privacy_policy')}</Link>
-            <Link to="/terms" className="link link-hover text-sm">{t('footer.terms')}</Link>
-          </nav>
-
-          {/* Contact */}
-          <nav className="flex flex-col gap-2" aria-label={t('footer.contact')}>
-            <h6 className="footer-title text-base">{t('footer.contact')}</h6>
-            <a href="tel:+34600500517" className="link link-hover text-sm">
-              +34 600 500 517
-            </a>
-            <a
-              href="mailto:empresa@serralleriasolidaria.cat"
-              className="link link-hover text-sm break-all"
-            >
-              empresa@serralleriasolidaria.cat
-            </a>
-            <p className="text-xs opacity-60 mt-1 max-w-xs">{t('footer.legal_disclaimer')}</p>
-          </nav>
-
-          {/* Social */}
-          <div className="flex flex-col gap-4">
-            <h6 className="footer-title text-base">{t('footer.social')}</h6>
-            <div className="flex flex-wrap gap-3">
-              {SOCIAL_LINKS.map(({ key, href, Icon, label }) => (
-                <a
-                  key={key}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="btn btn-circle btn-sm btn-ghost opacity-70 hover:opacity-100 hover:bg-base-200 transition-opacity"
-                >
-                  <Icon className="h-5 w-5" />
-                </a>
-              ))}
-            </div>
-            <div className="mt-2">
-              <a
-                href="https://www.serralleriasolidaria.cat/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="link link-hover text-sm opacity-70"
-              >
-                {t('footer.legal_link')}
-              </a>
-            </div>
+    <footer className="footer-shop" role="contentinfo">
+      <div className="footer-shop__container">
+        <div className="footer-shop__grid">
+          {/* Col 1: Brand */}
+          <div className="footer-shop__brand">
+            <p className="footer-shop__brand-logo text-primary">
+              {t('app.name', 'La Botiga')}
+            </p>
+            <p className="footer-shop__brand-description">
+              {t('footer.description', 'La teva botiga de confiança. Els millors productes al teu servei.')}
+            </p>
           </div>
 
-        </div>
-      </div>
+          {/* Col 2: Quick links */}
+          <nav className="footer-shop__links" aria-label={t('footer.links', 'Enllaços')}>
+            <h3>{t('footer.links', 'Enllaços')}</h3>
+            <ul>
+              <li><Link to="/">{t('nav.home', 'Inici')}</Link></li>
+              <li><Link to="/products">{t('nav.products', 'Productes')}</Link></li>
+              <li><Link to="/cart">{t('nav.cart', 'Carret')}</Link></li>
+              <li><Link to="/faq">{t('nav.faq', 'FAQs')}</Link></li>
+              <li><Link to="/custom-solution">{t('nav.custom_solution', 'Solucions Personalitzades')}</Link></li>
+              <li><Link to="/privacy-policy">{t('footer.privacy', 'Política de privacitat')}</Link></li>
+              <li><Link to="/terms">{t('footer.terms', 'Termes i condicions')}</Link></li>
+            </ul>
+          </nav>
 
-      {/* Bottom bar */}
-      <div className="header-gradient-line relative w-full border-t border-base-300 py-3 text-white">
-        <Link
-          to="/admin"
-          className="absolute inset-y-0 left-0 z-10 w-16 max-w-[30%] min-w-10 cursor-default bg-transparent text-transparent select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/55"
-          aria-label={t('footer.admin_access_aria')}
-        />
-        <div className="container mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-xs opacity-60 shrink-0">
-            {t('footer.version', { version: APP_VERSION })}
-          </span>
-          <p className="text-sm opacity-90 text-center flex-1">
-            {t('footer.copyright', { year })}
-          </p>
-          <span className="text-xs opacity-60 shrink-0">
-            Developed by{' '}
-            <a
-              href="https://ldeluipy.es"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link link-hover text-white/90 hover:text-white"
-            >
-              ldeluipy
-            </a>
-          </span>
+          {/* Col 3: Contact */}
+          <div className="footer-shop__contact">
+            <h3>{t('footer.contact', 'Contacte')}</h3>
+            <ul>
+              <li>
+                <span>{t('footer.phone', 'Telèfon')}:</span>{' '}
+                <a href="tel:+34000000000">+34 000 000 000</a>
+              </li>
+              <li>
+                <span>{t('footer.email', 'Email')}:</span>{' '}
+                <a href="mailto:info@labotiga.cat">info@labotiga.cat</a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 4: Social + payments */}
+          <div className="footer-shop__social">
+            <h3>{t('footer.follow_us', 'Segueix-nos')}</h3>
+            <div className="footer-shop__social-icons" aria-label={t('footer.social', 'Xarxes socials')}>
+              <a href="#" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+                <FaFacebook aria-hidden="true" />
+              </a>
+              <a href="#" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                <FaInstagram aria-hidden="true" />
+              </a>
+              <a href="#" aria-label="Twitter / X" target="_blank" rel="noopener noreferrer">
+                <FaTwitter aria-hidden="true" />
+              </a>
+            </div>
+
+            <div className="footer-shop__payments">
+              <h3>{t('footer.secure_payment', 'Pagament segur')}</h3>
+              <p>{t('footer.payment_methods', 'Acceptem targeta de crèdit i PayPal.')}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="footer-shop__bottom">
+          <div className="footer-shop__bottom-links">
+            <Link to="/privacy-policy">{t('footer.privacy', 'Política de privacitat')}</Link>
+            <span className="footer-shop__bottom-separator">|</span>
+            <Link to="/terms">{t('footer.terms', 'Termes')}</Link>
+          </div>
+          <p>© {currentYear} {t('app.name', 'La Botiga')}. {t('footer.rights', 'Tots els drets reservats.')} </p>
         </div>
       </div>
     </footer>
-  );
+  )
 }

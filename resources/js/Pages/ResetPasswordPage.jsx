@@ -1,3 +1,4 @@
+import '../scss/main_shop.scss'
 import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

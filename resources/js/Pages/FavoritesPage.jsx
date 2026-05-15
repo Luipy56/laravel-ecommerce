@@ -1,3 +1,4 @@
+import '../scss/main_shop.scss'
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

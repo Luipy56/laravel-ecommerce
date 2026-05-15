@@ -1,3 +1,4 @@
+import '../scss/main_shop.scss'
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
@@ -27,6 +28,8 @@ export default function FaqPage() {
   }, [i18n.language]);
 
   return (
+    <div className="products-page">
+    <div className="products-page__container">
     <div className="mx-auto w-full min-w-0 max-w-3xl space-y-6">
       <PageTitle title={t('shop.faq.title')} />
 
@@ -48,6 +51,8 @@ export default function FaqPage() {
           ))}
         </div>
       )}
+    </div>
+    </div>
     </div>
   );
 }

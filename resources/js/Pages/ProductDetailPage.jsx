@@ -1,3 +1,4 @@
+import '../scss/main_shop.scss'
 import React, { useState, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

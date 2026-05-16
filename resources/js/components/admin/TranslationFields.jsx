@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 const LOCALES = [
-  { code: 'ca', flag: '🇦🇩', label: 'Català' },
-  { code: 'es', flag: '🇪🇸', label: 'Castellano' },
-  { code: 'en', flag: '🇬🇧', label: 'English' },
+  { code: 'ca', label: 'Català' },
+  { code: 'es', label: 'Castellano' },
+  { code: 'en', label: 'English' },
 ];
 
 /**
@@ -26,10 +26,9 @@ export default function TranslationFields({ field, values = {}, onChange, label,
       <legend className="fieldset-legend text-sm font-semibold text-base-content/70">
         {label ?? t('admin.translations.section')}
       </legend>
-      {LOCALES.map(({ code, flag, label: localeName }) => (
+      {LOCALES.map(({ code, label: localeName }) => (
         <label key={code} className="form-field">
           <span className="form-label flex items-center gap-1.5">
-            <span>{flag}</span>
             <span>{localeName}</span>
             {code === 'ca' && required && <span className="text-error">*</span>}
           </span>

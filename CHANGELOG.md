@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.251] - 2026-05-16
+
+### Added
+- Admin feature-name (type) forms now include per-locale name inputs (CA / ES / EN) and a required `code` (internal slug) field — both on create and edit pages.
+- Admin category forms now include per-locale name inputs (CA / ES / EN) on create and edit pages.
+- Admin feature (value) form now includes per-locale value inputs (CA / ES / EN) on both create and edit pages.
+- Reusable `TranslationFields` component (`resources/js/components/admin/TranslationFields.jsx`) for rendering locale-aware text fields.
+- New i18n keys: `admin.feature_types.code`, `admin.feature_types.code_hint`, `admin.feature_types.name_translations`, `admin.features.value_translations`, `admin.categories.name_translations`, `admin.translations.section` in all three locales (ca / es / en).
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

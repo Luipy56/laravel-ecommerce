@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.254] - 2026-05-16
+
+### Changed
+- **FeatureSeeder:** colors now have proper CA/EN translations ("Daurat"/"Gold", "Plata"/"Silver"); key types fully translated ("Punts copiables"/"Copyable pins", "Element mòbil"/"Moving element", "Codificació magnètica"/"Magnetic coding", "Punts no copiables"/"Non-copyable pins"); measures unchanged (numeric, locale-neutral).
+- **ProductSeeder:** all 30 products now have distinct CA/EN names and descriptions instead of copying the Spanish text. Cylinder products translated (Cilindre/Cylinder, llautó/brass, doble embragament/double clutch); shield products (Escut/Shield, daurat/gold); second deadbolts (segon pestell/second deadbolt). Securemme description fully translated into CA and EN.
+- **PackSeeder:** all three packs now have proper CA/EN names and descriptions instead of repeating the Spanish text across all locales.
+
 ## [0.1.252] - 2026-05-16
 
 ### Fixed

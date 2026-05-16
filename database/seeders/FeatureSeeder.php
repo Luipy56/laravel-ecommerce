@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\DB;
 class FeatureSeeder extends Seeder
 {
     /**
-     * Feature rows (per distinct value) with translations; values match Spanish catalog copy used by ProductFeatureSeeder.
+     * Insert a feature with per-locale translations.
      *
-     * @param  array<string, string>  $valuesByLocale  keys ca|es|en
+     * @param  array<string, string>  $valuesByLocale  keys: ca, es, en
      */
     private function insertFeatureWithTranslations(string $featureNameCode, array $valuesByLocale, \Illuminate\Support\Carbon $now): void
     {
@@ -21,12 +21,14 @@ class FeatureSeeder extends Seeder
         $es = $valuesByLocale['es'] ?? '';
         $ca = $valuesByLocale['ca'] ?? $es;
         $en = $valuesByLocale['en'] ?? $es;
+
         $fid = DB::table('features')->insertGetId([
             'feature_name_id' => $fnId,
             'is_active' => true,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
+
         foreach (['ca' => $ca, 'es' => $es, 'en' => $en] as $loc => $val) {
             DB::table('feature_translations')->insert([
                 'feature_id' => $fid,
@@ -41,22 +43,42 @@ class FeatureSeeder extends Seeder
     public function run(): void
     {
         $now = now();
-        $same = fn (string $v): array => ['es' => $v, 'ca' => $v, 'en' => $v];
 
+        // Brand names are proper nouns — same in every locale
         foreach (['Securemme', 'M&C', 'Keso', 'Abus', 'DMC', 'Disec'] as $brand) {
-            $this->insertFeatureWithTranslations('brand', $same($brand), $now);
+            $this->insertFeatureWithTranslations('brand', ['ca' => $brand, 'es' => $brand, 'en' => $brand], $now);
         }
-        foreach (['Plata', 'Dorado'] as $color) {
-            $this->insertFeatureWithTranslations('color', $same($color), $now);
-        }
-        foreach (['Puntos copiables', 'Puntos no copiables', 'Elemento móvil', 'Codificación magnética'] as $kt) {
-            $this->insertFeatureWithTranslations('key_type', $same($kt), $now);
-        }
+
+        // Colors
+        $this->insertFeatureWithTranslations('color', ['ca' => 'Plata',  'es' => 'Plata',  'en' => 'Silver'], $now);
+        $this->insertFeatureWithTranslations('color', ['ca' => 'Daurat', 'es' => 'Dorado', 'en' => 'Gold'],   $now);
+
+        // Key types
+        $this->insertFeatureWithTranslations('key_type', [
+            'ca' => 'Punts copiables',
+            'es' => 'Puntos copiables',
+            'en' => 'Copyable pins',
+        ], $now);
+        $this->insertFeatureWithTranslations('key_type', [
+            'ca' => 'Punts no copiables',
+            'es' => 'Puntos no copiables',
+            'en' => 'Non-copyable pins',
+        ], $now);
+        $this->insertFeatureWithTranslations('key_type', [
+            'ca' => 'Element mòbil',
+            'es' => 'Elemento móvil',
+            'en' => 'Moving element',
+        ], $now);
+        $this->insertFeatureWithTranslations('key_type', [
+            'ca' => 'Codificació magnètica',
+            'es' => 'Codificación magnética',
+            'en' => 'Magnetic coding',
+        ], $now);
+
+        // Measures — numeric, same in all locales
         foreach (['30mm', '32mm', '40mm'] as $mm) {
-            $this->insertFeatureWithTranslations('inner_measure', $same($mm), $now);
-        }
-        foreach (['30mm', '32mm', '40mm'] as $mm) {
-            $this->insertFeatureWithTranslations('outer_measure', $same($mm), $now);
+            $this->insertFeatureWithTranslations('inner_measure', ['ca' => $mm, 'es' => $mm, 'en' => $mm], $now);
+            $this->insertFeatureWithTranslations('outer_measure', ['ca' => $mm, 'es' => $mm, 'en' => $mm], $now);
         }
     }
 }

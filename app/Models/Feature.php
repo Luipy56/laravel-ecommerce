@@ -69,6 +69,12 @@ class Feature extends Model
             }
         }
 
+        // Fallback to legacy value column when no translation rows exist yet
+        $legacy = $this->attributes['value'] ?? null;
+        if ($legacy !== null && trim((string) $legacy) !== '') {
+            return (string) $legacy;
+        }
+
         return null;
     }
 

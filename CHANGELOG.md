@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.252] - 2026-05-16
+
+### Fixed
+- Feature values were blank in the admin list because `Feature::translatedValue()` had no legacy fallback to the old `value` column; added the same pattern used by Product and Pack models.
+- Rebuilt JS bundle so the new per-locale translation inputs in feature-type, feature-value and category forms are served to the browser.
+
 ## [0.1.251] - 2026-05-16
 
 ### Added

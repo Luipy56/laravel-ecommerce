@@ -11,6 +11,7 @@ class PackSeeder extends Seeder
     public function run(): void
     {
         $now = now();
+
         $packs = [
             [
                 'row' => [
@@ -21,9 +22,19 @@ class PackSeeder extends Seeder
                     'created_at' => $now,
                     'updated_at' => $now,
                 ],
-                'es' => [
-                    'name' => 'Pack cilindro + escudo',
-                    'description' => 'Cilindro estándar y escudo. Ideal para cambiar el bombín.',
+                'locales' => [
+                    'ca' => [
+                        'name' => 'Pack cilindre + escut',
+                        'description' => 'Cilindre estàndard i escut. Ideal per canviar el bombí de la porta.',
+                    ],
+                    'es' => [
+                        'name' => 'Pack cilindro + escudo',
+                        'description' => 'Cilindro estándar y escudo. Ideal para cambiar el bombín de la puerta.',
+                    ],
+                    'en' => [
+                        'name' => 'Cylinder + shield pack',
+                        'description' => 'Standard cylinder and door shield. Ideal for replacing your door lock.',
+                    ],
                 ],
             ],
             [
@@ -35,9 +46,19 @@ class PackSeeder extends Seeder
                     'created_at' => $now,
                     'updated_at' => $now,
                 ],
-                'es' => [
-                    'name' => 'Pack seguridad',
-                    'description' => 'Cilindro alta seguridad y escudo reforzado.',
+                'locales' => [
+                    'ca' => [
+                        'name' => 'Pack seguretat',
+                        'description' => 'Cilindre d\'alta seguretat i escut reforçat. Màxima protecció per a la teva porta.',
+                    ],
+                    'es' => [
+                        'name' => 'Pack seguridad',
+                        'description' => 'Cilindro alta seguridad y escudo reforzado. Máxima protección para tu puerta.',
+                    ],
+                    'en' => [
+                        'name' => 'Security pack',
+                        'description' => 'High-security cylinder and reinforced shield. Maximum protection for your door.',
+                    ],
                 ],
             ],
             [
@@ -49,26 +70,34 @@ class PackSeeder extends Seeder
                     'created_at' => $now,
                     'updated_at' => $now,
                 ],
-                'es' => [
-                    'name' => 'Pack segundo cerrojo',
-                    'description' => 'Segundo cerrojo estándar y cilindro 40 mm.',
+                'locales' => [
+                    'ca' => [
+                        'name' => 'Pack segon pestell',
+                        'description' => 'Segon pestell estàndard i cilindre de 40 mm. Doble bloqueig per a la màxima seguretat.',
+                    ],
+                    'es' => [
+                        'name' => 'Pack segundo cerrojo',
+                        'description' => 'Segundo cerrojo estándar y cilindro de 40 mm. Doble cierre para máxima seguridad.',
+                    ],
+                    'en' => [
+                        'name' => 'Second deadbolt pack',
+                        'description' => 'Standard second deadbolt and 40 mm cylinder. Double locking for maximum security.',
+                    ],
                 ],
             ],
         ];
 
         foreach ($packs as $entry) {
             $id = DB::table('packs')->insertGetId($entry['row']);
-            $es = $entry['es'];
+
             foreach (['ca', 'es', 'en'] as $loc) {
-                $pName = $es['name'];
-                $pDesc = $es['description'];
-                $st = Product::normalizeSearchText($pName, '', $pDesc);
+                $t = $entry['locales'][$loc];
                 DB::table('pack_translations')->insert([
                     'pack_id' => $id,
                     'locale' => $loc,
-                    'name' => $pName,
-                    'description' => $pDesc,
-                    'search_text' => $st,
+                    'name' => $t['name'],
+                    'description' => $t['description'],
+                    'search_text' => Product::normalizeSearchText($t['name'], '', $t['description']),
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import TranslationFields from '../../components/admin/TranslationFields';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
 export default function AdminCategoryEditPage() {
@@ -10,23 +11,33 @@ export default function AdminCategoryEditPage() {
   const navigate = useNavigate();
   const { showSuccess } = useAdminToast();
   const { id } = useParams();
+
   const [code, setCode] = useState('');
-  const [name, setName] = useState('');
+  const [names, setNames] = useState({ ca: '', es: '', en: '' });
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [submitError, setSubmitError] = useState('');
 
+  const handleNamesChange = (locale, value) => setNames((prev) => ({ ...prev, [locale]: value }));
+
   const fetchCategory = useCallback(async () => {
     if (!id) return;
     try {
       const { data } = await api.get(`admin/categories/${id}`);
       if (data.success && data.data) {
-        setCode(data.data.code ?? '');
-        setName(data.data.name ?? '');
-        setIsActive(!!data.data.is_active);
-      } else setLoadError(t('common.error'));
+        const d = data.data;
+        setCode(d.code ?? '');
+        setIsActive(!!d.is_active);
+        setNames({
+          ca: d.translations?.ca?.name ?? d.name ?? '',
+          es: d.translations?.es?.name ?? '',
+          en: d.translations?.en?.name ?? '',
+        });
+      } else {
+        setLoadError(t('common.error'));
+      }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
       else setLoadError(err.response?.data?.message || t('common.error'));
@@ -44,16 +55,25 @@ export default function AdminCategoryEditPage() {
     setSubmitError('');
     setLoading(true);
     try {
-      const payload = { name: name.trim(), is_active: isActive };
-      if (code.trim() !== '') payload.code = code.trim();
-      else payload.code = null;
+      const payload = {
+        name: names.ca.trim(),
+        is_active: isActive,
+        translations: {
+          es: { name: names.es.trim() },
+          en: { name: names.en.trim() },
+        },
+      };
+      payload.code = code.trim() || null;
       const { data } = await api.put(`admin/categories/${id}`, payload);
       if (data.success) {
         showSuccess(t('common.saved'));
         navigate('/admin/categories');
-      } else setSubmitError(data.message || t('common.error'));
+      } else {
+        setSubmitError(data.message || t('common.error'));
+      }
     } catch (err) {
-      setSubmitError(err.response?.data?.message || err.response?.data?.errors?.name?.[0] || err.response?.data?.errors?.code?.[0] || t('common.error'));
+      const errs = err.response?.data?.errors ?? {};
+      setSubmitError(errs.name?.[0] ?? errs.code?.[0] ?? err.response?.data?.message ?? t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -96,6 +116,7 @@ export default function AdminCategoryEditPage() {
                 {submitError}
               </div>
             )}
+
             <label className="form-field">
               <span className="form-label">{t('admin.products.code')}</span>
               <input
@@ -106,17 +127,15 @@ export default function AdminCategoryEditPage() {
                 aria-label={t('admin.products.code')}
               />
             </label>
-            <label className="form-field">
-              <span className="form-label">{t('admin.products.name')} *</span>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                aria-label={t('admin.products.name')}
-              />
-            </label>
+
+            <TranslationFields
+              field="name"
+              values={names}
+              onChange={handleNamesChange}
+              label={t('admin.categories.name_translations')}
+              required
+            />
+
             <label className="label cursor-pointer gap-2">
               <input
                 type="checkbox"
@@ -126,6 +145,7 @@ export default function AdminCategoryEditPage() {
               />
               <span className="label-text">{t('admin.products.is_active')}</span>
             </label>
+
             <div className="flex justify-between gap-2 pt-4">
               <Link to={`/admin/categories/${id}`} className="btn btn-ghost">
                 {t('common.back')}

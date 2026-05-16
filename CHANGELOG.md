@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.1.254] - 2026-05-16
+
+### Changed
+- **FeatureSeeder:** colors now have proper CA/EN translations ("Daurat"/"Gold", "Plata"/"Silver"); key types fully translated ("Punts copiables"/"Copyable pins", "Element mòbil"/"Moving element", "Codificació magnètica"/"Magnetic coding", "Punts no copiables"/"Non-copyable pins"); measures unchanged (numeric, locale-neutral).
+- **ProductSeeder:** all 30 products now have distinct CA/EN names and descriptions instead of copying the Spanish text. Cylinder products translated (Cilindre/Cylinder, llautó/brass, doble embragament/double clutch); shield products (Escut/Shield, daurat/gold); second deadbolts (segon pestell/second deadbolt). Securemme description fully translated into CA and EN.
+- **PackSeeder:** all three packs now have proper CA/EN names and descriptions instead of repeating the Spanish text across all locales.
+
+## [0.1.252] - 2026-05-16
+
+### Fixed
+- Feature values were blank in the admin list because `Feature::translatedValue()` had no legacy fallback to the old `value` column; added the same pattern used by Product and Pack models.
+- Rebuilt JS bundle so the new per-locale translation inputs in feature-type, feature-value and category forms are served to the browser.
+
+## [0.1.251] - 2026-05-16
+
+### Added
+- Admin feature-name (type) forms now include per-locale name inputs (CA / ES / EN) and a required `code` (internal slug) field — both on create and edit pages.
+- Admin category forms now include per-locale name inputs (CA / ES / EN) on create and edit pages.
+- Admin feature (value) form now includes per-locale value inputs (CA / ES / EN) on both create and edit pages.
+- Reusable `TranslationFields` component (`resources/js/components/admin/TranslationFields.jsx`) for rendering locale-aware text fields.
+- New i18n keys: `admin.feature_types.code`, `admin.feature_types.code_hint`, `admin.feature_types.name_translations`, `admin.features.value_translations`, `admin.categories.name_translations`, `admin.translations.section` in all three locales (ca / es / en).
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

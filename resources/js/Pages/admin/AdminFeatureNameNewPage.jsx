@@ -3,30 +3,46 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import TranslationFields from '../../components/admin/TranslationFields';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
 export default function AdminFeatureNameNewPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { showSuccess } = useAdminToast();
-  const [name, setName] = useState('');
+
+  const [code, setCode] = useState('');
+  const [names, setNames] = useState({ ca: '', es: '', en: '' });
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleNamesChange = (locale, value) => setNames((prev) => ({ ...prev, [locale]: value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.post('admin/feature-names', { name: name.trim(), is_active: isActive });
+      const payload = {
+        code: code.trim(),
+        name: names.ca.trim(),
+        is_active: isActive,
+        translations: {
+          es: { name: names.es.trim() },
+          en: { name: names.en.trim() },
+        },
+      };
+      const { data } = await api.post('admin/feature-names', payload);
       if (data.success) {
         showSuccess(t('common.saved'));
         navigate('/admin/features');
+      } else {
+        setError(data.message || t('common.error'));
       }
-      else setError(data.message || t('common.error'));
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.errors?.name?.[0] || t('common.error'));
+      const errs = err.response?.data?.errors ?? {};
+      setError(errs.code?.[0] ?? errs.name?.[0] ?? err.response?.data?.message ?? t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -48,17 +64,30 @@ export default function AdminFeatureNameNewPage() {
                 {error}
               </div>
             )}
+
             <label className="form-field">
-              <span className="form-label">{t('admin.features.type')} *</span>
+              <span className="form-label">{t('admin.feature_types.code')} *</span>
               <input
                 type="text"
-                className="input input-bordered w-full"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                className="input input-bordered w-full font-mono"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
                 required
-                aria-label={t('admin.features.type')}
+                pattern="[a-z0-9][a-z0-9_\-]*"
+                placeholder="ex: brand, key_type"
+                aria-label={t('admin.feature_types.code')}
               />
+              <span className="label text-xs text-base-content/50">{t('admin.feature_types.code_hint')}</span>
             </label>
+
+            <TranslationFields
+              field="name"
+              values={names}
+              onChange={handleNamesChange}
+              label={t('admin.feature_types.name_translations')}
+              required
+            />
+
             <label className="label cursor-pointer gap-2">
               <input
                 type="checkbox"
@@ -68,6 +97,7 @@ export default function AdminFeatureNameNewPage() {
               />
               <span className="label-text">{t('admin.products.is_active')}</span>
             </label>
+
             <div className="flex justify-between gap-2 pt-4">
               <Link to="/admin/features" className="btn btn-ghost">
                 {t('common.back')}

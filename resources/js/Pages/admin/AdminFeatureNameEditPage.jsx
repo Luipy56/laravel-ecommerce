@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import TranslationFields from '../../components/admin/TranslationFields';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
 export default function AdminFeatureNameEditPage() {
@@ -10,21 +11,33 @@ export default function AdminFeatureNameEditPage() {
   const navigate = useNavigate();
   const { showSuccess } = useAdminToast();
   const { id } = useParams();
-  const [name, setName] = useState('');
+
+  const [code, setCode] = useState('');
+  const [names, setNames] = useState({ ca: '', es: '', en: '' });
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [submitError, setSubmitError] = useState('');
 
+  const handleNamesChange = (locale, value) => setNames((prev) => ({ ...prev, [locale]: value }));
+
   const fetchFeatureName = useCallback(async () => {
     if (!id) return;
     try {
       const { data } = await api.get(`admin/feature-names/${id}`);
       if (data.success && data.data) {
-        setName(data.data.name ?? '');
-        setIsActive(!!data.data.is_active);
-      } else setLoadError(t('common.error'));
+        const d = data.data;
+        setCode(d.code ?? '');
+        setIsActive(!!d.is_active);
+        setNames({
+          ca: d.translations?.ca?.name ?? d.name ?? '',
+          es: d.translations?.es?.name ?? '',
+          en: d.translations?.en?.name ?? '',
+        });
+      } else {
+        setLoadError(t('common.error'));
+      }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
       else setLoadError(err.response?.data?.message || t('common.error'));
@@ -42,14 +55,25 @@ export default function AdminFeatureNameEditPage() {
     setSubmitError('');
     setLoading(true);
     try {
-      const { data } = await api.put(`admin/feature-names/${id}`, { name: name.trim(), is_active: isActive });
+      const payload = {
+        code: code.trim(),
+        name: names.ca.trim(),
+        is_active: isActive,
+        translations: {
+          es: { name: names.es.trim() },
+          en: { name: names.en.trim() },
+        },
+      };
+      const { data } = await api.put(`admin/feature-names/${id}`, payload);
       if (data.success) {
         showSuccess(t('common.saved'));
         navigate('/admin/features');
+      } else {
+        setSubmitError(data.message || t('common.error'));
       }
-      else setSubmitError(data.message || t('common.error'));
     } catch (err) {
-      setSubmitError(err.response?.data?.message || err.response?.data?.errors?.name?.[0] || t('common.error'));
+      const errs = err.response?.data?.errors ?? {};
+      setSubmitError(errs.code?.[0] ?? errs.name?.[0] ?? err.response?.data?.message ?? t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -92,17 +116,30 @@ export default function AdminFeatureNameEditPage() {
                 {submitError}
               </div>
             )}
+
             <label className="form-field">
-              <span className="form-label">{t('admin.features.type')} *</span>
+              <span className="form-label">{t('admin.feature_types.code')} *</span>
               <input
                 type="text"
-                className="input input-bordered w-full"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                className="input input-bordered w-full font-mono"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
                 required
-                aria-label={t('admin.features.type')}
+                pattern="[a-z0-9][a-z0-9_\-]*"
+                placeholder="ex: brand, key_type"
+                aria-label={t('admin.feature_types.code')}
               />
+              <span className="label text-xs text-base-content/50">{t('admin.feature_types.code_hint')}</span>
             </label>
+
+            <TranslationFields
+              field="name"
+              values={names}
+              onChange={handleNamesChange}
+              label={t('admin.feature_types.name_translations')}
+              required
+            />
+
             <label className="label cursor-pointer gap-2">
               <input
                 type="checkbox"
@@ -112,6 +149,7 @@ export default function AdminFeatureNameEditPage() {
               />
               <span className="label-text">{t('admin.products.is_active')}</span>
             </label>
+
             <div className="flex justify-between gap-2 pt-4">
               <Link to={`/admin/feature-names/${id}`} className="btn btn-ghost">
                 {t('common.back')}

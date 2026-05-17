@@ -22,6 +22,9 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
   const [name, setName] = useState(pack?.name ?? '');
   const [description, setDescription] = useState(pack?.description ?? '');
   const [price, setPrice] = useState(pack?.price ?? 0);
+  const [discountPercent, setDiscountPercent] = useState(
+    pack?.discount_percent != null && pack?.discount_percent !== '' ? String(pack.discount_percent) : ''
+  );
   const [isTrending, setIsTrending] = useState(pack?.is_trending ?? false);
   const [isActive, setIsActive] = useState(pack?.is_active ?? true);
   const [containsKeys, setContainsKeys] = useState(pack?.contains_keys ?? false);
@@ -57,6 +60,7 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
       name: name.trim(),
       description: description.trim() || null,
       price: Number(price),
+      discount_percent: discountPercent !== '' && discountPercent != null ? Number(discountPercent) : null,
       is_trending: !!isTrending,
       is_active: !!isActive,
       contains_keys: !!containsKeys,
@@ -110,6 +114,21 @@ export default function AdminPackForm({ pack = null, products = [], onSubmit, on
           required
           aria-label={t('admin.products.price')}
         />
+      </label>
+
+      <label className="form-field max-w-xs">
+        <span className="form-label">{t('admin.products.discount_percent')}</span>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          max="100"
+          className="input input-bordered w-full"
+          value={discountPercent}
+          onChange={(e) => setDiscountPercent(e.target.value)}
+          aria-label={t('admin.products.discount_percent')}
+        />
+        <span className="text-xs text-base-content/70">{t('admin.products.discount_percent_help')}</span>
       </label>
 
       <div className="form-field">

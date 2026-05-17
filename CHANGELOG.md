@@ -1,5 +1,121 @@
 # Changelog
 
+## [0.1.277] - 2026-05-17
+
+### Changed
+- **ProductCard layout:** price is now on the same line as the product name (`__name-row` flex row). Footer reduced to features + cart button only; `__left` wrapper removed.
+- **Home featured grid:** reduced column count for wider cards — 2+btn at 768 px, 3+btn at 1024 px, 4+btn at 1280 px.
+
+## [0.1.276] - 2026-05-17
+
+### Fixed
+- **Home featured grid:** corrected CSS Grid layout bug — `grid-column: -1` on the slider-btn was resolving to an implicit column past the explicit grid, causing one card to land in the `auto` track and render very wide. Replaced `repeat(N, 1fr) auto` with all-`1fr` grids (`repeat(4,1fr)` / `repeat(5,1fr)` / `repeat(6,1fr)`) and pinned the button with an explicit column number (`grid-column: 4 / 5 / 6` per breakpoint).
+
+## [0.1.275] - 2026-05-17
+
+### Changed
+- **Home slider-btn:** inverted gradient direction — dark red (#8b2400) now at top, orange (#f75211) at bottom, on both border and chevron stroke. Chevron uses SVG `linearGradient` driven by `--chev-from`/`--chev-to` CSS variables so hover (white fill) works without JS.
+
+## [0.1.274] - 2026-05-17
+
+### Changed
+- **ProductCard image:** aspect-ratio changed from `4/3` to `1/1` (square), giving cards more visual presence and height.
+- **ProductCard typography:** product name reduced to `fluid(12,14)`, features to `fluid(10,11)`, price to `fluid(13,15)`.
+- **ProductCard footer layout:** price moved to the left column (below features, aligned with the product name); cart button is now the sole element on the right.
+
+## [0.1.273] - 2026-05-17
+
+### Changed
+- **Home featured grid:** desktop now uses CSS Grid (no horizontal scroll) — cards wrap into rows. Breakpoints: 3 cols at 768 px, 4 at 1024 px, 5 at 1280 px.
+- **Home ">" button:** moved inside the product grid as a grid item; positioned at `grid-column: -1 / grid-row: 1` so it always appears at the right end of the first row. One button per category, links to `/categories/{id}/products`. Mobile retains horizontal drag-scroll with the button at the end.
+- **Home section header:** removed the global ">" button from the "Destacats" title row.
+
+## [0.1.272] - 2026-05-17
+
+### Changed
+- **Home slider-btn:** gradient border bottom-to-top (#8b2400 → #f75211) via CSS mask; hover fills the circle with the same gradient and turns the icon white.
+
+## [0.1.271] - 2026-05-17
+
+### Changed
+- **Storefront nav:** custom-solution link label is «Soluciones personalizadas» / «Solucions personalitzades» / «Custom solutions» (`shop.nav.custom_solution`).
+
+## [0.1.269] - 2026-05-17
+
+### Changed
+- **Product cards:** features + cart now share the bottom row (features left, price+cart stacked right); gap between cards increased to fluid(16,28); cards fixed at 210px desktop (~5 visible at 1440px) with horizontal scroll always active; cart button reduced to 30-36px.
+
+## [0.1.270] - 2026-05-17
+
+### Changed
+- **Storefront nav:** desktop navbar and mobile drawer order is Soluciones → Productos → Packs → Ofertas → FAQ; shorter nav label `shop.nav.custom_solution` for the custom-solution link.
+
+## [0.1.268] - 2026-05-17
+
+### Added
+- **Ofertes (Offers):** new «Ofertes/Ofertas/Offers» section linked from the top navbar (desktop) and the burger-menu drawer (mobile). Navigating to it opens the existing `/products` catalog pre-filtered to items with a discount (`offers_only=1`), showing only products and packs that have a `discount_percent > 0`. The filter is applied silently via a hidden checkbox; no visible UI change to the sidebar.
+- **Pack discounts:** `packs` table now has a `discount_percent` column (same semantics as products: 0–100, optional). `Pack::effectivePrice()` applies the discount to the list price. `PackResource` now exposes `price` (effective), `list_price`, and `discount_percent`. Admin pack form includes a discount field. `AdminPackResource` and `AdminPackController` validation updated accordingly.
+- **Pack card and detail:** `PackCard` displays a `−X%` badge and a struck-through list price when the pack has a discount. `PackDetailPage` shows the discount badge in the header and the original price struck through next to the discounted price.
+- **`IconTag`:** new tag icon added to the shared icon library, used for the Ofertes nav item in the mobile drawer.
+- **API:** `GET /api/v1/products` now accepts `offers_only=1` query param, filtering both products and packs to those with `discount_percent > 0`.
+- **Tests:** `ProductCatalogOffersOnlyTest` verifies the offers-only filter returns only discounted items (products and packs) and exposes correct `discount_percent`, `list_price`, and effective `price` fields.
+
+## [0.1.267] - 2026-05-17
+
+### Changed
+- **Product cards:** increased info area padding (12-16px v, 14-18px h) to match Figma; name and price font bumped to 14-17px; features now show 2 separate truncated lines; slider-btn reduced to 36-44px.
+
+## [0.1.266] - 2026-05-17
+
+### Removed
+- **Home:** categories chip section below the hero (category links remain in the navbar and in featured product rows).
+
+## [0.1.265] - 2026-05-17
+
+### Changed
+- **Home hero:** wider content column so the title and tagline wrap less on desktop.
+
+## [0.1.264] - 2026-05-17
+
+### Changed
+- **Home hero:** text block uses the same `page-container` horizontal inset as section titles (e.g. Destacats), instead of extra left padding.
+
+## [0.1.263] - 2026-05-17
+
+### Changed
+- **Home hero:** title, tagline, and CTA align to the left of the banner instead of sitting centered over the lock image.
+
+## [0.1.262] - 2026-05-17
+
+### Fixed
+- **Catalan locale flag:** serves `es-ct.svg` (Senyera) instead of misnamed `ca.svg` (Canada in ISO flag sets).
+
+## [0.1.260] - 2026-05-17
+
+### Changed
+- **Product cards:** cart button uses the brand orange-to-dark-red gradient instead of flat primary.
+- **Home featured:** category titles in primary orange; per-category chevron links to `/categories/{id}/products` (centered beside each scroll row); chevron uses theme primary colors; horizontal card scroll unchanged on mobile.
+
+## [0.1.259] - 2026-05-17
+
+### Fixed
+- **Locale flags:** Catalan locale uses the Senyera (`es-ct`) instead of the Canada flag from ISO `ca.svg`; flag thumbnails use rounded corners and a light border to match the navbar design.
+
+## [0.1.258] - 2026-05-17
+
+### Fixed
+- **Home hero image:** background photo is absolutely positioned with `object-fit: cover` and `object-position: center` so overflow crops equally from the top and bottom instead of anchoring to the top.
+
+## [0.1.257] - 2026-05-17
+
+### Changed
+- **Catalog cards (products and packs):** same GIF-on-hover behaviour on `ProductCard` and `PackCard`; API exposes `content_type` on catalog images so GIF detection works by MIME as well as `.gif` URL.
+
+## [0.1.256] - 2026-05-17
+
+### Changed
+- **Product cards:** animated GIF thumbnails stay on the first frame until the card is hovered; product and pack detail pages (`/products/:id`, `/packs/:id`) keep GIFs playing as before. Respects `prefers-reduced-motion` (no hover animation).
+
 ## [0.1.255] - 2026-05-17
 
 ### Changed

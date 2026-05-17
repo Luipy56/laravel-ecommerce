@@ -14,6 +14,7 @@ class Pack extends Model
 
     protected $fillable = [
         'price',
+        'discount_percent',
         'is_trending',
         'is_active',
         'contains_keys',
@@ -23,10 +24,27 @@ class Pack extends Model
     {
         return [
             'price' => 'decimal:2',
+            'discount_percent' => 'decimal:2',
             'is_trending' => 'boolean',
             'is_active' => 'boolean',
             'contains_keys' => 'boolean',
         ];
+    }
+
+    /** Customer-facing price after optional percentage discount. */
+    public function effectivePrice(): float
+    {
+        $base = (float) $this->price;
+        $d = $this->discount_percent;
+        if ($d === null) {
+            return round($base, 2);
+        }
+        $pct = min(100.0, max(0.0, (float) $d));
+        if ($pct <= 0) {
+            return round($base, 2);
+        }
+
+        return round($base * (1 - $pct / 100), 2);
     }
 
     public function translations(): HasMany

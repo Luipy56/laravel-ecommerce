@@ -17,6 +17,7 @@ import {
   IconX,
 } from './icons';
 import {
+  STOREFRONT_FLAG_IMG_CLASS,
   STOREFRONT_LANGUAGE_OPTIONS,
   storefrontLanguageFlag,
 } from '../lib/storefrontLanguageOptions';
@@ -68,8 +69,15 @@ export default function Navbar() {
     () => new URLSearchParams(location.search).get('packs_only') === '1',
     [location.search]
   );
-  const productsNavActive = location.pathname === '/products' && !packsOnlyInUrl;
+  const offersOnlyInUrl = useMemo(
+    () => new URLSearchParams(location.search).get('offers_only') === '1',
+    [location.search]
+  );
+  const customSolutionNavActive = location.pathname === '/custom-solution';
+  const productsNavActive = location.pathname === '/products' && !packsOnlyInUrl && !offersOnlyInUrl;
   const packsNavActive = location.pathname === '/products' && packsOnlyInUrl;
+  const offersNavActive = location.pathname === '/products' && offersOnlyInUrl;
+  const faqNavActive = location.pathname === '/faq';
   const activeLocaleFlag = useMemo(() => storefrontLanguageFlag(locale), [locale]);
 
   // Sync search input with URL when on product list (so clearing + Enter updates list)
@@ -240,8 +248,17 @@ export default function Navbar() {
           <div className="min-w-2 flex-1" aria-hidden="true" />
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <nav className="hidden items-center gap-0.5 lg:flex" aria-label={t('common.menu')}>
-              <Link to="/custom-solution" className="btn btn-ghost btn-sm shrink-0">
-                {t('shop.custom_solution')}
+              <Link
+                to="/custom-solution"
+                className={`btn btn-ghost btn-sm shrink-0${customSolutionNavActive ? ' btn-active' : ''}`}
+              >
+                {t('shop.nav.custom_solution')}
+              </Link>
+              <Link
+                to="/products"
+                className={`btn btn-ghost btn-sm shrink-0${productsNavActive ? ' btn-active' : ''}`}
+              >
+                {t('shop.products')}
               </Link>
               <Link
                 to="/products?packs_only=1"
@@ -249,14 +266,17 @@ export default function Navbar() {
               >
                 {t('shop.filters.packs_only')}
               </Link>
-              <Link to="/faq" className="btn btn-ghost btn-sm shrink-0">
-                {t('shop.faq.nav')}
+              <Link
+                to="/products?offers_only=1"
+                className={`btn btn-ghost btn-sm shrink-0${offersNavActive ? ' btn-active' : ''}`}
+              >
+                {t('shop.offers')}
               </Link>
               <Link
-                to="/products"
-                className={`btn btn-ghost btn-sm shrink-0${productsNavActive ? ' btn-active' : ''}`}
+                to="/faq"
+                className={`btn btn-ghost btn-sm shrink-0${faqNavActive ? ' btn-active' : ''}`}
               >
-                {t('shop.products')}
+                {t('shop.faq.nav')}
               </Link>
             </nav>
             <div className="mx-1 hidden h-6 w-px shrink-0 bg-base-300 lg:block" aria-hidden="true" />
@@ -276,7 +296,7 @@ export default function Navbar() {
                 <img
                   src={activeLocaleFlag}
                   alt=""
-                  className="h-5 w-5 rounded-sm object-cover"
+                  className={`h-5 w-5 ${STOREFRONT_FLAG_IMG_CLASS}`}
                 />
               </button>
               <div className="dropdown-content z-[60] mt-2 max-sm:right-0 max-sm:left-auto sm:right-0">
@@ -312,7 +332,7 @@ export default function Navbar() {
                               <img
                                 src={flag}
                                 alt=""
-                                className="h-5 w-5 shrink-0 rounded-sm object-cover"
+                                className={`h-5 w-5 ${STOREFRONT_FLAG_IMG_CLASS}`}
                                 aria-hidden="true"
                               />
                               <span>{label}</span>

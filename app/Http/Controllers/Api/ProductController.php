@@ -25,7 +25,7 @@ class ProductController extends Controller
     /**
      * Paginated product catalog (optionally merged with packs when include_packs=1).
      *
-     * @param  Request  $request  Query string: per_page (1–50), page, category_id, feature_ids, search, include_packs, packs_only.
+     * @param  Request  $request  Query string: per_page (1–50), page, category_id, feature_ids, search, include_packs, packs_only, offers_only.
      * @return JsonResponse JSON envelope with success, data (ProductResource collection or mixed catalog rows), and meta pagination.
      */
     public function index(Request $request): JsonResponse
@@ -178,6 +178,9 @@ class ProductController extends Controller
         if ($request->filled('price_max')) {
             $query->where('price', '<=', (float) $request->input('price_max'));
         }
+        if ($request->boolean('offers_only')) {
+            $query->whereNotNull('discount_percent')->where('discount_percent', '>', 0);
+        }
 
         return $query;
     }
@@ -221,6 +224,9 @@ class ProductController extends Controller
         }
         if ($request->filled('price_max')) {
             $query->where('price', '<=', (float) $request->input('price_max'));
+        }
+        if ($request->boolean('offers_only')) {
+            $query->whereNotNull('discount_percent')->where('discount_percent', '>', 0);
         }
 
         return $query;

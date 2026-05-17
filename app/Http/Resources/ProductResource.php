@@ -45,6 +45,7 @@ class ProductResource extends JsonResource
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => [
                 'id' => $img->id,
                 'url' => $img->url,
+                'content_type' => $img->content_type,
             ])),
             'variant_options' => $this->whenLoaded('variantGroup', function () {
                 $products = $this->variantGroup?->products ?? collect();

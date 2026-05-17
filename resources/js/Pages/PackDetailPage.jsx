@@ -148,7 +148,10 @@ export default function PackDetailPage() {
   const hasMultipleImages = imageUrls.length > 1;
 
   const price = Number(pack.price) || 0;
+  const listPrice = pack.list_price != null ? Number(pack.list_price) : null;
+  const discountPercent = pack.discount_percent != null && Number(pack.discount_percent) > 0 ? Number(pack.discount_percent) : null;
   const formattedPrice = formatEur(price);
+  const formattedListPrice = listPrice != null ? formatEur(listPrice) : null;
 
   const items = pack.items ?? [];
 
@@ -280,6 +283,11 @@ export default function PackDetailPage() {
                     🔑 {t('admin.packs.contains_keys')}
                   </span>
                 )}
+                {discountPercent != null && (
+                  <span className="badge badge-error badge-soft font-semibold text-xs">
+                    −{Math.round(discountPercent)}%
+                  </span>
+                )}
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-base-content leading-tight">
                 {pack.name}
@@ -292,7 +300,12 @@ export default function PackDetailPage() {
                 <span className="text-3xl font-extrabold text-primary tabular-nums">
                   {formattedPrice}
                 </span>
-                {hasSavings && (
+                {formattedListPrice && (
+                  <span className="text-sm text-base-content/60 line-through tabular-nums">
+                    {formattedListPrice}
+                  </span>
+                )}
+                {!formattedListPrice && hasSavings && (
                   <span className="text-sm text-base-content/60 line-through tabular-nums">
                     {formatEur(totalIfSeparate)}
                   </span>

@@ -1,5 +1,6 @@
 import './ProductCard.scss';
 import React, { useState } from 'react';
+import CatalogCardImage from './CatalogCardImage';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import { IconCart } from './icons';
@@ -21,6 +22,7 @@ export default function ProductCard({ product, pack }) {
   const { addLine } = useCart();
   const { data: publicSettings } = usePublicShopSettings();
   const [modalOpen, setModalOpen] = useState(false);
+  const [imageHovered, setImageHovered] = useState(false);
 
   const isPack = Boolean(pack);
   const isLowStock =
@@ -57,9 +59,11 @@ export default function ProductCard({ product, pack }) {
   };
 
   const name = isPack ? pack.name : product.name;
+  const primaryImage = isPack ? pack.images?.[0] : product.images?.[0];
   const imageUrl = isPack
-    ? (pack.primaryImageUrl ?? pack.images?.[0]?.url ?? FALLBACK_IMAGE)
+    ? (pack.primaryImageUrl ?? primaryImage?.url ?? FALLBACK_IMAGE)
     : product.primaryImageUrl;
+  const imageContentType = primaryImage?.content_type ?? null;
   const formattedPrice = isPack
     ? (pack.formattedPrice ?? (pack.price != null
         ? new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(Number(pack.price))
@@ -81,6 +85,8 @@ export default function ProductCard({ product, pack }) {
         tabIndex={0}
         onClick={openModal}
         onKeyDown={handleCardKeyDown}
+        onMouseEnter={() => setImageHovered(true)}
+        onMouseLeave={() => setImageHovered(false)}
         draggable
         onDragStart={handleDragStart}
         aria-label={name}
@@ -110,9 +116,11 @@ export default function ProductCard({ product, pack }) {
               packId={isPack ? pack.id : undefined}
             />
           </div>
-          <img
+          <CatalogCardImage
             src={imageUrl}
             alt={name}
+            contentType={imageContentType}
+            animate={imageHovered}
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = FALLBACK_IMAGE;
@@ -120,43 +128,37 @@ export default function ProductCard({ product, pack }) {
           />
         </div>
         <div className="product-card__info">
-          <h3>{name}</h3>
-          {isPack ? (
-            packProductNames.length > 0 && (
-              <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
-                {packProductNames.map((productName, i) => (
-                  <li key={i}>{productName}</li>
-                ))}
-              </ul>
-            )
-          ) : (
-            product.features?.length > 0 && (
-              <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
-                {product.features.slice(0, 2).map((f, i) => {
-                  const typeLabel = catalogFeatureTypeLabel(f, t);
-                  return (
-                    <li key={f.id ?? i}>
-                      {typeLabel ? (
-                        <span>
-                          <span className="product-card__feature-label">{typeLabel}:</span>{' '}
-                          {f.value ?? ''}
-                        </span>
-                      ) : (
-                        <span>{f.value ?? ''}</span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )
-          )}
-          <div className="product-card__footer">
+          <div className="product-card__name-row">
+            <h3>{name}</h3>
             <div className="product-card__prices">
               {!isPack && product.formattedListPrice && (
                 <span className="product-card__old-price">{product.formattedListPrice}</span>
               )}
               <span className="price">{formattedPrice}</span>
             </div>
+          </div>
+          <div className="product-card__footer">
+            <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
+              {isPack
+                ? packProductNames.map((productName, i) => (
+                    <li key={i}>{productName}</li>
+                  ))
+                : product.features?.slice(0, 2).map((f, i) => {
+                    const typeLabel = catalogFeatureTypeLabel(f, t);
+                    return (
+                      <li key={f.id ?? i}>
+                        {typeLabel ? (
+                          <span>
+                            <span className="product-card__feature-label">{typeLabel}:</span>{' '}
+                            {f.value ?? ''}
+                          </span>
+                        ) : (
+                          <span>{f.value ?? ''}</span>
+                        )}
+                      </li>
+                    );
+                  })}
+            </ul>
             <button
               type="button"
               className="cart-btn"

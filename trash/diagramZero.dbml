@@ -316,7 +316,8 @@ Table ADMINS {
 
 Table PACKS {
   id int [pk, increment]
-  price decimal(10,2) [not null]
+  price decimal(10,2) [not null, note: 'List/catalog price (storefront base before discount)']
+  discount_percent decimal(5,2) [null, note: 'Optional 0–100; customer pays price * (1 - discount/100)']
   is_trending boolean [not null, default: false, note: 'Trending pack']
   is_active boolean [not null, default: true, note: 'Disable without deleting']
   contains_keys boolean [not null, default: false, note: 'Pack contains keys (e.g. 3 locks); client can choose at cart: all same key or all different']

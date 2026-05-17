@@ -61,11 +61,15 @@ class AdminPackController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        if ($request->input('discount_percent') === '' || $request->input('discount_percent') === null) {
+            $request->merge(['discount_percent' => null]);
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'translations' => ['nullable', 'array'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'is_trending' => ['boolean'],
             'is_active' => ['boolean'],
             'contains_keys' => ['boolean'],
@@ -74,6 +78,9 @@ class AdminPackController extends Controller
             'images' => ['nullable', 'array'],
             'images.*' => ['file', 'image', 'max:10240'],
         ]);
+        if (! array_key_exists('discount_percent', $validated) || $validated['discount_percent'] === '' || $validated['discount_percent'] === null) {
+            $validated['discount_percent'] = null;
+        }
 
         $defaults = ['is_trending' => false, 'is_active' => true, 'contains_keys' => false];
         $pack = Pack::create(array_merge($defaults, collect($validated)->except(['product_ids', 'images', 'name', 'description', 'translations'])->all()));
@@ -112,17 +119,24 @@ class AdminPackController extends Controller
 
     public function update(Request $request, Pack $pack): JsonResponse
     {
+        if ($request->input('discount_percent') === '' || $request->input('discount_percent') === null) {
+            $request->merge(['discount_percent' => null]);
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'translations' => ['nullable', 'array'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'is_trending' => ['boolean'],
             'is_active' => ['boolean'],
             'contains_keys' => ['boolean'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
         ]);
+        if (! array_key_exists('discount_percent', $validated) || $validated['discount_percent'] === '' || $validated['discount_percent'] === null) {
+            $validated['discount_percent'] = null;
+        }
 
         $pack->update(collect($validated)->except(['product_ids', 'name', 'description', 'translations'])->all());
         $by = ['ca' => ['name' => $validated['name'], 'description' => $validated['description'] ?? null]];

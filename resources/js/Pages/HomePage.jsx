@@ -8,12 +8,37 @@ import { Product } from '../lib/Product';
 import ProductCard from '../components/ProductCard';
 import useDragScroll from '../hooks/useDragScroll';
 
-function ScrollRow({ children }) {
+function CategoryGrid({ group, t }) {
   const { scrollRef, wrapperRef } = useDragScroll();
   return (
     <div ref={wrapperRef} className="scroll-row-wrapper">
-      <div ref={scrollRef} className="products-row products-row--scroll">
-        {children}
+      <div ref={scrollRef} className="products-home-grid">
+        {group.products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+        {group.categoryId != null && (
+          <Link
+            to={`/categories/${group.categoryId}/products`}
+            className="slider-btn"
+            aria-label={group.categoryName ?? t('shop.categories')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <defs>
+                <linearGradient id={`chev-${group.key}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   style={{ stopColor: 'var(--chev-from)' }} />
+                  <stop offset="100%" style={{ stopColor: 'var(--chev-to)' }} />
+                </linearGradient>
+              </defs>
+              <polyline
+                points="9 18 15 12 9 6"
+                stroke={`url(#chev-${group.key})`}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+        )}
       </div>
     </div>
   );
@@ -46,14 +71,6 @@ export default function HomePage() {
   const { t } = useTranslation();
   const [heroImageFailed, setHeroImageFailed] = useState(false);
 
-  const categoriesQuery = useQuery({
-    queryKey: ['categories'],
-    queryFn: async ({ signal }) => {
-      const r = await api.get('categories', { signal });
-      return r.data.success ? r.data.data || [] : [];
-    },
-  });
-
   const featuredQuery = useQuery({
     queryKey: ['products', 'featured'],
     queryFn: async ({ signal }) => {
@@ -63,7 +80,6 @@ export default function HomePage() {
     },
   });
 
-  const categories = categoriesQuery.data ?? [];
   const featured = featuredQuery.data ?? [];
   const featuredByCategory = useMemo(() => groupFeaturedProductsByCategory(featured), [featured]);
   const loading = featuredQuery.isPending;
@@ -107,28 +123,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {categories.length > 0 && (
-        <section className="categories section">
-          <div className="page-container">
-            <h2 className="section-title">{t('shop.categories')}</h2>
-            <div className="categories__list">
-              {categories.map((c) => (
-                <Link key={c.id} to={`/categories/${c.id}/products`} className="tag">
-                  {c.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       <section className="trending section">
         <div className="page-container">
           <div className="section-header">
             <h2 className="section-title">{t('shop.featured')}</h2>
-            <Link to="/products" className="slider-btn" aria-label={t('shop.featured')}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6" /></svg>
-            </Link>
           </div>
 
           {loading ? (
@@ -151,11 +149,7 @@ export default function HomePage() {
                   >
                     {group.categoryName ?? t('shop.featured_uncategorized')}
                   </h3>
-                  <ScrollRow>
-                    {group.products.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </ScrollRow>
+                  <CategoryGrid group={group} t={t} />
                 </div>
               ))}
             </div>

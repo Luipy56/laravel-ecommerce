@@ -3,7 +3,10 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { StorefrontNavbarVisibilityProvider } from '../contexts/StorefrontNavbarVisibilityContext';
-import { STOREFRONT_LANGUAGE_OPTIONS } from '../lib/storefrontLanguageOptions';
+import {
+  STOREFRONT_FLAG_IMG_CLASS,
+  STOREFRONT_LANGUAGE_OPTIONS,
+} from '../lib/storefrontLanguageOptions';
 import Navbar from './Navbar';
 import CartWidget from './CartWidget';
 import Footer from './Footer';
@@ -20,6 +23,7 @@ import {
   IconLogIn,
   IconPackage,
   IconSparkles,
+  IconTag,
   IconUser,
   IconX,
 } from './icons';
@@ -70,6 +74,11 @@ export default function Layout() {
   const packsOnlyActive = useMemo(() => {
     if (pathname !== '/products') return false;
     return new URLSearchParams(search).get('packs_only') === '1';
+  }, [pathname, search]);
+
+  const offersOnlyActive = useMemo(() => {
+    if (pathname !== '/products') return false;
+    return new URLSearchParams(search).get('offers_only') === '1';
   }, [pathname, search]);
 
   return (
@@ -125,13 +134,27 @@ export default function Layout() {
                 </NavLink>
               </li>
               <li>
+                <NavLink
+                  to="/custom-solution"
+                  onClick={closeStorefrontDrawer}
+                  className={({ isActive }) => drawerNavClass(isActive)}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <IconSparkles className={drawerIconClass(isActive)} aria-hidden="true" />
+                      {t('shop.nav.custom_solution')}
+                    </>
+                  )}
+                </NavLink>
+              </li>
+              <li>
                 <Link
                   to="/products"
                   onClick={closeStorefrontDrawer}
-                  className={drawerNavClass(isProductsArea && !packsOnlyActive)}
-                  aria-current={isProductsArea && !packsOnlyActive ? 'page' : undefined}
+                  className={drawerNavClass(isProductsArea && !packsOnlyActive && !offersOnlyActive)}
+                  aria-current={isProductsArea && !packsOnlyActive && !offersOnlyActive ? 'page' : undefined}
                 >
-                  <IconGrid className={drawerIconClass(isProductsArea && !packsOnlyActive)} aria-hidden="true" />
+                  <IconGrid className={drawerIconClass(isProductsArea && !packsOnlyActive && !offersOnlyActive)} aria-hidden="true" />
                   {t('shop.products')}
                 </Link>
               </li>
@@ -147,18 +170,15 @@ export default function Layout() {
                 </Link>
               </li>
               <li>
-                <NavLink
-                  to="/custom-solution"
+                <Link
+                  to="/products?offers_only=1"
                   onClick={closeStorefrontDrawer}
-                  className={({ isActive }) => drawerNavClass(isActive)}
+                  className={drawerNavClass(offersOnlyActive)}
+                  aria-current={offersOnlyActive ? 'page' : undefined}
                 >
-                  {({ isActive }) => (
-                    <>
-                      <IconSparkles className={drawerIconClass(isActive)} aria-hidden="true" />
-                      {t('shop.custom_solution')}
-                    </>
-                  )}
-                </NavLink>
+                  <IconTag className={drawerIconClass(offersOnlyActive)} aria-hidden="true" />
+                  {t('shop.offers')}
+                </Link>
               </li>
               <li>
                 <NavLink
@@ -218,7 +238,7 @@ export default function Layout() {
                       <img
                         src={flag}
                         alt=""
-                        className="h-6 w-6 rounded-sm object-cover"
+                        className={`h-6 w-6 ${STOREFRONT_FLAG_IMG_CLASS}`}
                         aria-hidden="true"
                       />
                       <span className="text-[10px] font-semibold leading-none">{label}</span>

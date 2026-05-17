@@ -33,10 +33,13 @@
   }
 
   &__image {
+    position: absolute;
+    inset: 0;
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center center;
   }
 
   &__overlay {
@@ -44,6 +47,7 @@
     inset: 0;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     // Stronger gradient from the left so text is always legible
     background: linear-gradient(
       100deg,
@@ -51,11 +55,16 @@
       rgba(0, 0, 0, 0.58) 42%,
       rgba(0, 0, 0, 0.10) 100%
     );
+
+    // Match section titles below: same page-container column (margin + padding), not flush left
+    > .page-container {
+      width: 100%;
+    }
   }
 
   &__content {
     color: white;
-    max-width: fluid(240, 460);
+    max-width: fluid(300, 680);
 
     h1 {
       font-size: fluid(30, 58);
@@ -104,26 +113,6 @@
   &:hover { opacity: 0.9; }
 }
 
-// ─── Categories ──────────────────────────────────────────────────────────────
-.categories__list {
-  display: flex;
-  gap: fluid(10, 16);
-  flex-wrap: wrap;
-
-  .tag {
-    padding: fluid(7, 10) fluid(14, 20);
-    border-radius: 10px;
-    border: 1px solid #d6a282;
-    background: white;
-    color: #c84d0f;
-    text-decoration: none;
-    font-size: fluid(13, 15);
-    transition: background 0.15s;
-
-    &:hover { background: #fff3ec; }
-  }
-}
-
 // ─── Trending ────────────────────────────────────────────────────────────────
 .section-header {
   display: flex;
@@ -132,21 +121,47 @@
 }
 
 .slider-btn {
-  width: fluid(40, 56);
-  height: fluid(40, 56);
+  // CSS vars that drive both the border gradient and the chevron stroke gradient.
+  // Hover inverts to solid white so the icon stays readable on the filled background.
+  --chev-from: #8b2400; // dark red at top
+  --chev-to:   #f75211; // orange at bottom
+
+  position: relative;
+  width: fluid(36, 44);
+  height: fluid(36, 44);
   border-radius: 50%;
-  border: 2px solid #c84d0f;
+  border: none;
   background: transparent;
-  color: #c84d0f;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.25s, color 0.25s;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: background 0.25s;
+
+  // Gradient border: dark red top → orange bottom
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(to bottom, #8b2400 0%, #f75211 100%);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
 
   &:hover {
-    background: #c84d0f;
-    color: white;
+    --chev-from: white;
+    --chev-to:   white;
+    background: linear-gradient(to bottom, #8b2400 0%, #f75211 100%);
+
+    &::before { display: none; }
   }
 }
 
@@ -174,6 +189,65 @@
     font-size: fluid(14, 16);
     font-weight: 600;
     margin-bottom: fluid(12, 16);
-    color: #222;
+    color: var(--color-primary, #fb5412);
+  }
+
+}
+
+// ─── Home featured grid ───────────────────────────────────────────────────────
+// Mobile: horizontal drag-scroll (same full-bleed as before via .scroll-row-wrapper)
+// Desktop: CSS Grid — ">" lives at last column of first row (grid-column:-1 / grid-row:1)
+.products-home-grid {
+  // ─── Mobile ──────────────────────────────────────────────────────────────────
+  @media (max-width: 767px) {
+    display: flex;
+    gap: fluid(16, 28);
+    overflow-x: auto;
+    padding-inline: fluid(16, 24);
+    padding-bottom: 10px;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+
+    &::-webkit-scrollbar { height: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 3px;
+      &:hover { background: rgba(0, 0, 0, 0.3); }
+    }
+
+    > .product-card { flex-shrink: 0; width: clamp(190px, 58vw, 240px); }
+    > .slider-btn   { flex-shrink: 0; align-self: center; }
+  }
+
+  // ─── Desktop: grid, no scroll ────────────────────────────────────────────────
+  // Each breakpoint adds one extra 1fr column for the ">" button so all tracks
+  // are equal width. Explicit grid-column keeps the button in the first row.
+  @media (min-width: 768px) {
+    display: grid;
+    gap: fluid(16, 28);
+    grid-template-columns: repeat(3, 1fr); // 2 cards + 1 btn
+
+    > .slider-btn {
+      grid-column: 3;
+      grid-row: 1;
+      align-self: center;
+      justify-self: center;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr); // 3 cards + 1 btn
+
+    > .slider-btn { grid-column: 4; }
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(5, 1fr); // 4 cards + 1 btn
+
+    > .slider-btn { grid-column: 5; }
   }
 }

@@ -15,6 +15,7 @@ class AdminPackResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'price' => (float) $this->price,
+            'discount_percent' => $this->discount_percent !== null ? (float) $this->discount_percent : null,
             'is_trending' => (bool) $this->is_trending,
             'is_active' => (bool) $this->is_active,
             'contains_keys' => (bool) $this->contains_keys,

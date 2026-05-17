@@ -25,7 +25,7 @@
 // ─── Hero ────────────────────────────────────────────────────────────────────
 .hero {
   position: relative;
-  height: fluid(280, 520);
+  height: fluid(180, 320);
   overflow: hidden;
 
   &--gradient {
@@ -55,7 +55,7 @@
 
   &__content {
     color: white;
-    max-width: fluid(280, 560);
+    max-width: fluid(240, 460);
 
     h1 {
       font-size: fluid(30, 58);

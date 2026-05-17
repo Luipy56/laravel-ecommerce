@@ -46,12 +46,6 @@ function drawerIconClass(isActive) {
   return ['h-5 w-5 shrink-0', isActive ? 'text-primary-content' : 'text-primary'].join(' ');
 }
 
-function localeCode(lng) {
-  if (lng === 'ca') return 'CA';
-  if (lng === 'es') return 'ES';
-  return 'EN';
-}
-
 export default function Layout() {
   const { t, i18n } = useTranslation();
   const { pathname, search } = useLocation();
@@ -203,7 +197,7 @@ export default function Layout() {
                 {t('common.language')}
               </p>
               <div className="flex gap-1.5" role="radiogroup" aria-label={t('common.language')}>
-                {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
+                {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label, flag }) => {
                   const selected = locale === code;
                   return (
                     <button
@@ -211,16 +205,23 @@ export default function Layout() {
                       type="button"
                       role="radio"
                       aria-checked={selected}
+                      aria-label={label}
+                      title={label}
                       onClick={() => handleLocale(code)}
                       className={[
-                        'flex-1 rounded-lg py-2 text-xs font-semibold tabular-nums transition-all duration-150',
+                        'flex flex-1 flex-col items-center justify-center gap-1 rounded-lg py-2 transition-all duration-150',
                         selected
-                          ? 'bg-primary text-primary-content shadow-sm'
+                          ? 'bg-primary text-primary-content shadow-sm ring-2 ring-primary/30'
                           : 'bg-base-200 text-base-content/60 hover:bg-base-300 hover:text-base-content',
                       ].join(' ')}
                     >
-                      {localeCode(code)}
-                      <span className="sr-only"> — {label}</span>
+                      <img
+                        src={flag}
+                        alt=""
+                        className="h-6 w-6 rounded-sm object-cover"
+                        aria-hidden="true"
+                      />
+                      <span className="text-[10px] font-semibold leading-none">{label}</span>
                     </button>
                   );
                 })}

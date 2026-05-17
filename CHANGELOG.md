@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.255] - 2026-05-17
+
+### Changed
+- **Storefront navbar:** brand logo image replaces text label; catalog search sits after the logo on desktop; nav links align right with a pipe separator before locale, cart, and account icons.
+- **Language selector:** Catalan, Spanish, and English use flag icons (CA / ES / GB) in the navbar dropdown and mobile drawer.
+- **Home hero:** shorter banner height and narrower left-aligned text block to match the updated design.
+
 ## [0.1.254] - 2026-05-16
 
 ### Changed

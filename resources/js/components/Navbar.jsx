@@ -16,7 +16,10 @@ import {
   IconUser,
   IconX,
 } from './icons';
-import { STOREFRONT_LANGUAGE_OPTIONS } from '../lib/storefrontLanguageOptions';
+import {
+  STOREFRONT_LANGUAGE_OPTIONS,
+  storefrontLanguageFlag,
+} from '../lib/storefrontLanguageOptions';
 
 const SCROLL_THRESHOLD = 10;   // px: below this, navbar is always visible
 const SCROLL_DELTA = 5;        // px: min scroll movement to consider direction
@@ -52,7 +55,6 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [locale, setLocale] = useState(i18n.language);
-  const localeCode = (lng) => (lng === 'ca' ? 'CA' : lng === 'es' ? 'ES' : 'EN');
   const [searchQ, setSearchQ] = useState('');
   const { visible, setNavbarVisible } = useStorefrontNavbarVisibility();
   const lastScrollY = useRef(0);
@@ -68,6 +70,7 @@ export default function Navbar() {
   );
   const productsNavActive = location.pathname === '/products' && !packsOnlyInUrl;
   const packsNavActive = location.pathname === '/products' && packsOnlyInUrl;
+  const activeLocaleFlag = useMemo(() => storefrontLanguageFlag(locale), [locale]);
 
   // Sync search input with URL when on product list (so clearing + Enter updates list)
   useEffect(() => {
@@ -202,42 +205,28 @@ export default function Navbar() {
         style={{ transform: visible ? 'translateY(0)' : 'translateY(-100%)' }}
       >
         <div className="flex min-h-14 w-full min-w-0 max-w-full flex-nowrap items-center gap-1 px-2 py-1 sm:min-h-16 sm:gap-2 sm:px-4 sm:py-1">
-          <div className="flex min-w-0 max-w-full flex-1 items-center gap-1 sm:gap-2">
+          <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
             <label htmlFor="drawer-nav" className="btn btn-ghost btn-square btn-sm shrink-0 lg:hidden" aria-label={t('common.menu')}>
               <IconMenu className="h-6 w-6" />
             </label>
             <Link
               to="/"
-              className="btn btn-ghost min-w-0 shrink max-w-[9rem] px-1 text-base normal-case sm:max-w-[14rem] sm:px-2 sm:text-xl md:max-w-none"
+              className="btn btn-ghost shrink-0 px-1 sm:px-2"
               title={t('shop.brand_name')}
             >
-              <span className="truncate">{t('shop.brand_name')}</span>
-            </Link>
-            <Link
-              to="/products"
-              className={`btn btn-ghost hidden shrink-0 sm:inline-flex${productsNavActive ? ' btn-active' : ''}`}
-            >
-              {t('shop.products')}
-            </Link>
-            <Link
-              to="/products?packs_only=1"
-              className={`btn btn-ghost hidden shrink-0 sm:inline-flex${packsNavActive ? ' btn-active' : ''}`}
-            >
-              {t('shop.filters.packs_only')}
-            </Link>
-            <Link to="/custom-solution" className="btn btn-ghost hidden shrink-0 lg:inline-flex">
-              {t('shop.custom_solution')}
-            </Link>
-            <Link to="/faq" className="btn btn-ghost hidden shrink-0 xl:inline-flex">
-              {t('shop.faq.nav')}
+              <img
+                src="/images/serraller_solidaria_logo.png"
+                alt={t('shop.brand_name')}
+                className="h-8 w-auto max-w-[9rem] object-contain sm:h-10 sm:max-w-[11rem]"
+              />
             </Link>
             <form
               onSubmit={handleSearch}
-              className="join ml-0 hidden min-w-0 flex-1 basis-0 lg:ml-1 lg:flex lg:max-w-md xl:max-w-lg"
+              className="join ml-0 hidden min-w-0 lg:ml-1 lg:flex lg:max-w-xs xl:max-w-sm"
             >
               <input
                 type="search"
-                className="input input-bordered join-item input-sm min-w-0 w-full flex-1 basis-0"
+                className="input input-bordered join-item input-sm min-w-0 w-full min-w-[8rem]"
                 placeholder={t('shop.search_placeholder')}
                 value={searchQ}
                 onChange={handleSearchInputChange}
@@ -248,7 +237,29 @@ export default function Navbar() {
               </button>
             </form>
           </div>
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="min-w-2 flex-1" aria-hidden="true" />
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            <nav className="hidden items-center gap-0.5 lg:flex" aria-label={t('common.menu')}>
+              <Link to="/custom-solution" className="btn btn-ghost btn-sm shrink-0">
+                {t('shop.custom_solution')}
+              </Link>
+              <Link
+                to="/products?packs_only=1"
+                className={`btn btn-ghost btn-sm shrink-0${packsNavActive ? ' btn-active' : ''}`}
+              >
+                {t('shop.filters.packs_only')}
+              </Link>
+              <Link to="/faq" className="btn btn-ghost btn-sm shrink-0">
+                {t('shop.faq.nav')}
+              </Link>
+              <Link
+                to="/products"
+                className={`btn btn-ghost btn-sm shrink-0${productsNavActive ? ' btn-active' : ''}`}
+              >
+                {t('shop.products')}
+              </Link>
+            </nav>
+            <div className="mx-1 hidden h-6 w-px shrink-0 bg-base-300 lg:block" aria-hidden="true" />
             <div
               ref={localeMenuRef}
               className={`dropdown dropdown-end hidden lg:inline-block ${localeMenuOpen ? 'dropdown-open' : 'dropdown-close'}`}
@@ -262,7 +273,11 @@ export default function Navbar() {
                 aria-label={t('common.language')}
                 onClick={() => setLocaleMenuOpen((o) => !o)}
               >
-                <span className="font-semibold tracking-wide text-xs sm:text-sm">{localeCode(locale)}</span>
+                <img
+                  src={activeLocaleFlag}
+                  alt=""
+                  className="h-5 w-5 rounded-sm object-cover"
+                />
               </button>
               <div className="dropdown-content z-[60] mt-2 max-sm:right-0 max-sm:left-auto sm:right-0">
                 <div className="card card-border w-[min(18rem,calc(100vw-1.5rem))] sm:w-52 border border-base-300 bg-base-100 shadow-xl">
@@ -278,7 +293,7 @@ export default function Navbar() {
                     </button>
                   </div>
                   <ul className="menu menu-sm p-2 gap-0.5" role="listbox" aria-label={t('common.language')}>
-                    {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
+                    {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label, flag }) => {
                       const selected = locale === code;
                       return (
                         <li key={code} role="none">
@@ -286,14 +301,22 @@ export default function Navbar() {
                             type="button"
                             role="option"
                             aria-selected={selected}
-                            className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left active:bg-base-200 ${
+                            className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left active:bg-base-200 ${
                               selected
                                 ? 'bg-gradient-to-r from-primary/15 to-secondary/10 font-medium text-primary'
                                 : 'hover:bg-base-200'
                             }`}
                             onClick={() => handleLocale(code)}
                           >
-                            <span>{label}</span>
+                            <span className="flex min-w-0 items-center gap-2">
+                              <img
+                                src={flag}
+                                alt=""
+                                className="h-5 w-5 shrink-0 rounded-sm object-cover"
+                                aria-hidden="true"
+                              />
+                              <span>{label}</span>
+                            </span>
                             {selected ? (
                               <span className="text-primary text-xs font-bold tabular-nums" aria-hidden>
                                 ✓

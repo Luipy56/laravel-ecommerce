@@ -391,7 +391,7 @@ export default function PackDetailPage() {
         </div>
       </div>
 
-      <CartPreviewBar />
+      {/* <CartPreviewBar /> */}
 
       {/* Reviews */}
       <div className="mt-8">

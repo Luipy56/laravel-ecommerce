@@ -374,7 +374,7 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      <CartPreviewBar />
+      {/* <CartPreviewBar /> */}
 
       <div style={{ marginTop: '80px' }}>
         <ReviewsSection productId={id} />

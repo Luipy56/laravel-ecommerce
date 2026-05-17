@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.307] - 2026-05-17
+
+### Changed
+- **CartPreviewBar:** gradient top/bottom lines (full-width, full-bleed) instead of block border; images enlarged to 200×200 px (+150%); "+" separators use gradient text; cart button uses solid brand color.
+
 ## [0.1.306] - 2026-05-17
 
 ### Added

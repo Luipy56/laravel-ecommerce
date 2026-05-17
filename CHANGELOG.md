@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.304] - 2026-05-17
+
+### Fixed
+- **LoginPage:** toast de verificació d'email ara apareix una sola vegada (eliminació del paràmetre `?verified=1` de la URL just après de mostrar-lo, evitant el doble disparo de React StrictMode).
+
 ## [0.1.303] - 2026-05-17
 
 ### Changed

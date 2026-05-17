@@ -19,6 +19,8 @@ export default function LoginPage() {
   useEffect(() => {
     if (verifiedFromEmail) {
       showToast({ message: t('auth.verify_success_banner'), type: 'success' });
+      const next = searchParams.get('next');
+      navigate({ search: next ? `?next=${encodeURIComponent(next)}` : '' }, { replace: true });
     }
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps
   const [loginEmail, setLoginEmail] = useState('');

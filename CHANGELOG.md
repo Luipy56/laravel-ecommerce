@@ -1,6 +1,11 @@
 # Changelog
 
-## [0.1.307] - 2026-05-17
+## [0.1.308] - 2026-05-17
+
+### Changed
+- **CartPreviewBar:** gradient lines doubled in thickness from 3px to 6px.
+
+
 
 ### Changed
 - **CartPreviewBar:** gradient top/bottom lines (full-width, full-bleed) instead of block border; images enlarged to 200×200 px (+150%); "+" separators use gradient text; cart button uses solid brand color.

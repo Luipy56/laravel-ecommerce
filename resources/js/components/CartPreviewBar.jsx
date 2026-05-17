@@ -14,7 +14,7 @@ function GradientLine() {
     <div
       style={{
         background: GRADIENT,
-        height: '6px',
+        height: '4.5px',
         width: '100vw',
         marginLeft: 'calc(50% - 50vw)',
       }}

@@ -1,27 +1,26 @@
 import './ProductCard.scss';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CatalogCardImage from './CatalogCardImage';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import { IconCart } from './icons';
 import FavoriteToggle from './FavoriteToggle';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
-import ProductPreviewModal from './ProductPreviewModal';
 import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
 /**
  * Shared card for products and packs in list and featured grids.
- * Accepts either `product` or `pack`. Clicking the card opens a preview modal;
- * "View more info" inside the modal navigates to the detail page.
+ * Accepts either `product` or `pack`. Clicking the card navigates to the detail page.
  * Packs show a "Pack" badge and at least 2 product names from the pack.
  */
 export default function ProductCard({ product, pack }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { addLine } = useCart();
   const { data: publicSettings } = usePublicShopSettings();
-  const [modalOpen, setModalOpen] = useState(false);
   const [imageHovered, setImageHovered] = useState(false);
 
   const isPack = Boolean(pack);
@@ -49,12 +48,12 @@ export default function ProductCard({ product, pack }) {
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const openModal = () => setModalOpen(true);
+  const goToDetail = () => navigate(detailUrl);
 
   const handleCardKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      openModal();
+      goToDetail();
     }
   };
 
@@ -78,12 +77,11 @@ export default function ProductCard({ product, pack }) {
     : [];
 
   return (
-    <>
       <div
         className={`product-card${isPack ? ' product-card--pack' : ''}`}
         role="button"
         tabIndex={0}
-        onClick={openModal}
+        onClick={goToDetail}
         onKeyDown={handleCardKeyDown}
         onMouseEnter={() => setImageHovered(true)}
         onMouseLeave={() => setImageHovered(false)}
@@ -105,7 +103,7 @@ export default function ProductCard({ product, pack }) {
               {t('shop.product.low_stock')}
             </span>
           )}
-          {/* stopPropagation so favorite toggle doesn't open the modal */}
+          {/* stopPropagation so favorite toggle doesn't navigate away */}
           <div
             className="product-card__favorite"
             onClick={(e) => e.stopPropagation()}
@@ -170,15 +168,5 @@ export default function ProductCard({ product, pack }) {
           </div>
         </div>
       </div>
-
-      {modalOpen && (
-        <ProductPreviewModal
-          product={isPack ? undefined : product}
-          pack={isPack ? pack : undefined}
-          detailUrl={detailUrl}
-          onClose={() => setModalOpen(false)}
-        />
-      )}
-    </>
   );
 }

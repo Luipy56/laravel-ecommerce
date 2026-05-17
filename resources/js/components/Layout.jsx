@@ -90,7 +90,13 @@ export default function Layout() {
         aria-hidden="true"
       />
       <StorefrontNavbarVisibilityProvider>
-        <div className="drawer-content flex min-h-screen flex-col bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
+        <div
+          className="drawer-content flex min-h-screen flex-col bg-base-200 storefront-bg"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('/images/home-bg.jpg')",
+          }}
+        >
           <Navbar />
           <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
             <Outlet />

@@ -11,35 +11,37 @@ import useDragScroll from '../hooks/useDragScroll';
 function CategoryGrid({ group, t }) {
   const { scrollRef, wrapperRef } = useDragScroll();
   return (
-    <div ref={wrapperRef} className="scroll-row-wrapper">
-      <div ref={scrollRef} className="products-home-grid">
-        {group.products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-        {group.categoryId != null && (
-          <Link
-            to={`/categories/${group.categoryId}/products`}
-            className="slider-btn"
-            aria-label={group.categoryName ?? t('shop.categories')}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <defs>
-                <linearGradient id={`chev-${group.key}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   style={{ stopColor: 'var(--chev-from)' }} />
-                  <stop offset="100%" style={{ stopColor: 'var(--chev-to)' }} />
-                </linearGradient>
-              </defs>
-              <polyline
-                points="9 18 15 12 9 6"
-                stroke={`url(#chev-${group.key})`}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
-        )}
+    <div className="trending__category-row">
+      <div ref={wrapperRef} className="scroll-row-wrapper">
+        <div ref={scrollRef} className="products-home-grid">
+          {group.products.slice(0, 5).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       </div>
+      {group.categoryId != null && (
+        <Link
+          to={`/categories/${group.categoryId}/products`}
+          className="slider-btn"
+          aria-label={group.categoryName ?? t('shop.categories')}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id={`chev-${group.key}`} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%"   style={{ stopColor: 'var(--chev-from)' }} />
+                <stop offset="100%" style={{ stopColor: 'var(--chev-to)' }} />
+              </linearGradient>
+            </defs>
+            <polyline
+              points="9 18 15 12 9 6"
+              stroke={`url(#chev-${group.key})`}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+      )}
     </div>
   );
 }

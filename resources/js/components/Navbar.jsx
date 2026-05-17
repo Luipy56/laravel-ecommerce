@@ -206,14 +206,14 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Spacer: mobile = main row + search row + gradient (~8rem); lg+ single row + gradient */}
-      <div className="min-h-[8rem] shrink-0 lg:min-h-[4.25rem]" aria-hidden="true" />
+      {/* Spacer matches fixed header height (main row + mobile search row + gradient line) */}
+      <div className="h-[8rem] shrink-0 lg:h-[4.5rem]" aria-hidden="true" />
       <header
         className="fixed top-0 left-0 right-0 z-50 w-full max-w-full min-w-0 transition-transform duration-300 ease-out bg-base-100 shadow-lg"
         style={{ transform: visible ? 'translateY(0)' : 'translateY(-100%)' }}
       >
         <div className="flex min-h-14 w-full min-w-0 max-w-full flex-nowrap items-center gap-1 px-2 py-1 sm:min-h-16 sm:gap-2 sm:px-4 sm:py-1">
-          <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2 lg:pr-2">
             <label htmlFor="drawer-nav" className="btn btn-ghost btn-square btn-sm shrink-0 lg:hidden" aria-label={t('common.menu')}>
               <IconMenu className="h-6 w-6" />
             </label>
@@ -230,11 +230,11 @@ export default function Navbar() {
             </Link>
             <form
               onSubmit={handleSearch}
-              className="join ml-0 hidden min-w-0 lg:ml-1 lg:flex lg:max-w-xs xl:max-w-sm"
+              className="join ml-0 hidden min-w-[10rem] w-full max-w-full flex-1 lg:ml-2 lg:flex lg:max-w-[50%] xl:min-w-[14rem] 2xl:min-w-[18rem]"
             >
               <input
                 type="search"
-                className="input input-bordered join-item input-sm min-w-0 w-full min-w-[8rem]"
+                className="input input-bordered join-item input-sm min-w-0 w-full flex-1"
                 placeholder={t('shop.search_placeholder')}
                 value={searchQ}
                 onChange={handleSearchInputChange}
@@ -245,7 +245,6 @@ export default function Navbar() {
               </button>
             </form>
           </div>
-          <div className="min-w-2 flex-1" aria-hidden="true" />
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <nav className="hidden items-center gap-0.5 lg:flex" aria-label={t('common.menu')}>
               <Link

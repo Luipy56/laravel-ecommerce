@@ -210,7 +210,13 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="drawer lg:drawer-open min-h-screen min-w-0 max-w-full overflow-x-clip bg-base-200 storefront-bg" style={{ backgroundImage: "url('/images/home-bg.jpg')" }}>
+    <div
+      className="drawer lg:drawer-open min-h-screen min-w-0 max-w-full overflow-x-clip bg-base-200 storefront-bg"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('/images/home-bg.jpg')",
+      }}
+    >
       <input id="admin-drawer" type="checkbox" className="drawer-toggle" aria-label={t('common.menu')} />
       <div className="drawer-content flex min-w-0 flex-col">
         <header className="sticky top-0 z-10 bg-base-100 border-b border-base-200 shrink-0">

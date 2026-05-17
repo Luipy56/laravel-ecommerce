@@ -1,5 +1,77 @@
 # Changelog
 
+## [0.1.291] - 2026-05-17
+
+### Fixed
+- **Storefront background:** reverted veil/`::before` experiments; restored inline `home-bg.jpg` (as before) with a light 10% white wash so the photo stays ~90% visible.
+
+## [0.1.290] - 2026-05-17
+
+### Fixed
+- **Storefront background:** restored visible `home-bg.jpg` using a 90% `base-200` veil (~10% image strength) on `.storefront-bg` instead of a broken `::before` layer hidden under opaque fills and z-index stacking.
+- **Navbar spacer:** height aligned to the fixed header (`h-[8rem]` / `lg:h-[4.5rem]`) to remove the empty strip above main content.
+
+## [0.1.289] - 2026-05-17
+
+### Changed
+- **Storefront background (`home-bg.jpg`):** decorative image renders at 10% opacity via `.storefront-bg::before` so text and cards stay fully opaque; URL moved from inline styles to `app.css`.
+
+## [0.1.288] - 2026-05-17
+
+### Changed
+- **Storefront navbar (desktop):** search bar capped at 50% of the logo+search row width on large screens (`lg:max-w-[50%]`).
+
+## [0.1.287] - 2026-05-17
+
+### Removed
+- **ProductPreviewModal:** clicking a product or pack card goes straight to `/products/:id` or `/packs/:id`; intermediate preview modal removed.
+
+## [0.1.286] - 2026-05-17
+
+### Changed
+- **ProductCard cart button:** gradient direction changed to left→right (orange → dark red), matching the slider-btn style.
+
+## [0.1.285] - 2026-05-17
+
+### Changed
+- **Home slider-btn:** gradient direction changed to left→right (orange #f75211 → dark red #8b2400) on border, hover fill, and chevron SVG stroke.
+
+## [0.1.284] - 2026-05-17
+
+### Changed
+- **Home featured:** reduced gap between category groups from `fluid(28,40)` to `fluid(22,32)`.
+
+## [0.1.283] - 2026-05-17
+
+### Changed
+- **Storefront navbar (desktop):** search bar grows with available space between logo and nav links (removed fixed `max-w-xs` / `max-w-sm` cap).
+
+## [0.1.282] - 2026-05-17
+
+### Changed
+- **Home featured grid:** increased card gap from `fluid(16,28)` to `fluid(20,36)`.
+
+## [0.1.281] - 2026-05-17
+
+### Changed
+- **Home slider-btn:** added `margin-left: 10px` to push the ">" button a bit further right from the card grid.
+
+## [0.1.280] - 2026-05-17
+
+### Changed
+- **Home featured grid:** ">" button moved outside the card grid — it is now a flex sibling via `trending__category-row`, no longer occupying a card column. Grid is cards-only (`repeat(3/4/5, 1fr)` per breakpoint).
+- **Home featured grid:** max 5 products shown per category (`.slice(0, 5)` in `CategoryGrid`).
+
+## [0.1.279] - 2026-05-17
+
+### Changed
+- **ProductCard:** reduced `__info` vertical padding (`fluid(6,8)`) so the image occupies a larger proportion of the square card.
+
+## [0.1.278] - 2026-05-17
+
+### Changed
+- **ProductCard:** card is now perfectly square (`aspect-ratio: 1/1` on the card itself). Image section uses `flex: 1` to fill remaining height after the info block; `object-position: center` centres the photo. Info section uses `flex-shrink: 0` so its height stays fixed.
+
 ## [0.1.277] - 2026-05-17
 
 ### Changed

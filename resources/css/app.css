@@ -51,9 +51,7 @@ html, body {
     'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-/* Storefront background: shared across all client pages.
-   background-image is set inline in Layout.jsx so the URL resolves
-   against the page origin, not the Vite dev server. */
+/* Storefront background: image + sizing from inline background-image in Layout.jsx. */
 .storefront-bg {
   background-size: cover;
   background-repeat: no-repeat;

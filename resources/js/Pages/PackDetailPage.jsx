@@ -6,6 +6,7 @@ import { useCart } from '../contexts/CartContext';
 import { IconCart, IconChevronLeft, IconChevronRight } from '../components/icons';
 import FavoriteToggle from '../components/FavoriteToggle';
 import ReviewsSection from '../components/ReviewsSection';
+import CartPreviewBar from '../components/CartPreviewBar';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 const ZOOM_SCALE = 3.5;
@@ -389,6 +390,8 @@ export default function PackDetailPage() {
           </div>
         </div>
       </div>
+
+      <CartPreviewBar />
 
       {/* Reviews */}
       <div className="mt-8">

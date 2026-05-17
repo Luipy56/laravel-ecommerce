@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.306] - 2026-05-17
+
+### Added
+- **CartPreviewBar:** new dynamic block on product and pack detail pages (between product info and reviews) showing the current cart contents as a horizontal row of item thumbnails separated by "+" signs, with a cart navigation button at the right end. Hidden when the cart is empty.
+
+## [0.1.305] - 2026-05-17
+
+### Changed
+- **ProductDetailPage:** fixed reviews spacing at 80px.
+
 ## [0.1.304] - 2026-05-17
 
 ### Fixed

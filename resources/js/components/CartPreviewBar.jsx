@@ -68,14 +68,21 @@ export default function CartPreviewBar() {
             +
           </span>
 
-          <button
-            type="button"
-            className="btn btn-square shrink-0 w-[200px] h-[200px] rounded-lg border-2 bg-white hover:bg-[#F75211] hover:border-[#F75211] hover:text-white border-[#F75211] text-[#F75211]"
-            onClick={() => navigate('/cart')}
-            aria-label={t('shop.cart.go_to_cart', 'Anar al carret')}
+          <div
+            style={{ background: GRADIENT, padding: '2px', borderRadius: '10px', flexShrink: 0 }}
           >
-            <IconCart className="h-16 w-16" aria-hidden="true" />
-          </button>
+            <button
+              type="button"
+              className="btn btn-square bg-white border-0 text-[#F75211] hover:text-white"
+              style={{ borderRadius: '8px' }}
+              onClick={() => navigate('/cart')}
+              onMouseEnter={(e) => { e.currentTarget.parentElement.style.padding = '0'; e.currentTarget.style.background = 'linear-gradient(to right, #F75211, #8B2400)'; }}
+              onMouseLeave={(e) => { e.currentTarget.parentElement.style.padding = '2px'; e.currentTarget.style.background = 'white'; }}
+              aria-label={t('shop.cart.go_to_cart', 'Anar al carret')}
+            >
+              <IconCart className="h-5 w-5" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
 

@@ -81,7 +81,7 @@ export default function Layout() {
     return new URLSearchParams(search).get('offers_only') === '1';
   }, [pathname, search]);
 
-  const isProductDetailPage = /^\/products\/[^/]+$/.test(pathname);
+  const isProductDetailPage = /^\/(products|packs)\/[^/]+$/.test(pathname);
 
   return (
     <div className="drawer">

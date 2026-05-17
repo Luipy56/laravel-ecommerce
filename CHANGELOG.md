@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.1.326] - 2026-05-18
+
+### Changed
+- **Pack detail page:** full redesign aligned with product detail (gallery, gradient add-to-cart, `PackDetailPage.scss`).
+- **Storefront layout:** product-detail white column and side-band background also apply to `/packs/:id`.
+
+## [0.1.325] - 2026-05-18
+
+### Fixed
+- **PackDetailPage:** restore `useEffect` import removed by mistake in previous refactor.
+
+## [0.1.324] - 2026-05-18
+
+### Fixed
+- **PackDetailPage:** wrap content in `.product-detail-page` shell (same as ProductDetailPage) so the white centered column with gray side bands appears correctly. Removed manual `useEffect` background hack.
+
+## [0.1.323] - 2026-05-18
+
+### Changed
+- **PackDetailPage redesign:** same layout as ProductDetailPage — white `main` background via `useEffect`, thumbnails as vertical strip to the left of the main image (fully rounded corners), removed floating card wrapper and prev/next arrows, gradient "Add to cart" button with text, reviews section with 80px top spacing. New `PackDetailPage.scss` added.
+
+## [0.1.322] - 2026-05-18
+
+### Changed
+- **Pack detail:** same full-height white-column layout as product detail — `PackDetailShell` wraps content, decorative background visible only in side margins, card chrome removed.
+- **Pack detail thumbnails:** GIFs show a still frame and animate only on hover, using `CatalogCardImage` with `content_type` from API.
+
 ## [0.1.321] - 2026-05-17
 
 ### Changed

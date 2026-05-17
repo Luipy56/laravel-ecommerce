@@ -16,7 +16,7 @@ class ProductReviewSeeder extends Seeder
      *  - client 1 (maria.garcia) → order 1 (pending)   → cilStd
      *  - client 1 (maria.garcia) → order 2 (in_transit) → escEst
      *  - client 1 (maria.garcia) → order 3 (sent)       → cilStd + escEst (already covered above)
-     *  - client 2 (joan.martinez) → order 5 (installation_confirmed) → spEst
+     *  - client 2 (holaquetal@gmail.com) → order 5 (installation_confirmed) → spEst
      */
     public function run(): void
     {

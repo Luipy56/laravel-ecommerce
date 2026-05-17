@@ -1,10 +1,12 @@
 <?php
 
 use App\Exceptions\PaymentProviderNotConfiguredException;
+use App\Http\Controllers\Api\ClientVerificationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 
 return Application::configure(basePath: dirname(__DIR__))
     // Explicit listeners live in AppServiceProvider; automatic discovery from app/Listeners
@@ -38,6 +40,14 @@ return Application::configure(basePath: dirname(__DIR__))
             PaymentProviderNotConfiguredException::class,
         ]);
         $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $e) {
-            return $request->is('api/*');
+            return $request->is('api/*')
+                && ! ($e instanceof InvalidSignatureException && $request->routeIs('verification.verify'));
+        });
+        $exceptions->render(function (InvalidSignatureException $e, Request $request) {
+            if ($request->routeIs('verification.verify')) {
+                return ClientVerificationController::failedRedirect('expired');
+            }
+
+            return null;
         });
     })->create();

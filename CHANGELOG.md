@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.1.321] - 2026-05-17
+
+### Changed
+- **Demo seeders:** client 2 login and related contacts/solutions use `holaquetal@gmail.com` (password matches) so `ClientContactSeeder` and tests stay aligned.
+
+## [0.1.320] - 2026-05-17
+
+### Changed
+- **Product detail thumbnails:** GIFs show a still first frame by default and animate only on thumbnail hover (same behaviour as catalog cards).
+
+## [0.1.319] - 2026-05-17
+
+### Changed
+- **Product detail reviews:** remove duplicate faint top border above the reviews block (keep `ReviewsSection` separator only).
+
+## [0.1.318] - 2026-05-17
+
+### Changed
+- **Product detail:** white content column stretches from navbar to footer (`product-detail-page`); decorative background remains visible only in the side margins.
+
+## [0.1.317] - 2026-05-17
+
+### Fixed
+- **Product detail:** restore missing `</div>` for `product-detail__card` (Vite “Unterminated JSX” build error).
+
+## [0.1.316] - 2026-05-17
+
+### Changed
+- **Product detail:** entire content column (product + reviews) uses a white background; decorative storefront background shows only in the side margins.
+
+## [0.1.315] - 2026-05-17
+
+### Changed
+- **Product detail:** white panel with margin around product info (back link + gallery + specs); page background image visible outside the panel; reviews sit below on transparent background.
+
+## [0.1.314] - 2026-05-17
+
+### Changed
+- **Catalog empty state:** «no results» panel uses white (`base-100`) background with a light border so it reads clearly over the decorative page background.
+
+## [0.1.312] - 2026-05-17
+
+### Changed
+- **Navbar search:** submit button shows a search icon instead of localized text (Cercar/Buscar/Search); label remains available via `aria-label`.
+
+## [0.1.311] - 2026-05-17
+
+### Fixed
+- **Email verification:** expired or invalid signed links no longer return a JSON 403; the API redirects to **`/verify-email?reason=expired`** (or **`invalid`**) with a clear warning and the existing resend button. Guests are sent through login with **`next`** preserving the reason.
+
 ## [0.1.308] - 2026-05-17
 
 ### Changed

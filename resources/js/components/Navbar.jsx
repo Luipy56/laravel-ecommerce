@@ -13,6 +13,7 @@ import {
   IconLogOut,
   IconMenu,
   IconPackage,
+  IconSearch,
   IconUser,
   IconX,
 } from './icons';
@@ -240,8 +241,12 @@ export default function Navbar() {
                 onChange={handleSearchInputChange}
                 aria-label={t('shop.search_placeholder')}
               />
-              <button type="submit" className="btn btn-primary join-item btn-sm shrink-0">
-                {t('common.search')}
+              <button
+                type="submit"
+                className="btn btn-primary join-item btn-sm btn-square shrink-0"
+                aria-label={t('common.search')}
+              >
+                <IconSearch className="h-5 w-5" aria-hidden="true" />
               </button>
             </form>
           </div>
@@ -494,8 +499,12 @@ export default function Navbar() {
               onChange={handleSearchInputChange}
               aria-label={t('shop.search_placeholder')}
             />
-            <button type="submit" className="btn btn-primary btn-sm shrink-0">
-              {t('common.search')}
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm btn-square shrink-0"
+              aria-label={t('common.search')}
+            >
+              <IconSearch className="h-5 w-5" aria-hidden="true" />
             </button>
           </form>
         </div>

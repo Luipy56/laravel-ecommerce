@@ -130,6 +130,8 @@ return [
 
     'verify_email_redirect_path' => env('FRONTEND_VERIFY_REDIRECT', '/login'),
 
+    'verify_email_failed_redirect_path' => env('FRONTEND_VERIFY_FAILED_REDIRECT', '/verify-email'),
+
     'frontend_reset_password_path' => env('FRONTEND_RESET_PASSWORD_PATH', '/reset-password'),
 
     /*

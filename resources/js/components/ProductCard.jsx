@@ -63,11 +63,13 @@ export default function ProductCard({ product, pack }) {
     ? (pack.primaryImageUrl ?? primaryImage?.url ?? FALLBACK_IMAGE)
     : product.primaryImageUrl;
   const imageContentType = primaryImage?.content_type ?? null;
+  const hasDiscount = !isPack && product.discount_percent > 0;
   const formattedPrice = isPack
     ? (pack.formattedPrice ?? (pack.price != null
         ? new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(Number(pack.price))
         : ''))
     : product.formattedPrice;
+  const showListPrice = !isPack && product.formattedListPrice && !hasDiscount;
 
   const packProductNames = isPack && Array.isArray(pack.items)
     ? pack.items
@@ -93,7 +95,7 @@ export default function ProductCard({ product, pack }) {
           {isPack && (
             <span className="product-card__pack-badge">{t('shop.pack')}</span>
           )}
-          {!isPack && product.discount_percent > 0 && (
+          {hasDiscount && (
             <span className="product-card__discount-badge">
               −{Math.round(Number(product.discount_percent))}%
             </span>
@@ -129,7 +131,7 @@ export default function ProductCard({ product, pack }) {
           <div className="product-card__name-row">
             <h3>{name}</h3>
             <div className="product-card__prices">
-              {!isPack && product.formattedListPrice && (
+              {showListPrice && (
                 <span className="product-card__old-price">{product.formattedListPrice}</span>
               )}
               <span className="price">{formattedPrice}</span>

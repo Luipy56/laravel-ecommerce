@@ -56,8 +56,25 @@
 // ─── Grid (desktop / catalog) ────────────────────────────────────────────────
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  gap: fluid(16, 28);
+  gap: fluid(14, 22);
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  // Sidebar appears at 768px — content area narrows, back to 2 cols
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 // ─── Card ────────────────────────────────────────────────────────────────────

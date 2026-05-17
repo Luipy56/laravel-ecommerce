@@ -257,7 +257,7 @@ export default function ProductListPage() {
     queryKey: catalogQueryKey,
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {
-      const params = { page: pageParam };
+      const params = { page: pageParam, per_page: 16 };
       if (packsOnly) {
         params.packs_only = 1;
       } else {

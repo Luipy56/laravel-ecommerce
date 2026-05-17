@@ -266,6 +266,16 @@ export function IconPencil({ className, strokeWidth, ...rest }) {
   );
 }
 
+/** Magnifying glass (search). Lucide search icon. */
+export function IconSearch({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path strokeWidth={strokeWidth ?? 2} d="m21 21-4.34-4.34" />
+      <circle cx="11" cy="11" r="8" strokeWidth={strokeWidth ?? 2} />
+    </IconWrapper>
+  );
+}
+
 export function IconEye({ className, strokeWidth, ...rest }) {
   return (
     <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>

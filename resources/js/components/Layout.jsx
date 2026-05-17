@@ -81,6 +81,8 @@ export default function Layout() {
     return new URLSearchParams(search).get('offers_only') === '1';
   }, [pathname, search]);
 
+  const isProductDetailPage = /^\/products\/[^/]+$/.test(pathname);
+
   return (
     <div className="drawer">
       <input
@@ -98,7 +100,12 @@ export default function Layout() {
           }}
         >
           <Navbar />
-          <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
+          <main
+            className={[
+              'container mx-auto min-w-0 max-w-full flex-1',
+              isProductDetailPage ? 'flex flex-col px-4 py-0' : 'px-4 py-6',
+            ].join(' ')}
+          >
             <Outlet />
           </main>
           <Footer />

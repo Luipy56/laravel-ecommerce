@@ -1,5 +1,5 @@
 import './ProductDetailPage.scss';
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
 import { IconCart, IconChevronUp, IconWarning } from '../components/icons';
 import FavoriteToggle from '../components/FavoriteToggle';
+import CatalogCardImage from '../components/CatalogCardImage';
 import ReviewsSection from '../components/ReviewsSection';
 import CartPreviewBar from '../components/CartPreviewBar';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
@@ -15,6 +16,10 @@ import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 
 const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
+
+function ProductDetailShell({ children }) {
+  return <div className="product-detail-page">{children}</div>;
+}
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -25,29 +30,11 @@ export default function ProductDetailPage() {
   const [zoomVisible, setZoomVisible] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 0.5, y: 0.5 });
   const [variantsExpanded, setVariantsExpanded] = useState(false);
+  const [hoveredThumbIndex, setHoveredThumbIndex] = useState(null);
   const imageRef = useRef(null);
   const galleryRef = useRef(null);
   const { addLine } = useCart();
   const { data: publicSettings } = usePublicShopSettings();
-
-  // Paint the page white (override the gray storefront background for this page only)
-  useEffect(() => {
-    const main = document.querySelector('main');
-    if (!main) return;
-    const prev = { bg: main.style.background, pl: main.style.paddingLeft, pr: main.style.paddingRight, pt: main.style.paddingTop, pb: main.style.paddingBottom };
-    main.style.background = 'white';
-    main.style.paddingLeft = '16px';
-    main.style.paddingRight = '16px';
-    main.style.paddingTop = '16px';
-    main.style.paddingBottom = '24px';
-    return () => {
-      main.style.background = prev.bg;
-      main.style.paddingLeft = prev.pl;
-      main.style.paddingRight = prev.pr;
-      main.style.paddingTop = prev.pt;
-      main.style.paddingBottom = prev.pb;
-    };
-  }, []);
 
   const productQuery = useQuery({
     queryKey: ['product', 'detail', id],
@@ -63,7 +50,12 @@ export default function ProductDetailPage() {
 
   const handleAdd = () => addLine(product.id, null, qty);
 
-  const imageUrls = product?.imageUrls ?? [];
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
+    const list = product.images?.filter((img) => img?.url && String(img.url).trim()) ?? [];
+    return list.length > 0 ? list : [{ url: Product.fallbackImageUrl, content_type: null }];
+  }, [product]);
+  const imageUrls = galleryImages.map((img) => img.url);
   const mainImageUrl = imageUrls[selectedImageIndex] ?? Product.fallbackImageUrl;
   const hasMultipleImages = imageUrls.length > 1;
 
@@ -104,51 +96,62 @@ export default function ProductDetailPage() {
   // ── Loading / error ──────────────────────────────────────────────────────────
   if (productQuery.isPending) {
     return (
-      <div className="product-detail">
+      <ProductDetailShell>
+        <div className="product-detail">
         <div className="product-detail__back">
-          <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
-        </div>
+            <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
+          </div>
         <div className="flex justify-center py-12" aria-live="polite" aria-busy="true">
           <span className="loading loading-spinner loading-lg" />
         </div>
-      </div>
+        </div>
+      </ProductDetailShell>
     );
   }
   if (productQuery.isError || !product) {
     return (
-      <div className="product-detail">
-        <div className="product-detail__back">
-          <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
+      <ProductDetailShell>
+        <div className="product-detail">
+          <div className="product-detail__back">
+            <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
+          </div>
+          <p className="text-error" role="alert">{t('common.error')}</p>
         </div>
-        <p className="text-error" role="alert">{t('common.error')}</p>
-      </div>
+      </ProductDetailShell>
     );
   }
 
   return (
-    <div className="product-detail">
-      <div className="product-detail__back">
-        <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
-      </div>
+    <ProductDetailShell>
+      <div className="product-detail">
+        <div className="product-detail__back">
+          <Link to="/products" className="btn btn-ghost btn-sm">{t('common.back')}</Link>
+        </div>
 
-      <div className="product-detail__card">
+        <div className="product-detail__card">
 
         {/* ── LEFT: media block (thumbs + image in one white card) ───────── */}
         <div className="product-detail__media">
           {/* Thumbnail strip — vertical on desktop, horizontal on mobile */}
           {hasMultipleImages && (
             <div className="product-detail__thumbs">
-              {imageUrls.map((url, i) => (
+              {galleryImages.map((img, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setSelectedImageIndex(i)}
+                  onMouseEnter={() => setHoveredThumbIndex(i)}
+                  onMouseLeave={() => setHoveredThumbIndex(null)}
+                  onFocus={() => setHoveredThumbIndex(i)}
+                  onBlur={() => setHoveredThumbIndex(null)}
                   aria-label={t('shop.product.select_image', { n: i + 1, m: imageUrls.length })}
                   className={`product-detail__thumb${selectedImageIndex === i ? ' product-detail__thumb--active' : ''}`}
                 >
-                  <img
-                    src={url}
+                  <CatalogCardImage
+                    src={img.url}
+                    contentType={img.content_type}
                     alt=""
+                    animate={hoveredThumbIndex === i}
                     onError={(e) => { e.target.onerror = null; e.target.src = Product.fallbackImageUrl; }}
                   />
                 </button>
@@ -376,9 +379,10 @@ export default function ProductDetailPage() {
 
       {/* <CartPreviewBar /> */}
 
-      <div style={{ marginTop: '80px' }}>
+      <div className="product-detail__reviews">
         <ReviewsSection productId={id} />
       </div>
-    </div>
+      </div>
+    </ProductDetailShell>
   );
 }

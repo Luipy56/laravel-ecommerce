@@ -73,6 +73,8 @@
   "auth.verify_email_resend": "Reenviar correo de confirmación",
   "auth.verify_email_cooldown": "Espera {{seconds}} s para reenviar",
   "auth.verify_email_auto_notice": "Cuando confirmes el correo, te redirigiremos automáticamente.",
+  "auth.verify_email_link_failed_title": "Este enlace de confirmación ya no es válido",
+  "auth.verify_email_link_failed_body": "Puede haber caducado o ya haberse usado. Inicia sesión con tu cuenta y usa el botón de abajo para recibir un correo nuevo.",
   "auth.verify_email_required_to_save": "Debes confirmar el correo antes de poder guardar estos cambios.",
   "register.account_type": "Tipo de cuenta",
   "register.type_person": "Persona",

@@ -15,12 +15,23 @@ function safeNextPath(raw) {
   return raw;
 }
 
+function buildVerifyEmailPath(nextPath, linkReason) {
+  const params = new URLSearchParams();
+  params.set('next', safeNextPath(nextPath));
+  if (linkReason === 'expired' || linkReason === 'invalid') {
+    params.set('reason', linkReason);
+  }
+  return `/verify-email?${params.toString()}`;
+}
+
 export default function EmailVerifyPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, loading, refreshUser } = useAuth();
   const [searchParams] = useSearchParams();
   const nextPath = safeNextPath(searchParams.get('next'));
+  const linkReason = searchParams.get('reason');
+  const showLinkFailedBanner = linkReason === 'expired' || linkReason === 'invalid';
   const [sending, setSending] = useState(false);
   const [cooldownLeft, setCooldownLeft] = useState(0);
   const cooldownTimerRef = useRef(null);
@@ -71,7 +82,12 @@ export default function EmailVerifyPage() {
   }
 
   if (!user) {
-    return <Navigate to={`/login?next=${encodeURIComponent(`/verify-email?next=${encodeURIComponent(nextPath)}`)}`} replace />;
+    return (
+      <Navigate
+        to={`/login?next=${encodeURIComponent(buildVerifyEmailPath(nextPath, linkReason))}`}
+        replace
+      />
+    );
   }
 
   const onResend = async () => {
@@ -102,6 +118,14 @@ export default function EmailVerifyPage() {
       <PageTitle className="mb-4">{t('auth.verify_email_page_title')}</PageTitle>
       <div className="card bg-base-100 border border-base-200 shadow-xl">
         <div className="card-body gap-6">
+          {showLinkFailedBanner ? (
+            <div role="alert" className="alert alert-warning text-sm">
+              <div>
+                <p className="font-semibold">{t('auth.verify_email_link_failed_title')}</p>
+                <p className="mt-1">{t('auth.verify_email_link_failed_body')}</p>
+              </div>
+            </div>
+          ) : null}
           <p className="text-base text-base-content/90 leading-relaxed">
             {t('auth.verify_email_page_intro')}
           </p>

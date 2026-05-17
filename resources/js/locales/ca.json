@@ -73,6 +73,8 @@
   "auth.verify_email_resend": "Reenviar correu de confirmació",
   "auth.verify_email_cooldown": "Espera {{seconds}} s per reenviar",
   "auth.verify_email_auto_notice": "Quan confirmis el correu, et redirigirem automàticament.",
+  "auth.verify_email_link_failed_title": "Aquest enllaç de confirmació ja no és vàlid",
+  "auth.verify_email_link_failed_body": "Pot haver caducat o ja s'ha utilitzat. Inicia sessió amb el teu compte i fes servir el botó de sota per rebre un correu nou.",
   "auth.verify_email_required_to_save": "Has de confirmar el correu abans de poder desar aquests canvis.",
   "register.account_type": "Tipus de compte",
   "register.type_person": "Persona",

@@ -1,5 +1,65 @@
 # Changelog
 
+## [0.1.303] - 2026-05-17
+
+### Changed
+- **LoginPage:** email-verified confirmation is now shown as a toast notification instead of an inline alert.
+
+## [0.1.302] - 2026-05-17
+
+### Changed
+- **ProductDetailPage:** further increased spacing between product and reviews (80–140px).
+
+## [0.1.301] - 2026-05-17
+
+### Fixed
+- **Product cards:** strikethrough list price is hidden when the product has an active discount; only the sale price is shown.
+
+## [0.1.300] - 2026-05-17
+
+### Changed
+- **ProductDetailPage:** increased spacing between product block and reviews section (fluid 40–72px).
+
+## [0.1.299] - 2026-05-17
+
+### Changed
+- **ProductDetailPage add-to-cart button:** reduced to ~70% size (smaller padding and font-size), font-weight kept bold.
+
+## [0.1.298] - 2026-05-17
+
+### Fixed
+- **ProductDetailPage:** white background now applied to the `<main>` element via `useEffect` (restores original background on unmount). Thumbnails moved to a vertical strip on the left of the main image (both inside `.product-detail__media` flex-row).
+
+## [0.1.297] - 2026-05-17
+
+### Changed
+- **ProductDetailPage:** white page background; thumbnails separated from main image (appear as a horizontal strip above it, image has full rounded corners on all sides); removed prev/next arrows inside the image; reduced edge padding; thumbnails and image larger.
+
+## [0.1.296] - 2026-05-17
+
+### Changed
+- **ProductDetailPage layout:** thumbnails and main image are now grouped in a single white `.product-detail__media` card (thumbs vertical on desktop, horizontal on mobile). Info panel sits directly on the page background with no wrapping box. Price, discount badge and divider line cleaned up.
+
+## [0.1.295] - 2026-05-17
+
+### Fixed
+- **ProductDetailPage:** removed floating card background/border from the grid wrapper — content is now integrated directly into the page without a card container.
+
+## [0.1.294] - 2026-05-17
+
+### Changed
+- **ProductDetailPage redesign:** 3-column CSS Grid layout on desktop (vertical thumbnail strip on the left, large main image in the center, info panel on the right). Removed the floating `card card-border` wrapper. Thumbnails moved from a horizontal row below the image to a vertical strip. "Add to Cart" button is now full-width with the brand gradient (`#f75211` → `#8b2400`), larger size, text label and cart icon. New dedicated `ProductDetailPage.scss` added.
+
+## [0.1.293] - 2026-05-17
+
+### Changed
+- **ProductListPage infinite scroll:** `per_page` set to 16 (multiple of 4) so each page loads exactly 4 full rows.
+
+## [0.1.292] - 2026-05-17
+
+### Changed
+- **ProductListPage grid:** explicit column breakpoints — 2 cols mobile, 3 at 640 px, 2 at 768 px (sidebar narrows content), 3 at 1024 px, 4 at 1280 px. Gap reduced to `fluid(14,22)`.
+
 ## [0.1.291] - 2026-05-17
 
 ### Fixed

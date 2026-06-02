@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.335] - 2026-06-02
+
+### Fixed
+- **Tests:** `CsrfRecoveryTest` forces CSRF enforcement under PHPUnit (`APP_ENV=testing` normally skips it); reset HTTP cookie jar between tests in `TestCase` to avoid XSRF leakage.
+
+### Changed
+- **CI:** GitHub Actions workflow also runs on push to **`master`** (same `composer test` gate as prod).
+- **AGENTS.md:** prefer **`composer test`** over Docker-only `php artisan test` for parity with CI.
+
 ## [0.1.334] - 2026-06-02
 
 ### Fixed

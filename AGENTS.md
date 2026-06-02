@@ -32,10 +32,11 @@ Laravel ecommerce: REST API + React storefront and admin UI.
 
 When the user **explicitly** asks for verification before calling a fix complete, run:
 
-1. **`php artisan test`**
-2. **`php artisan routes:smoke`** (no HTTP **500** on GET routes)
-3. When **`resources/js/`** or Vite config changed: **`npm run build`**
-4. When checkout or payments changed: open **`/checkout`** with a logged-in user and non-empty cart; confirm **`GET /api/v1/payments/config`** per **`.cursor/rules/testing-verification.mdc`**
+1. **`composer test`** (same as GitHub Actions / prod CI — prefer this over `docker compose exec app php artisan test` alone, which can differ for CSRF/session feature tests)
+2. **`php artisan test`** (if not using the composer script)
+3. **`php artisan routes:smoke`** (no HTTP **500** on GET routes)
+4. When **`resources/js/`** or Vite config changed: **`npm run build`**
+5. When checkout or payments changed: open **`/checkout`** with a logged-in user and non-empty cart; confirm **`GET /api/v1/payments/config`** per **`.cursor/rules/testing-verification.mdc`**
 
 Otherwise see **`.cursor/rules/agent-verification-opt-in.mdc`** (skip the list above by default).
 

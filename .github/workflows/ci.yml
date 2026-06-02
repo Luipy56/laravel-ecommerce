@@ -1,11 +1,11 @@
-# Integration CI: runs on push/PR to autoagents (and PRs targeting prod/master).
-# Catches schema drift, OAuth regressions, and frontend build failures before merge to prod.
+# Integration CI: same gate as prod (composer test + npm build) on integration and release branches.
+# Catches schema drift, OAuth/CSRF regressions, and frontend build failures before prod deploy.
 
 name: CI
 
 on:
   push:
-    branches: [autoagents]
+    branches: [autoagents, master]
   pull_request:
     branches: [autoagents, prod, master]
 

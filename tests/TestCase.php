@@ -16,6 +16,7 @@ abstract class TestCase extends BaseTestCase
         // Laravel clears defaultHeaders in tearDown but not cookies / withCredentials (MakesHttpRequests).
         $this->defaultCookies = [];
         $this->unencryptedCookies = [];
+        $this->cookies = [];
         $this->withCredentials = false;
     }
 

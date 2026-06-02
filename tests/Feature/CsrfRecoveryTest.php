@@ -13,14 +13,29 @@ class CsrfRecoveryTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** @var string|null Previous app env while CSRF assertions run with enforcement enabled. */
+    private ?string $previousAppEnv = null;
+
     protected function setUp(): void
     {
         parent::setUp();
+        // Laravel skips CSRF when env=testing (VerifyCsrfToken::runningUnitTests). Force enforcement here.
+        $this->previousAppEnv = $this->app->environment();
+        $this->app['env'] = 'local';
         config([
             'services.google.client_id' => 'test-google-client-id',
             'services.google.client_secret' => 'test-secret',
             'services.google.redirect' => 'http://localhost/auth/google/callback',
         ]);
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->previousAppEnv !== null) {
+            $this->app['env'] = $this->previousAppEnv;
+        }
+        Mockery::close();
+        parent::tearDown();
     }
 
     public function test_csrf_cookie_endpoint_returns_fresh_token(): void
@@ -39,8 +54,8 @@ class CsrfRecoveryTest extends TestCase
 
     public function test_google_redirect_without_csrf_token_returns_419(): void
     {
-        $this->get('/csrf-cookie');
-
+        // Do not warm /csrf-cookie first: the test client replays XSRF-TOKEN as X-XSRF-TOKEN on POST,
+        // which would make this assertion environment-dependent (302 vs 419).
         $this->post('/auth/google/redirect', [])
             ->assertStatus(419);
     }
@@ -59,9 +74,9 @@ class CsrfRecoveryTest extends TestCase
     public function test_token_mismatch_is_logged_without_token_values(): void
     {
         Log::spy();
-        $this->get('/csrf-cookie');
 
-        $this->post('/auth/google/redirect', [])->assertStatus(419);
+        $this->post('/auth/google/redirect', ['_token' => 'stale-or-invalid-token'])
+            ->assertStatus(419);
 
         Log::shouldHaveReceived('warning')
             ->once()

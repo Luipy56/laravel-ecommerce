@@ -35,6 +35,27 @@ Legacy names `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` are also re
 - Google-only accounts have nullable `password`; users may set a password later in profile.
 - Admin auth (`admins` guard) is not affected.
 
+## Production database upgrade
+
+Google OAuth columns (`clients.google_sub`, nullable `password`) live in the **initial** `clients` migration (`0001_01_01_000000_create_users_table.php`). Per project migration rules, column changes are **not** shipped as separate `_add_` migrations during development — edit that file and run:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+**Databases that already ran the old `clients` schema** (e.g. production before Google OIDC) will not pick up the change from `migrate --force`. Apply a **one-time manual upgrade** on MySQL:
+
+```sql
+ALTER TABLE clients ADD COLUMN google_sub VARCHAR(255) NULL UNIQUE AFTER password;
+ALTER TABLE clients MODIFY password VARCHAR(255) NULL;
+```
+
+Then confirm:
+
+```bash
+php artisan tinker --execute="echo Schema::hasColumn('clients','google_sub') ? 'ok' : 'missing';"
+```
+
 ## Manual testing checklist
 
 1. With credentials in `.env`, open `/login` — Google button appears at the top (no checkbox required).

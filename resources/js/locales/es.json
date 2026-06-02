@@ -84,6 +84,8 @@
   "auth.google_oauth_email_not_verified": "No podemos enlazar la cuenta: confirma el correo con la contraseña o verifícalo antes de usar Google.",
   "auth.google_oauth_sub_conflict": "No se ha podido enlazar la cuenta de Google. Contacta con soporte.",
   "auth.google_oauth_provider_error": "No se ha podido completar el inicio de sesión con Google. Vuelve a intentarlo.",
+  "auth.google_oauth_session_expired": "La sesión de Google ha caducado. Vuelve a pulsar «Continuar con Google».",
+  "auth.google_oauth_schema_outdated": "Falta actualizar la base de datos. Contacta con soporte si persiste tras el despliegue.",
   "auth.profile_complete_title": "Completa tu perfil",
   "auth.profile_complete_body": "Añade el teléfono y el código postal en el perfil para facilitar los pedidos y el contacto.",
   "auth.profile_complete_cta": "Ir al perfil",

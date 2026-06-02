@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.332] - 2026-06-02
+
+### Changed
+- **Migrations:** removed additive `2026_06_02_120000_add_google_oauth_columns_to_clients_table` — Google OAuth columns stay in **`0001_01_01_000000_create_users_table.php`** per project standards (no `_add_` migrations in pre-release dev).
+
+## [0.1.331] - 2026-06-02
+
+### Fixed
+- **Google OAuth errors:** map missing `google_sub` / SQL schema failures to `schema_outdated`, Socialite state mismatch to `session_expired` (with i18n toasts instead of generic `provider_error`).
+
+### Added
+- **CI:** workflow **`.github/workflows/ci.yml`** on `autoagents` push/PR — migrate, build, and test before prod merge.
+- **Tests:** `GoogleOAuthSchemaTest` (asserts `google_sub` in initial migration), `GoogleOAuthErrorMapperTest`.
+
+### Changed
+- **Prod / integration CI:** run `php artisan migrate --force` before PHPUnit so the full migration set is applied in the pipeline.
+- **Google OAuth schema:** `clients.google_sub` + nullable `password` remain in **`0001_01_01_000000_create_users_table.php`** only (no `_add_` migration; existing prod DBs need one-time manual ALTER — see `docs/CONFIGURACION_GOOGLE_OAUTH.md`).
+
 ## [0.1.330] - 2026-06-02
 
 ### Fixed

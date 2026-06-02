@@ -19,6 +19,8 @@
     "auth.google_oauth_email_not_verified": "No podemos enlazar la cuenta: confirma el correo con la contraseña o verifícalo antes de usar Google.",
     "auth.google_oauth_sub_conflict": "No se ha podido enlazar la cuenta de Google. Contacta con soporte.",
     "auth.google_oauth_provider_error": "No se ha podido completar el inicio de sesión con Google. Vuelve a intentarlo.",
+    "auth.google_oauth_session_expired": "La sesión de Google ha caducado. Vuelve a pulsar «Continuar con Google».",
+    "auth.google_oauth_schema_outdated": "Falta actualizar la base de datos (columna google_sub). En desarrollo: php artisan migrate:fresh --seed.",
     "auth.login": "Iniciar sesión",
     "auth.logout": "Cerrar sesión",
     "auth.email": "Correo electrónico",

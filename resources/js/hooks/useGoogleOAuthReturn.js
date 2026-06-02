@@ -8,6 +8,8 @@ import { useToast } from '../contexts/ToastContext';
 const OAUTH_ERROR_KEYS = {
   email_not_verified: 'auth.google_oauth_email_not_verified',
   sub_conflict: 'auth.google_oauth_sub_conflict',
+  session_expired: 'auth.google_oauth_session_expired',
+  schema_outdated: 'auth.google_oauth_schema_outdated',
   provider_error: 'auth.google_oauth_provider_error',
 };
 

@@ -84,6 +84,8 @@
   "auth.google_oauth_email_not_verified": "We cannot link your account: confirm your email with your password or verify it before using Google.",
   "auth.google_oauth_sub_conflict": "Your Google account could not be linked. Please contact support.",
   "auth.google_oauth_provider_error": "Google sign-in could not be completed. Please try again.",
+  "auth.google_oauth_session_expired": "Your Google sign-in session expired. Click Continue with Google again.",
+  "auth.google_oauth_schema_outdated": "The database is missing Google OAuth columns. Contact support if this persists after deploy.",
   "auth.profile_complete_title": "Complete your profile",
   "auth.profile_complete_body": "Add your phone number and postal code in your profile to make checkout and contact easier.",
   "auth.profile_complete_cta": "Go to profile",

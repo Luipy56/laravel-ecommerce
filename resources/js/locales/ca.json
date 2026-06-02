@@ -84,6 +84,8 @@
   "auth.google_oauth_email_not_verified": "No podem enllaçar el compte: confirma el correu amb la contrasenya o verifica'l abans d'usar Google.",
   "auth.google_oauth_sub_conflict": "No s'ha pogut enllaçar el compte de Google. Contacta amb suport.",
   "auth.google_oauth_provider_error": "No s'ha pogut completar l'inici de sessió amb Google. Torna-ho a provar.",
+  "auth.google_oauth_session_expired": "La sessió de Google ha caducat. Torna a prémer «Continuar amb Google».",
+  "auth.google_oauth_schema_outdated": "Falta actualitzar la base de dades. Contacta amb suport si persisteix després del desplegament.",
   "auth.profile_complete_title": "Completa el teu perfil",
   "auth.profile_complete_body": "Afegeix el telèfon i el codi postal al perfil per facilitar les comandes i el contacte.",
   "auth.profile_complete_cta": "Anar al perfil",

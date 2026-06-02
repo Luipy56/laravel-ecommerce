@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Exceptions\GoogleOAuthException;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\GoogleOAuthService;
+use App\Support\Auth\GoogleOAuthErrorMapper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -68,11 +69,14 @@ class GoogleAuthController extends Controller
         } catch (GoogleOAuthException $e) {
             return $this->errorRedirect($e->errorCode, $next);
         } catch (Throwable $e) {
+            $code = GoogleOAuthErrorMapper::errorCodeFrom($e);
             Log::warning('google_oauth_callback_failed', [
+                'code' => $code,
+                'exception' => $e::class,
                 'message' => $e->getMessage(),
             ]);
 
-            return $this->errorRedirect('provider_error', $next);
+            return $this->errorRedirect($code, $next);
         }
     }
 

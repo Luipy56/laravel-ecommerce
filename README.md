@@ -163,7 +163,7 @@ For checkout and payments work, see **`.cursor/rules/testing-verification.mdc`**
 | [`docs/email-notifications.md`](docs/email-notifications.md) | Email / notification configuration |
 | [`docs/mobile-responsive.md`](docs/mobile-responsive.md) | Responsive UI notes |
 | [`docs/postgresql.md`](docs/postgresql.md) | PostgreSQL setup, PHP `pdo_pgsql`, SSL, extensions, search |
-| [`docs/agent-loop.md`](docs/agent-loop.md) | Task pipeline and labels (for teams using `agents/tasks/`) |
+| [`docs/agent-loop.md`](docs/agent-loop.md) | Task pipeline and labels (for teams using `autoagents/tasks/`) |
 | [`docs/agent-cursor-rules.md`](docs/agent-cursor-rules.md) | Index of Cursor/project rules |
 | [`docker-compose.yml`](docker-compose.yml) / [`docker-compose.prod.yml`](docker-compose.prod.yml) | Docker development and production stacks (see *Docker* above) |
 
@@ -175,7 +175,7 @@ The repository does not ship large binary screenshots by default. If you add vis
 
 ## Contributing
 
-- Routine integration work often targets the **`agentdevelop`** branch; production promotion follows your team’s release process (see **`AGENTS.md`**).
+- Routine integration work targets the **`autoagents`** branch; production promotion follows your team’s release process (see **`AGENTS.md`**).
 - Follow existing code style, validation, and security practices (CSRF on web forms, Sanctum/API auth patterns, server-side validation).
 - User-visible strings should remain translatable (Catalan / Spanish) per project standards.
 

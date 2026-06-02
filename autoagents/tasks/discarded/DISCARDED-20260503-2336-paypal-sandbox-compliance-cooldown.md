@@ -1,3 +1,9 @@
+---
+status: discarded
+reason: PayPal sandbox compliance cooldown — deferred/abandoned before autoagents migration (2026-06-02)
+---
+
+
 # PayPal sandbox: continuar tras cooldown del compliance
 
 ## Contexto

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.327] - 2026-06-02
+
+### Changed
+- **Agent pipeline:** migrated from **`agents/`** to **`autoagents/`** (orchestrator **`autoagents-loop.sh`**, Python **`issue_checker_agent.py`** / **`gh_issue_sync.py`**, preflight digest, step 012 handoff).
+- **Git:** integration branch is **`autoagents`** (replaces **`agentdevelop`**); sync via **`scripts/git-sync-autoagents-branch.sh`**.
+- **Tasks:** new filenames **`FEAT-<N>-…`** / **`CLOSED-<N>-…`**; historical **`done/`** archive unchanged; PayPal cooldown task moved to **`discarded/`**.
+
+### Added
+- **Cursor rules:** **`autoagents-workflow.mdc`**, **`autoagents-create-task-from-chat.mdc`**.
+- **`scripts/setup-autoagents-gh.sh`**; GitHub label **`agent:untested`**.
+
+### Removed
+- **`agents/`** folder and **`laravel-ecommerce-agent-loop.sh`**.
+
 ## [0.1.326] - 2026-05-18
 
 ### Changed

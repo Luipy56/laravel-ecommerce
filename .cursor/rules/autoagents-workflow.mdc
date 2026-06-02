@@ -1,0 +1,39 @@
+---
+description: autoagents workflow — folder, loop, branch, and task conventions (replaces agents/)
+alwaysApply: true
+---
+
+# autoagents workflow (laravel-ecommerce)
+
+This repo uses **`autoagents/`** (not **`agents/`**) for the multi-agent task pipeline.
+
+## Essentials
+
+| Item | Value |
+|------|--------|
+| Folder | **`autoagents/`** |
+| Loop | **`./autoagents/autoagents-loop.sh`** |
+| Tasks | **`autoagents/tasks/`** — conventions in **`autoagents/TASKS-README.md`** |
+| Integration branch | **`autoagents`** (**`AGENT_GIT_BRANCH`** overrides) |
+| Git sync | **`./scripts/git-sync-autoagents-branch.sh`** |
+| GitHub setup | **`./scripts/setup-autoagents-gh.sh`** |
+| Archive helper | **`./scripts/move-agent-task-to-done.sh autoagents/tasks/CLOSED-…md`** |
+| Docs | **`docs/agent-loop.md`**, **`autoagents/README.md`** |
+
+## Task filename pattern (new work)
+
+- **From GitHub:** `FEAT-<issue>-YYYYMMDD-HHMM-slug.md` → … → `CLOSED-<issue>-YYYYMMDD-HHMM-slug.md`
+- **From logs (no issue):** `NEW-0-YYYYMMDD-HHMM-slug.md` or `NEW-YYYYMMDD-HHMM-slug.md`
+- **Historical archive** under **`autoagents/tasks/done/`** may use legacy `CLOSED-YYYYMMDD-…` — do not rename.
+
+## Pipeline steps (loop order)
+
+001 GitHub/log reviewer → 010 FEAT coder (×5 max) → 002 NEW/WIP coder → 012 handoff → 020 tester → 030 closer → 040 committer.
+
+## App version
+
+Shippable commits bump root **`package.json`** / **`CHANGELOG.md`** (footer **`APP_VERSION`**). There is no separate **`autoagents/VERSION`** in this repo.
+
+## Discarded tasks
+
+Abandoned tasks go under **`autoagents/tasks/discarded/`** with prefix **`DISCARDED-`**.

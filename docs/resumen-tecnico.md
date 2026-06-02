@@ -251,7 +251,7 @@ El proyecto adopta una metodología **ágil basada en Scrum/Kanban**, implementa
 
 ### Tablero Kanban de tareas (equivalente a Trello)
 
-Las tareas se gestionan como archivos Markdown en `agents/tasks/` con estados que replican las columnas de un tablero Kanban:
+Las tareas se gestionan como archivos Markdown en `autoagents/tasks/` con estados que replican las columnas de un tablero Kanban:
 
 ```
 BACKLOG      →  NEW       →  WIP        →  UNTESTED   →  CLOSED   →  DONE/
@@ -272,7 +272,7 @@ Este enfoque es equivalente a las tarjetas de Trello organizadas en columnas (`P
 | **Sprint Review** | Entradas del `CHANGELOG.md` bajo `## [X.Y.Z] - YYYY-MM-DD` |
 | **Definition of Done** | Tests pasan + build OK + `routes:smoke` sin 500 + CHANGELOG actualizado |
 | **Velocidad** | 142 patches en ~10 semanas (≈14 entregas/semana; estimado desde v0.1.1 a v0.1.142) |
-| **Integración continua** | Rama `agentdevelop` → `master` cada ~2h o ante cambio urgente |
+| **Integración continua** | Rama `autoagents` → `master` cada ~2h o ante cambio urgente |
 | **Release a producción** | Push manual a rama `prod` → GitHub Actions despliega automáticamente vía SSH |
 
 ### Control de versiones como registro de progreso
@@ -295,8 +295,8 @@ El `CHANGELOG.md` actúa como el **diario de sprint** del proyecto: cada entrada
 |-------------|--------------------------|
 | **GitHub Issues** | Backlog de funcionalidades y bugs; etiquetas `production-urgent`, `hotfix` para priorización |
 | **GitHub Actions** | CI/CD automatizado; gate de calidad antes de cada despliegue |
-| **Trello / Kanban** | Gestión visual de tareas (equivalente al sistema `agents/tasks/`); columnas: Backlog · En curso · En revisión · Hecho |
-| **Git branches** | `agentdevelop` (integración) → `master` (estable) → `prod` (despliegue) |
+| **Trello / Kanban** | Gestión visual de tareas (equivalente al sistema `autoagents/tasks/`); columnas: Backlog · En curso · En revisión · Hecho |
+| **Git branches** | `autoagents` (integración) → `master` (estable) → `prod` (despliegue) |
 | **CHANGELOG.md** | Historial de entregas equivalente al sprint review |
 | **Cursor IDE** | Editor con agentes de IA integrados que automatizan fases del ciclo (coder, tester, committer) |
 | **Versionado semántico** | `npm version patch` en cada tarea completada; la versión es visible en el footer del storefront y el panel admin |

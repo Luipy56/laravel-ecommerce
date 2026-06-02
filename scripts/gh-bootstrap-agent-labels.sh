@@ -35,6 +35,7 @@ ensure_label() {
 echo "Repo: $REPO"
 ensure_label "agent:planned" "0E8A16" "Agent queue: task file created / planned"
 ensure_label "agent:wip" "FBCA04" "Agent queue: implementation in progress"
+ensure_label "agent:untested" "1D76DB" "Agent queue: implementation done, awaiting tester"
 ensure_label "agent:testing" "7057FF" "Agent queue: under verification"
 ensure_label "production-urgent" "B60205" "Needs fast track to production / hotfix"
 echo "Done."

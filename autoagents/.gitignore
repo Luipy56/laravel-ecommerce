@@ -1,0 +1,4 @@
+var/loop/
+.env
+__pycache__/
+*.pyc

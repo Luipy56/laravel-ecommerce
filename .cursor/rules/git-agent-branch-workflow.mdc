@@ -1,11 +1,13 @@
 ---
-description: Work on agentdevelop (or AGENT_GIT_BRANCH); promote to master only on 2h cadence, big prod changes, or urgent issue; sync before edits
+description: Work on autoagents branch (or AGENT_GIT_BRANCH); promote to master only on 2h cadence, big prod changes, or urgent issue; sync before edits
 alwaysApply: true
 ---
 
 # Git: integration branch vs `master` (essential)
 
-Routine work targets the **integration branch** — **`agentdevelop`** by default. Override with environment variable **`AGENT_GIT_BRANCH`** if the team uses another shared branch for multi-agent work. **`master`** tracks what is ready for **production** (or your team merges **`prod`** from **`master`** — follow human release docs).
+Routine work targets the **integration branch** — **`autoagents`** by default. Override with environment variable **`AGENT_GIT_BRANCH`** if the team uses another shared branch for multi-agent work. **`master`** tracks what is ready for **production** (or your team merges **`prod`** from **`master`** — follow human release docs).
+
+The legacy branch **`agentdevelop`** was retired after migration to **`autoagents/`** (June 2026).
 
 ## Sync before you change anything (multi-agent)
 
@@ -13,16 +15,16 @@ Several agents (and humans) push to the same integration branch. Treat **“get 
 
 | When | Action |
 |------|--------|
-| **Before the first edit** in a session or agent step (code, task files, changelog) | Run **`./scripts/git-sync-agent-branch.sh`** from the repo root (or equivalent: `git fetch origin`, checkout **`AGENT_GIT_BRANCH`** default **`agentdevelop`**, `git pull --rebase --autostash origin <branch>`). |
+| **Before the first edit** in a session or agent step (code, task files, changelog) | Run **`./scripts/git-sync-autoagents-branch.sh`** from the repo root (or **`./scripts/git-sync-agent-branch.sh`**, which delegates to the same script). Equivalent: `git fetch origin`, checkout **`AGENT_GIT_BRANCH`** default **`autoagents`**, `git pull --rebase --autostash origin <branch>`. |
 | **Before `git push`** | Pull/rebase again on the integration branch so your push is based on the current remote tip. |
-| **Orchestrator** | **`agents/laravel-ecommerce-agent-loop.sh`** runs the sync script **at the start of each step** (log reviewer, feature coder, coder, tester, closer, committer). Disable with **`AGENT_GIT_SYNC=0`** only for offline or special cases. |
+| **Orchestrator** | **`autoagents/autoagents-loop.sh`** runs the sync script **at the start of each step**. Disable with **`AGENT_GIT_SYNC=0`** only for offline or special cases. |
 
 If sync fails (merge conflict after rebase, no network), **stop** and resolve; do not layer new commits on a stale tree.
 
 ## Where to commit and push
 
 1. **Branch:** Check out the integration branch before starting. If it does not exist locally:  
-   `git fetch origin && git checkout -b agentdevelop origin/agentdevelop`  
+   `git fetch origin && git checkout -b autoagents origin/autoagents`  
    (adjust names if using **`AGENT_GIT_BRANCH`**.)
 2. **Commits:** Make commits on the integration branch (or a short-lived branch that merges back into it first).
 3. **Push after work:** **`git push origin <integration-branch>`**. Do **not** routinely push only to **`master`** for normal fixes and features.

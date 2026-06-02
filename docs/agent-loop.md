@@ -1,65 +1,68 @@
 # Agent loop — multi-agent workflow (laravel-ecommerce)
 
-This document defines a **multi-agent workflow** for this repository, modeled on the **POS** (`~/Repos/pos/`) and **mac-stats-reviewer** pattern: separate **coordination** (tasks, prompts, optional CLI loop) from **implementation** (Laravel + React in this repo). Application code and agent coordination both live here; the split is **logical** (roles and folders).
+Multi-agent workflow: **coordination** (`autoagents/`, tasks, optional CLI loop) separate from **implementation** (Laravel + React). See **`autoagents/README.md`** for prompt index.
 
 ---
 
 ## Goals
 
-- **Traceable work:** Each change flows through named stages (task file renames).
-- **Separation of concerns:** Review/analysis agents do not implement; coders implement; testers verify with evidence; closing reviewer archives; committer handles changelog/version only.
-- **Stack alignment:** Follow **`AGENTS.md`**, **`.cursor/rules/`** (catalog: **`docs/agent-cursor-rules.md`**), **`php artisan test`**, **`php artisan routes:smoke`**, **`npm run build`**, and project i18n/standards rules.
+- **Traceable work:** Named stages via task file renames.
+- **Separation of concerns:** Reviewers plan; coders implement; testers verify; closer archives; committer handles changelog/version.
+- **Stack alignment:** **`AGENTS.md`**, **`.cursor/rules/`**, **`php artisan test`**, **`php artisan routes:smoke`**, **`npm run build`**, i18n (ca/es/en).
 
 ---
 
-## Git branching and production (essential)
+## Git branching
 
 | Branch | Role |
 |--------|------|
-| **`agentdevelop`** (default integration) | **Routine work.** Agents commit here and **`git push origin agentdevelop`** unless **`AGENT_GIT_BRANCH`** overrides. |
-| **`master`** | **Stable line** — merge or promote only per policy below. |
-| **`prod`** | Optional **deployment** branch for some teams; align human release docs with actual practice. |
+| **`autoagents`** (default integration) | Routine agent and feature work. **`git push origin autoagents`**. |
+| **`master`** | Stable line — merge only per policy below. |
+| **`prod`** | Optional deployment branch. |
 
-### When to merge `agentdevelop` → `master` (or cut a release)
+Legacy **`agentdevelop`** was merged to **`master`** and retired (June 2026).
 
-Merge or promote **only** if **at least one** applies:
+### When to merge `autoagents` → `master`
 
-1. **~2-hour cadence** — Batch integrate tested commits about every **two hours** (operator choice), not every tiny commit.
-2. **Big production change** — Security, payments, data integrity, critical breakage, blocking migrations.
-3. **Urgent / explicit production** — GitHub issue or human says **urgent**, **hotfix**, **production**, **deploy now**, or similar. Label **`production-urgent`** when used.
+Merge **only** if **at least one** applies:
 
-If **none** of the above applies: **push `agentdevelop`** (or your **`AGENT_GIT_BRANCH`**) only; do **not** routinely merge to **`master`**.
+1. **~2-hour cadence** — batch integrate tested commits.
+2. **Big production change** — security, payments, migrations, critical bugs.
+3. **Urgent / explicit production** — issue or human says deploy now; label **`production-urgent`** when used.
 
-**Cursor / agents:** **`.cursor/rules/git-agent-branch-workflow.mdc`** (`alwaysApply: true`) encodes sync and branch habits.
+Otherwise push **`autoagents`** only.
 
-**Committer agent:** Changelog and version bumps happen on the **integration branch**; promoting to **`master`** is a **separate** step.
+**Rules:** **`.cursor/rules/git-agent-branch-workflow.mdc`**, **`.cursor/rules/autoagents-workflow.mdc`**.
 
-### Sync before edits (multi-agent)
+### Sync before edits
 
-Before any step that edits the repo (code, **`agents/tasks/*.md`**, **`CHANGELOG.md`**, etc.):
+```bash
+./scripts/git-sync-autoagents-branch.sh
+```
 
-- Run **`./scripts/git-sync-agent-branch.sh`** from the repo root (or equivalent fetch + checkout **`AGENT_GIT_BRANCH`** + **`git pull --rebase --autostash origin <branch>`**).
-- **`laravel-ecommerce-agent-loop.sh`** runs that script at the start of each step unless **`AGENT_GIT_SYNC=0`**.
-- Before **push**: pull/rebase again so **`git push`** does not race another agent.
+**`autoagents/autoagents-loop.sh`** runs this each step unless **`AGENT_GIT_SYNC=0`**.
 
 ---
 
 ## Roles
 
-| Agent | POS-style role | Typical inputs | Writes / edits |
-|-------|----------------|----------------|----------------|
-| **001** Log reviewer | GitHub → **FEAT**; logs → **NEW** | Issues, **`storage/logs/laravel.log`**, optional Docker logs | **`agents/tasks/`** only; **`time-of-last-review.txt`** |
-| **002** Coder | Implementer (main) | **NEW** / **WIP** | **`app/`**, **`resources/js/`**, tests, task file → **UNTESTED** |
-| **006** Feature coder | **FEAT** queue only | **FEAT** → **WIP** | Same as coder |
-| **003** Tester | Verifier | **UNTESTED** → **TESTING** | Test report; **CLOSED** or **WIP** |
-| **004** Closing reviewer | Archivist | **CLOSED** in **`agents/tasks/`** | Prepends summary; **`move-agent-task-to-done.sh`** |
-| **007** Committer | Changelog / version | Dirty git tree | **`CHANGELOG.md`**, root **`package.json`** / lockfile; git commit/push |
+| Step | Agent | Typical inputs | Writes |
+|------|-------|----------------|--------|
+| **001** | GitHub / log reviewer | Issues, `laravel.log`, Docker logs | **`autoagents/tasks/`** FEAT / NEW; **`001-gh-reviewer/time-of-last-review.txt`** |
+| **010** | Feature coder | **FEAT** → **WIP** | `app/`, `resources/js/`, tests |
+| **002** | Main coder | **NEW** / **WIP** | Same |
+| **012** | Feature handoff | **WIP** ready? | Rename → **UNTESTED** |
+| **020** | Tester | **UNTESTED** → **TESTING** | Test report; **CLOSED** or **WIP** |
+| **030** | Closing reviewer | **CLOSED** in tasks root | Summary; **`move-agent-task-to-done.sh`** |
+| **040** | Committer | Dirty tree | **`CHANGELOG.md`**, **`package.json`**; git push |
+
+**001 automation:** **`autoagents/issue_checker_agent.py`** creates FEAT files from open issues before cursor-agent runs.
 
 ---
 
 ## Task workflow
 
-See **`agents/tasks/README.md`** for filename pattern and statuses.
+See **`autoagents/TASKS-README.md`**.
 
 ```text
   new   ─┐
@@ -67,60 +70,67 @@ See **`agents/tasks/README.md`** for filename pattern and statuses.
   feat  ─┘
 ```
 
-**Tester loop protection:** If the same task fails verification **more than three** times, document in **Test report** and follow team policy (e.g. close with explanation).
+**New filenames:** `FEAT-<N>-YYYYMMDD-HHMM-slug.md`, `CLOSED-<N>-…`. **Legacy** `CLOSED-YYYYMMDD-…` remains in **`done/`** archive only.
+
+**Discarded:** **`autoagents/tasks/discarded/DISCARDED-…`**.
+
+**Tester loop protection:** After **three** failures, document in Test report and follow team policy.
 
 ---
 
-## Agent loop script (`agents/laravel-ecommerce-agent-loop.sh`)
+## Agent loop script
 
-| Invocation | Behaviour |
-|------------|-----------|
-| **`./agents/laravel-ecommerce-agent-loop.sh`** | Full cycle every **`AGENT_LOOP_SLEEP_MINUTES`** (default **5**); requires **`cursor-agent`** on `PATH`. |
-| **`./agents/laravel-ecommerce-agent-loop.sh log`** (or **`001`**) | Run **001** log / GitHub reviewer. |
-| **`./agents/laravel-ecommerce-agent-loop.sh coder`** | Coder if **`NEW-*.md`** or **`WIP-*.md`** exists. |
-| **`./agents/laravel-ecommerce-agent-loop.sh feat`** | Feature coder if **`FEAT-*.md`** exists. |
-| **`./agents/laravel-ecommerce-agent-loop.sh tester`** | Tester if **`UNTESTED-*.md`** exists. |
-| **`./agents/laravel-ecommerce-agent-loop.sh closing-review`** | Closer if **`CLOSED-*.md`** still in **`agents/tasks/`**. |
-| **`./agents/laravel-ecommerce-agent-loop.sh committer`** | Committer if there are unstaged/staged changes. |
-| **`./agents/laravel-ecommerce-agent-loop.sh help`** | Usage. |
+```bash
+./autoagents/autoagents-loop.sh              # full cycle every 5 min
+./autoagents/autoagents-loop.sh log          # 001
+./autoagents/autoagents-loop.sh feat         # 010
+./autoagents/autoagents-loop.sh coder        # 002
+./autoagents/autoagents-loop.sh handoff      # 012
+./autoagents/autoagents-loop.sh tester     # 020
+./autoagents/autoagents-loop.sh closing-review
+./autoagents/autoagents-loop.sh committer    # 040
+```
 
-**Git:** each step begins with **`scripts/git-sync-agent-branch.sh`** (unless **`AGENT_GIT_SYNC=0`**). **Branch:** **`AGENT_GIT_BRANCH`** (default **`agentdevelop`**).
+Requires **`cursor-agent`** on PATH. GitHub: **`./scripts/setup-autoagents-gh.sh`**.
 
-**Stack:** start **`php artisan serve`** and **`npm run dev`** (or your stack) separately; the loop does **not** start the app.
-
-**Do not** run two loop steps **in parallel** in the same clone (each step runs **`git pull --rebase`**; concurrent pulls can fail with *Cannot rebase onto multiple branches*).
+**Stack:** start app separately (`docker compose up`, or `php artisan serve` + `npm run dev`). Do not run two loop steps in parallel in the same clone.
 
 ---
 
-## Committer (this repo)
+## Committer
 
-- Update **`CHANGELOG.md`** under **`## [X.Y.Z] - YYYY-MM-DD`** matching bumped **`package.json`** (see **`commit-changelog-version.mdc`**; avoid **`[Unreleased]`** backlogs).
-- Version: root **`package.json`** and **`package-lock.json`** (see **`.cursor/rules/commit-changelog-version.mdc`**).
-- **No** application source edits in this role.
-- **Push** the integration branch; merge to **`master`** only per the branching table above.
+- **`CHANGELOG.md`** under **`## [X.Y.Z] - date`** matching **`package.json`** bump.
+- Patch bump: **`npm version patch --no-git-tag-version`** per **`.cursor/rules/commit-changelog-version.mdc`**.
+- Push **`autoagents`**; merge **`master`** only per branching table.
 
 ---
 
-## GitHub Issues integration (optional)
+## GitHub Issues
 
 **Repo:** [github.com/Luipy56/laravel-ecommerce/issues](https://github.com/Luipy56/laravel-ecommerce/issues)
 
-Use **`gh`** with **`gh auth login`** or **`GH_TOKEN`**. Suggested labels (create if useful): **`agent:planned`**, **`agent:wip`**, **`agent:testing`**, **`production-urgent`**.
+Labels: **`agent:planned`**, **`agent:wip`**, **`agent:untested`**, **`agent:testing`**, **`production-urgent`**. Bootstrap: **`./scripts/gh-bootstrap-agent-labels.sh`**.
 
-| Role | When | Suggested issue update |
-|------|------|-------------------------|
-| **001** | After creating **`FEAT-…`** for **#NN** | Comment with task path; **`agent:planned`**. |
-| **002 / 006** | **new/feat → wip** | Comment; **`agent:planned` → `agent:wip`**. |
-| **003** | **untested → testing** | Comment; **`agent:wip` → `agent:testing`**. |
-| **004** | After archive | Comment outcome; remove agent labels; close issue if done. |
+| Role | When | Issue update |
+|------|------|--------------|
+| **001** / issue_checker | FEAT created for **#NN** | Comment + **`agent:planned`** |
+| **010 / 002** | **feat/new → wip** | Comment; **`agent:wip`** |
+| **012** | **wip → untested** | **`agent:untested`** |
+| **020** | **untested → testing** | **`agent:testing`** |
+| **030** / move script | Archive **CLOSED-<N>-*** | Comment, remove agent labels, close **#N** |
 
-**GitHub → always `FEAT-`**, never **`NEW-`**. **Logs/incidents → `NEW-`**.
+**GitHub → always `FEAT-<N>-`**, never **`NEW-`**. **Logs → `NEW-`**.
+
+---
+
+## Create task from chat
+
+See **`.cursor/rules/autoagents-create-task-from-chat.mdc`**.
 
 ---
 
 ## Related
 
-- **`AGENTS.md`** — operator guide and smoke checks.
-- **`.cursor/rules/git-agent-branch-workflow.mdc`** — always-on branch rules.
-- **`.cursor/rules/commit-changelog-version.mdc`** — changelog and version bump.
-- **`agents/README.md`** — prompt file index.
+- **`AGENTS.md`**
+- **`autoagents/README.md`**
+- **`.cursor/rules/autoagents-workflow.mdc`**

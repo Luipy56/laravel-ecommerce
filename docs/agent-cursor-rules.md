@@ -12,7 +12,9 @@ Rules focus on **what to do when editing** a given area. Do not duplicate long b
 
 | Area | Rule file | When it applies |
 |------|-----------|-----------------|
-| **Git / branches** | `.cursor/rules/git-agent-branch-workflow.mdc` | Always — integration branch (**`agentdevelop`** default, override **`AGENT_GIT_BRANCH`**), sync **`./scripts/git-sync-agent-branch.sh`**, when to promote **`master`** |
+| **Git / branches** | `.cursor/rules/git-agent-branch-workflow.mdc` | Always — integration branch (**`autoagents`** default), sync **`./scripts/git-sync-autoagents-branch.sh`**, when to promote **`master`** |
+| **autoagents** | `.cursor/rules/autoagents-workflow.mdc` | Always — folder, loop, task naming |
+| **Create task from chat** | `.cursor/rules/autoagents-create-task-from-chat.mdc` | Always — manual task creation without GitHub Issues |
 | **Commits / changelog** | `.cursor/rules/commit-changelog-version.mdc` | User asks to commit; **`CHANGELOG.md`** entries under **`## [X.Y.Z] - date`** (match **`package.json`**); **`README.md`**, **`docs/`** scan; **patch bump per shippable task**; commits stay on integration branch (promotion per git rule above) |
 | **Agent version bump** | `.cursor/rules/agent-task-version-bump.mdc` | Always — **mandatory** root **`package.json`** patch after **each completed prompt/task** that changes tracked files (before hand-off / push), not only when the user says **commit** |
 | **App version / footer** | `.cursor/rules/app-version-cadence.mdc` | Always — why **`package.json`** drives **`footer.version`**; **when** to bump semver before push / **`prod`** |
@@ -76,4 +78,4 @@ Alphabetical — must match **`ls .cursor/rules/*.mdc`** (24 files):
 ## Related
 
 - **`docs/agent-loop.md`** — multi-agent roles and task filenames.
-- **`agents/tasks/README.md`** — task status pipeline (`wip`, `untested`, …).
+- **`autoagents/TASKS-README.md`** — task status pipeline (`wip`, `untested`, …).

@@ -34,4 +34,4 @@ When the user says **"commit"** (or asks to commit changes), or when finishing *
 
 5. **If in doubt:** Bump patch — stale footer versions confuse operators more than an extra patch digit.
 
-6. **Branching:** Changelog and version commits belong on the **integration branch** (**`agentdevelop`** default, or **`AGENT_GIT_BRANCH`**). Promoting to **`master`** / **`prod`** follows **`.cursor/rules/git-agent-branch-workflow.mdc`**.
+6. **Branching:** Changelog and version commits belong on the **integration branch** (**`autoagents`** default, or **`AGENT_GIT_BRANCH`**). Promoting to **`master`** / **`prod`** follows **`.cursor/rules/git-agent-branch-workflow.mdc`**.

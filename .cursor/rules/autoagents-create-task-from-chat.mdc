@@ -1,0 +1,57 @@
+---
+description: Create an autoagents task from chat (without GitHub Issues)
+alwaysApply: true
+---
+
+# Create autoagents task from chat
+
+When the **user asks to create a task** in Cursor (not via GitHub Issues), follow this workflow.
+
+## Before creating
+
+1. Run **`./scripts/git-sync-autoagents-branch.sh`** from repo root.
+2. Confirm intent: feature (usually needs an issue) vs incident/ops (NEW) vs explicit discard later (**`discarded/`**).
+
+## Choose filename prefix
+
+| Source | Pattern | Example |
+|--------|---------|---------|
+| User describes work tied to GitHub **#N** | `FEAT-<N>-YYYYMMDD-HHMM-slug.md` | `FEAT-22-20260602-1430-fix-footer-version.md` |
+| User describes incident / no issue | `NEW-0-YYYYMMDD-HHMM-slug.md` | `NEW-0-20260602-1430-checkout-500.md` |
+| Abandoned before start | `DISCARDED-YYYYMMDD-HHMM-slug.md` in **`autoagents/tasks/discarded/`** | — |
+
+Use **UTC** for `YYYYMMDD-HHMM`. Slug: kebab-case from title (ASCII, max ~40 chars).
+
+## File location and template
+
+- Active tasks: **`autoagents/tasks/`** only (not **`done/`**).
+- Copy structure from **`autoagents/tasks/TEMPLATE.md`** or **`autoagents/templates/FEAT_TEMPLATE.md`**.
+
+Minimum sections:
+
+```markdown
+# <title>
+
+## Problem / goal
+<what and why>
+
+## High-level instructions for coder
+- <bullets — no code patches>
+
+## Testing instructions
+(filled by coder before UNTESTED-)
+```
+
+For FEAT tasks, add **## GitHub Issue** with issue URL and **#N**.
+
+## After creating
+
+- **Do not** implement product code in the same turn unless the user explicitly asks.
+- Tell the user the exact path created.
+- Optional: if **#N** exists, `gh issue comment` + label **`agent:planned`** per **`docs/agent-loop.md`**.
+
+## Pipeline (for reference)
+
+`FEAT/NEW → WIP → UNTESTED → TESTING → CLOSED → done/YYYY/MM/DD/` via **`scripts/move-agent-task-to-done.sh`**.
+
+See **`autoagents/TASKS-README.md`** for full rules.

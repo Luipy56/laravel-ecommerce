@@ -95,6 +95,9 @@ export default function RegisterPage() {
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.register')}</h1>
         <p className="text-sm text-base-content/70">{t('register.verify_email_hint')}</p>
+        {form.type === 'person' ? (
+          <GoogleSignInSection next="/" showBottomDivider />
+        ) : null}
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && <div className="alert alert-error text-sm">{error}</div>}
 
@@ -283,15 +286,6 @@ export default function RegisterPage() {
             </button>
           </div>
         </form>
-        <GoogleSignInSection
-          next="/"
-          acceptPrivacy={acceptPrivacy}
-          acceptMarketing={acceptMarketing}
-          onPrivacyRequired={() => {
-            setError(t('gdpr.accept_privacy'));
-            scrollWindowToTopOnFormError();
-          }}
-        />
       </div>
     </div>
   );

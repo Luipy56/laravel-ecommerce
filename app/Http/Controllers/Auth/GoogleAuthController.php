@@ -24,8 +24,8 @@ class GoogleAuthController extends Controller
             abort(404);
         }
 
+        // Privacy policy acceptance is implicit when the user chooses Google sign-in (see auth.google_privacy_notice_* i18n).
         $request->validate([
-            'accept_privacy' => ['required', 'accepted'],
             'accept_marketing' => ['nullable', 'in:0,1'],
         ]);
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.329] - 2026-06-02
+
+### Fixed
+- **Google Sign-In button:** call GIS `initialize()` before `renderButton()` so the official button renders (fixes console `Failed to render button before calling initialize()`).
+
+### Changed
+- **Google OAuth UX:** button moved to the top of `/login` and `/register` (person accounts); implicit privacy notice replaces mandatory checkbox before Google sign-in.
+- **Google redirect:** privacy consent is recorded implicitly when the user starts Google OAuth (email/password register still requires the checkbox).
+
 ## [0.1.328] - 2026-06-02
 
 ### Added

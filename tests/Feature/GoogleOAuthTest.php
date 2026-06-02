@@ -58,7 +58,7 @@ class GoogleOAuthTest extends TestCase
         $sub = 'google-sub-link-'.uniqid('', true);
         $this->fakeGoogleSocialiteUser($sub, $email, true);
 
-        $this->post('/auth/google/redirect', ['accept_privacy' => '1']);
+        $this->post('/auth/google/redirect', []);
         $this->get('/auth/google/callback')->assertRedirect();
 
         $client->refresh();
@@ -78,7 +78,7 @@ class GoogleOAuthTest extends TestCase
 
         $this->fakeGoogleSocialiteUser('sub-unverified', $email, false);
 
-        $this->post('/auth/google/redirect', ['accept_privacy' => '1']);
+        $this->post('/auth/google/redirect', []);
         $response = $this->get('/auth/google/callback');
 
         $response->assertRedirect();
@@ -96,7 +96,7 @@ class GoogleOAuthTest extends TestCase
 
         $this->fakeGoogleSocialiteUser($sub, $email, true);
 
-        $this->post('/auth/google/redirect', ['accept_privacy' => '1']);
+        $this->post('/auth/google/redirect', []);
         $this->get('/auth/google/callback');
 
         $client = Client::query()->where('login_email', $email)->firstOrFail();

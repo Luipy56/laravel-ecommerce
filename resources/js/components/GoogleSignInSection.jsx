@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
-
-function getCsrfToken() {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta?.getAttribute('content') ?? '';
-}
+import { getMetaCsrfToken, refreshCsrfCookie } from '../csrfRecovery';
 
 function GoogleLogoIcon({ className = 'h-5 w-5 shrink-0' }) {
   return (
@@ -44,7 +40,17 @@ export default function GoogleSignInSection({
   const { t } = useTranslation();
   const [config, setConfig] = useState({ enabled: false, client_id: null });
   const [loading, setLoading] = useState(true);
-  const [csrfToken, setCsrfToken] = useState(getCsrfToken);
+  const [csrfToken, setCsrfToken] = useState(getMetaCsrfToken);
+  const formRef = useRef(null);
+
+  const syncCsrfToken = useCallback(async () => {
+    try {
+      const token = await refreshCsrfCookie();
+      setCsrfToken(token);
+    } catch {
+      setCsrfToken(getMetaCsrfToken());
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,8 +72,33 @@ export default function GoogleSignInSection({
   }, []);
 
   useEffect(() => {
-    setCsrfToken(getCsrfToken());
-  }, [config.enabled]);
+    if (!config.enabled) {
+      return undefined;
+    }
+    syncCsrfToken();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        syncCsrfToken();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [config.enabled, syncCsrfToken]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const token = await refreshCsrfCookie();
+      setCsrfToken(token);
+    } catch {
+      // submit with last known token
+    }
+    formRef.current?.submit();
+  };
 
   if (loading || !config.enabled) {
     return null;
@@ -79,9 +110,11 @@ export default function GoogleSignInSection({
         <div className="divider text-sm text-base-content/60">{t('auth.or_divider')}</div>
       ) : null}
       <form
+        ref={formRef}
         method="POST"
         action="/auth/google/redirect"
         className="flex flex-col items-stretch gap-3"
+        onSubmit={handleSubmit}
       >
         <input type="hidden" name="_token" value={csrfToken} />
         <input type="hidden" name="accept_privacy" value="1" />

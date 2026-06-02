@@ -53,8 +53,14 @@ class Product extends Model
             }
         });
 
-        static::saved(fn () => Cache::forget('sitemap.xml'));
-        static::deleted(fn () => Cache::forget('sitemap.xml'));
+        static::saved(function (): void {
+            Cache::forget('sitemap.xml');
+            Cache::forget(\App\Http\Controllers\GoogleMerchantFeedController::CACHE_KEY);
+        });
+        static::deleted(function (): void {
+            Cache::forget('sitemap.xml');
+            Cache::forget(\App\Http\Controllers\GoogleMerchantFeedController::CACHE_KEY);
+        });
     }
 
     /**

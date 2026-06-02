@@ -7,6 +7,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Log;
 
 return Application::configure(basePath: dirname(__DIR__))
     // Explicit listeners live in AppServiceProvider; automatic discovery from app/Listeners
@@ -39,6 +41,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->dontReport([
             PaymentProviderNotConfiguredException::class,
         ]);
+        $exceptions->stopIgnoring(TokenMismatchException::class);
+        $exceptions->reportable(function (TokenMismatchException $e): void {
+            $request = request();
+            Log::warning('CSRF token mismatch', [
+                'path' => $request->path(),
+                'method' => $request->method(),
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'has_session_cookie' => $request->hasCookie(config('session.cookie')),
+            ]);
+        });
         $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $e) {
             return $request->is('api/*')
                 && ! ($e instanceof InvalidSignatureException && $request->routeIs('verification.verify'));

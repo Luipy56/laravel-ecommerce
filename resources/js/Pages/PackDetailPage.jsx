@@ -8,6 +8,7 @@ import { IconCart } from '../components/icons';
 import FavoriteToggle from '../components/FavoriteToggle';
 import ReviewsSection from '../components/ReviewsSection';
 import CatalogCardImage from '../components/CatalogCardImage';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 const ZOOM_SCALE = 3.5;
@@ -103,6 +104,11 @@ export default function PackDetailPage() {
       .finally(() => setLoading(false));
     return () => ac.abort();
   }, [id]);
+
+  useDocumentMeta(
+    pack?.name ?? undefined,
+    pack?.description ? String(pack.description).slice(0, 200) : undefined,
+  );
 
   if (loading) {
     return (

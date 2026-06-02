@@ -40,6 +40,8 @@
   "errors.session_expired_title": "Sessió caducada",
   "errors.session_expired_body": "La sessió de seguretat ha caducat (per exemple, token CSRF). Recarrega la pàgina o torna a iniciar sessió.",
   "errors.session_expired_toast": "Sessió caducada. Torna a iniciar sessió o recarrega.",
+  "errors.session_renewed_retry": "Sessió renovada. Torna-ho a provar.",
+  "errors.session_expired_auto_reload": "La pàgina es recarregarà automàticament en uns segons.",
   "errors.reload": "Recarregar",
   "errors.network": "No s'ha pogut connectar amb el servidor. Comprova la connexió.",
   "shop.scroll_top": "Pujar a dalt",

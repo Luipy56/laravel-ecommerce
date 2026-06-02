@@ -79,6 +79,7 @@ import SessionExpiredPage from './Pages/SessionExpiredPage';
 import GamesPage from './Pages/GamesPage';
 import ErrorPage from './Pages/ErrorPage';
 import ErrorBoundary from './components/ErrorBoundary';
+import SessionKeepAlive from './components/SessionKeepAlive';
 import PrivacyPolicyPage from './Pages/PrivacyPolicyPage';
 import TermsPage from './Pages/TermsPage';
 
@@ -103,6 +104,7 @@ export default function App() {
         <NavigationSetter />
         <ToastProvider>
           <AuthProvider>
+            <SessionKeepAlive />
             <CartProvider>
               <ErrorBoundary fallback={(error, reset) => <ErrorPage error={error} resetError={reset} />}>
               <Routes>

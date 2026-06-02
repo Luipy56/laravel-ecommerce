@@ -40,6 +40,8 @@
   "errors.session_expired_title": "Session expired",
   "errors.session_expired_body": "Security session has expired (e.g. CSRF token). Reload the page or log in again.",
   "errors.session_expired_toast": "Session expired. Please log in again or reload.",
+  "errors.session_renewed_retry": "Session renewed. Please try again.",
+  "errors.session_expired_auto_reload": "The page will reload automatically in a few seconds.",
   "errors.reload": "Reload",
   "errors.network": "Could not connect to the server. Check the connection.",
   "shop.scroll_top": "Back to top",

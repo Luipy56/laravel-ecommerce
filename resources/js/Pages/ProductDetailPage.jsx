@@ -13,6 +13,7 @@ import ReviewsSection from '../components/ReviewsSection';
 import CartPreviewBar from '../components/CartPreviewBar';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
 import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 
 const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
@@ -47,6 +48,11 @@ export default function ProductDetailPage() {
     staleTime: 60_000,
   });
   const product = productQuery.data;
+
+  useDocumentMeta(
+    product?.name ?? undefined,
+    product?.description ? String(product.description).slice(0, 200) : undefined,
+  );
 
   const handleAdd = () => addLine(product.id, null, qty);
 

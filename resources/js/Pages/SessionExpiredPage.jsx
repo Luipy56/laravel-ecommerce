@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PageTitle from '../components/PageTitle';
+import { trySessionExpiredAutoReloadOnce } from '../csrfRecovery';
 
 /**
  * Shown when API returns 419 (CSRF / session expired). User should refresh or sign in again.
@@ -9,10 +10,20 @@ import PageTitle from '../components/PageTitle';
 export default function SessionExpiredPage() {
   const { t } = useTranslation();
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (trySessionExpiredAutoReloadOnce()) {
+        window.location.reload();
+      }
+    }, 2000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
     <div className="mx-auto w-full min-w-0 max-w-lg text-center py-16">
       <PageTitle>{t('errors.session_expired_title')}</PageTitle>
-      <p className="text-base-content/80 mb-6">{t('errors.session_expired_body')}</p>
+      <p className="text-base-content/80 mb-2">{t('errors.session_expired_body')}</p>
+      <p className="text-sm text-base-content/60 mb-6">{t('errors.session_expired_auto_reload')}</p>
       <div className="flex flex-wrap gap-3 justify-center">
         <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
           {t('errors.reload')}

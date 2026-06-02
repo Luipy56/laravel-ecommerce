@@ -9,6 +9,7 @@ import { Product } from '../lib/Product';
 import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 import ProductCard from '../components/ProductCard';
 import PageTitle from '../components/PageTitle';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 
 const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 0 };
 
@@ -412,6 +413,20 @@ export default function ProductListPage() {
   );
 
   const categoriesList = categoriesQuery.data ?? [];
+  const selectedCategoryName = useMemo(() => {
+    if (!selectedCategoryId) return null;
+    const match = categoriesList.find((c) => String(c.id) === String(selectedCategoryId));
+    return match?.name ?? null;
+  }, [categoriesList, selectedCategoryId]);
+
+  const pageTitle = useMemo(() => {
+    if (offersOnly) return t('shop.offers');
+    if (search) return `${t('common.search')}: ${search}`;
+    if (selectedCategoryName) return `${selectedCategoryName} · ${t('shop.brand_name')}`;
+    return `${t('shop.products')} · ${t('shop.brand_name')}`;
+  }, [offersOnly, search, selectedCategoryName, t]);
+
+  useDocumentMeta(pageTitle);
   const featuresList = featuresQuery.data ?? [];
   const loadingInitial =
     categoriesQuery.isPending || featuresQuery.isPending || catalogInfinite.isPending;

@@ -2,6 +2,11 @@ import axios from 'axios';
 import i18n from './i18n';
 import { navigationRef } from './routerBridge';
 import { emitAppToast } from './toastEvents';
+import {
+  isStorefrontAuthPath,
+  refreshCsrfCookie,
+  tryAuthPageReloadOnce,
+} from './csrfRecovery';
 
 /**
  * Use xsrfCookieName/xsrfHeaderName so axios reads the XSRF-TOKEN cookie before each request.
@@ -65,26 +70,54 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+function handle419Failure(err) {
+  const path = typeof window !== 'undefined' ? window.location.pathname : '';
+  emitAppToast(i18n.t('errors.session_expired_toast'), 'warning');
+
+  const onAdminLogin = /^\/admin\/login\/?$/.test(path);
+  const onSessionExpired = path.startsWith('/session-expired');
+  if (onAdminLogin || onSessionExpired) {
+    return Promise.reject(err);
+  }
+
+  if (isStorefrontAuthPath(path) && tryAuthPageReloadOnce()) {
+    emitAppToast(i18n.t('errors.session_renewed_retry'), 'info');
+    window.location.reload();
+    return Promise.reject(err);
+  }
+
+  const target = path.startsWith('/admin') ? '/admin/login' : '/session-expired';
+  if (navigationRef.current) {
+    navigationRef.current(target, { replace: true });
+  } else {
+    window.location.assign(target);
+  }
+  return Promise.reject(err);
+}
+
 api.interceptors.response.use(
-  (r) => r,
-  (err) => {
+  (response) => {
+    bumpApiPending(-1);
+    return response;
+  },
+  async (err) => {
+    bumpApiPending(-1);
+
     const status = err.response?.status;
-    const path = typeof window !== 'undefined' ? window.location.pathname : '';
+    const config = err.config;
+
+    if (status === 419 && config && !config._csrfRetried) {
+      config._csrfRetried = true;
+      try {
+        await refreshCsrfCookie();
+        return api.request(config);
+      } catch {
+        return handle419Failure(err);
+      }
+    }
 
     if (status === 419) {
-      emitAppToast(i18n.t('errors.session_expired_toast'), 'warning');
-      const onAdminLogin = /^\/admin\/login\/?$/.test(path);
-      const onSessionExpired = path.startsWith('/session-expired');
-      if (onAdminLogin || onSessionExpired) {
-        return Promise.reject(err);
-      }
-      const target = path.startsWith('/admin') ? '/admin/login' : '/session-expired';
-      if (navigationRef.current) {
-        navigationRef.current(target, { replace: true });
-      } else {
-        window.location.assign(target);
-      }
-      return Promise.reject(err);
+      return handle419Failure(err);
     }
 
     if (!err.response && err.request) {
@@ -101,17 +134,6 @@ api.interceptors.response.use(
       // Optional: trigger logout in auth context
     }
     return Promise.reject(err);
-  }
-);
-
-api.interceptors.response.use(
-  (response) => {
-    bumpApiPending(-1);
-    return response;
-  },
-  (error) => {
-    bumpApiPending(-1);
-    return Promise.reject(error);
   }
 );
 

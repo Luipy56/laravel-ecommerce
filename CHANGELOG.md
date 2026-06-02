@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.334] - 2026-06-02
+
+### Fixed
+- **HTTP 419 / CSRF (SPA):** axios interceptor refreshes `/csrf-cookie` and retries once; auth pages auto-reload once; `/session-expired` auto-reloads after 2 s; tab-focus keep-alive; Google Sign-In refreshes token before submit.
+
+### Added
+- **Routes:** `GET /csrf-cookie` (fresh token + XSRF cookie), `GET /api/v1/csrf-ping` (session ping).
+- **Observability:** structured log on CSRF token mismatch (path, method, IP, user-agent — no token values).
+- **Docs:** `docs/TROUBLESHOOTING_419.md` (production session/cookie checklist).
+- **Tests:** `CsrfRecoveryTest` (419 on Google redirect, csrf-cookie, logging).
+
+## [0.1.333] - 2026-06-02
+
+### Added
+- **SEO / link previews:** server-side Open Graph and Twitter Card meta on home, catalog, product, pack, and category SPA routes (`SpaShellController`, `ShareMetaService`); ca/es/en fallback strings in `lang/*/seo.php`.
+- **Google Merchant Center:** public feed at `GET /feeds/google-merchant.xml` (active products, discounted price, stock availability, 6 h cache + invalidation on product save).
+- **Client meta:** `useDocumentMeta` hook updates `document.title` and description on key storefront pages.
+- **Docs:** `docs/google-merchant-center.md` (one-time GMC setup, no manual CSV exports).
+- **Tests:** `ShareMetaSeoTest`, `GoogleMerchantFeedTest`.
+
 ## [0.1.332] - 2026-06-02
 
 ### Changed

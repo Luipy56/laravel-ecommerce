@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import ProductCard from '../components/ProductCard';
 import useDragScroll from '../hooks/useDragScroll';
 
@@ -86,9 +87,7 @@ export default function HomePage() {
   const featuredByCategory = useMemo(() => groupFeaturedProductsByCategory(featured), [featured]);
   const loading = featuredQuery.isPending;
 
-  useEffect(() => {
-    document.title = t('shop.brand_name');
-  }, [t]);
+  useDocumentMeta(t('shop.brand_name'));
 
   return (
     <div className="home-page">

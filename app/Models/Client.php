@@ -26,6 +26,7 @@ class Client extends Authenticatable implements CanResetPasswordContract, MustVe
         'identification',
         'login_email',
         'password',
+        'google_sub',
         'is_active',
         'email_verified_at',
     ];

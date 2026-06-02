@@ -21,6 +21,15 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $client = Client::query()->where('login_email', $validated['login_email'])->first();
+        if ($client && ($client->password === null || $client->password === '')) {
+            return response()->json([
+                'success' => false,
+                'message' => __('auth.google_password_required'),
+                'errors' => ['login_email' => [__('auth.google_password_required')]],
+            ], 422);
+        }
+
         if (! Auth::attempt(['login_email' => $validated['login_email'], 'password' => $validated['password']], $request->boolean('remember'))) {
             return response()->json([
                 'success' => false,

@@ -6,6 +6,9 @@ import { useCart } from '../contexts/CartContext';
 import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { loginSchema, parseWithZod } from '../validation';
 import { useToast } from '../contexts/ToastContext';
+import GoogleSignInSection, { GoogleOAuthConsentCheckboxes } from '../components/GoogleSignInSection';
+import ProfileCompletionModal from '../components/ProfileCompletionModal';
+import { useGoogleOAuthReturn } from '../hooks/useGoogleOAuthReturn';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -29,6 +32,12 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
+  const [acceptMarketing, setAcceptMarketing] = useState(false);
+  const { profileModalOpen, closeProfileModal } = useGoogleOAuthReturn();
+  const oauthNext = searchParams.get('next');
+  const safeOauthNext =
+    oauthNext && oauthNext.startsWith('/') && !oauthNext.startsWith('//') ? oauthNext : '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,6 +81,7 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-md card bg-base-100 shadow-lg">
+      <ProfileCompletionModal open={profileModalOpen} onClose={closeProfileModal} />
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.login')}</h1>
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -125,6 +135,23 @@ export default function LoginPage() {
             {loading ? t('common.loading') : t('auth.login')}
           </button>
         </form>
+        <div className="mt-6 space-y-4">
+          <GoogleOAuthConsentCheckboxes
+            acceptPrivacy={acceptPrivacy}
+            setAcceptPrivacy={setAcceptPrivacy}
+            acceptMarketing={acceptMarketing}
+            setAcceptMarketing={setAcceptMarketing}
+          />
+        <GoogleSignInSection
+          next={safeOauthNext}
+          acceptPrivacy={acceptPrivacy}
+          acceptMarketing={acceptMarketing}
+          onPrivacyRequired={() => {
+            setError(t('gdpr.accept_privacy'));
+            scrollWindowToTopOnFormError();
+          }}
+        />
+        </div>
         <p className="text-sm mt-4">
           <Link to="/register" className="link link-primary">{t('auth.register')}</Link>
         </p>

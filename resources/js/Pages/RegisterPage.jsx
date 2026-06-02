@@ -7,6 +7,9 @@ import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { parseWithZod, registerFormSchema } from '../validation';
 import FieldHint from '../components/FieldHint';
+import GoogleSignInSection from '../components/GoogleSignInSection';
+import ProfileCompletionModal from '../components/ProfileCompletionModal';
+import { useGoogleOAuthReturn } from '../hooks/useGoogleOAuthReturn';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -32,6 +35,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const [acceptMarketing, setAcceptMarketing] = useState(false);
+  const { profileModalOpen, closeProfileModal } = useGoogleOAuthReturn();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,6 +91,7 @@ export default function RegisterPage() {
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-4xl card bg-base-100 shadow-lg">
+      <ProfileCompletionModal open={profileModalOpen} onClose={closeProfileModal} />
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.register')}</h1>
         <p className="text-sm text-base-content/70">{t('register.verify_email_hint')}</p>
@@ -278,6 +283,15 @@ export default function RegisterPage() {
             </button>
           </div>
         </form>
+        <GoogleSignInSection
+          next="/"
+          acceptPrivacy={acceptPrivacy}
+          acceptMarketing={acceptMarketing}
+          onPrivacyRequired={() => {
+            setError(t('gdpr.accept_privacy'));
+            scrollWindowToTopOnFormError();
+          }}
+        />
       </div>
     </div>
   );

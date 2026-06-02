@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\AdminProductReviewController;
 use App\Http\Controllers\Api\AdminShopSettingsController;
 use App\Http\Controllers\Api\AdminVariantGroupController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GoogleAuthConfigController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ProductReviewController;
 use App\Http\Controllers\Api\CategoryController;
@@ -50,6 +51,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 Route::get('user', [AuthController::class, 'user']);
+Route::get('auth/google-config', GoogleAuthConfigController::class);
 
 Route::post('forgot-password', [ClientPasswordResetController::class, 'forgot'])
     ->middleware('throttle:6,1');

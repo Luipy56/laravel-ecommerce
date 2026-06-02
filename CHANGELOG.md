@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.328] - 2026-06-02
+
+### Added
+- **Google OIDC (storefront):** optional Sign in with Google on `/login` and `/register` (Laravel Socialite, session auth, account linking by verified email).
+- **API:** `GET /api/v1/auth/google-config`; web routes `POST /auth/google/redirect`, `GET /auth/google/callback`.
+- **Docs:** `docs/CONFIGURACION_GOOGLE_OAUTH.md`; `.env.example` entries for `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
+
+### Changed
+- **`clients`:** nullable `password`, unique nullable `google_sub` (OIDC subject).
+- **Profile nudge:** soft completion modal after first Google sign-in when phone or postal code is missing.
+
 ## [0.1.327] - 2026-06-02
 
 ### Changed

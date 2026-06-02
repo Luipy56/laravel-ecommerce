@@ -29,7 +29,8 @@ return new class extends Migration
             $table->string('type', 50)->comment('Person vs company');
             $table->text('identification')->nullable()->comment('ID document (DNI, CIF or NIE); encrypted at rest. Uniqueness enforced at application layer.');
             $table->string('login_email', 255)->unique()->comment('Email for authentication');
-            $table->string('password', 255);
+            $table->string('password', 255)->nullable()->comment('Nullable for Google-only accounts');
+            $table->string('google_sub', 255)->nullable()->unique()->comment('Google OIDC subject (sub)');
             $table->timestamp('email_verified_at')->nullable()->comment('Email verification timestamp');
             $table->rememberToken();
             $table->boolean('is_active')->default(true)->comment('Soft delete');

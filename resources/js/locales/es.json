@@ -77,6 +77,7 @@
   "auth.verify_email_link_failed_body": "Puede haber caducado o ya haberse usado. Inicia sesión con tu cuenta y usa el botón de abajo para recibir un correo nuevo.",
   "auth.verify_email_required_to_save": "Debes confirmar el correo antes de poder guardar estos cambios.",
   "auth.or_divider": "o",
+  "auth.continue_with_google": "Continuar con Google",
   "auth.google_privacy_notice_prefix": "Al usar este servicio, aceptas la",
   "auth.google_privacy_notice_suffix": ".",
   "auth.google_oauth_success": "Sesión iniciada con Google.",

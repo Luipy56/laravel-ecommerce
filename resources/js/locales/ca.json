@@ -77,6 +77,7 @@
   "auth.verify_email_link_failed_body": "Pot haver caducat o ja s'ha utilitzat. Inicia sessió amb el teu compte i fes servir el botó de sota per rebre un correu nou.",
   "auth.verify_email_required_to_save": "Has de confirmar el correu abans de poder desar aquests canvis.",
   "auth.or_divider": "o",
+  "auth.continue_with_google": "Continuar amb Google",
   "auth.google_privacy_notice_prefix": "En usar aquest servei, acceptes la",
   "auth.google_privacy_notice_suffix": ".",
   "auth.google_oauth_success": "Sessió iniciada amb Google.",

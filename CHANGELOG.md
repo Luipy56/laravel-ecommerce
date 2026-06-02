@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.330] - 2026-06-02
+
+### Fixed
+- **Google Sign-In:** replace GIS `renderButton` (FedCM popup) with full-page Socialite redirect — fixes blank Google popup, COOP console errors, and immediate `provider_error` on login/register.
+
 ## [0.1.329] - 2026-06-02
 
 ### Fixed

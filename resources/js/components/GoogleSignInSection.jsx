@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api';
@@ -8,53 +8,33 @@ function getCsrfToken() {
   return meta?.getAttribute('content') ?? '';
 }
 
-let gsiScriptPromise = null;
-let gsiInitializedClientId = null;
-
-function loadGsiScript() {
-  if (typeof window !== 'undefined' && window.google?.accounts?.id) {
-    return Promise.resolve();
-  }
-  if (gsiScriptPromise) {
-    return gsiScriptPromise;
-  }
-
-  gsiScriptPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector('script[data-google-gsi="1"]');
-    if (existing) {
-      if (window.google?.accounts?.id) {
-        resolve();
-        return;
-      }
-      existing.addEventListener('load', () => resolve(), { once: true });
-      existing.addEventListener('error', () => reject(new Error('GSI script failed')), { once: true });
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.dataset.googleGsi = '1';
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('GSI script failed'));
-    document.head.appendChild(script);
-  });
-
-  return gsiScriptPromise;
+function GoogleLogoIcon({ className = 'h-5 w-5 shrink-0' }) {
+  return (
+    <svg className={className} viewBox="0 0 48 48" aria-hidden="true">
+      <path
+        fill="#EA4335"
+        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.56 2.95-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+      />
+      <path
+        fill="#34A853"
+        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+      />
+    </svg>
+  );
 }
 
-function ensureGsiInitialized(clientId) {
-  if (!window.google?.accounts?.id) {
-    return false;
-  }
-  if (gsiInitializedClientId !== clientId) {
-    window.google.accounts.id.initialize({ client_id: clientId });
-    gsiInitializedClientId = clientId;
-  }
-  return true;
-}
-
+/**
+ * Storefront Google sign-in via full-page Laravel Socialite redirect (no GIS popup / FedCM).
+ * GIS renderButton opens a second window and races OAuth state with the server redirect.
+ */
 export default function GoogleSignInSection({
   next = '/',
   acceptMarketing = false,
@@ -64,8 +44,7 @@ export default function GoogleSignInSection({
   const { t } = useTranslation();
   const [config, setConfig] = useState({ enabled: false, client_id: null });
   const [loading, setLoading] = useState(true);
-  const buttonRef = useRef(null);
-  const formRef = useRef(null);
+  const [csrfToken, setCsrfToken] = useState(getCsrfToken);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,42 +66,8 @@ export default function GoogleSignInSection({
   }, []);
 
   useEffect(() => {
-    if (!config.enabled || !config.client_id || !buttonRef.current) {
-      return undefined;
-    }
-
-    let cancelled = false;
-
-    const renderButton = () => {
-      if (cancelled || !buttonRef.current || !config.client_id) {
-        return;
-      }
-      if (!ensureGsiInitialized(config.client_id)) {
-        return;
-      }
-      buttonRef.current.innerHTML = '';
-      window.google.accounts.id.renderButton(buttonRef.current, {
-        type: 'standard',
-        theme: 'outline',
-        size: 'large',
-        text: 'continue_with',
-        width: Math.min(400, buttonRef.current.offsetWidth || 320),
-        click_listener: () => {
-          formRef.current?.requestSubmit();
-        },
-      });
-    };
-
-    loadGsiScript()
-      .then(renderButton)
-      .catch(() => {
-        /* Button stays empty; config still enabled — user can retry reload */
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [config.enabled, config.client_id]);
+    setCsrfToken(getCsrfToken());
+  }, [config.enabled]);
 
   if (loading || !config.enabled) {
     return null;
@@ -134,16 +79,21 @@ export default function GoogleSignInSection({
         <div className="divider text-sm text-base-content/60">{t('auth.or_divider')}</div>
       ) : null}
       <form
-        ref={formRef}
         method="POST"
         action="/auth/google/redirect"
         className="flex flex-col items-stretch gap-3"
       >
-        <input type="hidden" name="_token" value={getCsrfToken()} />
+        <input type="hidden" name="_token" value={csrfToken} />
         <input type="hidden" name="accept_privacy" value="1" />
         <input type="hidden" name="accept_marketing" value={acceptMarketing ? '1' : '0'} />
         <input type="hidden" name="next" value={next} />
-        <div ref={buttonRef} className="flex justify-center min-h-[44px]" />
+        <button
+          type="submit"
+          className="btn btn-lg w-full min-h-12 bg-base-100 border border-[#747775] text-base-content font-medium normal-case shadow-none hover:bg-base-200 hover:border-[#747775] gap-3"
+        >
+          <GoogleLogoIcon />
+          <span>{t('auth.continue_with_google')}</span>
+        </button>
       </form>
       <p className="text-xs text-base-content/60 text-center">
         {t('auth.google_privacy_notice_prefix')}{' '}

@@ -83,7 +83,7 @@ final class CatalogProductSearchService
             ]);
         }
 
-        $slice = $this->databaseSearch->search($normalized)->take($limit)->values()->all();
+        $slice = $this->databaseSearch->search($normalized, app()->getLocale())->take($limit)->values()->all();
 
         return [
             'products' => (new Product)->newCollection($slice),
@@ -114,7 +114,7 @@ final class CatalogProductSearchService
             ]);
         }
 
-        $products = $this->databaseSearch->search($normalized)->take($limit)->values();
+        $products = $this->databaseSearch->search($normalized, app()->getLocale())->take($limit)->values();
         $suggestions = [];
         foreach ($products as $product) {
             $text = trim((string) $product->name);

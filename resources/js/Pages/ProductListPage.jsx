@@ -2,9 +2,11 @@ import './ProductListPage.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useStorefrontNavbarVisibility } from '../contexts/StorefrontNavbarVisibilityContext';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
+import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 import ProductCard from '../components/ProductCard';
 import PageTitle from '../components/PageTitle';
 
@@ -12,12 +14,13 @@ const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 
 
 const fmt = new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
-function buildSearchParams({ selectedCategoryId, featureIds, search, categoryInPath = false, packsOnly = false, priceMin = null, priceMax = null }) {
+function buildSearchParams({ selectedCategoryId, featureIds, search, categoryInPath = false, packsOnly = false, offersOnly = false, priceMin = null, priceMax = null }) {
   const next = new URLSearchParams();
   if (search) next.set('search', search);
   if (!categoryInPath && selectedCategoryId) next.set('category_id', String(selectedCategoryId));
   featureIds.forEach((id) => next.append('feature_id', id));
   if (packsOnly) next.set('packs_only', '1');
+  if (offersOnly) next.set('offers_only', '1');
   if (priceMin !== null) next.set('price_min', String(priceMin));
   if (priceMax !== null) next.set('price_max', String(priceMax));
   return next;
@@ -39,8 +42,14 @@ function mapCatalogFromResponse(r) {
             id: d.id,
             name: d.name,
             price,
+            list_price: d.list_price != null ? Number(d.list_price) : null,
+            discount_percent: d.discount_percent != null ? Number(d.discount_percent) : null,
             items: d.items ?? [],
-            images: d.images ?? [],
+            images: (d.images ?? []).map((img) => ({
+              id: img.id,
+              url: img.url,
+              content_type: img.content_type ?? null,
+            })),
             primaryImageUrl: d.images?.[0]?.url ?? '/images/dummy.jpg',
             formattedPrice: new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(price),
           },
@@ -179,6 +188,17 @@ function PriceRangeSlider({ globalMin, globalMax, priceMin, priceMax, onChange }
 
 export default function ProductListPage() {
   const { t } = useTranslation();
+  const { visible: navbarVisible } = useStorefrontNavbarVisibility();
+  const [isLgUp, setIsLgUp] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const sync = () => setIsLgUp(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { id: categoryIdFromRoute } = useParams();
@@ -195,14 +215,15 @@ export default function ProductListPage() {
   const featureIds = searchParams.getAll('feature_id');
   const search = searchParams.get('search');
   const packsOnly = searchParams.get('packs_only') === '1';
+  const offersOnly = searchParams.get('offers_only') === '1';
   const priceMinParam = searchParams.get('price_min') ? Number(searchParams.get('price_min')) : null;
   const priceMaxParam = searchParams.get('price_max') ? Number(searchParams.get('price_max')) : null;
 
   const featureIdsKey = featureIds.join(',');
 
   const catalogQueryKey = useMemo(
-    () => ['products', 'catalog', selectedCategoryId ?? '', featureIdsKey, search ?? '', packsOnly ? '1' : '0', priceMinParam ?? '', priceMaxParam ?? ''],
-    [selectedCategoryId, featureIdsKey, search, packsOnly, priceMinParam, priceMaxParam]
+    () => ['products', 'catalog', selectedCategoryId ?? '', featureIdsKey, search ?? '', packsOnly ? '1' : '0', offersOnly ? '1' : '0', priceMinParam ?? '', priceMaxParam ?? ''],
+    [selectedCategoryId, featureIdsKey, search, packsOnly, offersOnly, priceMinParam, priceMaxParam]
   );
 
   const loadMoreSentinelRef = useRef(null);
@@ -236,12 +257,13 @@ export default function ProductListPage() {
     queryKey: catalogQueryKey,
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {
-      const params = { page: pageParam };
+      const params = { page: pageParam, per_page: 16 };
       if (packsOnly) {
         params.packs_only = 1;
       } else {
         params.include_packs = true;
       }
+      if (offersOnly) params.offers_only = 1;
       if (selectedCategoryId) params.category_id = selectedCategoryId;
       if (featureIds.length) params.feature_ids = featureIds;
       if (search) params.search = search;
@@ -266,8 +288,8 @@ export default function ProductListPage() {
   }, [searchParams, setSearchParams]);
 
   const filterKey = useMemo(
-    () => `${selectedCategoryId ?? ''}|${featureIdsKey}|${search ?? ''}|${packsOnly ? '1' : '0'}|${priceMinParam ?? ''}|${priceMaxParam ?? ''}`,
-    [selectedCategoryId, featureIdsKey, search, packsOnly, priceMinParam, priceMaxParam]
+    () => `${selectedCategoryId ?? ''}|${featureIdsKey}|${search ?? ''}|${packsOnly ? '1' : '0'}|${offersOnly ? '1' : '0'}|${priceMinParam ?? ''}|${priceMaxParam ?? ''}`,
+    [selectedCategoryId, featureIdsKey, search, packsOnly, offersOnly, priceMinParam, priceMaxParam]
   );
   const prevFilterKeyRef = useRef(null);
   useEffect(() => {
@@ -307,26 +329,14 @@ export default function ProductListPage() {
         search: updates.search ?? search ?? '',
         categoryInPath: isCategoryRoute,
         packsOnly: updates.packsOnly !== undefined ? updates.packsOnly : packsOnly,
+        offersOnly: updates.offersOnly !== undefined ? updates.offersOnly : offersOnly,
         priceMin: updates.priceMin !== undefined ? updates.priceMin : priceMinParam,
         priceMax: updates.priceMax !== undefined ? updates.priceMax : priceMaxParam,
       });
       setSearchParams(next);
     },
-    [selectedCategoryId, featureIds, search, setSearchParams, isCategoryRoute, packsOnly, priceMinParam, priceMaxParam]
+    [selectedCategoryId, featureIds, search, setSearchParams, isCategoryRoute, packsOnly, offersOnly, priceMinParam, priceMaxParam]
   );
-
-  const handleAllCategories = useCallback(() => {
-    const next = buildSearchParams({
-      selectedCategoryId: null,
-      featureIds: [],
-      search: search ?? '',
-      categoryInPath: false,
-      packsOnly,
-      priceMin: priceMinParam,
-      priceMax: priceMaxParam,
-    });
-    navigate('/products?' + next.toString());
-  }, [search, navigate, packsOnly, priceMinParam, priceMaxParam]);
 
   const handleClearAllFilters = useCallback(() => {
     const next = buildSearchParams({
@@ -335,6 +345,7 @@ export default function ProductListPage() {
       search: search ?? '',
       categoryInPath: false,
       packsOnly: false,
+      offersOnly: false,
       priceMin: null,
       priceMax: null,
     });
@@ -344,18 +355,32 @@ export default function ProductListPage() {
   const selectCategory = useCallback(
     (id) => {
       const sid = String(id);
+      if (selectedCategoryId === sid) {
+        const next = buildSearchParams({
+          selectedCategoryId: null,
+          featureIds: [],
+          search: search ?? '',
+          packsOnly,
+          offersOnly,
+          priceMin: priceMinParam,
+          priceMax: priceMaxParam,
+        });
+        navigate('/products?' + next.toString());
+        return;
+      }
       const qs = buildSearchParams({
         selectedCategoryId: null,
         featureIds,
         search: search ?? '',
         categoryInPath: true,
         packsOnly,
+        offersOnly,
         priceMin: priceMinParam,
         priceMax: priceMaxParam,
       }).toString();
       navigate(`/categories/${sid}/products${qs ? `?${qs}` : ''}`);
     },
-    [featureIds, search, navigate, packsOnly, priceMinParam, priceMaxParam]
+    [selectedCategoryId, featureIds, search, navigate, packsOnly, offersOnly, priceMinParam, priceMaxParam]
   );
 
   const toggleFeature = useCallback(
@@ -394,24 +419,45 @@ export default function ProductListPage() {
   const featuresByGroup = useMemo(() => {
     const map = new Map();
     for (const f of featuresList) {
-      const name = f.feature_name || '';
-      if (!map.has(name)) map.set(name, []);
-      map.get(name).push(f);
+      const groupKey = String(f.feature_name_id ?? f.id);
+      if (!map.has(groupKey)) {
+        map.set(groupKey, { list: [], heading: '' });
+      }
+      const entry = map.get(groupKey);
+      entry.list.push(f);
+      const lbl = catalogFeatureTypeLabel(
+        { type: f.feature_name, feature_name_code: f.feature_name_code },
+        t
+      );
+      if (lbl && !entry.heading) entry.heading = lbl;
     }
-    return Array.from(map.entries()).map(([name, list]) => ({ name, list }));
-  }, [featuresList]);
+    return Array.from(map.values()).map(({ list, heading }) => ({
+      name: heading || t('shop.filters.feature_group'),
+      list,
+    }));
+  }, [featuresList, t]);
 
   const globalMin = priceRangeQuery.data?.min ?? 0;
   const globalMax = priceRangeQuery.data?.max ?? 9999;
   const showPriceSlider = !priceRangeQuery.isPending && globalMax > globalMin;
 
-  const hasActiveFilters = selectedCategoryId !== null || featureIds.length > 0 || packsOnly || priceMinParam !== null || priceMaxParam !== null;
+  const hasActiveFilters = selectedCategoryId !== null || featureIds.length > 0 || packsOnly || offersOnly || priceMinParam !== null || priceMaxParam !== null;
 
   return (
     <div className="catalog-page">
       <section className="catalog section">
         <div className="page-container catalog-layout">
-          <aside className="sidebar">
+          <aside
+            className="sidebar"
+            style={{
+              '--catalog-sidebar-top': navbarVisible ? (isLgUp ? '4.25rem' : '8rem') : '1rem',
+              '--catalog-sidebar-max-h': navbarVisible
+                ? isLgUp
+                  ? 'calc(100vh - 5.25rem)'
+                  : 'calc(100vh - 9rem)'
+                : 'calc(100vh - 2rem)',
+            }}
+          >
             {hasActiveFilters && (
               <button type="button" className="clear-btn" onClick={handleClearAllFilters}>
                 {t('shop.filters.clear')}
@@ -421,13 +467,6 @@ export default function ProductListPage() {
             <div className="sidebar-block">
               <h4>{t('shop.categories')}</h4>
               <div className="filters-tags">
-                <button
-                  type="button"
-                  className={`tag${selectedCategoryId === null ? ' active' : ''}`}
-                  onClick={handleAllCategories}
-                >
-                  {t('shop.categories.all')}
-                </button>
                 {categoriesList.map((c) => (
                   <button
                     key={c.id}
@@ -448,12 +487,22 @@ export default function ProductListPage() {
                   type="checkbox"
                   role="switch"
                   checked={packsOnly}
-                  onChange={() => setFilters({ packsOnly: !packsOnly })}
+                  onChange={() => setFilters({ packsOnly: !packsOnly, offersOnly: false })}
                   aria-checked={packsOnly}
                   aria-label={t('shop.filters.packs_only')}
                 />
               </label>
             </div>
+
+            {/* Hidden: offersOnly is set via the nav link, not a user-visible filter */}
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={offersOnly}
+              readOnly
+              aria-hidden="true"
+              tabIndex={-1}
+            />
 
             {showPriceSlider && (
               <PriceRangeSlider
@@ -466,7 +515,7 @@ export default function ProductListPage() {
             )}
 
             {featuresByGroup.map(({ name, list }) => (
-              <div key={name} className="sidebar-block">
+              <div key={list[0]?.feature_name_id ?? list[0]?.id ?? name} className="sidebar-block">
                 <h4>{name}</h4>
                 <div className="checkbox-list">
                   {list.map((f) => (
@@ -487,7 +536,7 @@ export default function ProductListPage() {
 
           <div className="catalog-content">
             <PageTitle className="catalog-title">
-              {search ? `${t('common.search')}: ${search}` : t('shop.products')}
+              {offersOnly ? t('shop.offers') : search ? `${t('common.search')}: ${search}` : t('shop.products')}
             </PageTitle>
 
             {loadingInitial ? (

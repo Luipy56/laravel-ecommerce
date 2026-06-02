@@ -39,21 +39,26 @@ class ProductResource extends JsonResource
             'features' => $this->whenLoaded('features', fn () => $this->features->map(fn ($f) => [
                 'id' => $f->id,
                 'type' => $f->featureName?->name,
+                'feature_name_code' => $f->featureName?->code,
                 'value' => $f->value,
             ])),
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => [
                 'id' => $img->id,
                 'url' => $img->url,
+                'content_type' => $img->content_type,
             ])),
             'variant_options' => $this->whenLoaded('variantGroup', function () {
                 $products = $this->variantGroup?->products ?? collect();
 
                 return $products->map(function ($p) {
-                    $labelFeature = $p->features->first(fn ($f) => ($f->featureName?->name ?? '') === 'Medida')
-                        ?? $p->features->first(fn ($f) => ($f->featureName?->name ?? '') === 'Medida interna')
+                    $labelFeature = $p->features->first(fn ($f) => ($f->featureName?->code ?? '') === 'inner_measure')
+                        ?? $p->features->first(fn ($f) => ($f->featureName?->code ?? '') === 'outer_measure')
                         ?? $p->features->first();
+                    $fn = $labelFeature?->featureName;
+                    $typeLabel = $fn?->name ?? '';
+                    $val = $labelFeature?->value ?? '';
                     $variantLabel = $labelFeature
-                        ? trim(($labelFeature->featureName?->name ? $labelFeature->featureName->name.': ' : '').($labelFeature->value ?? ''))
+                        ? trim(($typeLabel !== '' ? $typeLabel.': ' : '').(is_string($val) ? $val : ''))
                         : ($p->name ?: $p->code ?? '');
                     $price = $p->effectivePrice();
 

@@ -56,7 +56,7 @@ class AdminReturnRequestController extends Controller
 
     public function show(ReturnRequest $rma): JsonResponse
     {
-        $rma->load(['order.client:id,login_email,identification', 'order.lines.product:id,name,code', 'order.lines.pack:id,name', 'order.payments', 'client:id,login_email', 'payment']);
+        $rma->load(['order.client:id,login_email,identification', 'order.lines.product.translations', 'order.lines.pack.translations', 'order.payments', 'client:id,login_email', 'payment']);
 
         return response()->json([
             'success' => true,

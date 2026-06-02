@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
-import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 import { loadAdminListFilters, normalizedActiveTriState, normalizedPeriod, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
 import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
 
@@ -38,15 +38,12 @@ export default function AdminPersonalizedSolutionsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('personalized_solutions');
-  const { defaultPeriod, isLoading: periodLoading } = useAdminListDefaultPeriod();
   const persistedRef = useRef(undefined);
   if (persistedRef.current === undefined) {
     persistedRef.current = readPersistedPsFilters();
   }
   const persisted = persistedRef.current;
-  const hasPersistedPeriodRef = useRef(persisted.hasPersistedPeriod);
 
-  const [periodInitialized, setPeriodInitialized] = useState(false);
   const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -55,18 +52,10 @@ export default function AdminPersonalizedSolutionsPage() {
   const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
   const [statusFilter, setStatusFilter] = useState(() => persisted.statusFilter);
   const [activeFilter, setActiveFilter] = useState(() => persisted.activeFilter);
-  const [periodFilter, setPeriodFilter] = useState(() => (persisted.hasPersistedPeriod ? persisted.period : 'week'));
+  const [periodFilter, setPeriodFilter] = useState(() => persisted.period ?? 'week');
+  const periodInitialized = true;
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
-
-  useEffect(() => {
-    if (!periodLoading && !periodInitialized) {
-      if (!hasPersistedPeriodRef.current) {
-        setPeriodFilter(defaultPeriod);
-      }
-      setPeriodInitialized(true);
-    }
-  }, [periodLoading, periodInitialized, defaultPeriod]);
 
   const fetchSolutions = useCallback(async (pageNum, reset = false) => {
     if (reset) setLoading(true);

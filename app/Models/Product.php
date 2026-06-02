@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
+use App\Support\CatalogLocale;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Scout\Searchable;
 
 /**
  * Sellable catalog item: pricing, stock, merchandising flags, and Scout indexing for search.
  *
- * Search text is denormalised on save for consistent catalog and Elasticsearch matching.
+ * Localised name/description live in {@see ProductTranslation}; per-locale search_text is maintained there.
  */
 class Product extends Model
 {
@@ -24,8 +27,6 @@ class Product extends Model
         'category_id',
         'variant_group_id',
         'code',
-        'name',
-        'description',
         'price',
         'purchase_price',
         'stock',
@@ -44,12 +45,12 @@ class Product extends Model
 
     protected static function booted(): void
     {
-        static::saving(function (Product $product): void {
-            $product->search_text = self::normalizeSearchText(
-                $product->name,
-                $product->code,
-                $product->description
-            );
+        static::saved(function (Product $product): void {
+            if ($product->wasChanged('code')) {
+                $product->translations()->each(function (ProductTranslation $t): void {
+                    $t->save();
+                });
+            }
         });
 
         static::saved(fn () => Cache::forget('sitemap.xml'));
@@ -89,7 +90,6 @@ class Product extends Model
             }
         }
 
-        // CI and minimal PHP builds often omit intl; iconv transliteration matches search expectations.
         if (function_exists('iconv')) {
             $converted = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
             if ($converted !== false && $converted !== '') {
@@ -119,6 +119,11 @@ class Product extends Model
         ];
     }
 
+    public function translations(): HasMany
+    {
+        return $this->hasMany(ProductTranslation::class);
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
@@ -130,7 +135,7 @@ class Product extends Model
     }
 
     /**
-     * Other products in the same variant group (siblings). Order by name asc.
+     * Other products in the same variant group (siblings). Order by translated name asc.
      */
     public function variantSiblings()
     {
@@ -142,7 +147,8 @@ class Product extends Model
             ->where('variant_group_id', $this->variant_group_id)
             ->where('id', '!=', $this->id)
             ->active()
-            ->orderBy('name')
+            ->orderByTranslatedName()
+            ->with('translations')
             ->get();
     }
 
@@ -171,9 +177,67 @@ class Product extends Model
         return $this->hasMany(ProductReview::class);
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeOrderByTranslatedName(Builder $query, ?string $locale = null, string $dir = 'asc'): Builder
+    {
+        $loc = CatalogLocale::normalize($locale ?? app()->getLocale());
+        $dir = strtolower($dir) === 'desc' ? 'desc' : 'asc';
+
+        return $query
+            ->leftJoin('product_translations as pt_sort', function ($join) use ($loc): void {
+                $join->on('pt_sort.product_id', '=', 'products.id')->where('pt_sort.locale', '=', $loc);
+            })
+            ->orderBy('pt_sort.name', $dir)
+            ->select('products.*');
+    }
+
+    /** @param  Collection<int, ProductTranslation>|null  $rows */
+    public function translatedName(?string $locale = null, ?Collection $rows = null): ?string
+    {
+        return $this->translatedField('name', $locale, $rows);
+    }
+
+    /** @param  Collection<int, ProductTranslation>|null  $rows */
+    public function translatedDescription(?string $locale = null, ?Collection $rows = null): ?string
+    {
+        return $this->translatedField('description', $locale, $rows);
+    }
+
+    /**
+     * @param  Collection<int, ProductTranslation>|null  $rows
+     */
+    private function translatedField(string $field, ?string $locale, ?Collection $rows): ?string
+    {
+        $rows ??= $this->relationLoaded('translations') ? $this->translations : $this->translations()->get();
+        foreach (CatalogLocale::fallbackChain($locale ?? app()->getLocale()) as $loc) {
+            $t = $rows->firstWhere('locale', $loc);
+            $v = $t?->{$field};
+            if ($v !== null && trim((string) $v) !== '') {
+                return is_string($v) ? $v : null;
+            }
+        }
+
+        // Fallback to legacy column when no translation rows exist yet
+        $legacy = $this->attributes[$field] ?? null;
+        if ($legacy !== null && trim((string) $legacy) !== '') {
+            return (string) $legacy;
+        }
+
+        return null;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->translatedName();
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->translatedDescription();
     }
 
     /** Customer-facing unit price after optional percentage discount. */
@@ -192,7 +256,7 @@ class Product extends Model
         return round($base * (1 - $pct / 100), 2);
     }
 
-    public function scopeFeatured($query)
+    public function scopeFeatured(Builder $query): Builder
     {
         return $query->where('is_featured', true);
     }
@@ -207,26 +271,41 @@ class Product extends Model
      */
     public function toSearchableArray(): array
     {
-        $inputs = array_values(array_filter([
-            $this->name,
-            $this->code,
-        ], fn ($v) => $v !== null && $v !== ''));
+        $this->loadMissing('translations');
+        $by = $this->translations->keyBy('locale');
 
+        $out = [
+            'id' => $this->getKey(),
+            'code' => $this->code !== null ? (string) $this->code : '',
+            'is_active' => (bool) $this->is_active,
+        ];
+
+        $inputs = [];
+        foreach (CatalogLocale::SUPPORTED as $loc) {
+            $t = $by->get($loc);
+            $name = $t?->name;
+            $desc = $t?->description;
+            $st = $t?->search_text;
+            $out['name_'.$loc] = $name !== null ? (string) $name : '';
+            $out['description_'.$loc] = $desc !== null ? (string) $desc : '';
+            $out['search_text_'.$loc] = $st !== null ? (string) $st : '';
+            if ($name !== null && trim((string) $name) !== '') {
+                $inputs[] = trim((string) $name);
+            }
+        }
+        if ($this->code !== null && trim((string) $this->code) !== '') {
+            $inputs[] = trim((string) $this->code);
+        }
+        $inputs = array_values(array_unique(array_filter($inputs, fn ($v) => $v !== '')));
         if ($inputs === []) {
             $inputs = [(string) $this->getKey()];
         }
 
-        return [
-            'id' => $this->getKey(),
-            'name' => (string) $this->name,
-            'code' => $this->code !== null ? (string) $this->code : '',
-            'description' => $this->description !== null ? (string) $this->description : '',
-            'search_text' => $this->search_text !== null ? (string) $this->search_text : '',
-            'is_active' => (bool) $this->is_active,
-            'suggest' => [
-                'input' => $inputs,
-                'weight' => $this->is_featured ? 2 : 1,
-            ],
+        $out['suggest'] = [
+            'input' => $inputs,
+            'weight' => $this->is_featured ? 2 : 1,
         ];
+
+        return $out;
     }
 }

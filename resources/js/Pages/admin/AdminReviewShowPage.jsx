@@ -7,9 +7,8 @@ import StarRating from '../../components/StarRating';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
 const STATUS_COLORS = {
-  pending: 'badge-warning',
-  approved: 'badge-success',
-  rejected: 'badge-error',
+  published: 'badge-success',
+  hidden: 'badge-error',
 };
 
 export default function AdminReviewShowPage() {
@@ -23,8 +22,6 @@ export default function AdminReviewShowPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [adminNote, setAdminNote] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   useEffect(() => {
@@ -35,7 +32,6 @@ export default function AdminReviewShowPage() {
         const { data } = await api.get(`admin/reviews/${id}`);
         if (!cancelled && data.success) {
           setReview(data.data);
-          setAdminNote(data.data.admin_note ?? '');
         }
       } catch (err) {
         if (err.response?.status === 401) navigate('/admin/login');
@@ -47,19 +43,14 @@ export default function AdminReviewShowPage() {
     return () => { cancelled = true; };
   }, [id, navigate, t]);
 
-  const updateStatus = async (status, note) => {
+  const handleToggleVisibility = async () => {
     setSaving(true);
     setError(null);
     try {
-      const { data } = await api.patch(`admin/reviews/${id}`, {
-        status,
-        admin_note: note ?? null,
-      });
+      const { data } = await api.patch(`admin/reviews/${id}/toggle-visibility`);
       if (data.success) {
         setReview(data.data);
-        setAdminNote(data.data.admin_note ?? '');
         showSuccess(t('common.saved'));
-        setRejectModalOpen(false);
       }
     } catch (err) {
       setError(err?.response?.data?.message ?? t('common.error'));
@@ -100,6 +91,8 @@ export default function AdminReviewShowPage() {
     ? new Date(review.created_at).toLocaleDateString('ca-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
     : '';
 
+  const isHidden = review.status === 'hidden';
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -111,13 +104,13 @@ export default function AdminReviewShowPage() {
 
       <div className="card bg-base-100 shadow border border-base-200">
         <div className="card-body space-y-4">
-          {/* Status badge */}
+          {/* Status + verified badge */}
           <div className="flex flex-wrap items-center gap-3">
-            <span className={`badge badge-soft badge-md ${STATUS_COLORS[review.status] ?? 'badge-ghost'}`}>
+            <span className={`badge badge-outline badge-md ${STATUS_COLORS[review.status] ?? 'badge-ghost'}`}>
               {t(`admin.reviews.status_${review.status}`)}
             </span>
             {review.verified_purchase && (
-              <span className="badge badge-success badge-soft badge-sm">{t('shop.reviews.verified_purchase')}</span>
+              <span className="badge badge-success badge-outline badge-sm">{t('shop.reviews.verified_purchase')}</span>
             )}
           </div>
 
@@ -126,10 +119,16 @@ export default function AdminReviewShowPage() {
             <span className="text-xs font-semibold uppercase tracking-wide text-base-content/50">{t('admin.reviews.column_product')}</span>
             <p className="mt-0.5 font-medium">
               {review.product ? (
-                <Link to={`/admin/products/${review.product.id}`} className="link link-primary">
-                  {review.product.name}
-                  {review.product.code && <span className="text-base-content/50 ml-1 font-normal">({review.product.code})</span>}
-                </Link>
+                <>
+                  <Link to={`/admin/products/${review.product.id}`} className="link link-primary">
+                    {review.product.name}
+                    {review.product.code && <span className="text-base-content/50 ml-1 font-normal">({review.product.code})</span>}
+                  </Link>
+                  <span className="mx-1.5 text-base-content/30">·</span>
+                  <a href={`/products/${review.product.id}`} className="link link-hover text-sm" target="_blank" rel="noopener noreferrer">
+                    {t('admin.reviews.view_in_shop')}
+                  </a>
+                </>
               ) : review.product_id}
             </p>
           </div>
@@ -194,37 +193,15 @@ export default function AdminReviewShowPage() {
 
       {/* Action buttons */}
       <div className="flex flex-wrap gap-3">
-        {review.status !== 'approved' && (
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={saving}
-            onClick={() => updateStatus('approved', null)}
-          >
-            {saving && <span className="loading loading-spinner loading-sm" />}
-            {t('admin.reviews.approve')}
-          </button>
-        )}
-        {review.status !== 'rejected' && (
-          <button
-            type="button"
-            className="btn btn-error btn-outline"
-            disabled={saving}
-            onClick={() => setRejectModalOpen(true)}
-          >
-            {t('admin.reviews.reject')}
-          </button>
-        )}
-        {review.status !== 'pending' && (
-          <button
-            type="button"
-            className="btn btn-ghost"
-            disabled={saving}
-            onClick={() => updateStatus('pending', null)}
-          >
-            {t('admin.reviews.reset_pending')}
-          </button>
-        )}
+        <button
+          type="button"
+          className={isHidden ? 'btn btn-primary' : 'btn btn-warning btn-outline'}
+          disabled={saving}
+          onClick={handleToggleVisibility}
+        >
+          {saving && <span className="loading loading-spinner loading-sm" />}
+          {isHidden ? t('admin.reviews.show_review') : t('admin.reviews.hide_review')}
+        </button>
         <button
           type="button"
           className="btn btn-ghost text-error ml-auto"
@@ -234,48 +211,6 @@ export default function AdminReviewShowPage() {
           {t('common.delete')}
         </button>
       </div>
-
-      {/* Reject modal */}
-      {rejectModalOpen && (
-        <dialog className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-3">{t('admin.reviews.reject')}</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium" htmlFor="admin-note-input">
-                  {t('admin.reviews.admin_note')} <span className="text-base-content/50 font-normal">({t('common.optional')})</span>
-                </label>
-                <textarea
-                  id="admin-note-input"
-                  className="textarea textarea-bordered w-full mt-1"
-                  rows={3}
-                  maxLength={500}
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  placeholder={t('admin.reviews.admin_note_placeholder')}
-                />
-              </div>
-            </div>
-            <div className="modal-action">
-              <button type="button" className="btn btn-ghost" onClick={() => setRejectModalOpen(false)}>
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                className="btn btn-error"
-                disabled={saving}
-                onClick={() => updateStatus('rejected', adminNote.trim() || null)}
-              >
-                {saving && <span className="loading loading-spinner loading-sm" />}
-                {t('admin.reviews.reject')}
-              </button>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button type="button" onClick={() => setRejectModalOpen(false)}>close</button>
-          </form>
-        </dialog>
-      )}
 
       {/* Delete confirm modal */}
       {deleteConfirmOpen && (

@@ -12,16 +12,16 @@ function statusBadgeClass(status) {
     case 'awaiting_payment':
     case 'awaiting_installation_price':
     case 'installation_pending':
-      return 'badge-warning badge-soft';
+      return 'badge-outline badge-warning';
     case 'in_transit':
     case 'sent':
-      return 'badge-success badge-soft';
+      return 'badge-outline badge-success';
     case 'installation_confirmed':
-      return 'badge-info badge-soft';
+      return 'badge-outline badge-info';
     case 'returned':
-      return 'badge-neutral badge-soft';
+      return 'badge-outline badge-neutral';
     default:
-      return 'badge-neutral badge-soft';
+      return 'badge-outline badge-neutral';
   }
 }
 
@@ -83,7 +83,7 @@ export default function OrdersPage() {
                 {t('shop.order.tracker.last_order_title')} · #{lastOrder.id}
               </span>
               <Link to={`/orders/${lastOrder.id}`} className="btn btn-ghost btn-xs shrink-0">
-                {t('shop.order.tracker.view_order')} →
+                {t('shop.order.tracker.view_order')}
               </Link>
             </div>
             <OrderStatusTracker order={lastOrder} />
@@ -97,8 +97,8 @@ export default function OrdersPage() {
           {orders.map((o) => {
             const statusKey = `shop.status.${o.status}`;
             const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : o.status;
-            const paymentDue = !o.has_payment && o.can_pay;
             const closed = isOrderClosed(o.status);
+            const paymentDue = !closed && !o.has_payment && o.can_pay;
 
             return (
               <li key={o.id}>
@@ -144,7 +144,7 @@ export default function OrdersPage() {
                         {Number(o.grand_total ?? o.total ?? 0).toFixed(2)} €
                       </span>
                       <span className="btn btn-ghost btn-sm hidden sm:inline-flex">
-                        {t('common.detail')} →
+                        {t('common.detail')}
                       </span>
                     </div>
                   </div>

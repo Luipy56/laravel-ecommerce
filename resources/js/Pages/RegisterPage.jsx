@@ -255,7 +255,7 @@ export default function RegisterPage() {
               />
               <span className="text-sm">
                 {t('gdpr.accept_privacy_prefix')}{' '}
-                <Link to="/privacy-policy" className="link link-primary" onClick={() => window.scrollTo(0, 0)}>
+                <Link to="/privacy-policy" className="link link-primary">
                   {t('footer.privacy_policy')}
                 </Link>
               </span>

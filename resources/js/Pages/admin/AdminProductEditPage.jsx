@@ -133,7 +133,7 @@ export default function AdminProductEditPage() {
     return (
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Link to="/admin/products" className="btn btn-ghost btn-sm">
+          <Link to={`/admin/products/${id}`} className="btn btn-ghost btn-sm">
             {t('common.back')}
           </Link>
         </div>
@@ -154,7 +154,7 @@ export default function AdminProductEditPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.products.edit')} · {product.name || product.code || id}</PageTitle>
-        <Link to="/admin/products" className="btn btn-ghost btn-sm shrink-0">
+        <Link to={`/admin/products/${id}`} className="btn btn-ghost btn-sm shrink-0">
           {t('common.back')}
         </Link>
       </div>

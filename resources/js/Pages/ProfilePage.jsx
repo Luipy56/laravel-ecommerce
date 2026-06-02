@@ -8,6 +8,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import DecryptionWarningBanner from '../components/admin/DecryptionWarningBanner';
 import { scrollOpenModalBoxToTop, scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
+import { isEmailNotVerifiedError, profileMutationErrorMessage } from '../lib/apiErrors';
 import {
   parseWithZod,
   profileAccountSchema,
@@ -72,6 +73,30 @@ export default function ProfilePage() {
   const [contactSaving, setContactSaving] = useState(false);
   const [contactFieldErrors, setContactFieldErrors] = useState({});
 
+  /** API error banner: message + optional link to /verify-email */
+  const [accountSubmitBanner, setAccountSubmitBanner] = useState(null);
+  const [passwordSubmitBanner, setPasswordSubmitBanner] = useState(null);
+  const [addressSubmitBanner, setAddressSubmitBanner] = useState(null);
+  const [contactSubmitBanner, setContactSubmitBanner] = useState(null);
+
+  const verifyEmailProfileHref = `/verify-email?next=${encodeURIComponent('/profile')}`;
+
+  const mutationBanner = (banner) => {
+    if (!banner) return null;
+    return (
+      <div role="alert" className="alert alert-warning text-sm">
+        <div className="flex flex-col gap-2">
+          <span>{banner.message}</span>
+          {banner.verifyLink ? (
+            <Link to={verifyEmailProfileHref} className="link link-primary self-start">
+              {t('auth.verify_email_page_title')}
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    );
+  };
+
   const fetchProfile = useCallback(async () => {
     const r = await api.get('profile');
     if (r.data.success && r.data.data) {
@@ -100,6 +125,7 @@ export default function ProfilePage() {
 
   const handleAccountChange = (e) => {
     const { name, value } = e.target;
+    setAccountSubmitBanner(null);
     setAccountForm((f) => ({ ...f, [name]: value }));
     if (accountFieldErrors[name]) {
       setAccountFieldErrors((fe) => {
@@ -113,6 +139,7 @@ export default function ProfilePage() {
   const handleAccountSubmit = async (e) => {
     e.preventDefault();
     setAccountFieldErrors({});
+    setAccountSubmitBanner(null);
     const parsed = parseWithZod(profileAccountSchema, accountForm, t);
     if (!parsed.ok) {
       setAccountFieldErrors(parsed.fieldErrors);
@@ -128,7 +155,14 @@ export default function ProfilePage() {
         phone: parsed.data.phone,
       });
       await fetchProfile();
+      setAccountSubmitBanner(null);
       setSaved(true);
+    } catch (err) {
+      setAccountSubmitBanner({
+        message: profileMutationErrorMessage(err, t),
+        verifyLink: isEmailNotVerifiedError(err),
+      });
+      scrollWindowToTopOnFormError();
     } finally {
       setAccountSaving(false);
     }
@@ -136,6 +170,7 @@ export default function ProfilePage() {
 
   const handlePasswordChange = (e) => {
     const { name } = e.target;
+    setPasswordSubmitBanner(null);
     setPasswordForm((f) => ({ ...f, [name]: e.target.value }));
     if (passwordFieldErrors[name]) {
       setPasswordFieldErrors((fe) => {
@@ -149,6 +184,7 @@ export default function ProfilePage() {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setPasswordFieldErrors({});
+    setPasswordSubmitBanner(null);
     const parsed = parseWithZod(profilePasswordSchema, passwordForm, t);
     if (!parsed.ok) {
       setPasswordFieldErrors(parsed.fieldErrors);
@@ -165,7 +201,14 @@ export default function ProfilePage() {
         password_confirmation: parsed.data.password_confirmation,
       });
       setPasswordForm({ password: '', password_confirmation: '' });
+      setPasswordSubmitBanner(null);
       setSaved(true);
+    } catch (err) {
+      setPasswordSubmitBanner({
+        message: profileMutationErrorMessage(err, t),
+        verifyLink: isEmailNotVerifiedError(err),
+      });
+      scrollWindowToTopOnFormError();
     } finally {
       setPasswordSaving(false);
     }
@@ -173,6 +216,7 @@ export default function ProfilePage() {
 
   const openAddressModal = (addr = null) => {
     setAddressFieldErrors({});
+    setAddressSubmitBanner(null);
     if (addr) {
       setAddressModal({ id: addr.id });
       setAddressForm({
@@ -200,6 +244,7 @@ export default function ProfilePage() {
 
   const handleAddressFormChange = (e) => {
     const { name, value, type, checked } = e.target;
+    setAddressSubmitBanner(null);
     const nextVal =
       type === 'checkbox' ? checked : coercePostalCodeFieldValue(name, value);
     setAddressForm((f) => ({
@@ -218,6 +263,7 @@ export default function ProfilePage() {
   const handleAddressSubmit = async (e) => {
     e.preventDefault();
     setAddressFieldErrors({});
+    setAddressSubmitBanner(null);
     const parsed = parseWithZod(profileAddressSchema, addressForm, t);
     if (!parsed.ok) {
       setAddressFieldErrors(parsed.fieldErrors);
@@ -233,7 +279,14 @@ export default function ProfilePage() {
       }
       await fetchProfile();
       setAddressModal(null);
+      setAddressSubmitBanner(null);
       setSaved(true);
+    } catch (err) {
+      setAddressSubmitBanner({
+        message: profileMutationErrorMessage(err, t),
+        verifyLink: isEmailNotVerifiedError(err),
+      });
+      scrollOpenModalBoxToTop();
     } finally {
       setAddressSaving(false);
     }
@@ -260,6 +313,7 @@ export default function ProfilePage() {
 
   const openContactModal = (contact = null) => {
     setContactFieldErrors({});
+    setContactSubmitBanner(null);
     if (contact) {
       setContactModal({ id: contact.id });
       setContactForm({
@@ -285,6 +339,7 @@ export default function ProfilePage() {
 
   const handleContactFormChange = (e) => {
     const { name, value, type, checked } = e.target;
+    setContactSubmitBanner(null);
     setContactForm((f) => ({
       ...f,
       [name]: type === 'checkbox' ? checked : value,
@@ -301,6 +356,7 @@ export default function ProfilePage() {
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setContactFieldErrors({});
+    setContactSubmitBanner(null);
     const parsed = parseWithZod(profileContactSchema, contactForm, t);
     if (!parsed.ok) {
       setContactFieldErrors(parsed.fieldErrors);
@@ -316,7 +372,14 @@ export default function ProfilePage() {
       }
       await fetchProfile();
       setContactModal(null);
+      setContactSubmitBanner(null);
       setSaved(true);
+    } catch (err) {
+      setContactSubmitBanner({
+        message: profileMutationErrorMessage(err, t),
+        verifyLink: isEmailNotVerifiedError(err),
+      });
+      scrollOpenModalBoxToTop();
     } finally {
       setContactSaving(false);
     }
@@ -383,13 +446,14 @@ export default function ProfilePage() {
       )}
 
       {/* Account data */}
-      <section className="card bg-base-100 shadow">
-        <div className="card-body">
+      <section className="card min-w-0 max-w-full bg-base-100 shadow">
+        <div className="card-body min-w-0 max-w-full">
           <h2 className="card-title text-lg">{t('profile.account_data')}</h2>
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm">
+          {mutationBanner(accountSubmitBanner)}
+          <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
+            <span className="min-w-0 max-w-full break-words text-sm">
               <span className="text-base-content/70">{t('profile.email')}: </span>
-              <span className="text-base-content font-medium">{profile.login_email}</span>
+              <span className="font-medium text-base-content">{profile.login_email}</span>
             </span>
           </div>
           <form onSubmit={handleAccountSubmit} className="space-y-4 mt-4">
@@ -457,40 +521,45 @@ export default function ProfilePage() {
 
       {/* Company: contacts list */}
       {isCompany && (
-        <section className="card bg-base-100 shadow">
-          <div className="card-body">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+        <section className="card min-w-0 max-w-full bg-base-100 shadow">
+          <div className="card-body min-w-0 max-w-full">
+            <div className="flex flex-col gap-2 min-[400px]:flex-row min-[400px]:flex-wrap min-[400px]:items-center min-[400px]:justify-between">
               <h2 className="card-title text-lg">{t('profile.contacts')}</h2>
-              <button type="button" className="btn btn-sm btn-primary" onClick={() => openContactModal()}>
+              <button type="button" className="btn btn-sm btn-primary w-full shrink-0 min-[400px]:w-auto" onClick={() => openContactModal()}>
                 {t('profile.add_contact')}
               </button>
             </div>
             {profile.contacts?.length ? (
               <ul className="space-y-3">
                 {profile.contacts.map((c) => (
-                  <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 p-3 bg-base-200 rounded-lg">
-                    <div>
-                      <span className="font-medium">{c.name} {c.surname}</span>
+                  <li
+                    key={c.id}
+                    className="flex flex-col gap-3 rounded-lg bg-base-200 p-3 min-[480px]:flex-row min-[480px]:flex-wrap min-[480px]:items-center min-[480px]:justify-between"
+                  >
+                    <div className="min-w-0 max-w-full flex-1">
+                      <span className="font-medium break-words">
+                        {c.name} {c.surname}
+                      </span>
                       {c.is_primary && (
-                        <span className="badge badge-sm badge-primary ml-2">{t('profile.primary_contact')}</span>
+                        <span className="badge badge-sm badge-primary ml-2 align-middle">{t('profile.primary_contact')}</span>
                       )}
-                      <div className="text-sm text-base-content/70">
+                      <div className="mt-1 break-words text-sm text-base-content/70">
                         {c.phone && <span>{c.phone}</span>}
                         {c.phone2 && <span> · {c.phone2}</span>}
                         {c.email && <span> · {c.email}</span>}
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex w-full shrink-0 flex-col gap-2 min-[480px]:w-auto min-[480px]:flex-row">
                       <button
                         type="button"
-                        className="btn btn-sm btn-outline btn-neutral"
+                        className="btn btn-sm btn-outline btn-neutral w-full min-[480px]:w-auto"
                         onClick={() => openContactModal(c)}
                       >
                         {t('common.edit')}
                       </button>
                       <button
                         type="button"
-                        className="btn btn-sm btn-ghost text-error hover:bg-error/10"
+                        className="btn btn-sm btn-ghost w-full text-error hover:bg-error/10 min-[480px]:w-auto"
                         onClick={() => handleDeleteContact(c.id)}
                       >
                         {t('profile.delete')}
@@ -507,41 +576,44 @@ export default function ProfilePage() {
       )}
 
       {/* Addresses */}
-      <section className="card bg-base-100 shadow">
-        <div className="card-body">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+      <section className="card min-w-0 max-w-full bg-base-100 shadow">
+        <div className="card-body min-w-0 max-w-full">
+          <div className="flex flex-col gap-2 min-[400px]:flex-row min-[400px]:flex-wrap min-[400px]:items-center min-[400px]:justify-between">
             <h2 className="card-title text-lg">{t('profile.addresses')}</h2>
-            <button type="button" className="btn btn-sm btn-primary" onClick={() => openAddressModal()}>
+            <button type="button" className="btn btn-sm btn-primary w-full shrink-0 min-[400px]:w-auto" onClick={() => openAddressModal()}>
               {t('profile.add_address')}
             </button>
           </div>
             {profile.addresses?.length ? (
             <ul className="space-y-3">
               {profile.addresses.map((addr) => (
-                <li key={addr.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-base-200 rounded-lg border border-base-300/50">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap gap-2 items-center">
+                <li
+                  key={addr.id}
+                  className="flex flex-col gap-3 rounded-lg border border-base-300/50 bg-base-200 p-4 min-[480px]:flex-row min-[480px]:items-center"
+                >
+                  <div className="min-w-0 max-w-full flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="badge badge-outline badge-sm">{addressTypeLabel(addr.type)}</span>
                       {addr.is_primary && (
                         <span className="badge badge-sm badge-primary">{t('profile.primary_address')}</span>
                       )}
-                      {addr.label && <span className="text-sm font-medium">{addr.label}</span>}
+                      {addr.label && <span className="break-words text-sm font-medium">{addr.label}</span>}
                     </div>
-                    <p className="text-sm mt-1.5 text-base-content">
+                    <p className="mt-1.5 break-words text-sm text-base-content">
                       {[addr.street, addr.postal_code, addr.city, addr.province].filter(Boolean).join(', ')}
                     </p>
                   </div>
-                  <div className="flex gap-2 shrink-0">
+                  <div className="flex w-full shrink-0 flex-col gap-2 min-[480px]:w-auto min-[480px]:flex-row">
                     <button
                       type="button"
-                      className="btn btn-sm btn-outline btn-neutral"
+                      className="btn btn-sm btn-outline btn-neutral w-full min-[480px]:w-auto"
                       onClick={() => openAddressModal(addr)}
                     >
                       {t('common.edit')}
                     </button>
                     <button
                       type="button"
-                      className="btn btn-sm btn-ghost text-error hover:bg-error/10"
+                      className="btn btn-sm btn-ghost w-full text-error hover:bg-error/10 min-[480px]:w-auto"
                       onClick={() => handleDeleteAddress(addr.id)}
                     >
                       {t('profile.delete')}
@@ -557,9 +629,10 @@ export default function ProfilePage() {
       </section>
 
       {/* Change password */}
-      <section className="card bg-base-100 shadow">
-        <div className="card-body">
+      <section className="card min-w-0 max-w-full bg-base-100 shadow">
+        <div className="card-body min-w-0 max-w-full">
           <h2 className="card-title text-lg">{t('profile.change_password')}</h2>
+          {mutationBanner(passwordSubmitBanner)}
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <input
               type="password"
@@ -594,10 +667,11 @@ export default function ProfilePage() {
 
       {/* Address modal */}
       <dialog className={`modal ${addressModal !== null ? 'modal-open' : ''}`}>
-        <div className="modal-box">
+        <div className="modal-box w-[calc(100%-2rem)] max-w-lg max-h-[min(90dvh,40rem)] overflow-y-auto">
           <h3 className="font-bold text-lg">
             {addressModal?.id ? t('profile.edit_address') : t('profile.add_address')}
           </h3>
+          {mutationBanner(addressSubmitBanner)}
           <form onSubmit={handleAddressSubmit} className="space-y-3 mt-4">
             <label className="label">
               <span className="label-text">{t('profile.address_type')}</span>
@@ -702,10 +776,11 @@ export default function ProfilePage() {
 
       {/* Contact modal (company only) */}
       <dialog className={`modal ${contactModal !== null ? 'modal-open' : ''}`}>
-        <div className="modal-box">
+        <div className="modal-box w-[calc(100%-2rem)] max-w-lg max-h-[min(90dvh,40rem)] overflow-y-auto">
           <h3 className="font-bold text-lg">
             {contactModal?.id ? t('profile.edit_contact') : t('profile.add_contact')}
           </h3>
+          {mutationBanner(contactSubmitBanner)}
           <form onSubmit={handleContactSubmit} className="space-y-3 mt-4">
             <input
               type="text"

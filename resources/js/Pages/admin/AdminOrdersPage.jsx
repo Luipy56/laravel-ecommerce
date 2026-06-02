@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
-import { useAdminIndexColumnVisibility, useAdminListDefaultPeriod } from '../../hooks/useAdminShopSettingsQuery';
+import { useAdminIndexColumnVisibility } from '../../hooks/useAdminShopSettingsQuery';
 import { loadAdminListFilters, normalizedPeriod, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
 
 const ORDERS_FILTERS_PAGE_ID = 'orders';
@@ -52,15 +52,12 @@ export default function AdminOrdersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { orderedVisibleColumnIds } = useAdminIndexColumnVisibility('orders');
-  const { defaultPeriod, isLoading: periodLoading } = useAdminListDefaultPeriod();
   const persistedRef = useRef(undefined);
   if (persistedRef.current === undefined) {
     persistedRef.current = readPersistedOrdersFilters();
   }
   const persisted = persistedRef.current;
-  const hasPersistedPeriodRef = useRef(persisted.hasPersistedPeriod);
 
-  const [periodInitialized, setPeriodInitialized] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -69,18 +66,10 @@ export default function AdminOrdersPage() {
   const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
   const [kindFilter, setKindFilter] = useState(() => persisted.kind);
   const [statusFilter, setStatusFilter] = useState(() => persisted.status);
-  const [periodFilter, setPeriodFilter] = useState(() => (persisted.hasPersistedPeriod ? persisted.period : 'week'));
+  const [periodFilter, setPeriodFilter] = useState(() => persisted.period ?? 'week');
+  const periodInitialized = true;
   const pageRef = useRef(1);
   const sentinelRef = useRef(null);
-
-  useEffect(() => {
-    if (!periodLoading && !periodInitialized) {
-      if (!hasPersistedPeriodRef.current) {
-        setPeriodFilter(defaultPeriod);
-      }
-      setPeriodInitialized(true);
-    }
-  }, [periodLoading, periodInitialized, defaultPeriod]);
 
   const fetchOrders = useCallback(async (pageNum, reset = false) => {
     if (reset) setLoading(true);

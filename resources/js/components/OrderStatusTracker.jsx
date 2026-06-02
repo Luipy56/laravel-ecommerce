@@ -16,12 +16,12 @@ function currentStepIndex(status, withInstall) {
   if (withInstall) {
     switch (status) {
       case 'awaiting_installation_price': return 0;
-      case 'awaiting_payment':            return 1;
+      case 'awaiting_payment':            return 0;
       case 'pending':                     return 1;
       case 'in_transit':                  return 2;
-      case 'sent':                        return 3;
-      case 'installation_pending':        return 4;
-      case 'installation_confirmed':      return 5;
+      case 'sent':                        return 2;
+      case 'installation_pending':        return 3;
+      case 'installation_confirmed':      return 4;
       default:                            return 0;
     }
   } else {
@@ -51,13 +51,16 @@ export default function OrderStatusTracker({ order }) {
 
   const withInstall = Boolean(order.installation_requested);
 
+  const installStepLabel = order.status === 'installation_confirmed'
+    ? t('shop.order.tracker.step_installation')
+    : t('shop.order.tracker.step_installing');
+
   const steps = withInstall
     ? [
+        t('shop.order.tracker.step_pending'),
         t('shop.order.tracker.step_received'),
-        t('shop.order.tracker.step_payment'),
         t('shop.order.tracker.step_transit'),
-        t('shop.order.tracker.step_sent'),
-        t('shop.order.tracker.step_installation'),
+        installStepLabel,
         t('shop.order.tracker.step_done'),
       ]
     : [

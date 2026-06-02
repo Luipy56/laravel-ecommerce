@@ -1,19 +1,30 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import TranslationFields from './TranslationFields';
 
 export default function AdminFeatureForm({ feature = null, featureNames = [], onSubmit, loading = false, error = '' }) {
   const { t } = useTranslation();
   const [featureNameId, setFeatureNameId] = useState(feature?.feature_name_id ?? '');
-  const [value, setValue] = useState(feature?.value ?? '');
+  const [values, setValues] = useState({
+    ca: feature?.translations?.ca?.value ?? feature?.value ?? '',
+    es: feature?.translations?.es?.value ?? '',
+    en: feature?.translations?.en?.value ?? '',
+  });
   const [isActive, setIsActive] = useState(feature?.is_active ?? true);
+
+  const handleValuesChange = (locale, val) => setValues((prev) => ({ ...prev, [locale]: val }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit({
       feature_name_id: Number(featureNameId),
-      value: value.trim(),
+      value: values.ca.trim(),
       is_active: !!isActive,
+      translations: {
+        es: { value: values.es.trim() },
+        en: { value: values.en.trim() },
+      },
     });
   };
 
@@ -43,17 +54,13 @@ export default function AdminFeatureForm({ feature = null, featureNames = [], on
         </select>
       </label>
 
-      <label className="form-field">
-        <span className="form-label">{t('admin.features.value')} *</span>
-        <input
-          type="text"
-          className="input input-bordered w-full"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          required
-          aria-label={t('admin.features.value')}
-        />
-      </label>
+      <TranslationFields
+        field="value"
+        values={values}
+        onChange={handleValuesChange}
+        label={t('admin.features.value_translations')}
+        required
+      />
 
       <label className="label cursor-pointer gap-2">
         <input

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { loginSchema, parseWithZod } from '../validation';
+import { useToast } from '../contexts/ToastContext';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -12,7 +13,16 @@ export default function LoginPage() {
   const { mergeCart } = useCart();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { showToast } = useToast();
   const verifiedFromEmail = searchParams.get('verified') === '1';
+
+  useEffect(() => {
+    if (verifiedFromEmail) {
+      showToast({ message: t('auth.verify_success_banner'), type: 'success' });
+      const next = searchParams.get('next');
+      navigate({ search: next ? `?next=${encodeURIComponent(next)}` : '' }, { replace: true });
+    }
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
   const [loginEmail, setLoginEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
@@ -65,11 +75,6 @@ export default function LoginPage() {
       <div className="card-body">
         <h1 className="card-title text-2xl">{t('auth.login')}</h1>
         <form onSubmit={handleSubmit} className="space-y-5">
-          {verifiedFromEmail ? (
-            <div className="alert alert-success text-sm" role="status">
-              {t('auth.verify_success_banner')}
-            </div>
-          ) : null}
           {error && <div className="alert alert-error text-sm">{error}</div>}
           <label htmlFor="login-email" className="form-field w-full">
             <span className="form-label">{t('auth.email')}</span>

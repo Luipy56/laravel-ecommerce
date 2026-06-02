@@ -7,21 +7,20 @@ import StarRating from '../../components/StarRating';
 import { loadAdminListFilters, normalizedStoredSearch, saveAdminListFilters } from '../../utils/adminListFiltersStorage';
 
 const REVIEWS_FILTERS_PAGE_ID = 'reviews';
-const REVIEW_STATUS_VALUES = ['', 'pending', 'approved', 'rejected'];
+const REVIEW_STATUS_VALUES = ['', 'published', 'hidden'];
 
 function readPersistedReviewFilters() {
   const raw = loadAdminListFilters(REVIEWS_FILTERS_PAGE_ID);
   const search = normalizedStoredSearch(raw?.search ?? '', '');
   const st = raw?.status;
   const statusFilter =
-    typeof st === 'string' && REVIEW_STATUS_VALUES.includes(st) ? st : 'pending';
+    typeof st === 'string' && REVIEW_STATUS_VALUES.includes(st) ? st : '';
   return { search, statusFilter };
 }
 
 const STATUS_COLORS = {
-  pending: 'badge-warning',
-  approved: 'badge-success',
-  rejected: 'badge-error',
+  published: 'badge-success',
+  hidden: 'badge-error',
 };
 
 export default function AdminReviewsPage() {
@@ -38,7 +37,7 @@ export default function AdminReviewsPage() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [pendingCount, setPendingCount] = useState(0);
+  const [hiddenCount, setHiddenCount] = useState(0);
 
   const [search, setSearch] = useState(() => persisted.search);
   const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
@@ -60,7 +59,7 @@ export default function AdminReviewsPage() {
         setReviews(data.data ?? []);
         setLastPage(data.meta?.last_page ?? 1);
         setTotal(data.meta?.total ?? 0);
-        setPendingCount(data.meta?.pending_count ?? 0);
+        setHiddenCount(data.meta?.hidden_count ?? 0);
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
@@ -104,9 +103,8 @@ export default function AdminReviewsPage() {
           aria-label={t('admin.reviews.filter_status')}
         >
           <option value="">{t('shop.categories.all')}{total > 0 ? ` (${total})` : ''}</option>
-          <option value="pending">{t('admin.reviews.status_pending')}{pendingCount > 0 ? ` (${pendingCount})` : ''}</option>
-          <option value="approved">{t('admin.reviews.status_approved')}</option>
-          <option value="rejected">{t('admin.reviews.status_rejected')}</option>
+          <option value="published">{t('admin.reviews.status_published')}</option>
+          <option value="hidden">{t('admin.reviews.status_hidden')}{hiddenCount > 0 ? ` (${hiddenCount})` : ''}</option>
         </select>
       </div>
 
@@ -164,7 +162,7 @@ export default function AdminReviewsPage() {
                       <span className="block truncate">{truncate(row.comment)}</span>
                     </td>
                     <td className="text-center">
-                      <span className={`badge badge-soft badge-sm ${STATUS_COLORS[row.status] ?? 'badge-ghost'}`}>
+                      <span className={`badge badge-outline badge-sm ${STATUS_COLORS[row.status] ?? 'badge-ghost'}`}>
                         {t(`admin.reviews.status_${row.status}`)}
                       </span>
                     </td>

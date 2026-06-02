@@ -6,6 +6,7 @@ import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 import { useToast } from '../../contexts/ToastContext';
 import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
+import SendEmailModal from '../../components/admin/SendEmailModal';
 
 const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
 
@@ -36,6 +37,7 @@ export default function AdminPersonalizedSolutionShowPage() {
   const [solution, setSolution] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
+  const [sendEmailModalOpen, setSendEmailModalOpen] = useState(false);
   const [notifyLoading, setNotifyLoading] = useState(false);
   const [resolutionSaveLoading, setResolutionSaveLoading] = useState(false);
   const [draftResolution, setDraftResolution] = useState('');
@@ -156,6 +158,11 @@ export default function AdminPersonalizedSolutionShowPage() {
           >
             {t('admin.personalized_solutions.resolution_modal_open')}
           </button>
+          {(solution.client?.login_email || solution.email) && (
+            <button type="button" className="btn btn-outline btn-sm shrink-0" onClick={() => setSendEmailModalOpen(true)}>
+              {t('admin.send_email.button')}
+            </button>
+          )}
           <button
             type="button"
             className="btn btn-outline btn-sm shrink-0"
@@ -168,6 +175,13 @@ export default function AdminPersonalizedSolutionShowPage() {
           <Link to={`/admin/personalized-solutions/${id}/edit`} className="btn btn-ghost btn-sm shrink-0">{t('common.edit')}</Link>
         </div>
       </div>
+
+      <SendEmailModal
+        recipientEmail={solution.client?.login_email || solution.email}
+        defaultSubject={t('admin.send_email.default_subject_solution', { id: solution.id })}
+        isOpen={sendEmailModalOpen}
+        onClose={() => setSendEmailModalOpen(false)}
+      />
 
       <dialog ref={notifyConfirmDialogRef} id="admin-sp-notify-confirm-modal" className="modal" aria-labelledby="admin-sp-notify-confirm-title">
         <div className="modal-box max-w-md">

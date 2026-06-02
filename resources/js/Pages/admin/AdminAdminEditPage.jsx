@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { useAdminToast } from '../../contexts/AdminToastContext';
+import { IconEye, IconEyeOff } from '../../components/icons';
 
 export default function AdminAdminEditPage() {
   const { t } = useTranslation();
@@ -12,6 +13,8 @@ export default function AdminAdminEditPage() {
   const { id } = useParams();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -41,6 +44,10 @@ export default function AdminAdminEditPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
+    if (password.trim() && password !== passwordConfirm) {
+      setSubmitError(t('admin.admins.password_mismatch'));
+      return;
+    }
     setLoading(true);
     try {
       const payload = { username: username.trim(), is_active: isActive };
@@ -49,6 +56,8 @@ export default function AdminAdminEditPage() {
       if (data.success) {
         showSuccess(t('common.saved'));
         setPassword('');
+        setPasswordConfirm('');
+        setShowPassword(false);
       } else setSubmitError(data.message || t('common.error'));
     } catch (err) {
       setSubmitError(err.response?.data?.message || err.response?.data?.errors?.username?.[0] || t('common.error'));
@@ -102,14 +111,51 @@ export default function AdminAdminEditPage() {
             </label>
             <label className="form-field">
               <span className="form-label">{t('admin.admins.password_optional')}</span>
-              <input
-                type="password"
-                className="input input-bordered w-full"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                aria-label={t('admin.login.password')}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className="input input-bordered w-full pr-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  aria-label={t('admin.admins.password_optional')}
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs btn-circle"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={t('admin.admins.show_password')}
+                  tabIndex={-1}
+                >
+                  {showPassword
+                    ? <IconEyeOff className="h-4 w-4" aria-hidden="true" />
+                    : <IconEye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
+            </label>
+            <label className="form-field">
+              <span className="form-label">{t('admin.admins.password_confirm')}</span>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className="input input-bordered w-full pr-10"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  autoComplete="new-password"
+                  aria-label={t('admin.admins.password_confirm')}
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs btn-circle"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={t('admin.admins.show_password')}
+                  tabIndex={-1}
+                >
+                  {showPassword
+                    ? <IconEyeOff className="h-4 w-4" aria-hidden="true" />
+                    : <IconEye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
             </label>
             <label className="label cursor-pointer gap-2">
               <input

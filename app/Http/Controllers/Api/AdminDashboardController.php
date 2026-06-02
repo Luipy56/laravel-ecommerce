@@ -166,7 +166,7 @@ class AdminDashboardController extends Controller
         $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
         $data = $lines->map(fn ($l) => [
             'product_id' => $l->product_id,
-            'name' => $products->get($l->product_id)?->name ?? '-',
+            'name' => $products->get($l->product_id)?->name ?? '',
             'quantity' => (int) $l->qty,
         ]);
 
@@ -176,7 +176,13 @@ class AdminDashboardController extends Controller
     /** Products with lowest stock. */
     public function lowStock(): JsonResponse
     {
-        $data = Product::query()->where('is_active', true)->orderBy('stock')->limit(10)->get(['id', 'name', 'stock', 'code']);
+        $data = Product::query()
+            ->where('is_active', true)
+            ->with('translations')
+            ->orderBy('stock')
+            ->limit(10)
+            ->get(['id', 'stock', 'code'])
+            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'stock' => $p->stock, 'code' => $p->code]);
 
         return response()->json(['success' => true, 'data' => $data]);
     }

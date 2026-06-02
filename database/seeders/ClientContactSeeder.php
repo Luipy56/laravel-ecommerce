@@ -16,7 +16,7 @@ class ClientContactSeeder extends Seeder
     {
         $byEmail = [
             'maria.garcia@example.com' => ['name' => 'Maria', 'surname' => 'García', 'phone' => '612345678', 'phone2' => '934567890', 'email' => 'maria.garcia@example.com', 'is_primary' => true, 'is_active' => true],
-            'joan.martinez@example.com' => ['name' => 'Juan', 'surname' => 'Martínez', 'phone' => '698765432', 'phone2' => null, 'email' => 'joan.martinez@example.com', 'is_primary' => true, 'is_active' => true],
+            'holaquetal@gmail.com' => ['name' => 'Juan', 'surname' => 'Martínez', 'phone' => '698765432', 'phone2' => null, 'email' => 'holaquetal@gmail.com', 'is_primary' => true, 'is_active' => true],
             'anna.lopez@example.com' => ['name' => 'Ana', 'surname' => 'López', 'phone' => '655443322', 'phone2' => '931122334', 'email' => 'anna.lopez@example.com', 'is_primary' => true, 'is_active' => true],
         ];
 

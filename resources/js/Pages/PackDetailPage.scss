@@ -1,0 +1,296 @@
+@use "../styles/fluid" as *;
+
+// ─── Shared layout classes (same as ProductDetailPage) ────────────────────────
+// .product-detail__media, .product-detail__thumbs, .product-detail__thumb,
+// .product-detail__image-wrap, .product-detail__image-inner,
+// .product-detail__info, .product-detail__actions, .product-detail__qty,
+// .product-detail__add-btn, .product-detail__fav
+// are defined here so PackDetailPage can use them without depending on ProductDetailPage.scss
+
+// ─── Inner wrapper (product-detail-page is the outer shell with bg + borders) ─
+.pack-detail {
+  flex: 1;
+  width: 100%;
+}
+
+// ─── Back link ────────────────────────────────────────────────────────────────
+.pack-detail__back {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: fluid(8, 14);
+}
+
+// ─── Two-column layout: [media] [info] ───────────────────────────────────────
+.pack-detail__card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: fluid(20, 40);
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+// ─── LEFT: media — thumbs vertical strip + main image side by side ────────────
+.pack-detail__media {
+  display: flex;
+  flex-direction: row;
+  gap: fluid(10, 14);
+  align-items: flex-start;
+}
+
+.pack-detail__thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(8, 10);
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 520px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+.pack-detail__thumb {
+  width: fluid(64, 76);
+  height: fluid(64, 76);
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background: #f0f0f0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &--active {
+    border-color: #f75211;
+    box-shadow: 0 0 0 2px rgba(247, 82, 17, 0.18);
+  }
+
+  &:hover:not(.pack-detail__thumb--active) {
+    border-color: rgba(0, 0, 0, 0.18);
+  }
+}
+
+// Main image — fully rounded on all 4 corners
+.pack-detail__image-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+  background: #f5f5f5;
+  border-radius: fluid(12, 16);
+}
+
+.pack-detail__image-inner {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    user-select: none;
+  }
+}
+
+// ─── RIGHT: info panel ────────────────────────────────────────────────────────
+.pack-detail__info {
+  display: flex;
+  flex-direction: column;
+  gap: fluid(12, 16);
+  padding: fluid(4, 8) 0;
+
+  @media (min-width: 768px) {
+    position: sticky;
+    top: fluid(16, 24);
+  }
+}
+
+// Badge row (Pack / contains_keys / discount)
+.pack-detail__badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.pack-detail__name {
+  font-size: fluid(20, 28);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--color-base-content, #1a1a1a);
+}
+
+// Price block
+.pack-detail__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pack-detail__price {
+  font-size: fluid(24, 34);
+  font-weight: 800;
+  color: #f75211;
+  font-variant-numeric: tabular-nums;
+}
+
+.pack-detail__old-price {
+  font-size: fluid(14, 16);
+  color: #bbb;
+  text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
+}
+
+.pack-detail__discount {
+  font-size: fluid(12, 13);
+  color: #ef4444;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+// Savings callout
+.pack-detail__savings {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(247, 82, 17, 0.07);
+  border: 1px solid rgba(247, 82, 17, 0.2);
+  color: #f75211;
+  border-radius: 10px;
+  padding: fluid(8, 10) fluid(10, 14);
+  font-size: fluid(13, 14);
+  font-weight: 600;
+  width: fit-content;
+}
+
+// Divider
+.pack-detail__divider {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin: 0;
+}
+
+.pack-detail__description {
+  font-size: fluid(13, 14);
+  color: #555;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+// Pack contents block
+.pack-detail__contents {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pack-detail__contents-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: fluid(8, 10) fluid(12, 16);
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: fluid(12, 13);
+  font-weight: 600;
+  color: #555;
+}
+
+.pack-detail__contents-original {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: fluid(6, 8) fluid(12, 16);
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: fluid(11, 12);
+  color: #888;
+}
+
+.pack-detail__contents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: fluid(10, 12);
+}
+
+// ─── Actions: qty + add btn + fav ─────────────────────────────────────────────
+.pack-detail__actions {
+  display: flex;
+  align-items: center;
+  gap: fluid(10, 14);
+  padding-top: fluid(4, 8);
+}
+
+.pack-detail__qty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: fluid(13, 14);
+  font-weight: 500;
+  flex-shrink: 0;
+
+  input {
+    width: 58px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: fluid(13, 14);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    outline: none;
+    background: var(--color-base-100, white);
+    color: var(--color-base-content, #1a1a1a);
+    transition: border-color 0.15s;
+
+    &:focus { border-color: #f75211; }
+  }
+}
+
+.pack-detail__add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: fluid(6, 8);
+  padding: fluid(8, 10) fluid(14, 18);
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(to right, #f75211 0%, #8b2400 100%);
+  color: white;
+  font-size: fluid(12, 13);
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(247, 82, 17, 0.35);
+  }
+
+  &:active { transform: scale(0.98); }
+}
+
+.pack-detail__fav {
+  flex-shrink: 0;
+}

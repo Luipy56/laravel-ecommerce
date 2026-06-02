@@ -1,9 +1,812 @@
 # Changelog
 
+## [0.1.326] - 2026-05-18
+
+### Changed
+- **Pack detail page:** full redesign aligned with product detail (gallery, gradient add-to-cart, `PackDetailPage.scss`).
+- **Storefront layout:** product-detail white column and side-band background also apply to `/packs/:id`.
+
+## [0.1.325] - 2026-05-18
+
+### Fixed
+- **PackDetailPage:** restore `useEffect` import removed by mistake in previous refactor.
+
+## [0.1.324] - 2026-05-18
+
+### Fixed
+- **PackDetailPage:** wrap content in `.product-detail-page` shell (same as ProductDetailPage) so the white centered column with gray side bands appears correctly. Removed manual `useEffect` background hack.
+
+## [0.1.323] - 2026-05-18
+
+### Changed
+- **PackDetailPage redesign:** same layout as ProductDetailPage — white `main` background via `useEffect`, thumbnails as vertical strip to the left of the main image (fully rounded corners), removed floating card wrapper and prev/next arrows, gradient "Add to cart" button with text, reviews section with 80px top spacing. New `PackDetailPage.scss` added.
+
+## [0.1.322] - 2026-05-18
+
+### Changed
+- **Pack detail:** same full-height white-column layout as product detail — `PackDetailShell` wraps content, decorative background visible only in side margins, card chrome removed.
+- **Pack detail thumbnails:** GIFs show a still frame and animate only on hover, using `CatalogCardImage` with `content_type` from API.
+
+## [0.1.321] - 2026-05-17
+
+### Changed
+- **Demo seeders:** client 2 login and related contacts/solutions use `holaquetal@gmail.com` (password matches) so `ClientContactSeeder` and tests stay aligned.
+
+## [0.1.320] - 2026-05-17
+
+### Changed
+- **Product detail thumbnails:** GIFs show a still first frame by default and animate only on thumbnail hover (same behaviour as catalog cards).
+
+## [0.1.319] - 2026-05-17
+
+### Changed
+- **Product detail reviews:** remove duplicate faint top border above the reviews block (keep `ReviewsSection` separator only).
+
+## [0.1.318] - 2026-05-17
+
+### Changed
+- **Product detail:** white content column stretches from navbar to footer (`product-detail-page`); decorative background remains visible only in the side margins.
+
+## [0.1.317] - 2026-05-17
+
+### Fixed
+- **Product detail:** restore missing `</div>` for `product-detail__card` (Vite “Unterminated JSX” build error).
+
+## [0.1.316] - 2026-05-17
+
+### Changed
+- **Product detail:** entire content column (product + reviews) uses a white background; decorative storefront background shows only in the side margins.
+
+## [0.1.315] - 2026-05-17
+
+### Changed
+- **Product detail:** white panel with margin around product info (back link + gallery + specs); page background image visible outside the panel; reviews sit below on transparent background.
+
+## [0.1.314] - 2026-05-17
+
+### Changed
+- **Catalog empty state:** «no results» panel uses white (`base-100`) background with a light border so it reads clearly over the decorative page background.
+
+## [0.1.312] - 2026-05-17
+
+### Changed
+- **Navbar search:** submit button shows a search icon instead of localized text (Cercar/Buscar/Search); label remains available via `aria-label`.
+
+## [0.1.311] - 2026-05-17
+
+### Fixed
+- **Email verification:** expired or invalid signed links no longer return a JSON 403; the API redirects to **`/verify-email?reason=expired`** (or **`invalid`**) with a clear warning and the existing resend button. Guests are sent through login with **`next`** preserving the reason.
+
+## [0.1.308] - 2026-05-17
+
+### Changed
+- **CartPreviewBar:** gradient lines doubled in thickness from 3px to 6px.
+
+
+
+### Changed
+- **CartPreviewBar:** gradient top/bottom lines (full-width, full-bleed) instead of block border; images enlarged to 200×200 px (+150%); "+" separators use gradient text; cart button uses solid brand color.
+
+## [0.1.306] - 2026-05-17
+
+### Added
+- **CartPreviewBar:** new dynamic block on product and pack detail pages (between product info and reviews) showing the current cart contents as a horizontal row of item thumbnails separated by "+" signs, with a cart navigation button at the right end. Hidden when the cart is empty.
+
+## [0.1.305] - 2026-05-17
+
+### Changed
+- **ProductDetailPage:** fixed reviews spacing at 80px.
+
+## [0.1.304] - 2026-05-17
+
+### Fixed
+- **LoginPage:** toast de verificació d'email ara apareix una sola vegada (eliminació del paràmetre `?verified=1` de la URL just après de mostrar-lo, evitant el doble disparo de React StrictMode).
+
+## [0.1.303] - 2026-05-17
+
+### Changed
+- **LoginPage:** email-verified confirmation is now shown as a toast notification instead of an inline alert.
+
+## [0.1.302] - 2026-05-17
+
+### Changed
+- **ProductDetailPage:** further increased spacing between product and reviews (80–140px).
+
+## [0.1.301] - 2026-05-17
+
+### Fixed
+- **Product cards:** strikethrough list price is hidden when the product has an active discount; only the sale price is shown.
+
+## [0.1.300] - 2026-05-17
+
+### Changed
+- **ProductDetailPage:** increased spacing between product block and reviews section (fluid 40–72px).
+
+## [0.1.299] - 2026-05-17
+
+### Changed
+- **ProductDetailPage add-to-cart button:** reduced to ~70% size (smaller padding and font-size), font-weight kept bold.
+
+## [0.1.298] - 2026-05-17
+
+### Fixed
+- **ProductDetailPage:** white background now applied to the `<main>` element via `useEffect` (restores original background on unmount). Thumbnails moved to a vertical strip on the left of the main image (both inside `.product-detail__media` flex-row).
+
+## [0.1.297] - 2026-05-17
+
+### Changed
+- **ProductDetailPage:** white page background; thumbnails separated from main image (appear as a horizontal strip above it, image has full rounded corners on all sides); removed prev/next arrows inside the image; reduced edge padding; thumbnails and image larger.
+
+## [0.1.296] - 2026-05-17
+
+### Changed
+- **ProductDetailPage layout:** thumbnails and main image are now grouped in a single white `.product-detail__media` card (thumbs vertical on desktop, horizontal on mobile). Info panel sits directly on the page background with no wrapping box. Price, discount badge and divider line cleaned up.
+
+## [0.1.295] - 2026-05-17
+
+### Fixed
+- **ProductDetailPage:** removed floating card background/border from the grid wrapper — content is now integrated directly into the page without a card container.
+
+## [0.1.294] - 2026-05-17
+
+### Changed
+- **ProductDetailPage redesign:** 3-column CSS Grid layout on desktop (vertical thumbnail strip on the left, large main image in the center, info panel on the right). Removed the floating `card card-border` wrapper. Thumbnails moved from a horizontal row below the image to a vertical strip. "Add to Cart" button is now full-width with the brand gradient (`#f75211` → `#8b2400`), larger size, text label and cart icon. New dedicated `ProductDetailPage.scss` added.
+
+## [0.1.293] - 2026-05-17
+
+### Changed
+- **ProductListPage infinite scroll:** `per_page` set to 16 (multiple of 4) so each page loads exactly 4 full rows.
+
+## [0.1.292] - 2026-05-17
+
+### Changed
+- **ProductListPage grid:** explicit column breakpoints — 2 cols mobile, 3 at 640 px, 2 at 768 px (sidebar narrows content), 3 at 1024 px, 4 at 1280 px. Gap reduced to `fluid(14,22)`.
+
+## [0.1.291] - 2026-05-17
+
+### Fixed
+- **Storefront background:** reverted veil/`::before` experiments; restored inline `home-bg.jpg` (as before) with a light 10% white wash so the photo stays ~90% visible.
+
+## [0.1.290] - 2026-05-17
+
+### Fixed
+- **Storefront background:** restored visible `home-bg.jpg` using a 90% `base-200` veil (~10% image strength) on `.storefront-bg` instead of a broken `::before` layer hidden under opaque fills and z-index stacking.
+- **Navbar spacer:** height aligned to the fixed header (`h-[8rem]` / `lg:h-[4.5rem]`) to remove the empty strip above main content.
+
+## [0.1.289] - 2026-05-17
+
+### Changed
+- **Storefront background (`home-bg.jpg`):** decorative image renders at 10% opacity via `.storefront-bg::before` so text and cards stay fully opaque; URL moved from inline styles to `app.css`.
+
+## [0.1.288] - 2026-05-17
+
+### Changed
+- **Storefront navbar (desktop):** search bar capped at 50% of the logo+search row width on large screens (`lg:max-w-[50%]`).
+
+## [0.1.287] - 2026-05-17
+
+### Removed
+- **ProductPreviewModal:** clicking a product or pack card goes straight to `/products/:id` or `/packs/:id`; intermediate preview modal removed.
+
+## [0.1.286] - 2026-05-17
+
+### Changed
+- **ProductCard cart button:** gradient direction changed to left→right (orange → dark red), matching the slider-btn style.
+
+## [0.1.285] - 2026-05-17
+
+### Changed
+- **Home slider-btn:** gradient direction changed to left→right (orange #f75211 → dark red #8b2400) on border, hover fill, and chevron SVG stroke.
+
+## [0.1.284] - 2026-05-17
+
+### Changed
+- **Home featured:** reduced gap between category groups from `fluid(28,40)` to `fluid(22,32)`.
+
+## [0.1.283] - 2026-05-17
+
+### Changed
+- **Storefront navbar (desktop):** search bar grows with available space between logo and nav links (removed fixed `max-w-xs` / `max-w-sm` cap).
+
+## [0.1.282] - 2026-05-17
+
+### Changed
+- **Home featured grid:** increased card gap from `fluid(16,28)` to `fluid(20,36)`.
+
+## [0.1.281] - 2026-05-17
+
+### Changed
+- **Home slider-btn:** added `margin-left: 10px` to push the ">" button a bit further right from the card grid.
+
+## [0.1.280] - 2026-05-17
+
+### Changed
+- **Home featured grid:** ">" button moved outside the card grid — it is now a flex sibling via `trending__category-row`, no longer occupying a card column. Grid is cards-only (`repeat(3/4/5, 1fr)` per breakpoint).
+- **Home featured grid:** max 5 products shown per category (`.slice(0, 5)` in `CategoryGrid`).
+
+## [0.1.279] - 2026-05-17
+
+### Changed
+- **ProductCard:** reduced `__info` vertical padding (`fluid(6,8)`) so the image occupies a larger proportion of the square card.
+
+## [0.1.278] - 2026-05-17
+
+### Changed
+- **ProductCard:** card is now perfectly square (`aspect-ratio: 1/1` on the card itself). Image section uses `flex: 1` to fill remaining height after the info block; `object-position: center` centres the photo. Info section uses `flex-shrink: 0` so its height stays fixed.
+
+## [0.1.277] - 2026-05-17
+
+### Changed
+- **ProductCard layout:** price is now on the same line as the product name (`__name-row` flex row). Footer reduced to features + cart button only; `__left` wrapper removed.
+- **Home featured grid:** reduced column count for wider cards — 2+btn at 768 px, 3+btn at 1024 px, 4+btn at 1280 px.
+
+## [0.1.276] - 2026-05-17
+
+### Fixed
+- **Home featured grid:** corrected CSS Grid layout bug — `grid-column: -1` on the slider-btn was resolving to an implicit column past the explicit grid, causing one card to land in the `auto` track and render very wide. Replaced `repeat(N, 1fr) auto` with all-`1fr` grids (`repeat(4,1fr)` / `repeat(5,1fr)` / `repeat(6,1fr)`) and pinned the button with an explicit column number (`grid-column: 4 / 5 / 6` per breakpoint).
+
+## [0.1.275] - 2026-05-17
+
+### Changed
+- **Home slider-btn:** inverted gradient direction — dark red (#8b2400) now at top, orange (#f75211) at bottom, on both border and chevron stroke. Chevron uses SVG `linearGradient` driven by `--chev-from`/`--chev-to` CSS variables so hover (white fill) works without JS.
+
+## [0.1.274] - 2026-05-17
+
+### Changed
+- **ProductCard image:** aspect-ratio changed from `4/3` to `1/1` (square), giving cards more visual presence and height.
+- **ProductCard typography:** product name reduced to `fluid(12,14)`, features to `fluid(10,11)`, price to `fluid(13,15)`.
+- **ProductCard footer layout:** price moved to the left column (below features, aligned with the product name); cart button is now the sole element on the right.
+
+## [0.1.273] - 2026-05-17
+
+### Changed
+- **Home featured grid:** desktop now uses CSS Grid (no horizontal scroll) — cards wrap into rows. Breakpoints: 3 cols at 768 px, 4 at 1024 px, 5 at 1280 px.
+- **Home ">" button:** moved inside the product grid as a grid item; positioned at `grid-column: -1 / grid-row: 1` so it always appears at the right end of the first row. One button per category, links to `/categories/{id}/products`. Mobile retains horizontal drag-scroll with the button at the end.
+- **Home section header:** removed the global ">" button from the "Destacats" title row.
+
+## [0.1.272] - 2026-05-17
+
+### Changed
+- **Home slider-btn:** gradient border bottom-to-top (#8b2400 → #f75211) via CSS mask; hover fills the circle with the same gradient and turns the icon white.
+
+## [0.1.271] - 2026-05-17
+
+### Changed
+- **Storefront nav:** custom-solution link label is «Soluciones personalizadas» / «Solucions personalitzades» / «Custom solutions» (`shop.nav.custom_solution`).
+
+## [0.1.269] - 2026-05-17
+
+### Changed
+- **Product cards:** features + cart now share the bottom row (features left, price+cart stacked right); gap between cards increased to fluid(16,28); cards fixed at 210px desktop (~5 visible at 1440px) with horizontal scroll always active; cart button reduced to 30-36px.
+
+## [0.1.270] - 2026-05-17
+
+### Changed
+- **Storefront nav:** desktop navbar and mobile drawer order is Soluciones → Productos → Packs → Ofertas → FAQ; shorter nav label `shop.nav.custom_solution` for the custom-solution link.
+
+## [0.1.268] - 2026-05-17
+
+### Added
+- **Ofertes (Offers):** new «Ofertes/Ofertas/Offers» section linked from the top navbar (desktop) and the burger-menu drawer (mobile). Navigating to it opens the existing `/products` catalog pre-filtered to items with a discount (`offers_only=1`), showing only products and packs that have a `discount_percent > 0`. The filter is applied silently via a hidden checkbox; no visible UI change to the sidebar.
+- **Pack discounts:** `packs` table now has a `discount_percent` column (same semantics as products: 0–100, optional). `Pack::effectivePrice()` applies the discount to the list price. `PackResource` now exposes `price` (effective), `list_price`, and `discount_percent`. Admin pack form includes a discount field. `AdminPackResource` and `AdminPackController` validation updated accordingly.
+- **Pack card and detail:** `PackCard` displays a `−X%` badge and a struck-through list price when the pack has a discount. `PackDetailPage` shows the discount badge in the header and the original price struck through next to the discounted price.
+- **`IconTag`:** new tag icon added to the shared icon library, used for the Ofertes nav item in the mobile drawer.
+- **API:** `GET /api/v1/products` now accepts `offers_only=1` query param, filtering both products and packs to those with `discount_percent > 0`.
+- **Tests:** `ProductCatalogOffersOnlyTest` verifies the offers-only filter returns only discounted items (products and packs) and exposes correct `discount_percent`, `list_price`, and effective `price` fields.
+
+## [0.1.267] - 2026-05-17
+
+### Changed
+- **Product cards:** increased info area padding (12-16px v, 14-18px h) to match Figma; name and price font bumped to 14-17px; features now show 2 separate truncated lines; slider-btn reduced to 36-44px.
+
+## [0.1.266] - 2026-05-17
+
+### Removed
+- **Home:** categories chip section below the hero (category links remain in the navbar and in featured product rows).
+
+## [0.1.265] - 2026-05-17
+
+### Changed
+- **Home hero:** wider content column so the title and tagline wrap less on desktop.
+
+## [0.1.264] - 2026-05-17
+
+### Changed
+- **Home hero:** text block uses the same `page-container` horizontal inset as section titles (e.g. Destacats), instead of extra left padding.
+
+## [0.1.263] - 2026-05-17
+
+### Changed
+- **Home hero:** title, tagline, and CTA align to the left of the banner instead of sitting centered over the lock image.
+
+## [0.1.262] - 2026-05-17
+
+### Fixed
+- **Catalan locale flag:** serves `es-ct.svg` (Senyera) instead of misnamed `ca.svg` (Canada in ISO flag sets).
+
+## [0.1.260] - 2026-05-17
+
+### Changed
+- **Product cards:** cart button uses the brand orange-to-dark-red gradient instead of flat primary.
+- **Home featured:** category titles in primary orange; per-category chevron links to `/categories/{id}/products` (centered beside each scroll row); chevron uses theme primary colors; horizontal card scroll unchanged on mobile.
+
+## [0.1.259] - 2026-05-17
+
+### Fixed
+- **Locale flags:** Catalan locale uses the Senyera (`es-ct`) instead of the Canada flag from ISO `ca.svg`; flag thumbnails use rounded corners and a light border to match the navbar design.
+
+## [0.1.258] - 2026-05-17
+
+### Fixed
+- **Home hero image:** background photo is absolutely positioned with `object-fit: cover` and `object-position: center` so overflow crops equally from the top and bottom instead of anchoring to the top.
+
+## [0.1.257] - 2026-05-17
+
+### Changed
+- **Catalog cards (products and packs):** same GIF-on-hover behaviour on `ProductCard` and `PackCard`; API exposes `content_type` on catalog images so GIF detection works by MIME as well as `.gif` URL.
+
+## [0.1.256] - 2026-05-17
+
+### Changed
+- **Product cards:** animated GIF thumbnails stay on the first frame until the card is hovered; product and pack detail pages (`/products/:id`, `/packs/:id`) keep GIFs playing as before. Respects `prefers-reduced-motion` (no hover animation).
+
+## [0.1.255] - 2026-05-17
+
+### Changed
+- **Storefront navbar:** brand logo image replaces text label; catalog search sits after the logo on desktop; nav links align right with a pipe separator before locale, cart, and account icons.
+- **Language selector:** Catalan, Spanish, and English use flag icons (CA / ES / GB) in the navbar dropdown and mobile drawer.
+- **Home hero:** shorter banner height and narrower left-aligned text block to match the updated design.
+
+## [0.1.254] - 2026-05-16
+
+### Changed
+- **FeatureSeeder:** colors now have proper CA/EN translations ("Daurat"/"Gold", "Plata"/"Silver"); key types fully translated ("Punts copiables"/"Copyable pins", "Element mòbil"/"Moving element", "Codificació magnètica"/"Magnetic coding", "Punts no copiables"/"Non-copyable pins"); measures unchanged (numeric, locale-neutral).
+- **ProductSeeder:** all 30 products now have distinct CA/EN names and descriptions instead of copying the Spanish text. Cylinder products translated (Cilindre/Cylinder, llautó/brass, doble embragament/double clutch); shield products (Escut/Shield, daurat/gold); second deadbolts (segon pestell/second deadbolt). Securemme description fully translated into CA and EN.
+- **PackSeeder:** all three packs now have proper CA/EN names and descriptions instead of repeating the Spanish text across all locales.
+
+## [0.1.252] - 2026-05-16
+
+### Fixed
+- Feature values were blank in the admin list because `Feature::translatedValue()` had no legacy fallback to the old `value` column; added the same pattern used by Product and Pack models.
+- Rebuilt JS bundle so the new per-locale translation inputs in feature-type, feature-value and category forms are served to the browser.
+
+## [0.1.251] - 2026-05-16
+
+### Added
+- Admin feature-name (type) forms now include per-locale name inputs (CA / ES / EN) and a required `code` (internal slug) field — both on create and edit pages.
+- Admin category forms now include per-locale name inputs (CA / ES / EN) on create and edit pages.
+- Admin feature (value) form now includes per-locale value inputs (CA / ES / EN) on both create and edit pages.
+- Reusable `TranslationFields` component (`resources/js/components/admin/TranslationFields.jsx`) for rendering locale-aware text fields.
+- New i18n keys: `admin.feature_types.code`, `admin.feature_types.code_hint`, `admin.feature_types.name_translations`, `admin.features.value_translations`, `admin.categories.name_translations`, `admin.translations.section` in all three locales (ca / es / en).
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.250] - 2026-05-16
+
+### Fixed
+- **Models:** `FeatureName`, `Pack`, `Product`, and `ProductCategory` `translatedName()` / `translatedField()` now fall back to the legacy direct column (e.g. `feature_names.name`, `packs.name`, `products.name`) when no translation rows exist, so feature-type labels and entity names display correctly on legacy databases that have not yet had `catalog:backfill-legacy-translations` applied.
+
+## [0.1.249] - 2026-05-16
+
+### Fixed
+- **API:** `GET /api/v1/features` no longer returns 500 when `feature_names.code` column is absent on legacy databases — removed column-constrained eager load (`featureName:id,code`) that caused `undefined column` errors; simplified to `featureName.translations` load.
+- **API:** `GET /api/v1/admin/stats/low-stock`, `GET /api/v1/reports/summary`, and `GET /api/v1/admin/orders/:id` no longer return 500 on freshly migrated PostgreSQL databases — replaced direct `products.name` / `packs.name` column selects (column removed from schema in favour of translations) with `->with('translations')` eager loads and accessor-based name resolution.
+
+## [0.1.248] - 2026-05-15
+
+### Added
+- **Config:** `config/catalog_feature_name_labels.php` supplies default labels per locale for known `feature_names.code` values; `catalog:backfill-legacy-translations` uses it when translation rows are empty.
+- **API:** `feature_name_code` on public product features, admin product features, storefront `GET /api/v1/features`, and admin feature payloads.
+
+### Changed
+- **CLI:** `catalog:backfill-legacy-translations` can add a nullable `feature_names.code` on legacy databases, backfill from a legacy `name` column when present, then fill missing `feature_name_translations` from the config map.
+- **Storefront layout:** `html`/`body` use `overflow-x: clip` instead of `hidden`; storefront drawer no longer uses `overflow-x-clip` so the catalog filter sidebar can stick to the viewport while scrolling.
+
+### Fixed
+- **API:** `FeatureController` eager-loads `featureName` with `code` and `translations` (not the removed `name` column) and orders filter values with `orderByTranslatedValue`.
+- **React:** Product detail, cards, preview modal, product list filter groups, and admin product/feature views avoid orphan `": value"` lines when the feature dimension label is missing; optional `shop.feature_label.*` i18n fallback by code.
+
+## [0.1.247] - 2026-05-15
+
+### Added
+- **CLI:** `php artisan catalog:backfill-legacy-translations` copies legacy `name` / `description` / `value` columns (when they still exist on parent tables) into `*_translations` for `ca`, `es`, and `en`, then runs `products:rebuild-search-text`. Use `--dry-run` to count rows only. Skips `feature_names` when the `code` column is missing (schema must be aligned first).
+
+### Fixed
+- **Deploy:** After `php artisan migrate` adds translation tables to an older PostgreSQL database, run the backfill command so storefront APIs (`/api/v1/categories`, `/api/v1/products/featured`, etc.) resolve names from translations instead of returning null.
+
+## [0.1.246] - 2026-05-15
+
+### Added
+- **Admin products:** optional Spanish and English name and description fields (Zod + API `translations`); Catalan remains the primary required fields for the catalog.
+
+### Changed
+- **Schema diagram:** `trash/diagramZero.dbml` updated for `*_translations` tables and removal of monolingual translatable columns from parent catalog tables.
+
+### Fixed
+- **ProductTranslation / Scout:** do not call `Product::searchable()` when Scout syncing is disabled for `Product` (for example inside `Product::withoutSyncingToSearch`), so tests can mock the Elasticsearch catalog adapter without a live cluster.
+- **Tests:** `PurchasedProductsTest`, `OrderPayConfigurationExceptionTest`, `CheckoutPaymentConfigTest`, and `CustomerTransactionalEmailTest` use `TestCase` catalog helpers for the translation schema.
+
+## [0.1.245] - 2026-05-15
+
+### Fixed
+- **Changelog:** removed duplicate `## [0.1.241]` block; merged navbar and mobile storefront notes under a single `[0.1.241]` heading.
+
+## [0.1.244] - 2026-05-15
+
+### Changed
+- **Catalog sidebar categories:** removed the "Todos" button; category tags now toggle — clicking an already-active category deselects it and resets to the full product list.
+
+## [0.1.243] - 2026-05-15
+
+### Fixed
+- **Catalog sidebar sticky:** replaced `overflow-x: hidden` with `overflow-x: clip` on the drawer root in `Layout.jsx`. The `hidden` value coerces `overflow-y` to `auto`, creating a new scroll container that broke `position: sticky` on the filter sidebar. `clip` clips content identically but does not create a scroll container, so the sidebar now correctly follows the user again while accounting for the hide/show navbar offset.
+
+## [0.1.242] - 2026-05-15
+
+### Fixed
+- **Home page product cards:** removed `flex-grow` from scroll-row desktop layout so all cards render at a consistent width regardless of how many items are in a row.
+
+## [0.1.241] - 2026-05-15
+
+### Fixed
+- **Navbar:** Restore Products and Packs buttons at `sm:inline-flex` (640 px+); commit `6af9d33` had accidentally moved them to `md:inline-flex` (768 px+), hiding them on tablet-sized and narrow laptop screens.
+- **Mobile responsiveness:** Added `overflow-x: hidden` to `html, body` in `app.css` and to the daisyUI `drawer` root wrapper in `Layout.jsx` — eliminates lateral (horizontal) scroll on all pages including `/profile`.
+- **Navbar mobile:** User dropdown button now shows icon-only on xs screens (`< sm`); username text visible from `sm` breakpoint up — prevents navbar cramping on narrow viewports.
+- **Navbar brand link:** Removed `calc(100vw-8.5rem)` (which could produce a 1 px overflow from scrollbar-width difference) in favour of a simple `max-w-[9rem] sm:max-w-[14rem]` with `shrink`.
+
+## [0.1.240] - 2026-05-15
+
+### Fixed
+- **npm ci / CI:** regenerated `package-lock.json` with `npm install` so it matches `package.json` (adds `sass-embedded@1.99.0` and required optional platform packages and transitive deps). `npm ci` was failing in GitHub Actions with “Missing: sass-embedded@1.99.0 from lock file”.
+
+## [0.1.239] - 2026-05-15
+
+### Added
+- **ProductPreviewModal:** new `ProductPreviewModal.jsx` component opened from **ProductCard** (bottom sheet on small viewports, centered modal on larger screens).
+
+### Changed
+- **ProductCard:** card activation opens the preview modal; pack tiles show a Pack badge and up to two contained product names; **ProductCard.scss** trimmed to match.
+- **PackDetailPage:** loading and error states use the same max-width layout and “Back” row as the loaded page; savings callout uses primary accent; add-to-cart uses the compact icon control with `aria-label` for screen readers.
+- **i18n:** shorter `shop.pack.savings` string in `ca`, `es`, and `en`; added `shop.product.view_more_info` in all three locales.
+- **SearchDemoProductSeeder:** Catalan retail description for demo SKU `SEARCH-DEMO-MIX-3030-K1` (replaces internal search-testing copy).
+
+## [0.1.237] - 2026-05-15
+
+### Changed
+- **PackDetailPage:** "Volver" link matches **ProductDetailPage** — `flex justify-end mb-4`, `btn btn-ghost btn-sm` text only (no chevron, no muted text classes); loading and error states include the same back row.
+
+## [0.1.233] - 2026-05-15
+
+### Changed
+- **ProductPreviewModal:** increased modal width from `max-w-4xl` (56 rem) to `max-w-[68rem]` (~22% wider); cart button now uses `btn btn-primary btn-square rounded-xl` — same orange square style as the product-card cart buttons, independent of the SCSS import.
+
+## [0.1.232] - 2026-05-15
+
+### Changed
+- **ProductPreviewModal:** enlarged to `max-w-4xl` (was `max-w-2xl`); image panel widened to 50% with square crop (`aspect-square`); action row reordered — "Veure més informació" button is now smaller (`btn-sm btn-outline`) on the left, cart button uses the same square card style (`cart-btn`) on the right.
+- **SearchDemoProductSeeder:** replaced developer test note with a proper Catalan product description for `SEARCH-DEMO-MIX-3030-K1`; updated live product in the database accordingly.
+
+## [0.1.231] - 2026-05-15
+
+### Added
+- **Product preview modal:** clicking a product or pack card now opens an intermediate modal (slides up from the bottom on mobile, centered on desktop) showing the large image, name, price, low-stock warning, description, and full features/pack contents. A primary "View more info" button navigates to the existing detail page; add-to-cart is also available directly from the modal.
+- **i18n:** added `shop.product.view_more_info` key to `ca`, `es`, and `en` locale files.
+
+### Changed
+- **ProductCard:** replaced direct `<Link>` navigation with a modal-trigger click; favourite toggle and cart button still work independently with their own `stopPropagation`.
+
+## [0.1.230] - 2026-05-14
+
+### Added
+- **Pack reviews:** new `pack_reviews` table, `PackReview` model, `PackReviewController` and `PackReviewResource`; storefront routes `GET/POST packs/{pack}/reviews` and `GET packs/{pack}/reviews/mine` mirroring the product reviews API.
+- **Pack detail page:** savings block showing how much the customer saves vs buying each product individually; product mini-cards inside "Contingut del pack" with thumbnail, name, code, and unit price; `ReviewsSection` wired at the bottom with pack-level reviews.
+- **i18n:** added `shop.pack.savings` and `shop.pack.original_total` keys to `ca`, `es`, and `en` locale files.
+
+### Changed
+- **ReviewsSection:** generalized to accept either `productId` or `packId` prop; derives API path and React Query keys dynamically; existing product usage unchanged.
+- **PackResource:** items now expose `product.price` and `product.image_url` (first active image).
+- **PackController:** eager-loads `items.product.images` to support thumbnails without N+1.
+- **PackDetailPage:** complete visual redesign — larger price, Pack/contains-keys badges, savings alert, product mini-cards block, improved add-to-cart row.
+
+## [0.1.229] - 2026-05-14
+
+### Changed
+- **ProductCard:** tarjetas más grandes (base mínima 240 px, máx 320 px en grid y carrusel); zona de información más compacta (padding reducido, título a 1 línea, features a 1 línea, espaciados menores).
+
+## [0.1.228] - 2026-05-14
+
+### Changed
+- **ProductCard:** revertido al diseño original (imagen + bloque de info debajo); la imagen ahora ocupa el ancho completo de la tarjeta sin padding interior (a sangre con los bordes redondeados superiores); eliminados overlay, bottom-sheet y clases del experimento anterior.
+
+## [0.1.227] - 2026-05-14
+
+### Changed
+- **ProductCard:** botón de carrito solo con icono (sin texto visible), más compacto; se mantiene `aria-label` para accesibilidad.
+
+## [0.1.226] - 2026-05-14
+
+### Fixed
+- **ProductCard:** `aspect-ratio` del bloque de imagen cambiado de `1/1` a `3/4` (retrato) para que la imagen del producto sea visible (~55% de la tarjeta); padding del panel y botón ligeramente reducidos para mayor compacidad.
+
+## [0.1.225] - 2026-05-14
+
+### Fixed
+- Removed erroneous `overflow-x-clip`, `min-w-0 max-w-full` overrides on `.drawer` and `drawer-content` in `Layout.jsx` that introduced a right-side gap on the homepage and product list page; restored original clean drawer/main structure.
+- Removed `html { overflow-x: clip }` and `.drawer.storefront-drawer` grid override from `app.css` that were not needed and conflicted with page layout.
+- Restored `.home-page` and `.catalog-page` SCSS to their original margin-only state, removing `min-width`/`max-width`/`overflow-x` additions that were superfluous.
+
+## [0.1.224] - 2026-05-14
+
+### Changed
+- **ProductCard:** nuevo diseño tipo *overlay*: imagen cuadrada (`aspect-ratio: 1`) que ocupa toda la tarjeta; panel inferior (`__details`) con ancho 90% y radio asimétrico arriba-derecha; al hover la tarjeta se oscurece y el panel se expande al 100% sin bordes redondeados; grilla 2 columnas para nombre y precio; botón de carrito con texto y icono; tokens del tema para colores y sombras; soporte `prefers-reduced-motion`.
+
+## [0.1.223] - 2026-05-15
+
+### Fixed
+- **Storefront drawer:** daisyUI’s default **`max-content` + `auto`** drawer grid reserved width for the off-canvas **`drawer-side`** (intrinsic aside width) even when closed, so **`main` stayed narrower than the viewport** (right gutter on home and `/products`). Added **`storefront-drawer`** with **`grid-template-columns: 0 minmax(0, 1fr)`** so **`drawer-content` spans the full width**; the mobile drawer still uses **`position: fixed`**.
+
+## [0.1.222] - 2026-05-14
+
+### Fixed
+- **Storefront layout:** `main` no longer uses Tailwind **`container mx-auto`**, so home hero / trending and the catalog page span the same width as the navbar and page background (removed the persistent side gutter from the container max-width cap).
+
+## [0.1.220] - 2026-05-14
+
+### Fixed
+- **Storefront mobile:** background image uses **scroll** attachment on small viewports (fixed attachment breaks on many mobile browsers); **horizontal overflow** clipped at `html` and storefront **drawer** shell; navbar **brand truncates** on narrow widths, **Products/Packs** links show from **md**; cart uses **stacked line cards** below **md** (table with horizontal scroll from **md** up); **profile** cards, contact/address rows, and modals tightened for ~320–400px; **order detail** tables and totals block avoid **100vw** width traps; **home** and **catalog** pages use **min-width / overflow-x clip** so negative margins cannot widen the document; toasts use **`max-w-[min(100%,100dvw)]`** instead of raw **100vw**.
+
+## [0.1.219] - 2026-05-14
+
+### Changed
+- **ProductCard:** storefront product/pack tiles use a **square image** with a **bottom sheet** (name + price grid, features, cart CTA), **hover dim overlay**, and panel **width 90% → 100%** with asymmetric top-right radius; theme tokens for borders and muted text; **prefers-reduced-motion** trims transitions; catalog row/grid min widths tuned for the new aspect ratio.
+
+## [0.1.218] - 2026-05-14
+
+### Fixed
+- **Login (`?verified=1`):** email-verified toast no longer appears twice in dev (React 18 **StrictMode** double `useEffect`); one module-level gate per visit, and **`verified`** is stripped from the URL with **`replace`** while preserving other query params (e.g. **`next`**).
+
+## [0.1.217] - 2026-05-14
+
+### Changed
+- **i18n (`shop.filters.packs_only`):** storefront nav, drawer, and catalog filter label shortened to **“Packs”** in **ca**, **es**, and **en** (was “Només packs” / “Solo packs” / “Packs only”).
+
+## [0.1.216] - 2026-05-14
+
+### Fixed
+- **Storefront navbar:** home / brand link shows the **full company name** (no `truncate` or max-width cap); **`shrink-0`** + **`whitespace-nowrap`** so the label is not ellipsized by the flex row.
+
+## [0.1.215] - 2026-05-14
+
+### Fixed
+- **Storefront header:** replaced daisyUI **`navbar-start` / `navbar-end`** (fixed **50%** width each) with a plain **flex** row so left content cannot paint over language, cart, and account; desktop search uses **`flex-1 min-w-0`** with a **max-width** cap instead of a fixed width; **FAQ** and **custom solution** links show from **xl** / **lg** respectively to reduce crowding; spacer height matches the two-row mobile header (**~8rem**); catalog sticky sidebar and toasts use matching offsets by breakpoint.
+
+## [0.1.214] - 2026-05-14
+
+### Fixed
+- **Profile:** saving account, password, addresses, or contacts while the login email is still unverified no longer leaves an uncaught Axios **403**; the UI shows a translated warning and a link to **`/verify-email`** (returns to **`/profile`** after confirmation).
+
+## [0.1.213] - 2026-05-14
+
+### Changed
+- **Login (`?verified=1`):** “email verified” feedback uses the global top-end toast with brand orange (`.alert-app-success`) instead of an inline green `alert-success` in the form.
+
+## [0.1.212] - 2026-05-14
+
+### Added
+- **Storefront footer:** invisible left hit area on the gradient bar linking to **`/admin`**, with translated **`footer.admin_access_aria`** (ca / es / en).
+
+### Changed
+- **Docker Compose (dev):** nginx mounts **`default.dev.conf`** (Vite proxy upstream to `node:5173`); **`VITE_DEV_SERVER_URL`** defaults to **`http://localhost:${HTTP_PORT}`** so the browser loads dev assets through nginx; nginx **`depends_on`** **`node`**; **`VITE_DOCKER_PUBLISHED_PORT`** / **`HTTP_PORT`** passed into the **`node`** service for HMR.
+- **Vite (Docker dev):** **`server.origin`**, **`allowedHosts: true`**, **`cors: true`**, and HMR **`clientPort`** aligned with the host-mapped Vite port; WebSocket HMR uses **`ws`** with explicit container **`port`** vs browser **`clientPort`**.
+- **docker/nginx/default.conf:** comment clarifying prod vs dev mount; **`.cursor/rules/docker-setup.mdc`:** URLs and nginx/Vite roles updated.
+
+## [0.1.211] - 2026-05-14
+
+### Added
+- Storefront navbar and mobile drawer: direct link to the catalog filtered with **`packs_only=1`** (`/products?packs_only=1`), reusing **`shop.filters.packs_only`** for labels.
+
+### Changed
+- Product catalog sidebar: **`position: sticky`** `top` and **`max-height`** follow navbar show/hide (via **`StorefrontNavbarVisibilityContext`**) so the filter column does not keep a large empty gap at the top when the header slides away on scroll down; transitions match the navbar transform duration.
+
+## [0.1.210] - 2026-05-12
+
+### Changed
+- HomePage: categories section now shows tag-style links instead of product cards with labels; uses simpler `/categories` API.
+- HomePage: loading state no longer waits for categories query.
+- Layout: active drawer nav link uses gradient background instead of plain primary color.
+- ProductCard: SCSS refactored and polished.
+
+## [0.1.206] - 2026-05-12
+
+### Added
+- Admin: send custom email modal (admin can email clients from the admin panel).
+- Public shop settings API: new `usePublicShopSettings` hook for storefront.
+- Drag-scroll hook (`useDragScroll`) for horizontal scrollable UI elements.
+- Product reviews: full CRUD with publishing workflow (pending/published/rejected), client authorship, denormalized rating on products.
+- Shop settings seeder with default configuration values.
+
+### Changed
+- CSRF: exempt all `api/*` routes from CSRF token verification (SPA session-cookie auth relies on SameSite cookies + CORS).
+- Product review model: `approved` status renamed to `published`; observer and resource updated accordingly.
+- ProductSeeder: category IDs now resolved dynamically by code instead of hardcoded numeric IDs.
+- DatabaseSeeder: reset PostgreSQL auto-increment sequences before seeding to prevent FK violations when tests use `RefreshDatabase` with transaction rollback.
+- Admin layout, order pages, review pages, feature pages, shop settings page: UI and i18n improvements across all three locales (ca, es, en).
+- Footer: updated with public shop settings integration.
+- HomePage, ProductDetailPage, CheckoutPage, OrdersPage, RegisterPage: various UI refinements.
+- Navigation setter: improved route handling.
+- ProductCard: styling updates (SCSS and component).
+
+### Fixed
+- Test suite: 58 test failures resolved (CSRF 419 on API routes, PostgreSQL sequence drift causing seeder FK violations).
+
+## [0.1.201] - 2026-05-12
+
+### Changed
+- Admin pack form: product name in grid cards is now truncated with ellipsis when it overflows; full name visible on hover via tooltip.
+
+## [0.1.202] - 2026-05-12
+
+### Changed
+- Admin order detail: moved delivery note and invoice buttons to the bottom of the page instead of the toolbar.
+
+## [0.1.199] - 2026-05-12
+
+### Added
+- Admin order detail: delivery note (albarán) and invoice (factura) buttons that open the existing Blade-rendered documents in a new tab.
+- Admin API routes: `GET admin/orders/{order}/invoice` and `GET admin/orders/{order}/delivery-note`, reusing the same templates as the client-facing endpoints without ownership/payment restrictions.
+- New i18n keys for button labels (ca, es, en).
+
+## [0.1.196] - 2026-05-12
+
+### Changed
+- Admin pack form: product selection uses a responsive grid (1/2/3 columns) with fixed-height cards instead of a free-flow flex row.
+- Each product card now shows the name in bold with the price below in smaller gray text.
+- Double-clicking a product card opens its admin detail page in a new tab.
+
+## [0.1.198] - 2026-05-12
+
+### Changed
+- Admin features page: removed all toggle switches; is_active now shown as text (Sí/No) in the values table.
+- Feature-name header: only the chevron arrow expands/collapses; clicking the name navigates to the detail/edit view.
+- Feature value rows are clickable to navigate to the value detail view.
+- Added `common.expand` / `common.collapse` i18n keys (ca, es, en).
+
+## [0.1.195] - 2026-05-12
+
+### Changed
+- Admin features page: replaced double-list layout with collapsible feature-name sections, each containing a values table with inline toggle switches for is_active.
+- Added API endpoints: GET `admin/feature-names-with-features` (nested response), PATCH `admin/feature-names/{id}/toggle`, PATCH `admin/features/{id}/toggle`.
+- Added `IconPencil` and fixed `IconChevronDown` (now a proper angle chevron) in shared icons.
+- New i18n keys for the features manager UI (ca, es, en).
+
+## [0.1.194] - 2026-05-12
+
+### Changed
+- Admin edit page: password field now requires confirmation (double input) and includes an eye toggle to show/hide the password.
+- Added `IconEye` and `IconEyeOff` to the shared icons library.
+
+## [0.1.190] - 2026-05-12
+
+### Changed
+- FAQ seeder expanded from 1 entry to 9 realistic trilingual questions covering orders, payment, shipping, returns, accounts, product selection, installation, data privacy, and international shipping (last one seeded as inactive).
+
+## [0.1.185] - 2026-05-12
+
+### Fixed
+- Product card image container now uses a fixed 4:3 aspect ratio with object-fit cover, so cards align consistently regardless of image dimensions (e.g. wide GIFs no longer compress the card height).
+
+## [0.1.186] - 2026-05-12
+
+### Changed
+- Custom Solution page process steps redesigned: replaced orange gradient numbered circles with icon squares connected by a vertical line; step copy rewritten to be conversational and business-specific (no need to have everything figured out, case-by-case assessment, proposal by email in a few days).
+
+## [0.1.184] - 2026-05-12
+
+### Changed
+- Custom Solution page redesigned with a two-column layout: left column shows a hero title, subtitle, and three numbered process steps (with brand orange gradient circles) explaining what the client does, what the team does, and how the client is contacted; right column keeps the existing form with a new overline label and updated submit button label.
+- New locale keys added in ca/es/en for the hero copy, process step titles and descriptions, form overline label, and submit button label.
+
+## [0.1.183] - 2026-05-12
+
+### Added
+- `ShopSettingSeeder` with default Terms & Conditions content in ca, es, en (10 sections: scope, products & prices, payment, shipping, withdrawal, warranties, liability, disputes, modifications).
+
+### Fixed
+- `/terms` page showed "not configured" because `shop_settings` had no seeded terms rows. Seeder now populates them on `migrate:fresh --seed`.
+
+## [0.1.182] - 2026-05-12
+
+### Added
+- Admin custom email: "Send email" button on Order, Return, Personalized Solution, and Client detail pages opens a modal where the admin writes a free-text message sent to the customer using the existing transactional email template (logo + gradient band).
+- New `AdminCustomMail` Mailable, `AdminSendEmailController`, and shared `SendEmailModal` React component.
+- `IconMail` icon added to the icons library.
+- i18n keys for the send-email feature in ca, es, en.
+
+## [0.1.180] - 2026-05-12
+
+### Fixed
+- Admin edit pages "Volver" (back) button now navigates to the resource show page instead of the list index (products, features, feature names, packs, variant groups, categories).
+
+## [0.1.179] - 2026-05-12
+
+### Added
+- GIF support for product and pack images: animated GIFs now work in uploads, thumbnails, detail galleries, zoom panels, and product cards.
+- GIF fixture (`seeder-gif-1.gif`) added to seeder fixtures so development data includes animated images.
+
+### Changed
+- ProductImageSeeder and PackImageSeeder now auto-detect file format (jpg, png, gif, webp) instead of hardcoding JPEG, storing the correct MIME type and extension.
+
+## [0.1.177] - 2026-05-12
+
+### Changed
+- Hero section redesigned: left-aligned layout, heavier h1 (weight 800), left-to-right dark gradient overlay for better text legibility.
+- Tagline split into a static prefix line (small, 78% opacity) + a large rotating orange word using daisyUI `text-rotate` (pure CSS, 5 words, 2 s each).
+- Added `home.hero.tagline_prefix` and `home.hero.tagline_w1–w5` i18n keys for ca, es, en.
+
+
+
+### Changed
+- Footer redesigned: 4-column layout (brand, navigation, contact, social) matching the reference design.
+- Added "Segueix-nos / Síguenos / Follow us" social media section with circular icon buttons: Facebook, Instagram, X (Twitter), LinkedIn, YouTube — using real Serralleria Solidaria profile URLs.
+- Added 5 brand SVG icons (filled) to `icons/index.jsx`: `IconFacebook`, `IconInstagram`, `IconXTwitter`, `IconLinkedIn`, `IconYouTube`.
+- Added company address (Carrer Diputació 426, Barcelona) to brand column.
+- Legal links (privacy, terms) moved into the navigation column; external site link moved to social column.
+- Added `footer.social` i18n key (ca, es, en).
+
+
+
+### Changed
+- Privacy Policy page expanded into a combined Legal Notice & Privacy Policy page (Avís Legal i Política de Privacitat), now compliant with both LSSI-CE and GDPR.
+- Section 1 (Data Controller) updated with full real company data: NIF B-67344291302, registered address (Carrer Diputació 426, Barcelona), representative, and phone.
+- Added four new sections sourced from the reference legal notice: Terms of Use (§11), Links Policy (§12), Intellectual and Industrial Property (§13), and Applicable Law & Jurisdiction (§14).
+- Page title and footer link label updated across all three locales (ca, es, en).
+- Added `common.legal_notice` i18n key (ca, es, en) for the section divider.
+
+## [0.1.181] - 2026-05-12
+
+### Added
+- Product detail page (`/products/:id`): shows a warning alert ("Quedan pocas unidades disponibles") when the low stock badge setting is enabled and the product stock is at or below the configured threshold.
+- New `IconWarning` icon in the shared icons file.
+- i18n keys `shop.product.low_stock_warning` (ca, es, en).
+
+## [0.1.178] - 2026-05-12
+
+### Removed
+- Admin settings UI: removed blacklist controls (toggle + product IDs textarea) from both the Low Stock and Overstock sections. Backend keys remain for backward compatibility but are no longer exposed in the admin form.
+
+## [0.1.174] - 2026-05-12
+
+### Added
+- Low stock badge on product cards: new admin setting (`show_low_stock_badge`) to display a warning badge on storefront product cards when stock is at or below the configured threshold.
+- Public settings API now exposes `show_low_stock_badge` and `low_stock_threshold` for the storefront.
+- New `usePublicShopSettings` React hook for cached access to public shop settings.
+- i18n keys for badge text and admin toggle label (ca, es, en).
+
+## [0.1.173] - 2026-05-12
+
+### Changed
+- Reviews no longer require admin approval. Client reviews are published immediately and visible to all users.
+- Admin review workflow simplified: approve/reject/reset replaced with hide/show toggle. Admins can hide inappropriate reviews or delete them entirely.
+- Migration: `product_reviews.status` values changed from `pending|approved|rejected` to `published|hidden` (default `published`).
+- Removed reviews pending-moderation alert badge from admin sidebar navigation.
+- Storefront: removed "pending approval" and "rejected" status badges from the user's own review display.
+- Updated all locale keys (ca, es, en) to reflect new published/hidden statuses and hide/show actions.
+
+## [0.1.165] - 2026-05-11
+
+### Fixed
+- Translation: replaced incorrect "fusteria/carpintería/carpentry" with "serralleria/cerrajería/locksmith" in hero tagline (ca/es/en) and Blade meta tags.
+
+## [0.1.164] - 2026-05-11
+
+### Fixed
+- SEO: added `<title>`, meta description, canonical, Open Graph, and Twitter Card tags to the Blade shell (`welcome.blade.php`).
+- Accessibility: corrected invalid ARIA roles in drawer language selector (`role="group"` + `role="option"` to `role="radiogroup"` + `role="radio"`).
+- Accessibility: added `aria-hidden` to decorative SVG chevron and `role="status"` to loading spinner on HomePage.
+- HomePage sets `document.title` on mount so Lighthouse reads a proper page title.
 
 ## [0.1.160] - 2026-05-11
 

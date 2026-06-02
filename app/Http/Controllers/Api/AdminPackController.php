@@ -7,6 +7,8 @@ use App\Http\Resources\AdminPackResource;
 use App\Models\Pack;
 use App\Models\PackImage;
 use App\Models\PackItem;
+use App\Support\CatalogLocale;
+use App\Support\CatalogTranslationSync;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,12 +16,15 @@ class AdminPackController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Pack::query()->withCount('packItems')->orderBy('name');
+        $query = Pack::query()->withCount('packItems')->with('translations')->orderByTranslatedName();
 
         if ($request->filled('search')) {
-            $term = '%' . $request->string('search')->trim() . '%';
-            $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', $term)->orWhere('description', 'like', $term);
+            $term = '%'.$request->string('search')->trim().'%';
+            $loc = CatalogLocale::normalize(app()->getLocale());
+            $query->where(function ($q) use ($term, $loc) {
+                $q->whereHas('translations', fn ($t) => $t->where('locale', $loc)->where(function ($x) use ($term) {
+                    $x->where('name', 'like', $term)->orWhere('description', 'like', $term);
+                }));
             });
         }
         if ($request->has('is_active')) {
@@ -56,10 +61,15 @@ class AdminPackController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        if ($request->input('discount_percent') === '' || $request->input('discount_percent') === null) {
+            $request->merge(['discount_percent' => null]);
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'translations' => ['nullable', 'array'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'is_trending' => ['boolean'],
             'is_active' => ['boolean'],
             'contains_keys' => ['boolean'],
@@ -68,9 +78,22 @@ class AdminPackController extends Controller
             'images' => ['nullable', 'array'],
             'images.*' => ['file', 'image', 'max:10240'],
         ]);
+        if (! array_key_exists('discount_percent', $validated) || $validated['discount_percent'] === '' || $validated['discount_percent'] === null) {
+            $validated['discount_percent'] = null;
+        }
 
         $defaults = ['is_trending' => false, 'is_active' => true, 'contains_keys' => false];
-        $pack = Pack::create(array_merge($defaults, collect($validated)->except(['product_ids', 'images'])->all()));
+        $pack = Pack::create(array_merge($defaults, collect($validated)->except(['product_ids', 'images', 'name', 'description', 'translations'])->all()));
+
+        $by = ['ca' => ['name' => $validated['name'], 'description' => $validated['description'] ?? null]];
+        if (is_array($request->input('translations'))) {
+            foreach ($request->input('translations') as $loc => $payload) {
+                if (in_array((string) $loc, CatalogLocale::SUPPORTED, true) && is_array($payload)) {
+                    $by[(string) $loc] = array_merge($by[(string) $loc] ?? [], $payload);
+                }
+            }
+        }
+        CatalogTranslationSync::syncPackTranslations($pack, $by);
 
         $this->syncPackItems($pack, $validated['product_ids'] ?? []);
 
@@ -80,13 +103,13 @@ class AdminPackController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => new AdminPackResource($pack->load(['packItems.product', 'images'])),
+            'data' => new AdminPackResource($pack->load(['packItems.product.category.translations', 'packItems.product.translations', 'images', 'translations'])),
         ], 201);
     }
 
     public function show(Pack $pack): JsonResponse
     {
-        $pack->load(['packItems.product.category', 'packItems.product.images', 'images']);
+        $pack->load(['packItems.product.category.translations', 'packItems.product.translations', 'packItems.product.images', 'images', 'translations']);
 
         return response()->json([
             'success' => true,
@@ -96,23 +119,40 @@ class AdminPackController extends Controller
 
     public function update(Request $request, Pack $pack): JsonResponse
     {
+        if ($request->input('discount_percent') === '' || $request->input('discount_percent') === null) {
+            $request->merge(['discount_percent' => null]);
+        }
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'translations' => ['nullable', 'array'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'is_trending' => ['boolean'],
             'is_active' => ['boolean'],
             'contains_keys' => ['boolean'],
             'product_ids' => ['nullable', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
         ]);
+        if (! array_key_exists('discount_percent', $validated) || $validated['discount_percent'] === '' || $validated['discount_percent'] === null) {
+            $validated['discount_percent'] = null;
+        }
 
-        $pack->update(collect($validated)->except('product_ids')->all());
+        $pack->update(collect($validated)->except(['product_ids', 'name', 'description', 'translations'])->all());
+        $by = ['ca' => ['name' => $validated['name'], 'description' => $validated['description'] ?? null]];
+        if (is_array($request->input('translations'))) {
+            foreach ($request->input('translations') as $loc => $payload) {
+                if (in_array((string) $loc, CatalogLocale::SUPPORTED, true) && is_array($payload)) {
+                    $by[(string) $loc] = array_merge($by[(string) $loc] ?? [], $payload);
+                }
+            }
+        }
+        CatalogTranslationSync::syncPackTranslations($pack, $by);
         $this->syncPackItems($pack, $validated['product_ids'] ?? []);
 
         return response()->json([
             'success' => true,
-            'data' => new AdminPackResource($pack->fresh()->load(['packItems.product', 'images'])),
+            'data' => new AdminPackResource($pack->fresh()->load(['packItems.product.category.translations', 'packItems.product.translations', 'images', 'translations'])),
         ]);
     }
 
@@ -127,7 +167,7 @@ class AdminPackController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => new AdminPackResource($pack->load(['packItems.product', 'images'])),
+            'data' => new AdminPackResource($pack->load(['packItems.product', 'images', 'translations'])),
         ]);
     }
 
@@ -146,7 +186,7 @@ class AdminPackController extends Controller
         $maxSort = (int) PackImage::where('pack_id', $pack->id)->max('sort_order');
         foreach ($files as $file) {
             $maxSort++;
-            $path = $file->store('packs/' . $pack->id, 'uploads');
+            $path = $file->store('packs/'.$pack->id, 'uploads');
             PackImage::create([
                 'pack_id' => $pack->id,
                 'storage_path' => $path,

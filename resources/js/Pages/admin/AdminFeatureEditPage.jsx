@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { catalogFeatureTypeLabel } from '../../lib/catalogFeatureTypeLabel';
 import AdminFeatureForm from '../../components/admin/AdminFeatureForm';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
@@ -67,7 +68,7 @@ export default function AdminFeatureEditPage() {
     return (
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Link to="/admin/features" className="btn btn-ghost btn-sm">
+          <Link to={`/admin/features/${id}`} className="btn btn-ghost btn-sm">
             {t('common.back')}
           </Link>
         </div>
@@ -87,7 +88,17 @@ export default function AdminFeatureEditPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <PageTitle className="mb-0">{t('admin.features.edit')} · {feature.feature_name}: {feature.value}</PageTitle>
+        <PageTitle className="mb-0">
+          {t('admin.features.edit')}
+          {' · '}
+          {(() => {
+            const typeLabel = catalogFeatureTypeLabel(
+              { type: feature.feature_name, feature_name_code: feature.feature_name_code },
+              t
+            );
+            return typeLabel ? `${typeLabel}: ${feature.value}` : String(feature.value ?? '');
+          })()}
+        </PageTitle>
       </div>
       <div className="card bg-base-100 shadow border border-base-200">
         <div className="card-body">

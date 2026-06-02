@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductVariantGroup;
+use App\Support\CatalogLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -16,13 +17,17 @@ class AdminVariantGroupController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = ProductVariantGroup::query()->with(['products' => fn ($q) => $q->orderBy('name')]);
+        $query = ProductVariantGroup::query()->with(['products' => fn ($q) => $q->orderByTranslatedName()->with('translations')]);
 
         if ($request->filled('search')) {
-            $term = '%' . $request->string('search')->trim() . '%';
-            $query->where(function ($q) use ($term) {
+            $term = '%'.$request->string('search')->trim().'%';
+            $loc = CatalogLocale::normalize(app()->getLocale());
+            $query->where(function ($q) use ($term, $loc) {
                 $q->where('name', 'like', $term)
-                    ->orWhereHas('products', fn ($pq) => $pq->where('name', 'like', $term)->orWhere('code', 'like', $term));
+                    ->orWhereHas('products', function ($pq) use ($term, $loc) {
+                        $pq->where('code', 'like', $term)
+                            ->orWhereHas('translations', fn ($pt) => $pt->where('locale', $loc)->where('name', 'like', $term));
+                    });
             });
         }
 
@@ -67,7 +72,7 @@ class AdminVariantGroupController extends Controller
 
         $this->assignProductsToGroup($group->id, $productIds);
 
-        $group->load(['products' => fn ($q) => $q->orderBy('name')]);
+        $group->load(['products' => fn ($q) => $q->orderByTranslatedName()->with('translations')]);
 
         return response()->json([
             'success' => true,
@@ -78,7 +83,7 @@ class AdminVariantGroupController extends Controller
     public function show(ProductVariantGroup $variant_group): JsonResponse
     {
         $variant_group->load([
-            'products' => fn ($q) => $q->orderBy('name')->with(['category', 'images']),
+            'products' => fn ($q) => $q->orderByTranslatedName()->with(['category.translations', 'images', 'translations']),
         ]);
 
         return response()->json([
@@ -102,7 +107,7 @@ class AdminVariantGroupController extends Controller
         Product::query()->where('variant_group_id', $variant_group->id)->update(['variant_group_id' => null]);
         $this->assignProductsToGroup($variant_group->id, $productIds);
 
-        $variant_group->load(['products' => fn ($q) => $q->orderBy('name')]);
+        $variant_group->load(['products' => fn ($q) => $q->orderByTranslatedName()->with('translations')]);
 
         return response()->json([
             'success' => true,

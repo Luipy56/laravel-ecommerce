@@ -233,10 +233,16 @@ return [
                 'mappings' => [
                     'properties' => [
                         'id' => ['type' => 'keyword'],
-                        'name' => ['type' => 'text', 'analyzer' => 'standard'],
                         'code' => ['type' => 'text', 'analyzer' => 'standard'],
-                        'description' => ['type' => 'text', 'analyzer' => 'standard'],
-                        'search_text' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'name_ca' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'name_es' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'name_en' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'description_ca' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'description_es' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'description_en' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'search_text_ca' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'search_text_es' => ['type' => 'text', 'analyzer' => 'standard'],
+                        'search_text_en' => ['type' => 'text', 'analyzer' => 'standard'],
                         'is_active' => ['type' => 'boolean'],
                         'suggest' => [
                             'type' => 'completion',

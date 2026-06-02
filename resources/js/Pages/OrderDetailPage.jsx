@@ -39,32 +39,32 @@ function storefrontOrderStatusBadgeClass(status) {
 
 function rmaStatusBadgeClass(status) {
   switch (status) {
-    case 'pending_review': return 'badge-warning';
-    case 'approved': return 'badge-info';
-    case 'refunded': return 'badge-success';
-    case 'rejected': return 'badge-error';
-    case 'cancelled': return 'badge-neutral';
-    default: return 'badge-neutral';
+    case 'pending_review': return 'badge-outline badge-warning';
+    case 'approved': return 'badge-outline badge-info';
+    case 'refunded': return 'badge-outline badge-success';
+    case 'rejected': return 'badge-outline badge-error';
+    case 'cancelled': return 'badge-outline badge-neutral';
+    default: return 'badge-outline badge-neutral';
   }
 }
 
 function StorefrontOrderLinesTable({ lines, nameHeaderKey, t }) {
   if (lines.length === 0) return null;
   return (
-    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-      <table className="table table-sm w-full [&_th]:text-base-content/80 [&_td]:align-middle">
+    <div className="min-w-0 max-w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+      <table className="table table-sm w-full min-w-0 [&_th]:text-base-content/80 [&_td]:align-middle">
         <thead>
-          <tr className="bg-base-200/60 border-b border-base-300">
+          <tr className="border-b border-base-300 bg-base-200/60">
             <th className="font-semibold">{t(nameHeaderKey)}</th>
-            <th className="text-center whitespace-nowrap font-semibold">{t('shop.quantity')}</th>
-            <th className="text-center whitespace-nowrap font-semibold">{t('shop.price')}</th>
-            <th className="text-end whitespace-nowrap font-semibold">{t('shop.total')}</th>
+            <th className="whitespace-nowrap text-center font-semibold">{t('shop.quantity')}</th>
+            <th className="whitespace-nowrap text-center font-semibold">{t('shop.price')}</th>
+            <th className="whitespace-nowrap text-end font-semibold">{t('shop.total')}</th>
           </tr>
         </thead>
         <tbody>
           {lines.map((l) => (
             <tr key={l.id} className="border-b border-base-200 last:border-b-0">
-              <td className="min-w-0 max-w-[min(100vw,22rem)] sm:max-w-none">{l.product?.name ?? l.pack?.name}</td>
+              <td className="min-w-0 break-words">{l.product?.name ?? l.pack?.name}</td>
               <td className="text-center tabular-nums">{l.quantity}</td>
               <td className="text-center tabular-nums">{Number(l.unit_price).toFixed(2)} €</td>
               <td className="text-end tabular-nums font-medium">{Number(l.line_total).toFixed(2)} €</td>
@@ -330,9 +330,12 @@ export default function OrderDetailPage() {
     order.has_payment &&
     !existingRma;
 
+  const REVIEWABLE_STATUSES = ['sent', 'installation_pending', 'installation_confirmed'];
   const statusKey = `shop.status.${order.status}`;
   const statusLabel = t(statusKey) !== statusKey ? t(statusKey) : order.status;
   const { products: productLines, packs: packLines } = partitionOrderLines(order.lines);
+  const firstProductId = productLines[0]?.product?.id ?? productLines[0]?.product_id;
+  const canReview = REVIEWABLE_STATUSES.includes(order.status) && firstProductId;
   const shippingAddress = order.addresses?.find((a) => a.type === 'shipping');
   const installationAddress = order.addresses?.find((a) => a.type === 'installation');
 
@@ -363,8 +366,8 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      <div className="card bg-base-100 border border-base-200 shadow-sm rounded-2xl mb-4">
-        <div className="card-body py-4 px-4 sm:px-5">
+      <div className="card min-w-0 max-w-full border border-base-200 bg-base-100 shadow-sm rounded-2xl mb-4">
+        <div className="card-body min-w-0 max-w-full px-4 py-4 sm:px-5">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div className="min-w-0">
               <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">{t('shop.order_status')}</dt>
@@ -400,19 +403,19 @@ export default function OrderDetailPage() {
       )}
 
       {(shippingAddress || installationAddress) && (
-        <div className="card bg-base-100 shadow border border-base-300 rounded-2xl mt-4">
-          <div className="card-body">
+        <div className="card min-w-0 max-w-full border border-base-300 bg-base-100 shadow rounded-2xl mt-4">
+          <div className="card-body min-w-0 max-w-full">
             <h2 className="card-title text-base">{t('shop.order_addresses')}</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 min-w-0 sm:grid-cols-2">
               {shippingAddress && (
-                <div>
+                <div className="min-w-0">
                   <h3 className="text-sm font-semibold text-base-content/70">{t('shop.order_address_shipping')}</h3>
                   <p className="whitespace-pre-wrap">{formatAddress(shippingAddress)}</p>
                   {shippingAddress.note && <p className="text-sm text-base-content/70 mt-1">{shippingAddress.note}</p>}
                 </div>
               )}
               {installationAddress && (
-                <div>
+                <div className="min-w-0">
                   <h3 className="text-sm font-semibold text-base-content/70">{t('shop.order_address_installation')}</h3>
                   <p className="whitespace-pre-wrap">{formatAddress(installationAddress)}</p>
                   {installationAddress.note && <p className="text-sm text-base-content/70 mt-1">{installationAddress.note}</p>}
@@ -423,8 +426,8 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      <div className="card bg-base-100 shadow border border-base-300 overflow-hidden rounded-2xl mt-4">
-        <div className="card-body px-4 py-5 sm:px-6">
+      <div className="card min-w-0 max-w-full overflow-hidden border border-base-300 bg-base-100 shadow rounded-2xl mt-4">
+        <div className="card-body min-w-0 max-w-full px-4 py-5 sm:px-6">
           {productLines.length === 0 && packLines.length === 0 ? (
             <p className="text-base-content/70 text-sm py-1">{t('shop.order.no_lines')}</p>
           ) : (
@@ -452,8 +455,8 @@ export default function OrderDetailPage() {
           )}
         </div>
         <div className="border-t border-base-300 bg-base-200/40 px-4 py-4 sm:px-6">
-          <div className="overflow-x-auto">
-            <table className="table table-sm w-full max-w-md ml-auto">
+          <div className="min-w-0 max-w-full overflow-x-auto">
+            <table className="table table-sm ml-0 w-full max-w-full sm:ml-auto sm:max-w-md">
               <tbody className="[&_td]:py-2">
                 <tr>
                   <td className="text-end font-medium text-base-content/90">{t('shop.order.lines_subtotal')}</td>
@@ -600,21 +603,36 @@ export default function OrderDetailPage() {
         </form>
       )}
 
-      {!canPay && order.has_payment && (
-        <div className="mt-4 flex flex-wrap justify-end gap-2">
-          <a href={`/api/v1/orders/${order.id}/delivery-note?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-primary btn-sm">
-            {t('shop.delivery_note')}
-          </a>
-          <a href={`/api/v1/orders/${order.id}/invoice?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
-            {t('shop.invoice')}
-          </a>
+      {(canReview || (!canPay && order.has_payment) || canRequestReturn) && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {canReview && (
+            <Link to={`/products/${firstProductId}`} className="btn btn-outline btn-primary btn-sm">
+              {t('shop.reviews.leave_review')}
+            </Link>
+          )}
+          <div className="flex-1" />
+          {canRequestReturn && (
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => setReturnModalOpen(true)}>
+              {t('shop.returns.request_return')}
+            </button>
+          )}
+          {!canPay && order.has_payment && (
+            <>
+              <a href={`/api/v1/orders/${order.id}/delivery-note?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-primary btn-sm">
+                {t('shop.delivery_note')}
+              </a>
+              <a href={`/api/v1/orders/${order.id}/invoice?locale=${i18n.language ?? 'ca'}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm">
+                {t('shop.invoice')}
+              </a>
+            </>
+          )}
         </div>
       )}
 
       {existingRma && (
         <div className="card bg-base-100 border border-base-200 shadow-sm rounded-2xl mt-4">
           <div className="card-body py-4 px-4 sm:px-5">
-            <h2 className="card-title text-base">{t('shop.returns.request_return')}</h2>
+            <h2 className="card-title text-base">{t('shop.returns.return_request_title')}</h2>
             <div className="flex flex-wrap items-center gap-3">
               <span className={`badge ${rmaStatusBadgeClass(existingRma.status)}`}>
                 {t(`shop.returns.status_${existingRma.status}`) || existingRma.status}
@@ -626,14 +644,6 @@ export default function OrderDetailPage() {
               )}
             </div>
           </div>
-        </div>
-      )}
-
-      {canRequestReturn && (
-        <div className="mt-4 flex justify-end">
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => setReturnModalOpen(true)}>
-            {t('shop.returns.request_return')}
-          </button>
         </div>
       )}
 

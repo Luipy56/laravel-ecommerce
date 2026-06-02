@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { STOREFRONT_LANGUAGE_OPTIONS } from '../lib/storefrontLanguageOptions';
+import { StorefrontNavbarVisibilityProvider } from '../contexts/StorefrontNavbarVisibilityContext';
+import {
+  STOREFRONT_FLAG_IMG_CLASS,
+  STOREFRONT_LANGUAGE_OPTIONS,
+} from '../lib/storefrontLanguageOptions';
 import Navbar from './Navbar';
 import CartWidget from './CartWidget';
 import Footer from './Footer';
@@ -19,6 +23,7 @@ import {
   IconLogIn,
   IconPackage,
   IconSparkles,
+  IconTag,
   IconUser,
   IconX,
 } from './icons';
@@ -36,7 +41,7 @@ function drawerNavClass(isActive) {
   return [
     'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors duration-200',
     isActive
-      ? 'bg-primary text-primary-content shadow-md'
+      ? 'text-white shadow-md [background:linear-gradient(to_right,#F75211,#8B2400)]'
       : 'text-base-content hover:bg-base-200 active:bg-base-300',
   ].join(' ');
 }
@@ -45,15 +50,9 @@ function drawerIconClass(isActive) {
   return ['h-5 w-5 shrink-0', isActive ? 'text-primary-content' : 'text-primary'].join(' ');
 }
 
-function localeCode(lng) {
-  if (lng === 'ca') return 'CA';
-  if (lng === 'es') return 'ES';
-  return 'EN';
-}
-
 export default function Layout() {
   const { t, i18n } = useTranslation();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const { user, loading: authLoading } = useAuth();
   const [locale, setLocale] = useState(i18n.language);
 
@@ -72,6 +71,18 @@ export default function Layout() {
     pathname.startsWith('/products/') ||
     /^\/categories\/[^/]+\/products$/.test(pathname);
 
+  const packsOnlyActive = useMemo(() => {
+    if (pathname !== '/products') return false;
+    return new URLSearchParams(search).get('packs_only') === '1';
+  }, [pathname, search]);
+
+  const offersOnlyActive = useMemo(() => {
+    if (pathname !== '/products') return false;
+    return new URLSearchParams(search).get('offers_only') === '1';
+  }, [pathname, search]);
+
+  const isProductDetailPage = /^\/(products|packs)\/[^/]+$/.test(pathname);
+
   return (
     <div className="drawer">
       <input
@@ -80,16 +91,29 @@ export default function Layout() {
         className="drawer-toggle"
         aria-hidden="true"
       />
-      <div className="drawer-content flex min-h-screen flex-col bg-base-200">
-        <Navbar />
-        <main className="container mx-auto min-w-0 max-w-full flex-1 px-4 py-6">
-          <Outlet />
-        </main>
-        <Footer />
-        <CartWidget />
-        <ScrollToTop />
-        <CookieConsentBanner />
-      </div>
+      <StorefrontNavbarVisibilityProvider>
+        <div
+          className="drawer-content flex min-h-screen flex-col bg-base-200 storefront-bg"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('/images/home-bg.jpg')",
+          }}
+        >
+          <Navbar />
+          <main
+            className={[
+              'container mx-auto min-w-0 max-w-full flex-1',
+              isProductDetailPage ? 'flex flex-col px-4 py-0' : 'px-4 py-6',
+            ].join(' ')}
+          >
+            <Outlet />
+          </main>
+          <Footer />
+          <CartWidget />
+          <ScrollToTop />
+          <CookieConsentBanner />
+        </div>
+      </StorefrontNavbarVisibilityProvider>
       <div className="drawer-side z-[60] lg:hidden">
         <label htmlFor={STOREFRONT_DRAWER_ID} aria-label={t('common.close')} className="drawer-overlay" />
         <aside className="flex min-h-full w-[min(100vw,20rem)] max-w-[min(100vw,20rem)] flex-col border-r border-base-300 bg-base-100 shadow-2xl">
@@ -123,17 +147,6 @@ export default function Layout() {
                 </NavLink>
               </li>
               <li>
-                <Link
-                  to="/products"
-                  onClick={closeStorefrontDrawer}
-                  className={drawerNavClass(isProductsArea)}
-                  aria-current={isProductsArea ? 'page' : undefined}
-                >
-                  <IconGrid className={drawerIconClass(isProductsArea)} aria-hidden="true" />
-                  {t('shop.products')}
-                </Link>
-              </li>
-              <li>
                 <NavLink
                   to="/custom-solution"
                   onClick={closeStorefrontDrawer}
@@ -142,10 +155,43 @@ export default function Layout() {
                   {({ isActive }) => (
                     <>
                       <IconSparkles className={drawerIconClass(isActive)} aria-hidden="true" />
-                      {t('shop.custom_solution')}
+                      {t('shop.nav.custom_solution')}
                     </>
                   )}
                 </NavLink>
+              </li>
+              <li>
+                <Link
+                  to="/products"
+                  onClick={closeStorefrontDrawer}
+                  className={drawerNavClass(isProductsArea && !packsOnlyActive && !offersOnlyActive)}
+                  aria-current={isProductsArea && !packsOnlyActive && !offersOnlyActive ? 'page' : undefined}
+                >
+                  <IconGrid className={drawerIconClass(isProductsArea && !packsOnlyActive && !offersOnlyActive)} aria-hidden="true" />
+                  {t('shop.products')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/products?packs_only=1"
+                  onClick={closeStorefrontDrawer}
+                  className={drawerNavClass(packsOnlyActive)}
+                  aria-current={packsOnlyActive ? 'page' : undefined}
+                >
+                  <IconPackage className={drawerIconClass(packsOnlyActive)} aria-hidden="true" />
+                  {t('shop.filters.packs_only')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/products?offers_only=1"
+                  onClick={closeStorefrontDrawer}
+                  className={drawerNavClass(offersOnlyActive)}
+                  aria-current={offersOnlyActive ? 'page' : undefined}
+                >
+                  <IconTag className={drawerIconClass(offersOnlyActive)} aria-hidden="true" />
+                  {t('shop.offers')}
+                </Link>
               </li>
               <li>
                 <NavLink
@@ -183,25 +229,32 @@ export default function Layout() {
               <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
                 {t('common.language')}
               </p>
-              <div className="flex gap-1.5" role="group" aria-label={t('common.language')}>
-                {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label }) => {
+              <div className="flex gap-1.5" role="radiogroup" aria-label={t('common.language')}>
+                {STOREFRONT_LANGUAGE_OPTIONS.map(({ code, label, flag }) => {
                   const selected = locale === code;
                   return (
                     <button
                       key={code}
                       type="button"
-                      role="option"
-                      aria-selected={selected}
+                      role="radio"
+                      aria-checked={selected}
+                      aria-label={label}
+                      title={label}
                       onClick={() => handleLocale(code)}
                       className={[
-                        'flex-1 rounded-lg py-2 text-xs font-semibold tabular-nums transition-all duration-150',
+                        'flex flex-1 flex-col items-center justify-center gap-1 rounded-lg py-2 transition-all duration-150',
                         selected
-                          ? 'bg-primary text-primary-content shadow-sm'
+                          ? 'bg-primary text-primary-content shadow-sm ring-2 ring-primary/30'
                           : 'bg-base-200 text-base-content/60 hover:bg-base-300 hover:text-base-content',
                       ].join(' ')}
                     >
-                      {localeCode(code)}
-                      <span className="sr-only"> — {label}</span>
+                      <img
+                        src={flag}
+                        alt=""
+                        className={`h-6 w-6 ${STOREFRONT_FLAG_IMG_CLASS}`}
+                        aria-hidden="true"
+                      />
+                      <span className="text-[10px] font-semibold leading-none">{label}</span>
                     </button>
                   );
                 })}

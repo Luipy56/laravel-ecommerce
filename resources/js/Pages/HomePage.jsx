@@ -1,11 +1,50 @@
 import './HomePage.scss';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api';
 import { Product } from '../lib/Product';
 import ProductCard from '../components/ProductCard';
+import useDragScroll from '../hooks/useDragScroll';
+
+function CategoryGrid({ group, t }) {
+  const { scrollRef, wrapperRef } = useDragScroll();
+  return (
+    <div className="trending__category-row">
+      <div ref={wrapperRef} className="scroll-row-wrapper">
+        <div ref={scrollRef} className="products-home-grid">
+          {group.products.slice(0, 5).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+      {group.categoryId != null && (
+        <Link
+          to={`/categories/${group.categoryId}/products`}
+          className="slider-btn"
+          aria-label={group.categoryName ?? t('shop.categories')}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id={`chev-${group.key}`} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%"   style={{ stopColor: 'var(--chev-from)' }} />
+                <stop offset="100%" style={{ stopColor: 'var(--chev-to)' }} />
+              </linearGradient>
+            </defs>
+            <polyline
+              points="9 18 15 12 9 6"
+              stroke={`url(#chev-${group.key})`}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+      )}
+    </div>
+  );
+}
 
 /** Preserves featured order; categories appear in first-seen order. */
 function groupFeaturedProductsByCategory(products) {
@@ -34,14 +73,6 @@ export default function HomePage() {
   const { t } = useTranslation();
   const [heroImageFailed, setHeroImageFailed] = useState(false);
 
-  const categoriesQuery = useQuery({
-    queryKey: ['categories'],
-    queryFn: async ({ signal }) => {
-      const r = await api.get('categories', { signal });
-      return r.data.success ? r.data.data || [] : [];
-    },
-  });
-
   const featuredQuery = useQuery({
     queryKey: ['products', 'featured'],
     queryFn: async ({ signal }) => {
@@ -51,10 +82,13 @@ export default function HomePage() {
     },
   });
 
-  const categories = categoriesQuery.data ?? [];
   const featured = featuredQuery.data ?? [];
   const featuredByCategory = useMemo(() => groupFeaturedProductsByCategory(featured), [featured]);
-  const loading = categoriesQuery.isPending || featuredQuery.isPending;
+  const loading = featuredQuery.isPending;
+
+  useEffect(() => {
+    document.title = t('shop.brand_name');
+  }, [t]);
 
   return (
     <div className="home-page">
@@ -71,7 +105,18 @@ export default function HomePage() {
           <div className="page-container">
             <div className="hero__content">
               <h1>{t('home.hero.title')}</h1>
-              <p>{t('home.hero.tagline')}</p>
+              <div className="hero__tagline">
+                <span className="hero__tagline-prefix">{t('home.hero.tagline_prefix')}</span>
+                <span className="text-rotate hero__rotating">
+                  <span>
+                    <span>{t('home.hero.tagline_w1')}</span>
+                    <span>{t('home.hero.tagline_w2')}</span>
+                    <span>{t('home.hero.tagline_w3')}</span>
+                    <span>{t('home.hero.tagline_w4')}</span>
+                    <span>{t('home.hero.tagline_w5')}</span>
+                  </span>
+                </span>
+              </div>
               <Link to="/products" className="primary-btn">
                 {t('home.hero.cta_products')}
               </Link>
@@ -80,65 +125,36 @@ export default function HomePage() {
         </div>
       </section>
 
-      {categories.length > 0 && (
-        <section className="categories section">
-          <div className="page-container">
-            <h2 className="section-title">{t('shop.categories')}</h2>
-            <div className="categories__list">
-              {categories.map((c) => (
-                <Link key={c.id} to={`/categories/${c.id}/products`} className="tag">
-                  {c.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       <section className="trending section">
         <div className="page-container">
           <div className="section-header">
             <h2 className="section-title">{t('shop.featured')}</h2>
-            <Link to="/products" className="slider-btn" aria-label={t('shop.featured')} onClick={() => window.scrollTo(0, 0)}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-            </Link>
           </div>
 
           {loading ? (
-            <div className="trending__loading">
+            <div className="trending__loading" role="status" aria-label={t('common.loading')}>
               <span className="loading loading-spinner loading-lg" />
             </div>
           ) : featured.length === 0 ? (
             <p className="trending__empty">{t('shop.featured_empty')}</p>
           ) : (
-            <>
-              <div className="trending__categories">
-                {featuredByCategory.map((group) => (
-                  <div
-                    key={group.key}
-                    className="trending__category-group"
-                    aria-labelledby={`home-featured-cat-${group.key}`}
+            <div className="trending__categories">
+              {featuredByCategory.map((group) => (
+                <div
+                  key={group.key}
+                  className="trending__category-group"
+                  aria-labelledby={`home-featured-cat-${group.key}`}
+                >
+                  <h3
+                    id={`home-featured-cat-${group.key}`}
+                    className="trending__category-title"
                   >
-                    <h3
-                      id={`home-featured-cat-${group.key}`}
-                      className="trending__category-title"
-                    >
-                      {group.categoryName ?? t('shop.featured_uncategorized')}
-                    </h3>
-                    <div className="products-row products-row--scroll">
-                      {group.products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="products-grid">
-                {featured.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </>
+                    {group.categoryName ?? t('shop.featured_uncategorized')}
+                  </h3>
+                  <CategoryGrid group={group} t={t} />
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </section>

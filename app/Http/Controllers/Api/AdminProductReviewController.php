@@ -42,7 +42,7 @@ class AdminProductReviewController extends Controller
 
         $reviews = $query->paginate($perPage);
 
-        $pendingCount = ProductReview::pending()->count();
+        $hiddenCount = ProductReview::hidden()->count();
 
         return response()->json([
             'success' => true,
@@ -52,7 +52,7 @@ class AdminProductReviewController extends Controller
                 'last_page' => $reviews->lastPage(),
                 'per_page' => $reviews->perPage(),
                 'total' => $reviews->total(),
-                'pending_count' => $pendingCount,
+                'hidden_count' => $hiddenCount,
             ],
         ]);
     }
@@ -67,14 +67,16 @@ class AdminProductReviewController extends Controller
         ]);
     }
 
-    public function update(Request $request, ProductReview $review): JsonResponse
+    /**
+     * Toggle visibility: published ↔ hidden.
+     */
+    public function toggleVisibility(ProductReview $review): JsonResponse
     {
-        $validated = $request->validate([
-            'status' => ['required', 'string', 'in:pending,approved,rejected'],
-            'admin_note' => ['nullable', 'string', 'max:500'],
-        ]);
+        $newStatus = $review->status === ProductReview::STATUS_HIDDEN
+            ? ProductReview::STATUS_PUBLISHED
+            : ProductReview::STATUS_HIDDEN;
 
-        $review->update($validated);
+        $review->update(['status' => $newStatus]);
 
         return response()->json([
             'success' => true,

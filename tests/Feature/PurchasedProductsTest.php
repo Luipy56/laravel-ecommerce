@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderLine;
-use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -86,19 +85,10 @@ class PurchasedProductsTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        $category = ProductCategory::query()->create([
-            'code' => 'cat_'.uniqid(),
-            'name' => 'Category',
-            'is_active' => true,
-        ]);
-
-        $product = Product::query()->create([
-            'category_id' => $category->id,
-            'code' => 'p_'.uniqid(),
-            'name' => $productName,
+        $category = $this->createProductCategoryForTests('cat_'.uniqid(), 'Category');
+        $product = $this->createProductForTests($category->id, 'p_'.uniqid(), $productName, null, [
             'price' => 10.00,
             'stock' => 5,
-            'is_active' => true,
         ]);
 
         $order = Order::query()->create([
@@ -129,13 +119,9 @@ class PurchasedProductsTest extends TestCase
     private function makeSecondOrderLineForClient(Client $client, string $productName, \DateTimeInterface|string $orderDate): void
     {
         $category = ProductCategory::query()->firstOrFail();
-        $product = Product::query()->create([
-            'category_id' => $category->id,
-            'code' => 'p2_'.uniqid(),
-            'name' => $productName,
+        $product = $this->createProductForTests($category->id, 'p2_'.uniqid(), $productName, null, [
             'price' => 12.00,
             'stock' => 3,
-            'is_active' => true,
         ]);
 
         $order = Order::query()->create([

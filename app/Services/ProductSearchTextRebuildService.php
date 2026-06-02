@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\RebuildsProductSearchText;
 use App\Models\Product;
+use App\Models\ProductTranslation;
 
 class ProductSearchTextRebuildService implements RebuildsProductSearchText
 {
@@ -11,15 +12,25 @@ class ProductSearchTextRebuildService implements RebuildsProductSearchText
     {
         $chunkSize = max(1, $chunkSize);
         $updated = 0;
-        Product::query()->orderBy('id')->chunkById($chunkSize, function ($products) use (&$updated): void {
+        Product::query()->with('translations')->orderBy('id')->chunkById($chunkSize, function ($products) use (&$updated): void {
             foreach ($products as $product) {
-                $product->search_text = Product::normalizeSearchText(
-                    $product->name,
-                    $product->code,
-                    $product->description
-                );
-                $product->saveQuietly();
-                $updated++;
+                foreach ($product->translations as $t) {
+                    $expected = Product::normalizeSearchText(
+                        $t->name,
+                        $product->code,
+                        $t->description
+                    );
+                    if ((string) ($t->search_text ?? '') !== $expected) {
+                        ProductTranslation::query()->whereKey($t->id)->update([
+                            'search_text' => $expected,
+                            'updated_at' => now(),
+                        ]);
+                        $updated++;
+                    }
+                }
+                if ($product->shouldBeSearchable()) {
+                    $product->searchable();
+                }
             }
         });
 
@@ -30,20 +41,27 @@ class ProductSearchTextRebuildService implements RebuildsProductSearchText
     {
         $chunkSize = max(1, $chunkSize);
         $updated = 0;
-        Product::query()->orderBy('id')->chunkById($chunkSize, function ($products) use (&$updated): void {
+        Product::query()->with('translations')->orderBy('id')->chunkById($chunkSize, function ($products) use (&$updated): void {
             foreach ($products as $product) {
-                $expected = Product::normalizeSearchText(
-                    $product->name,
-                    $product->code,
-                    $product->description
-                );
-                $current = $product->search_text;
-                if ($current !== null && (string) $current === $expected) {
-                    continue;
+                foreach ($product->translations as $t) {
+                    $expected = Product::normalizeSearchText(
+                        $t->name,
+                        $product->code,
+                        $t->description
+                    );
+                    $current = $t->search_text;
+                    if ($current !== null && (string) $current === $expected) {
+                        continue;
+                    }
+                    ProductTranslation::query()->whereKey($t->id)->update([
+                        'search_text' => $expected,
+                        'updated_at' => now(),
+                    ]);
+                    $updated++;
                 }
-                $product->search_text = $expected;
-                $product->saveQuietly();
-                $updated++;
+                if ($product->shouldBeSearchable()) {
+                    $product->searchable();
+                }
             }
         });
 

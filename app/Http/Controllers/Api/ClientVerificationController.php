@@ -20,7 +20,7 @@ class ClientVerificationController extends Controller
         $client = Client::query()->findOrFail($id);
 
         if (! hash_equals((string) $hash, sha1($client->getEmailForVerification()))) {
-            abort(403);
+            return self::failedRedirect('invalid');
         }
 
         if ($client->hasVerifiedEmail()) {
@@ -65,5 +65,17 @@ class ClientVerificationController extends Controller
         $join = str_contains($path, '?') ? '&' : '?';
 
         return redirect()->away($base.$path.$join.'verified=1');
+    }
+
+    /**
+     * Redirect to the SPA resend screen when the signed link is missing, expired, or invalid.
+     */
+    public static function failedRedirect(string $reason = 'expired'): RedirectResponse
+    {
+        $path = (string) config('app.verify_email_failed_redirect_path', '/verify-email');
+        $base = rtrim((string) config('app.url'), '/');
+        $join = str_contains($path, '?') ? '&' : '?';
+
+        return redirect()->away($base.$path.$join.http_build_query(['reason' => $reason]));
     }
 }

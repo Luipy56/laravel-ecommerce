@@ -69,7 +69,7 @@ export default function AdminVariantGroupEditPage() {
     return (
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Link to="/admin/variant-groups" className="btn btn-ghost btn-sm">
+          <Link to={`/admin/variant-groups/${id}`} className="btn btn-ghost btn-sm">
             {t('common.back')}
           </Link>
         </div>
@@ -90,7 +90,7 @@ export default function AdminVariantGroupEditPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.variant_groups.edit')}{group.name ? ` · ${group.name}` : ` · #${group.id}`}</PageTitle>
-        <Link to="/admin/variant-groups" className="btn btn-ghost btn-sm shrink-0">
+        <Link to={`/admin/variant-groups/${id}`} className="btn btn-ghost btn-sm shrink-0">
           {t('common.back')}
         </Link>
       </div>

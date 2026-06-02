@@ -5,6 +5,7 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { IconChevronDown, IconChevronRight } from '../../components/icons';
 import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
+import SendEmailModal from '../../components/admin/SendEmailModal';
 
 function clientTypeLabel(type, t) {
   if (type === 'person') return t('admin.clients.type_person');
@@ -25,6 +26,7 @@ export default function AdminClientShowPage() {
   const [client, setClient] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState('');
+  const [sendEmailModalOpen, setSendEmailModalOpen] = useState(false);
   const [contactsOpen, setContactsOpen] = useState(false);
   const [addressesOpen, setAddressesOpen] = useState(false);
 
@@ -72,9 +74,16 @@ export default function AdminClientShowPage() {
       {client._decryption_error && <DecryptionWarningBanner />}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.clients.ficha')}</PageTitle>
-        <Link to="/admin/clients" className="btn btn-ghost btn-sm shrink-0">
-          {t('common.back')}
-        </Link>
+        <div className="flex gap-2">
+          <Link to="/admin/clients" className="btn btn-ghost btn-sm shrink-0">
+            {t('common.back')}
+          </Link>
+          {client.login_email && (
+            <button type="button" className="btn btn-outline btn-sm shrink-0" onClick={() => setSendEmailModalOpen(true)}>
+              {t('admin.send_email.button')}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="card bg-base-100 shadow border border-base-200">
@@ -212,6 +221,13 @@ export default function AdminClientShowPage() {
           </div>
         </div>
       </div>
+
+      <SendEmailModal
+        recipientEmail={client.login_email}
+        defaultSubject={t('admin.send_email.default_subject_client')}
+        isOpen={sendEmailModalOpen}
+        onClose={() => setSendEmailModalOpen(false)}
+      />
     </div>
   );
 }

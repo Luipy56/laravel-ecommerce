@@ -31,7 +31,7 @@ class PersonalizedSolutionSeeder extends Seeder
         PersonalizedSolution::query()->create([
             'client_id' => 2,
             'order_id' => null,
-            'email' => 'joan.martinez@example.com',
+            'email' => 'holaquetal@gmail.com',
             'phone' => '698765432',
             'address_street' => 'Plaza de Cataluña 5',
             'address_city' => 'Barcelona',

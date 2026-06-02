@@ -5,6 +5,7 @@ import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 import { emitAppToast } from '../../toastEvents';
 import DecryptionWarningBanner from '../../components/admin/DecryptionWarningBanner';
+import SendEmailModal from '../../components/admin/SendEmailModal';
 
 const STATUS_COLORS = {
   pending_review: 'badge-warning',
@@ -24,6 +25,7 @@ export default function AdminReturnRequestShowPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
+  const [sendEmailModalOpen, setSendEmailModalOpen] = useState(false);
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const [actionType, setActionType] = useState('approve');
   const [adminNotes, setAdminNotes] = useState('');
@@ -122,11 +124,18 @@ export default function AdminReturnRequestShowPage() {
   const hasDecryptionError = order?.client?._decryption_error ?? false;
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       {hasDecryptionError && <DecryptionWarningBanner />}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PageTitle className="mb-0">{t('admin.returns.detail_title', { id: rma.id })}</PageTitle>
-        <Link to="/admin/returns" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+        <div className="flex gap-2">
+          <Link to="/admin/returns" className="btn btn-ghost btn-sm shrink-0">{t('common.back')}</Link>
+          {order?.client?.login_email && (
+            <button type="button" className="btn btn-outline btn-sm shrink-0" onClick={() => setSendEmailModalOpen(true)}>
+              {t('admin.send_email.button')}
+            </button>
+          )}
+        </div>
       </div>
 
       {error && <div role="alert" className="alert alert-error text-sm">{error}</div>}
@@ -135,7 +144,7 @@ export default function AdminReturnRequestShowPage() {
       <div className="card bg-base-100 shadow border border-base-200">
         <div className="card-body py-4 px-4 sm:px-5">
           <div className="flex flex-wrap items-center gap-4">
-            <span className={`badge badge-lg ${STATUS_COLORS[rma.status] ?? 'badge-neutral'}`}>
+            <span className={`badge badge-outline badge-lg ${STATUS_COLORS[rma.status] ?? 'badge-neutral'}`}>
               {t(`admin.returns.status_${rma.status}`)}
             </span>
             <span className="text-sm text-base-content/60 tabular-nums">
@@ -169,7 +178,7 @@ export default function AdminReturnRequestShowPage() {
               </div>
               <div>
                 <dt className="text-xs font-semibold text-base-content/60 uppercase tracking-wide">{t('admin.orders.status')}</dt>
-                <dd className="mt-1">{order.status}</dd>
+                <dd className="mt-1">{t(`admin.orders.status_${order.status}`)}</dd>
               </div>
               {order.client && (
                 <div>
@@ -292,6 +301,13 @@ export default function AdminReturnRequestShowPage() {
           </button>
         </div>
       )}
+
+      <SendEmailModal
+        recipientEmail={order?.client?.login_email}
+        defaultSubject={t('admin.send_email.default_subject_return', { id: rma.id })}
+        isOpen={sendEmailModalOpen}
+        onClose={() => setSendEmailModalOpen(false)}
+      />
 
       {/* Approve/Reject modal */}
       {actionModalOpen && (

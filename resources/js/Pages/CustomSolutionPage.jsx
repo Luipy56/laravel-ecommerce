@@ -12,6 +12,24 @@ import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue, sanitizePostalCodeDigits } from '../lib/postalInput';
 import { customSolutionFormSchema, parseWithZod } from '../validation';
 import FieldHint from '../components/FieldHint';
+import { IconClipboardList, IconSparkles, IconMail } from '../components/icons';
+
+function ProcessStep({ icon: Icon, title, description, isLast }) {
+  return (
+    <div className="relative flex gap-4 items-start">
+      {!isLast && (
+        <div className="absolute left-4 top-9 bottom-0 w-px bg-base-300" aria-hidden="true" />
+      )}
+      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 z-10 ring-4 ring-base-200">
+        <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+      </div>
+      <div className="pb-7">
+        <h3 className="font-semibold text-base-content leading-snug">{title}</h3>
+        <p className="text-sm text-base-content/65 leading-relaxed mt-1">{description}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function CustomSolutionPage() {
   const { t } = useTranslation();
@@ -191,16 +209,26 @@ export default function CustomSolutionPage() {
     setConfirmModalOpen(true);
   };
 
+  const steps = [
+    {
+      icon: IconClipboardList,
+      titleKey: 'shop.custom_solution.step1_title',
+      descKey: 'shop.custom_solution.step1_desc',
+    },
+    {
+      icon: IconSparkles,
+      titleKey: 'shop.custom_solution.step2_title',
+      descKey: 'shop.custom_solution.step2_desc',
+    },
+    {
+      icon: IconMail,
+      titleKey: 'shop.custom_solution.step3_title',
+      descKey: 'shop.custom_solution.step3_desc',
+    },
+  ];
+
   return (
-    <div className="mx-auto w-full min-w-0 max-w-4xl">
-      <div className="space-y-4">
-        <PageTitle>{t('shop.custom_solution')}</PageTitle>
-        {error ? (
-          <div className="alert alert-error mb-4" role="alert">
-            {error}
-          </div>
-        ) : null}
-      </div>
+    <div className="mx-auto w-full min-w-0 max-w-6xl">
       <ConfirmModal
         open={confirmModalOpen}
         onClose={() => setConfirmModalOpen(false)}
@@ -209,183 +237,232 @@ export default function CustomSolutionPage() {
         message={t('shop.custom_solution.confirm_message')}
         loading={loading}
       />
+
+      {error ? (
+        <div className="alert alert-error mb-6" role="alert">
+          {error}
+        </div>
+      ) : null}
+
       {newRequestsDisabled ? (
-        <div role="alert" className="alert alert-warning mb-4">
+        <div role="alert" className="alert alert-warning mb-6">
           {t('shop.custom_solution.disabled_public')}
         </div>
       ) : null}
-      <form onSubmit={handleSubmit} className="card bg-base-100 shadow">
-        <div className="card-body space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <label className="form-field w-full">
-              <span className="form-label">{t('auth.email')} *</span>
-              <input
-                type="email"
-                name="email"
-                className={`input input-bordered w-full${fieldErrors.email ? ' input-error' : ''}`}
-                value={form.email}
-                onChange={handleChange}
-                aria-invalid={!!fieldErrors.email}
-                disabled={newRequestsDisabled}
-              />
-              {fieldErrors.email ? <p className="validator-hint text-error">{fieldErrors.email}</p> : null}
-            </label>
-            <label className="form-field w-full">
-              <span className="form-label">
-                {t('profile.phone')}
-                <FieldHint text={t('gdpr.field_hint_phone')} />
-              </span>
-              <input
-                type="tel"
-                name="phone"
-                className={`input input-bordered w-full${fieldErrors.phone ? ' input-error' : ''}`}
-                value={form.phone}
-                onChange={handleChange}
-                aria-invalid={!!fieldErrors.phone}
-                disabled={newRequestsDisabled}
-              />
-              {fieldErrors.phone ? <p className="validator-hint text-error">{fieldErrors.phone}</p> : null}
-            </label>
+
+      <div className="lg:grid lg:grid-cols-[1fr_1.15fr] lg:gap-12 lg:items-start space-y-8 lg:space-y-0">
+        {/* Left column — info + process steps */}
+        <div className="space-y-8">
+          <div>
+            <PageTitle>{t('shop.custom_solution.hero_title')}</PageTitle>
+            <p className="mt-4 text-base-content/70 leading-relaxed">
+              {t('shop.custom_solution.hero_subtitle')}
+            </p>
           </div>
 
-          <label className="form-field w-full">
-            <span className="form-label">{t('shop.custom_solution.description')} *</span>
-            <textarea
-              name="problem_description"
-              className={`textarea textarea-bordered w-full${fieldErrors.problem_description ? ' textarea-error' : ''}`}
-              rows={5}
-              value={form.problem_description}
-              onChange={handleChange}
-              aria-invalid={!!fieldErrors.problem_description}
-              disabled={newRequestsDisabled}
-            />
-            {fieldErrors.problem_description ? <p className="validator-hint text-error">{fieldErrors.problem_description}</p> : null}
-          </label>
-
-          <label className="form-field w-full">
-            <span className="form-label">{t('shop.custom_solution.attachments')}</span>
-            <input
-              type="file"
-              className={`file-input file-input-bordered w-full${fieldErrors.attachments ? ' file-input-error' : ''}`}
-              multiple
-              accept="image/*,.pdf"
-              onChange={handleFiles}
-              disabled={newRequestsDisabled}
-              aria-invalid={!!fieldErrors.attachments}
-            />
-            {fieldErrors.attachments ? <p className="validator-hint text-error">{fieldErrors.attachments}</p> : null}
-          </label>
-
-          <fieldset className="form-field space-y-5 border border-base-300 rounded-lg p-4">
-            <legend className="form-label px-1 flex items-center gap-1">
-              {t('shop.custom_solution.address_optional')}
-              <FieldHint text={t('gdpr.field_hint_address')} />
-            </legend>
-            <label className="form-field w-full">
-              <span className="form-label">{t('checkout.street')}</span>
-              <input
-                name="address_street"
-                className={`input input-bordered w-full${fieldErrors.address_street ? ' input-error' : ''}`}
-                value={form.address_street}
-                onChange={handleChange}
-                aria-invalid={!!fieldErrors.address_street}
-                disabled={newRequestsDisabled}
+          <div className="space-y-0">
+            {steps.map((step, i) => (
+              <ProcessStep
+                key={i}
+                icon={step.icon}
+                title={t(step.titleKey)}
+                description={t(step.descKey)}
+                isLast={i === steps.length - 1}
               />
-              {fieldErrors.address_street ? <p className="validator-hint text-error">{fieldErrors.address_street}</p> : null}
-            </label>
-            <div className="flex gap-2">
-              <label className="form-field flex-1">
-                <span className="form-label">{t('profile.city')}</span>
-                <input
-                  name="address_city"
-                  className={`input input-bordered w-full${fieldErrors.address_city ? ' input-error' : ''}`}
-                  value={form.address_city}
-                  onChange={handleChange}
-                  aria-invalid={!!fieldErrors.address_city}
-                  disabled={newRequestsDisabled}
-                />
-                {fieldErrors.address_city ? <p className="validator-hint text-error">{fieldErrors.address_city}</p> : null}
-              </label>
-              <label className="form-field w-28">
-                <span className="form-label">{t('profile.postal_code')} *</span>
-                <input
-                  name="address_postal_code"
-                  inputMode="numeric"
-                  autoComplete="postal-code"
-                  pattern="[0-9]*"
-                  className={`input input-bordered w-full${fieldErrors.address_postal_code ? ' input-error' : ''}`}
-                  value={form.address_postal_code}
-                  onChange={handleChange}
-                  aria-invalid={!!fieldErrors.address_postal_code}
-                  disabled={newRequestsDisabled}
-                />
-                {fieldErrors.address_postal_code ? <p className="validator-hint text-error">{fieldErrors.address_postal_code}</p> : null}
-              </label>
-            </div>
-            <label className="form-field w-full">
-              <span className="form-label">{t('profile.province')}</span>
-              <input
-                name="address_province"
-                className={`input input-bordered w-full${fieldErrors.address_province ? ' input-error' : ''}`}
-                value={form.address_province}
-                onChange={handleChange}
-                aria-invalid={!!fieldErrors.address_province}
-                disabled={newRequestsDisabled}
-              />
-              {fieldErrors.address_province ? <p className="validator-hint text-error">{fieldErrors.address_province}</p> : null}
-            </label>
-            <label className="form-field w-full">
-              <span className="form-label">{t('shop.custom_solution.address_note')}</span>
-              <textarea
-                name="address_note"
-                className={`textarea textarea-bordered w-full${fieldErrors.address_note ? ' textarea-error' : ''}`}
-                rows={2}
-                placeholder=""
-                value={form.address_note}
-                onChange={handleChange}
-                aria-invalid={!!fieldErrors.address_note}
-                disabled={newRequestsDisabled}
-              />
-              {fieldErrors.address_note ? <p className="validator-hint text-error">{fieldErrors.address_note}</p> : null}
-            </label>
-          </fieldset>
-
-          <div className="flex flex-col gap-3">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-primary shrink-0"
-                checked={acceptPrivacy}
-                onChange={(e) => setAcceptPrivacy(e.target.checked)}
-                disabled={newRequestsDisabled}
-                required
-              />
-              <span className="text-sm">
-                {t('gdpr.accept_privacy_prefix')}{' '}
-                <Link to="/privacy-policy" className="link link-primary" onClick={() => window.scrollTo(0, 0)}>
-                  {t('footer.privacy_policy')}
-                </Link>
-              </span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="checkbox checkbox-primary shrink-0"
-                checked={acceptMarketing}
-                onChange={(e) => setAcceptMarketing(e.target.checked)}
-                disabled={newRequestsDisabled}
-              />
-              <span className="text-sm text-base-content/80">{t('gdpr.accept_marketing')}</span>
-            </label>
-          </div>
-
-          <div className="flex justify-end">
-            <button type="submit" className="btn btn-primary md:max-w-xs" disabled={loading || newRequestsDisabled || !acceptPrivacy}>
-              {loading ? t('common.loading') : t('shop.custom_solution.submit')}
-            </button>
+            ))}
           </div>
         </div>
-      </form>
+
+        {/* Right column — form */}
+        <div>
+          <form onSubmit={handleSubmit} className="card bg-base-100 shadow">
+            <div className="card-body space-y-6">
+              <div>
+                <p
+                  className="text-xs font-semibold tracking-widest mb-1"
+                  style={{ color: '#F75211' }}
+                >
+                  {t('shop.custom_solution.form_label')}
+                </p>
+                <h2 className="text-xl font-bold">{t('shop.custom_solution')}</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <label className="form-field w-full">
+                  <span className="form-label">{t('auth.email')} *</span>
+                  <input
+                    type="email"
+                    name="email"
+                    className={`input input-bordered w-full${fieldErrors.email ? ' input-error' : ''}`}
+                    value={form.email}
+                    onChange={handleChange}
+                    aria-invalid={!!fieldErrors.email}
+                    disabled={newRequestsDisabled}
+                  />
+                  {fieldErrors.email ? <p className="validator-hint text-error">{fieldErrors.email}</p> : null}
+                </label>
+                <label className="form-field w-full">
+                  <span className="form-label">
+                    {t('profile.phone')}
+                    <FieldHint text={t('gdpr.field_hint_phone')} />
+                  </span>
+                  <input
+                    type="tel"
+                    name="phone"
+                    className={`input input-bordered w-full${fieldErrors.phone ? ' input-error' : ''}`}
+                    value={form.phone}
+                    onChange={handleChange}
+                    aria-invalid={!!fieldErrors.phone}
+                    disabled={newRequestsDisabled}
+                  />
+                  {fieldErrors.phone ? <p className="validator-hint text-error">{fieldErrors.phone}</p> : null}
+                </label>
+              </div>
+
+              <label className="form-field w-full">
+                <span className="form-label">{t('shop.custom_solution.description')} *</span>
+                <textarea
+                  name="problem_description"
+                  className={`textarea textarea-bordered w-full${fieldErrors.problem_description ? ' textarea-error' : ''}`}
+                  rows={5}
+                  value={form.problem_description}
+                  onChange={handleChange}
+                  aria-invalid={!!fieldErrors.problem_description}
+                  disabled={newRequestsDisabled}
+                />
+                {fieldErrors.problem_description ? <p className="validator-hint text-error">{fieldErrors.problem_description}</p> : null}
+              </label>
+
+              <label className="form-field w-full">
+                <span className="form-label">{t('shop.custom_solution.attachments')}</span>
+                <input
+                  type="file"
+                  className={`file-input file-input-bordered w-full${fieldErrors.attachments ? ' file-input-error' : ''}`}
+                  multiple
+                  accept="image/*,.pdf"
+                  onChange={handleFiles}
+                  disabled={newRequestsDisabled}
+                  aria-invalid={!!fieldErrors.attachments}
+                />
+                {fieldErrors.attachments ? <p className="validator-hint text-error">{fieldErrors.attachments}</p> : null}
+              </label>
+
+              <fieldset className="form-field space-y-5 border border-base-300 rounded-lg p-4">
+                <legend className="form-label px-1 flex items-center gap-1">
+                  {t('shop.custom_solution.address_optional')}
+                  <FieldHint text={t('gdpr.field_hint_address')} />
+                </legend>
+                <label className="form-field w-full">
+                  <span className="form-label">{t('checkout.street')}</span>
+                  <input
+                    name="address_street"
+                    className={`input input-bordered w-full${fieldErrors.address_street ? ' input-error' : ''}`}
+                    value={form.address_street}
+                    onChange={handleChange}
+                    aria-invalid={!!fieldErrors.address_street}
+                    disabled={newRequestsDisabled}
+                  />
+                  {fieldErrors.address_street ? <p className="validator-hint text-error">{fieldErrors.address_street}</p> : null}
+                </label>
+                <div className="flex gap-2">
+                  <label className="form-field flex-1">
+                    <span className="form-label">{t('profile.city')}</span>
+                    <input
+                      name="address_city"
+                      className={`input input-bordered w-full${fieldErrors.address_city ? ' input-error' : ''}`}
+                      value={form.address_city}
+                      onChange={handleChange}
+                      aria-invalid={!!fieldErrors.address_city}
+                      disabled={newRequestsDisabled}
+                    />
+                    {fieldErrors.address_city ? <p className="validator-hint text-error">{fieldErrors.address_city}</p> : null}
+                  </label>
+                  <label className="form-field w-28">
+                    <span className="form-label">{t('profile.postal_code')} *</span>
+                    <input
+                      name="address_postal_code"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
+                      pattern="[0-9]*"
+                      className={`input input-bordered w-full${fieldErrors.address_postal_code ? ' input-error' : ''}`}
+                      value={form.address_postal_code}
+                      onChange={handleChange}
+                      aria-invalid={!!fieldErrors.address_postal_code}
+                      disabled={newRequestsDisabled}
+                    />
+                    {fieldErrors.address_postal_code ? <p className="validator-hint text-error">{fieldErrors.address_postal_code}</p> : null}
+                  </label>
+                </div>
+                <label className="form-field w-full">
+                  <span className="form-label">{t('profile.province')}</span>
+                  <input
+                    name="address_province"
+                    className={`input input-bordered w-full${fieldErrors.address_province ? ' input-error' : ''}`}
+                    value={form.address_province}
+                    onChange={handleChange}
+                    aria-invalid={!!fieldErrors.address_province}
+                    disabled={newRequestsDisabled}
+                  />
+                  {fieldErrors.address_province ? <p className="validator-hint text-error">{fieldErrors.address_province}</p> : null}
+                </label>
+                <label className="form-field w-full">
+                  <span className="form-label">{t('shop.custom_solution.address_note')}</span>
+                  <textarea
+                    name="address_note"
+                    className={`textarea textarea-bordered w-full${fieldErrors.address_note ? ' textarea-error' : ''}`}
+                    rows={2}
+                    placeholder=""
+                    value={form.address_note}
+                    onChange={handleChange}
+                    aria-invalid={!!fieldErrors.address_note}
+                    disabled={newRequestsDisabled}
+                  />
+                  {fieldErrors.address_note ? <p className="validator-hint text-error">{fieldErrors.address_note}</p> : null}
+                </label>
+              </fieldset>
+
+              <div className="flex flex-col gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary shrink-0"
+                    checked={acceptPrivacy}
+                    onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                    disabled={newRequestsDisabled}
+                    required
+                  />
+                  <span className="text-sm">
+                    {t('gdpr.accept_privacy_prefix')}{' '}
+                    <Link to="/privacy-policy" className="link link-primary">
+                      {t('footer.privacy_policy')}
+                    </Link>
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary shrink-0"
+                    checked={acceptMarketing}
+                    onChange={(e) => setAcceptMarketing(e.target.checked)}
+                    disabled={newRequestsDisabled}
+                  />
+                  <span className="text-sm text-base-content/80">{t('gdpr.accept_marketing')}</span>
+                </label>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="btn btn-primary md:max-w-xs"
+                  disabled={loading || newRequestsDisabled || !acceptPrivacy}
+                >
+                  {loading ? t('common.loading') : t('shop.custom_solution.submit')}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

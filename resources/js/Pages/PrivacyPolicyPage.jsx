@@ -20,6 +20,15 @@ function SubSection({ title, children }) {
   );
 }
 
+function InfoRow({ label, value }) {
+  return (
+    <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+      <span className="font-medium text-base-content/70 min-w-32">{label}:</span>
+      <span className="text-base-content/90">{value}</span>
+    </div>
+  );
+}
+
 export default function PrivacyPolicyPage() {
   const { t } = useTranslation();
   const contactEmail = 'empresa@serralleriasolidaria.cat';
@@ -28,13 +37,21 @@ export default function PrivacyPolicyPage() {
     <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 pb-12">
       <PageTitle title={t('privacy.title')} />
 
-      <div className="text-sm text-base-content/70 border-b border-base-300 pb-4">
-        {t('privacy.version_date', { date: '2026-05-05' })}
+      <div className="text-sm text-base-content/70 border-b border-base-300 pb-4 flex flex-col gap-1">
+        <span>{t('privacy.version_date', { date: '2026-05-05' })}</span>
+        <span className="text-xs">{t('privacy.lssi_note')}</span>
       </div>
 
       {/* 1. Data Controller */}
       <Section title={t('privacy.s1_title')}>
         <p>{t('privacy.s1_body')}</p>
+        <div className="flex flex-col gap-1 mt-1">
+          <InfoRow label={t('privacy.s1_nif')} value={t('privacy.s1_nif_value')} />
+          <InfoRow label={t('privacy.s1_registry')} value={t('privacy.s1_registry_value')} />
+          <InfoRow label={t('privacy.s1_rep')} value={t('privacy.s1_rep_value')} />
+          <InfoRow label={t('privacy.s1_address')} value={t('privacy.s1_address_value')} />
+          <InfoRow label={t('privacy.s1_phone')} value={t('privacy.s1_phone_value')} />
+        </div>
         <p>
           {t('privacy.s1_contact')}{' '}
           <a href={`mailto:${contactEmail}`} className="link link-primary">
@@ -271,6 +288,31 @@ export default function PrivacyPolicyPage() {
       {/* 10. Policy Changes */}
       <Section title={t('privacy.s10_title')}>
         <p>{t('privacy.s10_body')}</p>
+      </Section>
+
+      <div className="divider">{t('common.legal_notice', 'Avís Legal · LSSI-CE')}</div>
+
+      {/* 11. Terms of Use */}
+      <Section title={t('privacy.s11_title')}>
+        <p>{t('privacy.s11_body')}</p>
+        <SubSection title={t('privacy.s11_disclaimer_title')}>
+          {t('privacy.s11_disclaimer')}
+        </SubSection>
+      </Section>
+
+      {/* 12. Links Policy */}
+      <Section title={t('privacy.s12_title')}>
+        <p>{t('privacy.s12_body')}</p>
+      </Section>
+
+      {/* 13. Intellectual Property */}
+      <Section title={t('privacy.s13_title')}>
+        <p>{t('privacy.s13_body')}</p>
+      </Section>
+
+      {/* 14. Applicable Law */}
+      <Section title={t('privacy.s14_title')}>
+        <p>{t('privacy.s14_body')}</p>
       </Section>
     </div>
   );

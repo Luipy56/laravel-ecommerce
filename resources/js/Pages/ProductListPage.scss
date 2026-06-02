@@ -35,9 +35,10 @@
 
   @media (min-width: 768px) {
     position: sticky;
-    top: 6rem;
-    max-height: calc(100vh - 7rem);
+    top: var(--catalog-sidebar-top, 8rem);
+    max-height: var(--catalog-sidebar-max-h, calc(100vh - 9rem));
     overflow-y: auto;
+    transition: top 0.3s ease-out, max-height 0.3s ease-out;
   }
 }
 
@@ -287,10 +288,12 @@
 }
 
 .catalog-empty {
-  background: #f3f4f6;
+  background: var(--color-base-100, #fff);
+  border: 1px solid color-mix(in oklab, var(--color-base-300, #d1d5db) 55%, transparent);
   border-radius: 16px;
   padding: fluid(24, 40);
   text-align: center;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
 
   &__title {
     font-size: fluid(15, 18);

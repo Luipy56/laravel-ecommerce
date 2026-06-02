@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('packs', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 255);
-            $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
+            $table->decimal('price', 10, 2)->comment('List/catalog price (storefront base before discount)');
+            $table->decimal('discount_percent', 5, 2)->nullable()->comment('Optional 0–100; customer pays price * (1 - discount/100)');
             $table->boolean('is_trending')->default(false)->comment('Trending pack');
             $table->boolean('is_active')->default(true)->comment('Disable without deleting');
             $table->boolean('contains_keys')->default(false)->comment('Pack contains keys (e.g. 3 locks); client can choose at cart: all same key or all different');

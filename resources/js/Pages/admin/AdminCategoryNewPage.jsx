@@ -3,32 +3,46 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import TranslationFields from '../../components/admin/TranslationFields';
 import { useAdminToast } from '../../contexts/AdminToastContext';
 
 export default function AdminCategoryNewPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { showSuccess } = useAdminToast();
+
   const [code, setCode] = useState('');
-  const [name, setName] = useState('');
+  const [names, setNames] = useState({ ca: '', es: '', en: '' });
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleNamesChange = (locale, value) => setNames((prev) => ({ ...prev, [locale]: value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const payload = { name: name.trim(), is_active: isActive };
-      if (code.trim() !== '') payload.code = code.trim();
+      const payload = {
+        name: names.ca.trim(),
+        is_active: isActive,
+        translations: {
+          es: { name: names.es.trim() },
+          en: { name: names.en.trim() },
+        },
+      };
+      if (code.trim()) payload.code = code.trim();
       const { data } = await api.post('admin/categories', payload);
       if (data.success) {
         showSuccess(t('common.saved'));
         navigate('/admin/categories');
-      } else setError(data.message || t('common.error'));
+      } else {
+        setError(data.message || t('common.error'));
+      }
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.errors?.name?.[0] || err.response?.data?.errors?.code?.[0] || t('common.error'));
+      const errs = err.response?.data?.errors ?? {};
+      setError(errs.name?.[0] ?? errs.code?.[0] ?? err.response?.data?.message ?? t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -50,6 +64,7 @@ export default function AdminCategoryNewPage() {
                 {error}
               </div>
             )}
+
             <label className="form-field">
               <span className="form-label">{t('admin.products.code')}</span>
               <input
@@ -60,17 +75,15 @@ export default function AdminCategoryNewPage() {
                 aria-label={t('admin.products.code')}
               />
             </label>
-            <label className="form-field">
-              <span className="form-label">{t('admin.products.name')} *</span>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                aria-label={t('admin.products.name')}
-              />
-            </label>
+
+            <TranslationFields
+              field="name"
+              values={names}
+              onChange={handleNamesChange}
+              label={t('admin.categories.name_translations')}
+              required
+            />
+
             <label className="label cursor-pointer gap-2">
               <input
                 type="checkbox"
@@ -80,6 +93,7 @@ export default function AdminCategoryNewPage() {
               />
               <span className="label-text">{t('admin.products.is_active')}</span>
             </label>
+
             <div className="flex justify-between gap-2 pt-4">
               <Link to="/admin/categories" className="btn btn-ghost">
                 {t('common.back')}

@@ -4,7 +4,6 @@ namespace App\Observers;
 
 use App\Models\Product;
 use App\Models\ProductReview;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Keeps products.avg_rating and products.reviews_count in sync
@@ -26,7 +25,7 @@ class ProductReviewObserver
     {
         $agg = ProductReview::query()
             ->where('product_id', $productId)
-            ->where('status', ProductReview::STATUS_APPROVED)
+            ->where('status', ProductReview::STATUS_PUBLISHED)
             ->selectRaw('COUNT(*) as cnt, AVG(rating) as avg_r')
             ->first();
 

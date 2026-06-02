@@ -90,4 +90,35 @@ class ClientEmailVerificationTest extends TestCase
         $this->assertNotNull($client->email_verified_at);
         $this->assertTrue($client->hasVerifiedEmail());
     }
+
+    public function test_expired_signed_verify_link_redirects_to_spa_resend_page(): void
+    {
+        $client = Client::query()->create([
+            'type' => 'person',
+            'identification' => null,
+            'login_email' => 'expired_'.uniqid('', true).'@ietf.org',
+            'password' => bcrypt('password'),
+            'is_active' => true,
+            'email_verified_at' => null,
+        ]);
+
+        $url = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->subMinute(),
+            [
+                'id' => $client->id,
+                'hash' => sha1($client->getEmailForVerification()),
+            ],
+        );
+
+        $expected = rtrim((string) config('app.url'), '/')
+            .config('app.verify_email_failed_redirect_path', '/verify-email')
+            .'?reason=expired';
+
+        $this->get($url)
+            ->assertRedirect($expected);
+
+        $client->refresh();
+        $this->assertNull($client->email_verified_at);
+    }
 }

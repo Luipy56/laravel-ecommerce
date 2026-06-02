@@ -48,6 +48,13 @@ final class ScoutElasticsearchProductCatalogSearch implements ElasticsearchProdu
 
         try {
             $index = (new Product)->searchableAs();
+            $loc = app()->getLocale();
+            if (! in_array($loc, ['ca', 'es', 'en'], true)) {
+                $loc = 'ca';
+            }
+            $searchField = 'search_text_'.$loc;
+            $nameField = 'name_'.$loc;
+
             $response = $this->client->search([
                 'index' => $index,
                 'body' => [
@@ -57,7 +64,7 @@ final class ScoutElasticsearchProductCatalogSearch implements ElasticsearchProdu
                             'must' => [
                                 [
                                     'match_bool_prefix' => [
-                                        'search_text' => [
+                                        $searchField => [
                                             'query' => $normalizedPrefix,
                                             'max_expansions' => 50,
                                         ],
@@ -69,7 +76,7 @@ final class ScoutElasticsearchProductCatalogSearch implements ElasticsearchProdu
                             ],
                         ],
                     ],
-                    '_source' => ['id', 'name', 'code'],
+                    '_source' => ['id', $nameField, 'code'],
                     'sort' => [
                         ['_score' => 'desc'],
                         ['id' => 'asc'],
@@ -98,7 +105,7 @@ final class ScoutElasticsearchProductCatalogSearch implements ElasticsearchProdu
                     continue;
                 }
                 $seen[$id] = true;
-                $text = isset($src['name']) && is_string($src['name']) ? trim($src['name']) : '';
+                $text = isset($src[$nameField]) && is_string($src[$nameField]) ? trim($src[$nameField]) : '';
                 if ($text === '' && isset($src['code']) && is_string($src['code'])) {
                     $text = trim($src['code']);
                 }

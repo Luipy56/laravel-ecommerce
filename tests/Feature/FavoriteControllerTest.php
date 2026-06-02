@@ -7,7 +7,7 @@ use App\Models\Order;
 use App\Models\OrderLine;
 use App\Models\Pack;
 use App\Models\Product;
-use App\Models\ProductCategory;
+use App\Support\CatalogTranslationSync;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -142,19 +142,10 @@ class FavoriteControllerTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        $category = ProductCategory::query()->create([
-            'code' => 'cat_'.uniqid(),
-            'name' => 'Category',
-            'is_active' => true,
-        ]);
-
-        $product = Product::query()->create([
-            'category_id' => $category->id,
-            'code' => 'p_'.uniqid(),
-            'name' => 'Fav product',
+        $category = $this->createProductCategoryForTests('cat_'.uniqid(), 'Category');
+        $product = $this->createProductForTests($category->id, 'p_'.uniqid(), 'Fav product', null, [
             'price' => 12.00,
             'stock' => 3,
-            'is_active' => true,
         ]);
 
         return [$client, $product];
@@ -167,12 +158,15 @@ class FavoriteControllerTest extends TestCase
     {
         [$client, $product] = $this->makeVerifiedClientWithActiveProduct();
         $pack = Pack::query()->create([
-            'name' => 'Fav pack',
-            'description' => null,
             'price' => 20.00,
             'is_trending' => false,
             'is_active' => true,
             'contains_keys' => false,
+        ]);
+        CatalogTranslationSync::syncPackTranslations($pack, [
+            'ca' => ['name' => 'Fav pack', 'description' => null],
+            'es' => ['name' => 'Fav pack', 'description' => null],
+            'en' => ['name' => 'Fav pack', 'description' => null],
         ]);
 
         return [$client, $product, $pack];

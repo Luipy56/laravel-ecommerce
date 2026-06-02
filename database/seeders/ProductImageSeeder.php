@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductImageSeeder extends Seeder
 {
+    private const MIME_MAP = [
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'webp' => 'image/webp',
+    ];
+
     /**
      * Seeds product_images. Each product gets 2 images in products/{id}/ (same structure as real uploads).
      */
@@ -26,7 +34,9 @@ class ProductImageSeeder extends Seeder
             $dir = 'products/' . $product->id;
             $sortOrder = 1;
             foreach ($this->pickRandom($fixtures, 2) as $srcPath) {
-                $filename = 'image-' . $sortOrder . '.jpg';
+                $ext = strtolower(pathinfo($srcPath, PATHINFO_EXTENSION));
+                $mime = self::MIME_MAP[$ext] ?? 'image/jpeg';
+                $filename = 'image-' . $sortOrder . '.' . $ext;
                 $storagePath = $dir . '/' . $filename;
                 Storage::disk('uploads')->put($storagePath, file_get_contents($srcPath));
                 $rows[] = [
@@ -35,7 +45,7 @@ class ProductImageSeeder extends Seeder
                     'filename' => $filename,
                     'size_bytes' => (int) filesize($srcPath),
                     'checksum' => null,
-                    'content_type' => 'image/jpeg',
+                    'content_type' => $mime,
                     'sort_order' => $sortOrder,
                     'is_active' => true,
                 ];
@@ -53,9 +63,9 @@ class ProductImageSeeder extends Seeder
     {
         $dir = database_path('seeders/fixtures/images');
         $paths = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $p = $dir . '/seeder-' . $i . '.jpg';
-            if (is_file($p)) {
+        foreach (glob($dir . '/seeder-*') as $p) {
+            $ext = strtolower(pathinfo($p, PATHINFO_EXTENSION));
+            if (is_file($p) && isset(self::MIME_MAP[$ext])) {
                 $paths[] = $p;
             }
         }

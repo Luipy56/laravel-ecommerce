@@ -1,24 +1,35 @@
 import './ProductCard.scss';
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import CatalogCardImage from './CatalogCardImage';
 import { useTranslation } from 'react-i18next';
-import { Product } from '../lib/Product';
 import { useCart } from '../contexts/CartContext';
 import { IconCart } from './icons';
 import FavoriteToggle from './FavoriteToggle';
+import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
+import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
 /**
  * Shared card for products and packs in list and featured grids.
- * Accepts either `product` or `pack`. Whole card links to detail; add button adds to cart.
+ * Accepts either `product` or `pack`. Clicking the card navigates to the detail page.
  * Packs show a "Pack" badge and at least 2 product names from the pack.
  */
 export default function ProductCard({ product, pack }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { addLine } = useCart();
+  const { data: publicSettings } = usePublicShopSettings();
+  const [imageHovered, setImageHovered] = useState(false);
 
   const isPack = Boolean(pack);
+  const isLowStock =
+    !isPack &&
+    publicSettings?.show_low_stock_badge &&
+    publicSettings.low_stock_threshold > 0 &&
+    product.stock != null &&
+    Number(product.stock) <= publicSettings.low_stock_threshold;
   const detailUrl = isPack ? `/packs/${pack.id}` : `/products/${product.id}`;
 
   const handleAdd = (e) => {
@@ -37,13 +48,28 @@ export default function ProductCard({ product, pack }) {
     e.dataTransfer.effectAllowed = 'copy';
   };
 
+  const goToDetail = () => navigate(detailUrl);
+
+  const handleCardKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      goToDetail();
+    }
+  };
+
   const name = isPack ? pack.name : product.name;
+  const primaryImage = isPack ? pack.images?.[0] : product.images?.[0];
   const imageUrl = isPack
-    ? (pack.primaryImageUrl ?? pack.images?.[0]?.url ?? FALLBACK_IMAGE)
+    ? (pack.primaryImageUrl ?? primaryImage?.url ?? FALLBACK_IMAGE)
     : product.primaryImageUrl;
+  const imageContentType = primaryImage?.content_type ?? null;
+  const hasDiscount = !isPack && product.discount_percent > 0;
   const formattedPrice = isPack
-    ? (pack.formattedPrice ?? (pack.price != null ? new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(Number(pack.price)) : ''))
+    ? (pack.formattedPrice ?? (pack.price != null
+        ? new Intl.NumberFormat('ca-ES', { style: 'currency', currency: 'EUR' }).format(Number(pack.price))
+        : ''))
     : product.formattedPrice;
+  const showListPrice = !isPack && product.formattedListPrice && !hasDiscount;
 
   const packProductNames = isPack && Array.isArray(pack.items)
     ? pack.items
@@ -53,27 +79,48 @@ export default function ProductCard({ product, pack }) {
     : [];
 
   return (
-    <div
-      className={`product-card${isPack ? ' product-card--pack' : ''}`}
-      draggable
-      onDragStart={handleDragStart}
-    >
-      <Link to={detailUrl}>
+      <div
+        className={`product-card${isPack ? ' product-card--pack' : ''}`}
+        role="button"
+        tabIndex={0}
+        onClick={goToDetail}
+        onKeyDown={handleCardKeyDown}
+        onMouseEnter={() => setImageHovered(true)}
+        onMouseLeave={() => setImageHovered(false)}
+        draggable
+        onDragStart={handleDragStart}
+        aria-label={name}
+      >
         <div className="product-card__image">
           {isPack && (
             <span className="product-card__pack-badge">{t('shop.pack')}</span>
           )}
-          {!isPack && product.discount_percent > 0 && (
+          {hasDiscount && (
             <span className="product-card__discount-badge">
               −{Math.round(Number(product.discount_percent))}%
             </span>
           )}
-          <div className="product-card__favorite">
-            <FavoriteToggle productId={isPack ? undefined : product.id} packId={isPack ? pack.id : undefined} />
+          {isLowStock && (
+            <span className="product-card__low-stock-badge">
+              {t('shop.product.low_stock')}
+            </span>
+          )}
+          {/* stopPropagation so favorite toggle doesn't navigate away */}
+          <div
+            className="product-card__favorite"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <FavoriteToggle
+              productId={isPack ? undefined : product.id}
+              packId={isPack ? pack.id : undefined}
+            />
           </div>
-          <img
+          <CatalogCardImage
             src={imageUrl}
             alt={name}
+            contentType={imageContentType}
+            animate={imageHovered}
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = FALLBACK_IMAGE;
@@ -81,37 +128,37 @@ export default function ProductCard({ product, pack }) {
           />
         </div>
         <div className="product-card__info">
-          <h3>{name}</h3>
-          {isPack ? (
-            packProductNames.length > 0 && (
-              <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
-                {packProductNames.map((productName, i) => (
-                  <li key={i}>{productName}</li>
-                ))}
-              </ul>
-            )
-          ) : (
-            product.features?.length > 0 && (
-              <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
-                {product.features.slice(0, 2).map((f, i) => (
-                  <li key={f.id ?? i}>
-                    {(f.type ?? f.name) != null && String(f.type ?? f.name).trim() !== '' ? (
-                      <span><span className="product-card__feature-label">{f.type ?? f.name}:</span> {f.value ?? ''}</span>
-                    ) : (
-                      <span>{f.value ?? ''}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )
-          )}
-          <div className="product-card__footer">
+          <div className="product-card__name-row">
+            <h3>{name}</h3>
             <div className="product-card__prices">
-              {!isPack && product.formattedListPrice && (
+              {showListPrice && (
                 <span className="product-card__old-price">{product.formattedListPrice}</span>
               )}
               <span className="price">{formattedPrice}</span>
             </div>
+          </div>
+          <div className="product-card__footer">
+            <ul className="product-card__features" aria-label={t('shop.product.specifications')}>
+              {isPack
+                ? packProductNames.map((productName, i) => (
+                    <li key={i}>{productName}</li>
+                  ))
+                : product.features?.slice(0, 2).map((f, i) => {
+                    const typeLabel = catalogFeatureTypeLabel(f, t);
+                    return (
+                      <li key={f.id ?? i}>
+                        {typeLabel ? (
+                          <span>
+                            <span className="product-card__feature-label">{typeLabel}:</span>{' '}
+                            {f.value ?? ''}
+                          </span>
+                        ) : (
+                          <span>{f.value ?? ''}</span>
+                        )}
+                      </li>
+                    );
+                  })}
+            </ul>
             <button
               type="button"
               className="cart-btn"
@@ -122,7 +169,6 @@ export default function ProductCard({ product, pack }) {
             </button>
           </div>
         </div>
-      </Link>
-    </div>
+      </div>
   );
 }

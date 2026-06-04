@@ -75,7 +75,21 @@ Internal admin requests from **`/admin/help`** are queued as JSON and processed 
 | Binary | Notes |
 |--------|--------|
 | `gh` | Installed in the PHP Docker image |
-| `cursor-agent` | Install on the VPS host and bind-mount into the queue service, or install in a custom image layer |
+| `cursor-agent` | Bind-mount the host install (see below) |
+
+**Staging compose (`/srv/serra/stage/docker-compose.stage.yml`)** — queue and scheduler need:
+
+```yaml
+environment:
+  ADMIN_HELP_CURSOR_AGENT_PATH: /opt/cursor-agent/cursor-agent
+volumes:
+  - /root/.local/share/cursor-agent/versions/<version>:/opt/cursor-agent:ro
+  - /root/.config/cursor:/root/.config/cursor:ro   # cursor-agent session auth
+```
+
+Replace `<version>` with the folder under `/root/.local/share/cursor-agent/versions/` on the VPS (e.g. `2026.06.04-8f81907`). Alternatively set **`CURSOR_API_KEY`** in `.env` instead of mounting auth (never commit either to git).
+
+After changing mounts: `docker compose -f docker-compose.stage.yml up -d --force-recreate queue scheduler`.
 
 Verify after deploy:
 

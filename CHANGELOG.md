@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.336] - 2026-06-04
+
+### Added
+- **autoagents:** LAN task dashboard (`autoagents-dashboard.py` / `.sh`, `--dashboard` on loop); shared `lib/env.py` and `lib/gh_issue_actions.py`; `sync_github_from_tasks.py` for GitHub planned/closed sync.
+
 ## [0.1.335] - 2026-06-02
 
 ### Fixed

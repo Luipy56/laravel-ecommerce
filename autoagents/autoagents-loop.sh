@@ -37,6 +37,9 @@ ensure_gh_auth() {
 
 cd "$SCRIPTDIR" || exit 1
 
+[[ " $* " == *" --dashboard "* ]] && "$SCRIPTDIR/autoagents-dashboard.sh" &
+_a=(); for _x in "$@"; do [[ "$_x" != "--dashboard" ]] && _a+=("$_x"); done; set -- "${_a[@]}"
+
 have_cursor_agent() {
   command -v cursor-agent >/dev/null 2>&1
 }
@@ -400,20 +403,37 @@ warn_001_github_auth_if_needed() {
   fi
 }
 
+run_issue_checker_and_gh_sync() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "----- issue checker (skip: python3 not on PATH)"
+    return 0
+  fi
+  ensure_gh_auth || true
+  echo "----- issue checker (FEAT from open issues)"
+  python3 "${SCRIPTDIR}/issue_checker_agent.py" || true
+  echo "----- GitHub sync (FEAT → planned)"
+  python3 "${SCRIPTDIR}/sync_github_from_tasks.py" planned || true
+}
+
+run_gh_sync_closed() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "----- GitHub sync (CLOSED → comment + close, incl. done/)"
+  python3 "${SCRIPTDIR}/sync_github_from_tasks.py" closed || true
+}
+
 step_log_reviewer() {
   echo "-----> log reviewer (001) <----"
-  ensure_gh_auth || true
-  if command -v python3 >/dev/null 2>&1 && [[ -f "${SCRIPTDIR}/issue_checker_agent.py" ]]; then
-    echo "----- 001 issue_checker (FEAT + GitHub comment/label)"
-    set +e
-    python3 "${SCRIPTDIR}/issue_checker_agent.py"
-    set -e
-  fi
   mkdir -p "$AGENT_LOOP_TMP"
   local ctx="${AGENT_LOOP_TMP}/001-latest-context.txt"
   prepare_001_preflight_context "$ctx"
   echo "----- 001 preflight digest: $ctx"
   warn_001_github_auth_if_needed
+  if [[ "$G001_GH_OK" == "1" ]] && [[ "${G001_UNTRACKED_ISSUES:-0}" -gt 0 ]]; then
+    run_issue_checker_and_gh_sync
+    prepare_001_preflight_context "$ctx"
+  fi
   if should_run_001_cursor_agent; then
     if ! have_cursor_agent; then
       echo "----- log reviewer (001) (skip: cursor-agent not on PATH)" >&2
@@ -558,12 +578,15 @@ run_full_cycle() {
   step_feature_coder_handoff
   step_tester
   step_closing_review
+  run_gh_sync_closed
   step_committer
 }
 
 usage() {
   cat >&2 <<EOF
-Usage: $(basename "$0") [COMMAND]
+Usage: $(basename "$0") [--dashboard] [COMMAND]
+
+  --dashboard     Start ephemeral task progress web UI (background, port ${AGENT_DASHBOARD_PORT:-8765}).
 
   (no args)       Full agent cycle every ${AGENT_LOOP_SLEEP_MINUTES:-5} minutes.
 
@@ -579,6 +602,9 @@ Usage: $(basename "$0") [COMMAND]
 Environment:
   AGENT_GH_REPO              GitHub repo (default: Luipy56/laravel-ecommerce)
   AGENT_GIT_BRANCH           Git branch (default: autoagents)
+  AGENT_DASHBOARD_PORT       Dashboard HTTP port (default: 8765)
+  AGENT_PRIMORDIAL_CSS       Path to primordial.css for dashboard theme
+  AGENT_TASKDIR              Task queue directory (default: autoagents/tasks)
   AGENT_LOOP_SLEEP_MINUTES   Loop interval (default: 5)
   AGENT_COMMITTER_USE_CURSOR Set 1 to prefer full committer (default: 1 in .env.example)
   GH_TOKEN                   GitHub API token (or autoagents/.env)
@@ -595,7 +621,10 @@ if [[ -n "${1:-}" ]]; then
     coder) step_coder ;;
     handoff | 012 | feature-handoff) step_feature_coder_handoff ;;
     tester) step_tester ;;
-    closing-review | closing-closed) step_closing_review ;;
+    closing-review | closing-closed)
+      step_closing_review
+      run_gh_sync_closed
+      ;;
     committer) step_committer ;;
     *) usage; exit 1 ;;
   esac

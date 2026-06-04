@@ -13,7 +13,10 @@ import subprocess
 import sys
 from typing import Iterable, Optional
 
-GH_REPO = os.environ.get("AGENT_GH_REPO", "Luipy56/laravel-ecommerce")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from lib.env import gh_repo, load_env  # noqa: E402
+
+load_env()
 
 AGENT_LABELS = (
     "agent:planned",
@@ -71,7 +74,7 @@ def _issue_has_agent_comment(issue_num: int, marker: str) -> bool:
             "view",
             str(issue_num),
             "--repo",
-            GH_REPO,
+            gh_repo(),
             "--json",
             "comments",
         ],
@@ -99,7 +102,7 @@ def _add_labels(issue_num: int, labels: Iterable[str]) -> bool:
                 "edit",
                 str(issue_num),
                 "--repo",
-                GH_REPO,
+                gh_repo(),
                 "--add-label",
                 label,
             ],
@@ -122,7 +125,7 @@ def _remove_labels(issue_num: int, labels: Iterable[str]) -> None:
                 "edit",
                 str(issue_num),
                 "--repo",
-                GH_REPO,
+                gh_repo(),
                 "--remove-label",
                 label,
             ],
@@ -137,7 +140,7 @@ def comment(issue_num: int, body: str) -> bool:
             "comment",
             str(issue_num),
             "--repo",
-            GH_REPO,
+            gh_repo(),
             "--body",
             body,
         ],
@@ -186,7 +189,7 @@ def notify_closed(issue_num: int, summary: str) -> bool:
             "close",
             str(issue_num),
             "--repo",
-            GH_REPO,
+            gh_repo(),
         ],
         timeout=30,
     )

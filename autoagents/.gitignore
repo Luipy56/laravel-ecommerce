@@ -1,4 +1,6 @@
 var/loop/
+.runtime/
 .env
 __pycache__/
+lib/__pycache__/
 *.pyc

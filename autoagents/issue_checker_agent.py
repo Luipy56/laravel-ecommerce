@@ -2,7 +2,7 @@
 """
 Issue Checker Agent — creates FEAT task files from open GitHub issues.
 Uses gh CLI; repo from AGENT_GH_REPO env (default Luipy56/laravel-ecommerce).
-Posts GitHub comment + agent:planned when a FEAT file is created.
+After each new FEAT file, posts a GitHub comment and sets agent:planned (see lib/gh_issue_actions.py).
 """
 from __future__ import annotations
 
@@ -13,78 +13,98 @@ import sys
 from datetime import datetime, timezone
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-TASKS_DIR = os.path.join(SCRIPT_DIR, "tasks")
-GH_REPO = os.environ.get("AGENT_GH_REPO", "Luipy56/laravel-ecommerce")
-MAX_PER_RUN = int(os.environ.get("AGENT_001_MAX_ISSUES", "3"))
-
 sys.path.insert(0, SCRIPT_DIR)
-from gh_issue_sync import ensure_gh_auth, notify_planned  # noqa: E402
 
+from lib.env import gh_repo, load_env  # noqa: E402
+from lib.gh_issue_actions import ensure_agent_labels, notify_feat_planned  # noqa: E402
 
-def _gh(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["gh", *args],
-        capture_output=True,
-        text=True,
-        timeout=60,
-        check=False,
-    )
+load_env()
+
+TASKS_DIR = os.path.join(SCRIPT_DIR, "tasks")
+MAX_PER_RUN = int(os.environ.get("AGENT_001_MAX_ISSUES", "3"))
 
 
 def has_task_file(issue_num: int) -> bool:
-    if not os.path.isdir(TASKS_DIR):
-        return False
-    prefix = f"FEAT-{issue_num}-"
-    for f in os.listdir(TASKS_DIR):
-        if f.startswith(prefix):
-            return True
-        if f.endswith(".md") and f != "README.md" and f != "TEMPLATE.md":
-            path = os.path.join(TASKS_DIR, f)
+    """True if any pipeline task for this issue exists (active queue or done/)."""
+    prefixes = (
+        f"FEAT-{issue_num}-",
+        f"NEW-{issue_num}-",
+        f"WIP-{issue_num}-",
+        f"UNTESTED-{issue_num}-",
+        f"TESTING-{issue_num}-",
+        f"CLOSED-{issue_num}-",
+    )
+
+    def dir_has_match(directory: str) -> bool:
+        if not os.path.isdir(directory):
+            return False
+        for f in os.listdir(directory):
+            if f in ("README.md", "TEMPLATE.md") or not f.endswith(".md"):
+                continue
+            for p in prefixes:
+                if f.startswith(p):
+                    return True
+            path = os.path.join(directory, f)
             if os.path.isfile(path):
                 with open(path, encoding="utf-8") as fh:
                     text = fh.read()
                 if f"#{issue_num}" in text or f"/issues/{issue_num}" in text:
                     return True
+        return False
+
+    if dir_has_match(TASKS_DIR):
+        return True
+    done_root = os.path.join(TASKS_DIR, "done")
+    if not os.path.isdir(done_root):
+        return False
+    for root, _dirs, files in os.walk(done_root):
+        for f in files:
+            if not f.endswith(".md"):
+                continue
+            for p in prefixes:
+                if f.startswith(p):
+                    return True
     return False
 
 
 def get_open_issues() -> list[dict]:
+    repo = gh_repo()
     try:
-        result = _gh(
-            "issue",
-            "list",
-            "--repo",
-            GH_REPO,
-            "--state",
-            "open",
-            "--json",
-            "number,title,url",
+        result = subprocess.run(
+            [
+                "gh", "issue", "list",
+                "--repo", repo,
+                "--state", "open",
+                "--json", "number,title,url",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=60,
         )
-        if result.returncode != 0:
-            print(result.stderr.strip(), file=sys.stderr)
-            return []
         return json.loads(result.stdout)
-    except (json.JSONDecodeError, FileNotFoundError):
+    except (subprocess.CalledProcessError, json.JSONDecodeError, FileNotFoundError):
         return []
 
 
 def fetch_issue_details(issue_num: int) -> dict | None:
+    repo = gh_repo()
     try:
-        result = _gh(
-            "issue",
-            "view",
-            str(issue_num),
-            "--repo",
-            GH_REPO,
-            "--json",
-            "body,state,title,url,labels,createdAt",
+        result = subprocess.run(
+            [
+                "gh", "issue", "view", str(issue_num),
+                "--repo", repo,
+                "--json", "body,state,title,url,labels,createdAt",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
         )
-        if result.returncode != 0:
-            return None
         data = json.loads(result.stdout)
         data["number"] = int(issue_num)
         return data
-    except (json.JSONDecodeError, FileNotFoundError):
+    except (subprocess.CalledProcessError, json.JSONDecodeError, FileNotFoundError):
         return None
 
 
@@ -96,6 +116,7 @@ def create_task(issue: dict) -> str:
     created = issue.get("createdAt", "")
     labels = issue.get("labels", [])
     labels_str = ", ".join(str(l.get("name", "")) for l in labels) if labels else "none"
+    repo = gh_repo()
 
     clean_body = body.replace("\n", " ") if body else "[No issue body]"
     summary = clean_body[:250].strip()
@@ -130,7 +151,7 @@ def create_task(issue: dict) -> str:
 - Add **Testing instructions** before renaming to UNTESTED-
 
 ## References
-- Repo: https://github.com/{GH_REPO}
+- Repo: https://github.com/{repo}
 - Agent loop: docs/agent-loop.md
 """
     os.makedirs(TASKS_DIR, exist_ok=True)
@@ -140,18 +161,17 @@ def create_task(issue: dict) -> str:
 
 
 def run_workflow() -> bool:
+    repo = gh_repo()
     print("=" * 60)
     print("Issue Checker (autoagents / laravel-ecommerce)")
-    print(f"Repo: {GH_REPO}")
+    print(f"Repo: {repo}")
     print("=" * 60)
 
-    if not ensure_gh_auth():
-        print("\ngh not authenticated — run ./scripts/setup-autoagents-gh.sh", file=sys.stderr)
-        return False
+    ensure_agent_labels()
 
     issues = get_open_issues()
     if not issues:
-        print("\nNo open GitHub issues.")
+        print("\nNo open GitHub issues (or gh not authenticated).")
         return False
 
     created = 0
@@ -161,7 +181,7 @@ def run_workflow() -> bool:
             break
         num = issue["number"]
         if has_task_file(num):
-            print(f"  skip #{num} — FEAT file or task link exists")
+            print(f"  skip #{num} — task already exists (queue or done/)")
             continue
         details = fetch_issue_details(num)
         if not details:
@@ -172,9 +192,12 @@ def run_workflow() -> bool:
             print(f"  skip #{num} — agent:planned")
             continue
         path = create_task(details)
-        basename = os.path.basename(path)
-        print(f"  created: {basename}")
-        notify_planned(num, basename)
+        bn = os.path.basename(path)
+        print(f"  created: {bn}")
+        if notify_feat_planned(num, bn):
+            print(f"  GitHub: comment + agent:planned on #{num}")
+        else:
+            print(f"  GitHub: notify failed for #{num} (check GH_TOKEN / label permissions)", file=sys.stderr)
         created += 1
 
     print(f"\nCreated {created} task file(s)")

@@ -136,8 +136,10 @@ class AdminHelpIssueProcessor
      */
     private function generateIssueContent(string $id, array $payload): ?array
     {
-        if (! $this->commandExists('cursor-agent')) {
-            Log::warning('admin_help: cursor-agent not found on PATH');
+        $cursorAgent = (string) config('admin_help.cursor_agent_path', 'cursor-agent');
+
+        if (! $this->commandExists($cursorAgent)) {
+            Log::warning('admin_help: cursor-agent not found on PATH', ['path' => $cursorAgent]);
 
             return null;
         }
@@ -165,7 +167,7 @@ class AdminHelpIssueProcessor
 
         $timeout = (int) config('admin_help.cursor_agent_timeout', 900);
         $process = new Process(
-            ['cursor-agent', '--yolo', '--print', '--trust', '--workspace', base_path(), $fullPrompt],
+            [$cursorAgent, '--yolo', '--print', '--trust', '--workspace', base_path(), $fullPrompt],
             base_path(),
             $this->processEnvironment(),
             null,
@@ -321,6 +323,10 @@ class AdminHelpIssueProcessor
 
     private function commandExists(string $command): bool
     {
+        if (str_contains($command, '/')) {
+            return is_file($command) && is_executable($command);
+        }
+
         $process = new Process(['which', $command]);
         $process->run();
 

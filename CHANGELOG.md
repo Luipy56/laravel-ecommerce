@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.341] - 2026-06-04
+
+### Changed
+- **Docs:** DEPLOY.md documents cursor-agent bind-mount and `~/.config/cursor` auth for admin-help queue workers on staging.
+
 ## [0.1.340] - 2026-06-04
 
 ### Fixed

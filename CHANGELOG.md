@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.340] - 2026-06-04
+
+### Fixed
+- **Admin Help:** Configurable `ADMIN_HELP_CURSOR_AGENT_PATH` for Docker queue workers using bind-mounted `/opt/cursor-agent`.
+
 ## [0.1.339] - 2026-06-04
 
 ### Changed

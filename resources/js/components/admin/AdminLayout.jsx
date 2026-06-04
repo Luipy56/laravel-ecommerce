@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
-import { IconMenu } from '../icons';
+import { IconMenu, IconMoon, IconSun } from '../icons';
 import { AdminToastProvider } from '../../contexts/AdminToastContext';
 import { APP_VERSION } from '../../config/version';
 
@@ -65,12 +65,26 @@ function closeDrawer() {
   document.getElementById('admin-drawer')?.click();
 }
 
+const ADMIN_THEME_LIGHT = 'serralleria';
+const ADMIN_THEME_DARK = 'serralleria-dark';
+const ADMIN_THEME_STORAGE_KEY = 'admin-theme';
+
+function readStoredAdminTheme() {
+  try {
+    return localStorage.getItem(ADMIN_THEME_STORAGE_KEY) === 'dark' ? ADMIN_THEME_DARK : ADMIN_THEME_LIGHT;
+  } catch {
+    return ADMIN_THEME_LIGHT;
+  }
+}
+
 export default function AdminLayout() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
   const [locale, setLocale] = useState(i18n.language);
+  const [adminTheme, setAdminTheme] = useState(readStoredAdminTheme);
+  const isDarkTheme = adminTheme === ADMIN_THEME_DARK;
   const localeCode = (lng) => (lng === 'ca' ? 'CA' : lng === 'es' ? 'ES' : 'EN');
   const languageAria = () => {
     if (locale === 'en') return 'English';
@@ -86,6 +100,16 @@ export default function AdminLayout() {
     i18n.changeLanguage(lng);
     setLocale(lng);
     localStorage.setItem('locale', lng);
+  };
+
+  const toggleAdminTheme = () => {
+    const nextTheme = isDarkTheme ? ADMIN_THEME_LIGHT : ADMIN_THEME_DARK;
+    setAdminTheme(nextTheme);
+    try {
+      localStorage.setItem(ADMIN_THEME_STORAGE_KEY, nextTheme === ADMIN_THEME_DARK ? 'dark' : 'light');
+    } catch {
+      // ignore storage failures
+    }
   };
 
   const breadcrumbs = useMemo(() => getBreadcrumbs(pathname, t), [pathname, t]);
@@ -213,10 +237,12 @@ export default function AdminLayout() {
 
   return (
     <div
+      data-theme={adminTheme}
       className="drawer lg:drawer-open min-h-screen min-w-0 max-w-full overflow-x-clip bg-base-200 storefront-bg"
       style={{
-        backgroundImage:
-          "linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('/images/home-bg.jpg')",
+        backgroundImage: isDarkTheme
+          ? "linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('/images/home-bg.jpg')"
+          : "linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('/images/home-bg.jpg')",
       }}
     >
       <input id="admin-drawer" type="checkbox" className="drawer-toggle" aria-label={t('common.menu')} />
@@ -249,15 +275,29 @@ export default function AdminLayout() {
                 </nav>
               </div>
             </div>
-            <div className="dropdown dropdown-end shrink-0">
-              <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={languageAria()}>
-                {localeCode(locale)}
-              </label>
-              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-36 p-2 shadow border border-base-200">
-                <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
-                <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
-                <li><button type="button" onClick={() => handleLocale('en')}>English</button></li>
-              </ul>
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm btn-square"
+                onClick={toggleAdminTheme}
+                aria-label={isDarkTheme ? t('admin.theme.toggle_to_light') : t('admin.theme.toggle_to_dark')}
+              >
+                {isDarkTheme ? (
+                  <IconSun className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  <IconMoon className="h-5 w-5" aria-hidden="true" />
+                )}
+              </button>
+              <div className="dropdown dropdown-end">
+                <label tabIndex={0} className="btn btn-ghost btn-sm" aria-label={languageAria()}>
+                  {localeCode(locale)}
+                </label>
+                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-36 p-2 shadow border border-base-200">
+                  <li><button type="button" onClick={() => handleLocale('ca')}>Català</button></li>
+                  <li><button type="button" onClick={() => handleLocale('es')}>Español</button></li>
+                  <li><button type="button" onClick={() => handleLocale('en')}>English</button></li>
+                </ul>
+              </div>
             </div>
           </div>
         </header>

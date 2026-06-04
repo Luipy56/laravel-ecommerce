@@ -411,6 +411,8 @@
   "admin.login.submit": "Entrar",
   "admin.login.error": "Usuario o contraseña incorrectos.",
   "admin.back_to_shop": "Volver a la tienda",
+  "admin.theme.toggle_to_dark": "Cambiar a tema oscuro",
+  "admin.theme.toggle_to_light": "Cambiar a tema claro",
   "admin.nav.dashboard": "Panel",
   "admin.nav.data_explorer": "Consulta de datos",
   "admin.data_explorer.title": "Consulta de datos",

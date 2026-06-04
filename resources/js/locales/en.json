@@ -412,6 +412,8 @@
   "admin.login.submit": "Enter",
   "admin.login.error": "Incorrect username or password.",
   "admin.back_to_shop": "Return to the store",
+  "admin.theme.toggle_to_dark": "Switch to dark theme",
+  "admin.theme.toggle_to_light": "Switch to light theme",
   "admin.nav.dashboard": "Dashboard",
   "admin.nav.data_explorer": "Data query",
   "admin.data_explorer.title": "Data query",

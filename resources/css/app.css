@@ -5,7 +5,7 @@ html, body {
   max-width: 100%;
 }
 @plugin 'daisyui' {
-  themes: serralleria --default;
+  themes: serralleria --default, serralleria-dark;
 }
 @plugin 'daisyui/theme' {
   name: 'serralleria';
@@ -32,6 +32,38 @@ html, body {
   --color-warning: oklch(80% 0.25 80);
   --color-warning-content: oklch(20% 0.05 80);
   --color-error: oklch(65% 0.3 30);
+  --color-error-content: oklch(98% 0.01 30);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+@plugin 'daisyui/theme' {
+  name: 'serralleria-dark';
+  default: false;
+  prefersdark: false;
+  color-scheme: dark;
+  --color-base-100: oklch(22% 0.02 240);
+  --color-base-200: oklch(18% 0.02 240);
+  --color-base-300: oklch(15% 0.02 240);
+  --color-base-content: oklch(92% 0.01 240);
+  --color-primary: #fb5412;
+  --color-primary-content: #fff;
+  --color-secondary: #c44a1a;
+  --color-secondary-content: #fff;
+  --color-accent: #fb5412;
+  --color-accent-content: #fff;
+  --color-neutral: oklch(35% 0.03 240);
+  --color-neutral-content: oklch(92% 0.01 240);
+  --color-info: oklch(65% 0.18 220);
+  --color-info-content: oklch(98% 0.01 220);
+  --color-success: oklch(60% 0.22 140);
+  --color-success-content: oklch(98% 0.01 140);
+  --color-warning: oklch(75% 0.22 80);
+  --color-warning-content: oklch(20% 0.05 80);
+  --color-error: oklch(60% 0.28 30);
   --color-error-content: oklch(98% 0.01 30);
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;

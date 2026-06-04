@@ -411,6 +411,8 @@
   "admin.login.submit": "Entrar",
   "admin.login.error": "Usuari o contrasenya incorrectes.",
   "admin.back_to_shop": "Tornar a la botiga",
+  "admin.theme.toggle_to_dark": "Canviar a tema fosc",
+  "admin.theme.toggle_to_light": "Canviar a tema clar",
   "admin.nav.dashboard": "Tauler",
   "admin.nav.data_explorer": "Consulta de dades",
   "admin.data_explorer.title": "Consulta de dades",

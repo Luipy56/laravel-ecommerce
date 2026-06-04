@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.342] - 2026-06-04
+
+### Added
+- **Admin:** Light/dark theme toggle in the admin header (next to the language switcher), with `serralleria-dark` daisyUI theme and preference persisted in `localStorage`.
+
 ## [0.1.341] - 2026-06-04
 
 ### Changed

@@ -61,6 +61,7 @@ import AdminPersonalizedSolutionsPage from './Pages/admin/AdminPersonalizedSolut
 import AdminDataExplorerPage from './Pages/admin/AdminDataExplorerPage';
 import AdminShopSettingsPage from './Pages/admin/AdminShopSettingsPage';
 import AdminAboutPage from './Pages/admin/AdminAboutPage';
+import AdminHelpPage from './Pages/admin/AdminHelpPage';
 import AdminPersonalizedSolutionShowPage from './Pages/admin/AdminPersonalizedSolutionShowPage';
 import AdminPersonalizedSolutionEditPage from './Pages/admin/AdminPersonalizedSolutionEditPage';
 import AdminFaqsPage from './Pages/admin/AdminFaqsPage';
@@ -147,6 +148,7 @@ export default function App() {
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="data-explorer" element={<AdminDataExplorerPage />} />
                   <Route path="about" element={<AdminAboutPage />} />
+                  <Route path="help" element={<AdminHelpPage />} />
                   <Route path="settings" element={<AdminShopSettingsPage />} />
                   <Route path="categories" element={<AdminCategoriesPage />} />
                   <Route path="categories/new" element={<AdminCategoryNewPage />} />

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.337] - 2026-06-04
+
+### Added
+- **Admin Help:** New `/admin/help` page for authenticated admins to submit internal requests; stores pending JSON under `storage/app/admin-help/` and processes them via `admin-help:process` (cursor-agent + `gh`) into GitHub issues labeled `waiting for human validation`.
+- **API:** `POST /api/v1/admin/help-requests` (admin auth, throttled).
+- **i18n:** Help page strings in ca, es, en.
+
 ## [0.1.336] - 2026-06-04
 
 ### Added

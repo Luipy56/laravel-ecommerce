@@ -8,6 +8,7 @@ import { APP_VERSION } from '../../config/version';
 
 const SECTION_NAV_KEYS = {
   about: 'admin.nav.about',
+  help: 'admin.nav.help',
   'data-explorer': 'admin.nav.data_explorer',
   settings: 'admin.nav.settings',
   admins: 'admin.nav.admins',
@@ -128,6 +129,7 @@ export default function AdminLayout() {
         { to: '/admin/data-explorer', labelKey: 'admin.nav.data_explorer', alertKey: null },
         { to: '/admin/faqs', labelKey: 'admin.nav.faqs', alertKey: null },
         { to: '/admin/about', labelKey: 'admin.nav.about', alertKey: null },
+        { to: '/admin/help', labelKey: 'admin.nav.help', alertKey: null },
         { to: '/', labelKey: 'admin.back_to_shop', alertKey: null },
       ],
     };

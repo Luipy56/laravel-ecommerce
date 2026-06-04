@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\GdprPurgeCommand;
+use App\Console\Commands\ProcessAdminHelpIssuesCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -11,3 +12,6 @@ Artisan::command('inspire', function () {
 
 // GDPR data retention — runs every Sunday at 02:00
 Schedule::command(GdprPurgeCommand::class)->weeklyOn(0, '02:00');
+
+// Admin Help → GitHub issues (pending JSON payloads)
+Schedule::command(ProcessAdminHelpIssuesCommand::class, ['--limit' => 5])->everyFiveMinutes();

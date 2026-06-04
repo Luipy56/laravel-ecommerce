@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AdminDataExplorerController;
 use App\Http\Controllers\Api\AdminFaqController;
 use App\Http\Controllers\Api\AdminFeatureController;
 use App\Http\Controllers\Api\AdminFeatureNameController;
+use App\Http\Controllers\Api\AdminHelpController;
 use App\Http\Controllers\Api\AdminNavAlertsController;
 use App\Http\Controllers\Api\AdminOrderController;
 use App\Http\Controllers\Api\AdminSendEmailController;
@@ -220,4 +221,5 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::put('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'update']);
     Route::delete('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'destroy']);
     Route::post('send-email', AdminSendEmailController::class)->middleware('throttle:10,1');
+    Route::post('help-requests', [AdminHelpController::class, 'store'])->middleware('throttle:10,1');
 });

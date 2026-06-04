@@ -17,12 +17,12 @@ Multi-agent workflow: **coordination** (`autoagents/`, tasks, optional CLI loop)
 | Branch | Role |
 |--------|------|
 | **`autoagents`** (default integration) | Routine agent and feature work. **`git push origin autoagents`**. |
-| **`master`** | Stable line — merge only per policy below. |
-| **`prod`** | Optional deployment branch. |
+| **`main`** | Stable line — merge only per policy below. |
+| **`prod`** | Production deployment branch (VPS `/srv/serra/prod/source`). |
 
-Legacy **`agentdevelop`** was merged to **`master`** and retired (June 2026).
+Legacy **`agentdevelop`** was merged to **`main`** and retired (June 2026). Remote **`develop`** and **`dokku`** branches were removed (June 2026).
 
-### When to merge `autoagents` → `master`
+### When to merge `autoagents` → `main`
 
 Merge **only** if **at least one** applies:
 

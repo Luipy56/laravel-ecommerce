@@ -5,9 +5,9 @@ name: CI
 
 on:
   push:
-    branches: [autoagents, master]
+    branches: [autoagents, main]
   pull_request:
-    branches: [autoagents, prod, master]
+    branches: [autoagents, prod, main]
 
 jobs:
   build-test:

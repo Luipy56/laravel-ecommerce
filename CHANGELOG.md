@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.343] - 2026-06-04
+
+### Changed
+- **Admin dark theme:** Dedicated compressed background image (`home-bg-dark.webp`) instead of reusing `home-bg.jpg`.
+
 ## [0.1.342] - 2026-06-04
 
 ### Added

@@ -241,7 +241,7 @@ export default function AdminLayout() {
       className="drawer lg:drawer-open min-h-screen min-w-0 max-w-full overflow-x-clip bg-base-200 storefront-bg"
       style={{
         backgroundImage: isDarkTheme
-          ? "linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('/images/home-bg.jpg')"
+          ? "linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('/images/home-bg-dark.webp')"
           : "linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), url('/images/home-bg.jpg')",
       }}
     >

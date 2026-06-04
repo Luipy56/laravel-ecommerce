@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.338] - 2026-06-04
+
+### Changed
+- **CI/CD:** `STAGE_DEPLOY_ENABLED` set to `true` so pushes to `autoagents` run the staging Docker deploy after tests pass.
+
 ## [0.1.337] - 2026-06-04
 
 ### Added

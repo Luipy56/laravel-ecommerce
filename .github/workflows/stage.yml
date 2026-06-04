@@ -1,15 +1,15 @@
-# CI on main and PRs. Push to `autoagents` is covered by stage.yml; push to `prod` by prod.yml.
+# Staging CI/CD: runs on every push to branch `autoagents`.
+# - Tests + frontend build (same gate as production).
+# - Deploys to /srv/serra/stage via Docker when STAGE_DEPLOY_ENABLED=true.
 
-name: CI
+name: Stage CI/CD
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [autoagents, prod, main]
+    branches: [autoagents]
 
 jobs:
-  build-test:
+  ci:
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
@@ -58,3 +58,31 @@ jobs:
 
       - name: Run tests
         run: composer test
+
+  deploy:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    needs: ci
+    if: ${{ vars.STAGE_DEPLOY_ENABLED == 'true' }}
+    environment: staging
+    steps:
+      - name: Deploy via SSH (Docker stack)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT || 22 }}
+          script: |
+            set -e
+            DEPLOY_ROOT="${{ secrets.STAGE_PATH }}"
+            if [ -z "$DEPLOY_ROOT" ]; then
+              DEPLOY_ROOT="/srv/serra/stage"
+            fi
+            cd "$DEPLOY_ROOT"
+            git -C source fetch origin autoagents
+            git -C source reset --hard origin/autoagents
+            docker compose -f docker-compose.stage.yml build
+            docker compose -f docker-compose.stage.yml up -d
+            docker compose -f docker-compose.stage.yml exec -T app php artisan migrate --force --no-interaction
+            echo "Stage deploy done."

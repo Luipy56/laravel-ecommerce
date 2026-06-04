@@ -1,52 +1,38 @@
 ---
-description: Work on autoagents branch (or AGENT_GIT_BRANCH); promote to main only on 2h cadence, big prod changes, or urgent issue; sync before edits
+description: Work on autoagents → stage validation → prod release; sync before edits
 alwaysApply: true
 ---
 
-# Git: integration branch vs `main` (essential)
+# Git: `autoagents` (stage) vs `prod` (production)
 
-Routine work targets the **integration branch** — **`autoagents`** by default. Override with environment variable **`AGENT_GIT_BRANCH`** if the team uses another shared branch for multi-agent work. **`main`** tracks what is ready for **production** (or your team merges **`prod`** from **`main`** — follow human release docs).
+| Branch | Deploy target | URL |
+|--------|---------------|-----|
+| **`autoagents`** | Staging VPS (`/srv/serra/stage`) | https://stage-serra.ldeluipy.es |
+| **`prod`** | Production VPS (`/srv/serra/prod`) | https://serra.ldeluipy.es |
+| **`main`** | No auto-deploy — stable line; optional merge from `autoagents` | — |
 
-The legacy branch **`agentdevelop`** was retired after migration to **`autoagents/`** (June 2026).
+Routine work: **`autoagents`**. Push → `stage.yml` runs tests; deploys staging when `STAGE_DEPLOY_ENABLED=true`.
 
-## Sync before you change anything (multi-agent)
+Production: merge **`autoagents` → `prod`** only after cliente/dev sign-off on staging. Push **`prod`** → `prod.yml` (tests + Docker deploy when `DEPLOY_ENABLED=true`).
 
-Several agents (and humans) push to the same integration branch. Treat **“get latest”** as **`git fetch`** + **`git pull --rebase --autostash`** on that branch.
+See **`docs/DEPLOY.md`** for SSH paths and GitHub secrets.
 
-| When | Action |
-|------|--------|
-| **Before the first edit** in a session or agent step (code, task files, changelog) | Run **`./scripts/git-sync-autoagents-branch.sh`** from the repo root (or **`./scripts/git-sync-agent-branch.sh`**, which delegates to the same script). Equivalent: `git fetch origin`, checkout **`AGENT_GIT_BRANCH`** default **`autoagents`**, `git pull --rebase --autostash origin <branch>`. |
-| **Before `git push`** | Pull/rebase again on the integration branch so your push is based on the current remote tip. |
-| **Orchestrator** | **`autoagents/autoagents-loop.sh`** runs the sync script **at the start of each step**. Disable with **`AGENT_GIT_SYNC=0`** only for offline or special cases. |
+## Sync before you change anything
 
-If sync fails (merge conflict after rebase, no network), **stop** and resolve; do not layer new commits on a stale tree.
+Run **`./scripts/git-sync-autoagents-branch.sh`** before the first edit and before **`git push`**.
 
-## Where to commit and push
+## Where to commit
 
-1. **Branch:** Check out the integration branch before starting. If it does not exist locally:  
-   `git fetch origin && git checkout -b autoagents origin/autoagents`  
-   (adjust names if using **`AGENT_GIT_BRANCH`**.)
-2. **Commits:** Make commits on the integration branch (or a short-lived branch that merges back into it first).
-3. **Push after work:** **`git push origin <integration-branch>`**. Do **not** routinely push only to **`main`** for normal fixes and features.
+1. Checkout **`autoagents`** (or **`AGENT_GIT_BRANCH`**).
+2. Commit and **`git push origin autoagents`**.
+3. Do **not** push to **`prod`** for normal features.
 
-## When the integration branch may be merged into `main` (and `main` pushed)
+## Promote to production
 
-Merge **only** if **at least one** of these holds:
+Merge to **`prod`** only when staging is validated (or explicit urgent/hotfix instruction). Prefer a PR **`autoagents` → `prod`**.
 
-| Trigger | Meaning |
-|--------|---------|
-| **~2-hour cadence** | Batch promotion: roughly every **two hours**, integrate tested work into **`main`** and push (human or scheduler — not every single commit). |
-| **Big production change** | Large or high-risk change that **must** go live soon: security fixes, payment/order critical paths, migrations that block deploy, or similarly material production impact. State that in the PR/commit message or task. |
-| **Urgent / production in issue** | The linked **GitHub issue** (or explicit user instruction) says **urgent**, **hotfix**, **production**, **deploy now**, or equivalent. Prefer label **`production-urgent`** on the issue when applicable. |
+## Agents
 
-If none of the above applies, **stop after pushing the integration branch**; do **not** merge to **`main`**.
-
-## Agents and the committer role
-
-- **Coder / tester / closer:** Work on the integration branch; never assume **`main`** must be updated the same hour.
-- **Committer / changelog:** Commit on the integration branch and push it. Merge to **`main`** only per the table above.
-- **When the user says “push”** (no other qualifier): push the **integration branch** — if you are on **`main`**, switch back after any allowed promotion.
-
-## Conflicts with other instructions
-
-If anything else suggests “always push **main**” for every change, **this rule wins** for branch choice and promotion timing, except when the **user explicitly** asks to merge or release to production now.
+- **Coder / tester:** Work on **`autoagents`**; verify on staging URL when possible.
+- **Committer:** Push **`autoagents`**; merge **`prod`** only per release policy above.
+- **User says “push”** without qualifier → push **`autoagents`**, not **`prod`**.

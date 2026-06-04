@@ -12,25 +12,17 @@ Multi-agent workflow: **coordination** (`autoagents/`, tasks, optional CLI loop)
 
 ---
 
-## Git branching
+## Git branching & deploy
 
 | Branch | Role |
 |--------|------|
-| **`autoagents`** (default integration) | Routine agent and feature work. **`git push origin autoagents`**. |
-| **`main`** | Stable line — merge only per policy below. |
-| **`prod`** | Production deployment branch (VPS `/srv/serra/prod/source`). |
+| **`autoagents`** | Features and fixes → **staging** (`stage.yml`, https://stage-serra.ldeluipy.es). |
+| **`prod`** | Release line → **production** (`prod.yml`, https://serra.ldeluipy.es) after staging sign-off. |
+| **`main`** | Optional stable snapshot; no VPS auto-deploy. |
 
-Legacy **`agentdevelop`** was merged to **`main`** and retired (June 2026). Remote **`develop`** and **`dokku`** branches were removed (June 2026).
+**Flow:** develop → push **`autoagents`** → validate on staging → merge **`autoagents` → `prod`** → production workflow.
 
-### When to merge `autoagents` → `main`
-
-Merge **only** if **at least one** applies:
-
-1. **~2-hour cadence** — batch integrate tested commits.
-2. **Big production change** — security, payments, migrations, critical bugs.
-3. **Urgent / explicit production** — issue or human says deploy now; label **`production-urgent`** when used.
-
-Otherwise push **`autoagents`** only.
+Full ops detail: **`docs/DEPLOY.md`**. Deploy toggles: `STAGE_DEPLOY_ENABLED`, `DEPLOY_ENABLED` (both default off until secrets are verified).
 
 **Rules:** **`.cursor/rules/git-agent-branch-workflow.mdc`**, **`.cursor/rules/autoagents-workflow.mdc`**.
 

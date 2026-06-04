@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\ProcessAdminHelpIssueJob;
 use App\Services\AdminHelpIssueRequestService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class AdminHelpRequestTest extends TestCase
@@ -45,6 +47,8 @@ class AdminHelpRequestTest extends TestCase
 
     public function test_help_request_stores_pending_json_when_logged_in(): void
     {
+        Queue::fake();
+
         $this->seed(\Database\Seeders\DatabaseSeeder::class);
         $this->loginAsAdmin();
 
@@ -54,6 +58,8 @@ class AdminHelpRequestTest extends TestCase
         ]);
 
         $response->assertOk()->assertJsonPath('success', true);
+
+        Queue::assertPushed(ProcessAdminHelpIssueJob::class);
 
         $service = app(AdminHelpIssueRequestService::class);
         $ids = $service->listPendingIds();

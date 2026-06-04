@@ -68,6 +68,8 @@ services:
     volumes:
       - storage_prod:/var/www/html/storage
       - bootstrap_cache_prod:/var/www/html/bootstrap/cache
+      # Optional: mount host cursor-agent for admin-help processor (see docs/DEPLOY.md)
+      # - /root/.local/bin/cursor-agent:/usr/local/bin/cursor-agent:ro
     depends_on:
       postgres:
         condition: service_healthy

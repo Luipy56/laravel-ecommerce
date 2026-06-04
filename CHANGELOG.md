@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.339] - 2026-06-04
+
+### Changed
+- **Admin Help autoissue:** Align Comment → Issue flow with km0 pattern — `autoissue/admin-help-agent.md` draft prompt, `cursor-agent --yolo`, instant `ProcessAdminHelpIssueJob` on submit, daily scheduler fallback, human-validation gate in autoagents 001 / issue_checker.
+- **Docker:** Install `gh` CLI in PHP image for admin-help issue creation; document `cursor-agent` + `GH_TOKEN` for queue workers.
+
+### Added
+- **Docs:** `docs/admin-help-queue-plan.md`; admin Help env vars in `.env.example`.
+- **Tests:** `AdminHelpDraftParserTest`; queue dispatch assertion in `AdminHelpRequestTest`.
+
 ## [0.1.338] - 2026-06-04
 
 ### Changed

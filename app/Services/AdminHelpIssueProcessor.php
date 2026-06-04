@@ -18,17 +18,35 @@ class AdminHelpIssueProcessor
         $this->requests->ensureDirectories();
         $this->requests->recoverStaleProcessing();
 
-        $processed = 0;
-        foreach ($this->requests->listPendingIds() as $id) {
-            if ($processed >= $limit) {
-                break;
-            }
-            if ($this->processOne($id, $dryRun)) {
-                $processed++;
-            }
+        $lockHandle = fopen($this->requests->processorLockPath(), 'c+');
+        if ($lockHandle === false) {
+            Log::warning('admin_help: could not open processor lock');
+
+            return 0;
         }
 
-        return $processed;
+        if (! flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            fclose($lockHandle);
+
+            return 0;
+        }
+
+        try {
+            $processed = 0;
+            foreach ($this->requests->listPendingIds() as $id) {
+                if ($processed >= $limit) {
+                    break;
+                }
+                if ($this->processOne($id, $dryRun)) {
+                    $processed++;
+                }
+            }
+
+            return $processed;
+        } finally {
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+        }
     }
 
     public function processOne(string $id, bool $dryRun = false): bool
@@ -58,10 +76,10 @@ class AdminHelpIssueProcessor
         }
 
         try {
-            $issue = $this->generateIssueContent($validated);
+            $issue = $this->generateIssueContent($id, $validated);
             if ($issue === null) {
                 $this->requests->releaseToPending($id);
-                Log::warning('admin_help: cursor-agent did not return valid issue content', ['id' => $id]);
+                Log::warning('admin_help: cursor-agent did not produce a valid draft', ['id' => $id]);
 
                 return false;
             }
@@ -81,10 +99,23 @@ class AdminHelpIssueProcessor
                 return false;
             }
 
+            $repo = (string) config('admin_help.github_repo');
+            $draftPath = $this->requests->draftPath($id);
+
             $this->requests->markProcessed($id, [
                 'githubIssueNumber' => $issueNumber,
-                'githubRepo' => config('admin_help.github_repo'),
+                'githubRepo' => $repo,
             ]);
+
+            $this->requests->writeProcessedMeta($id, [
+                'issue' => $issueNumber,
+                'issueUrl' => "https://github.com/{$repo}/issues/{$issueNumber}",
+                'queueId' => $id,
+                'draftPath' => $draftPath,
+                'processedAt' => now()->utc()->toIso8601String(),
+            ]);
+
+            $this->requests->archiveDraft($id);
 
             return true;
         } catch (\Throwable $e) {
@@ -103,7 +134,7 @@ class AdminHelpIssueProcessor
      * @param  array<string, mixed>  $payload
      * @return array{title: string, body: string}|null
      */
-    private function generateIssueContent(array $payload): ?array
+    private function generateIssueContent(string $id, array $payload): ?array
     {
         if (! $this->commandExists('cursor-agent')) {
             Log::warning('admin_help: cursor-agent not found on PATH');
@@ -113,20 +144,30 @@ class AdminHelpIssueProcessor
 
         $promptPath = (string) config('admin_help.prompt_path');
         if (! File::exists($promptPath)) {
-            Log::error('admin_help: prompt file missing');
+            Log::error('admin_help: prompt file missing', ['path' => $promptPath]);
 
             return null;
         }
 
-        $promptTemplate = File::get($promptPath);
-        $payloadJson = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-        $fullPrompt = $promptTemplate."\n\n---\n\nAdmin help request payload (JSON):\n".$payloadJson;
+        $jsonPath = $this->requests->processingJsonPath($id);
+        $draftPath = $this->requests->draftPath($id);
 
-        $timeout = (int) config('admin_help.cursor_agent_timeout', 300);
+        if (File::exists($draftPath)) {
+            File::delete($draftPath);
+        }
+
+        $promptTemplate = File::get($promptPath);
+        $fullPrompt = $promptTemplate."\n\n---\n\nLoop message:\n"
+            ."Queue JSON (read this file): {$jsonPath}\n"
+            ."Output draft (write ONLY this file): {$draftPath}\n"
+            ."Queue ID: {$id}\n"
+            ."Do not create GitHub issues. Do not edit application source. Do your job.";
+
+        $timeout = (int) config('admin_help.cursor_agent_timeout', 900);
         $process = new Process(
-            ['cursor-agent', '--print', '--trust', '--workspace', base_path(), $fullPrompt],
+            ['cursor-agent', '--yolo', '--print', '--trust', '--workspace', base_path(), $fullPrompt],
             base_path(),
-            null,
+            $this->processEnvironment(),
             null,
             $timeout
         );
@@ -141,40 +182,34 @@ class AdminHelpIssueProcessor
             return null;
         }
 
-        return $this->parseAgentOutput(trim($process->getOutput()));
+        try {
+            return AdminHelpDraftParser::parseFile($draftPath);
+        } catch (\Throwable $e) {
+            Log::warning('admin_help: draft parse failed', [
+                'id' => $id,
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**
-     * @return array{title: string, body: string}|null
+     * @return array<string, string>|null
      */
-    private function parseAgentOutput(string $output): ?array
+    private function processEnvironment(): ?array
     {
-        if ($output === '') {
+        $env = getenv();
+        if (! is_array($env)) {
             return null;
         }
 
-        $json = $output;
-        if (preg_match('/\{[\s\S]*\}/', $output, $matches)) {
-            $json = $matches[0];
+        $ghToken = env('GH_TOKEN');
+        if (is_string($ghToken) && $ghToken !== '') {
+            $env['GH_TOKEN'] = $ghToken;
         }
 
-        $decoded = json_decode($json, true);
-        if (! is_array($decoded)) {
-            return null;
-        }
-
-        $title = isset($decoded['title']) && is_string($decoded['title']) ? trim($decoded['title']) : '';
-        $body = isset($decoded['body']) && is_string($decoded['body']) ? trim($decoded['body']) : '';
-
-        if ($title === '' || $body === '') {
-            return null;
-        }
-
-        if (mb_strlen($title) > 256) {
-            $title = mb_substr($title, 0, 256);
-        }
-
-        return ['title' => $title, 'body' => $body];
+        return $env;
     }
 
     private function ensureGitHubLabel(): bool
@@ -199,7 +234,7 @@ class AdminHelpIssueProcessor
             '--repo', $repo,
             '--color', $color,
             '--description', $description,
-        ], base_path(), null, null, 60);
+        ], base_path(), $this->processEnvironment(), null, 60);
 
         try {
             $create->mustRun();
@@ -215,7 +250,7 @@ class AdminHelpIssueProcessor
         $list = new Process(
             ['gh', 'label', 'list', '--repo', $repo, '--limit', '500', '--json', 'name'],
             base_path(),
-            null,
+            $this->processEnvironment(),
             null,
             60
         );
@@ -259,7 +294,7 @@ class AdminHelpIssueProcessor
                     '--label', $label,
                 ],
                 base_path(),
-                null,
+                $this->processEnvironment(),
                 null,
                 120
             );

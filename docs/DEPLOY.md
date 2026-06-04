@@ -59,6 +59,33 @@ gh variable set STAGE_DEPLOY_ENABLED -b true -R Luipy56/laravel-ecommerce
 gh variable set DEPLOY_ENABLED -b true -R Luipy56/laravel-ecommerce
 ```
 
+## Admin Help processor (Comment → GitHub Issue)
+
+Internal admin requests from **`/admin/help`** are queued as JSON and processed by the **queue** worker (`ProcessAdminHelpIssueJob` on submit; daily fallback via scheduler).
+
+**Required in the stack `.env`:**
+
+| Variable | Purpose |
+|----------|---------|
+| `GH_TOKEN` | GitHub CLI token for `gh issue create` (Issues read/write on target repo) |
+| `ADMIN_HELP_GITHUB_REPO` | Optional override (default `Luipy56/laravel-ecommerce`) |
+
+**Required on PATH inside the queue container:**
+
+| Binary | Notes |
+|--------|--------|
+| `gh` | Installed in the PHP Docker image |
+| `cursor-agent` | Install on the VPS host and bind-mount into the queue service, or install in a custom image layer |
+
+Verify after deploy:
+
+```bash
+docker compose -f docker-compose.stage.yml exec queue which gh cursor-agent
+docker compose -f docker-compose.stage.yml exec queue php artisan admin-help:process --dry-run --limit=1
+```
+
+Full flow: **`docs/admin-help-queue-plan.md`**.
+
 ## Manual deploy (SSH)
 
 **Staging** (after `git push origin autoagents`):

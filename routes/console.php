@@ -13,5 +13,8 @@ Artisan::command('inspire', function () {
 // GDPR data retention — runs every Sunday at 02:00
 Schedule::command(GdprPurgeCommand::class)->weeklyOn(0, '02:00');
 
-// Admin Help → GitHub issues (pending JSON payloads)
-Schedule::command(ProcessAdminHelpIssuesCommand::class, ['--limit' => 5])->everyFiveMinutes();
+// Admin Help → GitHub issues (pending JSON payloads; daily fallback if queue job missed)
+Schedule::command(ProcessAdminHelpIssuesCommand::class, [
+    '--limit' => config('admin_help.fallback_schedule_limit', 10),
+])
+    ->dailyAt((string) config('admin_help.fallback_schedule_at', '03:00'));

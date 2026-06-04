@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessAdminHelpIssueJob;
 use App\Services\AdminHelpIssueRequestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -65,6 +66,8 @@ class AdminHelpController extends Controller
                 'message' => __('Unable to submit the request. Please try again later.'),
             ], 500);
         }
+
+        ProcessAdminHelpIssueJob::dispatch();
 
         return response()->json(['success' => true]);
     }

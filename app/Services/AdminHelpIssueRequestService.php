@@ -15,12 +15,52 @@ class AdminHelpIssueRequestService
 
     public function ensureDirectories(): void
     {
-        foreach (['pending', 'processing', 'processed', 'failed'] as $dir) {
+        foreach (['pending', 'processing', 'processed', 'failed', 'drafts'] as $dir) {
             $path = $this->dirPath($dir);
             if (! File::isDirectory($path)) {
                 File::makeDirectory($path, 0755, true);
             }
         }
+    }
+
+    public function processingJsonPath(string $id): string
+    {
+        return $this->filePath('processing', $id);
+    }
+
+    public function draftPath(string $id): string
+    {
+        $safeId = preg_replace('/[^a-zA-Z0-9\-]/', '', $id) ?? $id;
+
+        return $this->dirPath('drafts').DIRECTORY_SEPARATOR.$safeId.'.md';
+    }
+
+    public function processorLockPath(): string
+    {
+        return $this->storageRoot().DIRECTORY_SEPARATOR.'.processor.lock';
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta
+     */
+    public function writeProcessedMeta(string $id, array $meta): void
+    {
+        $this->ensureDirectories();
+        $safeId = preg_replace('/[^a-zA-Z0-9\-]/', '', $id) ?? $id;
+        $path = $this->dirPath('processed').DIRECTORY_SEPARATOR.$safeId.'.meta.json';
+        File::put($path, json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
+    }
+
+    public function archiveDraft(string $id): void
+    {
+        $draft = $this->draftPath($id);
+        if (! File::exists($draft)) {
+            return;
+        }
+
+        $safeId = preg_replace('/[^a-zA-Z0-9\-]/', '', $id) ?? $id;
+        $dest = $this->dirPath('processed').DIRECTORY_SEPARATOR.$safeId.'.draft.md';
+        File::move($draft, $dest);
     }
 
     /**

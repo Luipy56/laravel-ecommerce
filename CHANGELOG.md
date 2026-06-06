@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.349] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — **#36** deduped (existing FEAT task, `agent:planned`); **#37** skipped (`waiting for human validation`); **NEW=0**.
+- **autoagents:** Archived CLOSED task for **#36** (admin Help to-staging tester smoke; pipeline PASS, no product code changes).
+
 ## [0.1.348] - 2026-06-06
 
 ### Changed

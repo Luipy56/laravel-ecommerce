@@ -8,7 +8,7 @@ let idSeq = 0;
 
 /**
  * Global daisyUI toast stack (top-end, below main nav). Use showToast({ message, type }) or emitAppToast from non-React code.
- * Types: success (orange), error, warning, info.
+ * Types: primary, success (orange), error, warning, info.
  */
 export function ToastProvider({ children }) {
   const [items, setItems] = useState([]);
@@ -67,13 +67,15 @@ function ToastViewport({ items, onDismiss }) {
     <div className={wrapClass}>
       {items.map((item) => {
         const color =
-          item.type === 'success'
-            ? 'alert-app-success'
-            : item.type === 'error'
-              ? 'alert-error'
-              : item.type === 'warning'
-                ? 'alert-warning'
-                : 'alert-info';
+          item.type === 'primary'
+            ? 'alert-primary'
+            : item.type === 'success'
+              ? 'alert-app-success'
+              : item.type === 'error'
+                ? 'alert-error'
+                : item.type === 'warning'
+                  ? 'alert-warning'
+                  : 'alert-info';
         return (
           <div key={item.id} role="alert" className={`alert ${color} shadow-lg max-w-sm animate-slide-in-toast`}>
             <span className="text-sm font-bold">{item.message}</span>

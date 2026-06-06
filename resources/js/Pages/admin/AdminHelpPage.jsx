@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
+import { useToast } from '../../contexts/ToastContext';
+
+const STAGE_URL = 'https://stage-serra.ldeluipy.es';
 
 const COMMENT_MAX = 4000;
 const TITLE_MAX = 200;
@@ -10,6 +13,7 @@ const TITLE_MAX = 200;
 export default function AdminHelpPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [title, setTitle] = useState('');
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,6 +44,7 @@ export default function AdminHelpPage() {
         setSuccess(true);
         setTitle('');
         setComment('');
+        showToast({ message: t('admin.help.success_toast'), type: 'primary' });
       } else {
         setError(t('admin.help.error'));
       }
@@ -63,9 +68,17 @@ export default function AdminHelpPage() {
           <p className="text-base-content/80 text-sm">{t('admin.help.intro')}</p>
 
           {success && (
-            <div role="status" className="alert alert-success text-sm">
-              {t('admin.help.success')}
-            </div>
+            <p className="text-sm text-base-content/80">
+              {t('admin.help.stage_preview')}{' '}
+              <a
+                href={STAGE_URL}
+                className="link link-primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                stage-serra.ldeluipy.es
+              </a>
+            </p>
           )}
 
           {error && (

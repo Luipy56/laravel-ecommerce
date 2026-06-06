@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.344] - 2026-06-06
+
+### Changed
+- **Admin Help:** Updated intro copy (prompt triage messaging), primary toast on successful submit, and stage preview link after submission (ca/es/en).
+
 ## [0.1.343] - 2026-06-04
 
 ### Changed

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.350] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — **#39** deduped (existing FEAT task, `agent:planned`); **#38** and **#37** skipped (`waiting for human validation`); **NEW=0**.
+- **autoagents:** Archived CLOSED task for **#39** (admin Help push-to-prod intake; operational request, no product code changes).
+
 ## [0.1.349] - 2026-06-06
 
 ### Changed

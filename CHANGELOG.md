@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.347] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer pass watermark — open **#35** deduped (`waiting for human validation`); log queue unchanged; **NEW=0**.
+
 ## [0.1.346] - 2026-06-06
 
 ### Added

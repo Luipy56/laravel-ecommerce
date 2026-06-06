@@ -217,7 +217,20 @@ class AdminHelpIssueRequestService
             return null;
         }
 
+        $label = $payload['label'] ?? null;
+        $payload['label'] = $this->resolveIssueLabel(is_string($label) ? $label : null);
+
         return $payload;
+    }
+
+    public function resolveIssueLabel(?string $label): string
+    {
+        $allowed = array_keys((array) config('admin_help.allowed_labels', []));
+        if ($label !== null && in_array($label, $allowed, true)) {
+            return $label;
+        }
+
+        return (string) config('admin_help.fallback_label', 'waiting for human validation');
     }
 
     private function moveBetween(string $fromDir, string $toDir, string $id): bool

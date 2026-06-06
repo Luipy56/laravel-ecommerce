@@ -101,14 +101,14 @@ Requires **`cursor-agent`** on PATH. GitHub: **`./scripts/setup-autoagents-gh.sh
 
 **Repo:** [github.com/Luipy56/laravel-ecommerce/issues](https://github.com/Luipy56/laravel-ecommerce/issues)
 
-Labels: **`agent:planned`**, **`agent:wip`**, **`agent:untested`**, **`agent:testing`**, **`production-urgent`**, **`waiting for human validation`**. Bootstrap: **`./scripts/gh-bootstrap-agent-labels.sh`**.
+Labels: **`agent:planned`**, **`agent:wip`**, **`agent:untested`**, **`agent:testing`**, **`production-urgent`**, **`to-staging`**, **`waiting for human validation`**. Bootstrap: **`./scripts/gh-bootstrap-agent-labels.sh`**.
 
-**Admin Help intake:** Admins submit requests at **`/admin/help`**; the API enqueues JSON and a queue job runs **`cursor-agent`** + **`gh issue create`** with label **`waiting for human validation`**. autoagents **001** / **`issue_checker_agent.py`** **skip** those issues until a human removes the label. See **`docs/admin-help-queue-plan.md`**.
+**Admin Help intake:** Admins submit at **`/admin/help`** with **`label`**: **`to-staging`** (default — autoagents queue) or **`waiting for human validation`** (human triage first). Invalid/missing label falls back to **`waiting for human validation`**. See **`docs/admin-help-queue-plan.md`**.
 
 | Role | When | Issue update |
 |------|------|--------------|
 | **001** / issue_checker | FEAT created for **#NN** | Comment + **`agent:planned`** |
-| **001** / issue_checker | Issue has **`waiting for human validation`** | **Skip** (admin Help / human triage) |
+| **001** / issue_checker | Issue has **`waiting for human validation`** | **Skip** (admin chose human triage) |
 | **010 / 002** | **feat/new → wip** | Comment; **`agent:wip`** |
 | **012** | **wip → untested** | **`agent:untested`** |
 | **020** | **untested → testing** | **`agent:testing`** |

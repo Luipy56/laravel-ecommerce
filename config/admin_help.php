@@ -2,9 +2,17 @@
 
 return [
     'github_repo' => env('ADMIN_HELP_GITHUB_REPO', 'Luipy56/laravel-ecommerce'),
-    'validation_label' => env('ADMIN_HELP_VALIDATION_LABEL', 'waiting for human validation'),
-    'validation_label_color' => 'C5DEF5',
-    'validation_label_description' => 'User idea pending human review',
+    'fallback_label' => 'waiting for human validation',
+    'allowed_labels' => [
+        'to-staging' => [
+            'color' => '5319E7',
+            'description' => 'Admin Help: autoagents implements and deploys to staging',
+        ],
+        'waiting for human validation' => [
+            'color' => 'C5DEF5',
+            'description' => 'Admin Help: pending human review before autoagents queue',
+        ],
+    ],
     'storage_path' => storage_path('app/admin-help'),
     'prompt_path' => base_path('autoissue/admin-help-agent.md'),
     'cursor_agent_timeout' => (int) env('ADMIN_HELP_CURSOR_AGENT_TIMEOUT', 900),

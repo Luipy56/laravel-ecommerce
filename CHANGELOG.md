@@ -1,5 +1,58 @@
 # Changelog
 
+## [0.1.352] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.351] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — **#39** closed (archived); **#38** and **#37** skipped (`waiting for human validation`); active queue empty; **NEW=0**.
+
+## [0.1.350] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — **#39** deduped (existing FEAT task, `agent:planned`); **#38** and **#37** skipped (`waiting for human validation`); **NEW=0**.
+- **autoagents:** Archived CLOSED task for **#39** (admin Help push-to-prod intake; operational request, no product code changes).
+
+## [0.1.349] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — **#36** deduped (existing FEAT task, `agent:planned`); **#37** skipped (`waiting for human validation`); **NEW=0**.
+- **autoagents:** Archived CLOSED task for **#36** (admin Help to-staging tester smoke; pipeline PASS, no product code changes).
+
+## [0.1.348] - 2026-06-06
+
+### Changed
+- **Admin Help:** Label select (`Send to Stage` / `Request validation`) on the intake form; submitted JSON includes the correct `label` key. Success toast and inline stage message replaced by a modal with label-specific copy and a Stage link.
+
+## [0.1.347] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer pass watermark — open **#35** deduped (`waiting for human validation`); log queue unchanged; **NEW=0**.
+
+## [0.1.346] - 2026-06-06
+
+### Added
+- **Admin Help:** Optional `label` on `POST /api/v1/admin/help-requests` — `to-staging` (autoagents queue) or `waiting for human validation` (human triage first); invalid or missing values fall back to human validation.
+- **GitHub:** Bootstrap label **`to-staging`** via `gh-bootstrap-agent-labels.sh`.
+- **Tests:** Label selection and fallback coverage in `AdminHelpRequestTest`.
+
+### Changed
+- **Admin Help processor:** Creates GitHub issues with the label from queue JSON; config uses `allowed_labels` map instead of a single `validation_label`.
+- **Docs:** `admin-help-queue-plan.md`, `agent-loop.md`, and `autoissue/admin-help-agent.md` document the two-label intake flow.
+
+## [0.1.345] - 2026-06-06
+
+### Added
+- **Docs:** Cursor rule for Redmine `.red` (Textile) exports — English-only prose, Textile code blocks (no Markdown fences).
+
+## [0.1.344] - 2026-06-06
+
+### Changed
+- **Admin Help:** Updated intro copy (prompt triage messaging), primary toast on successful submit, and stage preview link after submission (ca/es/en).
+
 ## [0.1.343] - 2026-06-04
 
 ### Changed

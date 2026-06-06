@@ -72,6 +72,67 @@ class AdminHelpRequestTest extends TestCase
         $this->assertSame('Orders export', $payload['title']);
         $this->assertSame('admin_help', $payload['meta']['source']);
         $this->assertSame('manager', $payload['submittedBy']['username']);
+        $this->assertSame('waiting for human validation', $payload['label']);
+
+        File::deleteDirectory($service->storageRoot());
+    }
+
+    public function test_help_request_stores_to_staging_label_when_selected(): void
+    {
+        Queue::fake();
+
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->loginAsAdmin();
+
+        $this->postJson('/api/v1/admin/help-requests', [
+            'comment' => 'Deploy this to stage immediately.',
+            'label' => 'to-staging',
+        ])->assertOk();
+
+        $service = app(AdminHelpIssueRequestService::class);
+        $ids = $service->listPendingIds();
+        $payload = $service->readPayload('pending', $ids[0]);
+        $this->assertSame('to-staging', $payload['label']);
+
+        File::deleteDirectory($service->storageRoot());
+    }
+
+    public function test_help_request_stores_human_validation_label_when_selected(): void
+    {
+        Queue::fake();
+
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->loginAsAdmin();
+
+        $this->postJson('/api/v1/admin/help-requests', [
+            'comment' => 'Please review before agents work on this.',
+            'label' => 'waiting for human validation',
+        ])->assertOk();
+
+        $service = app(AdminHelpIssueRequestService::class);
+        $ids = $service->listPendingIds();
+        $payload = $service->readPayload('pending', $ids[0]);
+        $this->assertSame('waiting for human validation', $payload['label']);
+
+        File::deleteDirectory($service->storageRoot());
+    }
+
+    public function test_help_request_falls_back_to_human_validation_for_invalid_label(): void
+    {
+        Queue::fake();
+
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->loginAsAdmin();
+
+        $this->postJson('/api/v1/admin/help-requests', [
+            'comment' => 'Unknown label should not break intake.',
+            'label' => 'not-a-real-label',
+        ])->assertOk();
+
+        $service = app(AdminHelpIssueRequestService::class);
+        $ids = $service->listPendingIds();
+        $payload = $service->readPayload('pending', $ids[0]);
+        $this->assertSame('waiting for human validation', $payload['label']);
 
         File::deleteDirectory($service->storageRoot());
     }

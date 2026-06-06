@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.346] - 2026-06-06
+
+### Added
+- **Admin Help:** Optional `label` on `POST /api/v1/admin/help-requests` — `to-staging` (autoagents queue) or `waiting for human validation` (human triage first); invalid or missing values fall back to human validation.
+- **GitHub:** Bootstrap label **`to-staging`** via `gh-bootstrap-agent-labels.sh`.
+- **Tests:** Label selection and fallback coverage in `AdminHelpRequestTest`.
+
+### Changed
+- **Admin Help processor:** Creates GitHub issues with the label from queue JSON; config uses `allowed_labels` map instead of a single `validation_label`.
+- **Docs:** `admin-help-queue-plan.md`, `agent-loop.md`, and `autoissue/admin-help-agent.md` document the two-label intake flow.
+
 ## [0.1.345] - 2026-06-06
 
 ### Added

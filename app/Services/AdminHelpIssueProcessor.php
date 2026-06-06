@@ -84,14 +84,16 @@ class AdminHelpIssueProcessor
                 return false;
             }
 
-            if (! $this->ensureGitHubLabel()) {
+            $issueLabel = (string) ($validated['label'] ?? config('admin_help.fallback_label'));
+
+            if (! $this->ensureGitHubLabel($issueLabel)) {
                 $this->requests->releaseToPending($id);
-                Log::warning('admin_help: failed to ensure GitHub label', ['id' => $id]);
+                Log::warning('admin_help: failed to ensure GitHub label', ['id' => $id, 'label' => $issueLabel]);
 
                 return false;
             }
 
-            $issueNumber = $this->createGitHubIssue($issue['title'], $issue['body']);
+            $issueNumber = $this->createGitHubIssue($issue['title'], $issue['body'], $issueLabel);
             if ($issueNumber === null) {
                 $this->requests->releaseToPending($id);
                 Log::warning('admin_help: GitHub issue creation failed', ['id' => $id]);
@@ -214,7 +216,7 @@ class AdminHelpIssueProcessor
         return $env;
     }
 
-    private function ensureGitHubLabel(): bool
+    private function ensureGitHubLabel(string $label): bool
     {
         if (! $this->commandExists('gh')) {
             Log::warning('admin_help: gh not found on PATH');
@@ -223,9 +225,16 @@ class AdminHelpIssueProcessor
         }
 
         $repo = (string) config('admin_help.github_repo');
-        $label = (string) config('admin_help.validation_label');
-        $color = (string) config('admin_help.validation_label_color');
-        $description = (string) config('admin_help.validation_label_description');
+        $allowed = (array) config('admin_help.allowed_labels', []);
+        $meta = $allowed[$label] ?? null;
+        if (! is_array($meta)) {
+            Log::warning('admin_help: unknown issue label', ['label' => $label]);
+
+            return false;
+        }
+
+        $color = (string) ($meta['color'] ?? '5319E7');
+        $description = (string) ($meta['description'] ?? 'Admin Help intake');
 
         if ($this->gitHubLabelExists($repo, $label)) {
             return true;
@@ -277,10 +286,9 @@ class AdminHelpIssueProcessor
         return false;
     }
 
-    private function createGitHubIssue(string $title, string $body): ?int
+    private function createGitHubIssue(string $title, string $body, string $label): ?int
     {
         $repo = (string) config('admin_help.github_repo');
-        $label = (string) config('admin_help.validation_label');
 
         $bodyFile = storage_path('app/admin-help/tmp-'.bin2hex(random_bytes(8)).'.md');
         File::ensureDirectoryExists(dirname($bodyFile));

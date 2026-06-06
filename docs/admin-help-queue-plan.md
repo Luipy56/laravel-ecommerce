@@ -11,12 +11,13 @@ Plan for collecting internal admin requests from `/admin/help` and turning them 
 
 ```text
 Admin form (/admin/help)
-  → POST /api/v1/admin/help-requests (auth:admin)
+  → POST /api/v1/admin/help-requests (auth:admin, body includes label)
   → Atomic write to storage/app/admin-help/pending/{uuid}.json
   → ProcessAdminHelpIssueJob (queue, immediate)
   → AdminHelpIssueProcessor: cursor-agent drafts markdown, then gh issue create
-  → GitHub issue with label waiting for human validation
-  → Human removes label → autoagents 001 picks up → FEAT task
+  → GitHub issue with label from JSON (to-staging | waiting for human validation)
+  → to-staging: autoagents 001 picks up → FEAT task → staging deploy
+  → waiting for human validation: skip until human removes/changes label
 ```
 
 ---
@@ -48,6 +49,7 @@ Repo prompt: **`autoissue/admin-help-agent.md`** (same role as km0 `autoissue/au
   "submittedBy": { "id": 1, "username": "manager" },
   "title": "Optional title",
   "comment": "Plain text from the admin.",
+  "label": "to-staging",
   "meta": {
     "userAgent": "Mozilla/5.0 ...",
     "remoteAddr": "203.0.113.42",
@@ -61,6 +63,7 @@ Repo prompt: **`autoissue/admin-help-agent.md`** (same role as km0 `autoissue/au
 |-------|--------|
 | `comment` | Required, max 4000 chars |
 | `title` | Optional, max 200 chars |
+| `label` | Optional in POST; allowed: `to-staging`, `waiting for human validation`. Invalid or missing → **`waiting for human validation`** (safe fallback) |
 | `meta` | Set by API only |
 
 ---
@@ -69,7 +72,7 @@ Repo prompt: **`autoissue/admin-help-agent.md`** (same role as km0 `autoissue/au
 
 1. **Claim** jobs atomically (`pending` → `processing`) with file lock (`.processor.lock`).
 2. Run **cursor-agent** with `autoissue/admin-help-agent.md` to write draft `.md` from queue JSON.
-3. Parse draft frontmatter (`title`) and body; **`gh issue create`** with label **`waiting for human validation`**.
+3. Parse draft frontmatter (`title`) and body; **`gh issue create`** with **`label`** from queue JSON.
 4. Archive JSON + draft + `{id}.meta.json` under `processed/`; on failure release to `pending/` or move to `failed/`.
 
 **cursor-agent flags (same as km0 autoissue):**
@@ -93,13 +96,16 @@ Equivalent to km0 systemd `.path` (instant) + `.timer` (`OnUnitActiveSec=24h`).
 
 ---
 
-## Human validation gate (autoagents)
+## Issue labels (autoagents)
 
-Issues are created with label **`waiting for human validation`** (color `C5DEF5`).
+Admin chooses **`label`** in the form (stored in queue JSON):
 
-- **`autoagents/issue_checker_agent.py`** skips these issues.
-- **`autoagents/001-gh-reviewer.md`** skips them in the GitHub sweep.
-- After a human removes the label and edits the issue if needed, the next autoagents cycle creates **`FEAT-<N>-*.md`** and adds **`agent:planned`**.
+| Label | autoagents |
+|-------|------------|
+| **`to-staging`** | Picked up on next cycle → **`FEAT-<N>-*.md`**, **`agent:planned`**, staging deploy |
+| **`waiting for human validation`** | **Skipped** by **`issue_checker_agent.py`** and **`001-gh-reviewer.md`** until a human removes or changes the label |
+
+Bootstrap both labels: **`./scripts/gh-bootstrap-agent-labels.sh`**.
 
 ---
 
@@ -133,7 +139,7 @@ ls -la storage/app/admin-help/pending/
 ls -la storage/app/admin-help/processed/
 ```
 
-Expect GitHub issue with **`waiting for human validation`**. autoagents loop should skip until label is removed.
+Expect GitHub issue with the chosen **`label`**. With **`to-staging`**, autoagents creates a FEAT task on the next cycle; with **`waiting for human validation`**, the loop skips until triage.
 
 ---
 

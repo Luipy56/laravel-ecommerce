@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.351] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — **#39** closed (archived); **#38** and **#37** skipped (`waiting for human validation`); active queue empty; **NEW=0**.
+
 ## [0.1.350] - 2026-06-06
 
 ### Changed

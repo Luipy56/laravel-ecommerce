@@ -1,0 +1,17 @@
+---
+description: Mandatory constraints for .red (Redmine Textile) files. Loads the global redmine-red skill for full syntax. English-only prose required.
+globs:
+  - "**/*.red"
+alwaysApply: false
+---
+
+# Redmine `.red` — mandatory constraints
+
+When creating, editing, or converting any `.red` file:
+
+1. **Read the global skill** `redmine-red`: `~/.cursor/skills/redmine-red/SKILL.md` (syntax details in `reference.md`, example in `examples.md`).
+2. **English only** — all prose (headings, paragraphs, tables, lists, footers) MUST be English, even if the user or source docs are in Spanish/Catalan. Only exception: the same user message explicitly requests another language for that file.
+3. **No triple backticks** — `.red` is Textile; use `@inline@` and `<pre><code class="shell">…</code></pre>` instead of Markdown fences.
+4. **Default save path** — `/root/redminenotes/` unless the user specifies otherwise (e.g. `docs/*.red`).
+
+Do not write `.red` content from memory alone; use the skill checklist before finishing.

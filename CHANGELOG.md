@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.345] - 2026-06-06
+
+### Added
+- **Docs:** Cursor rule for Redmine `.red` (Textile) exports — English-only prose, Textile code blocks (no Markdown fences).
+
 ## [0.1.344] - 2026-06-06
 
 ### Changed

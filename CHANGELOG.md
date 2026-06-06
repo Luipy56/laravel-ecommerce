@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.348] - 2026-06-06
+
+### Changed
+- **Admin Help:** Label select (`Send to Stage` / `Request validation`) on the intake form; submitted JSON includes the correct `label` key. Success toast and inline stage message replaced by a modal with label-specific copy and a Stage link.
+
 ## [0.1.347] - 2026-06-06
 
 ### Changed

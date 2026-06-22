@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.360] - 2026-06-22
+
+### Changed
+- **Storefront navbar:** Ofertas link uses the brand gradient (`#F75211` → `#8B2400`) on desktop and mobile drawer so offers stand out from other nav items (#43).
+
+### Fixed
+- **autoagents:** `gh-bootstrap-agent-labels.sh` uses `-q` instead of `--jq` for `gh label list`.
+
+## [0.1.359] - 2026-06-22
+
+### Changed
+- **Footer:** Updated storefront contact address to Ignasi Barraquer I Barraquer 15, 08310 Argentona (i18n keys `footer.address_line1` / `footer.address_line2`).
+
 ## [0.1.358] - 2026-06-06
 
 ### Changed

@@ -390,6 +390,8 @@
   "footer.legal": "Legal",
   "footer.social": "Síguenos",
   "footer.tagline": "Los mejores profesionales a tu servicio.",
+  "footer.address_line1": "Ignasi Barraquer I Barraquer 15",
+  "footer.address_line2": "08310 Argentona",
   "footer.legal_link": "Web Serralleria Solidària",
   "footer.legal_disclaimer": "Adheridos a la Junta Arbitral de Consumo de Cataluña.",
   "footer.copyright": "© {{year}} Serralleria Solidària. Todos los derechos reservados.",

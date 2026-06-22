@@ -19,7 +19,7 @@ fi
 
 label_exists() {
   local name="$1"
-  gh label list --repo "$REPO" --limit 500 --json name --jq -r '.[].name' | grep -Fxq "$name"
+  gh label list --repo "$REPO" --limit 500 --json name -q '.[].name' | grep -Fxq "$name"
 }
 
 ensure_label() {

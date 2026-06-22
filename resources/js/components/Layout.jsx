@@ -50,6 +50,17 @@ function drawerIconClass(isActive) {
   return ['h-5 w-5 shrink-0', isActive ? 'text-primary-content' : 'text-primary'].join(' ');
 }
 
+function drawerOffersNavClass(isActive) {
+  return [
+    'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium shadow-md nav-offers-highlight transition-all duration-200',
+    isActive ? 'nav-offers-highlight--active' : '',
+  ].join(' ');
+}
+
+function drawerOffersIconClass() {
+  return 'h-5 w-5 shrink-0 text-white';
+}
+
 export default function Layout() {
   const { t, i18n } = useTranslation();
   const { pathname, search } = useLocation();
@@ -186,10 +197,10 @@ export default function Layout() {
                 <Link
                   to="/products?offers_only=1"
                   onClick={closeStorefrontDrawer}
-                  className={drawerNavClass(offersOnlyActive)}
+                  className={drawerOffersNavClass(offersOnlyActive)}
                   aria-current={offersOnlyActive ? 'page' : undefined}
                 >
-                  <IconTag className={drawerIconClass(offersOnlyActive)} aria-hidden="true" />
+                  <IconTag className={drawerOffersIconClass()} aria-hidden="true" />
                   {t('shop.offers')}
                 </Link>
               </li>

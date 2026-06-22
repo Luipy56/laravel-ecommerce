@@ -272,7 +272,8 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/products?offers_only=1"
-                className={`btn btn-ghost btn-sm shrink-0${offersNavActive ? ' btn-active' : ''}`}
+                className={`btn btn-sm shrink-0 nav-offers-highlight${offersNavActive ? ' nav-offers-highlight--active' : ''}`}
+                aria-current={offersNavActive ? 'page' : undefined}
               >
                 {t('shop.offers')}
               </Link>

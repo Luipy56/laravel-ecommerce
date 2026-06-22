@@ -63,8 +63,8 @@ export default function Footer() {
             </Link>
             <p className="text-sm leading-relaxed opacity-70 max-w-xs">{t('footer.tagline')}</p>
             <div className="flex flex-col gap-1 text-sm opacity-80">
-              <span>Carrer Diputació, 426, 4rt 2ª</span>
-              <span>08013 Barcelona</span>
+              <span>{t('footer.address_line1')}</span>
+              <span>{t('footer.address_line2')}</span>
             </div>
           </aside>
 

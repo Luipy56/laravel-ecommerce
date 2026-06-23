@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.398] - 2026-06-23
+
+### Fixed
+- **Admin key colors list (#51):** `/admin/key-colors` table wrapped in opaque card (same pattern as clients/products) so zebra rows and color swatches render on solid background instead of the admin backdrop.
+
 ## [0.1.397] - 2026-06-23
 
 ### Fixed

@@ -96,54 +96,58 @@ export default function AdminKeyColorsPage() {
         </Link>
       </div>
 
-      {loading ? (
-        <p className="text-sm text-base-content/70">{t('common.loading')}</p>
-      ) : colors.length === 0 ? (
-        <p className="text-sm text-base-content/70">{t('admin.key_colors.no_colors')}</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="table table-zebra table-sm">
-            <thead>
-              <tr>
-                <th className="w-14">{t('admin.key_colors.color')}</th>
-                <th>{t('admin.key_colors.name')}</th>
-                <th>{t('admin.key_colors.rgb_code')}</th>
-                <th className="text-center">{t('admin.products.is_active')}</th>
-                <th className="text-end tabular-nums">{t('admin.key_colors.sort_order')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {colors.map((color) => (
-                <tr
-                  key={color.id}
-                  role="button"
-                  tabIndex={0}
-                  className="cursor-pointer hover:bg-base-200/50"
-                  onClick={() => navigate(`/admin/key-colors/${color.id}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      navigate(`/admin/key-colors/${color.id}`);
-                    }
-                  }}
-                >
-                  <td>
-                    <span
-                      className="inline-block w-8 h-8 rounded-full border border-base-300"
-                      style={{ backgroundColor: color.rgb_code }}
-                      aria-hidden
-                    />
-                  </td>
-                  <td>{color.name}</td>
-                  <td className="font-mono text-sm">{color.rgb_code}</td>
-                  <td className="text-center">{color.is_active ? t('common.yes') : t('common.no')}</td>
-                  <td className="text-end tabular-nums">{color.sort_order}</td>
+      <div className="card bg-base-100 shadow border border-base-200 overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <span className="loading loading-spinner loading-lg" aria-hidden="true" />
+          </div>
+        ) : colors.length === 0 ? (
+          <div className="p-8 text-center text-base-content/70">{t('admin.key_colors.no_colors')}</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table table-zebra table-sm [&_th]:whitespace-nowrap [&_td]:whitespace-nowrap [&_thead_th]:border-b-2 [&_thead_th]:border-base-300 [&_thead_th]:font-semibold [&_thead_th]:bg-transparent">
+              <thead>
+                <tr>
+                  <th className="w-14">{t('admin.key_colors.color')}</th>
+                  <th>{t('admin.key_colors.name')}</th>
+                  <th>{t('admin.key_colors.rgb_code')}</th>
+                  <th className="text-center">{t('admin.products.is_active')}</th>
+                  <th className="text-end tabular-nums">{t('admin.key_colors.sort_order')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {colors.map((color) => (
+                  <tr
+                    key={color.id}
+                    role="button"
+                    tabIndex={0}
+                    className="cursor-pointer hover:bg-base-200 focus:bg-base-200 focus:outline-none"
+                    onClick={() => navigate(`/admin/key-colors/${color.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/admin/key-colors/${color.id}`);
+                      }
+                    }}
+                  >
+                    <td>
+                      <span
+                        className="inline-block w-8 h-8 rounded-full border border-base-300 shrink-0 shadow-sm"
+                        style={{ backgroundColor: color.rgb_code || undefined }}
+                        aria-hidden
+                      />
+                    </td>
+                    <td>{color.name}</td>
+                    <td className="font-mono text-sm">{color.rgb_code}</td>
+                    <td className="text-center">{color.is_active ? t('common.yes') : t('common.no')}</td>
+                    <td className="text-end tabular-nums">{color.sort_order}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import PageTitle from '../components/PageTitle';
+import KeyColorPicker from '../components/KeyColorPicker';
+import { useKeyColors } from '../hooks/useKeyColors';
 
-function CartLine({ line, updateLine, removeLine, t }) {
+function CartLine({ line, updateLine, removeLine, keyColors, t }) {
   const isProduct = !!line.product;
   const isPack = !!line.pack;
   const packContainsKeys = !!line.pack?.contains_keys;
@@ -14,6 +16,7 @@ function CartLine({ line, updateLine, removeLine, t }) {
   const imageUrl = line.product?.image_url ?? line.pack?.image_url ?? '/images/dummy.jpg';
   const isIncluded = line.is_included !== false;
   const isExtraKeysAvailable = !!line.product?.is_extra_keys_available;
+  const involvesKeys = isExtraKeysAvailable || packContainsKeys;
   const extraKeyUnitPrice = line.product?.extra_key_unit_price ?? null;
   const extraKeysQty = line.extra_keys_qty ?? 0;
   const features = line.product?.features ?? [];
@@ -42,6 +45,10 @@ function CartLine({ line, updateLine, removeLine, t }) {
     updateLine(line.id, { quantity: line.quantity, keys_all_same: !keysAllSame });
   };
 
+  const handleKeyColorChange = (keyColorId) => {
+    updateLine(line.id, { quantity: line.quantity, key_color_id: keyColorId });
+  };
+
   const detailUrl = isProduct ? `/products/${line.product.id}` : `/packs/${line.pack.id}`;
 
   return (
@@ -56,26 +63,39 @@ function CartLine({ line, updateLine, removeLine, t }) {
         />
       </td>
       <td className="align-middle max-w-[9rem] sm:max-w-none">
-        <Link
-          to={detailUrl}
-          className="flex items-center gap-3 no-underline text-base-content hover:text-primary transition-colors"
-        >
-          <figure className="mask mask-squircle w-16 h-16 shrink-0 bg-base-300 flex items-center justify-center overflow-hidden">
-            <img
-              src={imageUrl}
-              alt={name ? t('shop.cart.line_image_alt', { name }) : ''}
-              className="w-full h-full object-cover"
+        <div className="flex items-center gap-3">
+          <Link
+            to={detailUrl}
+            className="flex items-center gap-3 no-underline text-base-content hover:text-primary transition-colors min-w-0"
+          >
+            <figure className="mask mask-squircle w-16 h-16 shrink-0 bg-base-300 flex items-center justify-center overflow-hidden">
+              <img
+                src={imageUrl}
+                alt={name ? t('shop.cart.line_image_alt', { name }) : ''}
+                className="w-full h-full object-cover"
+              />
+            </figure>
+            <div className="min-w-0">
+              <p className="font-medium overflow-hidden text-ellipsis whitespace-nowrap sm:whitespace-normal sm:overflow-visible">{name}</p>
+              {features.length > 0 && (
+                <p className="text-sm text-base-content/70 mt-0.5 hidden sm:block">
+                  {features.map((f) => `${f.name}: ${f.value}`).join(' · ')}
+                </p>
+              )}
+            </div>
+          </Link>
+        </div>
+        {involvesKeys && keyColors.length > 0 && (
+          <div className="mt-2 hidden sm:block pl-[4.5rem]">
+            <KeyColorPicker
+              compact
+              colors={keyColors}
+              value={line.key_color_id ?? null}
+              onChange={handleKeyColorChange}
+              name={`cart-line-${line.id}-key-color`}
             />
-          </figure>
-          <div className="min-w-0">
-            <p className="font-medium overflow-hidden text-ellipsis whitespace-nowrap sm:whitespace-normal sm:overflow-visible">{name}</p>
-            {features.length > 0 && (
-              <p className="text-sm text-base-content/70 mt-0.5 hidden sm:block">
-                {features.map((f) => `${f.name}: ${f.value}`).join(' · ')}
-              </p>
-            )}
           </div>
-        </Link>
+        )}
       </td>
       <td className="text-center align-middle whitespace-nowrap">{Number(line.unit_price).toFixed(2)} €</td>
       <td className="align-middle">
@@ -140,7 +160,7 @@ function CartLine({ line, updateLine, removeLine, t }) {
 }
 
 /** Stacked layout for viewports below `md` — avoids wide table horizontal scroll. */
-function CartLineMobile({ line, updateLine, removeLine, t }) {
+function CartLineMobile({ line, updateLine, removeLine, keyColors, t }) {
   const isProduct = !!line.product;
   const isPack = !!line.pack;
   const packContainsKeys = !!line.pack?.contains_keys;
@@ -150,6 +170,7 @@ function CartLineMobile({ line, updateLine, removeLine, t }) {
   const imageUrl = line.product?.image_url ?? line.pack?.image_url ?? '/images/dummy.jpg';
   const isIncluded = line.is_included !== false;
   const isExtraKeysAvailable = !!line.product?.is_extra_keys_available;
+  const involvesKeys = isExtraKeysAvailable || packContainsKeys;
   const extraKeyUnitPrice = line.product?.extra_key_unit_price ?? null;
   const extraKeysQty = line.extra_keys_qty ?? 0;
   const features = line.product?.features ?? [];
@@ -176,6 +197,10 @@ function CartLineMobile({ line, updateLine, removeLine, t }) {
   const handleKeysAllDifferentChange = () => {
     if (!canChooseKeysDifferent) return;
     updateLine(line.id, { quantity: line.quantity, keys_all_same: !keysAllSame });
+  };
+
+  const handleKeyColorChange = (keyColorId) => {
+    updateLine(line.id, { quantity: line.quantity, key_color_id: keyColorId });
   };
 
   const detailUrl = isProduct ? `/products/${line.product.id}` : `/packs/${line.pack.id}`;
@@ -224,6 +249,17 @@ function CartLineMobile({ line, updateLine, removeLine, t }) {
           ) : null}
         </div>
       </Link>
+      {involvesKeys && keyColors.length > 0 && (
+        <div className="mb-3">
+          <KeyColorPicker
+            compact
+            colors={keyColors}
+            value={line.key_color_id ?? null}
+            onChange={handleKeyColorChange}
+            name={`cart-line-mobile-${line.id}-key-color`}
+          />
+        </div>
+      )}
       <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
         <dt className="text-base-content/70">{t('shop.price')}</dt>
         <dd className="text-end tabular-nums">{Number(line.unit_price).toFixed(2)} €</dd>
@@ -289,6 +325,7 @@ function CartLineMobile({ line, updateLine, removeLine, t }) {
 export default function CartPage() {
   const { t } = useTranslation();
   const { cart, loading, updateLine, removeLine, setInstallationRequested } = useCart();
+  const { data: keyColors = [] } = useKeyColors(true);
   const [installSaving, setInstallSaving] = useState(false);
   const shipFlatCart = Number(cart.shipping_flat_eur ?? 9);
   const installationFeeCart =
@@ -372,6 +409,7 @@ export default function CartPage() {
               line={line}
               updateLine={updateLine}
               removeLine={removeLine}
+              keyColors={keyColors}
               t={t}
             />
           ))}
@@ -399,6 +437,7 @@ export default function CartPage() {
                   line={line}
                   updateLine={updateLine}
                   removeLine={removeLine}
+                  keyColors={keyColors}
                   t={t}
                 />
               ))}

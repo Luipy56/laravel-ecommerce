@@ -12,6 +12,7 @@ import CartWidget from './CartWidget';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import CookieConsentBanner from './CookieConsentBanner';
+import DemoPhaseModalLoader from './DemoPhaseModalLoader';
 import {
   IconCart,
   IconClipboardList,
@@ -123,6 +124,7 @@ export default function Layout() {
           <CartWidget />
           <ScrollToTop />
           <CookieConsentBanner />
+          <DemoPhaseModalLoader />
         </div>
       </StorefrontNavbarVisibilityProvider>
       <div className="drawer-side z-[60] lg:hidden">

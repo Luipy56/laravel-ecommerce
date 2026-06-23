@@ -69,6 +69,30 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin login: dev auto-login button (SPA /admin/login)
+    |--------------------------------------------------------------------------
+    |
+    | When true, the admin login page shows a one-click "Auto login" button.
+    | Set ADMINAUTOLOGIN=true in .env for local/staging only.
+    |
+    */
+
+    'admin_auto_login' => filter_var(env('ADMINAUTOLOGIN', false), FILTER_VALIDATE_BOOLEAN),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Storefront demo phase modal (first visit)
+    |--------------------------------------------------------------------------
+    |
+    | When true, the public storefront shows a one-time modal warning that the
+    | site is in development. Set isDEMO=true in .env for staging/demo only.
+    |
+    */
+
+    'is_demo' => filter_var(env('isDEMO', false), FILTER_VALIDATE_BOOLEAN),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |

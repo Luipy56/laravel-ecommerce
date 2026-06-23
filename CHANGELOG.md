@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.367] - 2026-06-23
+
+### Added
+- **Key color for products/packs with keys (#47):** Global `key_colors` catalog with ca/es/en translations; optional shopper choice (including “None”) on product/pack detail and cart; snapshots on order lines at checkout; admin CRUD at `/admin/key-colors`; seeded demo colors and first pack with `contains_keys`.
+
+## [0.1.366] - 2026-06-23
+
+### Added
+- **Storefront demo modal (#46):** First-visit modal on the public storefront (not `/admin`) when `isDEMO=true`, warning the site is in development; modal code loads only when the flag is enabled; dismissal persisted in `localStorage` (`serra-demo-phase-seen`).
+
+## [0.1.365] - 2026-06-23
+
+### Changed
+- **Admin login (#45):** "Auto login" button on `/admin/login` only when `ADMINAUTOLOGIN=true`; login background uses brand gradient (#F75211 → #8B2400).
+
+## [0.1.364] - 2026-06-23
+
+### Changed
+- **Admin Help (#44):** Removed Action select from `/admin/help`; all submissions use the human-validation workflow. API ignores client `label` and always stores `waiting for human validation`.
+
 ## [0.1.363] - 2026-06-22
 
 ### Changed

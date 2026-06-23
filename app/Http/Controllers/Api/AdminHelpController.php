@@ -25,7 +25,6 @@ class AdminHelpController extends Controller
         $validated = $request->validate([
             'comment' => ['required', 'string', 'min:1', 'max:'.$maxComment],
             'title' => ['nullable', 'string', 'max:'.$maxTitle],
-            'label' => ['nullable', 'string'],
         ]);
 
         $admin = Auth::guard('admin')->user();
@@ -47,7 +46,7 @@ class AdminHelpController extends Controller
             ],
             'title' => $title,
             'comment' => $validated['comment'],
-            'label' => $this->helpRequests->resolveIssueLabel($validated['label'] ?? null),
+            'label' => (string) config('admin_help.fallback_label', 'waiting for human validation'),
             'meta' => [
                 'userAgent' => $request->userAgent(),
                 'remoteAddr' => $request->ip(),

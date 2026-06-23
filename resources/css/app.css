@@ -154,9 +154,9 @@ html, body {
   background: linear-gradient(135deg, #882200 0%, #fb5412 100%);
 }
 
-/* ----- Admin login: animated gradient background ----- */
+/* ----- Admin login: brand gradient background (#F75211 → #8B2400) ----- */
 .bg-admin-login-animated {
-  background: linear-gradient(-45deg, #882200, #fb5412, #d94a0f, #6b2a0a);
+  background: linear-gradient(-45deg, #8b2400, #f75211, #d94a0f, #6b2a0a);
   background-size: 400% 400%;
   animation: gradient-admin-login 14s ease infinite;
   min-height: 100vh;

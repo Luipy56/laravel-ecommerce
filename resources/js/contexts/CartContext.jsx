@@ -95,8 +95,9 @@ export function CartProvider({ children }) {
     return { success: false };
   }, []);
 
-  const addLine = useCallback(async (productId, packId, quantity = 1) => {
+  const addLine = useCallback(async (productId, packId, quantity = 1, options = {}) => {
     const payload = productId ? { product_id: productId, quantity } : { pack_id: packId, quantity };
+    if (options.key_color_id !== undefined) payload.key_color_id = options.key_color_id;
     const { data } = await api.post('cart/lines', payload);
     if (data.success && data.data) {
       if (Array.isArray(data.data.lines)) {
@@ -114,6 +115,7 @@ export function CartProvider({ children }) {
       if (payload.included !== undefined) body.included = payload.included;
       if (payload.extra_keys_qty !== undefined) body.extra_keys_qty = payload.extra_keys_qty;
       if (payload.keys_all_same !== undefined) body.keys_all_same = payload.keys_all_same;
+      if (payload.key_color_id !== undefined) body.key_color_id = payload.key_color_id;
     }
     const { data } = await api.put(`cart/lines/${lineId}`, body);
     if (data.success && data.data) {

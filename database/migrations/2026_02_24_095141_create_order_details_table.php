@@ -23,6 +23,9 @@ return new class extends Migration
             $table->boolean('keys_all_same')->default(false)->comment('When pack contains_keys: true = client chose all same key, false = all different (or N/A)');
             $table->integer('extra_keys_qty')->default(0)->comment('Number of extra keys requested');
             $table->decimal('extra_key_unit_price', 10, 2)->nullable()->comment('Price per extra key at order time');
+            $table->foreignId('key_color_id')->nullable()->constrained('key_colors')->nullOnDelete();
+            $table->string('key_color_rgb', 7)->nullable()->comment('Snapshot at checkout');
+            $table->string('key_color_name', 255)->nullable()->comment('Localized snapshot at checkout');
             $table->boolean('is_included')->default(true)->comment('If false, line is excluded from total (e.g. saved for later)');
             $table->timestamps();
         });

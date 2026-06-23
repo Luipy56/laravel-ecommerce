@@ -38,6 +38,10 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}">
     {{-- Runtime semver from Laravel (reads root package.json); avoids stale __APP_VERSION__ until Vite dev restart --}}
     <script>window.__LARAVEL_APP_VERSION__ = @json(config('app.version'));</script>
+    <script>window.__LARAVEL_ADMIN_AUTO_LOGIN__ = @json(config('app.admin_auto_login'));</script>
+    @if (config('app.is_demo'))
+    <script>window.__LARAVEL_IS_DEMO__ = true;</script>
+    @endif
     @vite(['resources/css/app.css', 'resources/js/app.jsx'])
 </head>
 <body>

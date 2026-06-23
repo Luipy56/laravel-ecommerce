@@ -67,10 +67,21 @@ return new class extends Migration
             $table->unique(['feature_id', 'locale']);
         });
         $this->addLocaleCheck('feature_translations');
+
+        Schema::create('key_color_translations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('key_color_id')->constrained('key_colors')->cascadeOnDelete();
+            $table->string('locale', 5);
+            $table->string('name', 255)->nullable();
+            $table->timestamps();
+            $table->unique(['key_color_id', 'locale']);
+        });
+        $this->addLocaleCheck('key_color_translations');
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('key_color_translations');
         Schema::dropIfExists('feature_translations');
         Schema::dropIfExists('feature_name_translations');
         Schema::dropIfExists('pack_translations');

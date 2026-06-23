@@ -77,7 +77,7 @@ class AdminHelpRequestTest extends TestCase
         File::deleteDirectory($service->storageRoot());
     }
 
-    public function test_help_request_stores_to_staging_label_when_selected(): void
+    public function test_help_request_ignores_to_staging_label_and_uses_human_validation(): void
     {
         Queue::fake();
 
@@ -85,28 +85,8 @@ class AdminHelpRequestTest extends TestCase
         $this->loginAsAdmin();
 
         $this->postJson('/api/v1/admin/help-requests', [
-            'comment' => 'Deploy this to stage immediately.',
+            'comment' => 'Attempt to bypass validation with to-staging label.',
             'label' => 'to-staging',
-        ])->assertOk();
-
-        $service = app(AdminHelpIssueRequestService::class);
-        $ids = $service->listPendingIds();
-        $payload = $service->readPayload('pending', $ids[0]);
-        $this->assertSame('to-staging', $payload['label']);
-
-        File::deleteDirectory($service->storageRoot());
-    }
-
-    public function test_help_request_stores_human_validation_label_when_selected(): void
-    {
-        Queue::fake();
-
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
-        $this->loginAsAdmin();
-
-        $this->postJson('/api/v1/admin/help-requests', [
-            'comment' => 'Please review before agents work on this.',
-            'label' => 'waiting for human validation',
         ])->assertOk();
 
         $service = app(AdminHelpIssueRequestService::class);

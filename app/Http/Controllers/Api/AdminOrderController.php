@@ -125,7 +125,7 @@ class AdminOrderController extends Controller
                 'id' => $l->id,
                 'product_id' => $l->product_id,
                 'pack_id' => $l->pack_id,
-                'product' => $l->product ? ['id' => $l->product->id, 'name' => $l->product->name, 'code' => $l->product->code] : null,
+                'product' => $l->product ? ['id' => $l->product->id, 'name' => $l->product->name, 'code' => $l->product->code, 'is_extra_keys_available' => (bool) $l->product->is_extra_keys_available] : null,
                 'pack' => $l->pack ? ['id' => $l->pack->id, 'name' => $l->pack->name, 'contains_keys' => (bool) $l->pack->contains_keys] : null,
                 'keys_all_same' => (bool) ($l->keys_all_same ?? false),
                 'image_url' => $imageUrl,
@@ -134,6 +134,9 @@ class AdminOrderController extends Controller
                 'offer' => (float) ($l->offer ?? 0),
                 'extra_keys_qty' => (int) ($l->extra_keys_qty ?? 0),
                 'extra_key_unit_price' => $l->extra_key_unit_price !== null ? (float) $l->extra_key_unit_price : null,
+                'key_color_id' => $l->key_color_id,
+                'key_color_rgb' => $l->key_color_rgb,
+                'key_color_name' => $l->key_color_name,
                 'line_total' => (float) $l->line_total,
             ];
         })->values()->all();

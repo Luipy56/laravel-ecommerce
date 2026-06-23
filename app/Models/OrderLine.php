@@ -19,6 +19,9 @@ class OrderLine extends Model
         'keys_all_same',
         'extra_keys_qty',
         'extra_key_unit_price',
+        'key_color_id',
+        'key_color_rgb',
+        'key_color_name',
         'is_included',
     ];
 
@@ -46,6 +49,11 @@ class OrderLine extends Model
     public function pack(): BelongsTo
     {
         return $this->belongsTo(Pack::class);
+    }
+
+    public function keyColor(): BelongsTo
+    {
+        return $this->belongsTo(KeyColor::class, 'key_color_id');
     }
 
     /** Display name: product name or pack name. */

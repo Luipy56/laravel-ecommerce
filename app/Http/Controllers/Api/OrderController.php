@@ -11,6 +11,7 @@ use App\Models\OrderAddress;
 use App\Models\Payment;
 use App\Models\ShopSetting;
 use App\Support\InstallationAutoPricing;
+use App\Support\KeyColorSnapshot;
 use App\Services\Payments\PaymentCheckoutService;
 use App\Services\Payments\PaymentCompletionService;
 use App\Support\MailLocale;
@@ -161,6 +162,10 @@ class OrderController extends Controller
                     'status' => Payment::STATUS_PENDING,
                     'currency' => 'EUR',
                 ]);
+            }
+
+            if (! $deferOrderKind) {
+                KeyColorSnapshot::freezeOnOrderLines($cart->fresh(['lines.keyColor.translations']));
             }
         });
 
@@ -418,6 +423,9 @@ class OrderController extends Controller
             'quantity' => $l->quantity,
             'unit_price' => (float) $l->unit_price,
             'line_total' => (float) $l->line_total,
+            'key_color_id' => $l->key_color_id,
+            'key_color_rgb' => $l->key_color_rgb,
+            'key_color_name' => $l->key_color_name,
         ]);
 
         return response()->json([

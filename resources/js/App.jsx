@@ -48,6 +48,10 @@ import AdminVariantGroupsPage from './Pages/admin/AdminVariantGroupsPage';
 import AdminVariantGroupNewPage from './Pages/admin/AdminVariantGroupNewPage';
 import AdminVariantGroupShowPage from './Pages/admin/AdminVariantGroupShowPage';
 import AdminVariantGroupEditPage from './Pages/admin/AdminVariantGroupEditPage';
+import AdminKeyColorsPage from './Pages/admin/AdminKeyColorsPage';
+import AdminKeyColorNewPage from './Pages/admin/AdminKeyColorNewPage';
+import AdminKeyColorShowPage from './Pages/admin/AdminKeyColorShowPage';
+import AdminKeyColorEditPage from './Pages/admin/AdminKeyColorEditPage';
 import AdminClientsPage from './Pages/admin/AdminClientsPage';
 import AdminClientShowPage from './Pages/admin/AdminClientShowPage';
 import AdminAdminsPage from './Pages/admin/AdminAdminsPage';
@@ -177,6 +181,10 @@ export default function App() {
                   <Route path="variant-groups/new" element={<AdminVariantGroupNewPage />} />
                   <Route path="variant-groups/:id/edit" element={<AdminVariantGroupEditPage />} />
                   <Route path="variant-groups/:id" element={<AdminVariantGroupShowPage />} />
+                  <Route path="key-colors" element={<AdminKeyColorsPage />} />
+                  <Route path="key-colors/new" element={<AdminKeyColorNewPage />} />
+                  <Route path="key-colors/:id/edit" element={<AdminKeyColorEditPage />} />
+                  <Route path="key-colors/:id" element={<AdminKeyColorShowPage />} />
                   <Route path="clients" element={<AdminClientsPage />} />
                   <Route path="clients/:id" element={<AdminClientShowPage />} />
                   <Route path="orders" element={<AdminOrdersPage />} />

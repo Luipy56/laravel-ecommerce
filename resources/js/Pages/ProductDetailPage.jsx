@@ -13,7 +13,8 @@ import ReviewsSection from '../components/ReviewsSection';
 import CartPreviewBar from '../components/CartPreviewBar';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
 import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
-import { useDocumentMeta } from '../hooks/useDocumentMeta';
+import KeyColorPicker from '../components/KeyColorPicker';
+import { useKeyColors } from '../hooks/useKeyColors';
 
 const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
@@ -36,6 +37,7 @@ export default function ProductDetailPage() {
   const galleryRef = useRef(null);
   const { addLine } = useCart();
   const { data: publicSettings } = usePublicShopSettings();
+  const [selectedKeyColorId, setSelectedKeyColorId] = useState(null);
 
   const productQuery = useQuery({
     queryKey: ['product', 'detail', id],
@@ -48,13 +50,15 @@ export default function ProductDetailPage() {
     staleTime: 60_000,
   });
   const product = productQuery.data;
+  const hasKeyOptions = !!product?.is_extra_keys_available;
+  const { data: keyColors = [] } = useKeyColors(hasKeyOptions);
 
   useDocumentMeta(
     product?.name ?? undefined,
     product?.description ? String(product.description).slice(0, 200) : undefined,
   );
 
-  const handleAdd = () => addLine(product.id, null, qty);
+  const handleAdd = () => addLine(product.id, null, qty, { key_color_id: selectedKeyColorId });
 
   const galleryImages = useMemo(() => {
     if (!product) return [];
@@ -343,13 +347,21 @@ export default function ProductDetailPage() {
 
           {/* Extra keys */}
           {product.is_extra_keys_available && (
-            <div className="product-detail__extra-keys">
-              <p className="font-medium text-sm">{t('shop.product.extra_keys_available')}</p>
-              {product.formattedExtraKeyPrice && (
-                <p className="text-sm text-primary font-semibold mt-0.5">
-                  {t('shop.product.extra_key_price')}: {product.formattedExtraKeyPrice}
-                </p>
-              )}
+            <div className="product-detail__extra-keys space-y-3">
+              <div>
+                <p className="font-medium text-sm">{t('shop.product.extra_keys_available')}</p>
+                {product.formattedExtraKeyPrice && (
+                  <p className="text-sm text-primary font-semibold mt-0.5">
+                    {t('shop.product.extra_key_price')}: {product.formattedExtraKeyPrice}
+                  </p>
+                )}
+              </div>
+              <KeyColorPicker
+                colors={keyColors}
+                value={selectedKeyColorId}
+                onChange={setSelectedKeyColorId}
+                name={`product-${product.id}-key-color`}
+              />
             </div>
           )}
 

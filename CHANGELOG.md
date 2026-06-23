@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.397] - 2026-06-23
+
+### Fixed
+- **CI/CD:** Stage deploy removes stale hash-prefixed Docker containers before `compose up` to avoid scheduler name conflicts; workflow delegates to `scripts/deploy-stage.sh`.
+
 ## [0.1.396] - 2026-06-23
 
 ### Changed

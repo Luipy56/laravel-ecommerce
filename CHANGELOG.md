@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.373] - 2026-06-23
+
+### Fixed
+- **Staging deploy migrate failure (#49):** New `php artisan db:reconcile-key-color-schema` records the `key_colors` migration when the table already exists and adds missing `key_color_translations` / `order_lines.key_color_*` columns on long-lived databases; stage/prod deploy runs it before `migrate`.
+
 ## [0.1.372] - 2026-06-23
 
 ### Changed

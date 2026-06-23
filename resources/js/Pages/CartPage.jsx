@@ -3,10 +3,18 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import PageTitle from '../components/PageTitle';
-import KeyColorPicker from '../components/KeyColorPicker';
+import KeyColorSelect from '../components/KeyColorSelect';
 import { useKeyColors } from '../hooks/useKeyColors';
 
-function CartLine({ line, updateLine, removeLine, keyColors, t }) {
+function lineInvolvesKeys(line) {
+  return !!line.product?.is_extra_keys_available || !!line.pack?.contains_keys;
+}
+
+function lineCanChooseKeysAllSame(line) {
+  return !!line.pack?.contains_keys;
+}
+
+function CartLine({ line, updateLine, removeLine, keyColors, showKeyColorColumn, showKeysAllSameColumn, t }) {
   const isProduct = !!line.product;
   const isPack = !!line.pack;
   const packContainsKeys = !!line.pack?.contains_keys;
@@ -16,7 +24,7 @@ function CartLine({ line, updateLine, removeLine, keyColors, t }) {
   const imageUrl = line.product?.image_url ?? line.pack?.image_url ?? '/images/dummy.jpg';
   const isIncluded = line.is_included !== false;
   const isExtraKeysAvailable = !!line.product?.is_extra_keys_available;
-  const involvesKeys = isExtraKeysAvailable || packContainsKeys;
+  const involvesKeys = lineInvolvesKeys(line);
   const extraKeyUnitPrice = line.product?.extra_key_unit_price ?? null;
   const extraKeysQty = line.extra_keys_qty ?? 0;
   const features = line.product?.features ?? [];
@@ -85,17 +93,6 @@ function CartLine({ line, updateLine, removeLine, keyColors, t }) {
             </div>
           </Link>
         </div>
-        {involvesKeys && keyColors.length > 0 && (
-          <div className="mt-2 hidden sm:block pl-[4.5rem]">
-            <KeyColorPicker
-              compact
-              colors={keyColors}
-              value={line.key_color_id ?? null}
-              onChange={handleKeyColorChange}
-              name={`cart-line-${line.id}-key-color`}
-            />
-          </div>
-        )}
       </td>
       <td className="text-center align-middle whitespace-nowrap">{Number(line.unit_price).toFixed(2)} €</td>
       <td className="align-middle">
@@ -133,17 +130,31 @@ function CartLine({ line, updateLine, removeLine, keyColors, t }) {
           </div>
         ) : null}
       </td>
-      <td className="align-middle text-center">
-        <input
-          type="checkbox"
-          className="checkbox checkbox-sm checkbox-primary"
-          checked={keysAllSame}
-          onChange={handleKeysAllDifferentChange}
-          disabled={!canChooseKeysDifferent}
-          aria-label={t('shop.cart.keys_all_same')}
-          title={!canChooseKeysDifferent ? t('shop.cart.keys_all_same_only_packs') : undefined}
-        />
-      </td>
+      {showKeyColorColumn ? (
+        <td className="align-middle">
+          {involvesKeys && keyColors.length > 0 ? (
+            <KeyColorSelect
+              colors={keyColors}
+              value={line.key_color_id ?? null}
+              onChange={handleKeyColorChange}
+              name={`cart-line-${line.id}-key-color`}
+            />
+          ) : null}
+        </td>
+      ) : null}
+      {showKeysAllSameColumn ? (
+        <td className="align-middle text-center">
+          {canChooseKeysDifferent ? (
+            <input
+              type="checkbox"
+              className="checkbox checkbox-sm checkbox-primary"
+              checked={keysAllSame}
+              onChange={handleKeysAllDifferentChange}
+              aria-label={t('shop.cart.keys_all_same')}
+            />
+          ) : null}
+        </td>
+      ) : null}
       <td className="text-right font-medium align-middle whitespace-nowrap">{Number(line.line_total).toFixed(2)} €</td>
       <td className="align-middle text-center">
         <button
@@ -160,7 +171,7 @@ function CartLine({ line, updateLine, removeLine, keyColors, t }) {
 }
 
 /** Stacked layout for viewports below `md` — avoids wide table horizontal scroll. */
-function CartLineMobile({ line, updateLine, removeLine, keyColors, t }) {
+function CartLineMobile({ line, updateLine, removeLine, keyColors, showKeyColorColumn, showKeysAllSameColumn, t }) {
   const isProduct = !!line.product;
   const isPack = !!line.pack;
   const packContainsKeys = !!line.pack?.contains_keys;
@@ -170,7 +181,7 @@ function CartLineMobile({ line, updateLine, removeLine, keyColors, t }) {
   const imageUrl = line.product?.image_url ?? line.pack?.image_url ?? '/images/dummy.jpg';
   const isIncluded = line.is_included !== false;
   const isExtraKeysAvailable = !!line.product?.is_extra_keys_available;
-  const involvesKeys = isExtraKeysAvailable || packContainsKeys;
+  const involvesKeys = lineInvolvesKeys(line);
   const extraKeyUnitPrice = line.product?.extra_key_unit_price ?? null;
   const extraKeysQty = line.extra_keys_qty ?? 0;
   const features = line.product?.features ?? [];
@@ -249,17 +260,6 @@ function CartLineMobile({ line, updateLine, removeLine, keyColors, t }) {
           ) : null}
         </div>
       </Link>
-      {involvesKeys && keyColors.length > 0 && (
-        <div className="mb-3">
-          <KeyColorPicker
-            compact
-            colors={keyColors}
-            value={line.key_color_id ?? null}
-            onChange={handleKeyColorChange}
-            name={`cart-line-mobile-${line.id}-key-color`}
-          />
-        </div>
-      )}
       <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
         <dt className="text-base-content/70">{t('shop.price')}</dt>
         <dd className="text-end tabular-nums">{Number(line.unit_price).toFixed(2)} €</dd>
@@ -295,7 +295,20 @@ function CartLineMobile({ line, updateLine, removeLine, keyColors, t }) {
             </dd>
           </>
         ) : null}
-        {canChooseKeysDifferent || isPack ? (
+        {showKeyColorColumn && involvesKeys && keyColors.length > 0 ? (
+          <>
+            <dt className="min-w-0 text-base-content/70">{t('shop.cart.key_color')}</dt>
+            <dd className="flex justify-end">
+              <KeyColorSelect
+                colors={keyColors}
+                value={line.key_color_id ?? null}
+                onChange={handleKeyColorChange}
+                name={`cart-line-mobile-${line.id}-key-color`}
+              />
+            </dd>
+          </>
+        ) : null}
+        {showKeysAllSameColumn && canChooseKeysDifferent ? (
           <>
             <dt className="min-w-0 text-base-content/70">{t('shop.cart.keys_all_same')}</dt>
             <dd className="flex justify-end">
@@ -304,9 +317,7 @@ function CartLineMobile({ line, updateLine, removeLine, keyColors, t }) {
                 className="checkbox checkbox-sm checkbox-primary"
                 checked={keysAllSame}
                 onChange={handleKeysAllDifferentChange}
-                disabled={!canChooseKeysDifferent}
                 aria-label={t('shop.cart.keys_all_same')}
-                title={!canChooseKeysDifferent ? t('shop.cart.keys_all_same_only_packs') : undefined}
               />
             </dd>
           </>
@@ -334,6 +345,9 @@ export default function CartPage() {
   const installationTooltip = cart.installation_quote_required
     ? t('shop.cart.installation_quote_only_hint')
     : t('shop.cart.installation_tiers_hint');
+  const showKeyColorColumn =
+    keyColors.length > 0 && cart.lines?.some((line) => lineInvolvesKeys(line));
+  const showKeysAllSameColumn = cart.lines?.some((line) => lineCanChooseKeysAllSame(line));
 
   const onInstallationChange = async (e) => {
     const checked = e.target.checked;
@@ -410,6 +424,8 @@ export default function CartPage() {
               updateLine={updateLine}
               removeLine={removeLine}
               keyColors={keyColors}
+              showKeyColorColumn={showKeyColorColumn}
+              showKeysAllSameColumn={showKeysAllSameColumn}
               t={t}
             />
           ))}
@@ -423,9 +439,14 @@ export default function CartPage() {
                 <th className="whitespace-nowrap text-center">{t('shop.price')}</th>
                 <th className="whitespace-nowrap text-center">{t('shop.quantity')}</th>
                 <th className="whitespace-nowrap text-center">{t('shop.cart.extra_keys')}</th>
-                <th className="whitespace-nowrap text-center" title={t('shop.cart.keys_all_same_tooltip')}>
-                  {t('shop.cart.keys_all_same')}
-                </th>
+                {showKeyColorColumn ? (
+                  <th className="whitespace-nowrap text-center">{t('shop.cart.key_color')}</th>
+                ) : null}
+                {showKeysAllSameColumn ? (
+                  <th className="whitespace-nowrap text-center" title={t('shop.cart.keys_all_same_tooltip')}>
+                    {t('shop.cart.keys_all_same')}
+                  </th>
+                ) : null}
                 <th className="whitespace-nowrap text-right">{t('shop.total')}</th>
                 <th className="w-12 text-center" />
               </tr>
@@ -438,6 +459,8 @@ export default function CartPage() {
                   updateLine={updateLine}
                   removeLine={removeLine}
                   keyColors={keyColors}
+                  showKeyColorColumn={showKeyColorColumn}
+                  showKeysAllSameColumn={showKeysAllSameColumn}
                   t={t}
                 />
               ))}

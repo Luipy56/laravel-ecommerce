@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.399] - 2026-06-23
+
+### Fixed
+- **Cart key color (#52):** Replaced radio swatches under product names with a dedicated **Color llave** column using a compact `<select>`; **Llaves iguales** column only appears when a pack with keys is in the cart. Admin order key-color column label shortened to match.
+
 ## [0.1.398] - 2026-06-23
 
 ### Fixed

@@ -240,6 +240,7 @@
   "shop.cart.keys_all_same": "Keys alike",
   "shop.cart.keys_all_same_tooltip": "Select if you want all keys in the package to be exactly the same.",
   "shop.cart.keys_all_same_only_packs": "Only for packs with keys",
+  "shop.cart.key_color": "Key color",
   "shop.cart.line_image_alt": "Product or pack image: {{name}}",
   "shop.checkout": "Finalize order",
   "shop.orders": "Orders",

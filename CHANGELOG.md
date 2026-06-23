@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.386] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
 ## [0.1.385] - 2026-06-23
 
 ### Changed

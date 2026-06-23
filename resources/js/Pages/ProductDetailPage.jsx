@@ -12,6 +12,7 @@ import CatalogCardImage from '../components/CatalogCardImage';
 import ReviewsSection from '../components/ReviewsSection';
 import CartPreviewBar from '../components/CartPreviewBar';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 import KeyColorPicker from '../components/KeyColorPicker';
 import { useKeyColors } from '../hooks/useKeyColors';

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.378] - 2026-06-23
+
+### Fixed
+- **Product detail page (#50):** Added missing `useDocumentMeta` import in `ProductDetailPage.jsx` so `/products/{id}` renders instead of a client-side `ReferenceError`.
+
+### Added
+- **`StorefrontHookImportsTest`:** Static check that storefront pages import custom hooks (`useDocumentMeta`, etc.) when they call them, preventing repeat regressions.
+
 ## [0.1.377] - 2026-06-23
 
 ### Changed

@@ -94,6 +94,7 @@ Requires **`cursor-agent`** on PATH. GitHub: **`./scripts/setup-autoagents-gh.sh
 - **`CHANGELOG.md`** under **`## [X.Y.Z] - date`** matching **`package.json`** bump.
 - Patch bump: **`npm version patch --no-git-tag-version`** per **`.cursor/rules/commit-changelog-version.mdc`**.
 - Push **`autoagents`**; merge **`master`** only per branching table.
+- **001 watermarks** (`autoagents/001-gh-reviewer/time-of-last-review.txt` only): loop **does not commit or push** — local reviewer memory. Watermarks may ride along in the next real commit; they must not trigger their own push or semver bump.
 
 ---
 

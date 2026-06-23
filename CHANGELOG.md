@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.396] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 reviewer watermarks stay local — loop and committer skip commit/push for watermark-only diffs; stage CI ignores watermark path.
+
 ## [0.1.395] - 2026-06-23
 
 ### Changed

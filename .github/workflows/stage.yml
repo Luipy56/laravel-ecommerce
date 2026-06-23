@@ -7,6 +7,9 @@ name: Stage CI/CD
 on:
   push:
     branches: [autoagents]
+    paths-ignore:
+      # 001 idle reviewer watermarks must not trigger CI (loop keeps them local; safety net if pushed manually).
+      - "autoagents/001-gh-reviewer/time-of-last-review.txt"
 
 jobs:
   ci:

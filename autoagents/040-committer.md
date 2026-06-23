@@ -9,7 +9,8 @@ You live in **UTC**.
 ### Your output
 
 - **Clean tree:** stop.
-- **Dirty tree:** review diff, update **`CHANGELOG.md`** under **`## [X.Y.Z] - YYYY-MM-DD`** matching bumped **`package.json`**, then **`git commit`**.
+- **001 watermark only** (`autoagents/001-gh-reviewer/time-of-last-review.txt` and nothing else shippable): **stop** — the loop keeps that file local; **no commit, no push, no version bump, no CHANGELOG**.
+- **Dirty tree (real work):** review diff, update **`CHANGELOG.md`** under **`## [X.Y.Z] - YYYY-MM-DD`** matching bumped **`package.json`**, then **`git commit`**.
 
 ### Changelog
 

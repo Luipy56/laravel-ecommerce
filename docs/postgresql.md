@@ -40,6 +40,15 @@ php artisan migrate:fresh --seed
 
 Use `php artisan test` with the default SQLite testing configuration for CI-style checks.
 
+Before `php artisan migrate` on a long-lived PostgreSQL database (staging/production deploy), sync serial sequences so the `migrations` table and other tables do not hit duplicate primary-key errors after `migrate:fresh --seed` or manual imports:
+
+```bash
+php artisan db:sync-postgres-sequences
+php artisan migrate --force --no-interaction
+```
+
+Stage/prod deploy scripts and GitHub Actions run sequence sync automatically before migrate.
+
 After bulk raw SQL imports into `products`, run:
 
 ```bash

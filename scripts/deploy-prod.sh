@@ -7,5 +7,6 @@ git -C source fetch origin prod
 git -C source reset --hard origin/prod
 docker compose -f docker-compose.prod.yml build
 docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml exec -T app php artisan db:sync-postgres-sequences
 docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force --no-interaction
 echo "Prod deploy done: https://serra.ldeluipy.es"

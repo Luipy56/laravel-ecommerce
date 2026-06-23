@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.370] - 2026-06-23
+
+### Fixed
+- **Staging deploy migrate failure (#48):** `DatabaseSeeder` no longer resets `migrations_id_seq` after `migrate:fresh --seed`; new `php artisan db:sync-postgres-sequences` aligns PostgreSQL serial sequences before `migrate` on stage/prod deploy.
+
 ## [0.1.369] - 2026-06-23
 
 ### Changed

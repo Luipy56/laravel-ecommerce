@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Client;
 use App\Models\ClientConsent;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
 use Mockery;
@@ -89,8 +91,10 @@ class GoogleOAuthTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_google_login_sets_email_verified_at_when_provider_verifies_email(): void
+    public function test_google_registration_sends_verify_email_and_leaves_account_unverified(): void
     {
+        Notification::fake();
+
         $email = 'verify_google_'.uniqid('', true).'@ietf.org';
         $sub = 'google-sub-verify-'.uniqid('', true);
 
@@ -100,12 +104,14 @@ class GoogleOAuthTest extends TestCase
         $this->get('/auth/google/callback');
 
         $client = Client::query()->where('login_email', $email)->firstOrFail();
-        $this->assertNotNull($client->email_verified_at);
+        $this->assertNull($client->email_verified_at);
         $this->assertNull($client->password);
         $this->assertSame($sub, $client->google_sub);
         $this->assertTrue($client->contacts()->where('is_primary', true)->exists());
         $this->assertGreaterThanOrEqual(1, ClientConsent::query()->where('client_id', $client->id)->where('type', 'privacy_policy')->count());
         $this->assertAuthenticatedAs($client, 'web');
+
+        Notification::assertSentTo($client, VerifyEmail::class);
     }
 
     public function test_password_login_still_works_for_linked_account(): void

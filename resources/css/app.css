@@ -154,14 +154,28 @@ html, body {
   background: linear-gradient(135deg, #882200 0%, #fb5412 100%);
 }
 
-/* ----- Admin login: brand gradient background (#F75211 → #8B2400) ----- */
+/* ----- Admin login: brand gradient background (primary orange → secondary red) ----- */
 .bg-admin-login-animated {
-  background: linear-gradient(-45deg, #8b2400, #f75211, #d94a0f, #6b2a0a);
+  background: linear-gradient(
+    -45deg,
+    var(--color-primary),
+    var(--color-secondary),
+    var(--color-primary),
+    var(--color-secondary)
+  );
   background-size: 400% 400%;
   animation: gradient-admin-login 14s ease infinite;
   min-height: 100vh;
   position: relative;
   z-index: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-admin-login-animated {
+    animation: none;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    background-size: 100% 100%;
+  }
 }
 
 @keyframes gradient-admin-login {

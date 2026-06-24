@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.404] - 2026-06-24
+
+### Fixed
+- **Admin login gradient (#57):** Background uses theme `--color-primary` → `--color-secondary` (orange to dark red) instead of similar orange mid-tones; respects `prefers-reduced-motion`.
+
 ## [0.1.403] - 2026-06-24
 
 ### Fixed

@@ -18,7 +18,7 @@ class PackSeeder extends Seeder
                     'price' => 46.00,
                     'is_trending' => true,
                     'is_active' => true,
-                    'contains_keys' => false,
+                    'contains_keys' => true,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ],

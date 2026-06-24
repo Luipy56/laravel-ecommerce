@@ -17,6 +17,14 @@ export function scrollWindowToTopOnFormError() {
   });
 }
 
+/** Scroll a page section into view so inline validation feedback stays visible. */
+export function scrollFormSectionIntoView(sectionId) {
+  deferScroll(() => {
+    const el = typeof sectionId === 'string' ? document.getElementById(sectionId) : sectionId;
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
 /** Modal forms (daisyUI): scroll the open dialog content to the top so inline errors are visible. */
 export function scrollOpenModalBoxToTop() {
   deferScroll(() => {

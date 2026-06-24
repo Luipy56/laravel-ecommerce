@@ -55,6 +55,15 @@ function keysSameLabel(line, t) {
   return t('common.no');
 }
 
+function keyColorLabel(line, t) {
+  const name = line.key_color_name || line.key_color?.name;
+  if (name) return name;
+  if (line.key_color_rgb || line.key_color?.rgb_code) {
+    return line.key_color_rgb || line.key_color?.rgb_code;
+  }
+  return t('shop.product.key_color_none');
+}
+
 /** Pack lines have `pack_id` or nested `pack`; everything else is treated as product lines. */
 function partitionOrderLines(lines) {
   const list = lines || [];
@@ -84,6 +93,7 @@ function OrderLinesDesktopTable({ productLines, packLines, navigate, t }) {
             <th className="text-end">{t('admin.orders.line_unit_price')}</th>
             <th className="text-end">{t('admin.orders.line_extra_keys_price')}</th>
             <th className="text-center w-24 min-w-[6rem]">{t('admin.orders.keys_same')}</th>
+            <th className="text-center">{t('admin.orders.key_color')}</th>
             <th className="text-end">{t('admin.orders.line_total')}</th>
           </tr>
         </thead>
@@ -91,7 +101,7 @@ function OrderLinesDesktopTable({ productLines, packLines, navigate, t }) {
           {sections.map((section) => (
             <React.Fragment key={section.id}>
               <tr className="bg-base-200/90 hover:bg-base-200/90">
-                <td colSpan={7} className="font-semibold text-sm py-2.5">
+                <td colSpan={8} className="font-semibold text-sm py-2.5">
                   {t(section.titleKey)}
                 </td>
               </tr>
@@ -137,6 +147,20 @@ function OrderLinesDesktopTable({ productLines, packLines, navigate, t }) {
                     <td className="text-end tabular-nums">{line.unit_price != null ? `${Number(line.unit_price).toFixed(2)} €` : ''}</td>
                     <td className="text-end tabular-nums">{extraKeysTotal != null ? `${Number(extraKeysTotal).toFixed(2)} €` : ''}</td>
                     <td className="text-center w-24 min-w-[6rem]">{keysSameLabel(line, t)}</td>
+                    <td className="text-center">
+                      {(line.product?.is_extra_keys_available || line.pack?.contains_keys) ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          {(line.key_color_rgb || line.key_color?.rgb_code) && (
+                            <span
+                              className="inline-block w-4 h-4 rounded-full border border-base-300 shrink-0"
+                              style={{ backgroundColor: line.key_color_rgb || line.key_color?.rgb_code }}
+                              aria-hidden
+                            />
+                          )}
+                          <span className="text-sm">{keyColorLabel(line, t)}</span>
+                        </span>
+                      ) : ''}
+                    </td>
                     <td className="text-end font-medium tabular-nums">{line.line_total != null ? `${Number(line.line_total).toFixed(2)} €` : ''}</td>
                   </tr>
                 );

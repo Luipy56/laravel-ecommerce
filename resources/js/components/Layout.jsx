@@ -12,6 +12,7 @@ import CartWidget from './CartWidget';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import CookieConsentBanner from './CookieConsentBanner';
+import DemoPhaseModalLoader from './DemoPhaseModalLoader';
 import {
   IconCart,
   IconClipboardList,
@@ -48,6 +49,17 @@ function drawerNavClass(isActive) {
 
 function drawerIconClass(isActive) {
   return ['h-5 w-5 shrink-0', isActive ? 'text-primary-content' : 'text-primary'].join(' ');
+}
+
+function drawerOffersNavClass(isActive) {
+  return [
+    'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium shadow-md nav-offers-highlight transition-all duration-200',
+    isActive ? 'nav-offers-highlight--active' : '',
+  ].join(' ');
+}
+
+function drawerOffersIconClass() {
+  return 'h-5 w-5 shrink-0 text-white';
 }
 
 export default function Layout() {
@@ -112,6 +124,7 @@ export default function Layout() {
           <CartWidget />
           <ScrollToTop />
           <CookieConsentBanner />
+          <DemoPhaseModalLoader />
         </div>
       </StorefrontNavbarVisibilityProvider>
       <div className="drawer-side z-[60] lg:hidden">
@@ -186,10 +199,10 @@ export default function Layout() {
                 <Link
                   to="/products?offers_only=1"
                   onClick={closeStorefrontDrawer}
-                  className={drawerNavClass(offersOnlyActive)}
+                  className={drawerOffersNavClass(offersOnlyActive)}
                   aria-current={offersOnlyActive ? 'page' : undefined}
                 >
-                  <IconTag className={drawerIconClass(offersOnlyActive)} aria-hidden="true" />
+                  <IconTag className={drawerOffersIconClass()} aria-hidden="true" />
                   {t('shop.offers')}
                 </Link>
               </li>

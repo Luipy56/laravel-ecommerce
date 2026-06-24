@@ -86,7 +86,7 @@ export default function OrdersPage() {
                 {t('shop.order.tracker.view_order')}
               </Link>
             </div>
-            <OrderStatusTracker order={lastOrder} />
+            <OrderStatusTracker order={lastOrder} embedded />
           </div>
         </div>
       )}

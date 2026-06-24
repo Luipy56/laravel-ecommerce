@@ -151,3 +151,85 @@
 
 2026-06-06T08:29:09Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
 
+2026-06-06T08:34:48Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-06T08:40:22Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-06T08:46:03Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-06T08:51:36Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-06T08:57:17Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-06T09:02:55Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-22T13:58:26Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-22T14:01:26Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-22T17:43:20Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-22T17:48:28Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-22T17:59:59Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-22T18:05:39Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-22T18:11:15Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T18:56:19Z UTC | 001 cursor-agent | FEAT: 1 | NEW: 0 | Git sync OK (`autoagents`). Preflight digest **2026-06-23T18:55:44Z** (`G001_UNTRACKED_ISSUES=1`, `G001_LOG_SIGNALS=1`). GitHub: **4** open (**#44**–**#47**). **Dedupe:** **#45**, **#46**, **#47** — `FEAT-45-*`, `FEAT-46-*`, `FEAT-47-*` already in `autoagents/tasks/` + label **`agent:planned`** (created by **`issue_checker_agent.py`**) → skip. **#44** — no prior `FEAT-44-*` → created **`autoagents/tasks/FEAT-44-20260623-1856-admin-help-remove-action-select-always-va.md`** (**1** of max **3**). **`gh issue comment 44`** + **`gh issue edit 44 --add-label agent:planned`**. Log pass: `laravel.log` newest timestamps **`[2026-06-22 17:52–17:53]`** — `CSRF token mismatch` / Symfony route-smoke probe, **`google_oauth_callback_failed`** `session_expired`, burst **`sessions` does not exist** during smoke (env/migrations, not extended after **17:53**); no **`[2026-06-23 …]`** lines; Docker `nginx`/`queue` containers not present; same incident classes as prior reviews — not a new standing production incident. Active queue: **`FEAT-44-*`**, **`FEAT-45-*`**, **`FEAT-46-*`**, **`FEAT-47-*`**. **NEW=0**.
+
+2026-06-23T19:17:37Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T19:23:20Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T19:36:25Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T19:42:17Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T19:47:40Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T19:59:55Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:05:47Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:11:36Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:20:15Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:25:30Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:36:09Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:41:55Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:47:47Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:53:39Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T20:59:26Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:05:19Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:11:11Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:17:00Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:22:52Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:28:35Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:34:27Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:40:20Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:46:06Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:51:56Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T21:57:42Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T22:09:35Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+
+2026-06-23T22:15:25Z UTC | 001 local (no cursor-agent) | FEAT: 0 | NEW: 0 | G001_GH_OK=1 G001_UNTRACKED_ISSUES=0 G001_LOG_SIGNALS=1 | digest: /srv/serra/stage/source/autoagents/var/loop/001-latest-context.txt
+

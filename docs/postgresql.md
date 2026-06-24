@@ -40,6 +40,16 @@ php artisan migrate:fresh --seed
 
 Use `php artisan test` with the default SQLite testing configuration for CI-style checks.
 
+Before `php artisan migrate` on a long-lived PostgreSQL database (staging/production deploy), sync serial sequences so the `migrations` table and other tables do not hit duplicate primary-key errors after `migrate:fresh --seed` or manual imports:
+
+```bash
+php artisan db:sync-postgres-sequences
+php artisan db:reconcile-key-color-schema
+php artisan migrate --force --no-interaction
+```
+
+Stage/prod deploy scripts and GitHub Actions run sequence sync and key-color schema reconciliation automatically before migrate. The reconcile step is a no-op on fresh databases; on long-lived staging/production it records the `key_colors` migration when the table already exists and adds `key_color_translations` / `order_lines.key_color_*` columns when parent migrations ran before those edits landed.
+
 After bulk raw SQL imports into `products`, run:
 
 ```bash

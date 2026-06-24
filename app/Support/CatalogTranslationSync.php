@@ -8,6 +8,8 @@ use App\Models\Feature;
 use App\Models\FeatureName;
 use App\Models\FeatureTranslation;
 use App\Models\FeatureNameTranslation;
+use App\Models\KeyColor;
+use App\Models\KeyColorTranslation;
 use App\Models\Pack;
 use App\Models\PackTranslation;
 use App\Models\Product;
@@ -150,6 +152,32 @@ final class CatalogTranslationSync
             FeatureTranslation::query()->updateOrCreate(
                 ['feature_id' => $feature->id, 'locale' => $locale],
                 ['value' => $valueStr],
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, array{name?: mixed}>  $byLocale
+     */
+    public static function syncKeyColorTranslations(KeyColor $keyColor, array $byLocale): void
+    {
+        foreach (CatalogLocale::SUPPORTED as $locale) {
+            if (! isset($byLocale[$locale]) || ! is_array($byLocale[$locale])) {
+                continue;
+            }
+            $name = $byLocale[$locale]['name'] ?? null;
+            $nameStr = is_string($name) ? trim($name) : (is_numeric($name) ? (string) $name : null);
+            if ($nameStr === null || $nameStr === '') {
+                KeyColorTranslation::query()
+                    ->where('key_color_id', $keyColor->id)
+                    ->where('locale', $locale)
+                    ->delete();
+
+                continue;
+            }
+            KeyColorTranslation::query()->updateOrCreate(
+                ['key_color_id' => $keyColor->id, 'locale' => $locale],
+                ['name' => $nameStr],
             );
         }
     }

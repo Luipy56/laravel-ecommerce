@@ -5,6 +5,7 @@ namespace App\Services\Payments;
 use App\Events\OrderPaymentSucceeded;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Support\KeyColorSnapshot;
 use Illuminate\Support\Facades\DB;
 
 class PaymentCompletionService
@@ -31,6 +32,7 @@ class PaymentCompletionService
                     'order_date' => now(),
                     'status' => Order::STATUS_PENDING,
                 ]);
+                KeyColorSnapshot::freezeOnOrderLines($order->fresh(['lines.keyColor.translations']));
             }
 
             $locked->update(array_merge([

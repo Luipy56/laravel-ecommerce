@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Support\PostgresSequenceHelper;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         if (config('database.default') === 'pgsql') {
-            $this->resetPostgresSequences();
+            PostgresSequenceHelper::restartForSeeding();
         }
 
         $this->call([
@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             ShopSettingSeeder::class,
             ProductCategorySeeder::class,
             FeatureNameSeeder::class,
+            KeyColorSeeder::class,
             ProductSeeder::class,
             SearchDemoProductSeeder::class,
             ProductVariantGroupSeeder::class,
@@ -43,20 +44,4 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 
-    /**
-     * Reset all PostgreSQL auto-increment sequences to 1.
-     *
-     * RefreshDatabase uses transactions that rollback data but not sequences,
-     * so hardcoded FK IDs in seeders break on subsequent test runs.
-     */
-    private function resetPostgresSequences(): void
-    {
-        $sequences = DB::select(
-            "SELECT c.relname FROM pg_class c WHERE c.relkind = 'S'"
-        );
-
-        foreach ($sequences as $seq) {
-            DB::statement("ALTER SEQUENCE \"{$seq->relname}\" RESTART WITH 1");
-        }
-    }
 }

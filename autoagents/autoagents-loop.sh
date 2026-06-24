@@ -288,7 +288,8 @@ has_repo_uncommitted_changes() {
   ( cd "$REPO_ROOT" && { ! git diff --quiet 2>/dev/null || ! git diff --staged --quiet 2>/dev/null; } )
 }
 
-committer_paths_all_local_stamp_allowlist() {
+# True when the dirty tree is only 001 reviewer watermark / loop digest (no product work).
+is_watermark_only_worktree() {
   local f had=0
   while IFS= read -r f; do
     [[ -z "$f" ]] && continue
@@ -303,44 +304,6 @@ committer_paths_all_local_stamp_allowlist() {
     git ls-files --others --exclude-standard 2>/dev/null || true
   } | sort -u ) )
   ((had == 1))
-}
-
-committer_try_local_stamp_only() {
-  [[ "${AGENT_COMMITTER_LOCAL:-1}" == "0" ]] && return 1
-  local br
-  br=$(cd "$REPO_ROOT" && git rev-parse --abbrev-ref HEAD 2>/dev/null) || return 1
-  if [[ "$br" != "$GIT_BRANCH" ]]; then
-    echo "----- committer (local skip: repo not on ${GIT_BRANCH})" >&2
-    return 1
-  fi
-  if ! committer_paths_all_local_stamp_allowlist; then
-    return 1
-  fi
-  (
-    cd "$REPO_ROOT" || exit 1
-    git add -- autoagents/001-gh-reviewer/time-of-last-review.txt
-    if git diff --staged --quiet; then
-      exit 1
-    fi
-    git commit -m "chore(autoagents): update 001 reviewer stamp"
-    set +e
-    git pull --rebase --autostash origin "$GIT_BRANCH"
-    local prc=$?
-    set -e
-    if ((prc != 0)); then
-      echo "----- committer (local: git pull --rebase failed)" >&2
-      exit 1
-    fi
-    set +e
-    git push origin "$GIT_BRANCH"
-    local psh=$?
-    set -e
-    if ((psh != 0 )); then
-      echo "----- committer (local: git push failed)" >&2
-      exit 1
-    fi
-    exit 0
-  )
 }
 
 run_agent() {
@@ -535,17 +498,20 @@ step_committer() {
     echo "----- committer (skip: no uncommitted changes)"
     return 0
   fi
+  if is_watermark_only_worktree; then
+    echo "----- committer (skip: 001 watermark only — local memory, no commit/push)"
+    return 0
+  fi
   if ! sync_repo; then return 0; fi
   if ! has_repo_uncommitted_changes; then
     echo "----- committer (skip after sync: clean tree)"
     return 0
   fi
-  echo "-----> committer <----"
-
-  if [[ "${AGENT_COMMITTER_LOCAL:-1}" != "0" ]] && committer_try_local_stamp_only; then
-    echo "----- committer (local: stamp-only commit pushed)"
+  if is_watermark_only_worktree; then
+    echo "----- committer (skip after sync: 001 watermark only — local memory, no commit/push)"
     return 0
   fi
+  echo "-----> committer <----"
 
   if ! have_cursor_agent; then
     echo "----- committer (skip: cursor-agent not on PATH)"
@@ -607,6 +573,7 @@ Environment:
   AGENT_TASKDIR              Task queue directory (default: autoagents/tasks)
   AGENT_LOOP_SLEEP_MINUTES   Loop interval (default: 5)
   AGENT_COMMITTER_USE_CURSOR Set 1 to prefer full committer (default: 1 in .env.example)
+  001 watermarks in time-of-last-review.txt stay local; committer skips commit/push for those-only diffs
   GH_TOKEN                   GitHub API token (or autoagents/.env)
 
 See docs/agent-loop.md

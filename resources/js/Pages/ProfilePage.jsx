@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import PageTitle from '../components/PageTitle';
 import ConfirmModal from '../components/ConfirmModal';
 import DecryptionWarningBanner from '../components/admin/DecryptionWarningBanner';
-import { scrollOpenModalBoxToTop, scrollWindowToTopOnFormError } from '../lib/formScroll';
+import { scrollFormSectionIntoView, scrollOpenModalBoxToTop, scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { isEmailNotVerifiedError, profileMutationErrorMessage } from '../lib/apiErrors';
 import {
@@ -19,6 +19,22 @@ import {
 import FieldHint from '../components/FieldHint';
 
 const ADDRESS_TYPES = ['shipping', 'installation', 'other'];
+const PROFILE_PASSWORD_SECTION_ID = 'profile-password-section';
+
+function mapPasswordApiFieldErrors(apiErrors) {
+  if (!apiErrors || typeof apiErrors !== 'object') {
+    return {};
+  }
+  const next = {};
+  for (const key of ['password', 'password_confirmation']) {
+    const messages = apiErrors[key];
+    const first = Array.isArray(messages) ? messages[0] : messages;
+    if (typeof first === 'string' && first.trim()) {
+      next[key] = first.trim();
+    }
+  }
+  return next;
+}
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -41,6 +57,7 @@ export default function ProfilePage() {
   const [passwordForm, setPasswordForm] = useState({ password: '', password_confirmation: '' });
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordFieldErrors, setPasswordFieldErrors] = useState({});
+  const [passwordValidationError, setPasswordValidationError] = useState('');
 
   // Address modal: null = closed, {} = create, { id, ... } = edit
   const [addressModal, setAddressModal] = useState(null);
@@ -171,6 +188,7 @@ export default function ProfilePage() {
   const handlePasswordChange = (e) => {
     const { name } = e.target;
     setPasswordSubmitBanner(null);
+    setPasswordValidationError('');
     setPasswordForm((f) => ({ ...f, [name]: e.target.value }));
     if (passwordFieldErrors[name]) {
       setPasswordFieldErrors((fe) => {
@@ -185,10 +203,12 @@ export default function ProfilePage() {
     e.preventDefault();
     setPasswordFieldErrors({});
     setPasswordSubmitBanner(null);
+    setPasswordValidationError('');
     const parsed = parseWithZod(profilePasswordSchema, passwordForm, t);
     if (!parsed.ok) {
       setPasswordFieldErrors(parsed.fieldErrors);
-      scrollWindowToTopOnFormError();
+      setPasswordValidationError(parsed.firstError);
+      scrollFormSectionIntoView(PROFILE_PASSWORD_SECTION_ID);
       return;
     }
     setPasswordSaving(true);
@@ -202,13 +222,20 @@ export default function ProfilePage() {
       });
       setPasswordForm({ password: '', password_confirmation: '' });
       setPasswordSubmitBanner(null);
+      setPasswordValidationError('');
       setSaved(true);
     } catch (err) {
-      setPasswordSubmitBanner({
-        message: profileMutationErrorMessage(err, t),
-        verifyLink: isEmailNotVerifiedError(err),
-      });
-      scrollWindowToTopOnFormError();
+      const apiFieldErrors = mapPasswordApiFieldErrors(err?.response?.data?.errors);
+      if (Object.keys(apiFieldErrors).length > 0) {
+        setPasswordFieldErrors(apiFieldErrors);
+        setPasswordValidationError(Object.values(apiFieldErrors)[0]);
+      } else {
+        setPasswordSubmitBanner({
+          message: profileMutationErrorMessage(err, t),
+          verifyLink: isEmailNotVerifiedError(err),
+        });
+      }
+      scrollFormSectionIntoView(PROFILE_PASSWORD_SECTION_ID);
     } finally {
       setPasswordSaving(false);
     }
@@ -629,9 +656,14 @@ export default function ProfilePage() {
       </section>
 
       {/* Change password */}
-      <section className="card min-w-0 max-w-full bg-base-100 shadow">
+      <section id={PROFILE_PASSWORD_SECTION_ID} className="card min-w-0 max-w-full bg-base-100 shadow">
         <div className="card-body min-w-0 max-w-full">
           <h2 className="card-title text-lg">{t('profile.change_password')}</h2>
+          {passwordValidationError ? (
+            <div role="alert" className="alert alert-error text-sm">
+              {passwordValidationError}
+            </div>
+          ) : null}
           {mutationBanner(passwordSubmitBanner)}
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <input

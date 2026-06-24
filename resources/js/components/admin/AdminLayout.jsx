@@ -15,6 +15,7 @@ const SECTION_NAV_KEYS = {
   categories: 'admin.nav.categories',
   products: 'admin.nav.products',
   'variant-groups': 'admin.nav.variant_groups',
+  'key-colors': 'admin.nav.key_colors',
   clients: 'admin.nav.clients',
   orders: 'admin.nav.orders',
   'personalized-solutions': 'admin.nav.personalized_solutions',
@@ -35,6 +36,7 @@ const SECTION_NEW_KEYS = {
   'feature-names': 'admin.feature_types.new',
   packs: 'admin.packs.new',
   'variant-groups': 'admin.variant_groups.new',
+  'key-colors': 'admin.key_colors.new',
 };
 
 function getBreadcrumbs(pathname, t) {
@@ -140,6 +142,7 @@ export default function AdminLayout() {
       { to: '/admin/categories', labelKey: 'admin.nav.categories', alertKey: null },
       { to: '/admin/clients', labelKey: 'admin.nav.clients', alertKey: null },
       { to: '/admin/features', labelKey: 'admin.nav.features', alertKey: null },
+      { to: '/admin/key-colors', labelKey: 'admin.nav.key_colors', alertKey: null },
       { to: '/admin/packs', labelKey: 'admin.nav.packs', alertKey: null },
       { to: '/admin/products', labelKey: 'admin.nav.products', alertKey: null },
       { to: '/admin/variant-groups', labelKey: 'admin.nav.variant_groups', alertKey: null },

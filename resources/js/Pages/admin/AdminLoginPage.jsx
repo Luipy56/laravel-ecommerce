@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import { scrollWindowToTopOnFormError } from '../../lib/formScroll';
+import { ADMIN_AUTO_LOGIN_ENABLED } from '../../config/adminLogin';
 import { adminLoginSchema, parseWithZod } from '../../validation';
 
 export default function AdminLoginPage() {
@@ -97,17 +98,19 @@ export default function AdminLoginPage() {
                 />
                 {fieldErrors.password ? <p className="validator-hint text-error">{fieldErrors.password}</p> : null}
               </label>
-              <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+              <button type="submit" className="btn btn-brand-gradient w-full" disabled={loading}>
                 {loading ? t('common.loading') : t('admin.login.submit')}
               </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm w-full text-base-content/60"
-                onClick={handleAutoLogin}
-                disabled={loading}
-              >
-                Auto login (admin / admin)
-              </button>
+              {ADMIN_AUTO_LOGIN_ENABLED ? (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm w-full text-base-content/60"
+                  onClick={handleAutoLogin}
+                  disabled={loading}
+                >
+                  {t('admin.login.auto_login')}
+                </button>
+              ) : null}
             </form>
           </div>
         </div>

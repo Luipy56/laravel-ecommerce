@@ -10,6 +10,7 @@ use App\Models\ShopSetting;
 use App\Support\InstallationAutoPricing;
 use App\Models\Pack;
 use App\Models\Product;
+use App\Models\KeyColor;
 use App\Services\Payments\PaymentCompletionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -68,7 +69,7 @@ class CartController extends Controller
         $cart = Order::query()
             ->where('client_id', $client->id)
             ->where('kind', Order::KIND_CART)
-            ->with(['lines.product.images', 'lines.product.features.featureName', 'lines.pack.images', 'payments'])
+            ->with(['lines.product.images', 'lines.product.features.featureName', 'lines.pack.images', 'lines.keyColor.translations', 'payments'])
             ->first();
         $lines = $cart ? $this->formatLines($cart->lines) : [];
         $total = $cart ? $cart->lines->sum(fn ($l) => $l->line_total) : 0;
@@ -140,6 +141,7 @@ class CartController extends Controller
                         'line_total' => $lineTotal,
                         'is_included' => $included,
                         'keys_all_same' => false,
+                        'key_color_id' => isset($item['key_color_id']) ? (int) $item['key_color_id'] : null,
                     ];
                 }
             } elseif ($item['pack_id'] ?? null) {
@@ -159,6 +161,7 @@ class CartController extends Controller
                         'line_total' => $lineTotal,
                         'is_included' => $included,
                         'keys_all_same' => (bool) ($item['keys_all_same'] ?? false),
+                        'key_color_id' => isset($item['key_color_id']) ? (int) $item['key_color_id'] : null,
                     ];
                 }
             }
@@ -246,12 +249,23 @@ class CartController extends Controller
             'product_id' => ['nullable', 'integer', 'exists:products,id'],
             'pack_id' => ['nullable', 'integer', 'exists:packs,id'],
             'quantity' => ['required', 'integer', 'min:1', 'max:99'],
+            'key_color_id' => ['nullable', 'integer', 'exists:key_colors,id'],
+            'extra_keys_qty' => ['sometimes', 'integer', 'min:0', 'max:99'],
         ]);
         if (($validated['product_id'] ?? null) && ($validated['pack_id'] ?? null)) {
             return response()->json(['success' => false, 'message' => 'Specify product_id or pack_id, not both.'], 422);
         }
         if (! ($validated['product_id'] ?? $validated['pack_id'] ?? null)) {
             return response()->json(['success' => false, 'message' => 'Specify product_id or pack_id.'], 422);
+        }
+
+        $product = ($validated['product_id'] ?? null) ? Product::find($validated['product_id']) : null;
+        $pack = ($validated['pack_id'] ?? null) ? Pack::find($validated['pack_id']) : null;
+        if ($error = $this->validateKeyColorForLine($product, $pack, $validated['key_color_id'] ?? null)) {
+            return $error;
+        }
+        if ($error = $this->validateExtraKeysForLine($product, $pack, $validated['extra_keys_qty'] ?? 0)) {
+            return $error;
         }
 
         if ($request->user()) {
@@ -275,23 +289,39 @@ class CartController extends Controller
         $productId = $validated['product_id'] ?? null;
         $packId = $validated['pack_id'] ?? null;
         $quantity = (int) $validated['quantity'];
+        $keyColorId = array_key_exists('key_color_id', $validated) ? $validated['key_color_id'] : null;
+        $extraKeysQty = (int) ($validated['extra_keys_qty'] ?? 0);
+        $product = $productId ? Product::find($productId) : null;
 
         $existing = $cart->lines()->where('product_id', $productId)->where('pack_id', $packId)->first();
         if ($existing) {
-            $existing->update(['quantity' => $existing->quantity + $quantity]);
+            $updates = ['quantity' => $existing->quantity + $quantity];
+            if ($keyColorId !== null || $this->lineInvolvesKeys($existing->product, $existing->pack)) {
+                $updates['key_color_id'] = $keyColorId;
+            }
+            if (array_key_exists('extra_keys_qty', $validated)) {
+                $updates['extra_keys_qty'] = $extraKeysQty;
+                $updates['extra_key_unit_price'] = $existing->product?->is_extra_keys_available
+                    ? $existing->product->extra_key_unit_price
+                    : null;
+            }
+            $existing->update($updates);
             $line = $existing;
         } else {
-            $unitPrice = $productId ? Product::find($productId)?->effectivePrice() : Pack::find($packId)?->price;
+            $unitPrice = $productId ? $product?->effectivePrice() : Pack::find($packId)?->price;
             $line = $cart->lines()->create([
                 'product_id' => $productId,
                 'pack_id' => $packId,
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
                 'is_included' => true,
+                'key_color_id' => $keyColorId,
+                'extra_keys_qty' => $extraKeysQty,
+                'extra_key_unit_price' => $product?->is_extra_keys_available ? $product->extra_key_unit_price : null,
             ]);
         }
 
-        $cart->load(['lines.product.images', 'lines.product.features.featureName', 'lines.pack', 'payments']);
+        $cart->load(['lines.product.images', 'lines.product.features.featureName', 'lines.pack', 'lines.keyColor.translations', 'payments']);
         $lines = $this->formatLines($cart->lines);
         $total = $cart->lines->sum(fn ($l) => $l->line_total);
         $installationRequested = (bool) $cart->installation_requested;
@@ -328,7 +358,14 @@ class CartController extends Controller
             'included' => true,
             'extra_keys_qty' => 0,
             'keys_all_same' => false,
+            'key_color_id' => null,
         ];
+        if (array_key_exists('key_color_id', $validated)) {
+            $current['key_color_id'] = $validated['key_color_id'];
+        }
+        if (array_key_exists('extra_keys_qty', $validated)) {
+            $current['extra_keys_qty'] = (int) $validated['extra_keys_qty'];
+        }
         $current['quantity'] = ($current['quantity'] ?? 0) + (int) $validated['quantity'];
         $current['included'] = $current['included'] ?? true;
         $lines[$key] = $current;
@@ -344,6 +381,7 @@ class CartController extends Controller
             'included' => ['sometimes', 'boolean'],
             'extra_keys_qty' => ['sometimes', 'integer', 'min:0', 'max:99'],
             'keys_all_same' => ['sometimes', 'boolean'],
+            'key_color_id' => ['nullable', 'integer', 'exists:key_colors,id'],
         ]);
         $quantity = (int) $validated['quantity'];
 
@@ -354,6 +392,11 @@ class CartController extends Controller
             }
             if ($locked = $this->jsonIfCartPspLocked($orderLine->order)) {
                 return $locked;
+            }
+            if (array_key_exists('key_color_id', $validated)) {
+                if ($error = $this->validateKeyColorForLine($orderLine->product, $orderLine->pack, $validated['key_color_id'])) {
+                    return $error;
+                }
             }
             if ($quantity === 0) {
                 $orderLine->delete();
@@ -370,6 +413,9 @@ class CartController extends Controller
                 }
                 if (array_key_exists('keys_all_same', $validated) && $orderLine->pack_id && $orderLine->pack?->contains_keys) {
                     $updates['keys_all_same'] = $validated['keys_all_same'];
+                }
+                if (array_key_exists('key_color_id', $validated) && $this->lineInvolvesKeys($orderLine->product, $orderLine->pack)) {
+                    $updates['key_color_id'] = $validated['key_color_id'];
                 }
                 $orderLine->update($updates);
             }
@@ -394,6 +440,9 @@ class CartController extends Controller
             }
             if (array_key_exists('keys_all_same', $validated) && ! empty($lines[$line]['pack_id'])) {
                 $lines[$line]['keys_all_same'] = $validated['keys_all_same'];
+            }
+            if (array_key_exists('key_color_id', $validated)) {
+                $lines[$line]['key_color_id'] = $validated['key_color_id'];
             }
         }
         $session->put(self::SESSION_CART_KEY, $lines);
@@ -461,6 +510,9 @@ class CartController extends Controller
                 if (isset($item['keys_all_same']) && $existing->pack_id && $existing->pack?->contains_keys) {
                     $updates['keys_all_same'] = (bool) $item['keys_all_same'];
                 }
+                if (array_key_exists('key_color_id', $item)) {
+                    $updates['key_color_id'] = $item['key_color_id'];
+                }
                 $existing->update($updates);
             } else {
                 $unitPrice = $productId ? Product::find($productId)?->effectivePrice() : Pack::find($packId)?->price;
@@ -477,6 +529,7 @@ class CartController extends Controller
                     'extra_keys_qty' => $extraKeysQty,
                     'extra_key_unit_price' => $extraKeyUnitPrice,
                     'keys_all_same' => $keysAllSame,
+                    'key_color_id' => $item['key_color_id'] ?? null,
                 ]);
             }
         }
@@ -515,6 +568,75 @@ class CartController extends Controller
             'line_total' => (float) $line->line_total,
             'is_included' => (bool) ($line->is_included ?? true),
             'keys_all_same' => (bool) ($line->keys_all_same ?? false),
+            'key_color_id' => $line->key_color_id,
+            'key_color_rgb' => $line->key_color_rgb,
+            'key_color_name' => $line->key_color_name,
+            'key_color' => $this->formatKeyColorForLine($line),
         ];
+    }
+
+    /** @return array{id: int, rgb_code: string, name: string|null}|null */
+    private function formatKeyColorForLine(OrderLine $line): ?array
+    {
+        if ($line->key_color_rgb && $line->key_color_name) {
+            return [
+                'id' => $line->key_color_id,
+                'rgb_code' => $line->key_color_rgb,
+                'name' => $line->key_color_name,
+            ];
+        }
+        $color = $line->relationLoaded('keyColor') ? $line->keyColor : null;
+        if (! $color && $line->key_color_id) {
+            $color = KeyColor::query()->with('translations')->find($line->key_color_id);
+        }
+        if (! $color) {
+            return null;
+        }
+
+        return [
+            'id' => $color->id,
+            'rgb_code' => $color->rgb_code,
+            'name' => $color->name,
+        ];
+    }
+
+    private function lineInvolvesKeys(?Product $product, ?Pack $pack): bool
+    {
+        if ($product) {
+            return (bool) $product->is_extra_keys_available;
+        }
+        if ($pack) {
+            return (bool) $pack->contains_keys;
+        }
+
+        return false;
+    }
+
+    private function validateKeyColorForLine(?Product $product, ?Pack $pack, mixed $keyColorId): ?JsonResponse
+    {
+        if ($keyColorId === null || $keyColorId === '') {
+            return null;
+        }
+        if (! $this->lineInvolvesKeys($product, $pack)) {
+            return response()->json(['success' => false, 'message' => 'Key color is not applicable to this item.'], 422);
+        }
+        $active = KeyColor::query()->active()->whereKey($keyColorId)->exists();
+        if (! $active) {
+            return response()->json(['success' => false, 'message' => 'Key color is not available.'], 422);
+        }
+
+        return null;
+    }
+
+    private function validateExtraKeysForLine(?Product $product, ?Pack $pack, int $extraKeysQty): ?JsonResponse
+    {
+        if ($extraKeysQty === 0) {
+            return null;
+        }
+        if (! $product?->is_extra_keys_available) {
+            return response()->json(['success' => false, 'message' => 'Extra keys are not available for this item.'], 422);
+        }
+
+        return null;
     }
 }

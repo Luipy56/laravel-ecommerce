@@ -9,19 +9,14 @@ const STAGE_URL = 'https://stage-serra.ldeluipy.es';
 const COMMENT_MAX = 4000;
 const TITLE_MAX = 200;
 
-const LABEL_TO_STAGING = 'to-staging';
-const LABEL_HUMAN_VALIDATION = 'waiting for human validation';
-
 export default function AdminHelpPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [comment, setComment] = useState('');
-  const [label, setLabel] = useState(LABEL_HUMAN_VALIDATION);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const [submittedLabel, setSubmittedLabel] = useState(LABEL_HUMAN_VALIDATION);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -38,7 +33,6 @@ export default function AdminHelpPage() {
     try {
       const payload = {
         comment: trimmedComment,
-        label,
       };
       const trimmedTitle = title.trim();
       if (trimmedTitle) {
@@ -47,10 +41,8 @@ export default function AdminHelpPage() {
 
       const { data } = await api.post('admin/help-requests', payload);
       if (data.success) {
-        setSubmittedLabel(label);
         setTitle('');
         setComment('');
-        setLabel(LABEL_HUMAN_VALIDATION);
         setSuccessModalOpen(true);
       } else {
         setError(t('admin.help.error'));
@@ -77,8 +69,6 @@ export default function AdminHelpPage() {
     </a>
   );
 
-  const isToStaging = submittedLabel === LABEL_TO_STAGING;
-
   return (
     <div className="space-y-6">
       <PageTitle>{t('admin.help.title')}</PageTitle>
@@ -94,19 +84,6 @@ export default function AdminHelpPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <label className="form-control w-full">
-              <span className="label-text mb-1">{t('admin.help.label_field')}</span>
-              <select
-                className="select select-bordered select-sm sm:select-md w-full"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                disabled={loading}
-              >
-                <option value={LABEL_TO_STAGING}>{t('admin.help.label_to_staging')}</option>
-                <option value={LABEL_HUMAN_VALIDATION}>{t('admin.help.label_human_validation')}</option>
-              </select>
-            </label>
-
             <label className="form-control w-full">
               <span className="label-text mb-1">{t('admin.help.title_optional')}</span>
               <input
@@ -160,17 +137,8 @@ export default function AdminHelpPage() {
               {t('admin.help.modal_title')}
             </h3>
             <p className="text-sm text-base-content/80">
-              {isToStaging ? (
-                <>
-                  {t('admin.help.modal_to_staging_before')} {stageLink}
-                  {t('admin.help.modal_to_staging_after')}
-                </>
-              ) : (
-                <>
-                  {t('admin.help.modal_validation_before')} {stageLink}
-                  {t('admin.help.modal_validation_after')}
-                </>
-              )}
+              {t('admin.help.modal_validation_before')} {stageLink}
+              {t('admin.help.modal_validation_after')}
             </p>
             <div className="modal-action">
               <button

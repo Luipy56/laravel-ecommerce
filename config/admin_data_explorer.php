@@ -47,6 +47,7 @@ return [
             'columns' => [
                 'id', 'order_id', 'product_id', 'pack_id', 'quantity', 'unit_price',
                 'offer', 'keys_all_same', 'extra_keys_qty', 'extra_key_unit_price',
+                'key_color_id', 'key_color_rgb', 'key_color_name',
                 'is_included', 'created_at', 'updated_at',
             ],
             'search_columns' => [],

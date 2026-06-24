@@ -243,7 +243,7 @@ export default function Navbar() {
               />
               <button
                 type="submit"
-                className="btn btn-primary join-item btn-sm btn-square shrink-0"
+                className="btn btn-brand-gradient join-item btn-sm btn-square shrink-0"
                 aria-label={t('common.search')}
               >
                 <IconSearch className="h-5 w-5" aria-hidden="true" />
@@ -272,7 +272,8 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/products?offers_only=1"
-                className={`btn btn-ghost btn-sm shrink-0${offersNavActive ? ' btn-active' : ''}`}
+                className={`btn btn-sm shrink-0 nav-offers-highlight${offersNavActive ? ' nav-offers-highlight--active' : ''}`}
+                aria-current={offersNavActive ? 'page' : undefined}
               >
                 {t('shop.offers')}
               </Link>
@@ -501,7 +502,7 @@ export default function Navbar() {
             />
             <button
               type="submit"
-              className="btn btn-primary btn-sm btn-square shrink-0"
+              className="btn btn-brand-gradient btn-sm btn-square shrink-0"
               aria-label={t('common.search')}
             >
               <IconSearch className="h-5 w-5" aria-hidden="true" />

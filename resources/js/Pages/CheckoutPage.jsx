@@ -572,7 +572,7 @@ export default function CheckoutPage() {
             </div>
             <button
               type="submit"
-              className="btn btn-primary shrink-0"
+              className="btn btn-brand-gradient shrink-0"
               disabled={
                 loading ||
                 !!activeCheckout?.paypal ||

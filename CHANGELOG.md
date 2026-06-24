@@ -1,5 +1,292 @@
 # Changelog
 
+## [0.1.413] - 2026-06-24
+
+### Changed
+- **Order progress tracker:** Custom animated stepper replaces daisyUI steps — brand-gradient fill on mount, done/active/pending states, checkmarks on completed steps, horizontal layout on desktop and vertical timeline on mobile; respects `prefers-reduced-motion`.
+- **Admin login:** Submit button uses `.btn-brand-gradient` to match storefront CTAs.
+
+## [0.1.411] - 2026-06-24
+
+### Changed
+- **Storefront CTAs:** Cart checkout, checkout submit, and navbar search buttons use the brand gradient (`#F75211` → `#8B2400`) via shared `.btn-brand-gradient`.
+- **Order tracker:** Completed steps show the brand gradient on circles and connectors instead of flat primary orange.
+- **Home hero:** “See products” button uses the same brand gradient and hover as other primary CTAs.
+
+### Fixed
+- **Admin dashboard charts:** Legend labels use theme-aware `text-base-content`; chart colors read CSS variables from the admin `data-theme` drawer so dark mode text is readable.
+
+## [0.1.405] - 2026-06-24
+
+### Fixed
+- **Profile change password:** Mismatch and other validation errors now show an alert and inline hints in the password card; the page scrolls to that section instead of jumping to the top with no feedback.
+
+## [0.1.404] - 2026-06-24
+
+### Fixed
+- **Admin login gradient (#57):** Background uses theme `--color-primary` → `--color-secondary` (orange to dark red) instead of similar orange mid-tones; respects `prefers-reduced-motion`.
+
+## [0.1.403] - 2026-06-24
+
+### Fixed
+- **Cart key color picker (#56):** Color menu opens on swatch click (fixed positioning near trigger), closes on selection or outside click; trigger shows swatch only without color name text.
+
+## [0.1.402] - 2026-06-24
+
+### Changed
+- **Product detail key color (#55):** **Color de la llave** is its own collapsible block on `/products/:id`, separate from **Duplicado de llave disponible**; duplicate-key block adds an extra-keys quantity input and passes `extra_keys_qty` when adding to cart.
+
+## [0.1.401] - 2026-06-24
+
+### Fixed
+- **Cart extra keys column (#54):** **Llaves extra** table column (desktop header and cells, mobile rows) is hidden when no cart line has `is_extra_keys_available`.
+
+## [0.1.400] - 2026-06-24
+
+### Changed
+- **Cart key color (#53):** Cart key-color control shows a color swatch trigger (selected color or “none”) and opens a popover list with small swatches plus labels instead of a plain text `<select>`.
+
+## [0.1.399] - 2026-06-23
+
+### Fixed
+- **Cart key color (#52):** Replaced radio swatches under product names with a dedicated **Color llave** column using a compact `<select>`; **Llaves iguales** column only appears when a pack with keys is in the cart. Admin order key-color column label shortened to match.
+
+## [0.1.398] - 2026-06-23
+
+### Fixed
+- **Admin key colors list (#51):** `/admin/key-colors` table wrapped in opaque card (same pattern as clients/products) so zebra rows and color swatches render on solid background instead of the admin backdrop.
+
+## [0.1.397] - 2026-06-23
+
+### Fixed
+- **CI/CD:** Stage deploy removes stale hash-prefixed Docker containers before `compose up` to avoid scheduler name conflicts; workflow delegates to `scripts/deploy-stage.sh`.
+
+## [0.1.396] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 reviewer watermarks stay local — loop and committer skip commit/push for watermark-only diffs; stage CI ignores watermark path.
+
+## [0.1.395] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.394] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.393] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.392] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.391] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.390] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.389] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.388] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.387] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.386] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.385] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.384] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.383] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.382] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.381] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.380] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.379] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.378] - 2026-06-23
+
+### Fixed
+- **Product detail page (#50):** Added missing `useDocumentMeta` import in `ProductDetailPage.jsx` so `/products/{id}` renders instead of a client-side `ReferenceError`.
+
+### Added
+- **`StorefrontHookImportsTest`:** Static check that storefront pages import custom hooks (`useDocumentMeta`, etc.) when they call them, preventing repeat regressions.
+
+## [0.1.377] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.376] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.375] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.374] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.373] - 2026-06-23
+
+### Fixed
+- **Staging deploy migrate failure (#49):** New `php artisan db:reconcile-key-color-schema` records the `key_colors` migration when the table already exists and adds missing `key_color_translations` / `order_lines.key_color_*` columns on long-lived databases; stage/prod deploy runs it before `migrate`.
+
+## [0.1.372] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.371] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.370] - 2026-06-23
+
+### Fixed
+- **Staging deploy migrate failure (#48):** `DatabaseSeeder` no longer resets `migrations_id_seq` after `migrate:fresh --seed`; new `php artisan db:sync-postgres-sequences` aligns PostgreSQL serial sequences before `migrate` on stage/prod deploy.
+
+## [0.1.369] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.368] - 2026-06-23
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.367] - 2026-06-23
+
+### Added
+- **Key color for products/packs with keys (#47):** Global `key_colors` catalog with ca/es/en translations; optional shopper choice (including “None”) on product/pack detail and cart; snapshots on order lines at checkout; admin CRUD at `/admin/key-colors`; seeded demo colors and first pack with `contains_keys`.
+
+## [0.1.366] - 2026-06-23
+
+### Added
+- **Storefront demo modal (#46):** First-visit modal on the public storefront (not `/admin`) when `isDEMO=true`, warning the site is in development; modal code loads only when the flag is enabled; dismissal persisted in `localStorage` (`serra-demo-phase-seen`).
+
+## [0.1.365] - 2026-06-23
+
+### Changed
+- **Admin login (#45):** "Auto login" button on `/admin/login` only when `ADMINAUTOLOGIN=true`; login background uses brand gradient (#F75211 → #8B2400).
+
+## [0.1.364] - 2026-06-23
+
+### Changed
+- **Admin Help (#44):** Removed Action select from `/admin/help`; all submissions use the human-validation workflow. API ignores client `label` and always stores `waiting for human validation`.
+
+## [0.1.363] - 2026-06-22
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.362] - 2026-06-22
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.361] - 2026-06-22
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.360] - 2026-06-22
+
+### Changed
+- **Storefront navbar:** Ofertas link uses the brand gradient (`#F75211` → `#8B2400`) on desktop and mobile drawer so offers stand out from other nav items (#43).
+
+### Fixed
+- **autoagents:** `gh-bootstrap-agent-labels.sh` uses `-q` instead of `--jq` for `gh label list`.
+
+## [0.1.359] - 2026-06-22
+
+### Changed
+- **Footer:** Updated storefront contact address to Ignasi Barraquer I Barraquer 15, 08310 Argentona (i18n keys `footer.address_line1` / `footer.address_line2`).
+
+## [0.1.358] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.357] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.356] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.355] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.354] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
+## [0.1.353] - 2026-06-06
+
+### Changed
+- **autoagents:** 001 GitHub reviewer watermark — local pass (no cursor-agent); **G001_UNTRACKED_ISSUES=0**; **NEW=0**.
+
 ## [0.1.352] - 2026-06-06
 
 ### Changed

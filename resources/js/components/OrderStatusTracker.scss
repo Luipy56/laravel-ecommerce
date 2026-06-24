@@ -1,0 +1,280 @@
+// Order progress stepper — brand gradient, mount animation, accessible states.
+
+.order-tracker {
+  --order-tracker-marker: 2.25rem;
+  --order-tracker-brand-from: #f75211;
+  --order-tracker-brand-to: #8b2400;
+  --order-tracker-brand-glow: rgb(247 82 17 / 35%);
+
+  position: relative;
+  min-width: min(100%, 36rem);
+  margin-inline: auto;
+  padding-block: 0.35rem 0.15rem;
+}
+
+.order-tracker__rail {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.order-tracker__rail-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-base-300) 90%, var(--color-base-100));
+}
+
+.order-tracker__rail-fill {
+  position: absolute;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--order-tracker-brand-from), var(--order-tracker-brand-to));
+  box-shadow: 0 0 14px var(--order-tracker-brand-glow);
+}
+
+.order-tracker--ready .order-tracker__rail-fill {
+  animation: order-tracker-fill-x 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.1s;
+}
+
+.order-tracker__steps {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-tracker__step {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.order-tracker--ready .order-tracker__step {
+  animation: order-tracker-step-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--order-tracker-step-delay, 0s);
+}
+
+.order-tracker__marker {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--order-tracker-marker);
+  height: var(--order-tracker-marker);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+
+.order-tracker__check {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.order-tracker__step--pending .order-tracker__marker {
+  background: var(--color-base-100);
+  border: 2px solid color-mix(in oklab, var(--color-base-300) 95%, var(--color-base-content));
+  color: color-mix(in oklab, var(--color-base-content) 42%, transparent);
+}
+
+.order-tracker__step--done .order-tracker__marker {
+  border: none;
+  background: linear-gradient(135deg, var(--order-tracker-brand-from), var(--order-tracker-brand-to));
+  color: #fff;
+  box-shadow: 0 2px 10px rgb(139 36 0 / 26%);
+}
+
+.order-tracker__step--active .order-tracker__marker {
+  border: none;
+  background: linear-gradient(135deg, var(--order-tracker-brand-from), var(--order-tracker-brand-to));
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--order-tracker-brand-from) 22%, transparent),
+    0 6px 18px rgb(247 82 17 / 38%);
+}
+
+.order-tracker__step--active .order-tracker__marker::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  border: 2px solid color-mix(in oklab, var(--order-tracker-brand-from) 55%, transparent);
+  animation: order-tracker-pulse 2.4s ease-out infinite;
+}
+
+.order-tracker__label {
+  max-width: 5.75rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  color: color-mix(in oklab, var(--color-base-content) 52%, transparent);
+  hyphens: auto;
+}
+
+@media (min-width: 640px) {
+  .order-tracker__label {
+    font-size: 0.75rem;
+    max-width: 6.5rem;
+  }
+}
+
+.order-tracker__step--done .order-tracker__label {
+  color: color-mix(in oklab, var(--color-base-content) 78%, transparent);
+  font-weight: 600;
+}
+
+.order-tracker__step--active .order-tracker__label {
+  color: var(--color-base-content);
+  font-weight: 700;
+}
+
+// ─── Horizontal (default from sm) ───────────────────────────────────────────
+@media (min-width: 640px) {
+  .order-tracker__rail {
+    top: calc(var(--order-tracker-marker) / 2 - 2px);
+    left: calc(var(--order-tracker-marker) / 2);
+    right: calc(var(--order-tracker-marker) / 2);
+    height: 4px;
+  }
+
+  .order-tracker__rail-fill {
+    inset-block: 0;
+    left: 0;
+    width: 0;
+  }
+
+  @keyframes order-tracker-fill-x {
+    to {
+      width: var(--order-tracker-progress, 0%);
+    }
+  }
+}
+
+// ─── Vertical timeline (mobile) ─────────────────────────────────────────────
+@media (max-width: 639px) {
+  .order-tracker {
+    padding-inline: 0.15rem;
+  }
+
+  .order-tracker__rail {
+    top: calc(var(--order-tracker-marker) / 2);
+    bottom: calc(var(--order-tracker-marker) / 2);
+    left: calc(var(--order-tracker-marker) / 2 - 2px);
+    width: 4px;
+    height: auto;
+  }
+
+  .order-tracker__rail-fill {
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 0;
+  }
+
+  .order-tracker--ready .order-tracker__rail-fill {
+    animation-name: order-tracker-fill-y;
+  }
+
+  .order-tracker__steps {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.35rem;
+  }
+
+  .order-tracker__step {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.85rem;
+    transform: translateX(-8px);
+  }
+
+  .order-tracker--ready .order-tracker__step {
+    animation-name: order-tracker-step-in-mobile;
+  }
+
+  .order-tracker__label {
+    max-width: none;
+    flex: 1;
+    text-align: start;
+    font-size: 0.8125rem;
+  }
+}
+
+@keyframes order-tracker-fill-y {
+  to {
+    height: var(--order-tracker-progress, 0%);
+  }
+}
+
+@keyframes order-tracker-step-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes order-tracker-step-in-mobile {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes order-tracker-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  70%,
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .order-tracker--ready .order-tracker__rail-fill,
+  .order-tracker--ready .order-tracker__step,
+  .order-tracker__step--active .order-tracker__marker::after {
+    animation: none;
+  }
+
+  .order-tracker__rail-fill {
+    width: var(--order-tracker-progress, 0%);
+    height: var(--order-tracker-progress, 0%);
+  }
+
+  .order-tracker__step {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (max-width: 639px) {
+    .order-tracker__rail-fill {
+      width: 100%;
+      height: var(--order-tracker-progress, 0%);
+    }
+  }
+
+  @media (min-width: 640px) {
+    .order-tracker__rail-fill {
+      height: auto;
+      width: var(--order-tracker-progress, 0%);
+    }
+  }
+}

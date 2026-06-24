@@ -9,6 +9,8 @@ import FavoriteToggle from '../components/FavoriteToggle';
 import ReviewsSection from '../components/ReviewsSection';
 import CatalogCardImage from '../components/CatalogCardImage';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
+import KeyColorPicker from '../components/KeyColorPicker';
+import { useKeyColors } from '../hooks/useKeyColors';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 const ZOOM_SCALE = 3.5;
@@ -60,7 +62,10 @@ export default function PackDetailPage() {
   const { id } = useParams();
   const { t } = useTranslation();
   const { addLine } = useCart();
+  const [selectedKeyColorId, setSelectedKeyColorId] = useState(null);
   const [pack, setPack] = useState(null);
+  const hasKeyOptions = !!pack?.contains_keys;
+  const { data: keyColors = [] } = useKeyColors(hasKeyOptions);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -153,7 +158,7 @@ export default function PackDetailPage() {
   const savings = totalIfSeparate - price;
   const hasSavings = totalIfSeparate > 0 && savings > 0.005;
 
-  const handleAdd = () => addLine(null, pack.id, qty);
+  const handleAdd = () => addLine(null, pack.id, qty, { key_color_id: selectedKeyColorId });
 
   return (
     <div className="product-detail-page">
@@ -303,6 +308,15 @@ export default function PackDetailPage() {
                 ))}
               </div>
             </div>
+          )}
+
+          {pack.contains_keys && (
+            <KeyColorPicker
+              colors={keyColors}
+              value={selectedKeyColorId}
+              onChange={setSelectedKeyColorId}
+              name={`pack-${pack.id}-key-color`}
+            />
           )}
 
           {/* Actions */}

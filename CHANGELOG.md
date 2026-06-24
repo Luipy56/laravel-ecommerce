@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.403] - 2026-06-24
+
+### Fixed
+- **Cart key color picker (#56):** Color menu opens on swatch click (fixed positioning near trigger), closes on selection or outside click; trigger shows swatch only without color name text.
+
 ## [0.1.402] - 2026-06-24
 
 ### Changed

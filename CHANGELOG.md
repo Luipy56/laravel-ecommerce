@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.405] - 2026-06-24
+
+### Fixed
+- **Profile change password:** Mismatch and other validation errors now show an alert and inline hints in the password card; the page scrolls to that section instead of jumping to the top with no feedback.
+
 ## [0.1.404] - 2026-06-24
 
 ### Fixed

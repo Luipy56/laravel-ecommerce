@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.416] - 2026-06-24
+
+### Fixed
+- **Order progress tracker:** Horizontal rail is vertically centered on step markers and clipped to the first/last node centers so it no longer overhangs the ends.
+
+## [0.1.415] - 2026-06-24
+
+### Fixed
+- **Google OAuth registration:** New accounts created via Google sign-in now receive the same verification email as password registration; the account stays unverified until the user confirms via the app link (returning Google logins are unchanged).
+
 ## [0.1.414] - 2026-06-24
 
 ### Fixed

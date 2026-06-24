@@ -6,6 +6,7 @@ use App\Exceptions\GoogleOAuthException;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\GoogleOAuthService;
 use App\Support\Auth\GoogleOAuthErrorMapper;
+use App\Support\MailLocale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -58,6 +59,12 @@ class GoogleAuthController extends Controller
 
             Auth::login($client);
             $request->session()->regenerate();
+
+            if ($client->wasRecentlyCreated) {
+                $locale = MailLocale::resolve($request->getPreferredLanguage(config('app.available_locales', ['ca', 'es', 'en'])));
+                app()->setLocale($locale);
+                $client->sendEmailVerificationNotification();
+            }
 
             $query = http_build_query([
                 'oauth' => 'success',

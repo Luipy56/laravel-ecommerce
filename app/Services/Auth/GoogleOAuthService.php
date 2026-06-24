@@ -89,7 +89,7 @@ class GoogleOAuthService
                 'password' => null,
                 'google_sub' => $sub,
                 'is_active' => true,
-                'email_verified_at' => $emailVerified ? now() : null,
+                'email_verified_at' => null,
             ]);
 
             $client->contacts()->create([

@@ -71,4 +71,31 @@ class ReconcileKeyColorSchemaCommandTest extends TestCase
         $this->assertTrue(Schema::hasColumn('order_lines', 'key_color_rgb'));
         $this->assertTrue(Schema::hasColumn('order_lines', 'key_color_name'));
     }
+
+    public function test_reconcile_skips_order_line_columns_when_key_colors_table_missing(): void
+    {
+        $this->assertTrue(Schema::hasTable('order_lines'));
+        $this->assertTrue(Schema::hasColumn('order_lines', 'key_color_id'));
+
+        Schema::table('order_lines', function ($table) {
+            $table->dropForeign(['key_color_id']);
+            $table->dropColumn(['key_color_id', 'key_color_rgb', 'key_color_name']);
+        });
+
+        Schema::dropIfExists('key_color_translations');
+        Schema::dropIfExists('key_colors');
+
+        DB::table('migrations')
+            ->where('migration', KeyColorSchemaHelper::KEY_COLORS_MIGRATION)
+            ->delete();
+
+        $this->assertFalse(Schema::hasTable('key_colors'));
+        $this->assertFalse(Schema::hasColumn('order_lines', 'key_color_id'));
+
+        $this->artisan('db:reconcile-key-color-schema')
+            ->expectsOutputToContain('Key color schema already up to date.')
+            ->assertSuccessful();
+
+        $this->assertFalse(Schema::hasColumn('order_lines', 'key_color_id'));
+    }
 }

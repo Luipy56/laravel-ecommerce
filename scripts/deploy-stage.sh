@@ -17,4 +17,5 @@ docker ps -a --format '{{.Names}}' | grep -E '^[0-9a-f]{12}_serra-stage-' | xarg
 "${COMPOSE[@]}" exec -T app php artisan db:sync-postgres-sequences
 "${COMPOSE[@]}" exec -T app php artisan db:reconcile-key-color-schema
 "${COMPOSE[@]}" exec -T app php artisan migrate --force --no-interaction
+"${COMPOSE[@]}" exec -T app php artisan db:reconcile-key-color-schema
 echo "Stage deploy done: https://stage-serra.ldeluipy.es"

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.414] - 2026-06-24
+
+### Fixed
+- **Prod deploy migrate failure:** `db:reconcile-key-color-schema` no longer patches `order_lines` before `key_colors` exists; stage/prod deploy runs reconcile again after `migrate` so long-lived databases get key-color columns once the parent table is created.
+
 ## [0.1.413] - 2026-06-24
 
 ### Changed

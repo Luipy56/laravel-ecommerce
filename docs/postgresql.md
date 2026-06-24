@@ -46,9 +46,10 @@ Before `php artisan migrate` on a long-lived PostgreSQL database (staging/produc
 php artisan db:sync-postgres-sequences
 php artisan db:reconcile-key-color-schema
 php artisan migrate --force --no-interaction
+php artisan db:reconcile-key-color-schema
 ```
 
-Stage/prod deploy scripts and GitHub Actions run sequence sync and key-color schema reconciliation automatically before migrate. The reconcile step is a no-op on fresh databases; on long-lived staging/production it records the `key_colors` migration when the table already exists and adds `key_color_translations` / `order_lines.key_color_*` columns when parent migrations ran before those edits landed.
+Stage/prod deploy scripts and GitHub Actions run sequence sync and key-color schema reconciliation before and after migrate. Pre-migrate reconcile is a no-op on fresh databases; on long-lived staging/production it records the `key_colors` migration when the table already exists and adds `key_color_translations` when missing. Post-migrate reconcile adds `order_lines.key_color_*` columns when the parent migration ran before those edits landed (requires `key_colors` to exist first).
 
 After bulk raw SQL imports into `products`, run:
 

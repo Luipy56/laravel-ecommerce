@@ -10,4 +10,5 @@ docker compose -f docker-compose.prod.yml up -d
 docker compose -f docker-compose.prod.yml exec -T app php artisan db:sync-postgres-sequences
 docker compose -f docker-compose.prod.yml exec -T app php artisan db:reconcile-key-color-schema
 docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force --no-interaction
+docker compose -f docker-compose.prod.yml exec -T app php artisan db:reconcile-key-color-schema
 echo "Prod deploy done: https://serra.ldeluipy.es"

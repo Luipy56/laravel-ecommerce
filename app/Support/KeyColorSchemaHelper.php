@@ -33,7 +33,7 @@ final class KeyColorSchemaHelper
             $actions[] = 'Created key_color_translations table';
         }
 
-        if (Schema::hasTable('order_lines') && self::ensureOrderLineKeyColorColumns()) {
+        if (Schema::hasTable('key_colors') && Schema::hasTable('order_lines') && self::ensureOrderLineKeyColorColumns()) {
             $actions[] = 'Added key color columns to order_lines';
         }
 

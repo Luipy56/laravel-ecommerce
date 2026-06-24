@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.413] - 2026-06-24
+
+### Changed
+- **Order progress tracker:** Custom animated stepper replaces daisyUI steps — brand-gradient fill on mount, done/active/pending states, checkmarks on completed steps, horizontal layout on desktop and vertical timeline on mobile; respects `prefers-reduced-motion`.
+- **Admin login:** Submit button uses `.btn-brand-gradient` to match storefront CTAs.
+
 ## [0.1.411] - 2026-06-24
 
 ### Changed

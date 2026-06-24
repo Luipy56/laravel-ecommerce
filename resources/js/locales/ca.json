@@ -345,6 +345,7 @@
   "shop.order.tracker.step_installation": "Instal·lat",
   "shop.order.tracker.step_done": "Finalitzat",
   "shop.order.tracker.last_order_title": "Darrera comanda activa",
+  "shop.order.tracker.aria": "Progrés de la comanda",
   "shop.order.tracker.invite_browse": "Tots els teus pedidos estan finalitzats. Descobreix nous productes!",
   "shop.order.tracker.browse_products": "Veure productes",
   "shop.order.tracker.view_order": "Veure comanda",

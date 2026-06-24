@@ -345,6 +345,7 @@
   "shop.order.tracker.step_installation": "Instalado",
   "shop.order.tracker.step_done": "Finalizado",
   "shop.order.tracker.last_order_title": "Último pedido activo",
+  "shop.order.tracker.aria": "Progreso del pedido",
   "shop.order.tracker.invite_browse": "Todos tus pedidos están finalizados. ¡Descubre nuevos productos!",
   "shop.order.tracker.browse_products": "Ver productos",
   "shop.order.tracker.view_order": "Ver pedido",

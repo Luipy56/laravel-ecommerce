@@ -132,27 +132,6 @@ html, body {
   color: #fff;
 }
 
-/* Order status tracker: brand gradient on completed steps (daisyUI steps) */
-.order-status-steps .step-primary::after {
-  --step-fg: #fff;
-  background: linear-gradient(135deg, #F75211, #8B2400);
-  background-color: transparent;
-  border-color: #F75211;
-  color: #fff;
-}
-.order-status-steps.steps-vertical:not(.steps-horizontal) .step-primary + .step-primary::before {
-  background: linear-gradient(to bottom, #F75211, #8B2400);
-  background-color: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-.order-status-steps.steps-horizontal .step-primary + .step-primary::before {
-  background: linear-gradient(to right, #F75211, #8B2400);
-  background-color: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-
 /* Indeterminate “top bar” motion while React Query fetches (Navbar only) */
 .header-gradient-line--loading {
   background-image: linear-gradient(

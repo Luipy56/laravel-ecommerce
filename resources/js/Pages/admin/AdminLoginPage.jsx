@@ -98,7 +98,7 @@ export default function AdminLoginPage() {
                 />
                 {fieldErrors.password ? <p className="validator-hint text-error">{fieldErrors.password}</p> : null}
               </label>
-              <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+              <button type="submit" className="btn btn-brand-gradient w-full" disabled={loading}>
                 {loading ? t('common.loading') : t('admin.login.submit')}
               </button>
               {ADMIN_AUTO_LOGIN_ENABLED ? (

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.416] - 2026-06-24
+
+### Fixed
+- **Order progress tracker:** Horizontal rail is vertically centered on step markers and clipped to the first/last node centers so it no longer overhangs the ends.
+
 ## [0.1.415] - 2026-06-24
 
 ### Fixed

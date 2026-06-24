@@ -2,6 +2,8 @@
 
 .order-tracker {
   --order-tracker-marker: 2.25rem;
+  --order-tracker-step-count: 5;
+  --order-tracker-step-gap: 0.35rem;
   --order-tracker-brand-from: #f75211;
   --order-tracker-brand-to: #8b2400;
   --order-tracker-brand-glow: rgb(247 82 17 / 35%);
@@ -145,9 +147,15 @@
 // ─── Horizontal (default from sm) ───────────────────────────────────────────
 @media (min-width: 640px) {
   .order-tracker__rail {
-    top: calc(var(--order-tracker-marker) / 2 - 2px);
-    left: calc(var(--order-tracker-marker) / 2);
-    right: calc(var(--order-tracker-marker) / 2);
+    // Match flex row: first/last marker centers with equal flex columns + gap.
+    --order-tracker-rail-inset: calc(
+      (100% - (var(--order-tracker-step-count) - 1) * var(--order-tracker-step-gap))
+      / (2 * var(--order-tracker-step-count))
+    );
+
+    top: calc(0.35rem + var(--order-tracker-marker) / 2 - 2px);
+    left: var(--order-tracker-rail-inset);
+    right: var(--order-tracker-rail-inset);
     height: 4px;
   }
 

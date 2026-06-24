@@ -98,6 +98,7 @@ export function CartProvider({ children }) {
   const addLine = useCallback(async (productId, packId, quantity = 1, options = {}) => {
     const payload = productId ? { product_id: productId, quantity } : { pack_id: packId, quantity };
     if (options.key_color_id !== undefined) payload.key_color_id = options.key_color_id;
+    if (options.extra_keys_qty !== undefined) payload.extra_keys_qty = options.extra_keys_qty;
     const { data } = await api.post('cart/lines', payload);
     if (data.success && data.data) {
       if (Array.isArray(data.data.lines)) {

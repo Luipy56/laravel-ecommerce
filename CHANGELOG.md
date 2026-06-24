@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.402] - 2026-06-24
+
+### Changed
+- **Product detail key color (#55):** **Color de la llave** is its own collapsible block on `/products/:id`, separate from **Duplicado de llave disponible**; duplicate-key block adds an extra-keys quantity input and passes `extra_keys_qty` when adding to cart.
+
+## [0.1.401] - 2026-06-24
+
+### Fixed
+- **Cart extra keys column (#54):** **Llaves extra** table column (desktop header and cells, mobile rows) is hidden when no cart line has `is_extra_keys_available`.
+
 ## [0.1.400] - 2026-06-24
 
 ### Changed

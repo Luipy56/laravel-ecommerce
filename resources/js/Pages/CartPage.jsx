@@ -14,7 +14,11 @@ function lineCanChooseKeysAllSame(line) {
   return !!line.pack?.contains_keys;
 }
 
-function CartLine({ line, updateLine, removeLine, keyColors, showKeyColorColumn, showKeysAllSameColumn, t }) {
+function lineCanHaveExtraKeys(line) {
+  return !!line.product?.is_extra_keys_available;
+}
+
+function CartLine({ line, updateLine, removeLine, keyColors, showExtraKeysColumn, showKeyColorColumn, showKeysAllSameColumn, t }) {
   const isProduct = !!line.product;
   const isPack = !!line.pack;
   const packContainsKeys = !!line.pack?.contains_keys;
@@ -107,29 +111,31 @@ function CartLine({ line, updateLine, removeLine, keyColors, showKeyColorColumn,
           />
         </div>
       </td>
-      <td className="relative align-middle text-center">
-        {isExtraKeysAvailable ? (
-          <div className="absolute inset-0 flex items-center justify-center px-1 py-1">
-            {/* Inner box height = input only (price is position:absolute) so vertical centering anchors on the input */}
-            <div className="relative inline-block shrink-0">
-              <input
-                type="number"
-                min={0}
-                max={99}
-                value={extraKeysQty}
-                onChange={handleExtraKeysChange}
-                className="input input-bordered input-sm w-16 text-center block"
-                aria-label={t('shop.cart.extra_keys')}
-              />
-              {extraKeyUnitPrice != null && (
-                <span className="absolute left-1/2 top-full z-10 mt-0.5 -translate-x-1/2 whitespace-nowrap text-xs text-base-content/70">
-                  {Number(extraKeyUnitPrice).toFixed(2)} €/u
-                </span>
-              )}
+      {showExtraKeysColumn ? (
+        <td className="relative align-middle text-center">
+          {isExtraKeysAvailable ? (
+            <div className="absolute inset-0 flex items-center justify-center px-1 py-1">
+              {/* Inner box height = input only (price is position:absolute) so vertical centering anchors on the input */}
+              <div className="relative inline-block shrink-0">
+                <input
+                  type="number"
+                  min={0}
+                  max={99}
+                  value={extraKeysQty}
+                  onChange={handleExtraKeysChange}
+                  className="input input-bordered input-sm w-16 text-center block"
+                  aria-label={t('shop.cart.extra_keys')}
+                />
+                {extraKeyUnitPrice != null && (
+                  <span className="absolute left-1/2 top-full z-10 mt-0.5 -translate-x-1/2 whitespace-nowrap text-xs text-base-content/70">
+                    {Number(extraKeyUnitPrice).toFixed(2)} €/u
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ) : null}
-      </td>
+          ) : null}
+        </td>
+      ) : null}
       {showKeyColorColumn ? (
         <td className="align-middle">
           {involvesKeys && keyColors.length > 0 ? (
@@ -171,7 +177,7 @@ function CartLine({ line, updateLine, removeLine, keyColors, showKeyColorColumn,
 }
 
 /** Stacked layout for viewports below `md` — avoids wide table horizontal scroll. */
-function CartLineMobile({ line, updateLine, removeLine, keyColors, showKeyColorColumn, showKeysAllSameColumn, t }) {
+function CartLineMobile({ line, updateLine, removeLine, keyColors, showExtraKeysColumn, showKeyColorColumn, showKeysAllSameColumn, t }) {
   const isProduct = !!line.product;
   const isPack = !!line.pack;
   const packContainsKeys = !!line.pack?.contains_keys;
@@ -274,7 +280,7 @@ function CartLineMobile({ line, updateLine, removeLine, keyColors, showKeyColorC
             className="input input-bordered input-sm w-16 text-center"
           />
         </dd>
-        {isExtraKeysAvailable ? (
+        {showExtraKeysColumn && isExtraKeysAvailable ? (
           <>
             <dt className="text-base-content/70">{t('shop.cart.extra_keys')}</dt>
             <dd className="flex flex-col items-end gap-0.5">
@@ -345,6 +351,7 @@ export default function CartPage() {
   const installationTooltip = cart.installation_quote_required
     ? t('shop.cart.installation_quote_only_hint')
     : t('shop.cart.installation_tiers_hint');
+  const showExtraKeysColumn = cart.lines?.some((line) => lineCanHaveExtraKeys(line));
   const showKeyColorColumn =
     keyColors.length > 0 && cart.lines?.some((line) => lineInvolvesKeys(line));
   const showKeysAllSameColumn = cart.lines?.some((line) => lineCanChooseKeysAllSame(line));
@@ -424,6 +431,7 @@ export default function CartPage() {
               updateLine={updateLine}
               removeLine={removeLine}
               keyColors={keyColors}
+              showExtraKeysColumn={showExtraKeysColumn}
               showKeyColorColumn={showKeyColorColumn}
               showKeysAllSameColumn={showKeysAllSameColumn}
               t={t}
@@ -438,7 +446,9 @@ export default function CartPage() {
                 <th>{t('shop.products')}</th>
                 <th className="whitespace-nowrap text-center">{t('shop.price')}</th>
                 <th className="whitespace-nowrap text-center">{t('shop.quantity')}</th>
-                <th className="whitespace-nowrap text-center">{t('shop.cart.extra_keys')}</th>
+                {showExtraKeysColumn ? (
+                  <th className="whitespace-nowrap text-center">{t('shop.cart.extra_keys')}</th>
+                ) : null}
                 {showKeyColorColumn ? (
                   <th className="whitespace-nowrap text-center">{t('shop.cart.key_color')}</th>
                 ) : null}
@@ -459,6 +469,7 @@ export default function CartPage() {
                   updateLine={updateLine}
                   removeLine={removeLine}
                   keyColors={keyColors}
+                  showExtraKeysColumn={showExtraKeysColumn}
                   showKeyColorColumn={showKeyColorColumn}
                   showKeysAllSameColumn={showKeysAllSameColumn}
                   t={t}

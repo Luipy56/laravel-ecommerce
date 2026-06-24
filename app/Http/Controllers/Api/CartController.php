@@ -250,6 +250,7 @@ class CartController extends Controller
             'pack_id' => ['nullable', 'integer', 'exists:packs,id'],
             'quantity' => ['required', 'integer', 'min:1', 'max:99'],
             'key_color_id' => ['nullable', 'integer', 'exists:key_colors,id'],
+            'extra_keys_qty' => ['sometimes', 'integer', 'min:0', 'max:99'],
         ]);
         if (($validated['product_id'] ?? null) && ($validated['pack_id'] ?? null)) {
             return response()->json(['success' => false, 'message' => 'Specify product_id or pack_id, not both.'], 422);
@@ -261,6 +262,9 @@ class CartController extends Controller
         $product = ($validated['product_id'] ?? null) ? Product::find($validated['product_id']) : null;
         $pack = ($validated['pack_id'] ?? null) ? Pack::find($validated['pack_id']) : null;
         if ($error = $this->validateKeyColorForLine($product, $pack, $validated['key_color_id'] ?? null)) {
+            return $error;
+        }
+        if ($error = $this->validateExtraKeysForLine($product, $pack, $validated['extra_keys_qty'] ?? 0)) {
             return $error;
         }
 
@@ -286,6 +290,8 @@ class CartController extends Controller
         $packId = $validated['pack_id'] ?? null;
         $quantity = (int) $validated['quantity'];
         $keyColorId = array_key_exists('key_color_id', $validated) ? $validated['key_color_id'] : null;
+        $extraKeysQty = (int) ($validated['extra_keys_qty'] ?? 0);
+        $product = $productId ? Product::find($productId) : null;
 
         $existing = $cart->lines()->where('product_id', $productId)->where('pack_id', $packId)->first();
         if ($existing) {
@@ -293,10 +299,16 @@ class CartController extends Controller
             if ($keyColorId !== null || $this->lineInvolvesKeys($existing->product, $existing->pack)) {
                 $updates['key_color_id'] = $keyColorId;
             }
+            if (array_key_exists('extra_keys_qty', $validated)) {
+                $updates['extra_keys_qty'] = $extraKeysQty;
+                $updates['extra_key_unit_price'] = $existing->product?->is_extra_keys_available
+                    ? $existing->product->extra_key_unit_price
+                    : null;
+            }
             $existing->update($updates);
             $line = $existing;
         } else {
-            $unitPrice = $productId ? Product::find($productId)?->effectivePrice() : Pack::find($packId)?->price;
+            $unitPrice = $productId ? $product?->effectivePrice() : Pack::find($packId)?->price;
             $line = $cart->lines()->create([
                 'product_id' => $productId,
                 'pack_id' => $packId,
@@ -304,6 +316,8 @@ class CartController extends Controller
                 'unit_price' => $unitPrice,
                 'is_included' => true,
                 'key_color_id' => $keyColorId,
+                'extra_keys_qty' => $extraKeysQty,
+                'extra_key_unit_price' => $product?->is_extra_keys_available ? $product->extra_key_unit_price : null,
             ]);
         }
 
@@ -348,6 +362,9 @@ class CartController extends Controller
         ];
         if (array_key_exists('key_color_id', $validated)) {
             $current['key_color_id'] = $validated['key_color_id'];
+        }
+        if (array_key_exists('extra_keys_qty', $validated)) {
+            $current['extra_keys_qty'] = (int) $validated['extra_keys_qty'];
         }
         $current['quantity'] = ($current['quantity'] ?? 0) + (int) $validated['quantity'];
         $current['included'] = $current['included'] ?? true;
@@ -606,6 +623,18 @@ class CartController extends Controller
         $active = KeyColor::query()->active()->whereKey($keyColorId)->exists();
         if (! $active) {
             return response()->json(['success' => false, 'message' => 'Key color is not available.'], 422);
+        }
+
+        return null;
+    }
+
+    private function validateExtraKeysForLine(?Product $product, ?Pack $pack, int $extraKeysQty): ?JsonResponse
+    {
+        if ($extraKeysQty === 0) {
+            return null;
+        }
+        if (! $product?->is_extra_keys_available) {
+            return response()->json(['success' => false, 'message' => 'Extra keys are not available for this item.'], 422);
         }
 
         return null;

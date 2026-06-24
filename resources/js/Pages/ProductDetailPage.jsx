@@ -39,6 +39,7 @@ export default function ProductDetailPage() {
   const { addLine } = useCart();
   const { data: publicSettings } = usePublicShopSettings();
   const [selectedKeyColorId, setSelectedKeyColorId] = useState(null);
+  const [extraKeysQty, setExtraKeysQty] = useState(0);
 
   const productQuery = useQuery({
     queryKey: ['product', 'detail', id],
@@ -59,7 +60,10 @@ export default function ProductDetailPage() {
     product?.description ? String(product.description).slice(0, 200) : undefined,
   );
 
-  const handleAdd = () => addLine(product.id, null, qty, { key_color_id: selectedKeyColorId });
+  const handleAdd = () => addLine(product.id, null, qty, {
+    key_color_id: selectedKeyColorId,
+    extra_keys_qty: extraKeysQty,
+  });
 
   const galleryImages = useMemo(() => {
     if (!product) return [];
@@ -346,10 +350,20 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          {/* Extra keys */}
+          {/* Key color — applies to the product key and any duplicate keys */}
+          {product.is_extra_keys_available && keyColors.length > 0 && (
+            <KeyColorPicker
+              colors={keyColors}
+              value={selectedKeyColorId}
+              onChange={setSelectedKeyColorId}
+              name={`product-${product.id}-key-color`}
+            />
+          )}
+
+          {/* Extra / duplicate keys */}
           {product.is_extra_keys_available && (
-            <div className="product-detail__extra-keys space-y-3">
-              <div>
+            <div className="product-detail__extra-keys">
+              <div className="product-detail__extra-keys-header">
                 <p className="font-medium text-sm">{t('shop.product.extra_keys_available')}</p>
                 {product.formattedExtraKeyPrice && (
                   <p className="text-sm text-primary font-semibold mt-0.5">
@@ -357,12 +371,21 @@ export default function ProductDetailPage() {
                   </p>
                 )}
               </div>
-              <KeyColorPicker
-                colors={keyColors}
-                value={selectedKeyColorId}
-                onChange={setSelectedKeyColorId}
-                name={`product-${product.id}-key-color`}
-              />
+              <div className="product-detail__extra-keys-row">
+                <label htmlFor={`product-${product.id}-extra-keys`} className="text-sm text-base-content/80">
+                  {t('shop.cart.extra_keys')}
+                </label>
+                <input
+                  id={`product-${product.id}-extra-keys`}
+                  type="number"
+                  min={0}
+                  max={99}
+                  value={extraKeysQty}
+                  onChange={(e) => setExtraKeysQty(Math.max(0, Math.min(99, parseInt(e.target.value, 10) || 0)))}
+                  className="input input-bordered input-sm w-20 text-center tabular-nums"
+                  aria-label={t('shop.cart.extra_keys')}
+                />
+              </div>
             </div>
           )}
 

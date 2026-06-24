@@ -93,6 +93,39 @@ class KeyColorCartTest extends TestCase
         $this->assertSame($color->id, $line->key_color_id);
     }
 
+    public function test_cart_line_stores_extra_keys_qty_when_adding_product(): void
+    {
+        $client = Client::query()->create([
+            'type' => 'person',
+            'identification' => null,
+            'login_email' => 'extrakeys_'.uniqid('', true).'@example.com',
+            'password' => bcrypt('password'),
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $category = $this->createProductCategoryForTests('cat-extra', 'Extra keys');
+        $product = $this->createProductForTests($category->id, 'KEY-PROD-3', 'Lock with duplicates', null, [
+            'is_extra_keys_available' => true,
+            'extra_key_unit_price' => 26.00,
+        ]);
+
+        $response = $this->actingAs($client, 'web')->postJson('/api/v1/cart/lines', [
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'extra_keys_qty' => 2,
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.lines.0.extra_keys_qty', 2);
+
+        $cart = Order::query()->where('client_id', $client->id)->where('kind', Order::KIND_CART)->first();
+        $line = $cart->lines()->first();
+        $this->assertSame(2, $line->extra_keys_qty);
+        $this->assertSame(26.00, (float) $line->extra_key_unit_price);
+    }
+
     public function test_checkout_snapshots_key_color_on_order_line(): void
     {
         $client = Client::query()->create([

@@ -243,7 +243,7 @@ export default function Navbar() {
               />
               <button
                 type="submit"
-                className="btn btn-primary join-item btn-sm btn-square shrink-0"
+                className="btn btn-brand-gradient join-item btn-sm btn-square shrink-0"
                 aria-label={t('common.search')}
               >
                 <IconSearch className="h-5 w-5" aria-hidden="true" />
@@ -502,7 +502,7 @@ export default function Navbar() {
             />
             <button
               type="submit"
-              className="btn btn-primary btn-sm btn-square shrink-0"
+              className="btn btn-brand-gradient btn-sm btn-square shrink-0"
               aria-label={t('common.search')}
             >
               <IconSearch className="h-5 w-5" aria-hidden="true" />

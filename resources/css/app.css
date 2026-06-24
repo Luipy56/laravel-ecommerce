@@ -119,6 +119,40 @@ html, body {
   box-shadow: 0 0 0 2px rgb(251 84 18 / 35%), 0 2px 6px rgb(139 36 0 / 28%);
 }
 
+/* Primary CTA buttons: brand gradient instead of flat primary */
+.btn-brand-gradient {
+  border-width: 0;
+  background: linear-gradient(to right, #F75211, #8B2400);
+  color: #fff;
+  box-shadow: 0 1px 4px rgb(139 36 0 / 22%);
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-brand-gradient:hover {
+  filter: brightness(1.08);
+  color: #fff;
+}
+
+/* Order status tracker: brand gradient on completed steps (daisyUI steps) */
+.order-status-steps .step-primary::after {
+  --step-fg: #fff;
+  background: linear-gradient(135deg, #F75211, #8B2400);
+  background-color: transparent;
+  border-color: #F75211;
+  color: #fff;
+}
+.order-status-steps.steps-vertical:not(.steps-horizontal) .step-primary + .step-primary::before {
+  background: linear-gradient(to bottom, #F75211, #8B2400);
+  background-color: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+.order-status-steps.steps-horizontal .step-primary + .step-primary::before {
+  background: linear-gradient(to right, #F75211, #8B2400);
+  background-color: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
 /* Indeterminate “top bar” motion while React Query fetches (Navbar only) */
 .header-gradient-line--loading {
   background-image: linear-gradient(

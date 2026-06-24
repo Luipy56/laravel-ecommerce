@@ -505,7 +505,7 @@ export default function CartPage() {
             </p>
           </div>
           <div className="flex gap-2 justify-center sm:justify-end sm:items-end">
-            <Link to="/checkout" className="btn btn-primary">
+            <Link to="/checkout" className="btn btn-brand-gradient">
               {t('shop.checkout')}
             </Link>
           </div>

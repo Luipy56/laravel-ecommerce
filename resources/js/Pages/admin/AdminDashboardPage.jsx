@@ -16,9 +16,15 @@ import {
 import { api } from '../../api';
 import PageTitle from '../../components/PageTitle';
 
+function getThemedRoot() {
+  if (typeof document === 'undefined') return null;
+  return document.querySelector('.drawer[data-theme]') ?? document.querySelector('[data-theme]') ?? document.documentElement;
+}
+
 function getThemeColor(variable) {
-  if (typeof document === 'undefined') return '#888';
-  const value = getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+  const root = getThemedRoot();
+  if (!root) return '#888';
+  const value = getComputedStyle(root).getPropertyValue(variable).trim();
   return value || '#888';
 }
 
@@ -360,7 +366,7 @@ export default function AdminDashboardPage() {
                     formatter={() => []}
                     wrapperStyle={{ paddingTop: 8 }}
                     content={() => (
-                      <div className="flex flex-wrap justify-center gap-4 text-sm" style={{ color: textColor }}>
+                      <div className="flex flex-wrap justify-center gap-4 text-sm text-base-content">
                         <span className="flex items-center gap-2">
                           <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: primaryColor }} aria-hidden />
                           {currentYear}
@@ -424,7 +430,7 @@ export default function AdminDashboardPage() {
                     formatter={() => []}
                     wrapperStyle={{ paddingTop: 8 }}
                     content={() => (
-                      <div className="flex flex-wrap justify-center gap-4 text-sm" style={{ color: textColor }}>
+                      <div className="flex flex-wrap justify-center gap-4 text-sm text-base-content">
                         <span className="flex items-center gap-2">
                           <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: primaryColor }} aria-hidden />
                           {currentYear}
@@ -487,7 +493,7 @@ export default function AdminDashboardPage() {
                   <Legend
                     wrapperStyle={{ paddingTop: 8 }}
                     content={() => (
-                      <div className="flex flex-wrap justify-center gap-4 text-sm" style={{ color: textColor }}>
+                      <div className="flex flex-wrap justify-center gap-4 text-sm text-base-content">
                         <span className="flex items-center gap-2">
                           <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: primaryColor }} aria-hidden />
                           {currentYear}

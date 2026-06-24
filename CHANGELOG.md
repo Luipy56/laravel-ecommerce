@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.411] - 2026-06-24
+
+### Changed
+- **Storefront CTAs:** Cart checkout, checkout submit, and navbar search buttons use the brand gradient (`#F75211` → `#8B2400`) via shared `.btn-brand-gradient`.
+- **Order tracker:** Completed steps show the brand gradient on circles and connectors instead of flat primary orange.
+- **Home hero:** “See products” button uses the same brand gradient and hover as other primary CTAs.
+
+### Fixed
+- **Admin dashboard charts:** Legend labels use theme-aware `text-base-content`; chart colors read CSS variables from the admin `data-theme` drawer so dark mode text is readable.
+
 ## [0.1.405] - 2026-06-24
 
 ### Fixed

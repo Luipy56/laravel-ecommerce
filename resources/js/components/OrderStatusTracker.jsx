@@ -10,7 +10,7 @@ export function isOrderClosed(status) {
 
 /**
  * Computes the 0-based index of the current active step.
- * Steps 0…currentIndex are rendered with step-primary (orange).
+ * Steps 0…currentIndex are rendered with the brand gradient (step-primary).
  */
 function currentStepIndex(status, withInstall) {
   if (withInstall) {
@@ -76,7 +76,7 @@ export default function OrderStatusTracker({ order }) {
   return (
     <div className="card bg-base-100 border border-base-200 shadow-sm rounded-2xl overflow-x-auto">
       <div className="card-body py-4 px-4 sm:px-6">
-        <ul className="steps steps-vertical sm:steps-horizontal w-full min-w-0">
+        <ul className="steps steps-vertical sm:steps-horizontal order-status-steps w-full min-w-0">
           {steps.map((label, i) => (
             <li
               key={label}

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.400] - 2026-06-24
+
+### Changed
+- **Cart key color (#53):** Cart key-color control shows a color swatch trigger (selected color or “none”) and opens a popover list with small swatches plus labels instead of a plain text `<select>`.
+
 ## [0.1.399] - 2026-06-23
 
 ### Fixed

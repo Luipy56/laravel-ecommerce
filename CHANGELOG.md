@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.418] - 2026-09-07
+
+### Added
+- **Artisan `products:import-scrape`:** Import competitor scrape JSONL (and optional local images) into the catalog with dry-run/limit options, duplicate code/URL skips, and category mapping from scrape labels.
+
 ## [0.1.417] - 2026-09-07
 
 ### Added

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.417] - 2026-09-07
+
+### Added
+- **ProductPreviewModal:** clicking a product or pack card opens an intermediate preview modal again (image, price, low-stock warning, description, features/pack contents); “View more info” goes to the detail page; add-to-cart works from the modal.
+
+### Changed
+- **ProductCard:** card activation opens the preview modal instead of navigating straight to `/products/:id` or `/packs/:id` (home, product list, favorites, and other `ProductCard` grids).
+
 ## [0.1.416] - 2026-06-24
 
 ### Fixed

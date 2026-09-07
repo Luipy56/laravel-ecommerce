@@ -23,6 +23,12 @@ if [[ -f "$ENV_FILE" ]]; then
   set -a && source "$ENV_FILE" && set +a
 fi
 
+# Force Luipy identity for all agent commits (cursor-agent otherwise invents autoagents-committer).
+export GIT_AUTHOR_NAME="${AGENT_GIT_AUTHOR_NAME:-Luipy56}"
+export GIT_AUTHOR_EMAIL="${AGENT_GIT_AUTHOR_EMAIL:-yoelberjaga@gmail.com}"
+export GIT_COMMITTER_NAME="${AGENT_GIT_COMMITTER_NAME:-$GIT_AUTHOR_NAME}"
+export GIT_COMMITTER_EMAIL="${AGENT_GIT_COMMITTER_EMAIL:-$GIT_AUTHOR_EMAIL}"
+
 ensure_gh_auth() {
   if command -v gh >/dev/null 2>&1 && gh auth status --hostname github.com >/dev/null 2>&1; then
     return 0
@@ -573,6 +579,8 @@ Environment:
   AGENT_TASKDIR              Task queue directory (default: autoagents/tasks)
   AGENT_LOOP_SLEEP_MINUTES   Loop interval (default: 5)
   AGENT_COMMITTER_USE_CURSOR Set 1 to prefer full committer (default: 1 in .env.example)
+  AGENT_GIT_AUTHOR_NAME      Commit author name (default: Luipy56)
+  AGENT_GIT_AUTHOR_EMAIL     Commit author email (default: yoelberjaga@gmail.com)
   001 watermarks in time-of-last-review.txt stay local; committer skips commit/push for those-only diffs
   GH_TOKEN                   GitHub API token (or autoagents/.env)
 

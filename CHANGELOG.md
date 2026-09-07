@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.419] - 2026-09-07
+
+### Fixed
+- **Autoagents committer identity:** agent commits use Luipy56 / yoelberjaga@gmail.com (loop exports `GIT_AUTHOR_*` / `GIT_COMMITTER_*`; committer prompt forbids `autoagents-committer`).
+
+## [0.1.418] - 2026-09-07
+
+### Added
+- **Artisan `products:import-scrape`:** Import competitor scrape JSONL (and optional local images) into the catalog with dry-run/limit options, duplicate code/URL skips, and category mapping from scrape labels.
+
+## [0.1.417] - 2026-09-07
+
+### Added
+- **ProductPreviewModal:** clicking a product or pack card opens an intermediate preview modal again (image, price, low-stock warning, description, features/pack contents); “View more info” goes to the detail page; add-to-cart works from the modal.
+
+### Changed
+- **ProductCard:** card activation opens the preview modal instead of navigating straight to `/products/:id` or `/packs/:id` (home, product list, favorites, and other `ProductCard` grids).
+
 ## [0.1.416] - 2026-06-24
 
 ### Fixed

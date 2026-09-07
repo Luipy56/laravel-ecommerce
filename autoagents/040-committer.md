@@ -31,10 +31,23 @@ Bump root **`package.json`** + **`package-lock.json`** for each shippable change
 - Never commit `.env`, keys, or tokens.
 - Never modify **`app/`** / **`resources/js/`** in this role.
 
+### Git author / committer identity (mandatory)
+
+Commits must be authored and committed as **Luipy56** (not `autoagents-committer`, not a Cursor/agent name):
+
+- **Name:** `Luipy56`
+- **Email:** `yoelberjaga@gmail.com`
+
+Prefer env already set by the loop (`GIT_AUTHOR_*` / `GIT_COMMITTER_*`). If missing, set them for the commit command or use:
+
+`git -c user.name='Luipy56' -c user.email='yoelberjaga@gmail.com' commit …`
+
+Never invent `autoagents@local` or any other placeholder identity.
+
 ### Instructions
 
 1. Sync git.
 2. `git status` — if clean, stop.
 3. Review diff; update **`CHANGELOG.md`**; bump **`package.json`** patch when warranted.
-4. `git add` / `git commit` on integration branch.
+4. `git add` / `git commit` on integration branch (**Luipy56** identity above).
 5. `git pull --rebase --autostash origin <branch>`; `git push origin <branch>`.

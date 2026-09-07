@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.419] - 2026-09-07
+
+### Fixed
+- **Autoagents committer identity:** agent commits use Luipy56 / yoelberjaga@gmail.com (loop exports `GIT_AUTHOR_*` / `GIT_COMMITTER_*`; committer prompt forbids `autoagents-committer`).
+
 ## [0.1.418] - 2026-09-07
 
 ### Added

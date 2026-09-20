@@ -97,8 +97,12 @@ class RevolutRegisterWebhookCommand extends Command
 
         $envPath = $this->option('write-env');
         if (is_string($envPath) && $envPath !== '') {
-            if (! is_file($envPath) || ! is_writable($envPath)) {
+            $dir = dirname($envPath);
+            $canWrite = (is_file($envPath) && is_writable($envPath))
+                || ((! is_file($envPath)) && is_dir($dir) && is_writable($dir));
+            if (! $canWrite) {
                 $this->error('Cannot write --write-env path: '.$envPath);
+                $this->line('REVOLUT_WEBHOOK_SECRET='.$signingSecret);
 
                 return self::FAILURE;
             }

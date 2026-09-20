@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.421] - 2026-09-20
+
+### Fixed
+- **`revolut:register-webhook --write-env`:** allow creating a new env file when the parent directory is writable; still print the signing secret if write fails.
+
 ## [0.1.420] - 2026-09-20
 
 ### Added

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.422] - 2026-09-20
+
+### Fixed
+- **PayPalPaymentTest:** availability payload always includes `revolut` (false without keys); assert false instead of missing key (Stage CI #79/#80).
+
 ## [0.1.421] - 2026-09-20
 
 ### Fixed

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1] - 2026-09-20
+
+### Changed
+- **Version dump:** storefront/admin semver jumps from the `0.1.x` line to **`0.2.1`** (Revolut Pay checkout + webhook on stage).
+
+### Added
+- **Revolut Pay** (from `0.1.420`): Merchant API hosted checkout, HMAC webhook, return confirm, `revolut:register-webhook`.
+
 ## [0.1.422] - 2026-09-20
 
 ### Fixed

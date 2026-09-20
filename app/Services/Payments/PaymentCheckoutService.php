@@ -6,12 +6,14 @@ use App\Contracts\Payments\PaymentCheckoutStarter;
 use App\Models\Payment;
 use App\Services\Payments\PayPal\PayPalCheckoutStarter;
 use App\Services\Payments\PayPal\PayPalClient;
+use App\Services\Payments\Revolut\RevolutCheckoutStarter;
+use App\Services\Payments\Revolut\RevolutCredentials;
 use App\Services\Payments\Stripe\StripeCredentials;
 use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Orchestrates starting a checkout session for a {@see Payment} using the configured gateway (Stripe or PayPal).
+ * Orchestrates starting a checkout session for a {@see Payment} using the configured gateway (Stripe, PayPal, Revolut).
  *
  * Also exposes helpers for storefront configuration: which methods are available, simulated checkout in debug,
  * and credential hints for the UI.
@@ -21,13 +23,14 @@ class PaymentCheckoutService
     public function __construct(
         private readonly PaymentCheckoutStarter $stripe,
         private readonly PayPalCheckoutStarter $paypal,
+        private readonly RevolutCheckoutStarter $revolut,
         private readonly PaymentCompletionService $completion,
     ) {}
 
     /**
      * Starts the remote checkout flow for the given payment and returns gateway-specific payload for the client.
      *
-     * @param  Payment  $payment  Persisted payment row including payment_method (e.g. card, paypal).
+     * @param  Payment  $payment  Persisted payment row including payment_method (e.g. card, paypal, revolut).
      * @return array{type: string}&array<string, mixed> Gateway type plus fields from the selected starter (e.g. client_secret, approval URL).
      *
      * @throws InvalidArgumentException When payment_method is not supported by a registered starter.
@@ -44,6 +47,7 @@ class PaymentCheckoutService
         return match ($method) {
             Payment::METHOD_CARD => $this->stripe,
             Payment::METHOD_PAYPAL => $this->paypal,
+            Payment::METHOD_REVOLUT => $this->revolut,
             default => throw new InvalidArgumentException('Unsupported payment_method: '.$method),
         };
     }
@@ -65,7 +69,7 @@ class PaymentCheckoutService
     {
         $keys = config('payments.checkout_method_keys');
 
-        return is_array($keys) ? $keys : ['card', 'paypal'];
+        return is_array($keys) ? $keys : ['card', 'paypal', 'revolut'];
     }
 
     /** True when the PSP for this method has real credentials (ignores simulated blanket availability). */
@@ -74,6 +78,7 @@ class PaymentCheckoutService
         return match ($method) {
             Payment::METHOD_CARD => StripeCredentials::areConfigured(),
             Payment::METHOD_PAYPAL => PayPalClient::envCredentialsPresent(),
+            Payment::METHOD_REVOLUT => RevolutCredentials::areConfigured(),
             default => false,
         };
     }
@@ -116,9 +121,19 @@ class PaymentCheckoutService
         return ! self::methodHasRealProviderCredentials(Payment::METHOD_CARD);
     }
 
+    /** Revolut is whitelisted but REVOLUT_MERCHANT_API_KEY is missing (never simulated). */
+    public static function revolutMissingCredentialsForStorefront(): bool
+    {
+        if (! in_array(Payment::METHOD_REVOLUT, self::checkoutMethodKeysFromConfig(), true)) {
+            return false;
+        }
+
+        return ! self::methodHasRealProviderCredentials(Payment::METHOD_REVOLUT);
+    }
+
     /**
      * When simulated mode is on, skip the PSP only if that method has no real credentials.
-     * PayPal is never simulated: without credentials it stays unavailable; with credentials the SDK must run.
+     * PayPal and Revolut are never simulated: without credentials they stay unavailable.
      */
     public static function shouldSimulateCheckoutForPayment(Payment $payment): bool
     {
@@ -128,7 +143,7 @@ class PaymentCheckoutService
     /** Same rules as {@see shouldSimulateCheckoutForPayment} before a {@see Payment} row exists. */
     public static function shouldSimulateCheckoutForPaymentMethod(string $method): bool
     {
-        if ($method === Payment::METHOD_PAYPAL) {
+        if ($method === Payment::METHOD_PAYPAL || $method === Payment::METHOD_REVOLUT) {
             return false;
         }
         if ($method === Payment::METHOD_CHECKOUT_DEMO_SKIP) {
@@ -155,29 +170,31 @@ class PaymentCheckoutService
     }
 
     /**
-     * @return array{card: bool, paypal: bool, simulated: bool}
+     * @return array{card: bool, paypal: bool, revolut: bool, simulated: bool}
      */
     private static function paymentMethodsBaseAvailability(): array
     {
         $simulated = self::allowSimulatedPayments();
         $stripeOk = $simulated || StripeCredentials::areConfigured();
         $paypalOk = PayPalClient::envCredentialsPresent();
+        $revolutOk = RevolutCredentials::areConfigured();
 
         return [
             'card' => $stripeOk,
             'paypal' => $paypalOk,
+            'revolut' => $revolutOk,
             'simulated' => $simulated,
         ];
     }
 
     /**
-     * @param  array{card: bool, paypal: bool, simulated: bool}  $base
-     * @return array{card: bool, paypal: bool, simulated: bool}
+     * @param  array{card: bool, paypal: bool, revolut: bool, simulated: bool}  $base
+     * @return array{card: bool, paypal: bool, revolut: bool, simulated: bool}
      */
     private static function applyCheckoutMethodWhitelist(array $base): array
     {
         $allowed = self::checkoutMethodKeysFromConfig();
-        foreach (['card', 'paypal'] as $k) {
+        foreach (['card', 'paypal', 'revolut'] as $k) {
             if (! in_array($k, $allowed, true)) {
                 $base[$k] = false;
             }
@@ -189,7 +206,7 @@ class PaymentCheckoutService
     /**
      * Storefront + API: credential/simulated availability intersected with PAYMENTS_CHECKOUT_METHODS.
      *
-     * @return array{card: bool, paypal: bool, simulated: bool}
+     * @return array{card: bool, paypal: bool, revolut: bool, simulated: bool}
      */
     public static function paymentMethodsAvailability(): array
     {
@@ -203,6 +220,7 @@ class PaymentCheckoutService
         return match ($method) {
             Payment::METHOD_CARD => $a['card'],
             Payment::METHOD_PAYPAL => $a['paypal'],
+            Payment::METHOD_REVOLUT => $a['revolut'],
             default => false,
         };
     }

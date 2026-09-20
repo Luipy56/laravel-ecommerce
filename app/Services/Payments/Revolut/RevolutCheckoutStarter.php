@@ -3,12 +3,17 @@
 namespace App\Services\Payments\Revolut;
 
 use App\Contracts\Payments\PaymentCheckoutStarter;
+use App\Exceptions\PaymentProviderNotConfiguredException;
+use App\Models\Order;
 use App\Models\Payment;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 class RevolutCheckoutStarter implements PaymentCheckoutStarter
 {
+    public function __construct(
+        private readonly RevolutClient $client,
+    ) {}
+
     public function gateway(): string
     {
         return Payment::GATEWAY_REVOLUT;
@@ -16,41 +21,72 @@ class RevolutCheckoutStarter implements PaymentCheckoutStarter
 
     public function start(Payment $payment): array
     {
-        $apiKey = config('services.revolut.api_key');
-        if (! is_string($apiKey) || $apiKey === '') {
-            throw new RuntimeException('Revolut is not configured (REVOLUT_MERCHANT_API_KEY).');
+        if (! RevolutCredentials::areConfigured()) {
+            throw new PaymentProviderNotConfiguredException(
+                'Revolut is not configured (REVOLUT_MERCHANT_API_KEY).',
+            );
         }
 
-        $sandbox = (bool) config('services.revolut.sandbox', true);
-        $base = $sandbox
-            ? 'https://sandbox-merchant.revolut.com'
-            : 'https://merchant.revolut.com';
+        $payment->loadMissing('order.client');
+        $order = $payment->order;
+        if ($order === null) {
+            throw new RuntimeException('Payment has no order.');
+        }
 
-        $version = config('services.revolut.api_version', '2023-09-01');
+        if ($payment->gateway === Payment::GATEWAY_REVOLUT
+            && is_string($payment->gateway_reference)
+            && $payment->gateway_reference !== '') {
+            $existingUrl = $payment->metadata['revolut_checkout_url'] ?? null;
+            if (is_string($existingUrl) && $existingUrl !== '') {
+                return [
+                    'gateway' => Payment::GATEWAY_REVOLUT,
+                    'checkout_url' => $existingUrl,
+                    'revolut_order_id' => $payment->gateway_reference,
+                    'public_key' => RevolutCredentials::publicKey(),
+                    'sandbox' => RevolutCredentials::sandbox(),
+                ];
+            }
+        }
+
+        $baseUrl = rtrim((string) config('app.url'), '/');
+        $returnPath = $order->kind === Order::KIND_CART
+            ? '/checkout'
+            : '/orders/'.$order->id;
 
         $amountMinor = (int) round((float) $payment->amount * 100);
+        $currency = strtoupper((string) ($payment->currency ?? 'EUR'));
+        $extRef = 'payment_'.$payment->id;
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$apiKey,
-            'Revolut-Api-Version' => $version,
-            'Content-Type' => 'application/json',
-        ])->post($base.'/api/orders', [
+        $body = [
             'amount' => $amountMinor,
-            'currency' => strtoupper($payment->currency ?? 'EUR'),
+            'currency' => $currency,
             'capture_mode' => 'automatic',
-            'merchant_order_ext_ref' => 'payment_'.$payment->id,
-        ]);
+            'merchant_order_ext_ref' => $extRef,
+            'merchant_order_data' => [
+                'reference' => $extRef,
+            ],
+            'metadata' => [
+                'payment_id' => (string) $payment->id,
+                'order_id' => (string) $payment->order_id,
+            ],
+            // Known before create (unlike Revolut order id). Confirm + webhook both resolve the payment.
+            'redirect_url' => $baseUrl.$returnPath.'?payment=ok&revolut_payment='.$payment->id,
+        ];
 
-        if (! $response->successful()) {
-            throw new RuntimeException('Revolut order creation failed: '.$response->body());
+        $email = $order->client?->login_email;
+        if (is_string($email) && $email !== '') {
+            $body['customer'] = ['email' => $email];
         }
 
-        $body = $response->json();
-        $orderId = $body['id'] ?? null;
-        $checkoutUrl = $body['checkout_url'] ?? ($body['public_id'] ?? null);
+        $created = $this->client->createOrder($body);
+        $orderId = $created['id'] ?? null;
+        $checkoutUrl = $created['checkout_url'] ?? null;
 
-        if (! is_string($orderId)) {
+        if (! is_string($orderId) || $orderId === '') {
             throw new RuntimeException('Revolut response missing order id.');
+        }
+        if (! is_string($checkoutUrl) || $checkoutUrl === '') {
+            throw new RuntimeException('Revolut response missing checkout_url.');
         }
 
         $payment->update([
@@ -58,17 +94,17 @@ class RevolutCheckoutStarter implements PaymentCheckoutStarter
             'gateway_reference' => $orderId,
             'status' => Payment::STATUS_REQUIRES_ACTION,
             'metadata' => array_merge($payment->metadata ?? [], [
-                'revolut_checkout_url' => is_string($checkoutUrl) ? $checkoutUrl : null,
+                'revolut_checkout_url' => $checkoutUrl,
+                'revolut_token' => is_string($created['token'] ?? null) ? $created['token'] : null,
             ]),
         ]);
-
-        if (! is_string($checkoutUrl) || $checkoutUrl === '') {
-            throw new RuntimeException('Revolut response missing checkout_url.');
-        }
 
         return [
             'gateway' => Payment::GATEWAY_REVOLUT,
             'checkout_url' => $checkoutUrl,
+            'revolut_order_id' => $orderId,
+            'public_key' => RevolutCredentials::publicKey(),
+            'sandbox' => RevolutCredentials::sandbox(),
         ];
     }
 }

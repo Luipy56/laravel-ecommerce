@@ -45,6 +45,7 @@ use App\Http\Controllers\Api\PurchasedProductsController;
 use App\Http\Controllers\Api\AdminReturnRequestController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReturnRequestController;
+use App\Http\Controllers\Api\RevolutCheckoutConfirmController;
 use App\Http\Controllers\Api\ShopPublicSettingsController;
 use App\Http\Controllers\Api\StripeCheckoutConfirmController;
 use App\Http\Controllers\Api\UserController;
@@ -99,6 +100,7 @@ Route::post('public/personalized-solutions/{token}/request-improvements', [Publi
     ->where('token', '[a-f0-9]{64}');
 
 Route::post('payments/webhooks/stripe', [PaymentWebhookController::class, 'stripe']);
+Route::post('payments/webhooks/revolut', [PaymentWebhookController::class, 'revolut']);
 
 /* Cart: guest uses session, auth uses DB; controller branches */
 Route::get('cart', [CartController::class, 'show']);
@@ -139,6 +141,8 @@ Route::middleware(['auth', 'client.verified'])->group(function () {
 
     Route::post('payments/paypal/capture', [PayPalPaymentController::class, 'capture']);
     Route::post('payments/stripe/checkout/confirm', [StripeCheckoutConfirmController::class, 'store'])
+        ->middleware('throttle:12,1');
+    Route::post('payments/revolut/checkout/confirm', [RevolutCheckoutConfirmController::class, 'store'])
         ->middleware('throttle:12,1');
 
     Route::post('orders/checkout', [OrderController::class, 'checkout']);

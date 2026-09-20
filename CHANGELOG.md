@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.420] - 2026-09-20
+
+### Added
+- **Revolut Pay checkout:** hosted redirect via Merchant API (`REVOLUT_MERCHANT_API_KEY` / sandbox), storefront method alongside Stripe and PayPal, webhook `POST /api/v1/payments/webhooks/revolut` (HMAC), return confirm `POST /api/v1/payments/revolut/checkout/confirm`, and idempotent `php artisan revolut:register-webhook`.
+
 ## [0.1.419] - 2026-09-07
 
 ### Fixed

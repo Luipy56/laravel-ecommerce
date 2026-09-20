@@ -159,9 +159,12 @@ export default function OrderDetailPage() {
     const sp = new URLSearchParams(window.location.search);
     const payment = sp.get('payment');
     const sessionId = sp.get('session_id');
+    const revolutPaymentId = sp.get('revolut_payment');
+    const revolutOrderId = sp.get('revolut_order');
     const needsStripeConfirm = payment === 'ok' && !!sessionId;
+    const needsRevolutConfirm = payment === 'ok' && (!!revolutPaymentId || !!revolutOrderId);
     const needsRefresh =
-      payment != null || sp.has('payment_intent') || sp.has('redirect_status') || needsStripeConfirm;
+      payment != null || sp.has('payment_intent') || sp.has('redirect_status') || needsStripeConfirm || needsRevolutConfirm;
     if (!needsRefresh) return;
 
     let cancelled = false;
@@ -207,6 +210,24 @@ export default function OrderDetailPage() {
           }
         }
       }
+      if (needsRevolutConfirm) {
+        try {
+          const body = {};
+          if (revolutPaymentId) body.revolut_payment = Number(revolutPaymentId);
+          if (revolutOrderId) body.revolut_order = revolutOrderId;
+          const { data } = await api.post('payments/revolut/checkout/confirm', body);
+          if (!cancelled && data.success && data.data?.has_payment) {
+            emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
+          } else if (!cancelled && data?.message) {
+            emitAppToast(data.message, 'warning');
+          }
+        } catch (err) {
+          if (!cancelled) {
+            const msg = err.response?.data?.message || t('common.error');
+            emitAppToast(msg, 'error');
+          }
+        }
+      }
       if (!cancelled) {
         const r = await api.get(`orders/${id}`);
         if (r.data.success) setOrder(r.data.data);
@@ -240,7 +261,7 @@ export default function OrderDetailPage() {
         return;
       }
       const c = d.payment_checkout;
-      if (c?.gateway === 'stripe' && c.checkout_url) {
+      if ((c?.gateway === 'stripe' || c?.gateway === 'revolut') && c.checkout_url) {
         window.location.href = c.checkout_url;
         return;
       }
@@ -349,6 +370,7 @@ export default function OrderDetailPage() {
   const payAvail = order.payment_methods_available ?? {
     card: false,
     paypal: false,
+    revolut: false,
   };
   const paymentsSimulated = !!order.payments_simulated;
   const anyPaymentMethod = Object.values(payAvail).some(Boolean);
@@ -537,6 +559,11 @@ export default function OrderDetailPage() {
       {canPay && order.stripe_missing_credentials && (
         <div role="status" className="alert alert-info mt-4 text-sm">
           {t('checkout.payment.stripe_missing_credentials_hint')}
+        </div>
+      )}
+      {canPay && order.revolut_missing_credentials && (
+        <div role="status" className="alert alert-info mt-4 text-sm">
+          {t('checkout.payment.revolut_missing_credentials_hint')}
         </div>
       )}
       {canPay && (

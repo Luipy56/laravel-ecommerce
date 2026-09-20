@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\StripeWebhookEvent;
 use App\Services\Payments\PaymentCompletionService;
+use App\Services\Payments\Revolut\RevolutClient;
+use App\Services\Payments\Revolut\RevolutOrderCompleter;
+use App\Services\Payments\Revolut\RevolutSignature;
 use App\Services\Payments\Stripe\StripeCheckoutSessionCompleter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,12 +20,15 @@ use Stripe\Exception\SignatureVerificationException;
 use Stripe\PaymentIntent as StripePaymentIntent;
 use Stripe\Webhook;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Throwable;
 
 class PaymentWebhookController extends Controller
 {
     public function __construct(
         private readonly PaymentCompletionService $completion,
         private readonly StripeCheckoutSessionCompleter $stripeCheckoutSessionCompleter,
+        private readonly RevolutClient $revolutClient,
+        private readonly RevolutOrderCompleter $revolutOrderCompleter,
     ) {}
 
     public function stripe(Request $request): SymfonyResponse
@@ -222,5 +228,112 @@ class PaymentWebhookController extends Controller
             ->where('gateway', Payment::GATEWAY_STRIPE)
             ->where('gateway_reference', $intent->id)
             ->first();
+    }
+
+    public function revolut(Request $request): SymfonyResponse
+    {
+        $secret = config('services.revolut.webhook_secret');
+        if (! is_string($secret) || $secret === '') {
+            return response('Webhook not configured', 503);
+        }
+
+        $payload = $request->getContent();
+        $timestamp = (string) $request->header('Revolut-Request-Timestamp', '');
+        $signature = (string) $request->header('Revolut-Signature', '');
+
+        if (! RevolutSignature::isValid($payload, $timestamp, $signature, $secret)) {
+            return response('Invalid signature', 400);
+        }
+
+        $data = json_decode($payload, true);
+        if (! is_array($data)) {
+            return response('Invalid payload', 400);
+        }
+
+        $event = (string) ($data['event'] ?? '');
+        $orderId = $data['order_id'] ?? null;
+        if (! is_string($orderId) || $orderId === '') {
+            return response()->noContent(204);
+        }
+
+        match ($event) {
+            'ORDER_COMPLETED', 'ORDER_AUTHORISED' => $this->handleRevolutOrderPaid($orderId, $data),
+            'ORDER_CANCELLED' => $this->handleRevolutOrderCancelled($orderId, $data),
+            default => null,
+        };
+
+        return response()->noContent(204);
+    }
+
+    /**
+     * @param  array<string, mixed>  $webhookBody
+     */
+    private function handleRevolutOrderPaid(string $orderId, array $webhookBody): void
+    {
+        // Prefer local resolution (no Merchant API call) when the webhook carries enough refs.
+        $localPayload = array_merge($webhookBody, [
+            'id' => $orderId,
+            'state' => ($webhookBody['event'] ?? '') === 'ORDER_COMPLETED' ? 'completed' : 'authorised',
+        ]);
+        $payment = $this->revolutOrderCompleter->completeFromOrderPayload($localPayload);
+        if ($payment) {
+            Log::info('revolut.webhook.order_paid', [
+                'event' => $webhookBody['event'] ?? null,
+                'revolut_order_id' => $orderId,
+                'payment_id' => $payment->id,
+                'order_id' => $payment->order_id,
+                'via' => 'webhook_payload',
+            ]);
+
+            return;
+        }
+
+        try {
+            $revolutOrder = $this->revolutClient->retrieveOrder($orderId);
+        } catch (Throwable $e) {
+            Log::warning('revolut.webhook.retrieve_failed', [
+                'order_id' => $orderId,
+                'message' => $e->getMessage(),
+            ]);
+
+            return;
+        }
+
+        $payment = $this->revolutOrderCompleter->completeFromOrderPayload($revolutOrder);
+        if ($payment) {
+            Log::info('revolut.webhook.order_paid', [
+                'event' => $webhookBody['event'] ?? null,
+                'revolut_order_id' => $orderId,
+                'payment_id' => $payment->id,
+                'order_id' => $payment->order_id,
+                'via' => 'retrieve',
+            ]);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $webhookBody
+     */
+    private function handleRevolutOrderCancelled(string $orderId, array $webhookBody): void
+    {
+        $payment = Payment::query()
+            ->where('gateway', Payment::GATEWAY_REVOLUT)
+            ->where('gateway_reference', $orderId)
+            ->first();
+
+        if ($payment === null) {
+            $ext = $webhookBody['merchant_order_ext_ref'] ?? null;
+            if (is_string($ext) && preg_match('/^payment_(\d+)$/', $ext, $m)) {
+                $payment = Payment::query()->find((int) $m[1]);
+            }
+        }
+
+        if ($payment && $payment->status !== Payment::STATUS_SUCCEEDED) {
+            $this->completion->markCanceled($payment);
+            Log::info('revolut.webhook.order_cancelled', [
+                'revolut_order_id' => $orderId,
+                'payment_id' => $payment->id,
+            ]);
+        }
     }
 }

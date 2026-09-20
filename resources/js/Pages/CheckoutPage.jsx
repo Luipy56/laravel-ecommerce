@@ -45,6 +45,7 @@ export default function CheckoutPage() {
     local_checkout_needs_debug: false,
     paypal_missing_credentials: false,
     stripe_missing_credentials: false,
+    revolut_missing_credentials: false,
     paypal_mode: undefined,
     checkout_demo_skip_payment_allowed: false,
   });
@@ -59,7 +60,7 @@ export default function CheckoutPage() {
   /** Must choose a PSP method (not used when awaiting a manual installation quote only). */
   const paymentRequired = !wantsInstallation || !installationQuoteRequired;
   const allowedPaymentMethods = useMemo(() => {
-    if (payMethods === null) return ['card', 'paypal'];
+    if (payMethods === null) return ['card', 'paypal', 'revolut'];
     return CHECKOUT_PAYMENT_METHOD_ORDER.filter((k) => payMethods[k]);
   }, [payMethods]);
 
@@ -84,16 +85,18 @@ export default function CheckoutPage() {
             local_checkout_needs_debug: !!d.local_checkout_needs_debug,
             paypal_missing_credentials: !!d.paypal_missing_credentials,
             stripe_missing_credentials: !!d.stripe_missing_credentials,
+            revolut_missing_credentials: !!d.revolut_missing_credentials,
             paypal_mode: d.paypal_mode === 'live' ? 'live' : d.paypal_mode === 'sandbox' ? 'sandbox' : undefined,
             checkout_demo_skip_payment_allowed: !!d.checkout_demo_skip_payment_allowed,
           });
         } else {
-          setPayMethods({ card: false, paypal: false });
+          setPayMethods({ card: false, paypal: false, revolut: false });
           setPayConfigMeta({
             simulated: false,
             local_checkout_needs_debug: false,
             paypal_missing_credentials: false,
             stripe_missing_credentials: false,
+            revolut_missing_credentials: false,
             paypal_mode: undefined,
             checkout_demo_skip_payment_allowed: false,
           });
@@ -101,12 +104,13 @@ export default function CheckoutPage() {
       })
       .catch(() => {
         setPayConfigLoadError(true);
-        setPayMethods({ card: false, paypal: false });
+        setPayMethods({ card: false, paypal: false, revolut: false });
         setPayConfigMeta({
           simulated: false,
           local_checkout_needs_debug: false,
           paypal_missing_credentials: false,
           stripe_missing_credentials: false,
+          revolut_missing_credentials: false,
           paypal_mode: undefined,
           checkout_demo_skip_payment_allowed: false,
         });
@@ -159,7 +163,9 @@ export default function CheckoutPage() {
     const sp = new URLSearchParams(location.search);
     const payment = sp.get('payment');
     const sessionId = sp.get('session_id');
-    if (payment == null && !sessionId) return;
+    const revolutPaymentId = sp.get('revolut_payment');
+    const revolutOrderId = sp.get('revolut_order');
+    if (payment == null && !sessionId && !revolutPaymentId && !revolutOrderId) return;
 
     let cancelled = false;
 
@@ -178,6 +184,33 @@ export default function CheckoutPage() {
       if (payment === 'ok' && sessionId) {
         try {
           const { data } = await api.post('payments/stripe/checkout/confirm', { session_id: sessionId });
+          if (!cancelled && data.success && data.data?.has_payment) {
+            emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
+            const oid = data.data?.order?.id;
+            if (oid) {
+              navigate(`/orders/${oid}`, { replace: true });
+              return;
+            }
+          } else if (!cancelled && data?.message) {
+            emitAppToast(data.message, 'warning');
+          }
+        } catch (err) {
+          if (!cancelled) {
+            emitAppToast(err.response?.data?.message || t('common.error'), 'error');
+          }
+        }
+        if (!cancelled) {
+          await fetchCart();
+          navigate('/checkout', { replace: true });
+        }
+        return;
+      }
+      if (payment === 'ok' && (revolutPaymentId || revolutOrderId)) {
+        try {
+          const body = {};
+          if (revolutPaymentId) body.revolut_payment = Number(revolutPaymentId);
+          if (revolutOrderId) body.revolut_order = revolutOrderId;
+          const { data } = await api.post('payments/revolut/checkout/confirm', body);
           if (!cancelled && data.success && data.data?.has_payment) {
             emitAppToast(t('shop.order.stripe_confirm_ok'), 'success');
             const oid = data.data?.order?.id;
@@ -293,7 +326,7 @@ export default function CheckoutPage() {
       }
 
       const c = d.payment_checkout;
-      if (c?.gateway === 'stripe' && c.checkout_url) {
+      if ((c?.gateway === 'stripe' || c?.gateway === 'revolut') && c.checkout_url) {
         window.location.href = c.checkout_url;
         return;
       }
@@ -517,6 +550,9 @@ export default function CheckoutPage() {
                   )}
                   {payMethodsReady && !payConfigLoadError && payConfigMeta.stripe_missing_credentials && (
                     <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.stripe_missing_credentials_hint')}</p>
+                  )}
+                  {payMethodsReady && !payConfigLoadError && payConfigMeta.revolut_missing_credentials && (
+                    <p className="m-0 text-xs text-base-content/60">{t('checkout.payment.revolut_missing_credentials_hint')}</p>
                   )}
                   <label className="form-field w-full">
                     <span className="form-label">{t('checkout.payment_method')}</span>

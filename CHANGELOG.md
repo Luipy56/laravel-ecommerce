@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.11] - 2026-10-06
+
+### Changed
+- **Sierra agent architecture:** LLM-first with admin-chat pack as catalog (Maestro-style); heuristic is deny/hint/fallback only. Multi-intent greetings no longer swallow data questions. `order_search` returns money totals; Cursor uses `--mode ask`.
+
 ## [0.2.10] - 2026-10-06
 
 ### Fixed

@@ -350,7 +350,7 @@ class AdminChatToolService
      */
     private function orderSearch(array $args): array
     {
-        $query = Order::query()->with('client:id,login_email');
+        $query = Order::query()->with(['client:id,login_email', 'lines', 'payments']);
         $q = trim((string) ($args['q'] ?? ''));
         if ($q !== '') {
             if (is_numeric($q)) {
@@ -371,14 +371,21 @@ class AdminChatToolService
         }
         $limit = $this->chatLimit($args);
         $total = (clone $query)->count();
-        $rows = $query->orderByDesc('id')->limit($limit)->get()->map(fn (Order $o) => [
-            'id' => $o->id,
-            'kind' => $o->kind,
-            'status' => $o->status,
-            'client_id' => $o->client_id,
-            'client_email' => $o->client?->login_email,
-            'order_date' => $o->order_date?->toDateString(),
-        ])->all();
+        $rows = $query->orderByDesc('id')->limit($limit)->get()->map(function (Order $o) {
+            $paid = round((float) $o->payments->sum(fn ($p) => (float) $p->amount), 2);
+
+            return [
+                'id' => $o->id,
+                'kind' => $o->kind,
+                'status' => $o->status,
+                'client_id' => $o->client_id,
+                'client_email' => $o->client?->login_email,
+                'order_date' => $o->order_date?->toDateString(),
+                'lines_subtotal' => (float) $o->lines_subtotal,
+                'amount_due' => (float) $o->grand_total,
+                'payments_sum' => $paid,
+            ];
+        })->all();
 
         return $this->okList('orders', $rows, $total);
     }

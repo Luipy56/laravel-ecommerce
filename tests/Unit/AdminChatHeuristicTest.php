@@ -46,6 +46,14 @@ class AdminChatHeuristicTest extends TestCase
         $this->assertSame('identity', $r['reply'] ?? null);
     }
 
+    public function test_multi_intent_greeting_plus_orders_is_not_canned_identity(): void
+    {
+        $h = new AdminChatHeuristic;
+        $r = $h->suggest('Hola qué tal? Cómo te llamas? Puedes hacerme un resumen de los últimos pedidos respecto al dinero');
+        $this->assertNotSame('identity', $r['reply'] ?? null);
+        $this->assertSame('order_search', $r['name'] ?? null);
+    }
+
     public function test_demo_request(): void
     {
         $h = new AdminChatHeuristic;

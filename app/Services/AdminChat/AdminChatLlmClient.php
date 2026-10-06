@@ -90,8 +90,9 @@ class AdminChatLlmClient
         $workspace = storage_path('app/admin-chat/workspace');
         File::ensureDirectoryExists($workspace);
 
+        // ask = read-only Q&A (Sierra only needs JSON plan/reply, not shell/write tools).
         $process = new Process(
-            [$binary, '--yolo', '--print', '--trust', '--workspace', $workspace, $prompt],
+            [$binary, '--mode', 'ask', '--print', '--output-format', 'text', '--trust', '--workspace', $workspace, $prompt],
             $workspace,
             $env,
             null,

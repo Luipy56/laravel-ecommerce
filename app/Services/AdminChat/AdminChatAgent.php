@@ -22,23 +22,10 @@ class AdminChatAgent
         $provider = $this->normalizeProvider($provider);
         $suggested = $this->heuristic->suggest($message);
 
+        // Hard policy (like Maestro DENY) — never ask the LLM to violate this.
         if (is_array($suggested) && isset($suggested['deny'])) {
             return [
                 'reply' => $this->denyText((string) $suggested['deny']),
-                'provider' => $provider,
-                'tools' => [],
-                'downloads' => [],
-            ];
-        }
-
-        if (is_array($suggested) && isset($suggested['reply'])) {
-            $code = (string) $suggested['reply'];
-            if ($code === 'demo') {
-                return $this->demoReply($provider);
-            }
-
-            return [
-                'reply' => $this->cannedReply($code),
                 'provider' => $provider,
                 'tools' => [],
                 'downloads' => [],
@@ -49,7 +36,41 @@ class AdminChatAgent
         $downloads = [];
         $lastTool = null;
 
-        // Clear tool intents run immediately (Cursor/Ollama only for ambiguous text).
+        // Maestro-style: with an LLM provider, the pack + model choose tools.
+        // Heuristic is only a hint / fallback — never a script that skips the brain.
+        if (in_array($provider, ['ollama', 'cursor'], true)) {
+            $loop = $this->llmLoop($message, $provider, $history, $suggested, $used, $downloads, $lastTool);
+            if ($loop !== null) {
+                return $loop;
+            }
+            $provider = $provider.'+fallback';
+        }
+
+        return $this->heuristicHandle($suggested, $provider, $used, $downloads);
+    }
+
+    /**
+     * @param  array{name?: string, args?: array<string, mixed>, reply?: string, deny?: string}|null  $suggested
+     * @param  list<string>  $used
+     * @param  list<array<string, mixed>>  $downloads
+     * @return array{reply: string, provider: string, tools: list<string>, downloads: list<array<string, mixed>>}
+     */
+    private function heuristicHandle(?array $suggested, string $provider, array $used, array $downloads): array
+    {
+        if (is_array($suggested) && isset($suggested['reply'])) {
+            $code = (string) $suggested['reply'];
+            if ($code === 'demo') {
+                return $this->demoReply($provider);
+            }
+
+            return [
+                'reply' => $this->cannedReply($code),
+                'provider' => $provider,
+                'tools' => $used,
+                'downloads' => $downloads,
+            ];
+        }
+
         if (is_array($suggested) && isset($suggested['name'])) {
             $result = $this->tools->run((string) $suggested['name'], $suggested['args'] ?? []);
             $used[] = (string) $suggested['name'];
@@ -63,14 +84,6 @@ class AdminChatAgent
                 'tools' => $used,
                 'downloads' => $downloads,
             ];
-        }
-
-        if (in_array($provider, ['ollama', 'cursor'], true)) {
-            $loop = $this->llmLoop($message, $provider, $history, $used, $downloads, $lastTool);
-            if ($loop !== null) {
-                return $loop;
-            }
-            $provider = $provider.'+fallback';
         }
 
         return [
@@ -106,19 +119,32 @@ class AdminChatAgent
 
     /**
      * @param  list<array{role: string, content: string}>  $history
+     * @param  array{name?: string, args?: array<string, mixed>, reply?: string}|null  $hint
      * @param  list<string>  $used
      * @param  list<array<string, mixed>>  $downloads
      * @return array{reply: string, provider: string, tools: list<string>, downloads: list<array<string, mixed>>}|null
      */
-    private function llmLoop(string $message, string $provider, array $history, array &$used, array &$downloads, mixed &$lastTool): ?array
+    private function llmLoop(string $message, string $provider, array $history, ?array $hint, array &$used, array &$downloads, mixed &$lastTool): ?array
     {
-        $system = 'You are Sierra, the admin assistant for Serralleria Solidària.'."\n"
-            ."Always identify as Sierra when asked your name.\n"
-            ."Follow the pack. Output JSON only.\n"
-            ."{\"action\":\"tool\",\"name\":\"...\",\"args\":{}} or {\"action\":\"reply\",\"text\":\"...\"}.\n"
-            ."For greetings or identity questions, use action=reply (no tools).\n"
-            ."v1 is read-only. Answer in the user's language. Compact answers.\n\n"
-            .$this->pack->load();
+        $system = implode("\n", [
+            'You are Sierra, the admin assistant for Serralleria Solidària.',
+            'Operate like Maestro: read the pack below as your catalog of policy + tools, then choose.',
+            'Always identify as Sierra when asked your name — but if the user ALSO asks for data, answer BOTH (greet briefly, then use tools for the data).',
+            'Never invent rows, IDs, prices, stock, or money. Use tools from TOOLS.md only.',
+            'v1 is read-only (see DENY.md).',
+            'Output ONE JSON object only, no markdown:',
+            '{"action":"tool","name":"...","args":{}} OR {"action":"reply","text":"..."}',
+            'After a TOOL_RESULT, reply with action=reply and a short human answer in the user language.',
+            'Prefer one tool, then answer. For money/order summaries use order_search (includes totals) or explorer_aggregate on payments.',
+            '',
+            $this->pack->load(),
+        ]);
+
+        if (is_array($hint) && isset($hint['name'])) {
+            $system .= "\n\n# HEURISTIC_HINT (optional, not mandatory)\n"
+                .json_encode(['name' => $hint['name'], 'args' => $hint['args'] ?? []], JSON_UNESCAPED_UNICODE);
+        }
+
         $messages = [
             ['role' => 'system', 'content' => $system],
         ];
@@ -164,7 +190,8 @@ class AdminChatAgent
                 $downloads[] = $result['download'];
             }
             $messages[] = ['role' => 'assistant', 'content' => json_encode($action, JSON_UNESCAPED_UNICODE)];
-            $messages[] = ['role' => 'user', 'content' => 'TOOL_RESULT '.json_encode($result, JSON_UNESCAPED_UNICODE)."\nNow reply with action=reply and a short human answer in Spanish (or the user language)."];
+            $messages[] = ['role' => 'user', 'content' => 'TOOL_RESULT '.json_encode($result, JSON_UNESCAPED_UNICODE)
+                ."\nNow reply with action=reply and a short human answer in the user's language. If they also asked your name, say you are Sierra in one short clause."];
         }
 
         if (is_array($lastTool) && $lastName !== '') {
@@ -239,7 +266,7 @@ class AdminChatAgent
                     ? 'No he encontrado '.$label.' que coincidan con «'.$q.'».'
                     : 'No he encontrado '.$label.'.';
             }
-            $lines = ['He encontrado '.$total.' '.$label.( $shown < $total ? ' (muestro '.$shown.')' : '').':'];
+            $lines = ['He encontrado '.$total.' '.$label.($shown < $total ? ' (muestro '.$shown.')' : '').':'];
             foreach (array_slice($data, 0, 10) as $row) {
                 if (! is_array($row)) {
                     continue;
@@ -272,17 +299,26 @@ class AdminChatAgent
             if ($total === 0 || $data === []) {
                 return 'No he encontrado ese pedido.';
             }
-            $label = $tool === 'order_search' ? 'Últimos pedidos (kind=order), total '.$total.':' : 'Pedido:';
-            $lines = $tool === 'order_search' ? [$label] : [];
+            $moneySum = 0.0;
+            $lines = $tool === 'order_search'
+                ? ['Últimos pedidos (total '.$total.', muestro '.min(10, count($data)).'):']
+                : [];
             foreach (array_slice($data, 0, 10) as $row) {
                 if (! is_array($row)) {
                     continue;
                 }
+                $due = isset($row['amount_due']) ? (float) $row['amount_due'] : (isset($row['lines_subtotal']) ? (float) $row['lines_subtotal'] : null);
+                if ($due !== null) {
+                    $moneySum += $due;
+                }
                 $lines[] = '· #'.($row['id'] ?? '?')
                     .' · '.($row['status'] ?? '?')
                     .(! empty($row['order_date']) ? ' · '.$row['order_date'] : '')
-                    .(! empty($row['client_email']) ? ' · '.$row['client_email'] : '')
-                    .' · factura/albarán: «factura del pedido '.($row['id'] ?? '').'»';
+                    .($due !== null ? ' · '.$due.' €' : '')
+                    .(! empty($row['client_email']) ? ' · '.$row['client_email'] : '');
+            }
+            if ($tool === 'order_search' && $moneySum > 0) {
+                $lines[] = 'Suma (mostrados): '.round($moneySum, 2).' €';
             }
 
             return implode("\n", $lines);
@@ -309,7 +345,7 @@ class AdminChatAgent
                 continue;
             }
             $bits = [];
-            foreach (['id', 'code', 'name', 'kind', 'status', 'login_email', 'stock', 'price', 'group_value', 'aggregate_value'] as $k) {
+            foreach (['id', 'code', 'name', 'kind', 'status', 'login_email', 'stock', 'price', 'group_value', 'aggregate_value', 'amount_due', 'lines_subtotal'] as $k) {
                 if (array_key_exists($k, $row) && $row[$k] !== null && $row[$k] !== '') {
                     $bits[] = $k.'='.$row[$k];
                 }

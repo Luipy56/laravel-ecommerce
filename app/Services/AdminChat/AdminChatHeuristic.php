@@ -14,12 +14,15 @@ class AdminChatHeuristic
             return null;
         }
 
-        if ($this->isDemoRequest($t)) {
-            return ['reply' => 'demo'];
-        }
-
-        if ($this->isIdentityOrHelp($t)) {
-            return ['reply' => 'identity'];
+        // Identity/demo only when the message is NOT also a data question.
+        // Multi-intent ("hola, cómo te llamas y resume pedidos…") must reach the LLM.
+        if (! $this->hasDataIntent($t)) {
+            if ($this->isDemoRequest($t)) {
+                return ['reply' => 'demo'];
+            }
+            if ($this->isIdentityOrHelp($t)) {
+                return ['reply' => 'identity'];
+            }
         }
 
         if (preg_match('/\b(crea|crear|inserta|insertar|modifica|modificar|borra|borrar|elimina|eliminar|actualiza|actualizar|sube|subir|upload|png|jpg|edita|editar)\b/u', $t)
@@ -38,9 +41,13 @@ class AdminChatHeuristic
             return ['name' => 'order_export_doc', 'args' => ['id' => $id, 'doc' => $doc]];
         }
 
-        // Recent invoices / last N orders (confirmed kind=order).
-        if (preg_match('/\b(factura|facturas|invoice|invoices)\b/u', $t)
-            && preg_match('/\b(\d{1,2}|diez|últim|ultim|recient|list|resumen|mostrar|muestra|dame)\b/u', $t)) {
+        // Recent invoices / last N orders / money summary (confirmed kind=order).
+        if (
+            (preg_match('/\b(factura|facturas|invoice|invoices)\b/u', $t)
+                && preg_match('/\b(\d{1,2}|diez|últim|ultim|recient|list|resumen|mostrar|muestra|dame)\b/u', $t))
+            || (preg_match('/\b(pedidos?|orders?)\b/u', $t)
+                && preg_match('/\b(últim|ultim|recient|resumen|dinero|importe|total|euros?|€)\b/u', $t))
+        ) {
             $limit = 10;
             if (preg_match('/\b(\d{1,2})\b/u', $t, $m)) {
                 $limit = max(1, min(20, (int) $m[1]));
@@ -111,6 +118,14 @@ class AdminChatHeuristic
         }
 
         return null;
+    }
+
+    private function hasDataIntent(string $t): bool
+    {
+        return (bool) preg_match(
+            '/\b(pedido|pedidos|factura|facturas|producto|productos|pack|packs|categor|cliente|clientes|pago|pagos|dinero|importe|total|stock|csv|export|albar[aá]n|invoice|order|sku|c[oó]digo|resumen|cu[aá]nt)\b/u',
+            $t
+        );
     }
 
     private function isIdentityOrHelp(string $t): bool

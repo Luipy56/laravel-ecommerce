@@ -61,7 +61,8 @@ Wraps admin `show`. Compact fields only (no full image payloads; image count + f
 ## order_search
 
 Args: optional `q`, `status`, `kind`, `client_id`, `date_from`, `date_to`, `limit`.  
-Wraps `GET /api/v1/admin/orders`. Compact: id, kind, status, client_id, order_date, totals if present.
+Wraps admin orders index. Compact: id, kind, status, client_id, order_date, **`lines_subtotal`**, **`amount_due`** (grand total), **`payments_sum`**.  
+Use this for “últimos pedidos”, “resumen de facturas”, “respecto al dinero”.
 
 ## order_get
 

@@ -161,12 +161,12 @@ class AdminChatAgent
         for ($i = 0; $i < $max; $i++) {
             $action = $this->llm->complete($provider, $messages);
             if ($action === null) {
-                return null;
+                break;
             }
             if (($action['action'] ?? '') === 'reply') {
                 $text = trim((string) ($action['text'] ?? ''));
                 if ($text === '') {
-                    return null;
+                    break;
                 }
 
                 return [
@@ -178,7 +178,7 @@ class AdminChatAgent
             }
             $name = (string) ($action['name'] ?? '');
             if ($name === '') {
-                return null;
+                break;
             }
             $args = $action['args'] ?? [];
             $result = $this->tools->run($name, is_array($args) ? $args : []);
@@ -194,6 +194,7 @@ class AdminChatAgent
                 ."\nNow reply with action=reply and a short human answer in the user's language. If they also asked your name, say you are Sierra in one short clause."];
         }
 
+        // If the model called a tool but never produced a final reply, still surface the data.
         if (is_array($lastTool) && $lastName !== '') {
             return [
                 'reply' => $this->formatToolReply($lastName, $lastTool, $lastArgs),

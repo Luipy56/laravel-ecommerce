@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.12] - 2026-10-06
+
+### Fixed
+- **Sierra:** if the LLM runs a tool but fails to draft the final reply, still return the tool data (no double heuristic run).
+
 ## [0.2.11] - 2026-10-06
 
 ### Changed

@@ -172,20 +172,28 @@ class AdminChatAgent
 
         if ($tool === 'explorer_aggregate') {
             $table = (string) ($args['table'] ?? 'tabla');
-            $lines = ['Conteo de '.$table.':'];
+            $groupBy = (string) ($args['group_by'] ?? '');
+            $sum = 0;
+            $lines = [];
             foreach (array_slice($data, 0, 20) as $row) {
                 if (! is_array($row)) {
                     continue;
                 }
                 $g = $row['group_value'] ?? '?';
-                $v = $row['aggregate_value'] ?? 0;
-                $lines[] = '· '.$g.': '.$v;
+                $v = (int) ($row['aggregate_value'] ?? 0);
+                $sum += $v;
+                if ($groupBy === 'is_active') {
+                    $label = ((string) $g === '1' || $g === 1 || $g === true) ? 'activos' : 'inactivos';
+                    $lines[] = '· '.$label.': '.$v;
+                } else {
+                    $lines[] = '· '.$g.': '.$v;
+                }
             }
-            if (count($lines) === 1) {
+            if ($lines === []) {
                 return 'No hay grupos para '.$table.'.';
             }
 
-            return implode("\n", $lines);
+            return 'Total '.$table.': '.$sum."\n".implode("\n", $lines);
         }
 
         if ($tool === 'catalog_search') {

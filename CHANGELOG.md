@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.8] - 2026-10-06
+
+### Changed
+- **Sierra:** aggregate counts show total plus active/inactive labels instead of raw `1: N`.
+
 ## [0.2.7] - 2026-10-06
 
 ### Changed

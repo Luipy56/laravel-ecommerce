@@ -6,16 +6,12 @@ import { IconCollapse, IconExpand } from '../icons';
 const PROVIDERS = ['ollama', 'cursor', 'heuristic'];
 const STORAGE_PROVIDER = 'admin-chat-provider';
 const STORAGE_EXPANDED = 'admin-chat-expanded';
-const KEY_MARK = '/images/serraller_solidaria_logo_key.png';
+const KEY_MARK = '/images/serraller_solidaria_chat_key.png';
 
-function BrandKey({ className = 'h-8 w-8', blend = false }) {
+function BrandKey({ className = 'h-8 w-8' }) {
   return (
-    <span className={`inline-flex overflow-hidden rounded-full ${className}`}>
-      <img
-        src={KEY_MARK}
-        alt=""
-        className={`h-full w-[170%] max-w-none object-cover object-left ${blend ? 'mix-blend-screen' : ''}`}
-      />
+    <span className={`inline-flex items-center justify-center overflow-hidden rounded-full bg-base-100 ${className}`}>
+      <img src={KEY_MARK} alt="" className="h-[58%] w-[58%] object-contain" />
     </span>
   );
 }
@@ -103,9 +99,7 @@ export default function AdminChatWidget() {
           aria-label={t('admin.chat.title')}
         >
           <header className="flex items-center gap-2 border-b border-base-200 bg-gradient-to-r from-primary to-secondary px-3 py-2 text-primary-content">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-base-100">
-              <BrandKey className="h-8 w-8" />
-            </span>
+            <BrandKey className="h-8 w-8 shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold leading-tight">{t('admin.chat.title')}</p>
               <p className="truncate text-[10px] opacity-80">{t('admin.chat.subtitle')}</p>
@@ -189,7 +183,7 @@ export default function AdminChatWidget() {
         {open ? (
           <span className="text-2xl leading-none" aria-hidden="true">×</span>
         ) : (
-          <BrandKey className="h-10 w-10" blend />
+          <BrandKey className="h-11 w-11" />
         )}
       </button>
     </>

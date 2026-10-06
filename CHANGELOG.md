@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.5] - 2026-10-06
+
+### Changed
+- **Admin chat key:** clean transparent key mark with padding on a white disc (FAB and header); no crop/blend of the full wordmark.
+
 ## [0.2.4] - 2026-10-06
 
 ### Changed

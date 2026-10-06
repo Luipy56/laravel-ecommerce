@@ -39,6 +39,38 @@ class AdminChatHeuristicTest extends TestCase
         $this->assertArrayNotHasKey('name', $r);
     }
 
+    public function test_capabilities_is_identity(): void
+    {
+        $h = new AdminChatHeuristic;
+        $r = $h->suggest('dime qué puedes hacer');
+        $this->assertSame('identity', $r['reply'] ?? null);
+    }
+
+    public function test_demo_request(): void
+    {
+        $h = new AdminChatHeuristic;
+        $r = $h->suggest('enséñame una de esas acciones, demuéstrame cómo lo haces');
+        $this->assertSame('demo', $r['reply'] ?? null);
+    }
+
+    public function test_recent_invoices(): void
+    {
+        $h = new AdminChatHeuristic;
+        $r = $h->suggest('Resumen de las últimas diez facturas');
+        $this->assertSame('order_search', $r['name'] ?? null);
+        $this->assertSame('order', $r['args']['kind'] ?? null);
+        $this->assertSame(10, $r['args']['limit'] ?? null);
+    }
+
+    public function test_list_categories(): void
+    {
+        $h = new AdminChatHeuristic;
+        $r = $h->suggest('¿Cómo se llaman las categorías?');
+        $this->assertSame('catalog_search', $r['name'] ?? null);
+        $this->assertSame('category', $r['args']['kind'] ?? null);
+        $this->assertSame('', $r['args']['q'] ?? null);
+    }
+
     public function test_vague_product_asks_for_code(): void
     {
         $h = new AdminChatHeuristic;

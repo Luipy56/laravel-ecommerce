@@ -80,19 +80,19 @@ class AdminChatLlmClient
         if (! is_array($env)) {
             $env = [];
         }
-        // PHP-FPM runs as www-data; prefer CURSOR_API_KEY from app env when present.
         $apiKey = env('CURSOR_API_KEY');
         if (is_string($apiKey) && $apiKey !== '') {
             $env['CURSOR_API_KEY'] = $apiKey;
         }
-        $home = config('admin_chat.cursor.home');
-        if (is_string($home) && $home !== '') {
-            $env['HOME'] = $home;
-        }
+        $env['HOME'] = $this->writableCursorHome();
+
+        // Prefer a scratch workspace: the baked app tree is root-owned and agent may mkdir.
+        $workspace = storage_path('app/admin-chat/workspace');
+        File::ensureDirectoryExists($workspace);
 
         $process = new Process(
-            [$binary, '--yolo', '--print', '--trust', '--workspace', base_path(), $prompt],
-            base_path(),
+            [$binary, '--yolo', '--print', '--trust', '--workspace', $workspace, $prompt],
+            $workspace,
             $env,
             null,
             $timeout
@@ -101,7 +101,10 @@ class AdminChatLlmClient
         try {
             $process->mustRun();
         } catch (ProcessFailedException) {
-            Log::warning('admin_chat: cursor-agent failed', ['exit' => $process->getExitCode()]);
+            Log::warning('admin_chat: cursor-agent failed', [
+                'exit' => $process->getExitCode(),
+                'stderr' => mb_substr($process->getErrorOutput(), 0, 500),
+            ]);
             $stdout = $process->getOutput();
 
             return $this->parseJsonAction($stdout);
@@ -115,6 +118,34 @@ class AdminChatLlmClient
         }
 
         return $this->parseJsonAction($process->getOutput());
+    }
+
+    /**
+     * cursor-agent needs a writable HOME (ro auth mount alone is not enough).
+     */
+    private function writableCursorHome(): string
+    {
+        $home = storage_path('app/admin-chat/cursor-home');
+        File::ensureDirectoryExists($home.'/.config/cursor');
+        File::ensureDirectoryExists($home.'/.cursor');
+
+        $authTarget = $home.'/.config/cursor/auth.json';
+        if (! File::isFile($authTarget)) {
+            $seed = config('admin_chat.cursor.home');
+            $seedAuth = is_string($seed) && $seed !== ''
+                ? rtrim($seed, '/').'/.config/cursor/auth.json'
+                : '';
+            if ($seedAuth !== '' && File::isFile($seedAuth)) {
+                File::copy($seedAuth, $authTarget);
+            }
+        }
+
+        @chmod($home, 0775);
+        @chmod($home.'/.config', 0775);
+        @chmod($home.'/.config/cursor', 0775);
+        @chmod($home.'/.cursor', 0775);
+
+        return $home;
     }
 
     /**

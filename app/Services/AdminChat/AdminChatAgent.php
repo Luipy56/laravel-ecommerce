@@ -32,8 +32,13 @@ class AdminChatAgent
         }
 
         if (is_array($suggested) && isset($suggested['reply'])) {
+            $code = (string) $suggested['reply'];
+            if ($code === 'demo') {
+                return $this->demoReply($provider);
+            }
+
             return [
-                'reply' => $this->cannedReply((string) $suggested['reply']),
+                'reply' => $this->cannedReply($code),
                 'provider' => $provider,
                 'tools' => [],
                 'downloads' => [],
@@ -44,14 +49,7 @@ class AdminChatAgent
         $downloads = [];
         $lastTool = null;
 
-        if (in_array($provider, ['ollama', 'cursor'], true)) {
-            $loop = $this->llmLoop($message, $provider, $history, $used, $downloads, $lastTool);
-            if ($loop !== null) {
-                return $loop;
-            }
-            $provider = $provider.'+fallback';
-        }
-
+        // Clear tool intents run immediately (Cursor/Ollama only for ambiguous text).
         if (is_array($suggested) && isset($suggested['name'])) {
             $result = $this->tools->run((string) $suggested['name'], $suggested['args'] ?? []);
             $used[] = (string) $suggested['name'];
@@ -67,11 +65,42 @@ class AdminChatAgent
             ];
         }
 
+        if (in_array($provider, ['ollama', 'cursor'], true)) {
+            $loop = $this->llmLoop($message, $provider, $history, $used, $downloads, $lastTool);
+            if ($loop !== null) {
+                return $loop;
+            }
+            $provider = $provider.'+fallback';
+        }
+
         return [
             'reply' => $this->cannedReply('unclear'),
             'provider' => $provider,
             'tools' => $used,
             'downloads' => $downloads,
+        ];
+    }
+
+    /**
+     * @return array{reply: string, provider: string, tools: list<string>, downloads: list<array<string, mixed>>}
+     */
+    private function demoReply(string $provider): array
+    {
+        $result = $this->tools->run('explorer_aggregate', [
+            'table' => 'clients',
+            'metric' => 'count',
+            'group_by' => 'is_active',
+        ]);
+        $body = $this->formatToolReply('explorer_aggregate', $result, [
+            'table' => 'clients',
+            'group_by' => 'is_active',
+        ]);
+
+        return [
+            'reply' => $this->cannedReply('identity')."\n\nDemo rápida (conteo de clientes):\n".$body,
+            'provider' => $provider,
+            'tools' => ['explorer_aggregate'],
+            'downloads' => [],
         ];
     }
 
@@ -243,15 +272,17 @@ class AdminChatAgent
             if ($total === 0 || $data === []) {
                 return 'No he encontrado ese pedido.';
             }
-            $lines = [];
+            $label = $tool === 'order_search' ? 'Últimos pedidos (kind=order), total '.$total.':' : 'Pedido:';
+            $lines = $tool === 'order_search' ? [$label] : [];
             foreach (array_slice($data, 0, 10) as $row) {
                 if (! is_array($row)) {
                     continue;
                 }
-                $lines[] = 'Pedido #'.($row['id'] ?? '?')
-                    .' · kind='.($row['kind'] ?? '?')
-                    .' · status='.($row['status'] ?? '?')
-                    .(! empty($row['client_email']) ? ' · '.$row['client_email'] : '');
+                $lines[] = '· #'.($row['id'] ?? '?')
+                    .' · '.($row['status'] ?? '?')
+                    .(! empty($row['order_date']) ? ' · '.$row['order_date'] : '')
+                    .(! empty($row['client_email']) ? ' · '.$row['client_email'] : '')
+                    .' · factura/albarán: «factura del pedido '.($row['id'] ?? '').'»';
             }
 
             return implode("\n", $lines);
@@ -307,7 +338,7 @@ class AdminChatAgent
                 .'Puedo consultar el catálogo (productos, packs, categorías), clientes, pedidos y pagos; '
                 .'contar registros; exportar CSV; y abrir factura/albarán HTML. '
                 .'En esta versión solo leo y exporto: no creo ni edito datos. '
-                .'Prueba: «¿cuántos clientes hay?», «busca producto evoK1», «factura del pedido 12».',
+                .'Prueba: «¿cuántos clientes hay?», «busca producto evoK1», «últimas 10 facturas», «factura del pedido 12».',
             'need_product_query' => 'Dime un código o nombre de producto (ej. «existe evoK1» o «busca bombín»).',
             default => 'No estoy segura de lo que pides. Puedo buscar productos/packs, contar clientes o pedidos, '
                 .'ver un pedido por id, o exportar CSV/factura. Pregúntame con un dato concreto.',

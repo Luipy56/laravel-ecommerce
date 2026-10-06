@@ -14,6 +14,10 @@ class AdminChatHeuristic
             return null;
         }
 
+        if ($this->isDemoRequest($t)) {
+            return ['reply' => 'demo'];
+        }
+
         if ($this->isIdentityOrHelp($t)) {
             return ['reply' => 'identity'];
         }
@@ -32,6 +36,19 @@ class AdminChatHeuristic
             $doc = preg_match('/albar|delivery/u', $t) ? 'delivery_note' : 'invoice';
 
             return ['name' => 'order_export_doc', 'args' => ['id' => $id, 'doc' => $doc]];
+        }
+
+        // Recent invoices / last N orders (confirmed kind=order).
+        if (preg_match('/\b(factura|facturas|invoice|invoices)\b/u', $t)
+            && preg_match('/\b(\d{1,2}|diez|últim|ultim|recient|list|resumen|mostrar|muestra|dame)\b/u', $t)) {
+            $limit = 10;
+            if (preg_match('/\b(\d{1,2})\b/u', $t, $m)) {
+                $limit = max(1, min(20, (int) $m[1]));
+            } elseif (preg_match('/\bdiez\b/u', $t)) {
+                $limit = 10;
+            }
+
+            return ['name' => 'order_search', 'args' => ['kind' => 'order', 'limit' => $limit]];
         }
 
         if (preg_match('/\b(csv|exporta|exportar|descarga)\b/u', $t)) {
@@ -56,6 +73,9 @@ class AdminChatHeuristic
         if (preg_match('/cu[aá]nt[oa]s?.{0,20}pedidos/u', $t) || preg_match('/pedidos.{0,20}hay/u', $t)) {
             return ['name' => 'explorer_aggregate', 'args' => ['table' => 'orders', 'metric' => 'count', 'group_by' => 'kind']];
         }
+        if (preg_match('/cu[aá]nt[oa]s?.{0,20}packs?\b/u', $t) || preg_match('/\bpacks?\b.{0,20}hay/u', $t)) {
+            return ['name' => 'catalog_search', 'args' => ['kind' => 'pack', 'q' => '', 'limit' => 20]];
+        }
 
         if (preg_match('/\b(pedido|order|comanda)\b.{0,12}(\d{1,9})/u', $t, $m)) {
             return ['name' => 'order_get', 'args' => ['id' => (int) $m[2]]];
@@ -64,13 +84,15 @@ class AdminChatHeuristic
             return ['name' => 'order_get', 'args' => ['id' => (int) $m[1]]];
         }
 
+        if (preg_match('/categor|tipo de product/u', $t)) {
+            $q = $this->isListAllIntent($t) ? '' : $this->searchNeedle($t);
+
+            return ['name' => 'catalog_search', 'args' => ['kind' => 'category', 'q' => $q, 'limit' => 30]];
+        }
         if (preg_match('/\bpacks?\b|lote/u', $t)) {
-            $q = $this->searchNeedle($t);
+            $q = $this->isListAllIntent($t) ? '' : $this->searchNeedle($t);
 
             return ['name' => 'catalog_search', 'args' => ['kind' => 'pack', 'q' => $q]];
-        }
-        if (preg_match('/categor|tipo de product/u', $t)) {
-            return ['name' => 'catalog_search', 'args' => ['kind' => 'category', 'q' => $this->searchNeedle($t)]];
         }
         if (preg_match('/cliente|email|nif|cif/u', $t) && preg_match('/@|\d{5,}/u', $t)) {
             return ['name' => 'client_search', 'args' => ['q' => $this->searchNeedle($t)]];
@@ -88,7 +110,6 @@ class AdminChatHeuristic
             return ['name' => 'catalog_search', 'args' => ['kind' => 'product', 'q' => $q]];
         }
 
-        // Do not invent a catalog search for chit-chat or unclear text.
         return null;
     }
 
@@ -99,15 +120,28 @@ class AdminChatHeuristic
         }
 
         return (bool) preg_match(
-            '/\b(c[oó]mo te llamas|qui[eé]n eres|quien eres|tu nombre|your name|qu[eé] eres|qu[eé] haces|cu[aá]l es tu funci[oó]n|what (?:are|do) you|help|ayuda|qui[eé]n soy)\b/u',
+            '/\b(c[oó]mo te llamas|qui[eé]n eres|quien eres|tu nombre|your name|qu[eé] eres|qu[eé] haces|qu[eé] puedes|qu[eé] sabes|cu[aá]l es tu funci[oó]n|what (?:are|do) you|help|ayuda|capacidades|en qu[eé] puedes)\b/u',
             $t
         );
+    }
+
+    private function isDemoRequest(string $t): bool
+    {
+        return (bool) preg_match('/\b(demostr\w*|ens[eé][nñ]ame|enséñame|muéstrame|muestrame|hazme una demo|pru[eé]bate)\b/u', $t);
+    }
+
+    private function isListAllIntent(string $t): bool
+    {
+        return (bool) preg_match(
+            '/\b(cu[aá]nt|list|lista|tod[oa]s|nombre|nombres|c[oó]mo se llama|cu[aá]les|hay|existen|mostrar|muestra|dame)\b/u',
+            $t
+        ) && ! preg_match('/\b(busca|buscar|filtra|con c[oó]digo)\b/u', $t);
     }
 
     private function searchNeedle(string $t): string
     {
         $stripped = preg_replace(
-            '/\b(hola|existe|existen|hay|tienes|tenemos|busca|buscar|quiero|saber|si|un|una|el|la|los|las|de|del|producto|productos|pack|packs|categor[ií]a|tipo|cu[aá]ntos|cu[aá]ntas|pedidos?|clientes?|c[oó]digo|sku|por favor|me puedes|puedes|dime|decir)\b/u',
+            '/\b(hola|existe|existen|hay|tienes|tenemos|busca|buscar|quiero|saber|si|un|una|el|la|los|las|de|del|producto|productos|pack|packs|categor[ií]as?|tipo|cu[aá]ntos|cu[aá]ntas|cu[aá]les|pedidos?|clientes?|c[oó]digo|sku|por favor|me puedes|puedes|dime|decir|c[oó]mo|se|llaman|llamáis|nombres?|lista|listar|todas|todos|resumen|últimas|ultimas|últimos|ultimos|recientes|facturas?|invoices?)\b/u',
             ' ',
             $t
         ) ?? $t;

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.10] - 2026-10-06
+
+### Fixed
+- **Sierra + Cursor:** writable HOME for cursor-agent (auth seed + project dirs); clear tool intents skip LLM; recent invoices, demo/capabilities, list packs/categories.
+
 ## [0.2.9] - 2026-10-06
 
 ### Fixed

@@ -5,13 +5,17 @@ namespace App\Services\AdminChat;
 class AdminChatHeuristic
 {
     /**
-     * @return array{name: string, args: array<string, mixed>}|array{deny: string}|null
+     * @return array{name: string, args: array<string, mixed>}|array{deny: string}|array{reply: string}|null
      */
     public function suggest(string $message): ?array
     {
         $t = mb_strtolower(trim($message));
         if ($t === '') {
             return null;
+        }
+
+        if ($this->isIdentityOrHelp($t)) {
+            return ['reply' => 'identity'];
         }
 
         if (preg_match('/\b(crea|crear|inserta|insertar|modifica|modificar|borra|borrar|elimina|eliminar|actualiza|actualizar|sube|subir|upload|png|jpg|edita|editar)\b/u', $t)
@@ -46,10 +50,10 @@ class AdminChatHeuristic
         if (preg_match('/cu[aá]nt[oa]s?.{0,20}(clientes|usuarios)/u', $t) || preg_match('/(clientes|usuarios).{0,20}hay/u', $t)) {
             return ['name' => 'explorer_aggregate', 'args' => ['table' => 'clients', 'metric' => 'count', 'group_by' => 'is_active']];
         }
-        if (preg_match('/cu[aá]nt[oa]s?.{0,20}productos/u', $t)) {
+        if (preg_match('/cu[aá]nt[oa]s?.{0,20}productos/u', $t) || preg_match('/productos.{0,20}hay/u', $t)) {
             return ['name' => 'explorer_aggregate', 'args' => ['table' => 'products', 'metric' => 'count', 'group_by' => 'is_active']];
         }
-        if (preg_match('/cu[aá]nt[oa]s?.{0,20}pedidos/u', $t)) {
+        if (preg_match('/cu[aá]nt[oa]s?.{0,20}pedidos/u', $t) || preg_match('/pedidos.{0,20}hay/u', $t)) {
             return ['name' => 'explorer_aggregate', 'args' => ['table' => 'orders', 'metric' => 'count', 'group_by' => 'kind']];
         }
 
@@ -61,7 +65,9 @@ class AdminChatHeuristic
         }
 
         if (preg_match('/\bpacks?\b|lote/u', $t)) {
-            return ['name' => 'catalog_search', 'args' => ['kind' => 'pack', 'q' => $this->searchNeedle($t)]];
+            $q = $this->searchNeedle($t);
+
+            return ['name' => 'catalog_search', 'args' => ['kind' => 'pack', 'q' => $q]];
         }
         if (preg_match('/categor|tipo de product/u', $t)) {
             return ['name' => 'catalog_search', 'args' => ['kind' => 'category', 'q' => $this->searchNeedle($t)]];
@@ -73,14 +79,41 @@ class AdminChatHeuristic
             return ['name' => 'stats_get', 'args' => ['which' => 'low_stock']];
         }
 
-        return ['name' => 'catalog_search', 'args' => ['kind' => 'product', 'q' => $this->searchNeedle($t)]];
+        if (preg_match('/\b(producto|sku|c[oó]digo|existe|buscar|busca)\b/u', $t)) {
+            $q = $this->searchNeedle($t);
+            if ($q === '' || mb_strlen($q) < 2) {
+                return ['reply' => 'need_product_query'];
+            }
+
+            return ['name' => 'catalog_search', 'args' => ['kind' => 'product', 'q' => $q]];
+        }
+
+        // Do not invent a catalog search for chit-chat or unclear text.
+        return null;
+    }
+
+    private function isIdentityOrHelp(string $t): bool
+    {
+        if (preg_match('/^(hola|hello|hi|bon dia|buenas|hey)[!?.\s]*$/u', $t)) {
+            return true;
+        }
+
+        return (bool) preg_match(
+            '/\b(c[oó]mo te llamas|qui[eé]n eres|quien eres|tu nombre|your name|qu[eé] eres|qu[eé] haces|cu[aá]l es tu funci[oó]n|what (?:are|do) you|help|ayuda|qui[eé]n soy)\b/u',
+            $t
+        );
     }
 
     private function searchNeedle(string $t): string
     {
-        $stripped = preg_replace('/\b(existe|hay|tienes|tenemos|busca|buscar|quiero|saber|si|un|una|el|la|los|las|de|del|producto|pack|categor[ií]a|tipo|cu[aá]ntos|cu[aá]ntas|pedidos?|clientes?)\b/u', ' ', $t) ?? $t;
+        $stripped = preg_replace(
+            '/\b(hola|existe|existen|hay|tienes|tenemos|busca|buscar|quiero|saber|si|un|una|el|la|los|las|de|del|producto|productos|pack|packs|categor[ií]a|tipo|cu[aá]ntos|cu[aá]ntas|pedidos?|clientes?|c[oó]digo|sku|por favor|me puedes|puedes|dime|decir)\b/u',
+            ' ',
+            $t
+        ) ?? $t;
+        $stripped = trim(preg_replace('/[¿?¡!.,;:]+/u', ' ', $stripped) ?? $stripped);
         $stripped = trim(preg_replace('/\s+/', ' ', $stripped) ?? $stripped);
 
-        return mb_substr($stripped !== '' ? $stripped : $t, 0, 80);
+        return mb_substr($stripped, 0, 80);
     }
 }

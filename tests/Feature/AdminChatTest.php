@@ -27,18 +27,35 @@ class AdminChatTest extends TestCase
         ])->assertStatus(401);
     }
 
+    public function test_admin_identity_reply_as_sierra(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $this->loginAsAdmin();
+
+        $resp = $this->postJson('/api/v1/admin/chat', [
+            'message' => 'Hola, cómo te llamas y cuál es tu función?',
+            'provider' => 'heuristic',
+        ])->assertOk()->assertJsonPath('success', true);
+
+        $reply = (string) $resp->json('data.reply');
+        $this->assertStringContainsString('Sierra', $reply);
+        $this->assertSame([], $resp->json('data.tools'));
+        $this->assertStringNotContainsString('products total=', $reply);
+    }
+
     public function test_admin_can_search_catalog_via_heuristic(): void
     {
         $this->seed(DatabaseSeeder::class);
         $this->loginAsAdmin();
 
         $resp = $this->postJson('/api/v1/admin/chat', [
-            'message' => '¿existe un producto?',
+            'message' => 'busca producto evo',
             'provider' => 'heuristic',
         ])->assertOk()->assertJsonPath('success', true);
 
         $this->assertNotEmpty($resp->json('data.reply'));
         $this->assertContains('catalog_search', $resp->json('data.tools'));
+        $this->assertStringNotContainsString('products total=', (string) $resp->json('data.reply'));
     }
 
     public function test_admin_write_request_is_refused(): void

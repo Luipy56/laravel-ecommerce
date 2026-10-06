@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.9] - 2026-10-06
+
+### Fixed
+- **Sierra chat:** stick-to-bottom autoscroll on send/receive; pauses when the operator scrolls up.
+
 ## [0.2.8] - 2026-10-06
 
 ### Changed

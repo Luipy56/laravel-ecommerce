@@ -39,6 +39,25 @@ export default function AdminChatWidget() {
   const [messages, setMessages] = useState([]);
   const panelRef = useRef(null);
   const inputRef = useRef(null);
+  const listRef = useRef(null);
+  // Stick to bottom unless the operator scrolls up on purpose (Discord/WhatsApp style).
+  const stickToBottomRef = useRef(true);
+
+  const isNearBottom = useCallback((el) => {
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight <= 80;
+  }, []);
+
+  const scrollToBottom = useCallback((force = false) => {
+    const el = listRef.current;
+    if (!el) return;
+    if (!force && !stickToBottomRef.current) return;
+    el.scrollTop = el.scrollHeight;
+  }, []);
+
+  const onListScroll = useCallback(() => {
+    stickToBottomRef.current = isNearBottom(listRef.current);
+  }, [isNearBottom]);
 
   useEffect(() => {
     try {
@@ -59,18 +78,26 @@ export default function AdminChatWidget() {
   useEffect(() => {
     if (!open) return undefined;
     inputRef.current?.focus();
+    stickToBottomRef.current = true;
+    requestAnimationFrame(() => scrollToBottom(true));
     const onKey = (e) => {
       if (e.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
+  }, [open, scrollToBottom]);
+
+  useEffect(() => {
+    if (!open) return;
+    requestAnimationFrame(() => scrollToBottom());
+  }, [messages, busy, open, expanded, scrollToBottom]);
 
   const send = useCallback(async () => {
     const text = draft.trim();
     if (!text || busy) return;
     const history = messages.map((m) => ({ role: m.role, content: m.content }));
     setDraft('');
+    stickToBottomRef.current = true;
     setMessages((prev) => [...prev, { role: 'user', content: text }]);
     setBusy(true);
     try {
@@ -129,7 +156,11 @@ export default function AdminChatWidget() {
               ))}
             </select>
           </label>
-          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-2 text-sm">
+          <div
+            ref={listRef}
+            onScroll={onListScroll}
+            className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-2 text-sm"
+          >
             {messages.length === 0 && (
               <p className="text-base-content/60">{t('admin.chat.empty')}</p>
             )}

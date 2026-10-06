@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminAboutController;
 use App\Http\Controllers\Api\AdminAdminController;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminCategoryController;
+use App\Http\Controllers\Api\AdminChatController;
 use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminDataExplorerController;
@@ -234,4 +235,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::delete('personalized-solutions/{personalized_solution}', [AdminPersonalizedSolutionController::class, 'destroy']);
     Route::post('send-email', AdminSendEmailController::class)->middleware('throttle:10,1');
     Route::post('help-requests', [AdminHelpController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('chat/config', [AdminChatController::class, 'config']);
+    Route::post('chat', [AdminChatController::class, 'message'])->middleware('throttle:30,1');
+    Route::get('chat/downloads/{token}', [AdminChatController::class, 'download']);
 });

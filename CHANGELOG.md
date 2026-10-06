@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.3] - 2026-10-06
+
+### Added
+- **Admin chat v1:** FAB in the admin shell (Serra colours/logo), `POST /api/v1/admin/chat` with Ollama / Cursor / tools-only providers, read+export tools, context pack in `docs/admin-chat/`.
+
 ## [0.2.2] - 2026-10-06
 
 ### Changed

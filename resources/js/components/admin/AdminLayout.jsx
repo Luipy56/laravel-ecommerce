@@ -5,6 +5,7 @@ import { api } from '../../api';
 import { IconMenu, IconMoon, IconSun } from '../icons';
 import { AdminToastProvider } from '../../contexts/AdminToastContext';
 import { APP_VERSION } from '../../config/version';
+import AdminChatWidget from './AdminChatWidget';
 
 const SECTION_NAV_KEYS = {
   about: 'admin.nav.about',
@@ -372,6 +373,7 @@ export default function AdminLayout() {
           </div>
         </aside>
       </div>
+      <AdminChatWidget />
     </div>
   );
 }

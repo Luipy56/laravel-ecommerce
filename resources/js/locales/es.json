@@ -1193,5 +1193,17 @@
   "admin.send_email.default_subject_order": "Referente al pedido #{{id}}",
   "admin.send_email.default_subject_return": "Referente a la devolución #{{id}}",
   "admin.send_email.default_subject_solution": "Referente a la solicitud #{{id}}",
-  "admin.send_email.default_subject_client": "Mensaje desde la tienda"
+  "admin.send_email.default_subject_client": "Mensaje desde la tienda",
+  "admin.chat.title": "Asistente admin",
+  "admin.chat.subtitle": "Lectura y exports · catálogo, pedidos, clientes",
+  "admin.chat.open": "Abrir chat de administración",
+  "admin.chat.placeholder": "Pregunta por un producto, pedido, cliente…",
+  "admin.chat.send": "Enviar",
+  "admin.chat.empty": "v1 es solo lectura. Prueba: ¿existe el producto X? ¿cuántos clientes hay? factura del pedido 12.",
+  "admin.chat.error": "El asistente no ha podido responder. Inténtalo de nuevo.",
+  "admin.chat.download": "Descargar archivo",
+  "admin.chat.provider": "Modelo",
+  "admin.chat.provider_ollama": "Ollama",
+  "admin.chat.provider_cursor": "Cursor",
+  "admin.chat.provider_heuristic": "Solo tools"
 }

@@ -102,10 +102,34 @@ class CheckoutPaymentConfigTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.methods.card', true);
         $response->assertJsonPath('data.methods.paypal', true);
+        $response->assertJsonPath('data.methods.revolut', false);
         $response->assertJsonPath('data.simulated', false);
         $response->assertJsonPath('data.paypal_missing_credentials', false);
         $response->assertJsonPath('data.stripe_missing_credentials', false);
+        $response->assertJsonPath('data.revolut_missing_credentials', false);
         $response->assertJsonPath('data.paypal_mode', 'sandbox');
+    }
+
+    public function test_payments_config_exposes_revolut_when_configured_and_whitelisted(): void
+    {
+        config([
+            'payments.checkout_method_keys' => ['card', 'paypal', 'revolut'],
+            'payments.allow_simulated' => false,
+            'app.debug' => true,
+            'services.stripe.key' => '',
+            'services.stripe.secret' => '',
+            'services.paypal.client_id' => '',
+            'services.paypal.secret' => '',
+            'services.revolut.api_key' => 'sk_test_revolut',
+            'services.revolut.sandbox' => true,
+        ]);
+
+        $response = $this->getJson('/api/v1/payments/config');
+        $response->assertOk();
+        $response->assertJsonPath('data.methods.card', false);
+        $response->assertJsonPath('data.methods.paypal', false);
+        $response->assertJsonPath('data.methods.revolut', true);
+        $response->assertJsonPath('data.revolut_missing_credentials', false);
     }
 
     public function test_payments_config_respects_checkout_method_whitelist(): void

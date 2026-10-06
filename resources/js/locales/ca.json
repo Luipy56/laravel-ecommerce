@@ -1193,5 +1193,17 @@
   "admin.send_email.default_subject_order": "Referent a la comanda #{{id}}",
   "admin.send_email.default_subject_return": "Referent a la devolució #{{id}}",
   "admin.send_email.default_subject_solution": "Referent a la sol·licitud #{{id}}",
-  "admin.send_email.default_subject_client": "Missatge des de la botiga"
+  "admin.send_email.default_subject_client": "Missatge des de la botiga",
+  "admin.chat.title": "Assistent admin",
+  "admin.chat.subtitle": "Lectura i exports · catàleg, comandes, clients",
+  "admin.chat.open": "Obrir xat d’administració",
+  "admin.chat.placeholder": "Pregunta per un producte, comanda, client…",
+  "admin.chat.send": "Enviar",
+  "admin.chat.empty": "v1 és només lectura. Prova: existeix el producte X? quants clients hi ha? factura de la comanda 12.",
+  "admin.chat.error": "L’assistent no ha pogut respondre. Torna-ho a provar.",
+  "admin.chat.download": "Descarregar fitxer",
+  "admin.chat.provider": "Model",
+  "admin.chat.provider_ollama": "Ollama",
+  "admin.chat.provider_cursor": "Cursor",
+  "admin.chat.provider_heuristic": "Només tools"
 }

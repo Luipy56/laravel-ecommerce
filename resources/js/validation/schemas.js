@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /** Order of options in checkout / pay forms (must match server `payment_method` values). */
-export const CHECKOUT_PAYMENT_METHOD_ORDER = ['card', 'paypal'];
+export const CHECKOUT_PAYMENT_METHOD_ORDER = ['card', 'paypal', 'revolut'];
 
 /** Optional phone: empty or international-style with at least 6 digits. */
 export const optionalPhoneString = z
@@ -82,7 +82,7 @@ export function checkoutFormSchema({
   wantsInstallation,
   installationQuoteRequired,
   checkoutDemoSkipPayment = false,
-  allowedPaymentMethods = ['card', 'paypal'],
+  allowedPaymentMethods = ['card', 'paypal', 'revolut'],
 }) {
   const allowed = [...new Set((allowedPaymentMethods || []).filter(Boolean))];
   const paymentMethodSchema = z

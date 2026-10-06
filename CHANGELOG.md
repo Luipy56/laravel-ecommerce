@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.2.3] - 2026-10-06
+
+### Added
+- **Admin chat v1:** FAB in the admin shell (Serra colours/logo), `POST /api/v1/admin/chat` with Ollama / Cursor / tools-only providers, read+export tools, context pack in `docs/admin-chat/`.
+
+## [0.2.2] - 2026-10-06
+
+### Changed
+- **Admin login background:** static glass-orange still (`/images/admin-login-bg.png`) instead of the animated brand gradient.
+
+## [0.2.1] - 2026-09-20
+
+### Changed
+- **Version dump:** storefront/admin semver jumps from the `0.1.x` line to **`0.2.1`** (Revolut Pay checkout + webhook on stage).
+
+### Added
+- **Revolut Pay** (from `0.1.420`): Merchant API hosted checkout, HMAC webhook, return confirm, `revolut:register-webhook`.
+
+## [0.1.422] - 2026-09-20
+
+### Fixed
+- **PayPalPaymentTest:** availability payload always includes `revolut` (false without keys); assert false instead of missing key (Stage CI #79/#80).
+
+## [0.1.421] - 2026-09-20
+
+### Fixed
+- **`revolut:register-webhook --write-env`:** allow creating a new env file when the parent directory is writable; still print the signing secret if write fails.
+
+## [0.1.420] - 2026-09-20
+
+### Added
+- **Revolut Pay checkout:** hosted redirect via Merchant API (`REVOLUT_MERCHANT_API_KEY` / sandbox), storefront method alongside Stripe and PayPal, webhook `POST /api/v1/payments/webhooks/revolut` (HMAC), return confirm `POST /api/v1/payments/revolut/checkout/confirm`, and idempotent `php artisan revolut:register-webhook`.
+
 ## [0.1.419] - 2026-09-07
 
 ### Fixed

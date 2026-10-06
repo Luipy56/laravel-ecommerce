@@ -27,16 +27,16 @@ return [
 
     /*
     | Comma-separated payment_method keys exposed on the storefront and accepted by checkout/pay.
-    | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal.
+    | Valid: card (Stripe Checkout: cards, wallets, Bizum when enabled in Stripe), paypal, revolut.
     |
-    | Omitted or empty string in .env → card and paypal are allowed
+    | Omitted or empty string in .env → card, paypal and revolut are allowed
     | (then filtered by PSP credentials).
     |
     | Invalid tokens are ignored; if the list is empty after parsing, defaults apply.
     */
     'checkout_method_keys' => (function () {
-        $valid = ['card', 'paypal'];
-        $defaults = ['card', 'paypal'];
+        $valid = ['card', 'paypal', 'revolut'];
+        $defaults = ['card', 'paypal', 'revolut'];
         $raw = env('PAYMENTS_CHECKOUT_METHODS');
         if ($raw === null || trim((string) $raw) === '') {
             return $defaults;

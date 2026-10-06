@@ -50,7 +50,8 @@ return [
 
     'revolut' => [
         'api_key' => env('REVOLUT_MERCHANT_API_KEY'),
-        'api_version' => env('REVOLUT_API_VERSION', '2023-09-01'),
+        'public_key' => env('REVOLUT_PUBLIC_KEY'),
+        'api_version' => env('REVOLUT_API_VERSION', '2024-09-01'),
         'sandbox' => env('REVOLUT_SANDBOX', true),
         'webhook_secret' => env('REVOLUT_WEBHOOK_SECRET'),
     ],

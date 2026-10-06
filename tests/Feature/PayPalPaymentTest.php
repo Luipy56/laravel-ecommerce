@@ -96,14 +96,16 @@ class PayPalPaymentTest extends TestCase
             'services.stripe.secret' => '',
             'services.paypal.client_id' => self::FAKE_PAYPAL_CLIENT_ID,
             'services.paypal.secret' => self::FAKE_PAYPAL_SECRET,
+            'services.revolut.api_key' => '',
         ]);
 
         $a = PaymentCheckoutService::paymentMethodsAvailability();
         $this->assertTrue($a['paypal']);
         $this->assertFalse($a['card']);
-        $this->assertArrayNotHasKey('revolut', $a);
+        $this->assertFalse($a['revolut']);
         $this->assertTrue(PaymentCheckoutService::isPaymentMethodAvailable(Payment::METHOD_PAYPAL));
         $this->assertFalse(PaymentCheckoutService::isPaymentMethodAvailable(Payment::METHOD_CARD));
+        $this->assertFalse(PaymentCheckoutService::isPaymentMethodAvailable(Payment::METHOD_REVOLUT));
     }
 
     public function test_paypal_checkout_starter_creates_order_and_updates_payment(): void

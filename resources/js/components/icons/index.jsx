@@ -376,6 +376,17 @@ export function IconMoon({ className, strokeWidth, ...rest }) {
   );
 }
 
+export function IconChat({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path
+        strokeWidth={strokeWidth ?? 2}
+        d="M8 10.5h8M8 14h5M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.25-.94L3 20l.94-3.76A7.7 7.7 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+      />
+    </IconWrapper>
+  );
+}
+
 export function IconTag({ className, strokeWidth, ...rest }) {
   return (
     <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>

@@ -53,4 +53,5 @@ Task pipeline and roles: **`docs/agent-loop.md`** (target **`autoagents/tasks/`*
 ## Related documentation
 
 - **`docs/agent-loop.md`** — roles, task filenames, GitHub labels, orchestrator.
+- **`docs/admin-chat/`** — admin assistant v1 (read + exports; FAB in AdminLayout).
 - **`docs/CONFIGURACION_PAGOS_CORREO.md`** — payment env vars (Stripe, PayPal, etc.).

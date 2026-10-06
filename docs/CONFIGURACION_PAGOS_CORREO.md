@@ -10,6 +10,7 @@ La aplicación no muestra formularios “del banco” genéricos en vacío: cada
 |---------------------|----------------|---------------------------------------------|
 | Tarjeta (etiqueta amplia: incluye Bizum y monederos donde Stripe lo permita en ES) | **Stripe Checkout** (`STRIPE_KEY` + `STRIPE_SECRET`) | Tras crear el pedido, el navegador **redirige** a la página alojada de Stripe. El pedido pasa a pagado cuando el webhook `POST /api/v1/payments/webhooks/stripe` procesa `checkout.session.completed` con firma válida (`STRIPE_WEBHOOK_SECRET`). Opcional: `STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES` (p. ej. `card,bizum`). Tras volver de Stripe con `?payment=ok&session_id=…`, el cliente autenticado puede llamar **`POST /api/v1/payments/stripe/checkout/confirm`** con `{ "session_id": "…" }` para completar el pago en servidor si el webhook va retrasado (idempotente con el webhook). |
 | PayPal              | **PayPal REST** (`PAYPAL_CLIENT_ID` + `PAYPAL_SECRET`, `PAYPAL_MODE=sandbox` o `live`) | Tras iniciar el pago, si la API devuelve enlace de aprobación, el navegador **redirige** a PayPal; si no, se muestran los Smart Payment Buttons en la tienda. La captura se confirma en el servidor (`POST /api/v1/payments/paypal/capture`) **después** de que el comprador complete el flujo en PayPal. |
+| Revolut Pay         | **Revolut Merchant API** (`REVOLUT_MERCHANT_API_KEY`, `REVOLUT_SANDBOX`, `REVOLUT_WEBHOOK_SECRET`) | Tras iniciar el pago, el navegador **redirige** a la página alojada de Revolut (`checkout_url`). El pedido pasa a pagado con `POST /api/v1/payments/webhooks/revolut` (`ORDER_COMPLETED` / `ORDER_AUTHORISED`, firma HMAC) o, al volver con `?payment=ok&revolut_payment=…`, con **`POST /api/v1/payments/revolut/checkout/confirm`**. Registrar el webhook **una sola vez**: `php artisan revolut:register-webhook --write-env=/ruta/.env` (idempotente: si la URL ya existe, solo recupera el `signing_secret`). |
 
 Si faltan credenciales, el listado de métodos en checkout y en el pedido se acorta o queda vacío, y las peticiones `POST …/orders/.../pay` pueden responder **422** con código `payment_method_not_configured`. Los mensajes tipo “Stripe is not configured” o “PayPal is not configured” indican falta de variables en `.env`, no un fallo del navegador. Puedes comprobar OAuth de PayPal con `php artisan paypal:test-credentials` (tras configurar `PAYPAL_*`).
 
@@ -19,15 +20,16 @@ Copia desde `.env.example` y rellena según el proveedor que uses:
 
 - **Stripe:** `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET` (obligatorio en producción para marcar pedidos como pagados de forma fiable). Opcional: `STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES` (por defecto en código: `card,bizum`; ajustar según cuenta y país).
 - **PayPal:** `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_MODE` (`sandbox` o `live`).
+- **Revolut:** `REVOLUT_MERCHANT_API_KEY`, opcional `REVOLUT_PUBLIC_KEY`, `REVOLUT_SANDBOX` (`true`/`false`), `REVOLUT_API_VERSION` (por defecto `2024-09-01`), `REVOLUT_WEBHOOK_SECRET` (salida de `revolut:register-webhook`).
 
 Tras cambiar `.env`, reinicia PHP-FPM / el contenedor o `php artisan config:clear` según tu despliegue.
 
 ### Limitar métodos en la tienda (`PAYMENTS_CHECKOUT_METHODS`)
 
-Por defecto el checkout ofrece **card** y **paypal** (según credenciales y simulación): variable **omitida** o **cadena vacía** en `.env` equivale a permitir ambos métodos. Para incluir explícitamente tarjeta (Stripe Checkout) y PayPal:
+Por defecto el checkout ofrece **card**, **paypal** y **revolut** (según credenciales y simulación): variable **omitida** o **cadena vacía** en `.env` equivale a permitir esos métodos. Para incluir explícitamente tarjeta (Stripe Checkout), PayPal y Revolut:
 
 ```env
-PAYMENTS_CHECKOUT_METHODS=card,paypal
+PAYMENTS_CHECKOUT_METHODS=card,paypal,revolut
 ```
 
 **Importante:** si defines **solo** `PAYMENTS_CHECKOUT_METHODS=paypal` (por ejemplo para pruebas E2E de PayPal), el endpoint `GET /api/v1/payments/config` devolverá `data.methods.card: false` aunque `STRIPE_KEY` / `STRIPE_SECRET` estén configurados: la lista blanca limita qué métodos se exponen. Para mostrar tarjeta en producción junto a PayPal, deja la variable vacía o incluye `card` en la lista.
@@ -38,7 +40,7 @@ Para mostrar y aceptar **solo uno** (por ejemplo solo PayPal), define en `.env`:
 PAYMENTS_CHECKOUT_METHODS=paypal
 ```
 
-Valores válidos: `card`, `paypal` (separados por comas). Los tokens inválidos se ignoran; si la lista queda vacía, se usan **solo** `card` y `paypal` por defecto. Las peticiones con un método fuera de la lista reciben error de validación.
+Valores válidos: `card`, `paypal`, `revolut` (separados por comas). Los tokens inválidos se ignoran; si la lista queda vacía, se usan **card**, **paypal** y **revolut** por defecto. Las peticiones con un método fuera de la lista reciben error de validación.
 
 ### Stripe CLI: webhooks en desarrollo local
 

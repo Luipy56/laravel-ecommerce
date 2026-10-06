@@ -387,6 +387,24 @@ export function IconChat({ className, strokeWidth, ...rest }) {
   );
 }
 
+/** Gmail-style pop-out (enlarge panel). */
+export function IconExpand({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path strokeWidth={strokeWidth ?? 2} d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+    </IconWrapper>
+  );
+}
+
+/** Gmail-style restore (shrink panel). */
+export function IconCollapse({ className, strokeWidth, ...rest }) {
+  return (
+    <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>
+      <path strokeWidth={strokeWidth ?? 2} d="M3 9h6V3M21 15h-6v6M9 9L3 3M15 15l6 6" />
+    </IconWrapper>
+  );
+}
+
 export function IconTag({ className, strokeWidth, ...rest }) {
   return (
     <IconWrapper className={className} strokeWidth={strokeWidth} {...rest}>

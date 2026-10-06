@@ -1,14 +1,35 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
-import { IconChat } from '../icons';
+import { IconCollapse, IconExpand } from '../icons';
 
 const PROVIDERS = ['ollama', 'cursor', 'heuristic'];
 const STORAGE_PROVIDER = 'admin-chat-provider';
+const STORAGE_EXPANDED = 'admin-chat-expanded';
+const KEY_MARK = '/images/serraller_solidaria_logo_key.png';
+
+function BrandKey({ className = 'h-8 w-8', blend = false }) {
+  return (
+    <span className={`inline-flex overflow-hidden rounded-full ${className}`}>
+      <img
+        src={KEY_MARK}
+        alt=""
+        className={`h-full w-[170%] max-w-none object-cover object-left ${blend ? 'mix-blend-screen' : ''}`}
+      />
+    </span>
+  );
+}
 
 export default function AdminChatWidget() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_EXPANDED) === '1';
+    } catch {
+      return false;
+    }
+  });
   const [provider, setProvider] = useState(() => {
     try {
       const v = localStorage.getItem(STORAGE_PROVIDER);
@@ -30,6 +51,14 @@ export default function AdminChatWidget() {
       // ignore
     }
   }, [provider]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_EXPANDED, expanded ? '1' : '0');
+    } catch {
+      // ignore
+    }
+  }, [expanded]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -61,20 +90,35 @@ export default function AdminChatWidget() {
     }
   }, [busy, draft, messages, provider, t]);
 
+  const panelClass = expanded
+    ? 'fixed bottom-6 right-6 z-[60] flex h-[min(85dvh,42rem)] w-[min(96vw,48rem)] flex-col overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-2xl'
+    : 'fixed bottom-24 right-4 z-[60] flex h-[min(70dvh,28rem)] w-[min(100vw-1.5rem,22rem)] flex-col overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-2xl sm:right-6';
+
   return (
     <>
       {open && (
         <section
           ref={panelRef}
-          className="fixed bottom-24 right-4 z-[60] flex w-[min(100vw-1.5rem,22rem)] flex-col overflow-hidden rounded-2xl border border-base-200 bg-base-100 shadow-2xl sm:right-6"
+          className={panelClass}
           aria-label={t('admin.chat.title')}
         >
           <header className="flex items-center gap-2 border-b border-base-200 bg-gradient-to-r from-primary to-secondary px-3 py-2 text-primary-content">
-            <img src="/images/serraller_solidaria_logo.png" alt="" className="h-8 w-8 rounded-full bg-base-100 object-contain p-0.5" />
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-base-100">
+              <BrandKey className="h-8 w-8" />
+            </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold leading-tight">{t('admin.chat.title')}</p>
               <p className="truncate text-[10px] opacity-80">{t('admin.chat.subtitle')}</p>
             </div>
+            <button
+              type="button"
+              className="btn btn-ghost btn-xs text-primary-content"
+              onClick={() => setExpanded((v) => !v)}
+              aria-label={expanded ? t('admin.chat.collapse') : t('admin.chat.expand')}
+              title={expanded ? t('admin.chat.collapse') : t('admin.chat.expand')}
+            >
+              {expanded ? <IconCollapse className="h-4 w-4" /> : <IconExpand className="h-4 w-4" />}
+            </button>
             <button type="button" className="btn btn-ghost btn-xs text-primary-content" onClick={() => setOpen(false)} aria-label={t('common.close')}>
               ×
             </button>
@@ -91,7 +135,7 @@ export default function AdminChatWidget() {
               ))}
             </select>
           </label>
-          <div className="flex max-h-72 min-h-40 flex-col gap-2 overflow-y-auto px-3 py-2 text-sm">
+          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-2 text-sm">
             {messages.length === 0 && (
               <p className="text-base-content/60">{t('admin.chat.empty')}</p>
             )}
@@ -116,8 +160,8 @@ export default function AdminChatWidget() {
           >
             <textarea
               ref={inputRef}
-              className="textarea textarea-bordered textarea-sm min-h-12 flex-1"
-              rows={2}
+              className={`textarea textarea-bordered textarea-sm flex-1 ${expanded ? 'min-h-20' : 'min-h-12'}`}
+              rows={expanded ? 4 : 2}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder={t('admin.chat.placeholder')}
@@ -138,17 +182,14 @@ export default function AdminChatWidget() {
       <button
         type="button"
         className="btn btn-circle fixed bottom-6 right-6 z-50 min-h-14 min-w-14 border-0 bg-gradient-to-br from-primary to-secondary p-0 text-primary-content shadow-lg shadow-primary/25 ring-1 ring-inset ring-white/15 hover:brightness-110"
-        aria-label={t('admin.chat.open')}
+        aria-label={open ? t('common.close') : t('admin.chat.open')}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
         {open ? (
           <span className="text-2xl leading-none" aria-hidden="true">×</span>
         ) : (
-          <span className="relative flex h-full w-full items-center justify-center">
-            <img src="/images/serraller_solidaria_logo.png" alt="" className="absolute h-8 w-8 rounded-full bg-base-100 object-contain p-0.5 opacity-95" />
-            <IconChat className="absolute bottom-1 right-1 h-4 w-4 drop-shadow" aria-hidden="true" />
-          </span>
+          <BrandKey className="h-10 w-10" blend />
         )}
       </button>
     </>

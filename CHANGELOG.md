@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.4] - 2026-10-06
+
+### Changed
+- **Admin chat:** FAB and header use the key mark only (`serraller_solidaria_logo_key.png`); Gmail-style enlarge/restore on the panel.
+
 ## [0.2.3] - 2026-10-06
 
 ### Added

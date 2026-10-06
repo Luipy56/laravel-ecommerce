@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.2] - 2026-10-06
+
+### Changed
+- **Admin login background:** static glass-orange still (`/images/admin-login-bg.png`) instead of the animated brand gradient.
+
 ## [0.2.1] - 2026-09-20
 
 ### Changed

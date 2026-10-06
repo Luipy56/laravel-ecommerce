@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.6] - 2026-10-06
+
+### Changed
+- **Admin chat key:** white disc (not theme base), tighter crop, slightly brighter mark.
+
 ## [0.2.5] - 2026-10-06
 
 ### Changed

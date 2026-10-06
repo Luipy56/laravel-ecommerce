@@ -10,8 +10,8 @@ const KEY_MARK = '/images/serraller_solidaria_chat_key.png';
 
 function BrandKey({ className = 'h-8 w-8' }) {
   return (
-    <span className={`inline-flex items-center justify-center overflow-hidden rounded-full bg-base-100 ${className}`}>
-      <img src={KEY_MARK} alt="" className="h-[58%] w-[58%] object-contain" />
+    <span className={`inline-flex items-center justify-center overflow-hidden rounded-full bg-white ${className}`}>
+      <img src={KEY_MARK} alt="" className="h-[86%] w-[86%] object-contain" />
     </span>
   );
 }

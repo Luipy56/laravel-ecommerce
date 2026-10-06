@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.7] - 2026-10-06
+
+### Changed
+- **Sierra (admin chat):** assistant renamed to Sierra; greetings/identity reply without tools; product search needs a code/name; tool results formatted in Spanish (no raw `products total=` dumps).
+- **Cursor provider:** PHP-FPM uses `ADMIN_CHAT_CURSOR_HOME` so auth is readable by www-data.
+
 ## [0.2.6] - 2026-10-06
 
 ### Changed

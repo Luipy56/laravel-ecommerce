@@ -70,15 +70,30 @@ class AdminChatLlmClient
         $dir = storage_path('app/admin-chat');
         File::ensureDirectoryExists($dir);
         $out = $dir.'/reply-'.uniqid('', true).'.json';
-        $prompt = "You are the Serra admin assistant. Reply with ONE JSON object only, no markdown.\n"
+        $prompt = "You are Sierra, the Serralleria Solidària admin assistant. Reply with ONE JSON object only, no markdown.\n"
             ."Schema: {\"action\":\"tool\",\"name\":\"tool_name\",\"args\":{}} OR {\"action\":\"reply\",\"text\":\"...\"}.\n"
-            ."Read-only. Use tools from the system message.\n\n"
-            .json_encode($messages, JSON_UNESCAPED_UNICODE);
+            ."For greetings/identity use action=reply. Read-only. Use tools from the system message when needed.\n\n"
+            .json_encode($messages, JSON_UNESCAPED_UNICODE)
+            ."\nWrite ONLY that JSON object to this file: {$out}";
+
+        $env = getenv();
+        if (! is_array($env)) {
+            $env = [];
+        }
+        // PHP-FPM runs as www-data; prefer CURSOR_API_KEY from app env when present.
+        $apiKey = env('CURSOR_API_KEY');
+        if (is_string($apiKey) && $apiKey !== '') {
+            $env['CURSOR_API_KEY'] = $apiKey;
+        }
+        $home = config('admin_chat.cursor.home');
+        if (is_string($home) && $home !== '') {
+            $env['HOME'] = $home;
+        }
 
         $process = new Process(
-            [$binary, '--yolo', '--print', '--trust', '--workspace', base_path(), $prompt."\nWrite the JSON to: {$out}"],
+            [$binary, '--yolo', '--print', '--trust', '--workspace', base_path(), $prompt],
             base_path(),
-            getenv() ?: null,
+            $env,
             null,
             $timeout
         );

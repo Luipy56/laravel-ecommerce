@@ -1205,5 +1205,7 @@
   "admin.chat.provider": "Model",
   "admin.chat.provider_ollama": "Ollama",
   "admin.chat.provider_cursor": "Cursor",
-  "admin.chat.provider_heuristic": "Només tools"
+  "admin.chat.provider_heuristic": "Només tools",
+  "admin.chat.expand": "Ampliar xat",
+  "admin.chat.collapse": "Reduir xat"
 }

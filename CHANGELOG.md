@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.14] - 2026-10-12
+
+### Fixed
+- **Sierra Cursor auth:** single live bind of Maestro’s `/root/.config/cursor/auth.json` (no seeded copies); scratch HOME + symlink only.
+
 ## [0.2.13] - 2026-10-12
 
 ### Changed

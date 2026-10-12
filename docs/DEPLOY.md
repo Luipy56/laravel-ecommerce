@@ -89,6 +89,8 @@ volumes:
 
 Replace `<version>` with the folder under `/root/.local/share/cursor-agent/versions/` on the VPS (e.g. `2026.06.04-8f81907`). Alternatively set **`CURSOR_API_KEY`** in `.env` instead of mounting auth (never commit either to git).
 
+**Sierra (admin chat) Cursor auth — one live instance:** bind-mount the *same* host file Maestro uses (`/root/.config/cursor/auth.json` → `/run/cursor-auth/auth.json`). That is a live bind (same inode), not a copy at image build. PHP links it into a writable scratch `HOME` under `storage/`; never seed a second `auth.json`. Grant container `www-data` (uid 33) ACL read/write on the host file (`setfacl -m u:33:rw …`). Env: `ADMIN_CHAT_CURSOR_AUTH=/run/cursor-auth/auth.json`.
+
 After changing mounts: `docker compose -f docker-compose.stage.yml up -d --force-recreate queue scheduler`.
 
 Verify after deploy:

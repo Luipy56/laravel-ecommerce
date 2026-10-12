@@ -161,23 +161,26 @@ PROMPT;
     }
 
     /**
-     * cursor-agent needs a writable HOME (ro auth mount alone is not enough).
+     * Writable scratch HOME for cursor-agent + symlink to the live Maestro auth bind-mount.
+     * Never copy auth.json — the mount is the same host inode (token updates are instant).
      */
     private function writableCursorHome(): string
     {
-        $home = storage_path('app/admin-chat/cursor-home');
+        $configured = config('admin_chat.cursor.home');
+        $home = is_string($configured) && $configured !== ''
+            ? $configured
+            : storage_path('app/admin-chat/cursor-home');
+
         File::ensureDirectoryExists($home.'/.config/cursor');
         File::ensureDirectoryExists($home.'/.cursor');
 
-        $authTarget = $home.'/.config/cursor/auth.json';
-        if (! File::isFile($authTarget)) {
-            $seed = config('admin_chat.cursor.home');
-            $seedAuth = is_string($seed) && $seed !== ''
-                ? rtrim($seed, '/').'/.config/cursor/auth.json'
-                : '';
-            if ($seedAuth !== '' && File::isFile($seedAuth)) {
-                File::copy($seedAuth, $authTarget);
+        $authLive = (string) config('admin_chat.cursor.auth', '/run/cursor-auth/auth.json');
+        $authLink = $home.'/.config/cursor/auth.json';
+        if ($authLive !== '' && is_file($authLive)) {
+            if (is_link($authLink) || file_exists($authLink)) {
+                @unlink($authLink);
             }
+            @symlink($authLive, $authLink);
         }
 
         @chmod($home, 0775);

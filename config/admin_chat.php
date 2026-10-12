@@ -27,7 +27,9 @@ return [
     'cursor' => [
         'binary' => env('ADMIN_CHAT_CURSOR_AGENT_PATH', env('ADMIN_HELP_CURSOR_AGENT_PATH', 'cursor-agent')),
         'timeout' => (int) env('ADMIN_CHAT_CURSOR_TIMEOUT', 90),
-        // Optional: HOME for cursor auth files readable by php-fpm user, or set CURSOR_API_KEY.
+        // Live auth.json bind-mounted from the Maestro host (same inode — never a seeded copy).
+        'auth' => env('ADMIN_CHAT_CURSOR_AUTH', '/run/cursor-auth/auth.json'),
+        // Optional override for scratch HOME; default = storage/app/admin-chat/cursor-home.
         'home' => env('ADMIN_CHAT_CURSOR_HOME'),
     ],
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.16] - 2026-10-12
+
+### Added
+- **Sierra UX:** animated «Cargando.» / «..» / «...» while thinking; Markdown renderer (lists + GFM tables) in the chat bubble.
+- **Sierra writing:** `WRITING.md` in the pack (tables/lists, no em dash); tool fallbacks emit Markdown tables; reply sanitizer strips —/–.
+
 ## [0.2.15] - 2026-10-12
 
 ### Added

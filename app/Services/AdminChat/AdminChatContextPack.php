@@ -9,7 +9,7 @@ class AdminChatContextPack
     public function load(): string
     {
         $dir = (string) config('admin_chat.pack_path');
-        $files = ['CONTEXT.md', 'DENY.md', 'ALLOW.md', 'SCHEMA-BRIEF.md', 'TOOLS.md', 'EXAMPLES.md'];
+        $files = ['CONTEXT.md', 'DENY.md', 'ALLOW.md', 'SCHEMA-BRIEF.md', 'TOOLS.md', 'EXAMPLES.md', 'WRITING.md'];
         $parts = [];
         foreach ($files as $file) {
             $path = $dir.DIRECTORY_SEPARATOR.$file;

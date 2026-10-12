@@ -1205,6 +1205,7 @@
   "admin.chat.provider_cursor": "Cursor",
   "admin.chat.provider_heuristic": "Tools only",
   "admin.chat.fallback_badge": "Fallback · script (not LLM)",
+  "admin.chat.thinking": "Loading",
   "admin.chat.expand": "Enlarge chat",
   "admin.chat.collapse": "Restore chat size"
 }

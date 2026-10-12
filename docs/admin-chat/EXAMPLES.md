@@ -12,7 +12,15 @@ A: Explain you are Sierra (Maestro’s daughter), pack under docs/admin-chat/, l
 
 Q: ¿puedes hacerme un resumen de los productos más vendidos?  
 Tool: `stats_get` `{ "which": "top_products", "limit": 10 }`  
-A: Ranked list with code, name, qty_sold, revenue. Do not invent.
+A (Markdown table, no em dash):
+
+```markdown
+**Productos más vendidos** (por cantidad):
+
+| # | Código | Nombre | Qty | Ingresos |
+|---|--------|--------|----:|---------:|
+| 1 | SP-MC… | … | 501 | 108578.05 € |
+```
 
 ## Multi-intent (greeting + data)
 

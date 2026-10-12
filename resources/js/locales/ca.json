@@ -1207,6 +1207,7 @@
   "admin.chat.provider_cursor": "Cursor",
   "admin.chat.provider_heuristic": "Només tools",
   "admin.chat.fallback_badge": "Fallback · script (no LLM)",
+  "admin.chat.thinking": "Carregant",
   "admin.chat.expand": "Ampliar xat",
   "admin.chat.collapse": "Reduir xat"
 }

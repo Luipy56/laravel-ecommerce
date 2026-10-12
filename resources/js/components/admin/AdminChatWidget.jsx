@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api';
 import { IconCollapse, IconExpand } from '../icons';
+import ChatMarkdown from './ChatMarkdown';
 
 const PROVIDERS = ['ollama', 'cursor', 'heuristic'];
 const STORAGE_PROVIDER = 'admin-chat-provider';
@@ -13,6 +14,24 @@ function BrandKey({ className = 'h-8 w-8' }) {
     <span className={`inline-flex items-center justify-center overflow-hidden rounded-full bg-white ${className}`}>
       <img src={KEY_MARK} alt="" className="h-[86%] w-[86%] object-contain" />
     </span>
+  );
+}
+
+/** Anti-stress thinking indicator: Cargando. / .. / ... loop. */
+function ThinkingPulse({ label }) {
+  const [dots, setDots] = useState(1);
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setDots((n) => (n % 3) + 1);
+    }, 450);
+    return () => window.clearInterval(id);
+  }, []);
+
+  return (
+    <p className="self-start rounded-xl bg-base-200 px-3 py-2 text-xs text-base-content/60" aria-live="polite">
+      <span className="font-medium text-base-content/70">{label}</span>
+      <span className="inline-block min-w-[1.25rem]">{'.'.repeat(dots)}</span>
+    </p>
   );
 }
 
@@ -40,7 +59,6 @@ export default function AdminChatWidget() {
   const panelRef = useRef(null);
   const inputRef = useRef(null);
   const listRef = useRef(null);
-  // Stick to bottom unless the operator scrolls up on purpose (Discord/WhatsApp style).
   const stickToBottomRef = useRef(true);
 
   const isNearBottom = useCallback((el) => {
@@ -176,14 +194,18 @@ export default function AdminChatWidget() {
                 key={`${m.role}-${i}`}
                 className={m.role === 'user'
                   ? 'self-end rounded-xl bg-primary/15 px-3 py-2'
-                  : `self-start rounded-xl px-3 py-2 ${m.fallback ? 'border border-warning/40 bg-warning/10' : 'bg-base-200'}`}
+                  : `self-start max-w-full rounded-xl px-3 py-2 ${m.fallback ? 'border border-warning/40 bg-warning/10' : 'bg-base-200'}`}
               >
                 {m.fallback && (
                   <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-warning">
                     {t('admin.chat.fallback_badge')}
                   </p>
                 )}
-                <p className="whitespace-pre-wrap">{m.content}</p>
+                {m.role === 'assistant' ? (
+                  <ChatMarkdown content={m.content} />
+                ) : (
+                  <p className="whitespace-pre-wrap">{m.content}</p>
+                )}
                 {Array.isArray(m.downloads) && m.downloads.map((d) => (
                   <a key={d.token || d.url} className="link link-primary mt-1 block text-xs" href={d.url} target="_blank" rel="noreferrer">
                     {d.filename || t('admin.chat.download')}
@@ -191,7 +213,7 @@ export default function AdminChatWidget() {
                 ))}
               </div>
             ))}
-            {busy && <p className="text-xs text-base-content/50">{t('common.loading')}</p>}
+            {busy && <ThinkingPulse label={t('admin.chat.thinking')} />}
           </div>
           <form
             className="flex gap-2 border-t border-base-200 p-2"

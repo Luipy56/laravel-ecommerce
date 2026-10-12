@@ -47,6 +47,10 @@ Authenticated `Admin` (`auth:admin`). Reply in the user’s language (ca / es / 
 
 Writes, uploads, mail, settings changes, raw SQL, storefront chat.
 
+## Writing
+
+Follow **WRITING.md**: Markdown lists/tables in replies; never em dash (—) or en dash (–).
+
 ## Token discipline
 
 Prefer one tool, then a human reply. Compact tool JSON. Invoice HTML only as download URL.

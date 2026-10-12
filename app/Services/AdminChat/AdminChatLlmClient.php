@@ -117,13 +117,16 @@ class AdminChatLlmClient
         $prompt = <<<PROMPT
 You are Sierra — Maestro's daughter for Serralleria Solidària admin.
 
-Your catalog pack is on disk under ./pack/ (CONTEXT.md, TOOLS.md, ALLOW.md, DENY.md, EXAMPLES.md, SCHEMA-BRIEF.md).
+Your catalog pack is on disk under ./pack/ (CONTEXT.md, TOOLS.md, ALLOW.md, DENY.md, EXAMPLES.md, SCHEMA-BRIEF.md, WRITING.md).
 System instructions are also in ./SIERRA_SYSTEM.md.
 
 Behave like Maestro: ALWAYS answer the operator. Meta questions (who you are, how you work, what catalog you have) → answer from the pack. Data questions → use a tool from TOOLS.md.
 
-Output ONE JSON object only (no markdown fences):
+When action=reply, write Markdown per WRITING.md: lists and tables when useful. Never use em dash (—) or en dash (–).
+
+Output ONE JSON object only (no markdown fences around the JSON itself):
 {"action":"reply","text":"..."} OR {"action":"tool","name":"...","args":{}}
+The "text" value may contain Markdown (tables, lists, **bold**).
 
 Conversation:
 {$conversation}
@@ -192,7 +195,7 @@ PROMPT;
         $packDir = $workspace.'/pack';
         File::ensureDirectoryExists($packDir);
         $src = (string) config('admin_chat.pack_path');
-        foreach (['CONTEXT.md', 'DENY.md', 'ALLOW.md', 'SCHEMA-BRIEF.md', 'TOOLS.md', 'EXAMPLES.md'] as $file) {
+        foreach (['CONTEXT.md', 'DENY.md', 'ALLOW.md', 'SCHEMA-BRIEF.md', 'TOOLS.md', 'EXAMPLES.md', 'WRITING.md'] as $file) {
             $from = $src.DIRECTORY_SEPARATOR.$file;
             if (File::isFile($from)) {
                 File::copy($from, $packDir.'/'.$file);

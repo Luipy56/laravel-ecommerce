@@ -71,11 +71,17 @@ class AdminChatAgent
         $banner = '[Fallback · script] El modelo «'.$requestedProvider.'» no entregó una respuesta usable '
             .'(motivo: '.$reason.'). Continúo con tools/heurística — no es el LLM.';
 
-        $result['reply'] = $banner."\n\n".$result['reply'];
+        $result['reply'] = $this->sanitizeWriting($banner."\n\n".$result['reply']);
         $result['fallback'] = true;
         $result['fallback_reason'] = $reason;
 
         return $result;
+    }
+
+    /** Strip em/en dashes; UI + WRITING.md forbid them. */
+    private function sanitizeWriting(string $text): string
+    {
+        return str_replace(["\u{2014}", "\u{2013}", '—', '–'], [' - ', '-', ' - ', '-'], $text);
     }
 
     /**
@@ -93,7 +99,7 @@ class AdminChatAgent
             }
 
             return [
-                'reply' => $this->cannedReply($code),
+                'reply' => $this->sanitizeWriting($this->cannedReply($code)),
                 'provider' => $provider,
                 'tools' => $used,
                 'downloads' => $downloads,
@@ -108,7 +114,7 @@ class AdminChatAgent
             }
 
             return [
-                'reply' => $this->formatToolReply((string) $suggested['name'], $result, $suggested['args'] ?? []),
+                'reply' => $this->sanitizeWriting($this->formatToolReply((string) $suggested['name'], $result, $suggested['args'] ?? [])),
                 'provider' => $provider,
                 'tools' => $used,
                 'downloads' => $downloads,
@@ -117,7 +123,7 @@ class AdminChatAgent
 
         // Maestro never dead-ends: explain the catalog from the pack.
         return [
-            'reply' => $this->cannedReply('catalog'),
+            'reply' => $this->sanitizeWriting($this->cannedReply('catalog')),
             'provider' => $provider,
             'tools' => $used,
             'downloads' => $downloads,
@@ -140,7 +146,9 @@ class AdminChatAgent
         ]);
 
         return [
-            'reply' => $this->cannedReply('identity')."\n\nDemo rápida (conteo de clientes):\n".$body,
+            'reply' => $this->sanitizeWriting(
+                $this->cannedReply('identity')."\n\n**Demo rápida** (conteo de clientes):\n\n".$body
+            ),
             'provider' => $provider,
             'tools' => ['explorer_aggregate'],
             'downloads' => [],
@@ -168,6 +176,7 @@ class AdminChatAgent
             '{"action":"tool","name":"...","args":{}} OR {"action":"reply","text":"..."}',
             'After TOOL_RESULT → action=reply in the user language.',
             'Top sellers → stats_get which=top_products. Order money → order_search.',
+            'Write Markdown in reply text (lists/tables). Never use em dash (—) or en dash (–). Follow WRITING.md.',
             '',
             $this->pack->load(),
         ]);
@@ -202,7 +211,7 @@ class AdminChatAgent
                 }
 
                 return [
-                    'reply' => $text,
+                    'reply' => $this->sanitizeWriting($text),
                     'provider' => $provider,
                     'tools' => $used,
                     'downloads' => $downloads,
@@ -229,7 +238,7 @@ class AdminChatAgent
         // If the model called a tool but never produced a final reply, still surface the data.
         if (is_array($lastTool) && $lastName !== '') {
             return [
-                'reply' => $this->formatToolReply($lastName, $lastTool, $lastArgs),
+                'reply' => $this->sanitizeWriting($this->formatToolReply($lastName, $lastTool, $lastArgs)),
                 'provider' => $provider,
                 'tools' => $used,
                 'downloads' => $downloads,
@@ -263,7 +272,7 @@ class AdminChatAgent
             $table = (string) ($args['table'] ?? 'tabla');
             $groupBy = (string) ($args['group_by'] ?? '');
             $sum = 0;
-            $lines = [];
+            $rows = [];
             foreach (array_slice($data, 0, 20) as $row) {
                 if (! is_array($row)) {
                     continue;
@@ -273,16 +282,16 @@ class AdminChatAgent
                 $sum += $v;
                 if ($groupBy === 'is_active') {
                     $label = ((string) $g === '1' || $g === 1 || $g === true) ? 'activos' : 'inactivos';
-                    $lines[] = '· '.$label.': '.$v;
+                    $rows[] = [$label, (string) $v];
                 } else {
-                    $lines[] = '· '.$g.': '.$v;
+                    $rows[] = [(string) $g, (string) $v];
                 }
             }
-            if ($lines === []) {
+            if ($rows === []) {
                 return 'No hay grupos para '.$table.'.';
             }
 
-            return 'Total '.$table.': '.$sum."\n".implode("\n", $lines);
+            return '**Total '.$table.': '.$sum."**\n\n".$this->mdTable(['Grupo', 'Cantidad'], $rows);
         }
 
         if ($tool === 'catalog_search') {
@@ -299,33 +308,22 @@ class AdminChatAgent
                     ? 'No he encontrado '.$label.' que coincidan con «'.$q.'».'
                     : 'No he encontrado '.$label.'.';
             }
-            $lines = ['He encontrado '.$total.' '.$label.($shown < $total ? ' (muestro '.$shown.')' : '').':'];
+            $rows = [];
             foreach (array_slice($data, 0, 10) as $row) {
                 if (! is_array($row)) {
                     continue;
                 }
-                $bits = [];
-                if (! empty($row['code'])) {
-                    $bits[] = (string) $row['code'];
-                }
-                if (! empty($row['name'])) {
-                    $bits[] = (string) $row['name'];
-                }
-                if (isset($row['id'])) {
-                    $bits[] = 'id '.$row['id'];
-                }
-                if (isset($row['stock'])) {
-                    $bits[] = 'stock '.$row['stock'];
-                }
-                if (isset($row['price'])) {
-                    $bits[] = $row['price'].' €';
-                }
-                if ($bits !== []) {
-                    $lines[] = '· '.implode(' · ', $bits);
-                }
+                $rows[] = [
+                    (string) ($row['code'] ?? ''),
+                    (string) ($row['name'] ?? ''),
+                    isset($row['id']) ? (string) $row['id'] : '',
+                    isset($row['stock']) ? (string) $row['stock'] : '',
+                    isset($row['price']) ? $row['price'].' €' : '',
+                ];
             }
 
-            return implode("\n", $lines);
+            return 'He encontrado **'.$total.'** '.$label.($shown < $total ? ' (muestro '.$shown.')' : '').":\n\n"
+                .$this->mdTable(['Código', 'Nombre', 'Id', 'Stock', 'Precio'], $rows);
         }
 
         if ($tool === 'order_get' || $tool === 'order_search') {
@@ -333,9 +331,7 @@ class AdminChatAgent
                 return 'No he encontrado ese pedido.';
             }
             $moneySum = 0.0;
-            $lines = $tool === 'order_search'
-                ? ['Últimos pedidos (total '.$total.', muestro '.min(10, count($data)).'):']
-                : [];
+            $rows = [];
             foreach (array_slice($data, 0, 10) as $row) {
                 if (! is_array($row)) {
                     continue;
@@ -344,17 +340,23 @@ class AdminChatAgent
                 if ($due !== null) {
                     $moneySum += $due;
                 }
-                $lines[] = '· #'.($row['id'] ?? '?')
-                    .' · '.($row['status'] ?? '?')
-                    .(! empty($row['order_date']) ? ' · '.$row['order_date'] : '')
-                    .($due !== null ? ' · '.$due.' €' : '')
-                    .(! empty($row['client_email']) ? ' · '.$row['client_email'] : '');
+                $rows[] = [
+                    '#'.($row['id'] ?? '?'),
+                    (string) ($row['status'] ?? ''),
+                    (string) ($row['order_date'] ?? ''),
+                    $due !== null ? $due.' €' : '',
+                    (string) ($row['client_email'] ?? ''),
+                ];
             }
+            $head = $tool === 'order_search'
+                ? 'Últimos pedidos (total **'.$total.'**, muestro '.min(10, count($data)).'):'
+                : 'Pedido:';
+            $out = $head."\n\n".$this->mdTable(['Id', 'Estado', 'Fecha', 'Importe', 'Cliente'], $rows);
             if ($tool === 'order_search' && $moneySum > 0) {
-                $lines[] = 'Suma (mostrados): '.round($moneySum, 2).' €';
+                $out .= "\n\nSuma (mostrados): **".round($moneySum, 2).' €**';
             }
 
-            return implode("\n", $lines);
+            return $out;
         }
 
         if ($tool === 'stats_get') {
@@ -363,28 +365,33 @@ class AdminChatAgent
                 if ($data === []) {
                     return 'No hay datos de productos vendidos aún.';
                 }
-                $lines = ['Productos más vendidos (por cantidad):'];
+                $rows = [];
                 foreach (array_slice($data, 0, 10) as $i => $row) {
                     if (! is_array($row)) {
                         continue;
                     }
-                    $lines[] = '· '.($i + 1).'. '.($row['code'] ?? '').' '.($row['name'] ?? '')
-                        .' · qty '.($row['qty_sold'] ?? 0)
-                        .(isset($row['revenue']) ? ' · '.$row['revenue'].' €' : '');
+                    $rows[] = [
+                        (string) ($i + 1),
+                        (string) ($row['code'] ?? ''),
+                        (string) ($row['name'] ?? ''),
+                        (string) ($row['qty_sold'] ?? 0),
+                        isset($row['revenue']) ? $row['revenue'].' €' : '',
+                    ];
                 }
 
-                return implode("\n", $lines);
+                return "**Productos más vendidos** (por cantidad):\n\n"
+                    .$this->mdTable(['#', 'Código', 'Nombre', 'Qty', 'Ingresos'], $rows);
             }
             if ($which === 'low_stock') {
-                $lines = ['Stock bajo:'];
+                $rows = [];
                 foreach (array_slice($data, 0, 10) as $row) {
                     if (! is_array($row)) {
                         continue;
                     }
-                    $lines[] = '· '.($row['code'] ?? '').' · stock '.($row['stock'] ?? 0);
+                    $rows[] = [(string) ($row['code'] ?? ''), (string) ($row['stock'] ?? 0)];
                 }
 
-                return implode("\n", $lines);
+                return "**Stock bajo:**\n\n".$this->mdTable(['Código', 'Stock'], $rows);
             }
         }
 
@@ -392,15 +399,19 @@ class AdminChatAgent
             if ($total === 0 || $data === []) {
                 return 'No he encontrado clientes con ese criterio.';
             }
-            $lines = ['Clientes ('.$total.'):'];
+            $rows = [];
             foreach (array_slice($data, 0, 10) as $row) {
                 if (! is_array($row)) {
                     continue;
                 }
-                $lines[] = '· #'.($row['id'] ?? '?').' '.($row['login_email'] ?? '').' · '.($row['identification'] ?? '');
+                $rows[] = [
+                    '#'.($row['id'] ?? '?'),
+                    (string) ($row['login_email'] ?? ''),
+                    (string) ($row['identification'] ?? ''),
+                ];
             }
 
-            return implode("\n", $lines);
+            return 'Clientes (**'.$total."**):\n\n".$this->mdTable(['Id', 'Email', 'Identificación'], $rows);
         }
 
         $lines = [];
@@ -431,19 +442,40 @@ class AdminChatAgent
         return implode("\n", $lines);
     }
 
+    /**
+     * @param  list<string>  $headers
+     * @param  list<list<string>>  $rows
+     */
+    private function mdTable(array $headers, array $rows): string
+    {
+        $esc = static fn (string $c): string => str_replace('|', '\\|', $c);
+        $line = '| '.implode(' | ', array_map($esc, $headers)).' |';
+        $sep = '| '.implode(' | ', array_fill(0, count($headers), '---')).' |';
+        $body = [];
+        foreach ($rows as $row) {
+            $cells = [];
+            foreach ($headers as $i => $_) {
+                $cells[] = $esc((string) ($row[$i] ?? ''));
+            }
+            $body[] = '| '.implode(' | ', $cells).' |';
+        }
+
+        return $line."\n".$sep."\n".implode("\n", $body);
+    }
+
     private function cannedReply(string $code): string
     {
         return match ($code) {
-            'identity', 'catalog' => 'Soy **Sierra**, hija de Maestro, asistente de administración de Serralleria Solidària.'."\n"
+            'identity', 'catalog' => 'Soy **Sierra**, hija de Maestro, asistente de administración de Serralleria Solidària.'."\n\n"
                 .'Funciono como Maestro: tengo un **catálogo de contexto** en `docs/admin-chat/` '
-                .'(CONTEXT, ALLOW, DENY, TOOLS, SCHEMA-BRIEF, EXAMPLES). '
+                .'(CONTEXT, ALLOW, DENY, TOOLS, SCHEMA-BRIEF, EXAMPLES, WRITING). '
                 .'Cuando preguntas por datos, uso tools (no invento filas).'."\n\n"
                 .'**Catálogo de acciones (v1, solo lectura):**'."\n"
-                .'· Productos / packs / categorías → `catalog_search` / `catalog_get`'."\n"
-                .'· Clientes → `client_search` / `client_get` / conteos'."\n"
-                .'· Pedidos, importes, facturas HTML → `order_search` / `order_get` / `order_export_doc`'."\n"
-                .'· Más vendidos / stock bajo → `stats_get`'."\n"
-                .'· Export CSV → `explorer_export_csv`'."\n\n"
+                .'- Productos / packs / categorías: `catalog_search` / `catalog_get`'."\n"
+                .'- Clientes: `client_search` / `client_get` / conteos'."\n"
+                .'- Pedidos, importes, facturas HTML: `order_search` / `order_get` / `order_export_doc`'."\n"
+                .'- Más vendidos / stock bajo: `stats_get`'."\n"
+                .'- Export CSV: `explorer_export_csv`'."\n\n"
                 .'Ejemplos: «¿cuántos clientes hay?», «productos más vendidos», «últimas 10 facturas», «busca evoK1».',
             'need_product_query' => 'Dime un código o nombre de producto (ej. «existe evoK1» o «busca bombín»).',
             default => 'Soy **Sierra**. Puedo explicar mi catálogo o consultar datos del admin. '

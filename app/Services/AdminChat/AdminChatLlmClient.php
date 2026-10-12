@@ -10,18 +10,30 @@ use Symfony\Component\Process\Process;
 
 class AdminChatLlmClient
 {
+    private ?string $lastFailure = null;
+
+    public function consumeLastFailure(): ?string
+    {
+        $reason = $this->lastFailure;
+        $this->lastFailure = null;
+
+        return $reason;
+    }
+
     /**
      * @param  list<array{role: string, content: string}>  $messages
      * @return array{action: string, name?: string, args?: array<string, mixed>, text?: string}|null
      */
     public function complete(string $provider, array $messages): ?array
     {
+        $this->lastFailure = null;
         if ($provider === 'ollama') {
             return $this->completeOllama($messages);
         }
         if ($provider === 'cursor') {
             return $this->completeCursor($messages);
         }
+        $this->lastFailure = 'provider_no_soportado';
 
         return null;
     }
@@ -45,19 +57,31 @@ class AdminChatLlmClient
             ]);
         } catch (\Throwable $e) {
             Log::warning('admin_chat: ollama http failed', ['message' => $e->getMessage()]);
+            $this->lastFailure = 'ollama_http: '.$this->safeSnippet($e->getMessage());
 
             return null;
         }
 
         if (! $response->successful()) {
             Log::warning('admin_chat: ollama status', ['status' => $response->status()]);
+            $this->lastFailure = 'ollama_http_status_'.$response->status();
 
             return null;
         }
 
         $content = data_get($response->json(), 'message.content');
+        if (! is_string($content) || trim($content) === '') {
+            $this->lastFailure = 'ollama_respuesta_vacia';
 
-        return is_string($content) ? $this->parseModelOutput($content) : null;
+            return null;
+        }
+
+        $parsed = $this->parseModelOutput($content);
+        if ($parsed === null) {
+            $this->lastFailure = 'ollama_sin_json_utilizable';
+        }
+
+        return $parsed;
     }
 
     /**
@@ -125,26 +149,42 @@ PROMPT;
         );
 
         $stdout = '';
+        $exitCode = 0;
         try {
             $process->mustRun();
             $stdout = $process->getOutput();
         } catch (ProcessFailedException) {
+            $exitCode = (int) $process->getExitCode();
+            $stderr = $this->safeSnippet($process->getErrorOutput());
             Log::warning('admin_chat: cursor-agent failed', [
-                'exit' => $process->getExitCode(),
+                'exit' => $exitCode,
                 'stderr' => mb_substr($process->getErrorOutput(), 0, 500),
             ]);
             $stdout = $process->getOutput();
+            $this->lastFailure = 'cursor_exit_'.$exitCode.($stderr !== '' ? ': '.$stderr : '');
         }
 
         if (File::isFile($out)) {
             $parsed = $this->parseModelOutput(File::get($out));
             File::delete($out);
             if ($parsed !== null) {
+                $this->lastFailure = null;
+
                 return $parsed;
             }
         }
 
-        return $this->parseModelOutput($stdout);
+        $parsed = $this->parseModelOutput($stdout);
+        if ($parsed === null && $this->lastFailure === null) {
+            $this->lastFailure = $stdout === ''
+                ? 'cursor_sin_salida'
+                : 'cursor_sin_json_utilizable';
+        }
+        if ($parsed !== null) {
+            $this->lastFailure = null;
+        }
+
+        return $parsed;
     }
 
     private function syncPackIntoWorkspace(string $workspace): void
@@ -223,7 +263,6 @@ PROMPT;
             }
         }
 
-        // Strip obvious agent chatter wrappers; keep human prose.
         $text = preg_replace('/^```(?:json)?\s*|\s*```$/u', '', $raw) ?? $raw;
         $text = trim($text);
         if ($text === '' || str_starts_with($text, '{')) {
@@ -231,5 +270,14 @@ PROMPT;
         }
 
         return ['action' => 'reply', 'text' => $text];
+    }
+
+    private function safeSnippet(string $raw): string
+    {
+        $raw = preg_replace('/\b[A-Za-z0-9_-]{20,}\b/', '…', $raw) ?? $raw;
+        $raw = preg_replace('/\s+/', ' ', $raw) ?? $raw;
+        $raw = trim($raw);
+
+        return mb_substr($raw, 0, 180);
     }
 }

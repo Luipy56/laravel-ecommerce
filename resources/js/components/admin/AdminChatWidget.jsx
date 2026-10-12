@@ -105,7 +105,14 @@ export default function AdminChatWidget() {
       const payload = data?.data || {};
       const reply = payload.reply || t('admin.chat.error');
       const downloads = Array.isArray(payload.downloads) ? payload.downloads : [];
-      setMessages((prev) => [...prev, { role: 'assistant', content: reply, downloads, provider: payload.provider }]);
+      setMessages((prev) => [...prev, {
+        role: 'assistant',
+        content: reply,
+        downloads,
+        provider: payload.provider,
+        fallback: Boolean(payload.fallback),
+        fallbackReason: payload.fallback_reason || '',
+      }]);
     } catch {
       setMessages((prev) => [...prev, { role: 'assistant', content: t('admin.chat.error') }]);
     } finally {
@@ -165,7 +172,17 @@ export default function AdminChatWidget() {
               <p className="text-base-content/60">{t('admin.chat.empty')}</p>
             )}
             {messages.map((m, i) => (
-              <div key={`${m.role}-${i}`} className={m.role === 'user' ? 'self-end rounded-xl bg-primary/15 px-3 py-2' : 'self-start rounded-xl bg-base-200 px-3 py-2'}>
+              <div
+                key={`${m.role}-${i}`}
+                className={m.role === 'user'
+                  ? 'self-end rounded-xl bg-primary/15 px-3 py-2'
+                  : `self-start rounded-xl px-3 py-2 ${m.fallback ? 'border border-warning/40 bg-warning/10' : 'bg-base-200'}`}
+              >
+                {m.fallback && (
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-warning">
+                    {t('admin.chat.fallback_badge')}
+                  </p>
+                )}
                 <p className="whitespace-pre-wrap">{m.content}</p>
                 {Array.isArray(m.downloads) && m.downloads.map((d) => (
                   <a key={d.token || d.url} className="link link-primary mt-1 block text-xs" href={d.url} target="_blank" rel="noreferrer">

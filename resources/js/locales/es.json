@@ -1206,6 +1206,7 @@
   "admin.chat.provider_ollama": "Ollama",
   "admin.chat.provider_cursor": "Cursor",
   "admin.chat.provider_heuristic": "Solo tools",
+  "admin.chat.fallback_badge": "Fallback · script (no LLM)",
   "admin.chat.expand": "Ampliar chat",
   "admin.chat.collapse": "Reducir chat"
 }

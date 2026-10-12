@@ -15,7 +15,14 @@ class AdminChatAgent
 
     /**
      * @param  list<array{role: string, content: string}>  $history
-     * @return array{reply: string, provider: string, tools: list<string>, downloads: list<array<string, mixed>>}
+     * @return array{
+     *     reply: string,
+     *     provider: string,
+     *     tools: list<string>,
+     *     downloads: list<array<string, mixed>>,
+     *     fallback?: bool,
+     *     fallback_reason?: string
+     * }
      */
     public function handle(string $message, string $provider, array $history = []): array
     {
@@ -35,18 +42,40 @@ class AdminChatAgent
         $used = [];
         $downloads = [];
         $lastTool = null;
+        $requestedLlm = in_array($provider, ['ollama', 'cursor'], true);
 
         // Maestro-style: with an LLM provider, the pack + model choose tools.
         // Heuristic is only a hint / fallback — never a script that skips the brain.
-        if (in_array($provider, ['ollama', 'cursor'], true)) {
+        if ($requestedLlm) {
             $loop = $this->llmLoop($message, $provider, $history, $suggested, $used, $downloads, $lastTool);
             if ($loop !== null) {
                 return $loop;
             }
-            $provider = $provider.'+fallback';
+            $reason = $this->llm->consumeLastFailure() ?? 'llm_sin_respuesta_utilizable';
+            $fallback = $this->heuristicHandle($suggested, $provider.'+fallback', $used, $downloads);
+
+            return $this->withFallbackNotice($fallback, $provider, $reason);
         }
 
         return $this->heuristicHandle($suggested, $provider, $used, $downloads);
+    }
+
+    /**
+     * Script-generated notice (not LLM). Visible in chat when falling back.
+     *
+     * @param  array{reply: string, provider: string, tools: list<string>, downloads: list<array<string, mixed>>}  $result
+     * @return array{reply: string, provider: string, tools: list<string>, downloads: list<array<string, mixed>>, fallback: bool, fallback_reason: string}
+     */
+    private function withFallbackNotice(array $result, string $requestedProvider, string $reason): array
+    {
+        $banner = '[Fallback · script] El modelo «'.$requestedProvider.'» no entregó una respuesta usable '
+            .'(motivo: '.$reason.'). Continúo con tools/heurística — no es el LLM.';
+
+        $result['reply'] = $banner."\n\n".$result['reply'];
+        $result['fallback'] = true;
+        $result['fallback_reason'] = $reason;
+
+        return $result;
     }
 
     /**

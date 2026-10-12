@@ -46,6 +46,21 @@ class AdminChatHeuristicTest extends TestCase
         $this->assertSame('identity', $r['reply'] ?? null);
     }
 
+    public function test_meta_about_sierra_and_catalog(): void
+    {
+        $h = new AdminChatHeuristic;
+        $r = $h->suggest('Hola Sierra, qué me puedes decir de ti? Cómo funcionas? Qué catalogo de contexto tienes?');
+        $this->assertSame('identity', $r['reply'] ?? null);
+    }
+
+    public function test_top_sellers(): void
+    {
+        $h = new AdminChatHeuristic;
+        $r = $h->suggest('¿puedes hacerme un resumen de los productos más vendidos?');
+        $this->assertSame('stats_get', $r['name'] ?? null);
+        $this->assertSame('top_products', $r['args']['which'] ?? null);
+    }
+
     public function test_multi_intent_greeting_plus_orders_is_not_canned_identity(): void
     {
         $h = new AdminChatHeuristic;

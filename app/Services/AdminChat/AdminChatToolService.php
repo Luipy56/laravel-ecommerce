@@ -552,6 +552,33 @@ class AdminChatToolService
             return $this->okList('low_stock', $rows, count($rows));
         }
 
+        if ($which === 'top_products') {
+            $limit = $this->chatLimit($args);
+            $rows = \Illuminate\Support\Facades\DB::table('order_lines')
+                ->join('orders', 'orders.id', '=', 'order_lines.order_id')
+                ->where('orders.kind', Order::KIND_ORDER)
+                ->whereNotNull('order_lines.product_id')
+                ->selectRaw('order_lines.product_id as id, SUM(order_lines.quantity) as qty_sold, SUM(order_lines.quantity * order_lines.unit_price) as revenue')
+                ->groupBy('order_lines.product_id')
+                ->orderByDesc('qty_sold')
+                ->limit($limit)
+                ->get();
+            $products = Product::query()->whereIn('id', $rows->pluck('id'))->get()->keyBy('id');
+            $data = $rows->map(function ($r) use ($products) {
+                $p = $products->get((int) $r->id);
+
+                return [
+                    'id' => (int) $r->id,
+                    'code' => $p?->code,
+                    'name' => $p?->name,
+                    'qty_sold' => (int) $r->qty_sold,
+                    'revenue' => round((float) $r->revenue, 2),
+                ];
+            })->all();
+
+            return $this->okList('top_products', $data, count($data));
+        }
+
         return ['ok' => false, 'error' => 'unsupported_stat'];
     }
 

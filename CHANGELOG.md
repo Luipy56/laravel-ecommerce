@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.13] - 2026-10-12
+
+### Changed
+- **Sierra (Maestro’s daughter):** always-answer agent — pack is the action catalog; free-text LLM output accepted; no more dead-end «No estoy segura». Meta/catalog intros from CONTEXT; `stats_get top_products`; Cursor loads `./pack/` like Maestro injects project context.
+
 ## [0.2.12] - 2026-10-06
 
 ### Fixed

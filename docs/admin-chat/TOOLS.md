@@ -80,8 +80,9 @@ Wraps `GET /api/v1/admin/clients` and `show`. Fields: id, type, identification, 
 
 ## stats_get
 
-Args: `which` = `postal_codes` | `sales_by_period` | `top_products` | `low_stock`, plus the query params those endpoints already accept.  
-Wraps `GET /api/v1/admin/stats/*`.
+Args: `which` = `top_products` | `low_stock` (v1), optional `limit`.  
+- `top_products`: qty sold + revenue from confirmed orders (`kind=order`).  
+- `low_stock`: products ordered by stock ascending.
 
 ## entity_get (optional catch-all read)
 

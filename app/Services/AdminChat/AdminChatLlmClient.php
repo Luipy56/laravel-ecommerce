@@ -12,6 +12,7 @@ class AdminChatLlmClient
 {
     /**
      * @param  list<array{role: string, content: string}>  $messages
+     * @return array{action: string, name?: string, args?: array<string, mixed>, text?: string}|null
      */
     public function complete(string $provider, array $messages): ?array
     {
@@ -56,7 +57,7 @@ class AdminChatLlmClient
 
         $content = data_get($response->json(), 'message.content');
 
-        return is_string($content) ? $this->parseJsonAction($content) : null;
+        return is_string($content) ? $this->parseModelOutput($content) : null;
     }
 
     /**
@@ -66,15 +67,44 @@ class AdminChatLlmClient
     private function completeCursor(array $messages): ?array
     {
         $binary = (string) config('admin_chat.cursor.binary');
-        $timeout = (int) config('admin_chat.cursor.timeout', 60);
+        $timeout = (int) config('admin_chat.cursor.timeout', 90);
         $dir = storage_path('app/admin-chat');
         File::ensureDirectoryExists($dir);
+        $workspace = $dir.'/workspace';
+        File::ensureDirectoryExists($workspace);
+        $this->syncPackIntoWorkspace($workspace);
+
         $out = $dir.'/reply-'.uniqid('', true).'.json';
-        $prompt = "You are Sierra, the Serralleria Solidària admin assistant. Reply with ONE JSON object only, no markdown.\n"
-            ."Schema: {\"action\":\"tool\",\"name\":\"tool_name\",\"args\":{}} OR {\"action\":\"reply\",\"text\":\"...\"}.\n"
-            ."For greetings/identity use action=reply. Read-only. Use tools from the system message when needed.\n\n"
-            .json_encode($messages, JSON_UNESCAPED_UNICODE)
-            ."\nWrite ONLY that JSON object to this file: {$out}";
+        $userTurns = array_values(array_filter($messages, fn ($m) => ($m['role'] ?? '') !== 'system'));
+        $system = '';
+        foreach ($messages as $m) {
+            if (($m['role'] ?? '') === 'system') {
+                $system = (string) ($m['content'] ?? '');
+                break;
+            }
+        }
+        File::put($workspace.'/SIERRA_SYSTEM.md', $system);
+
+        $conversation = '';
+        foreach ($userTurns as $m) {
+            $conversation .= strtoupper((string) $m['role']).":\n".($m['content'] ?? '')."\n\n";
+        }
+
+        $prompt = <<<PROMPT
+You are Sierra — Maestro's daughter for Serralleria Solidària admin.
+
+Your catalog pack is on disk under ./pack/ (CONTEXT.md, TOOLS.md, ALLOW.md, DENY.md, EXAMPLES.md, SCHEMA-BRIEF.md).
+System instructions are also in ./SIERRA_SYSTEM.md.
+
+Behave like Maestro: ALWAYS answer the operator. Meta questions (who you are, how you work, what catalog you have) → answer from the pack. Data questions → use a tool from TOOLS.md.
+
+Output ONE JSON object only (no markdown fences):
+{"action":"reply","text":"..."} OR {"action":"tool","name":"...","args":{}}
+
+Conversation:
+{$conversation}
+Write that JSON object to this file: {$out}
+PROMPT;
 
         $env = getenv();
         if (! is_array($env)) {
@@ -86,11 +116,6 @@ class AdminChatLlmClient
         }
         $env['HOME'] = $this->writableCursorHome();
 
-        // Prefer a scratch workspace: the baked app tree is root-owned and agent may mkdir.
-        $workspace = storage_path('app/admin-chat/workspace');
-        File::ensureDirectoryExists($workspace);
-
-        // ask = read-only Q&A (Sierra only needs JSON plan/reply, not shell/write tools).
         $process = new Process(
             [$binary, '--mode', 'ask', '--print', '--output-format', 'text', '--trust', '--workspace', $workspace, $prompt],
             $workspace,
@@ -99,26 +124,40 @@ class AdminChatLlmClient
             $timeout
         );
 
+        $stdout = '';
         try {
             $process->mustRun();
+            $stdout = $process->getOutput();
         } catch (ProcessFailedException) {
             Log::warning('admin_chat: cursor-agent failed', [
                 'exit' => $process->getExitCode(),
                 'stderr' => mb_substr($process->getErrorOutput(), 0, 500),
             ]);
             $stdout = $process->getOutput();
-
-            return $this->parseJsonAction($stdout);
         }
 
         if (File::isFile($out)) {
-            $parsed = $this->parseJsonAction(File::get($out));
+            $parsed = $this->parseModelOutput(File::get($out));
             File::delete($out);
-
-            return $parsed;
+            if ($parsed !== null) {
+                return $parsed;
+            }
         }
 
-        return $this->parseJsonAction($process->getOutput());
+        return $this->parseModelOutput($stdout);
+    }
+
+    private function syncPackIntoWorkspace(string $workspace): void
+    {
+        $packDir = $workspace.'/pack';
+        File::ensureDirectoryExists($packDir);
+        $src = (string) config('admin_chat.pack_path');
+        foreach (['CONTEXT.md', 'DENY.md', 'ALLOW.md', 'SCHEMA-BRIEF.md', 'TOOLS.md', 'EXAMPLES.md'] as $file) {
+            $from = $src.DIRECTORY_SEPARATOR.$file;
+            if (File::isFile($from)) {
+                File::copy($from, $packDir.'/'.$file);
+            }
+        }
     }
 
     /**
@@ -150,33 +189,44 @@ class AdminChatLlmClient
     }
 
     /**
+     * Accept strict JSON actions, or free-text as a reply (Maestro never swallows prose).
+     *
      * @return array{action: string, name?: string, args?: array<string, mixed>, text?: string}|null
      */
-    private function parseJsonAction(string $raw): ?array
+    private function parseModelOutput(string $raw): ?array
     {
         $raw = trim($raw);
-        if (preg_match('/\{.*\}/s', $raw, $m)) {
-            $raw = $m[0];
-        }
-        $decoded = json_decode($raw, true);
-        if (! is_array($decoded) || empty($decoded['action'])) {
+        if ($raw === '') {
             return null;
         }
-        $action = (string) $decoded['action'];
-        if ($action === 'tool') {
-            return [
-                'action' => 'tool',
-                'name' => (string) ($decoded['name'] ?? ''),
-                'args' => is_array($decoded['args'] ?? null) ? $decoded['args'] : [],
-            ];
-        }
-        if ($action === 'reply') {
-            return [
-                'action' => 'reply',
-                'text' => (string) ($decoded['text'] ?? ''),
-            ];
+
+        if (preg_match('/\{.*\}/s', $raw, $m)) {
+            $decoded = json_decode($m[0], true);
+            if (is_array($decoded) && ! empty($decoded['action'])) {
+                $action = (string) $decoded['action'];
+                if ($action === 'tool') {
+                    return [
+                        'action' => 'tool',
+                        'name' => (string) ($decoded['name'] ?? ''),
+                        'args' => is_array($decoded['args'] ?? null) ? $decoded['args'] : [],
+                    ];
+                }
+                if ($action === 'reply') {
+                    $text = trim((string) ($decoded['text'] ?? ''));
+                    if ($text !== '') {
+                        return ['action' => 'reply', 'text' => $text];
+                    }
+                }
+            }
         }
 
-        return null;
+        // Strip obvious agent chatter wrappers; keep human prose.
+        $text = preg_replace('/^```(?:json)?\s*|\s*```$/u', '', $raw) ?? $raw;
+        $text = trim($text);
+        if ($text === '' || str_starts_with($text, '{')) {
+            return null;
+        }
+
+        return ['action' => 'reply', 'text' => $text];
     }
 }

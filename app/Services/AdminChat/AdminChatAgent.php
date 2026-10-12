@@ -86,8 +86,9 @@ class AdminChatAgent
             ];
         }
 
+        // Maestro never dead-ends: explain the catalog from the pack.
         return [
-            'reply' => $this->cannedReply('unclear'),
+            'reply' => $this->cannedReply('catalog'),
             'provider' => $provider,
             'tools' => $used,
             'downloads' => $downloads,
@@ -127,15 +128,17 @@ class AdminChatAgent
     private function llmLoop(string $message, string $provider, array $history, ?array $hint, array &$used, array &$downloads, mixed &$lastTool): ?array
     {
         $system = implode("\n", [
-            'You are Sierra, the admin assistant for Serralleria Solidària.',
-            'Operate like Maestro: read the pack below as your catalog of policy + tools, then choose.',
-            'Always identify as Sierra when asked your name — but if the user ALSO asks for data, answer BOTH (greet briefly, then use tools for the data).',
-            'Never invent rows, IDs, prices, stock, or money. Use tools from TOOLS.md only.',
-            'v1 is read-only (see DENY.md).',
-            'Output ONE JSON object only, no markdown:',
+            'You are Sierra — Maestro\'s daughter for Serralleria Solidària admin.',
+            'Behave like Maestro: ALWAYS answer. Never say you do not understand without explaining your catalog.',
+            'Meta (who you are, how you work, what context catalog you have) → reply from the pack below (no tool).',
+            'Data (clients, products, orders, money, top sellers) → pick a tool from TOOLS.md, then answer.',
+            'Multi-intent: greet briefly as Sierra AND fetch the data.',
+            'Never invent rows, IDs, prices, stock, or money.',
+            'v1 read-only (DENY.md).',
+            'Output ONE JSON object only:',
             '{"action":"tool","name":"...","args":{}} OR {"action":"reply","text":"..."}',
-            'After a TOOL_RESULT, reply with action=reply and a short human answer in the user language.',
-            'Prefer one tool, then answer. For money/order summaries use order_search (includes totals) or explorer_aggregate on payments.',
+            'After TOOL_RESULT → action=reply in the user language.',
+            'Top sellers → stats_get which=top_products. Order money → order_search.',
             '',
             $this->pack->load(),
         ]);
@@ -325,6 +328,37 @@ class AdminChatAgent
             return implode("\n", $lines);
         }
 
+        if ($tool === 'stats_get') {
+            $which = (string) ($args['which'] ?? '');
+            if ($which === 'top_products') {
+                if ($data === []) {
+                    return 'No hay datos de productos vendidos aún.';
+                }
+                $lines = ['Productos más vendidos (por cantidad):'];
+                foreach (array_slice($data, 0, 10) as $i => $row) {
+                    if (! is_array($row)) {
+                        continue;
+                    }
+                    $lines[] = '· '.($i + 1).'. '.($row['code'] ?? '').' '.($row['name'] ?? '')
+                        .' · qty '.($row['qty_sold'] ?? 0)
+                        .(isset($row['revenue']) ? ' · '.$row['revenue'].' €' : '');
+                }
+
+                return implode("\n", $lines);
+            }
+            if ($which === 'low_stock') {
+                $lines = ['Stock bajo:'];
+                foreach (array_slice($data, 0, 10) as $row) {
+                    if (! is_array($row)) {
+                        continue;
+                    }
+                    $lines[] = '· '.($row['code'] ?? '').' · stock '.($row['stock'] ?? 0);
+                }
+
+                return implode("\n", $lines);
+            }
+        }
+
         if ($tool === 'client_search' || $tool === 'client_get') {
             if ($total === 0 || $data === []) {
                 return 'No he encontrado clientes con ese criterio.';
@@ -371,14 +405,20 @@ class AdminChatAgent
     private function cannedReply(string $code): string
     {
         return match ($code) {
-            'identity' => 'Soy **Sierra**, la asistente de administración de Serralleria Solidària. '
-                .'Puedo consultar el catálogo (productos, packs, categorías), clientes, pedidos y pagos; '
-                .'contar registros; exportar CSV; y abrir factura/albarán HTML. '
-                .'En esta versión solo leo y exporto: no creo ni edito datos. '
-                .'Prueba: «¿cuántos clientes hay?», «busca producto evoK1», «últimas 10 facturas», «factura del pedido 12».',
+            'identity', 'catalog' => 'Soy **Sierra**, hija de Maestro, asistente de administración de Serralleria Solidària.'."\n"
+                .'Funciono como Maestro: tengo un **catálogo de contexto** en `docs/admin-chat/` '
+                .'(CONTEXT, ALLOW, DENY, TOOLS, SCHEMA-BRIEF, EXAMPLES). '
+                .'Cuando preguntas por datos, uso tools (no invento filas).'."\n\n"
+                .'**Catálogo de acciones (v1, solo lectura):**'."\n"
+                .'· Productos / packs / categorías → `catalog_search` / `catalog_get`'."\n"
+                .'· Clientes → `client_search` / `client_get` / conteos'."\n"
+                .'· Pedidos, importes, facturas HTML → `order_search` / `order_get` / `order_export_doc`'."\n"
+                .'· Más vendidos / stock bajo → `stats_get`'."\n"
+                .'· Export CSV → `explorer_export_csv`'."\n\n"
+                .'Ejemplos: «¿cuántos clientes hay?», «productos más vendidos», «últimas 10 facturas», «busca evoK1».',
             'need_product_query' => 'Dime un código o nombre de producto (ej. «existe evoK1» o «busca bombín»).',
-            default => 'No estoy segura de lo que pides. Puedo buscar productos/packs, contar clientes o pedidos, '
-                .'ver un pedido por id, o exportar CSV/factura. Pregúntame con un dato concreto.',
+            default => 'Soy **Sierra**. Puedo explicar mi catálogo o consultar datos del admin. '
+                .'Prueba: «cómo funcionas?», «productos más vendidos», «¿cuántos clientes hay?».',
         };
     }
 

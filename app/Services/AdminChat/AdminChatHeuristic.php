@@ -107,6 +107,9 @@ class AdminChatHeuristic
         if (preg_match('/stock bajo|low stock/u', $t)) {
             return ['name' => 'stats_get', 'args' => ['which' => 'low_stock']];
         }
+        if (preg_match('/m[aá]s vend|top products|best.?sell|productos?.{0,30}vend/u', $t)) {
+            return ['name' => 'stats_get', 'args' => ['which' => 'top_products', 'limit' => 10]];
+        }
 
         if (preg_match('/\b(producto|sku|c[oó]digo|existe|buscar|busca)\b/u', $t)) {
             $q = $this->searchNeedle($t);
@@ -135,7 +138,7 @@ class AdminChatHeuristic
         }
 
         return (bool) preg_match(
-            '/\b(c[oó]mo te llamas|qui[eé]n eres|quien eres|tu nombre|your name|qu[eé] eres|qu[eé] haces|qu[eé] puedes|qu[eé] sabes|cu[aá]l es tu funci[oó]n|what (?:are|do) you|help|ayuda|capacidades|en qu[eé] puedes)\b/u',
+            '/\b(c[oó]mo te llamas|c[oó]mo funcionas|qui[eé]n eres|quien eres|tu nombre|your name|qu[eé] eres|qu[eé] haces|qu[eé] puedes|qu[eé] me puedes|qu[eé] sabes|cu[aá]l es tu funci[oó]n|what (?:are|do) you|help|ayuda|capacidades|en qu[eé] puedes|cat[aá]logo|de ti|sobre ti)\b/u',
             $t
         );
     }

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.19] - 2026-10-27
+
+### Fixed
+- **Admin product/pack create with images:** send JSON body first (so nested `translations` stay an object/array), then upload images via the dedicated endpoint — avoids FormData turning `translations` into `"[object Object]"` and Laravel rejecting with “must be an array”.
+
 ## [0.2.18] - 2026-10-27
 
 ### Fixed

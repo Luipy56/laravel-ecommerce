@@ -31,31 +31,29 @@ export default function AdminPackNewPage() {
     setError('');
     setLoading(true);
     try {
-      let response;
-      if (payload.files?.length) {
-        const formData = new FormData();
-        const { files, ...rest } = payload;
-        const boolKeys = ['is_trending', 'is_active'];
-        Object.entries(rest).forEach(([k, v]) => {
-          if (v === null || v === undefined) return;
-          if (Array.isArray(v)) v.forEach((x) => formData.append(`${k}[]`, x));
-          else if (boolKeys.includes(k)) formData.append(k, v ? '1' : '0');
-          else formData.append(k, v);
-        });
-        files.forEach((f) => formData.append('images[]', f));
-        response = await api.post('admin/packs', formData);
-      } else {
-        const { files: _, ...rest } = payload;
-        response = await api.post('admin/packs', rest);
+      // JSON create first — nested objects break when coerced through FormData.
+      const { files, ...rest } = payload;
+      const { data } = await api.post('admin/packs', rest);
+      if (!data.success || !data.data?.id) {
+        setError(data.message || t('common.error'));
+        return;
       }
-      const { data } = response;
-      if (data.success) {
-        showSuccess(t('common.saved'));
-        navigate('/admin/packs');
-      } else setError(data.message || t('common.error'));
+      if (files?.length) {
+        const formData = new FormData();
+        files.forEach((f) => formData.append('images[]', f));
+        await api.post(`admin/packs/${data.data.id}/images`, formData);
+      }
+      showSuccess(t('common.saved'));
+      navigate('/admin/packs');
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      else setError(err.response?.data?.message || err.response?.data?.errors?.name?.[0] || t('common.error'));
+      else {
+        const errs = err.response?.data?.errors;
+        const first =
+          err.response?.data?.message ||
+          (errs && typeof errs === 'object' ? Object.values(errs).flat().find(Boolean) : null);
+        setError(first || t('common.error'));
+      }
     } finally {
       setLoading(false);
     }

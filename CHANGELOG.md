@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.18] - 2026-10-27
+
+### Fixed
+- **Admin sessions after client purge:** drop FK `sessions.user_id → clients` (shared session table for client + admin guards); admin Configuración / lists no longer 500 with opaque “Server Error”.
+- **Admin categories & features:** show API load errors (HTTP status + message) instead of an empty list with no explanation.
+
 ## [0.2.17] - 2026-10-27
 
 ### Changed

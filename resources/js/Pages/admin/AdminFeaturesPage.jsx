@@ -27,6 +27,7 @@ export default function AdminFeaturesPage() {
   const persisted = persistedRef.current;
 
   const [featureNames, setFeatureNames] = useState([]);
+  const [loadError, setLoadError] = useState('');
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(() => persisted.search);
   const [searchDebounce, setSearchDebounce] = useState(() => persisted.search.trim());
@@ -35,6 +36,7 @@ export default function AdminFeaturesPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const params = {};
       if (searchDebounce) params.search = searchDebounce;
@@ -44,10 +46,13 @@ export default function AdminFeaturesPage() {
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
       setFeatureNames([]);
+      const status = err.response?.status;
+      const msg = err.response?.data?.message || err.message || t('common.error');
+      setLoadError(status ? `${msg} (HTTP ${status})` : msg);
     } finally {
       setLoading(false);
     }
-  }, [navigate, searchDebounce, activeFilter]);
+  }, [navigate, searchDebounce, activeFilter, t]);
 
   useEffect(() => {
     fetchData();
@@ -69,6 +74,7 @@ export default function AdminFeaturesPage() {
   return (
     <div className="space-y-6">
       <PageTitle>{t('admin.features.title')}</PageTitle>
+      {loadError ? <div className="alert alert-error text-sm">{loadError}</div> : null}
 
       {/* Toolbar: search + filter + add buttons */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">

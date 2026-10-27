@@ -115,7 +115,11 @@ export default function AdminShopSettingsPage() {
       else setLoadError(t('common.error'));
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      else setLoadError(err.response?.data?.message || t('common.error'));
+      else {
+        const status = err.response?.status;
+        const msg = err.response?.data?.message || err.message || t('common.error');
+        setLoadError(status ? `${msg} (HTTP ${status})` : msg);
+      }
     } finally {
       setLoading(false);
     }

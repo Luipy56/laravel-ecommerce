@@ -26,6 +26,7 @@ export default function AdminCategoriesPage() {
   }
   const persisted = persistedRef.current;
   const [categories, setCategories] = useState([]);
+  const [loadError, setLoadError] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -36,8 +37,10 @@ export default function AdminCategoriesPage() {
   const sentinelRef = useRef(null);
 
   const fetchCategories = useCallback(async (pageNum, reset = false) => {
-    if (reset) setLoading(true);
-    else setLoadingMore(true);
+    if (reset) {
+      setLoading(true);
+      setLoadError('');
+    } else setLoadingMore(true);
     try {
       const params = { page: pageNum, per_page: 20 };
       if (searchDebounce) params.search = searchDebounce;
@@ -53,12 +56,17 @@ export default function AdminCategoriesPage() {
       }
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
-      if (reset) setCategories([]);
+      if (reset) {
+        setCategories([]);
+        const status = err.response?.status;
+        const msg = err.response?.data?.message || err.message || t('common.error');
+        setLoadError(status ? `${msg} (HTTP ${status})` : msg);
+      }
     } finally {
       if (reset) setLoading(false);
       else setLoadingMore(false);
     }
-  }, [navigate, searchDebounce, activeFilter]);
+  }, [navigate, searchDebounce, activeFilter, t]);
 
   useEffect(() => {
     pageRef.current = 1;
@@ -141,6 +149,7 @@ export default function AdminCategoriesPage() {
   return (
     <div className="space-y-6">
       <PageTitle>{t('admin.categories.title')}</PageTitle>
+      {loadError ? <div className="alert alert-error text-sm">{loadError}</div> : null}
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <div className="flex flex-wrap items-center gap-2 sm:gap-4 flex-1 min-w-0">

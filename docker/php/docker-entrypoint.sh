@@ -15,15 +15,19 @@ if [[ "${WAIT_FOR_DB:-0}" == "1" ]] && [[ "${DB_CONNECTION:-}" == "pgsql" ]]; th
   echo "PostgreSQL is ready."
 fi
 
-# Writable dirs for Laravel (especially bind-mounted dev trees).
+# Writable dirs for Laravel (especially bind-mounted / volume-mounted trees).
+owner="${APP_UID:-www-data}"
+if ! id "$owner" &>/dev/null; then
+  owner="www-data"
+fi
+mkdir -p public/uploads 2>/dev/null || true
 if [[ -d storage ]] && [[ -d bootstrap/cache ]]; then
-  owner="${APP_UID:-www-data}"
-  if id "$owner" &>/dev/null; then
-    chown -R "$owner:$owner" storage bootstrap/cache 2>/dev/null || true
-  else
-    chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
-  fi
+  chown -R "$owner:$owner" storage bootstrap/cache 2>/dev/null || true
   chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
+fi
+if [[ -d public/uploads ]]; then
+  chown -R "$owner:$owner" public/uploads 2>/dev/null || true
+  chmod -R ug+rwx public/uploads 2>/dev/null || true
 fi
 
 # Production-only optimizations on the web PHP-FPM container only (avoids races on

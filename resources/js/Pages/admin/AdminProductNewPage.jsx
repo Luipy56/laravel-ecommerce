@@ -64,13 +64,27 @@ export default function AdminProductNewPage() {
         setError(data.message || t('common.error'));
         return;
       }
+      const productId = data.data.id;
+      let imageWarning = '';
       if (files?.length) {
-        const formData = new FormData();
-        files.forEach((f) => formData.append('images[]', f));
-        await api.post(`admin/products/${data.data.id}/images`, formData);
+        try {
+          const formData = new FormData();
+          files.forEach((f) => formData.append('images[]', f));
+          await api.post(`admin/products/${productId}/images`, formData);
+        } catch (imgErr) {
+          const errs = imgErr.response?.data?.errors;
+          imageWarning =
+            imgErr.response?.data?.message ||
+            (errs && typeof errs === 'object' ? Object.values(errs).flat().find(Boolean) : null) ||
+            t('common.error');
+        }
       }
-      showSuccess(t('common.saved'));
-      navigate('/admin/products');
+      if (imageWarning) {
+        showSuccess(`${t('common.saved')} · ${imageWarning}`);
+      } else {
+        showSuccess(t('common.saved'));
+      }
+      navigate(`/admin/products/${productId}`);
     } catch (err) {
       if (err.response?.status === 401) navigate('/admin/login');
       else {

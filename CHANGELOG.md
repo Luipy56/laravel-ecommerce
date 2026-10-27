@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.20] - 2026-10-27
+
+### Fixed
+- **Product image upload on prod:** mount persistent `uploads_prod` volume for `public/uploads` (app write + nginx serve); entrypoint ensures ownership.
+- **Admin create flow:** after save, redirect to product/pack detail; if image upload fails, still open the ficha with a warning instead of a bare Server Error.
+
 ## [0.2.19] - 2026-10-27
 
 ### Fixed

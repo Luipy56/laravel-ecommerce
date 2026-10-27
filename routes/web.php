@@ -22,7 +22,8 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 Route::get('/feeds/google-merchant.xml', [GoogleMerchantFeedController::class, 'index'])->name('feeds.google-merchant');
 
 Route::get('/robots.txt', function () {
-    $content = "User-agent: *\nDisallow:\nSitemap: " . url('/sitemap.xml') . "\n";
+    $sitemap = rtrim((string) config('seo.sitemap_base_url'), '/').'/sitemap.xml';
+    $content = "User-agent: *\nDisallow:\nSitemap: {$sitemap}\n";
 
     return response($content, 200)->header('Content-Type', 'text/plain');
 })->name('robots');

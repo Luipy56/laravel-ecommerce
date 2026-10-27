@@ -7,10 +7,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class Pack extends Model
 {
     protected $table = 'packs';
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('sitemap.xml'));
+        static::deleted(fn () => Cache::forget('sitemap.xml'));
+    }
 
     protected $fillable = [
         'price',

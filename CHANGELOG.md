@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.21] - 2026-10-27
+
+### Fixed
+- **Sitemap XML:** escape `<?xml` so Blade no longer fatals with “unexpected identifier version” (HTTP 500).
+
+### Changed
+- **Sitemap / robots:** canonical host `https://serralleriasolidaria.cat` via `SITEMAP_BASE_URL`; includes `/web` (static site), shop pages, categories, products, and packs.
+
 ## [0.2.20] - 2026-10-27
 
 ### Fixed

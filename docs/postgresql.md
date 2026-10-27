@@ -35,6 +35,7 @@ SQLite and MySQL migrations skip this DDL; PHPUnit stays on SQLite.
 From a clean database:
 
 ```bash
+# Local/dev disposable DB only — NEVER prod or stage:
 php artisan migrate:fresh --seed
 ```
 

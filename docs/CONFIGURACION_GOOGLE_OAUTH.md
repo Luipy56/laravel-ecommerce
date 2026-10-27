@@ -8,11 +8,11 @@ Optional **Sign in with Google** for storefront clients (`Client` model). Email/
 2. **Authorized JavaScript origins** (examples):
    - `http://localhost:8080`
    - `http://127.0.0.1:8080`
-   - `https://serra.ldeluipy.es`
+   - `https://serralleriasolidaria.cat`
 3. **Authorized redirect URIs** (must match Laravel callback exactly):
    - `http://localhost:8080/auth/google/callback`
    - `http://127.0.0.1:8080/auth/google/callback`
-   - `https://serra.ldeluipy.es/auth/google/callback`
+   - `https://serralleriasolidaria.cat/auth/google/callback`
 
 ## Environment variables
 
@@ -25,7 +25,7 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 
 Legacy names `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` are also read.
 
-**Production:** set `APP_URL` to the public site origin (e.g. `https://serra.ldeluipy.es`). Do not commit secrets.
+**Production:** set `APP_URL` to the public site origin (e.g. `https://serralleriasolidaria.cat`). Do not commit secrets.
 
 ## Application behaviour
 
@@ -35,22 +35,13 @@ Legacy names `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` are also re
 - Google-only accounts have nullable `password`; users may set a password later in profile.
 - Admin auth (`admins` guard) is not affected.
 
-## Production database upgrade
+## Production / stage schema changes
 
-Google OAuth columns (`clients.google_sub`, nullable `password`) live in the **initial** `clients` migration (`0001_01_01_000000_create_users_table.php`). Per project migration rules, column changes are **not** shipped as separate `_add_` migrations during development — edit that file and run:
+Long-lived databases (prod/stage) must **not** use `migrate:fresh`. Ship **new additive migrations** and run `php artisan migrate --force` (see **`.cursor/rules/project-standards.mdc`** and **`.cursor/rules/prod-db-no-destructive.mdc`**).
 
-```bash
-php artisan migrate:fresh --seed
-```
+Google OAuth columns (`clients.google_sub`, nullable `password`) are defined in the initial `clients` migration for greenfield installs. If an older database is missing them, add a **new** `_add_` migration (or a one-time operator `ALTER`) — do not rewrite history and wipe data.
 
-**Databases that already ran the old `clients` schema** (e.g. production before Google OIDC) will not pick up the change from `migrate --force`. Apply a **one-time manual upgrade** on MySQL:
-
-```sql
-ALTER TABLE clients ADD COLUMN google_sub VARCHAR(255) NULL UNIQUE AFTER password;
-ALTER TABLE clients MODIFY password VARCHAR(255) NULL;
-```
-
-Then confirm:
+Confirm:
 
 ```bash
 php artisan tinker --execute="echo Schema::hasColumn('clients','google_sub') ? 'ok' : 'missing';"

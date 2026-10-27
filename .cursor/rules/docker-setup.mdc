@@ -40,7 +40,8 @@ docker compose down
 
 # Artisan (always exec into app, not locally)
 docker compose exec app php artisan migrate
-docker compose exec app php artisan migrate:fresh --seed
+# Dev/local disposable DB only — NEVER on serra-prod / serra-stage:
+# docker compose exec app php artisan migrate:fresh --seed
 docker compose exec app php artisan test
 docker compose exec app php artisan routes:smoke
 
@@ -61,3 +62,4 @@ docker compose logs -f queue
 - DB credentials default: host `postgres`, db/user/pass `laravel`/`postgres`/`postgres` (override via `.env`).
 - `WAIT_FOR_DB=1` in `app` and `queue` means they wait for Postgres health before starting php-fpm.
 - Production image: `docker-compose.prod.yml` + `docker/nginx/Dockerfile.prod`. Never use prod compose for local dev.
+- **Never** `migrate:fresh`, `db:wipe`, `db:seed`, or `docker compose down -v` against **serra-prod** / **serra-stage** — see **`.cursor/rules/prod-db-no-destructive.mdc`**.

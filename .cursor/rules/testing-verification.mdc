@@ -11,7 +11,7 @@ After substantive edits (database, routes, middleware, controllers, API, React, 
 
 Whenever **migrations**, **seeders**, **Eloquent `$fillable` / casts**, or anything that affects **schema or seeded data** changes:
 
-1. **`php artisan migrate:fresh --seed`** — must finish with **exit code 0** on the development database (this **drops all tables and data**; never run against production).
+1. On a **disposable local/dev** database only: **`php artisan migrate:fresh --seed`** must finish with **exit code 0**. This **drops all tables and data**. **Never** run it against **prod** or **stage** (see **`.cursor/rules/prod-db-no-destructive.mdc`**). For long-lived envs use **`php artisan migrate`** only.
 2. Fix any seeder FKs, duplicate keys, or invalid values before considering the task done.
 3. Then run **`php artisan test`** so automated checks still pass.
 

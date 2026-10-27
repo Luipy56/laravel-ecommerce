@@ -1,0 +1,33 @@
+---
+description: Production (and stage) database must never be wiped, fresh-migrated, or demo-seeded by agents or rebuilds
+alwaysApply: true
+---
+
+# Database integrity — prod / stage
+
+## Hard ban — `serra-prod` / `APP_ENV=production`
+
+On production (`/srv/serra/prod`, compose project `serra-prod`, `APP_ENV=production`), **never** run anything that drops, truncates, wipes, or reseeds business data — including “to verify”, rebuild, Docker recreate, or autoagents QA.
+
+**Forbidden** (unless Luipy gives an **explicit, scoped** one-shot order for that action):
+
+- `php artisan migrate:fresh`, `migrate:refresh`, `migrate:reset`
+- `php artisan db:wipe`, `db:seed` / `DatabaseSeeder`
+- `TRUNCATE` / mass `DELETE` / `DROP TABLE` / dropping the Postgres volume (`docker compose down -v`, recreate named DB volumes)
+- Editing seeders and then running them against prod
+
+**Allowed:** `php artisan migrate` (additive migrations only), `db:sync-postgres-sequences`, `db:reconcile-*` helpers, image/code rebuilds that **do not** touch the DB volume.
+
+Artisan enforces this when `APP_ENV` is `production` or `staging` (override only with `SERRA_ALLOW_DESTRUCTIVE_DB=1` — never set casually).
+
+## Stage — minimum care
+
+On `serra-stage` / `APP_ENV=staging`: same forbidden list by default. Do **not** use `migrate:fresh --seed` to “fix” schema. Prefer `migrate`. Destructive reset only after explicit Luipy confirmation.
+
+## Dev / style / PHPUnit
+
+`migrate:fresh --seed` is OK only on **local/dev** databases, style sandbox DBs that are disposable, or isolated SQLite used by tests (`APP_ENV=testing` / `local`). Never point those commands at prod or stage DSN.
+
+## Migrations on long-lived DBs
+
+Prod and stage keep data across deploys. Schema changes that alter existing tables **must** ship as **new additive migration files** and apply with `migrate` — see **`.cursor/rules/project-standards.mdc`**. Do not edit already-applied migration files and expect `migrate:fresh` on prod.

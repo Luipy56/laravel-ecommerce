@@ -18,9 +18,10 @@ Rules focus on **what to do when editing** a given area. Do not duplicate long b
 | **Commits / changelog** | `.cursor/rules/commit-changelog-version.mdc` | User asks to commit; **`CHANGELOG.md`** entries under **`## [X.Y.Z] - date`** (match **`package.json`**); **`README.md`**, **`docs/`** scan; **patch bump per shippable task**; commits stay on integration branch (promotion per git rule above) |
 | **Agent version bump** | `.cursor/rules/agent-task-version-bump.mdc` | Always — **mandatory** root **`package.json`** patch after **each completed prompt/task** that changes tracked files (before hand-off / push), not only when the user says **commit** |
 | **App version / footer** | `.cursor/rules/app-version-cadence.mdc` | Always — why **`package.json`** drives **`footer.version`**; **when** to bump semver before push / **`prod`** |
-| **Testing / verification** | `.cursor/rules/testing-verification.mdc` | Always — **`php artisan test`**, **`migrate:fresh --seed`** when schema/seeders change, **`routes:smoke`**, **`npm run build`** when front-end changes; **checkout / payments** manual checks and **`GET /api/v1/payments/config`**; env reference **`docs/CONFIGURACION_PAGOS_CORREO.md`** — **running** those commands is **opt-out by default**: see **`.cursor/rules/agent-verification-opt-in.mdc`** |
+| **Testing / verification** | `.cursor/rules/testing-verification.mdc` | Always — **`php artisan test`**, **`migrate:fresh --seed`** on **dev/local disposable DB only** when schema/seeders change, **`routes:smoke`**, **`npm run build`** when front-end changes; **checkout / payments** manual checks and **`GET /api/v1/payments/config`**; env reference **`docs/CONFIGURACION_PAGOS_CORREO.md`** — **running** those commands is **opt-out by default**: see **`.cursor/rules/agent-verification-opt-in.mdc`** |
 | **Verification opt-in (speed)** | `.cursor/rules/agent-verification-opt-in.mdc` | Always — **higher precedence** for *execution*: unless the user explicitly asks, **do not run** test / smoke / build / migrate-for-QA / discretionary payment browser checks; **always** bump root **`package.json`** patch before **`git push`** when tracked files changed (see **`agent-task-version-bump.mdc`**) |
-| **Project standards** | `.cursor/rules/project-standards.mdc` | Migrations (edit existing, not new columns), i18n ca/es/en, **storefront + admin** (AdminLayout, list/toolbar patterns), shared components |
+| **Prod/stage DB integrity** | `.cursor/rules/prod-db-no-destructive.mdc` | Always — never wipe / `migrate:fresh` / `db:seed` on prod (hard) or stage (default); additive `migrate` only |
+| **Project standards** | `.cursor/rules/project-standards.mdc` | Migrations (**new additive files** for long-lived DBs), i18n ca/es/en, **storefront + admin** (AdminLayout, list/toolbar patterns), shared components |
 | **Admin shop settings** | `.cursor/rules/admin-shop-settings.mdc` | `shop_settings`, automatic **`is_trending`**, admin settings page, public **`shop/public-settings`**, featured OR query |
 | **API** | `.cursor/rules/api.mdc` | REST API shape and conventions |
 | **Auth** | `.cursor/rules/auth.mdc` | Custom session auth, login routes, SPA cookies; **API guest behaviour** — see **testing-verification** (*Auth / API note*) |
@@ -41,7 +42,7 @@ Rules focus on **what to do when editing** a given area. Do not duplicate long b
 
 ## Inventory (sync check)
 
-Alphabetical — must match **`ls .cursor/rules/*.mdc`** (24 files):
+Alphabetical — must match **`ls .cursor/rules/*.mdc`** (regenerate if you add files):
 
 - `admin-shop-settings.mdc`
 - `agent-task-version-bump.mdc`
@@ -49,18 +50,24 @@ Alphabetical — must match **`ls .cursor/rules/*.mdc`** (24 files):
 - `api.mdc`
 - `app-version-cadence.mdc`
 - `auth.mdc`
+- `autoagents-create-task-from-chat.mdc`
+- `autoagents-workflow.mdc`
 - `blade-views.mdc`
 - `commit-changelog-version.mdc`
 - `components.mdc`
 - `daisyui.mdc`
+- `docker-setup.mdc`
 - `ecommerce-seo.mdc`
 - `ecommerce-ux.mdc`
 - `git-agent-branch-workflow.mdc`
 - `i18n.mdc`
 - `laravel-php.mdc`
 - `no-coauthor-no-branding.mdc`
+- `prod-db-no-destructive.mdc`
 - `project-standards.mdc`
+- `push-to-prod-protocol.mdc`
 - `react-use.mdc`
+- `redmine-red-format.mdc`
 - `scss-basics.mdc`
 - `security.mdc`
 - `svg.mdc`

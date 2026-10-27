@@ -34,9 +34,10 @@ All product code lives in **this repo**. Coordination files live under **`autoag
 
 - **Git — before you change anything:** From repo root run **`./scripts/git-sync-autoagents-branch.sh`** (or fetch + checkout **`AGENT_GIT_BRANCH`** + pull rebase) so you integrate other agents’ pushes before editing. **`autoagents-loop.sh`** does this each step; interactive runs must do it manually. See **`.cursor/rules/git-agent-branch-workflow.mdc`**.
 - Prefer **removing** or **simplifying** over adding when the task allows.
-- Follow **`.cursor/rules/testing-verification.mdc`** and **`.cursor/rules/project-standards.mdc`** for migrations, i18n (ca/es), and verification commands.
-- After **PHP** changes: run **`php artisan test`**; use **`php artisan migrate:fresh --seed`** when schema/seeders change (dev DB only).
-- After **React / Vite** changes: run **`npm run build`** when **`resources/js/`** or Vite config changed.
+- Follow **`.cursor/rules/testing-verification.mdc`**, **`.cursor/rules/project-standards.mdc`**, and **`.cursor/rules/prod-db-no-destructive.mdc`**.
+- **Database:** On this prod workspace (and stage), **never** `migrate:fresh`, `db:wipe`, or `db:seed`. Schema changes = **new additive migrations** + `migrate`. `migrate:fresh --seed` only on disposable local/dev or isolated SQLite for tests.
+- After **PHP** changes: run **`php artisan test`** when the user/task asks for verification.
+- After **React / Vite** changes: run **`npm run build`** when **`resources/js/`** or Vite config changed and verification is requested.
 - Use **`php artisan routes:smoke`** when routes or middleware change materially.
 - **Git:** work on the integration branch (**`autoagents`** by default, **`AGENT_GIT_BRANCH`**); follow **`.cursor/rules/git-agent-branch-workflow.mdc`**. When a task ties to GitHub **#NN**, update labels per **`docs/agent-loop.md`** (**`agent:planned` → `agent:wip`**) when your team uses them.
 

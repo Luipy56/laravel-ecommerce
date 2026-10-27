@@ -7,11 +7,14 @@ alwaysApply: true
 
 ## Migrations
 
-- **Do not create new migrations** to add, delete, or modify columns on existing tables.
-- **Only add migrations** for entirely new tables.
-- To change an existing table: **edit the existing migration file**, then run **`php artisan migrate:fresh --seed`** and verify **exit code 0** (see **`.cursor/rules/testing-verification.mdc`**).
-- **Whenever migrations are updated**, update **`trash/diagramZero.dbml`** so the schema diagram stays in sync with the database (tables, columns, notes).
-- **Seeder changes** (new codes, FKs, order in `DatabaseSeeder`) must be validated with the same **`migrate:fresh --seed`** run.
+Prod and stage are **long-lived** databases. Agents must not rely on wiping them. See **`.cursor/rules/prod-db-no-destructive.mdc`**.
+
+- **Prefer new additive migration files** for schema changes on tables that already exist in prod/stage (`Schema::table`, new indexes, new columns). Name them with a new timestamp; deploy applies them with **`php artisan migrate`** (never `migrate:fresh` on those envs).
+- **New tables:** also add a new migration (unchanged).
+- **Editing an already-applied migration** is only for **local/dev** experiments before that migration has ever run on stage/prod. Once a migration is on stage or prod, **do not rewrite it** — ship a follow-up migration instead.
+- **Local/dev verification:** when the user asks for schema/seeder QA on a disposable DB, **`php artisan migrate:fresh --seed`** must exit **0** (see **`.cursor/rules/testing-verification.mdc`**). Never run that against prod or stage.
+- **Whenever migrations change**, update **`trash/diagramZero.dbml`** so the schema diagram stays in sync.
+- **Seeder changes** are for local/dev (and PHPUnit). Do **not** run `db:seed` / `DatabaseSeeder` against prod or stage.
 
 ## Language and locale
 

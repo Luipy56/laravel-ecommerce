@@ -20,7 +20,7 @@ Adhere to **`autoagents/TASKS-README.md`**.
 
 1. Read **Testing instructions** completely.
 2. Note **start time (UTC)**.
-3. **`php artisan test`** from repo root (or **`docker compose exec app php artisan test`** when using Docker).
+3. **`php artisan test`** from repo root (or **`docker compose exec app php artisan test`** when using Docker). Use PHPUnit/SQLite or a disposable DB — **never** `migrate:fresh` / `db:wipe` / `db:seed` against **prod** or **stage** (**`.cursor/rules/prod-db-no-destructive.mdc`**).
 4. When routes/middleware changed: **`php artisan routes:smoke`** (no HTTP 500).
 5. When **`resources/js/`** or Vite changed: **`npm run build`** (or **`docker compose exec node npm run build`**).
 6. Checkout/payments: manual **`/checkout`** per **`.cursor/rules/testing-verification.mdc`** when applicable.

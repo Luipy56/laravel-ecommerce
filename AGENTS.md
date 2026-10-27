@@ -6,7 +6,7 @@ These instructions apply to all work in this repository:
 - **Branches and integration (`autoagents` vs `master`) — essential:** Do routine work on the **integration branch** (**`autoagents`** by default). Override with **`AGENT_GIT_BRANCH`** only if the team uses another shared branch. **Before changing files** (including task markdown under **`autoagents/tasks/`**), sync: run **`./scripts/git-sync-autoagents-branch.sh`** — see **`.cursor/rules/git-agent-branch-workflow.mdc`**. After committing, pull/rebase again, then **`git push origin <integration-branch>`**. Merge **`autoagents` → `master`** (or promote via **`prod`** per your release process) **only** when: (1) a **~2-hour** batch promotion window, (2) a **production-impacting** change (security, payments, critical bugs, blocking migrations), or (3) the **GitHub issue** or **user** explicitly requests **urgent / hotfix / production**. Otherwise **do not** merge to **`master`** routinely. When the user says to push without asking for production: push the **integration branch**. Details: **`docs/agent-loop.md`**.
 - **Stack:** Laravel (API + session auth), React SPA (Vite) under **`resources/js/`**, Tailwind CSS 4 + daisyUI 5. See **`.cursor/rules/project-standards.mdc`** and **`docs/agent-cursor-rules.md`**.
 - **Verification:** Default policy is **`.cursor/rules/agent-verification-opt-in.mdc`**: unless the user explicitly asks for checks, **do not run** test / smoke / build / migrate-for-QA as automatic gates; **always** bump root **`package.json`** patch when a **prompt/task ends** with tracked file changes (before hand-off / **`git push`**), not only after the user says **commit** — see **`.cursor/rules/agent-task-version-bump.mdc`** and **`.cursor/rules/commit-changelog-version.mdc`**. When the user **does** request full verification, follow **`.cursor/rules/testing-verification.mdc`** (and **`app-version-cadence.mdc`** for releases).
-- **Cursor rules:** Short constraints live in **`.cursor/rules/*.mdc`**. A categorized index is in **`docs/agent-cursor-rules.md`**.
+- **Cursor rules:** Short constraints live in **`.cursor/rules/*.mdc`**. A categorized index is in **`docs/agent-cursor-rules.md`**. **Prod/stage DB:** never wipe, `migrate:fresh`, or demo-seed — **`.cursor/rules/prod-db-no-destructive.mdc`**.
 
 ## Project overview
 
@@ -22,7 +22,7 @@ Laravel ecommerce: REST API + React storefront and admin UI.
 
 1. **Install PHP deps:** `composer install`
 2. **Environment:** copy `.env.example` → `.env`, generate key: `php artisan key:generate`
-3. **Database:** `php artisan migrate --seed` (or `migrate:fresh --seed` in development when schema changes)
+3. **Database:** Prefer `php artisan migrate`. Use `migrate:fresh --seed` **only** on disposable local/dev DBs — **never** on prod or stage (see **`.cursor/rules/prod-db-no-destructive.mdc`**). Long-lived schema changes = **new additive migrations**, not rewrite + fresh.
 4. **Frontend deps:** `npm ci` (or `npm install` per team habit)
 5. **Run:** `php artisan serve` and `npm run dev` (or your local orchestration script)
 

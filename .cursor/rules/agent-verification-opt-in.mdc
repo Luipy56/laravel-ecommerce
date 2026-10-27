@@ -17,7 +17,7 @@ When the **current user prompt or task** does **not** explicitly ask to run test
 
 - `php artisan test`
 - `php artisan routes:smoke` (or `--details`)
-- `php artisan migrate:fresh --seed` **for verification** (still run it **only** when the user explicitly requires it or the user’s instructions say schema/seed work must be validated that way)
+- `php artisan migrate:fresh --seed` **for verification** (still run it **only** when the user explicitly requires it on a **disposable local/dev** DB — **never** on prod/stage even if asked casually; see **`prod-db-no-destructive.mdc`**)
 - `npm run build`, `npm test`, or other npm scripts **for verification**
 - discretionary browser / curl checks solely to “prove” the change
 

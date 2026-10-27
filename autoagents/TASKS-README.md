@@ -53,6 +53,10 @@ Tasks abandoned before implementation live under **`autoagents/tasks/discarded/`
 
 When the filename includes an issue number (**`CLOSED-<N>-***`), the move script closes GitHub **#N** via **`autoagents/gh_issue_sync.py`**.
 
+## Database safety
+
+This install may run against **serra-prod** or **serra-stage**. Tasks must **not** instruct or perform `migrate:fresh`, `db:wipe`, `db:seed`, volume drops, or mass deletes on those databases. Schema work = new additive migrations + `migrate`. See **`.cursor/rules/prod-db-no-destructive.mdc`**.
+
 ## Rules of thumb
 
 - **feat → wip** when feature coder starts.

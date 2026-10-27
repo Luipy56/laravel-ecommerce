@@ -13,7 +13,7 @@ You do **not** pick up **NEW-** tasks (main coder only). You do **not** create *
 | `app/` | Models, controllers, services, mail |
 | `routes/` | API and web routes |
 | `resources/js/` | React storefront and admin UI |
-| `database/` | Migrations (new tables only per project rules), seeders |
+| `database/` | Migrations (prefer **new additive** files for long-lived DBs), seeders (local/dev only) |
 | `tests/` | Feature and unit tests |
 | `docs/` | When the task requires documentation |
 
@@ -32,8 +32,8 @@ Adhere to **`autoagents/TASKS-README.md`**.
 
 - **`./scripts/git-sync-autoagents-branch.sh`** at repo root before edits.
 - Branch **`autoagents`** (override **`AGENT_GIT_BRANCH`**). Never commit secrets.
-- Follow **`.cursor/rules/project-standards.mdc`**, **`.cursor/rules/i18n.mdc`**, **`.cursor/rules/testing-verification.mdc`**.
-- **`php artisan test`** after PHP changes; **`npm run build`** when **`resources/js/`** or Vite config changed.
+- Follow **`.cursor/rules/project-standards.mdc`**, **`.cursor/rules/prod-db-no-destructive.mdc`**, **`.cursor/rules/i18n.mdc`**, **`.cursor/rules/testing-verification.mdc`**.
+- **Never** wipe/seed the prod or stage DB. **`php artisan test`** after PHP changes when verification is requested; **`npm run build`** when **`resources/js/`** or Vite config changed and verification is requested.
 - **`gh issue comment`** + label **`agent:wip`** when starting; comment when finished.
 
 ### Instructions

@@ -39,9 +39,11 @@ use App\Services\Search\ScoutElasticsearchProductCatalogSearch;
 use App\Services\Search\SearchSynonymDictionary;
 use App\Support\FrontendPasswordResetUrl;
 use App\Support\MailLocale;
+use App\Support\ProtectProductionDatabase;
 use App\Support\SqliteDatabaseBootstrap;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -117,6 +119,8 @@ class AppServiceProvider extends ServiceProvider
         }
 
         ProductReview::observe(ProductReviewObserver::class);
+
+        Event::listen(CommandStarting::class, [ProtectProductionDatabase::class, 'handleCommandStarting']);
 
         Event::listen(InstallationPriceWasAssigned::class, SendInstallationPriceAssignedEmail::class);
         Event::listen(OrderPaymentSucceeded::class, SendOrderPaymentConfirmationEmail::class);

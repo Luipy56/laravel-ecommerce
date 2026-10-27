@@ -2,7 +2,7 @@
 
 /**
  * Admin data explorer: allowlisted tables and columns only (no raw SQL from clients).
- * Adjust allowlists when schema changes; run migrate:fresh --seed after edits.
+ * Adjust allowlists when schema changes; on local/dev only, validate with migrate:fresh --seed (never prod/stage).
  */
 
 return [

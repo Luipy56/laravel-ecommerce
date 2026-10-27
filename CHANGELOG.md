@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.17] - 2026-10-27
+
+### Changed
+- **Prod/stage DB integrity:** new always-on Cursor rule `prod-db-no-destructive.mdc`; migration policy now prefers **additive** migrations on long-lived DBs (no rewrite + `migrate:fresh` on prod/stage); Artisan blocks `migrate:fresh` / `db:wipe` / `db:seed` when `APP_ENV` is `production` or `staging` (override `SERRA_ALLOW_DESTRUCTIVE_DB=1` only). Maestro Serra CONTEXT + autoagents prompts aligned.
+
 ## [0.2.16] - 2026-10-12
 
 ### Added

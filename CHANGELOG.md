@@ -3,9 +3,9 @@
 ## [0.2.24] - 2026-11-09
 
 ### Changed
-- **Public URL model:** apex  is the shop; classic marketing site served at  (path prefix, not subdomain).
-- **Google OAuth / APP_URL:** production callback on apex .
-- **Sitemap:** shop URLs on apex; marketing entry is .
+- **Public URL model:** apex `serralleriasolidaria.cat` is the shop; classic marketing site served at `/web` (path prefix, not subdomain).
+- **Google OAuth / APP_URL:** production callback on apex `/auth/google/callback`.
+- **Sitemap:** shop URLs on apex; marketing entry is `/web`.
 
 ## [0.2.23] - 2026-11-09
 

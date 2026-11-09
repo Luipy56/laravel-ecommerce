@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.22] - 2026-11-09
+
+### Changed
+- **Docker PHP base image:** pin `php:8.2.35-fpm-bookworm` (explicit patch) instead of floating `php:8.2-fpm-bookworm`.
+
 ## [0.2.21] - 2026-10-27
 
 ### Fixed

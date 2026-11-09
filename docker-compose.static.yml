@@ -1,0 +1,38 @@
+# Marketing static/PHP site — SEPARATE stack from Laravel.
+# On lu-zero prod the live file is /srv/serra/prod/docker-compose.static.yml
+# (env_file + bind paths relative to that directory). This copy is for the repo.
+#
+# From a checkout that mirrors prod layout (compose next to `source/`):
+#   docker compose -f docker-compose.static.yml up -d --build
+# Or from this repo root with local .env.static:
+#   STATIC_SITE_WWW=./static-site/www docker compose -f docker-compose.static.yml up -d --build
+
+name: serra-static
+
+services:
+  php:
+    build:
+      context: ./static-site/docker/php
+      dockerfile: Dockerfile
+    image: serra-static-php:8.2
+    restart: unless-stopped
+    env_file:
+      - path: .env.static
+        required: true
+    volumes:
+      - ./static-site/www:/var/www/html:rw
+    tmpfs:
+      - /tmp
+
+  nginx:
+    build:
+      context: ./static-site/docker/nginx
+      dockerfile: Dockerfile
+    image: serra-static-nginx:1.27
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18083:80"
+    volumes:
+      - ./static-site/www:/var/www/html:ro
+    depends_on:
+      - php

@@ -1,0 +1,2 @@
+# Apache on OVH used this; nginx container ignores .htaccess.
+# TLS terminates at host Apache; do not force HTTPS inside the container.

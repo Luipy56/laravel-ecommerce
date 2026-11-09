@@ -28,4 +28,4 @@ Homestead.yaml
 Thumbs.db
 DEPLOY.md
 /autoissue/drafts/*
-!/autoissue/drafts/.gitkeep
+!/autoissue/drafts/.gitkeepstatic-site/www/plugins/securimage-master/database/*.sq3

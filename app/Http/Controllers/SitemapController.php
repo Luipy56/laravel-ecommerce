@@ -14,11 +14,12 @@ class SitemapController extends Controller
     {
         $xml = Cache::remember('sitemap.xml', now()->addHours(6), function (): string {
             $baseUrl = rtrim((string) config('seo.sitemap_base_url'), '/');
+            $marketingUrl = rtrim((string) config('seo.marketing_base_url'), '/');
             $categories = ProductCategory::active()->orderBy('id')->get(['id', 'updated_at']);
             $products = Product::active()->orderBy('id')->get(['id', 'updated_at']);
             $packs = Pack::active()->orderBy('id')->get(['id', 'updated_at']);
 
-            return view('sitemap', compact('baseUrl', 'categories', 'products', 'packs'))->render();
+            return view('sitemap', compact('baseUrl', 'marketingUrl', 'categories', 'products', 'packs'))->render();
         });
 
         return response($xml, 200)->header('Content-Type', 'application/xml');

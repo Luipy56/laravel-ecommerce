@@ -8,11 +8,15 @@ Optional **Sign in with Google** for storefront clients (`Client` model). Email/
 2. **Authorized JavaScript origins** (examples):
    - `http://localhost:8080`
    - `http://127.0.0.1:8080`
-   - `https://serralleriasolidaria.cat`
+   - `https://tienda.serralleriasolidaria.cat`
+   - `https://serra.ldeluipy.es` (legacy alias)
 3. **Authorized redirect URIs** (must match Laravel callback exactly):
    - `http://localhost:8080/auth/google/callback`
    - `http://127.0.0.1:8080/auth/google/callback`
-   - `https://serralleriasolidaria.cat/auth/google/callback`
+   - `https://tienda.serralleriasolidaria.cat/auth/google/callback`
+   - `https://serra.ldeluipy.es/auth/google/callback` (legacy alias)
+
+While the marketing site owns the apex `serralleriasolidaria.cat`, shop OAuth must use the **tienda** (or `serra.ldeluipy.es`) host — not the apex.
 
 ## Environment variables
 
@@ -25,7 +29,7 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 
 Legacy names `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` are also read.
 
-**Production:** set `APP_URL` to the public site origin (e.g. `https://serralleriasolidaria.cat`). Do not commit secrets.
+**Production:** set `APP_URL` to the public **shop** origin (e.g. `https://tienda.serralleriasolidaria.cat`) and `GOOGLE_REDIRECT_URI` to `{APP_URL}/auth/google/callback` when needed. Do not commit secrets.
 
 ## Application behaviour
 

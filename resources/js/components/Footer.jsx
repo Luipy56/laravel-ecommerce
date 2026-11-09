@@ -72,6 +72,13 @@ export default function Footer() {
           <nav className="flex flex-col gap-2" aria-label={t('footer.explore')}>
             <h6 className="footer-title text-base">{t('footer.explore')}</h6>
             <Link to="/" className="link link-hover text-sm">{t('shop.home')}</Link>
+            <a
+              href="https://serralleriasolidaria.cat/"
+              className="link link-hover text-sm"
+              rel="noopener noreferrer"
+            >
+              {t('footer.corporate_site', { defaultValue: 'Web corporativa' })}
+            </a>
             <Link to="/products" className="link link-hover text-sm">{t('shop.products')}</Link>
             <Link to="/custom-solution" className="link link-hover text-sm">{t('shop.custom_solution')}</Link>
             <Link to="/faq" className="link link-hover text-sm">{t('shop.faq.nav')}</Link>

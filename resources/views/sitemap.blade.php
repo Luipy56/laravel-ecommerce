@@ -1,14 +1,14 @@
 {!! '<'.'?xml version="1.0" encoding="UTF-8"?>' !!}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-    {{-- Static marketing site (former apex site, now under /web) --}}
+    {{-- Marketing apex (classic PHP site on lu-zero serra-static) --}}
     <url>
-        <loc>{{ $baseUrl }}/web</loc>
+        <loc>{{ $marketingUrl }}/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
 
-    {{-- Shop SPA (apex = storefront) --}}
+    {{-- Shop SPA on tienda host --}}
     <url>
         <loc>{{ $baseUrl }}/</loc>
         <changefreq>daily</changefreq>

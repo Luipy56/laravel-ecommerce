@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.23] - 2026-11-09
+
+### Added
+- **Marketing site stack:** classic PHP/HTML site under `static-site/` with dedicated Compose project `serra-static` (own nginx + PHP-FPM on `127.0.0.1:18083`) — separate from Laravel PHP.
+- **Cross-links:** marketing nav/footer → `tienda.serralleriasolidaria.cat`; shop footer → corporate apex.
+
+### Changed
+- **SEO sitemap:** shop URLs use `SITEMAP_BASE_URL` (tienda); marketing apex listed via `MARKETING_BASE_URL` (no `/web` path).
+- **Google OAuth docs / prod expectation:** redirect on tienda host while apex serves marketing.
+- **Contact form SMTP:** reads `STATIC_SMTP_*` from env (`.env.static` on host); secrets removed from PHP source.
+
 ## [0.2.22] - 2026-11-09
 
 ### Changed

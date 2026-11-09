@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Targets: development (php-fpm + extensions for bind-mounted code), production (optimized app + built assets).
 
-FROM php:8.2-fpm-bookworm AS php-base
+FROM php:8.2.35-fpm-bookworm AS php-base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \

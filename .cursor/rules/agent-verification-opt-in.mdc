@@ -1,39 +1,54 @@
 ---
-description: Skip heavy verification unless the user asks; version bump stays mandatory before commit/push
+description: Mid-task may skip heavy checks; mandatory pre-push gate + one push per logical change
 alwaysApply: true
 ---
 
-# Verification opt-in (speed policy) — precedence
+# Verification policy (speed vs CI noise)
 
 ## Precedence
 
-This rule has **higher priority** than:
+This rule overrides **running** the full checklist in **`.cursor/rules/testing-verification.mdc`** and the **AGENTS.md** smoke list **during mid-task exploration**. It does **not** waive the **pre-push gate** below.
 
-- **`.cursor/rules/testing-verification.mdc`** (sections that require **running** checks),
-- **`AGENTS.md`** (smoke / verification checklist that require **running** those commands),
-- the sentence in **`.cursor/rules/agent-task-version-bump.mdc`** that requires **`npm run build`** after JS/Vite edits **for verification or version-string alignment**.
+## Mid-task (default)
 
-When the **current user prompt or task** does **not** explicitly ask to run tests, smoke, build, migrate/seed verification, checkout/payment manual QA, or equivalent (“CI”, “quality gate”, “verify before merge”, etc.), the agent **must not** run:
+While still editing (user has **not** asked to commit/push/finish), the agent **may skip** running:
 
-- `php artisan test`
-- `php artisan routes:smoke` (or `--details`)
-- `php artisan migrate:fresh --seed` **for verification** (still run it **only** when the user explicitly requires it on a **disposable local/dev** DB — **never** on prod/stage even if asked casually; see **`prod-db-no-destructive.mdc`**)
-- `npm run build`, `npm test`, or other npm scripts **for verification**
-- discretionary browser / curl checks solely to “prove” the change
+- `composer test` / `php artisan test`
+- `php artisan routes:smoke`
+- `migrate:fresh --seed` for QA (**never** on prod/stage — **`prod-db-no-destructive.mdc`**)
+- `npm run build` / `npm test` solely as a verification gate
+- discretionary browser / curl “prove it” checks
 
-**Optional:** Briefly state in the reply that verification was skipped because the user did not request it (no need to apologize at length).
+Optional: one short line that mid-task verification was deferred.
 
-If the user **does** explicitly request any of the above, follow those instructions and the stricter rules normally.
+## Mandatory pre-push gate (autoagents / integration branch)
+
+Before **`git push`** to **`autoagents`** (or **`AGENT_GIT_BRANCH`**) when the push includes **application** changes under any of:
+
+- `app/`, `routes/`, `database/`, `config/`, `resources/js/`, `resources/views/`, `tests/`, `docker/`, root `composer.*`, Vite/`package.json` scripts that affect the app
+
+the agent **must**:
+
+1. Run **`composer test`** (CI-parity; prefer this over Docker-only `php artisan test`) and fix failures **before** push.
+2. If `resources/js/` or Vite config changed: **`npm run build`** must succeed.
+3. If routes/middleware changed: **`php artisan routes:smoke`** (no HTTP 500) when practical on this host.
+
+**Docs / changelog / version-only** pushes (`CHANGELOG.md`, `docs/**`, `.cursor/**`, `autoagents/tasks/**`, `package.json` bump alone with no app code): may skip `composer test`, but still follow **push batching** below.
+
+If the user explicitly asks for full verification earlier, follow **`.cursor/rules/testing-verification.mdc`**.
+
+## Push batching (reduce GitHub Failed noise)
+
+Stage CI **deploys** on every `autoagents` push. Overlapping deploys caused Docker name conflicts and red ❌ runs even when **Build & Test** passed.
+
+Agents **must**:
+
+1. Prefer **one push per logical task** (code + changelog + version bump in the same commit series, then a **single** `git push`).
+2. **Do not** push a follow-up “changelog wording only” commit seconds after a deploy-triggering push — fold it into the same push, or wait until the previous Stage workflow finished / was cancelled.
+3. Interactive Maestro/Cursor sessions: same rule — batch micro-commits locally; **one** push when the operator says go/commit/done.
+
+Workflow concurrency (`stage.yml`) cancels in-progress Stage runs when a newer push arrives; still avoid spam pushes.
 
 ## Always: project version
 
-Whenever the agent **changes tracked files** and the work is intended to end in **commit and/or `git push`** to the integration branch, **always** bump the root app semver using **`npm version patch --no-git-tag-version`** (same workflow as **`.cursor/rules/agent-task-version-bump.mdc`**) **before** push, included in the same commit series as the functional change when practical.
-
-- If **no** files were modified, **no** version bump.
-- Exception: full **git revert** restoring a prior release — team discretion, same as **`.cursor/rules/agent-task-version-bump.mdc`**.
-
-Do **not** skip the version bump to save time.
-
-## Changelog / commits
-
-When the user says **commit** or the task is shippable, still follow **`.cursor/rules/commit-changelog-version.mdc`** for `CHANGELOG.md` / README / docs review; this rule only relaxes **execution** of heavy verification commands unless asked.
+Whenever tracked app/docs that ship change and work ends in **commit and/or push**, bump root semver with **`npm version patch --no-git-tag-version`** per **`.cursor/rules/agent-task-version-bump.mdc`**. No bump if no files changed.

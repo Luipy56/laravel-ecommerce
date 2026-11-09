@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.25] - 2026-11-09
+
+### Changed
+- **Agent pre-push / Stage CI:** require `composer test` before pushing app-code; one push per logical task; Stage workflow concurrency cancels overlapping deploys; `deploy-stage.sh` uses flock + stronger orphan cleanup (fixes false Failed from Docker name races).
+
 ## [0.2.24] - 2026-11-09
 
 ### Changed

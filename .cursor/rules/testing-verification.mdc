@@ -5,7 +5,9 @@ alwaysApply: true
 
 # Testing and verification after changes
 
-After substantive edits (database, routes, middleware, controllers, API, React, locales), **verify before finishing**:
+**Execution timing:** Mid-task, agents may defer these commands per **`.cursor/rules/agent-verification-opt-in.mdc`**. They become **mandatory before `git push`** when the push includes application code (see that rule’s pre-push gate). When the user explicitly asks to verify, run this checklist immediately.
+
+After substantive edits (database, routes, middleware, controllers, API, React, locales), **verify before finishing** (or before push):
 
 ## Database (migrations, seeders, schema)
 

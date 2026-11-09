@@ -24,7 +24,7 @@ Run **`./scripts/git-sync-autoagents-branch.sh`** before the first edit and befo
 ## Where to commit
 
 1. Checkout **`autoagents`** (or **`AGENT_GIT_BRANCH`**).
-2. Commit and **`git push origin autoagents`**.
+2. Commit (batch changelog + version with the functional change) and **one** **`git push origin autoagents`** per logical task — see **`.cursor/rules/agent-verification-opt-in.mdc`** (pre-push gate + push batching). Stage CI uses workflow **concurrency** so a newer push cancels an in-flight Stage run.
 3. Do **not** push to **`prod`** for normal features.
 
 ## Promote to production

@@ -4,13 +4,24 @@ set -euo pipefail
 ROOT="${STAGE_ROOT:-/srv/serra/stage}"
 COMPOSE_FILE="${ROOT}/docker-compose.stage.yml"
 COMPOSE=(docker compose -f "$COMPOSE_FILE")
+LOCK_FILE="${SERRA_STAGE_DEPLOY_LOCK:-/var/lock/serra-stage-deploy.lock}"
 
 cd "$ROOT"
+
+# Serialize deploys (GitHub concurrency helps; flock covers manual + overlapping SSH).
+mkdir -p "$(dirname "$LOCK_FILE")"
+exec 9>"$LOCK_FILE"
+flock -w 900 9
+
 git -C source fetch origin autoagents
 git -C source reset --hard origin/autoagents
 
 # Failed `compose up` recreates leave hash-prefixed containers that block the canonical name.
 docker ps -a --format '{{.Names}}' | grep -E '^[0-9a-f]{12}_serra-stage-' | xargs -r docker rm -f || true
+# Also drop any anonymous leftovers still matching the project prefix in "Created" state.
+docker ps -a --filter "name=serra-stage" --format '{{.ID}} {{.Names}} {{.Status}}' \
+  | awk '/Created|Dead/ {print $1}' \
+  | xargs -r docker rm -f || true
 
 "${COMPOSE[@]}" build
 "${COMPOSE[@]}" up -d --remove-orphans

@@ -11,6 +11,12 @@ on:
       # 001 idle reviewer watermarks must not trigger CI (loop keeps them local; safety net if pushed manually).
       - "autoagents/001-gh-reviewer/time-of-last-review.txt"
 
+# One Stage pipeline at a time. Newer pushes cancel in-flight test+deploy so
+# overlapping SSH deploys do not race Docker recreate names (false "Failed").
+concurrency:
+  group: stage-ci-cd-autoagents
+  cancel-in-progress: true
+
 jobs:
   ci:
     name: Build & Test

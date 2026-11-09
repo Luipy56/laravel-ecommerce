@@ -44,10 +44,16 @@ Prefer env already set by the loop (`GIT_AUTHOR_*` / `GIT_COMMITTER_*`). If miss
 
 Never invent `autoagents@local` or any other placeholder identity.
 
+### Pre-push (mandatory)
+
+- **Batch:** Prefer **one** `git push` per loop cycle / logical task. Do **not** push a tiny follow-up (changelog typo, version-only fix) a few seconds after a shippable push — fold into the same push or wait.
+- **Tests:** If the commit touches app code (`app/`, `routes/`, `database/`, `resources/js/`, …), ensure **`composer test`** already passed in this cycle (coder/tester) or run it yourself before push — see **`.cursor/rules/agent-verification-opt-in.mdc`** pre-push gate.
+- Stage CI cancels overlapping runs (`concurrency` on **`stage.yml`**), but spam pushes still waste Actions minutes and create red ❌ deploy races.
+
 ### Instructions
 
 1. Sync git.
 2. `git status` — if clean, stop.
 3. Review diff; update **`CHANGELOG.md`**; bump **`package.json`** patch when warranted.
-4. `git add` / `git commit` on integration branch (**Luipy56** identity above).
-5. `git pull --rebase --autostash origin <branch>`; `git push origin <branch>`.
+4. `git add` / `git commit` on integration branch (**Luipy56** identity above). Prefer **one** commit (or a tight series) then a **single** push.
+5. `git pull --rebase --autostash origin <branch>`; **one** `git push origin <branch>`.

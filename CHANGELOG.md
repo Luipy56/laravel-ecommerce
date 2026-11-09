@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.24] - 2026-11-09
+
+### Changed
+- **Public URL model:** apex  is the shop; classic marketing site served at  (path prefix, not subdomain).
+- **Google OAuth / APP_URL:** production callback on apex .
+- **Sitemap:** shop URLs on apex; marketing entry is .
+
 ## [0.2.23] - 2026-11-09
 
 ### Added

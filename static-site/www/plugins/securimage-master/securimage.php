@@ -1415,8 +1415,8 @@ class Securimage
 
         $swf_path  = $securimage_path . '/securimage_play.swf';
         $play_path = $securimage_path . '/securimage_play.php?';
-        $icon_path = $securimage_path . '/images/audio_icon.png';
-        $load_path = $securimage_path . '/images/loading.png';
+        $icon_path = $securimage_path . '/web/images/audio_icon.png';
+        $load_path = $securimage_path . '/web/images/loading.png';
         $js_path   = $securimage_path . '/securimage.js';
 
         if (!empty($audio_icon_url)) {
@@ -1512,7 +1512,7 @@ class Securimage
         }
 
         if ( ($parts & Securimage::HTML_ICON_REFRESH) > 0 && $show_refresh_btn) {
-            $icon_path = $securimage_path . '/images/refresh.png';
+            $icon_path = $securimage_path . '/web/images/refresh.png';
             if ($refresh_icon_url) {
                 $icon_path = $refresh_icon_url;
             }

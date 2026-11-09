@@ -9,7 +9,7 @@ $PaginaActual = "blog";
 		<title>El blog de la serralleria</title>
 		<meta name="description" content="" />
 		<meta name="Author" content="Dorin Grigoras [www.stepofweb.com]" />
-		<link rel="icon" type="image/png" href="/images/favicon.png">
+		<link rel="icon" type="image/png" href="/web/images/favicon.png">
 
 		<!-- mobile settings -->
 		<meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0" />
@@ -19,15 +19,15 @@ $PaginaActual = "blog";
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600%7CRaleway:300,400,500,600,700%7CLato:300,400,400italic,600,700" rel="stylesheet" type="text/css" />
 
 		<!-- CORE CSS -->
-		<link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+		<link href="/web/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 
 		<!-- THEME CSS -->
-		<link href="/css/essentials.css" rel="stylesheet" type="text/css" />
-		<link href="/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
+		<link href="/web/css/essentials.css" rel="stylesheet" type="text/css" />
+		<link href="/web/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
 
 		<!-- PAGE LEVEL SCRIPTS -->
-		<link href="/css/header-1.css" rel="stylesheet" type="text/css" />
-		<link href="/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
+		<link href="/web/css/header-1.css" rel="stylesheet" type="text/css" />
+		<link href="/web/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
 	</head>
 
 	<!--
@@ -91,13 +91,13 @@ include_once("php/cabecera.php");
 						<!-- OWL SLIDER -->
 						<div class="owl-carousel buttons-autohide controlls-over" data-plugin-options='{"items": 1, "autoPlay": 3000, "autoHeight": false, "navigation": true, "pagination": true, "transitionStyle":"fadeUp", "progressBar":"false"}'>
 							<div>
-								<img class="img-fluid" src="/images/Claus-classiques.png" alt="Claus classiques">
+								<img class="img-fluid" src="/web/images/Claus-classiques.png" alt="Claus classiques">
 							</div>
 							<div>
-								<img class="img-fluid" src="/images/Clau-de-pompa.png" alt="Clau de pompa">
+								<img class="img-fluid" src="/web/images/Clau-de-pompa.png" alt="Clau de pompa">
 							</div>
 							<div>
-								<img class="img-fluid" src="/images/Claus-de-alta-seguretat.png" alt="Claus de alta seguretat">
+								<img class="img-fluid" src="/web/images/Claus-de-alta-seguretat.png" alt="Claus de alta seguretat">
 							</div>
 						</div>
 						<!-- /OWL SLIDER -->
@@ -489,9 +489,9 @@ include_once("php/pie.php");
 
 		<!-- JAVASCRIPT FILES -->
 		<script>var plugin_path = 'plugins/';</script>
-		<script src="/js/jquery-3.3.1.min.js"></script>
+		<script src="/web/js/jquery-3.3.1.min.js"></script>
 
-		<script src="/js/scripts.js"></script>
+		<script src="/web/js/scripts.js"></script>
 		
 	</body>
 </html>

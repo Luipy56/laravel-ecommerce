@@ -10,7 +10,7 @@ $PaginaActual = "avislegal";
     <title>Avís legal</title>
     <meta name="description" content="" />
     <meta name="Author" content="Dorin Grigoras [www.stepofweb.com]" />
-    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <link rel="icon" type="image/png" href="/web/images/favicon.png">
 
     <!-- mobile settings -->
     <meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0" />
@@ -20,19 +20,19 @@ $PaginaActual = "avislegal";
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600%7CRaleway:300,400,500,600,700%7CLato:300,400,400italic,600,700" rel="stylesheet" type="text/css" />
 
     <!-- CORE CSS -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/web/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 
     <!-- REVOLUTION SLIDER -->
-    <link href="/css/slider.revolution/extralayers.css" rel="stylesheet" type="text/css" />
-    <link href="/css/slider.revolution/settings.css" rel="stylesheet" type="text/css" />
+    <link href="/web/css/slider.revolution/extralayers.css" rel="stylesheet" type="text/css" />
+    <link href="/web/css/slider.revolution/settings.css" rel="stylesheet" type="text/css" />
 
     <!-- THEME CSS -->
-    <link href="/css/essentials.css" rel="stylesheet" type="text/css" />
-    <link href="/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
+    <link href="/web/css/essentials.css" rel="stylesheet" type="text/css" />
+    <link href="/web/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
 
     <!-- PAGE LEVEL SCRIPTS -->
-    <link href="/css/header-1.css" rel="stylesheet" type="text/css" />
-    <link href="/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
+    <link href="/web/css/header-1.css" rel="stylesheet" type="text/css" />
+    <link href="/web/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
 </head>
 
 <!--
@@ -234,15 +234,15 @@ $PaginaActual = "avislegal";
     <script>
         var plugin_path = 'plugins/';
     </script>
-    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/web/js/jquery-3.3.1.min.js"></script>
 
     <!-- REVOLUTION SLIDER -->
-    <script src="/js/slider.revolution/jquery.themepunch.tools.min.js"></script>
-    <script src="/js/slider.revolution/jquery.themepunch.revolution.min.js"></script>
-    <script src="/js/slider.revolution/demo.revolution_slider.js"></script>
+    <script src="/web/js/slider.revolution/jquery.themepunch.tools.min.js"></script>
+    <script src="/web/js/slider.revolution/jquery.themepunch.revolution.min.js"></script>
+    <script src="/web/js/slider.revolution/demo.revolution_slider.js"></script>
 
     <!-- SCRIPTS -->
-    <script src="/js/scripts.js"></script>
+    <script src="/web/js/scripts.js"></script>
 
 </body>
 

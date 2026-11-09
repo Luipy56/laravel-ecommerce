@@ -56,7 +56,7 @@
 		_loadPopperBS4();
 
 		// Load Bootstrap JS
-		loadScript('/js/bootstrap.min.js', function() {
+		loadScript('/web/js/bootstrap.min.js', function() {
 
 			// Load Material Design Js
 			if(jQuery("body").hasClass('enable-materialdesign')) {

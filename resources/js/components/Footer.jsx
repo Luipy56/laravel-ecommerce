@@ -73,7 +73,7 @@ export default function Footer() {
             <h6 className="footer-title text-base">{t('footer.explore')}</h6>
             <Link to="/" className="link link-hover text-sm">{t('shop.home')}</Link>
             <a
-              href="https://serralleriasolidaria.cat/"
+              href="/web/"
               className="link link-hover text-sm"
               rel="noopener noreferrer"
             >

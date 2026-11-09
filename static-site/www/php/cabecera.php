@@ -67,7 +67,7 @@ if (!isset($_SESSION["Idioma"])) {
 
 			<!-- Logo -->
 			<a class="logo float-left" href="index.php">
-				<img src="/images/logoweb.png" alt="" />
+				<img src="/web/images/logoweb.png" alt="" />
 			</a>
 
 			<!-- 
@@ -112,7 +112,7 @@ if (!isset($_SESSION["Idioma"])) {
 							<a <?php echo ($PaginaActual == "blog") ? 'class="active"' : ""; ?> href="blog.php">BLOG</a>
 						</li>
 						<li>
-							<a href="https://tienda.serralleriasolidaria.cat/">BOTIGA</a>
+							<a href="/">BOTIGA</a>
 						</li>
 						<li>
 							<a class="navbar-brand" href="https://api.whatsapp.com/send?phone=+34600500517&text=Hola,%20voldria%20informació%20sobre%20els%20vostres%20serveis" target="_blank"><i class="fa fa-whatsapp fa-2x whatsapp-icon" title="Envia'ns un whatsapp"></i></a>

@@ -10,7 +10,7 @@ $PaginaActual = "solidaritat";
 	<title>Solidaritat</title>
 	<meta name="description" content="" />
 	<meta name="Author" content="Dorin Grigoras [www.stepofweb.com]" />
-	<link rel="icon" type="image/png" href="/images/favicon.png">
+	<link rel="icon" type="image/png" href="/web/images/favicon.png">
 
 	<!-- mobile settings -->
 	<meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0" />
@@ -20,15 +20,15 @@ $PaginaActual = "solidaritat";
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600%7CRaleway:300,400,500,600,700%7CLato:300,400,400italic,600,700" rel="stylesheet" type="text/css" />
 
 	<!-- CORE CSS -->
-	<link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="/web/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 
 	<!-- THEME CSS -->
-	<link href="/css/essentials.css" rel="stylesheet" type="text/css" />
-	<link href="/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
+	<link href="/web/css/essentials.css" rel="stylesheet" type="text/css" />
+	<link href="/web/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
 
 	<!-- PAGE LEVEL SCRIPTS -->
-	<link href="/css/header-1.css" rel="stylesheet" type="text/css" />
-	<link href="/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
+	<link href="/web/css/header-1.css" rel="stylesheet" type="text/css" />
+	<link href="/web/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
 </head>
 
 <!--
@@ -86,7 +86,7 @@ $PaginaActual = "solidaritat";
 
 				<div class="row">
 					<div class="col-lg-6 col-12">
-						<img class="img-fluid" src="/images/solidaritat/solidaritat.png" alt="Projectes solidaris">
+						<img class="img-fluid" src="/web/images/solidaritat/solidaritat.png" alt="Projectes solidaris">
 					</div>
 					<div class="col-lg-6 col-12">
 						<p class="lead">Aquestos son els nostres projectes solidaris. Cada cop que realitzem un servei aportem a projectes com aquestos un 10% dels nostres beneficis. En el moment que ens encarreguis una feina tú també estaràs col·laborant en els projectes</p>
@@ -101,7 +101,7 @@ $PaginaActual = "solidaritat";
 
 				<article class="row">
 					<!-- <div class="col-lg-6 col-12">
-						<img class="img-fluid" src="/images/solidaritat/solidaritat.png" alt="Projectes solidaris">
+						<img class="img-fluid" src="/web/images/solidaritat/solidaritat.png" alt="Projectes solidaris">
 					</div> -->
 					<div class="col-md-6">
 						<h3><span>Nou projecte solidari</span></h3>
@@ -141,16 +141,16 @@ $PaginaActual = "solidaritat";
 								}'>
 
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-1.jpg" alt="Projecte Solidari Centre Obert Rialles">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-1.jpg" alt="Projecte Solidari Centre Obert Rialles">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-2.jpg" alt="Projecte Solidari Centre Obert Rialles">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-2.jpg" alt="Projecte Solidari Centre Obert Rialles">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-3.jpg" alt="Projecte Solidari Centre Obert Rialles">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-3.jpg" alt="Projecte Solidari Centre Obert Rialles">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-4.jpg" alt="Projecte Solidari Centre Obert Rialles">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-4.jpg" alt="Projecte Solidari Centre Obert Rialles">
 							</div>
 
 						</div>
@@ -197,16 +197,16 @@ $PaginaActual = "solidaritat";
 								}'>
 
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Lliga-De-Valors-1.jpg" alt="Projecte-Lliga-De-Valors">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Lliga-De-Valors-1.jpg" alt="Projecte-Lliga-De-Valors">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Lliga-De-Valors-2.jpg" alt="Projecte-Lliga-De-Valors">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Lliga-De-Valors-2.jpg" alt="Projecte-Lliga-De-Valors">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Lliga-De-Valors-3.jpg" alt="Projecte-Lliga-De-Valors">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Lliga-De-Valors-3.jpg" alt="Projecte-Lliga-De-Valors">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Lliga-De-Valors-4.jpg" alt="Projecte-Lliga-De-Valors">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Lliga-De-Valors-4.jpg" alt="Projecte-Lliga-De-Valors">
 							</div>
 
 						</div>
@@ -253,10 +253,10 @@ $PaginaActual = "solidaritat";
 								}'>
 
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/escoladefamiliesaprenem.png" alt="Escola de families Associació Aprenem">
+								<img class="img-fluid" src="/web/images/solidaritat/escoladefamiliesaprenem.png" alt="Escola de families Associació Aprenem">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/tags_aprenem.png" alt="Tags Associació Aprenem">
+								<img class="img-fluid" src="/web/images/solidaritat/tags_aprenem.png" alt="Tags Associació Aprenem">
 							</div>
 
 						</div>
@@ -303,16 +303,16 @@ $PaginaActual = "solidaritat";
 								}'>
 
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-1.jpg" alt="Projecte Solidari Centre Obert Rialles">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-1.jpg" alt="Projecte Solidari Centre Obert Rialles">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-2.jpg" alt="Projecte Solidari Centre Obert Rialles">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-2.jpg" alt="Projecte Solidari Centre Obert Rialles">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-3.jpg" alt="Projecte Solidari Centre Obert Rialles">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-3.jpg" alt="Projecte Solidari Centre Obert Rialles">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-4.jpg" alt="Projecte Solidari Centre Obert Rialles">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-4.jpg" alt="Projecte Solidari Centre Obert Rialles">
 							</div>
 
 						</div>
@@ -362,16 +362,16 @@ $PaginaActual = "solidaritat";
 								}'>
 
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Club-futbol-sala-Centre-Compartir-1.jpg" alt="Projecte Solidari Club futbol sala Centre Compartir">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Club-futbol-sala-Centre-Compartir-1.jpg" alt="Projecte Solidari Club futbol sala Centre Compartir">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Club-futbol-sala-Centre-Compartir-2.jpg" alt="Projecte Solidari Club futbol sala Centre Compartir">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Club-futbol-sala-Centre-Compartir-2.jpg" alt="Projecte Solidari Club futbol sala Centre Compartir">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Club-futbol-sala-Centre-Compartir-3.jpg" alt="Projecte Solidari Club futbol sala Centre Compartir">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Club-futbol-sala-Centre-Compartir-3.jpg" alt="Projecte Solidari Club futbol sala Centre Compartir">
 							</div>
 							<div class="owl-item">
-								<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Club-futbol-sala-Centre-Compartir-4.jpg" alt="Projecte Solidari Club futbol sala Centre Compartir">
+								<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Club-futbol-sala-Centre-Compartir-4.jpg" alt="Projecte Solidari Club futbol sala Centre Compartir">
 							</div>
 
 						</div>
@@ -530,9 +530,9 @@ $PaginaActual = "solidaritat";
 	<script>
 		var plugin_path = 'plugins/';
 	</script>
-	<script src="/js/jquery-3.3.1.min.js"></script>
+	<script src="/web/js/jquery-3.3.1.min.js"></script>
 
-	<script src="/js/scripts.js"></script>
+	<script src="/web/js/scripts.js"></script>
 </body>
 
 </html>

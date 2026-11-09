@@ -9,7 +9,7 @@ $PaginaActual = "serveis";
 		<title>Els nostres serveis</title>
 		<meta name="description" content="" />
 		<meta name="Author" content="Dorin Grigoras [www.stepofweb.com]" />
-		<link rel="icon" type="image/png" href="/images/favicon.png">
+		<link rel="icon" type="image/png" href="/web/images/favicon.png">
 
 		<!-- mobile settings -->
 		<meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0" />
@@ -19,15 +19,15 @@ $PaginaActual = "serveis";
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600%7CRaleway:300,400,500,600,700%7CLato:300,400,400italic,600,700" rel="stylesheet" type="text/css" />
 
 		<!-- CORE CSS -->
-		<link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+		<link href="/web/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 
 		<!-- THEME CSS -->
-		<link href="/css/essentials.css" rel="stylesheet" type="text/css" />
-		<link href="/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
+		<link href="/web/css/essentials.css" rel="stylesheet" type="text/css" />
+		<link href="/web/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
 
 		<!-- PAGE LEVEL SCRIPTS -->
-		<link href="/css/header-1.css" rel="stylesheet" type="text/css" />
-		<link href="/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
+		<link href="/web/css/header-1.css" rel="stylesheet" type="text/css" />
+		<link href="/web/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
 	</head>
 
 	<!--
@@ -88,7 +88,7 @@ include_once("php/cabecera.php");
 					
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/obertures.jpg" alt="Obertures" />
+								<img class="img-fluid" src="/web/images/serveis/obertures.jpg" alt="Obertures" />
 							</figure>
 
 							<h4 class="mb-0">Obertures</h4>
@@ -99,7 +99,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/cerraduras-i-cerrojos.jpg" alt="Instal·lació de panys i escuts" />
+								<img class="img-fluid" src="/web/images/serveis/cerraduras-i-cerrojos.jpg" alt="Instal·lació de panys i escuts" />
 							</figure>
 
 							<h4 class="mb-0">Instal·lació de panys i escuts</h4>
@@ -111,7 +111,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Canvi-de-combinació.jpeg" alt="Canvi de combinació de panys" />
+								<img class="img-fluid" src="/web/images/serveis/Canvi-de-combinació.jpeg" alt="Canvi de combinació de panys" />
 							</figure>
 
 							<h4 class="mb-0">Canvi de combinació de panys</h4>
@@ -125,7 +125,7 @@ include_once("php/cabecera.php");
 					<div class="row">
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Persiana-domestica.jpg" alt="Persianes domèstiques" />
+								<img class="img-fluid" src="/web/images/serveis/Persiana-domestica.jpg" alt="Persianes domèstiques" />
 							</figure>
 
 							<h4 class="mb-0">Persianes domèstiques</h4>
@@ -136,7 +136,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Porta-basculant.jpg" alt="Portes basculants i oscil·lo batents" />
+								<img class="img-fluid" src="/web/images/serveis/Porta-basculant.jpg" alt="Portes basculants i oscil·lo batents" />
 							</figure>
 
 							<h4 class="mb-0">Portes basculants i oscil·lo batents</h4>
@@ -147,7 +147,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Tancaments_fixos.jpeg" alt="Tancaments fixos" />
+								<img class="img-fluid" src="/web/images/serveis/Tancaments_fixos.jpeg" alt="Tancaments fixos" />
 							</figure>
 
 							<h4 class="mb-0">Tancaments fixos</h4>
@@ -162,7 +162,7 @@ include_once("php/cabecera.php");
 					<div class="row">
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Persiana-comercial.jpg" alt="Persianes comercials" />
+								<img class="img-fluid" src="/web/images/serveis/Persiana-comercial.jpg" alt="Persianes comercials" />
 							</figure>
 
 							<h4 class="mb-0">Persianes comercials</h4>
@@ -174,7 +174,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Cadenat_de_Persiana.jpg" alt="Cadenats de seguretat" />
+								<img class="img-fluid" src="/web/images/serveis/Cadenat_de_Persiana.jpg" alt="Cadenats de seguretat" />
 							</figure>
 
 							<h4 class="mb-0">Cadenats de seguretat</h4>
@@ -185,7 +185,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Portes-corredises.jpg" alt="Portes corredisses" />
+								<img class="img-fluid" src="/web/images/serveis/Portes-corredises.jpg" alt="Portes corredisses" />
 							</figure>
 
 							<h4 class="mb-0">Portes corredisses</h4>
@@ -200,7 +200,7 @@ include_once("php/cabecera.php");
 					<div class="row">
 					<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Ballesta-Zincada.jpg" alt="Portes de ballesta" />
+								<img class="img-fluid" src="/web/images/serveis/Ballesta-Zincada.jpg" alt="Portes de ballesta" />
 							</figure>
 
 							<h4 class="mb-0">Portes de ballesta</h4>
@@ -211,7 +211,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Caixes-fortes.jpg" alt="Caixes Fortes" />
+								<img class="img-fluid" src="/web/images/serveis/Caixes-fortes.jpg" alt="Caixes Fortes" />
 							</figure>
 
 							<h4 class="mb-0">Caixes Fortes</h4>
@@ -222,7 +222,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Control-de-Accesoss.jpg" alt="Control d’accessos" />
+								<img class="img-fluid" src="/web/images/serveis/Control-de-Accesoss.jpg" alt="Control d’accessos" />
 							</figure>
 
 							<h4 class="mb-0">Control d’accessos</h4>
@@ -237,7 +237,7 @@ include_once("php/cabecera.php");
 					<div class="row">
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Porta-comunitat.jpg" alt="Portes de comunitat" />
+								<img class="img-fluid" src="/web/images/serveis/Porta-comunitat.jpg" alt="Portes de comunitat" />
 							</figure>
 
 							<h4 class="mb-0">Portes de comunitat</h4>
@@ -248,7 +248,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/muelle-cierra-puertas.jpg" alt="Molles tancaportes" />
+								<img class="img-fluid" src="/web/images/serveis/muelle-cierra-puertas.jpg" alt="Molles tancaportes" />
 							</figure>
 
 							<h4 class="mb-0">Molles tancaportes</h4>
@@ -259,7 +259,7 @@ include_once("php/cabecera.php");
 
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Operadors-portes.jpg" alt="Operadors" />
+								<img class="img-fluid" src="/web/images/serveis/Operadors-portes.jpg" alt="Operadors" />
 							</figure>
 
 							<h4 class="mb-0">Operadors</h4>
@@ -274,7 +274,7 @@ include_once("php/cabecera.php");
 					<div class="row">
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Mestrejament.jpeg" alt="Mestrejaments" />
+								<img class="img-fluid" src="/web/images/serveis/Mestrejament.jpeg" alt="Mestrejaments" />
 							</figure>
 
 							<h4 class="mb-0">Mestrejaments</h4>
@@ -285,7 +285,7 @@ include_once("php/cabecera.php");
 						
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/manteniment.jpeg" alt="Manteniments" />
+								<img class="img-fluid" src="/web/images/serveis/manteniment.jpeg" alt="Manteniments" />
 							</figure>
 
 							<h4 class="mb-0">Manteniments</h4>
@@ -296,7 +296,7 @@ include_once("php/cabecera.php");
 						
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/traster.jpeg" alt="Portes de traster" />
+								<img class="img-fluid" src="/web/images/serveis/traster.jpeg" alt="Portes de traster" />
 							</figure>
 
 							<h4 class="mb-0">Portes de traster</h4>
@@ -311,7 +311,7 @@ include_once("php/cabecera.php");
 					<div class="row">
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Puerta blindada.jpg" alt="Portes Blindades" />
+								<img class="img-fluid" src="/web/images/serveis/Puerta blindada.jpg" alt="Portes Blindades" />
 							</figure>
 
 							<h4 class="mb-0">Portes Blindades</h4>
@@ -322,7 +322,7 @@ include_once("php/cabecera.php");
 						
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Portes-de-seguretat.jpeg" alt="Portes de Seguretat" />
+								<img class="img-fluid" src="/web/images/serveis/Portes-de-seguretat.jpeg" alt="Portes de Seguretat" />
 							</figure>
 
 							<h4 class="mb-0">Portes de Seguretat</h4>
@@ -333,7 +333,7 @@ include_once("php/cabecera.php");
 						
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Escuts-de-seguretat.jpg" alt="Escuts de seguretat" />
+								<img class="img-fluid" src="/web/images/serveis/Escuts-de-seguretat.jpg" alt="Escuts de seguretat" />
 							</figure>
 
 							<h4 class="mb-0">Escuts de seguretat</h4>
@@ -348,7 +348,7 @@ include_once("php/cabecera.php");
 					<div class="row">
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/Conversio.jpeg" alt="Conversions" />
+								<img class="img-fluid" src="/web/images/serveis/Conversio.jpeg" alt="Conversions" />
 							</figure>
 
 							<h4 class="mb-0">Conversions</h4>
@@ -359,7 +359,7 @@ include_once("php/cabecera.php");
 						
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/deteccio-anticipada.jpeg" alt="Detecció anticipada" />
+								<img class="img-fluid" src="/web/images/serveis/deteccio-anticipada.jpeg" alt="Detecció anticipada" />
 							</figure>
 
 							<h4 class="mb-0">Detecció anticipada</h4>
@@ -370,7 +370,7 @@ include_once("php/cabecera.php");
 						
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<figure class="mb-20 fotoserveis">
-								<img class="img-fluid" src="/images/serveis/logo-sin-texto.png" alt="Altres" />
+								<img class="img-fluid" src="/web/images/serveis/logo-sin-texto.png" alt="Altres" />
 							</figure>
 
 							<h4 class="mb-0">Altres</h4>
@@ -416,9 +416,9 @@ include_once("php/pie.php");
 
 		<!-- JAVASCRIPT FILES -->
 		<script>var plugin_path = 'plugins/';</script>
-		<script src="/js/jquery-3.3.1.min.js"></script>
+		<script src="/web/js/jquery-3.3.1.min.js"></script>
 
-		<script src="/js/scripts.js"></script>
+		<script src="/web/js/scripts.js"></script>
 		
 		<!-- PAGE LEVEL SCRIPTS [cart js] -->
 		<script>
@@ -428,7 +428,7 @@ include_once("php/pie.php");
 					Chart.js
 					http://www.chartjs.org/
 				**/
-				loadScript('/js/chart.chartjs/Chart.min.js', function() {
+				loadScript('/web/js/chart.chartjs/Chart.min.js', function() {
 
 					// polarAreaChartCanvas
 					var polarAreaChartCanvas = [

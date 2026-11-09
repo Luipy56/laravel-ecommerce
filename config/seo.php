@@ -14,8 +14,8 @@ return [
     |
     */
 
-    'sitemap_base_url' => rtrim(env('SITEMAP_BASE_URL', 'https://tienda.serralleriasolidaria.cat'), '/'),
+    'sitemap_base_url' => rtrim(env('SITEMAP_BASE_URL', 'https://serralleriasolidaria.cat'), '/'),
 
-    'marketing_base_url' => rtrim(env('MARKETING_BASE_URL', 'https://serralleriasolidaria.cat'), '/'),
+    'marketing_base_url' => rtrim(env('MARKETING_BASE_URL', 'https://serralleriasolidaria.cat/web'), '/'),
 
 ];

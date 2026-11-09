@@ -13,7 +13,7 @@ $PaginaActual = "index";
 	<title>Serralleria Solidària</title>
 	<meta name="description" content="" />
 	<meta name="Author" content="Dorin Grigoras [www.stepofweb.com]" />
-	<link rel="icon" type="image/png" href="/images/favicon.png">
+	<link rel="icon" type="image/png" href="/web/images/favicon.png">
 
 	<!-- mobile settings -->
 	<meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0" />
@@ -23,19 +23,19 @@ $PaginaActual = "index";
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600%7CRaleway:300,400,500,600,700%7CLato:300,400,400italic,600,700" rel="stylesheet" type="text/css" />
 
 	<!-- CORE CSS -->
-	<link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="/web/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 
 	<!-- THEME CSS -->
-	<link href="/css/essentials.css" rel="stylesheet" type="text/css" />
-	<link href="/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
+	<link href="/web/css/essentials.css" rel="stylesheet" type="text/css" />
+	<link href="/web/css/layout.css?v=1.1" rel="stylesheet" type="text/css" />
 
 	<!-- PAGE LEVEL SCRIPTS -->
-	<link href="/css/header-1.css" rel="stylesheet" type="text/css" />
-	<link href="/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
+	<link href="/web/css/header-1.css" rel="stylesheet" type="text/css" />
+	<link href="/web/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
 
 	<!-- REVOLUTION SLIDER -->
-	<link href="/plugins/slider/css/extralayers.css" rel="stylesheet" type="text/css" />
-	<link href="/plugins/slider/css/settings.css" rel="stylesheet" type="text/css" />
+	<link href="/web/plugins/slider/css/extralayers.css" rel="stylesheet" type="text/css" />
+	<link href="/web/plugins/slider/css/settings.css" rel="stylesheet" type="text/css" />
 </head>
 
 <!--
@@ -105,9 +105,9 @@ $PaginaActual = "index";
 				<ul class="hide">
 
 					<!-- SLIDE -->
-					<li data-transition="fade" data-slotamount="1" data-masterspeed="1000" data-saveperformance="off" data-title="Serralleria Solidària" data-thumb="/images/neuron_thumb.jpg">
+					<li data-transition="fade" data-slotamount="1" data-masterspeed="1000" data-saveperformance="off" data-title="Serralleria Solidària" data-thumb="/web/images/neuron_thumb.jpg">
 
-						<img src="/images/1x1.png" data-lazyload="/images/neuron.jpg" alt="video" data-bgposition="center center" data-bgfit="cover" data-bgrepeat="no-repeat">
+						<img src="/web/images/1x1.png" data-lazyload="/web/images/neuron.jpg" alt="video" data-bgposition="center center" data-bgfit="cover" data-bgrepeat="no-repeat">
 
 						<div class="tp-caption tp-fade fadeout fullscreenvideo" data-x="0" data-y="0" data-speed="1000" data-start="1100" data-easing="Power4.easeOut" data-elementdelay="0.01" data-endelementdelay="0.1" data-endspeed="1500" data-endeasing="Power4.easeIn" data-autoplay="true" data-autoplayonlyfirsttime="false" data-nextslideatend="true" data-volume="mute" data-forceCover="1" data-aspectratio="16:9" data-forcerewind="on" style="z-index: 2;">
 
@@ -116,8 +116,8 @@ $PaginaActual = "index";
 							</div>
 
 							<video class="fullvideo" preload="none" poster="demo_files/images/video/neuron.jpg">
-								<source src="/images/neuron.webm" type="video/webm" />
-								<source src="/images/neuron.mp4" type="video/mp4" />
+								<source src="/web/images/neuron.webm" type="video/webm" />
+								<source src="/web/images/neuron.mp4" type="video/mp4" />
 							</video>
 
 						</div>
@@ -143,9 +143,9 @@ $PaginaActual = "index";
 					</li>
 
 					<!-- SLIDE  -->
-					<li data-transition="random" data-slotamount="1" data-masterspeed="1000" data-saveperformance="off" data-title="Al teu servei" data-thumb="/images/LLAVE-Y-BOMBIN-INN.jpg">
+					<li data-transition="random" data-slotamount="1" data-masterspeed="1000" data-saveperformance="off" data-title="Al teu servei" data-thumb="/web/images/LLAVE-Y-BOMBIN-INN.jpg">
 
-						<img src="assets/images/_smarty/1x1.png" data-lazyload="/images/LLAVE-Y-BOMBIN-INN.jpg" alt="" data-bgposition="center center" data-kenburns="on" data-duration="10000" data-ease="Linear.easeNone" data-bgfit="100" data-bgfitend="110" />
+						<img src="assets/images/_smarty/1x1.png" data-lazyload="/web/images/LLAVE-Y-BOMBIN-INN.jpg" alt="" data-bgposition="center center" data-kenburns="on" data-duration="10000" data-ease="Linear.easeNone" data-bgfit="100" data-bgfitend="110" />
 
 						<div class="overlay dark-1">
 							<!-- dark overlay [1 to 9 opacity] -->
@@ -172,9 +172,9 @@ $PaginaActual = "index";
 					</li>
 
 					<!-- SLIDE  funciona -->
-					<li data-transition="random" data-slotamount="1" data-masterspeed="1000" data-saveperformance="off" data-title="Ens adaptem a tu" data-thumb="/images/Cil-INN-interior.png">
+					<li data-transition="random" data-slotamount="1" data-masterspeed="1000" data-saveperformance="off" data-title="Ens adaptem a tu" data-thumb="/web/images/Cil-INN-interior.png">
 
-						<img src="assets/images/_smarty/1x1.png" data-lazyload="/images/Cil-INN-interior.png" alt="" data-bgposition="center center" data-kenburns="on" data-duration="10000" data-ease="Linear.easeNone" data-bgfit="100" data-bgfitend="110" />
+						<img src="assets/images/_smarty/1x1.png" data-lazyload="/web/images/Cil-INN-interior.png" alt="" data-bgposition="center center" data-kenburns="on" data-duration="10000" data-ease="Linear.easeNone" data-bgfit="100" data-bgfitend="110" />
 
 						<div class="overlay dark-1">
 							<!-- dark overlay [1 to 9 opacity] -->
@@ -277,7 +277,7 @@ $PaginaActual = "index";
 
 					<div class="col-md-5 col-sm-5">
 
-						<img class="img-fluid" src="/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-1.jpg" alt="...">
+						<img class="img-fluid" src="/web/images/solidaritat/Projecte-Solidari-Centre-Obert-Rialles-1.jpg" alt="...">
 
 					</div>
 
@@ -421,13 +421,13 @@ $PaginaActual = "index";
 
 				<div class="owl-carousel buttons-autohide controlls-over" data-plugin-options='{"singleItem": true, "autoPlay": true, "navigation": true, "pagination": true, "transitionStyle":"goDown"}'>
 					<div>
-						<img class="img-fluid" src="/images/portes.jpg" alt="Obertures">
+						<img class="img-fluid" src="/web/images/portes.jpg" alt="Obertures">
 					</div>
 					<div>
-						<img class="img-fluid" src="/images/serveis/Portes-corredises.jpg" alt="Portes corredisses">
+						<img class="img-fluid" src="/web/images/serveis/Portes-corredises.jpg" alt="Portes corredisses">
 					</div>
 					<div>
-						<img class="img-fluid" src="/images/serveis/Control-de-Accesoss.jpg" alt="Control d’accessos">
+						<img class="img-fluid" src="/web/images/serveis/Control-de-Accesoss.jpg" alt="Control d’accessos">
 					</div>
 				</div>
 			</div>
@@ -452,17 +452,17 @@ $PaginaActual = "index";
 
 	<!-- JAVASCRIPT FILES -->
 	<script>
-		var plugin_path = '/plugins/';
+		var plugin_path = '/web/plugins/';
 	</script>
-	<script src="/js/jquery-3.3.1.min.js"></script>
+	<script src="/web/js/jquery-3.3.1.min.js"></script>
 
-	<script src="/js/scripts.js"></script>
-	<script src="/js/serralleria.js"></script>
+	<script src="/web/js/scripts.js"></script>
+	<script src="/web/js/serralleria.js"></script>
 
 	<!-- REVOLUTION SLIDER -->
-	<script src="/plugins/slider/js/jquery.themepunch.tools.min.js"></script>
-	<script src="/plugins/slider/js/jquery.themepunch.revolution.min.js"></script>
-	<script src="/plugins/slider/js/revolution_slider.js"></script>
+	<script src="/web/plugins/slider/js/jquery.themepunch.tools.min.js"></script>
+	<script src="/web/plugins/slider/js/jquery.themepunch.revolution.min.js"></script>
+	<script src="/web/plugins/slider/js/revolution_slider.js"></script>
 </body>
 
 </html>

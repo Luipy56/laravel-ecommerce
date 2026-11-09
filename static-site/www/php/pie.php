@@ -5,7 +5,7 @@
 
 						<div class="col-lg-3">
 							<!-- Footer Logo -->
-							<img class="footer-logo" src="/images/logoweb.png" alt="" />
+							<img class="footer-logo" src="/web/images/logoweb.png" alt="" />
 
 							<!-- Small Description -->
 							<p>La primera serralleria solidària amb la nostra societat.<br><br>Els millors professionals al teu servei.</p>
@@ -59,7 +59,7 @@
 								<li><a href="webs.php">Webs d'interès</a></li>
 								<li><a href="contacte.php">Contacte</a></li>
 								<li><a href="blog.php">Blog</a></li>
-								<li><a href="https://tienda.serralleriasolidaria.cat/">Botiga</a></li>
+								<li><a href="/">Botiga</a></li>
 							</ul>
 							<!-- /Links -->
 
@@ -110,7 +110,7 @@
 
 							<!-- Links -->
 							<h4 class="letter-spacing-1">ESTEM ADHERITS</h4>
-							<a href="http://sac.gencat.cat/sacgencat/AppJava/organisme_fitxa.jsp?codi=5679" target="BLANK"><img class="img-fluid" src="/images/JACC.jpg" alt="Junta Arbitral de Consum de Catalunya"></a>
+							<a href="http://sac.gencat.cat/sacgencat/AppJava/organisme_fitxa.jsp?codi=5679" target="BLANK"><img class="img-fluid" src="/web/images/JACC.jpg" alt="Junta Arbitral de Consum de Catalunya"></a>
 							<!-- /Links -->
 
 						</div>

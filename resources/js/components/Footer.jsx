@@ -25,7 +25,7 @@ const SOCIAL_LINKS = [
   },
   {
     key: 'x',
-    href: 'https://x.com/serralleriasolidaria',
+    href: 'https://twitter.com/serralsolidaria',
     Icon: IconXTwitter,
     label: 'X (Twitter)',
   },
@@ -73,9 +73,8 @@ export default function Footer() {
             <h6 className="footer-title text-base">{t('footer.explore')}</h6>
             <Link to="/" className="link link-hover text-sm">{t('shop.home')}</Link>
             <a
-              href="/web/"
+              href="https://serralleriasolidaria.cat/web/"
               className="link link-hover text-sm"
-              rel="noopener noreferrer"
             >
               {t('footer.corporate_site', { defaultValue: 'Web corporativa' })}
             </a>
@@ -120,9 +119,7 @@ export default function Footer() {
             </div>
             <div className="mt-2">
               <a
-                href="https://www.serralleriasolidaria.cat/"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="https://serralleriasolidaria.cat/web/"
                 className="link link-hover text-sm opacity-70"
               >
                 {t('footer.legal_link')}

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.26] - 2026-11-10
+
+### Fixed
+- **Storefront footer:** X/Twitter points to `@serralsolidaria` (was a 404 handle); corporate/legal site links go to `/web/` on the apex.
+- **Marketing site footer:** physical address aligned with the shop (Ignasi Barraquer I Barraquer 15, 08310 Argentona); clear link to the online shop; contact page shows the same address.
+
 ## [0.2.25] - 2026-11-09
 
 ### Changed

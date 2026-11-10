@@ -384,8 +384,8 @@ if (isset($_POST["enviar"])) {
 						<hr />
 
 						<p>
-							<!--<span class="block"><strong><i class="fa fa-map-marker"></i> Address:</strong> Street Name, City Name, Country</span> -->
-							<span class="block"><strong><i class="fa fa-phone"></i> Telèfon:</strong> <a href="tel:">600 500 517</a></span>
+							<span class="block"><strong><i class="fa fa-map-marker"></i> Adreça:</strong> Ignasi Barraquer I Barraquer 15, 08310 Argentona</span>
+							<span class="block"><strong><i class="fa fa-phone"></i> Telèfon:</strong> <a href="tel:+34600500517">600 500 517</a></span>
 							<span class="block"><strong><i class="fa fa-envelope"></i> Email:</strong> <a href="mailto:empresa@serralleriasolidaria.cat">empresa@serralleriasolidaria.cat</a></span>
 						</p>
 

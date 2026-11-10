@@ -13,8 +13,12 @@
 							<!-- Contact Address -->
 							<address>
 								<ul class="list-unstyled">
+									<li class="footer-sprite address">
+										Ignasi Barraquer I Barraquer 15<br>
+										08310 Argentona
+									</li>
 									<li class="footer-sprite phone">
-										Telèfon: 600-500-517
+										Telèfon: <a href="tel:+34600500517">600-500-517</a>
 									</li>
 									<li class="footer-sprite email">
 										<a href="mailto:empresa@serralleriasolidaria.cat">empresa@serralleriasolidaria.cat</a>
@@ -59,7 +63,7 @@
 								<li><a href="webs.php">Webs d'interès</a></li>
 								<li><a href="contacte.php">Contacte</a></li>
 								<li><a href="blog.php">Blog</a></li>
-								<li><a href="/">Botiga</a></li>
+								<li><a href="https://serralleriasolidaria.cat/">Botiga online</a></li>
 							</ul>
 							<!-- /Links -->
 

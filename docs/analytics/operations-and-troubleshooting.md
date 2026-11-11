@@ -11,7 +11,8 @@
 | Host | `/srv/serra/prod` — `deploy-prod.sh` rebuild; static PHP recreate |
 | Env | `ANALYTICS_*` and `STATIC_*` enabled 2026-11-11 |
 | GTM JSON | `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json` |
-| Import failure | Invalid enum `list` → corrected to `LIST` |
+| Import failure (historical) | Invalid enum `list` → corrected to `LIST` in the UI before import |
+| Repo JSON fix | Same enum fixed in-repo (`0.2.34`) so a future Merge reimport does not hit that error |
 | Import | Admin → Import Container → **Existing workspace** → **Merge** (not Overwrite) |
 | Import preview | 17 added; no modifications/deletions of existing manual tags (operator) |
 | Preview validation | Passed (see testing matrix) |

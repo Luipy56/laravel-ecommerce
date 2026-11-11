@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.34] - 2026-11-11
+
+### Fixed
+- **GTM import JSON:** `consentType.type` enum corrected from lowercase `list` to `LIST` in `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json` (reimport-safe).
+
+### Changed
+- **Redmine hub #7469:** description aligned to production deploy `0.2.30` on `prod` and integration tip (see ticket; not stored in repo).
+
 ## [0.2.33] - 2026-11-11
 
 ### Changed

@@ -36,6 +36,7 @@ $PaginaActual = "index";
 	<!-- REVOLUTION SLIDER -->
 	<link href="/web/plugins/slider/css/extralayers.css" rel="stylesheet" type="text/css" />
 	<link href="/web/plugins/slider/css/settings.css" rel="stylesheet" type="text/css" />
+<?php include_once __DIR__ . '/php/seo-head.php'; ?>
 </head>
 
 <!--

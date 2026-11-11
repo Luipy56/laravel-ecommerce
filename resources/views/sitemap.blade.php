@@ -1,38 +1,31 @@
 {!! '<'.'?xml version="1.0" encoding="UTF-8"?>' !!}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-    {{-- Marketing apex (classic PHP site on lu-zero serra-static) --}}
+    {{-- Marketing site (canonical paths under /web, no .php) --}}
+    @foreach ($marketingPages as $page)
     <url>
-        <loc>{{ $marketingUrl }}/</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.9</priority>
+        <loc>{{ $page['loc'] }}</loc>
+        @if(!empty($page['lastmod']))
+        <lastmod>{{ $page['lastmod'] }}</lastmod>
+        @endif
     </url>
+    @endforeach
 
-    {{-- Shop SPA on tienda host --}}
+    {{-- Shop SPA on apex --}}
     <url>
         <loc>{{ $baseUrl }}/</loc>
-        <changefreq>daily</changefreq>
-        <priority>1.0</priority>
     </url>
     <url>
         <loc>{{ $baseUrl }}/products</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
     </url>
     <url>
         <loc>{{ $baseUrl }}/faq</loc>
-        <changefreq>monthly</changefreq>
-        <priority>0.5</priority>
     </url>
     <url>
         <loc>{{ $baseUrl }}/games</loc>
-        <changefreq>monthly</changefreq>
-        <priority>0.5</priority>
     </url>
     <url>
         <loc>{{ $baseUrl }}/terms</loc>
-        <changefreq>yearly</changefreq>
-        <priority>0.3</priority>
     </url>
 
     {{-- Active categories --}}
@@ -42,8 +35,6 @@
         @if($category->updated_at)
         <lastmod>{{ $category->updated_at->toAtomString() }}</lastmod>
         @endif
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
     </url>
     @endforeach
 
@@ -54,8 +45,6 @@
         @if($product->updated_at)
         <lastmod>{{ $product->updated_at->toAtomString() }}</lastmod>
         @endif
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
     </url>
     @endforeach
 
@@ -66,8 +55,6 @@
         @if($pack->updated_at)
         <lastmod>{{ $pack->updated_at->toAtomString() }}</lastmod>
         @endif
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
     </url>
     @endforeach
 

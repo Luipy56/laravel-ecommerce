@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.27] - 2026-11-11
+
+### Changed
+- **Sitemap:** list canonical marketing pages under `/web` (no `.php`); drop ignored `priority` / `changefreq`; `lastmod` only from real file/DB timestamps.
+- **Marketing SEO:** top-level `*.php` URLs 301 to extensionless `/web/{slug}`; pages emit `rel=canonical` (modal is `noindex`, excluded from sitemap).
+
+### Fixed
+- **Marketing contact page:** PHPMailer autoload no longer defines removed `__autoload()` on PHP 8.2 (page was fatal before HTML).
+
 ## [0.2.26] - 2026-11-10
 
 ### Fixed

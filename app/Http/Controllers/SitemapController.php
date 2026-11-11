@@ -19,7 +19,40 @@ class SitemapController extends Controller
             $products = Product::active()->orderBy('id')->get(['id', 'updated_at']);
             $packs = Pack::active()->orderBy('id')->get(['id', 'updated_at']);
 
-            return view('sitemap', compact('baseUrl', 'marketingUrl', 'categories', 'products', 'packs'))->render();
+            $marketingPages = [];
+            foreach ((array) config('seo.marketing_pages', []) as $page) {
+                $path = (string) ($page['path'] ?? '');
+                $file = (string) ($page['file'] ?? '');
+                if ($path === '' || $file === '') {
+                    continue;
+                }
+
+                $lastmod = null;
+                $absolute = base_path('static-site/www/'.$file);
+                if (is_file($absolute)) {
+                    $mtime = filemtime($absolute);
+                    if ($mtime !== false) {
+                        $lastmod = gmdate('c', $mtime);
+                    }
+                }
+
+                $loc = $path === '/'
+                    ? $marketingUrl.'/'
+                    : $marketingUrl.$path;
+
+                $marketingPages[] = [
+                    'loc' => $loc,
+                    'lastmod' => $lastmod,
+                ];
+            }
+
+            return view('sitemap', compact(
+                'baseUrl',
+                'marketingPages',
+                'categories',
+                'products',
+                'packs',
+            ))->render();
         });
 
         return response($xml, 200)->header('Content-Type', 'application/xml');

@@ -28,7 +28,8 @@ $PaginaActual = "nosaltres";
 		<!-- PAGE LEVEL SCRIPTS -->
 		<link href="/web/css/header-1.css" rel="stylesheet" type="text/css" />
 		<link href="/web/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
-	</head>
+		<?php include_once __DIR__ . '/php/seo-head.php'; ?>
+</head>
 
 	<!--
 		AVAILABLE BODY CLASSES:

@@ -1,5 +1,6 @@
-
-
+<?php
+header('X-Robots-Tag: noindex, nofollow');
+?>
 <div id="vacances-modal" class="modal fade" data-autoload="true" data-autoload-delay="2000">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

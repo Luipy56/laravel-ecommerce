@@ -33,6 +33,7 @@ $PaginaActual = "cookies";
     <!-- PAGE LEVEL SCRIPTS -->
     <link href="/web/css/header-1.css" rel="stylesheet" type="text/css" />
     <link href="/web/css/orange.css" rel="stylesheet" type="text/css" id="color_scheme" />
+<?php include_once __DIR__ . '/php/seo-head.php'; ?>
 </head>
 
 <!--

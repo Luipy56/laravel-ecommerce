@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.32] - 2026-11-11
+
+### Added
+- **Analytics docs pack:** `docs/analytics/` (architecture, configuration, events, consent, testing, operations, pending purchase validation). Reconcile `docs/analytics-ga4-gtm.md` as entry pointer. Redmine `#8465`.
+
 ## [0.2.31] - 2026-11-11
 
 ### Changed

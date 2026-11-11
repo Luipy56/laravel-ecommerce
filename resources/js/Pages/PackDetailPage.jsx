@@ -9,6 +9,7 @@ import FavoriteToggle from '../components/FavoriteToggle';
 import ReviewsSection from '../components/ReviewsSection';
 import CatalogCardImage from '../components/CatalogCardImage';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
+import { trackViewItem } from '../analytics';
 import KeyColorPicker from '../components/KeyColorPicker';
 import { useKeyColors } from '../hooks/useKeyColors';
 
@@ -114,6 +115,16 @@ export default function PackDetailPage() {
     pack?.name ?? undefined,
     pack?.description ? String(pack.description).slice(0, 200) : undefined,
   );
+
+  useEffect(() => {
+    if (!pack?.id) return;
+    trackViewItem({
+      item_id: pack.id,
+      item_name: pack.name,
+      price: pack.price,
+      item_category: 'Pack',
+    });
+  }, [pack?.id]);
 
   if (loading) {
     return (

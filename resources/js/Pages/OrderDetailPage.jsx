@@ -9,6 +9,7 @@ import { CHECKOUT_PAYMENT_METHOD_ORDER } from '../validation';
 import PayPalInlineButtons from '../components/payments/PayPalInlineButtons';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
 import { emitAppToast } from '../toastEvents';
+import { trackPurchaseOnce } from '../analytics';
 
 /** Pack lines have `pack_id` or nested `pack`; everything else is treated as product lines. */
 function partitionOrderLines(lines) {
@@ -153,6 +154,10 @@ export default function OrderDetailPage() {
     const m = order.payment_methods_available;
     setPaymentMethod((pm) => (m[pm] ? pm : CHECKOUT_PAYMENT_METHOD_ORDER.find((k) => m[k]) || 'card'));
   }, [order?.payment_methods_available, order?.id]);
+
+  useEffect(() => {
+    if (order?.has_payment) trackPurchaseOnce(order);
+  }, [order?.id, order?.has_payment, order]);
 
   useEffect(() => {
     if (!user || !id) return;

@@ -83,6 +83,13 @@ export default function Footer() {
             <Link to="/faq" className="link link-hover text-sm">{t('shop.faq.nav')}</Link>
             <Link to="/privacy-policy" className="link link-hover text-sm">{t('footer.privacy_policy')}</Link>
             <Link to="/terms" className="link link-hover text-sm">{t('footer.terms')}</Link>
+            <button
+              type="button"
+              className="link link-hover text-sm text-left"
+              onClick={() => window.dispatchEvent(new Event('serra:open-cookie-settings'))}
+            >
+              {t('cookies.settings_link')}
+            </button>
           </nav>
 
           {/* Contact */}

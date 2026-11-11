@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import PageTitle from '../components/PageTitle';
 import KeyColorSelect from '../components/KeyColorSelect';
 import { useKeyColors } from '../hooks/useKeyColors';
+import { trackViewCart } from '../analytics';
 
 function lineInvolvesKeys(line) {
   return !!line.product?.is_extra_keys_available || !!line.pack?.contains_keys;
@@ -355,6 +356,21 @@ export default function CartPage() {
   const showKeyColorColumn =
     keyColors.length > 0 && cart.lines?.some((line) => lineInvolvesKeys(line));
   const showKeysAllSameColumn = cart.lines?.some((line) => lineCanChooseKeysAllSame(line));
+
+  useEffect(() => {
+    if (loading || !cart.lines?.length) return;
+    trackViewCart(
+      cart.lines.map((l) => ({
+        product_id: l.product_id ?? l.product?.id,
+        pack_id: l.pack_id ?? l.pack?.id,
+        product_name: l.product?.name,
+        pack_name: l.pack?.name,
+        unit_price: l.unit_price ?? l.product?.price ?? l.pack?.price,
+        quantity: l.quantity,
+      })),
+      cartGrandTotal,
+    );
+  }, [loading, cart.lines, cartGrandTotal]);
 
   const onInstallationChange = async (e) => {
     const checked = e.target.checked;

@@ -1,5 +1,5 @@
 import './ProductDetailPage.scss';
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +16,7 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 import KeyColorPicker from '../components/KeyColorPicker';
 import { useKeyColors } from '../hooks/useKeyColors';
+import { trackViewItem } from '../analytics';
 
 const ZOOM_SCALE = 3.5;
 const ZOOM_PANEL_SIZE = 420;
@@ -59,6 +60,16 @@ export default function ProductDetailPage() {
     product?.name ?? undefined,
     product?.description ? String(product.description).slice(0, 200) : undefined,
   );
+
+  useEffect(() => {
+    if (!product?.id) return;
+    trackViewItem({
+      item_id: product.id,
+      item_name: product.name,
+      price: product.price,
+      item_category: product.category?.name,
+    });
+  }, [product?.id]);
 
   const handleAdd = () => addLine(product.id, null, qty, {
     key_color_id: selectedKeyColorId,

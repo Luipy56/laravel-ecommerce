@@ -12,6 +12,7 @@ import CartWidget from './CartWidget';
 import Footer from './Footer';
 import ScrollToTop from './ScrollToTop';
 import CookieConsentBanner from './CookieConsentBanner';
+import AnalyticsRouteTracker from '../analytics/AnalyticsRouteTracker';
 import DemoPhaseModalLoader from './DemoPhaseModalLoader';
 import {
   IconCart,
@@ -60,6 +61,23 @@ function drawerOffersNavClass(isActive) {
 
 function drawerOffersIconClass() {
   return 'h-5 w-5 shrink-0 text-white';
+}
+
+function CookieConsentHost() {
+  const [forceOpen, setForceOpen] = useState(false);
+
+  useEffect(() => {
+    const open = () => setForceOpen(true);
+    window.addEventListener('serra:open-cookie-settings', open);
+    return () => window.removeEventListener('serra:open-cookie-settings', open);
+  }, []);
+
+  return (
+    <CookieConsentBanner
+      forceOpen={forceOpen}
+      onClose={() => setForceOpen(false)}
+    />
+  );
 }
 
 export default function Layout() {
@@ -123,7 +141,8 @@ export default function Layout() {
           <Footer />
           <CartWidget />
           <ScrollToTop />
-          <CookieConsentBanner />
+          <AnalyticsRouteTracker />
+          <CookieConsentHost />
           <DemoPhaseModalLoader />
         </div>
       </StorefrontNavbarVisibilityProvider>

@@ -1,0 +1,59 @@
+.serra-cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  padding: 1rem;
+  pointer-events: none;
+}
+.serra-cookie-card {
+  pointer-events: auto;
+  max-width: 42rem;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  color: #222;
+  font-size: 14px;
+}
+.serra-cookie-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+.serra-cookie-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.4rem 0;
+}
+.serra-cookie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+.serra-btn {
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+}
+.serra-btn-outline {
+  background: #fff;
+  border-color: #888;
+}
+.serra-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+}
+.serra-btn-primary {
+  background: #fb5412;
+  color: #fff;
+}

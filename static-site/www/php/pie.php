@@ -133,6 +133,7 @@
 							<li><a href="avislegal.php">Avís legal</a></li>
 							<li><a href="privacitat.php">Política de privacitat</a></li>
 							<li><a href="cookies.php">Política de galetes</a></li>
+							<li><a href="#" data-serra-cookie-settings>Configuració de cookies</a></li>
 							<!--<li>&bull;</li>
 						</ul>
 						&copy; <?php echo date("Y") ?> serralleriasolidaria.cat - Tots els drets reservats.

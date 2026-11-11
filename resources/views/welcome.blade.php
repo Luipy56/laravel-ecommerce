@@ -42,6 +42,36 @@
     @if (config('app.is_demo'))
     <script>window.__LARAVEL_IS_DEMO__ = true;</script>
     @endif
+    @php
+        $serraAnalyticsBoot = [
+            'enabled' => (bool) config('analytics.enabled'),
+            'gtm_container_id' => (string) config('analytics.gtm_container_id'),
+            'ga4_measurement_id' => (string) config('analytics.ga4_measurement_id'),
+        ];
+    @endphp
+    <script>
+      window.__SERRA_ANALYTICS__ = @json($serraAnalyticsBoot);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+      window.gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        wait_for_update: 500
+      });
+      try {
+        var _c = JSON.parse(localStorage.getItem('cookie_consent_v2') || 'null');
+        if (_c && _c.analytics) {
+          window.gtag('consent', 'update', {
+            analytics_storage: 'granted',
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied'
+          });
+        }
+      } catch (e) {}
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.jsx'])
 </head>
 <body>

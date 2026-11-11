@@ -10,6 +10,7 @@ import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 import ProductCard from '../components/ProductCard';
 import PageTitle from '../components/PageTitle';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
+import { trackViewItemList, trackViewSearchResults, trackSelectItem } from '../analytics';
 
 const defaultPagination = { current_page: 1, last_page: 1, per_page: 15, total: 0 };
 
@@ -427,6 +428,23 @@ export default function ProductListPage() {
   }, [offersOnly, search, selectedCategoryName, t]);
 
   useDocumentMeta(pageTitle);
+
+  useEffect(() => {
+    if (!catalogItems.length) return;
+    const listId = selectedCategoryId ? `category-${selectedCategoryId}` : offersOnly ? 'offers' : packsOnly ? 'packs' : 'products';
+    const listName = selectedCategoryName || (offersOnly ? 'Offers' : packsOnly ? 'Packs' : 'Products');
+    trackViewItemList(
+      catalogItems.slice(0, 30).map((it) => ({
+        item_id: it.id,
+        item_name: it.name,
+        price: it.price,
+        item_category: it.category?.name ?? selectedCategoryName,
+      })),
+      listId,
+      listName,
+    );
+    if (search) trackViewSearchResults(search);
+  }, [catalogItems, selectedCategoryId, selectedCategoryName, offersOnly, packsOnly, search]);
   const featuresList = featuresQuery.data ?? [];
   const loadingInitial =
     categoriesQuery.isPending || featuresQuery.isPending || catalogInfinite.isPending;

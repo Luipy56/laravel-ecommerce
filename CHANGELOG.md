@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.29] - 2026-11-11
+
+### Added
+- **GA4 via GTM:** Consent Mode v2 defaults denied; GTM loads only after analytics consent; shop `dataLayer` ecommerce + SPA page views; marketing `/web` consent banner + GTM loader. See `docs/analytics-ga4-gtm.md` (GTM UI publish still required; prod deploy not auto-run).
+
 ## [0.2.28] - 2026-11-11
 
 ### Fixed

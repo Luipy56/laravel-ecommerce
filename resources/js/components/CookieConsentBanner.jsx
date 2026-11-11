@@ -1,45 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import {
+  applyAnalyticsConsent,
+  loadConsent,
+  saveConsent,
+} from '../analytics';
 
-const STORAGE_KEY = 'cookie_consent_v2';
-
-function loadConsent() {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function saveConsent(consent) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
-  } catch {
-    /* ignore */
-  }
-}
-
-export default function CookieConsentBanner() {
+/**
+ * Cookie consent v2 + Consent Mode bridge.
+ * AEPD: reject optional tracking with equal prominence to accept.
+ */
+export default function CookieConsentBanner({ forceOpen = false, onClose } = {}) {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [analyticsChecked, setAnalyticsChecked] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (!loadConsent()) setVisible(true);
-  }, []);
+    const existing = loadConsent();
+    if (forceOpen) {
+      setAnalyticsChecked(!!existing?.analytics);
+      setVisible(true);
+      return;
+    }
+    if (!existing) setVisible(true);
+  }, [forceOpen]);
 
-  const acceptSelected = () => {
-    saveConsent({ essential: true, analytics: analyticsChecked });
+  const finish = (analytics) => {
+    saveConsent({ essential: true, analytics: !!analytics });
+    applyAnalyticsConsent(!!analytics);
     setVisible(false);
-  };
-
-  const acceptAll = () => {
-    saveConsent({ essential: true, analytics: true });
-    setVisible(false);
+    onClose?.();
   };
 
   if (!visible) return null;
@@ -62,7 +54,6 @@ export default function CookieConsentBanner() {
             </p>
           </div>
 
-          {/* Granular options */}
           <div className="flex flex-col gap-2">
             <label className="flex items-center justify-between gap-4 cursor-default select-none text-sm">
               <span className="font-medium">{t('cookies.essential_label')}</span>
@@ -87,10 +78,13 @@ export default function CookieConsentBanner() {
           </p>
 
           <div className="flex flex-wrap gap-2 justify-end">
-            <button type="button" className="btn btn-ghost btn-sm" onClick={acceptSelected}>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => finish(false)}>
+              {t('cookies.reject_optional')}
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => finish(analyticsChecked)}>
               {t('cookies.accept_selected')}
             </button>
-            <button type="button" className="btn btn-primary btn-sm" onClick={acceptAll}>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => finish(true)}>
               {t('cookies.accept_all')}
             </button>
           </div>

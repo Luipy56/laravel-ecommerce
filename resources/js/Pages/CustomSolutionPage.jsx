@@ -13,6 +13,7 @@ import { coercePostalCodeFieldValue, sanitizePostalCodeDigits } from '../lib/pos
 import { customSolutionFormSchema, parseWithZod } from '../validation';
 import FieldHint from '../components/FieldHint';
 import { IconClipboardList, IconSparkles, IconMail } from '../components/icons';
+import { trackGenerateLead } from '../analytics';
 
 function ProcessStep({ icon: Icon, title, description, isLast }) {
   return (
@@ -162,6 +163,7 @@ export default function CustomSolutionPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (r.data.success) {
+        trackGenerateLead('custom_solution');
         showToast({ message: t('shop.custom_solution.success'), type: 'success' });
         const portalPath = r.data.data?.client_portal_path;
         if (portalPath) {

@@ -3,6 +3,7 @@ import i18n from '../i18n';
 import { api } from '../api';
 import { emitAppToast } from '../toastEvents';
 import { useAuth } from './AuthContext';
+import { trackAddToCart, trackRemoveFromCart } from '../analytics';
 
 /**
  * Cart state and actions. Guest cart is in session; logged-in cart is in DB.
@@ -104,6 +105,25 @@ export function CartProvider({ children }) {
       if (Array.isArray(data.data.lines)) {
         setCart((c) => cartStateFromApi({ ...data.data, id: data.data.id ?? c.id }));
       } else await fetchCart();
+      try {
+        const lines = data.data.lines;
+        const match = Array.isArray(lines)
+          ? lines.find((l) =>
+              productId ? Number(l.product_id) === Number(productId) : Number(l.pack_id) === Number(packId),
+            )
+          : null;
+        trackAddToCart(
+          {
+            item_id: match?.product_id ?? match?.pack_id ?? productId ?? packId,
+            item_name: match?.product_name ?? match?.pack_name ?? match?.name,
+            price: match?.unit_price ?? match?.price,
+            item_category: match?.category_name,
+          },
+          quantity,
+        );
+      } catch {
+        /* ignore */
+      }
       emitAppToast(i18n.t('shop.cart.added'), 'success');
       return { success: true };
     }
@@ -128,14 +148,25 @@ export function CartProvider({ children }) {
   }, [fetchCart]);
 
   const removeLine = useCallback(async (lineId) => {
+    const prev = cart.lines.find((l) => l.id === lineId);
     const { data } = await api.delete(`cart/lines/${lineId}`);
     if (data.success && data.data) {
       setCart(cartStateFromApi(data.data));
       if (!Array.isArray(data.data.lines)) await fetchCart();
+      if (prev) {
+        trackRemoveFromCart(
+          {
+            item_id: prev.product_id ?? prev.pack_id ?? prev.product?.id ?? prev.pack?.id,
+            item_name: prev.product?.name ?? prev.pack?.name ?? prev.product_name ?? prev.pack_name,
+            price: prev.unit_price ?? prev.product?.price ?? prev.pack?.price,
+          },
+          prev.quantity ?? 1,
+        );
+      }
       return { success: true };
     }
     return { success: false };
-  }, [fetchCart]);
+  }, [fetchCart, cart.lines]);
 
   const itemCount = cart.lines.reduce((acc, l) => acc + (l.quantity || 0), 0);
 

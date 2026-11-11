@@ -12,6 +12,7 @@ import { scrollWindowToTopOnFormError } from '../lib/formScroll';
 import { coercePostalCodeFieldValue } from '../lib/postalInput';
 import { CHECKOUT_PAYMENT_METHOD_ORDER, checkoutFormSchema, parseWithZod } from '../validation';
 import { openPayPalApprovalInNewTab } from '../payments/openPayPalApprovalInNewTab';
+import { trackBeginCheckout, trackAddShippingInfo, trackAddPaymentInfo } from '../analytics';
 
 
 const INITIAL_FORM = {
@@ -299,6 +300,22 @@ export default function CheckoutPage() {
         payload.checkout_demo_skip_payment = true;
         delete payload.payment_method;
       }
+      const cartItems = (cart.lines || []).map((l) => ({
+        product_id: l.product_id ?? l.product?.id,
+        pack_id: l.pack_id ?? l.pack?.id,
+        product_name: l.product?.name,
+        pack_name: l.pack?.name,
+        unit_price: l.unit_price ?? l.product?.price ?? l.pack?.price,
+        quantity: l.quantity,
+      }));
+      const ship = Number(cart.shipping_flat_eur ?? 9);
+      const installFee =
+        wantsInstallation && cart.installation_fee_eur != null ? Number(cart.installation_fee_eur) : 0;
+      const checkoutValue = Number(cart.total) + ship + installFee;
+      trackAddShippingInfo(cartItems, checkoutValue);
+      if (payload.payment_method) {
+        trackAddPaymentInfo(cartItems, checkoutValue, payload.payment_method);
+      }
       const { data } = await api.post('orders/checkout', payload);
       if (!data.success) return;
 
@@ -380,7 +397,26 @@ export default function CheckoutPage() {
     wantsInstallation,
     installationQuoteRequired,
     t,
+    cart,
   ]);
+
+  useEffect(() => {
+    if (!cart.lines?.length) return;
+    const ship = Number(cart.shipping_flat_eur ?? 9);
+    const installFee =
+      wantsInstallation && cart.installation_fee_eur != null ? Number(cart.installation_fee_eur) : 0;
+    trackBeginCheckout(
+      cart.lines.map((l) => ({
+        product_id: l.product_id ?? l.product?.id,
+        pack_id: l.pack_id ?? l.pack?.id,
+        product_name: l.product?.name,
+        pack_name: l.pack?.name,
+        unit_price: l.unit_price ?? l.product?.price ?? l.pack?.price,
+        quantity: l.quantity,
+      })),
+      Number(cart.total) + ship + installFee,
+    );
+  }, [cart.lines, cart.total, cart.shipping_flat_eur, cart.installation_fee_eur, wantsInstallation]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

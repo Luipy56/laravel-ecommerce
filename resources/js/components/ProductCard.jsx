@@ -8,6 +8,7 @@ import FavoriteToggle from './FavoriteToggle';
 import { usePublicShopSettings } from '../hooks/usePublicShopSettings';
 import { catalogFeatureTypeLabel } from '../lib/catalogFeatureTypeLabel';
 import ProductPreviewModal from './ProductPreviewModal';
+import { trackSelectItem } from '../analytics';
 
 const FALLBACK_IMAGE = '/images/dummy.jpg';
 
@@ -32,6 +33,19 @@ export default function ProductCard({ product, pack }) {
     product.stock != null &&
     Number(product.stock) <= publicSettings.low_stock_threshold;
   const detailUrl = isPack ? `/packs/${pack.id}` : `/products/${product.id}`;
+  const entity = isPack ? pack : product;
+
+  const handleSelect = () => {
+    trackSelectItem(
+      {
+        item_id: entity?.id,
+        item_name: entity?.name,
+        price: entity?.price,
+      },
+      isPack ? 'packs' : 'products',
+      isPack ? 'Packs' : 'Products',
+    );
+  };
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -49,7 +63,10 @@ export default function ProductCard({ product, pack }) {
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const openModal = () => setModalOpen(true);
+  const openModal = () => {
+    handleSelect();
+    setModalOpen(true);
+  };
 
   const handleCardKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {

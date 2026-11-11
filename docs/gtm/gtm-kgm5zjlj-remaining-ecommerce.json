@@ -1,0 +1,603 @@
+{
+  "exportFormatVersion": 2,
+  "exportTime": "2026-11-11 16:34:12",
+  "containerVersion": {
+    "path": "accounts/0000000000/containers/0000000/versions/0",
+    "accountId": "0000000000",
+    "containerId": "0000000",
+    "containerVersionId": "0",
+    "name": "Serra remaining GA4 ecommerce (merge import \u2014 do not overwrite)",
+    "description": "Partial merge for GTM-KGM5ZJLJ. Adds ecommerce + lead/search only. Preserves existing GA4 Config, page_view SPA, CE serra_page_view, DLV page_path/title. Do NOT publish from this import alone without Preview. Do NOT use Overwrite.",
+    "container": {
+      "path": "accounts/0000000000/containers/0000000",
+      "accountId": "0000000000",
+      "containerId": "0000000",
+      "name": "Serralleria Solid\u00e0ria",
+      "publicId": "GTM-KGM5ZJLJ",
+      "usageContext": [
+        "WEB"
+      ],
+      "fingerprint": "1794414852907",
+      "tagManagerUrl": "https://tagmanager.google.com/#/container/accounts/0000000000/containers/0000000/workspaces?apiLink=container",
+      "features": {
+        "supportUserPermissions": true,
+        "supportEnvironments": true,
+        "supportWorkspaces": true,
+        "supportGtagConfigs": true,
+        "supportBuiltInVariables": true,
+        "supportClients": false,
+        "supportFolders": true,
+        "supportTags": true,
+        "supportTemplates": true,
+        "supportTriggers": true,
+        "supportVariables": true,
+        "supportVersions": true,
+        "supportZones": true,
+        "supportTransformations": false
+      },
+      "tagIds": [
+        "GTM-KGM5ZJLJ"
+      ]
+    },
+    "tag": [
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "tagId": "1",
+        "name": "GA4 - ecommerce - Event",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "sendEcommerceData",
+            "value": "true"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "getEcommerceDataFrom",
+            "value": "dataLayer"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "{{Event}}"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "G-TS9QP8HY4H"
+          }
+        ],
+        "fingerprint": "1794414853207",
+        "firingTriggerId": [
+          "1"
+        ],
+        "parentFolderId": "1",
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "consentSettings": {
+          "consentStatus": "NEEDED",
+          "consentType": {
+            "type": "list",
+            "list": [
+              {
+                "type": "TEMPLATE",
+                "value": "analytics_storage"
+              }
+            ]
+          }
+        },
+        "notes": "Fires for Serra shop ecommerce dataLayer events. Uses GA4 recommended ecommerce object from dataLayer. Does NOT include serra_page_view (already configured). Measurement ID override: G-TS9QP8HY4H."
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "tagId": "2",
+        "name": "GA4 - generate_lead",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "generate_lead"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "G-TS9QP8HY4H"
+          },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "name",
+                    "value": "form_id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "value",
+                    "value": "{{DLV - form_id}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1794414853208",
+        "firingTriggerId": [
+          "2"
+        ],
+        "parentFolderId": "1",
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "consentSettings": {
+          "consentStatus": "NEEDED",
+          "consentType": {
+            "type": "list",
+            "list": [
+              {
+                "type": "TEMPLATE",
+                "value": "analytics_storage"
+              }
+            ]
+          }
+        },
+        "notes": "Custom-solution form success (non-ecommerce)."
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "tagId": "3",
+        "name": "GA4 - view_search_results",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "view_search_results"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "G-TS9QP8HY4H"
+          },
+          {
+            "type": "LIST",
+            "key": "eventParameters",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "name",
+                    "value": "search_term"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "value",
+                    "value": "{{DLV - search_term}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1794414853209",
+        "firingTriggerId": [
+          "3"
+        ],
+        "parentFolderId": "1",
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "consentSettings": {
+          "consentStatus": "NEEDED",
+          "consentType": {
+            "type": "list",
+            "list": [
+              {
+                "type": "TEMPLATE",
+                "value": "analytics_storage"
+              }
+            ]
+          }
+        },
+        "notes": "Product search results (search_term from dataLayer)."
+      }
+    ],
+    "trigger": [
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "triggerId": "1",
+        "name": "CE - GA4 ecommerce",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "MATCH_REGEX",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "^(view_item_list|select_item|view_item|add_to_cart|remove_from_cart|view_cart|begin_checkout|add_shipping_info|add_payment_info|purchase)$"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1794414853107",
+        "parentFolderId": "1"
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "triggerId": "2",
+        "name": "CE - generate_lead",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "generate_lead"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1794414853108",
+        "parentFolderId": "1"
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "triggerId": "3",
+        "name": "CE - view_search_results",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "view_search_results"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1794414853109",
+        "parentFolderId": "1"
+      }
+    ],
+    "variable": [
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "1",
+        "name": "DLV - form_id",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "form_id"
+          }
+        ],
+        "fingerprint": "1794414853007",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "2",
+        "name": "DLV - search_term",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "search_term"
+          }
+        ],
+        "fingerprint": "1794414853008",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "3",
+        "name": "DLV - ecommerce.items",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "ecommerce.items"
+          }
+        ],
+        "fingerprint": "1794414853009",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "4",
+        "name": "DLV - ecommerce.value",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "ecommerce.value"
+          }
+        ],
+        "fingerprint": "1794414853010",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "5",
+        "name": "DLV - ecommerce.currency",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "ecommerce.currency"
+          }
+        ],
+        "fingerprint": "1794414853011",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "6",
+        "name": "DLV - ecommerce.transaction_id",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "ecommerce.transaction_id"
+          }
+        ],
+        "fingerprint": "1794414853012",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "7",
+        "name": "DLV - ecommerce.payment_type",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "ecommerce.payment_type"
+          }
+        ],
+        "fingerprint": "1794414853013",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "8",
+        "name": "DLV - ecommerce.shipping",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "ecommerce.shipping"
+          }
+        ],
+        "fingerprint": "1794414853014",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "9",
+        "name": "DLV - ecommerce.item_list_id",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "ecommerce.item_list_id"
+          }
+        ],
+        "fingerprint": "1794414853015",
+        "parentFolderId": "1",
+        "formatValue": {}
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "variableId": "10",
+        "name": "DLV - ecommerce.item_list_name",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "ecommerce.item_list_name"
+          }
+        ],
+        "fingerprint": "1794414853016",
+        "parentFolderId": "1",
+        "formatValue": {}
+      }
+    ],
+    "folder": [
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "folderId": "1",
+        "name": "Serra - GA4 ecommerce (import)",
+        "fingerprint": "1794414852908"
+      }
+    ],
+    "builtInVariable": [
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "type": "EVENT",
+        "name": "Event"
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "type": "PAGE_PATH",
+        "name": "Page Path"
+      },
+      {
+        "accountId": "0000000000",
+        "containerId": "0000000",
+        "type": "PAGE_URL",
+        "name": "Page URL"
+      }
+    ],
+    "fingerprint": "1794414852909",
+    "tagManagerUrl": "https://tagmanager.google.com/#/versions/accounts/0000000000/containers/0000000/versions/0?apiLink=version"
+  }
+}

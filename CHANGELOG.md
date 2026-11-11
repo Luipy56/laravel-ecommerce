@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.30] - 2026-11-11
+
+### Changed
+- **Analytics prod:** document GTM `send_page_view=false` / SPA page_view tags already in container; add merge-import JSON `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json`; mark production deploy authorized (env + rebuild). GTM publish remains manual.
+
 ## [0.2.29] - 2026-11-11
 
 ### Added

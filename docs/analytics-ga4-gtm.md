@@ -4,11 +4,11 @@
 
 | Area | State |
 |------|--------|
-| Shop SPA code (consent, dataLayer, ecommerce events) | Implemented on `autoagents` |
+| Shop SPA code (consent, dataLayer, ecommerce events) | Implemented |
 | Marketing `/web` consent + GTM loader | Implemented |
-| Production deploy | **Not deployed** until Luipy authorizes |
-| GTM UI tags / triggers / publish | **Requires Google account work** |
-| GA4 DebugView / Realtime verification | After GTM publish + deploy |
+| Production deploy | **Enabled** 2026-11-11 (Luipy authorized env + rebuild) |
+| GTM UI tags / triggers / publish | Tags imported; **container not published** (Luipy publishes after verify) |
+| GA4 DebugView / Realtime verification | After GTM publish |
 
 ## Architecture
 
@@ -72,18 +72,32 @@ Ecommerce payloads clear prior `ecommerce` before each push (GA4 recommended pat
 ### Already done in GTM (by Luipy)
 
 - Container `GTM-KGM5ZJLJ`
-- Tag **GA4 - Serralleria Solidària - Configuración** + trigger Initialization / All Pages
+- Tag **GA4 - Serralleria Solidària - Configuración** (`send_page_view=false`) + Consent Mode / `analytics_storage`
+- Tag **GA4 - page_view - SPA** + trigger **CE - serra_page_view** + **DLV - page_path** / **DLV - page_title**
 - Container **not published** yet (correct until the site loads GTM)
+
+### Remaining GTM work (import JSON — preferred)
+
+Importable merge file (validated, no publish): `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json`
+
+1. Admin → **Import Container** → that JSON → **Existing workspace** → **Merge** → **Rename** conflicts.
+2. Preview after site deploy; **Publish only** when Luipy authorizes.
+3. Do **not** use Overwrite (would wipe the manual page_view / config tags).
+
+The import adds: one GA4 ecommerce tag (`{{Event}}` + ecommerce from dataLayer), `generate_lead`, `view_search_results`, matching triggers/variables, all with `analytics_storage` consent.
 
 ### Still required in GTM (before/at publish)
 
-1. **Consent:** In Admin → Container settings / Consent Overview, enable Consent Mode. On the GA4 Configuration tag, require `analytics_storage` = granted (so it does not fire before cookie accept).
-2. **SPA page views:** Shop is React. Add a GA4 Event tag `page_view` fired on custom event `serra_page_view` (and/or History Change). Do **not** rely only on the first full page load.
-3. **Ecommerce:** GA4 Event tags (or one GA4 Event using the Data Layer event name) for: `view_item_list`, `select_item`, `view_item`, `add_to_cart`, `remove_from_cart`, `view_cart`, `begin_checkout`, `add_shipping_info`, `add_payment_info`, `purchase`, `generate_lead`, `view_search_results`. Ecommerce parameter from Data Layer: `ecommerce`.
-4. **Avoid duplicates:** Do not also install the GA4 snippet (`gtag.js` with `G-TS9QP8HY4H`) in the website HTML. Code loads **only** GTM.
-5. **User-provided data / ads settings:** Prefer leave “datos proporcionados por el usuario” **off** unless legal review says otherwise (PII risk). Enhanced measurement / auto events are OK if they do not duplicate custom tags.
-6. **Publish** only after Luipy authorizes **and** the site is deployed with `ANALYTICS_ENABLED=true` + `GTM_CONTAINER_ID=GTM-KGM5ZJLJ`.
-7. Validate: GTM Preview → site → accept analytics cookies → GA4 DebugView / Realtime.
+1. Confirm Consent Mode remains enabled and existing GA4 tags still require `analytics_storage`.
+2. Import the remaining ecommerce JSON above (or recreate those tags manually).
+3. **Avoid duplicates:** Do not also install the GA4 snippet (`gtag.js` with `G-TS9QP8HY4H`) in the website HTML. Code loads **only** GTM.
+4. **User-provided data / ads settings:** Prefer leave “datos proporcionados por el usuario” **off** unless legal review says otherwise (PII risk). Enhanced measurement / auto events are OK if they do not duplicate custom tags.
+5. **Publish** only after Luipy authorizes **and** the site is deployed with `ANALYTICS_ENABLED=true` + `GTM_CONTAINER_ID=GTM-KGM5ZJLJ`.
+6. Validate: GTM Preview → site → accept analytics cookies → GA4 DebugView / Realtime.
+
+### GTM API automation
+
+Official Tag Manager API can create the same entities, but needs an OAuth client + refresh token from a Google user with **Edit** on `GTM-KGM5ZJLJ` (scopes `tagmanager.edit.containers` / `tagmanager.readonly`). No Google password. Not available on this host today; JSON import is the safe path.
 
 Until the site loads GTM **and** the container is published, GA4 will show “no data yet”.
 

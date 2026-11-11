@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.28] - 2026-11-11
+
+### Fixed
+- **Footer social links:** Instagram `serralleria_solidaria`, LinkedIn company page with accented slug, YouTube `@serralleriasolidaria7307` (aligned shop + marketing footers).
+
 ## [0.2.27] - 2026-11-11
 
 ### Changed

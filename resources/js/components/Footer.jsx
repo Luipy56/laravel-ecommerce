@@ -13,13 +13,13 @@ import {
 const SOCIAL_LINKS = [
   {
     key: 'facebook',
-    href: 'https://www.facebook.com/serralleriasolidaria',
+    href: 'https://www.facebook.com/serralleriasolidaria/',
     Icon: IconFacebook,
     label: 'Facebook',
   },
   {
     key: 'instagram',
-    href: 'https://www.instagram.com/serralleriasolidaria',
+    href: 'https://www.instagram.com/serralleria_solidaria/',
     Icon: IconInstagram,
     label: 'Instagram',
   },
@@ -31,13 +31,13 @@ const SOCIAL_LINKS = [
   },
   {
     key: 'linkedin',
-    href: 'https://www.linkedin.com/company/serralleria-solidaria',
+    href: 'https://es.linkedin.com/company/serralleria-solid%C3%A0ria-s-l-u',
     Icon: IconLinkedIn,
     label: 'LinkedIn',
   },
   {
     key: 'youtube',
-    href: 'https://www.youtube.com/@serralleriasolidaria',
+    href: 'https://www.youtube.com/@serralleriasolidaria7307',
     Icon: IconYouTube,
     label: 'YouTube',
   },

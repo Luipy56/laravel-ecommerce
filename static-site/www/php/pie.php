@@ -102,7 +102,11 @@
 									<img class="social-network-icon" src="images/icono-instagram.png" alt="">
 								</a>
 
-								<a href="https://www.youtube.com/channel/UCFhIQvRHGT4SG6bJcw6HWqw?view_as=subscriber" target="_blank" class="float-left" data-toggle="tooltip" data-placement="bottom" title="Segueix a la Serralleria a Youtube">
+								<a href="https://es.linkedin.com/company/serralleria-solid%C3%A0ria-s-l-u" target="_blank" class="float-left" data-toggle="tooltip" data-placement="top" title="Segueix a la Serralleria a LinkedIn" aria-label="LinkedIn" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;margin:0 6px 6px 0;border-radius:50%;background:#0a66c2;color:#fff;font-size:18px;text-decoration:none;">
+									<i class="fa fa-linkedin" aria-hidden="true"></i>
+								</a>
+
+								<a href="https://www.youtube.com/@serralleriasolidaria7307" target="_blank" class="float-left" data-toggle="tooltip" data-placement="bottom" title="Segueix a la Serralleria a Youtube">
 									<img class="social-network-icon" src="images/icono-youtube.png" alt="">
 								</a>
 

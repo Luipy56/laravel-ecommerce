@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.33] - 2026-11-11
+
+### Changed
+- **Analytics docs:** note that Redmine `#8465` issue description mirrors the full Textile technical documentation for offline/Redmine-first reading.
+
 ## [0.2.32] - 2026-11-11
 
 ### Added

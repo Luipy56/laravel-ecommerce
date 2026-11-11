@@ -2,7 +2,7 @@
 
 **Last reviewed:** 2026-11-11  
 **Audience:** engineers who maintain Serralleria Solidària tracking  
-**Redmine:** parent `#7469`, documentation subticket `#8465`
+**Redmine:** parent `#7469`, documentation subticket `#8465` (issue **description** holds a full Textile copy of this pack for engineers who read Redmine first)
 
 ## Status (2026-11-11)
 

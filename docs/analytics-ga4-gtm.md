@@ -4,29 +4,31 @@
 
 | Area | State |
 |------|--------|
-| Shop SPA code (consent, dataLayer, ecommerce events) | Implemented |
-| Marketing `/web` consent + GTM loader | Implemented |
-| Production deploy | **Enabled** 2026-11-11 (Luipy authorized env + rebuild) |
-| GTM UI tags / triggers / publish | Tags imported; **container not published** (Luipy publishes after verify) |
-| GA4 DebugView / Realtime verification | After GTM publish |
+| Shop SPA code (consent, dataLayer, ecommerce events) | Implemented on production |
+| Marketing `/web` consent + GTM loader | Implemented on production |
+| Production site env (`ANALYTICS_*` / `STATIC_*`) | **Enabled** 2026-11-11 |
+| GTM import (17 elements, Merge) | **Done** (JSON `list` → `LIST` fix before import) |
+| GTM Preview + GA4 DebugView (manual) | **Passed** 2026-11-11 (see Validation log) |
+| GTM container publish | **Not published** (Luipy publishes manually when ready) |
+| Purchase event validation | **Pending** safe test transaction |
 
 ## Architecture
 
 - **GTM only** (no parallel `gtag.js` config tag in the page). Measurement ID is for GTM configuration.
 - **Consent Mode v2** defaults to denied; GTM script loads **only after** analytics consent.
 - Shared consent key: `localStorage.cookie_consent_v2` (`{ essential, analytics, updated_at }`).
-- Shop SPA pushes ecommerce objects to `dataLayer`; GTM must map them to GA4.
+- Shop SPA pushes ecommerce objects to `dataLayer`; GTM maps them to GA4.
+- GA4 Configuration tag uses `send_page_view=false`. Shop page views come from custom event `serra_page_view`.
+- GA4 Enhanced Measurement **history-based page views are disabled** (avoids duplicate SPA page views).
 
-## Identifiers (verify in Google Admin)
+## Identifiers
 
 - GA4 Measurement ID: `G-TS9QP8HY4H`
 - GTM container: `GTM-KGM5ZJLJ` (do **not** use the old placeholder `GTM-P3JR3DMB`)
 
-Confirm both belong to Serralleria Solidària before enabling.
+## Environment (production)
 
-## Environment
-
-Shop (Laravel / Docker app):
+Shop (Laravel / Docker app) — `/srv/serra/prod/.env`:
 
 ```env
 ANALYTICS_ENABLED=true
@@ -34,7 +36,7 @@ GTM_CONTAINER_ID=GTM-KGM5ZJLJ
 GA4_MEASUREMENT_ID=G-TS9QP8HY4H
 ```
 
-Marketing static PHP-FPM (`.env.static`):
+Marketing static PHP-FPM — `/srv/serra/prod/.env.static`:
 
 ```env
 STATIC_ANALYTICS_ENABLED=1
@@ -52,6 +54,8 @@ Banner offers, with equal visibility for reject vs accept-all:
 
 Footer: **Cookie settings** reopens the banner.
 
+All GA4 tags in the container require `analytics_storage` (Consent Mode).
+
 ## dataLayer events (shop)
 
 | Event | When |
@@ -67,39 +71,57 @@ Footer: **Cookie settings** reopens the banner.
 
 Ecommerce payloads clear prior `ecommerce` before each push (GA4 recommended pattern).
 
-## What Luipy must do in GTM
+### Known SPA note (non-blocking)
 
-### Already done in GTM (by Luipy)
+`serra_page_view` is gated on analytics consent. Accepting cookies on the landing URL loads GTM but does **not** re-fire `trackPageView` for that same URL until the next SPA navigation. Preview/DebugView confirmed page views on subsequent navigations (including back to home = +1). Optional later fix: call `trackPageView` for the current path inside `applyAnalyticsConsent(true)`.
+
+### Marketing `/web` note
+
+Classic `/web` pages do not push `serra_page_view`. With `send_page_view=false` and history Enhanced Measurement off, marketing page views are out of scope of the SPA page_view tag unless a separate All Pages tag is added later.
+
+## GTM configuration (current)
+
+### Done
 
 - Container `GTM-KGM5ZJLJ`
-- Tag **GA4 - Serralleria Solidària - Configuración** (`send_page_view=false`) + Consent Mode / `analytics_storage`
-- Tag **GA4 - page_view - SPA** + trigger **CE - serra_page_view** + **DLV - page_path** / **DLV - page_title**
-- Container **not published** yet (correct until the site loads GTM)
+- Imported **all 17 elements** from `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json` via **Merge** (not Overwrite). Import required correcting invalid enum `list` → `LIST` before upload.
+- GA4 Configuration tag: `send_page_view=false`, Consent Mode / `analytics_storage`
+- SPA `page_view` tag + trigger **CE - serra_page_view** + **DLV - page_path** / **DLV - page_title**
+- Ecommerce tag + trigger; `generate_lead` and `view_search_results` tags verified present
+- Required `analytics_storage` consent on tags
+- Enhanced Measurement history-based page views **disabled** in GA4
 
-### Remaining GTM work (import JSON — preferred)
+### Not done (manual)
 
-Importable merge file (validated, no publish): `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json`
+1. **Publish** the GTM container (Luipy; after optional purchase test).
+2. **Purchase** tracking validation with a safe test transaction.
+3. Keep **user-provided data / ads** settings off unless legal review says otherwise.
+4. Do **not** add a parallel site `gtag.js` snippet for `G-TS9QP8HY4H` (site loads GTM only).
 
-1. Admin → **Import Container** → that JSON → **Existing workspace** → **Merge** → **Rename** conflicts.
-2. Preview after site deploy; **Publish only** when Luipy authorizes.
-3. Do **not** use Overwrite (would wipe the manual page_view / config tags).
-
-The import adds: one GA4 ecommerce tag (`{{Event}}` + ecommerce from dataLayer), `generate_lead`, `view_search_results`, matching triggers/variables, all with `analytics_storage` consent.
-
-### Still required in GTM (before/at publish)
-
-1. Confirm Consent Mode remains enabled and existing GA4 tags still require `analytics_storage`.
-2. Import the remaining ecommerce JSON above (or recreate those tags manually).
-3. **Avoid duplicates:** Do not also install the GA4 snippet (`gtag.js` with `G-TS9QP8HY4H`) in the website HTML. Code loads **only** GTM.
-4. **User-provided data / ads settings:** Prefer leave “datos proporcionados por el usuario” **off** unless legal review says otherwise (PII risk). Enhanced measurement / auto events are OK if they do not duplicate custom tags.
-5. **Publish** only after Luipy authorizes **and** the site is deployed with `ANALYTICS_ENABLED=true` + `GTM_CONTAINER_ID=GTM-KGM5ZJLJ`.
-6. Validate: GTM Preview → site → accept analytics cookies → GA4 DebugView / Realtime.
+Reference import file (historical; import already completed): `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json`
 
 ### GTM API automation
 
-Official Tag Manager API can create the same entities, but needs an OAuth client + refresh token from a Google user with **Edit** on `GTM-KGM5ZJLJ` (scopes `tagmanager.edit.containers` / `tagmanager.readonly`). No Google password. Not available on this host today; JSON import is the safe path.
+Official Tag Manager API can create the same entities, but needs an OAuth client + refresh token from a Google user with **Edit** on `GTM-KGM5ZJLJ`. JSON import was the path used. No further import is required.
 
-Until the site loads GTM **and** the container is published, GA4 will show “no data yet”.
+## Validation log (2026-11-11)
+
+Production testing with **Tag Assistant** and **GA4 DebugView** (container still unpublished; Preview connected to production site):
+
+| Check | Result |
+|-------|--------|
+| GTM connects to production site | OK |
+| GA4 Config + SPA `page_view` tags fire | OK |
+| `page_path` / `page_title` resolve | OK |
+| `view_item_list`, `select_item`, `add_to_cart` in GA4 | OK |
+| `add_to_cart` product info, EUR, value | OK |
+| No customer PII in inspected `add_to_cart` | OK |
+| SPA nav back to homepage → `page_view` +1 | OK |
+| Obvious duplicate page views | None observed |
+| Purchase / safe test transaction | Pending |
+| GTM container published | No (manual next step) |
+
+Until the container is **published**, live visitors outside Preview do not receive the full tag set as a released version. After publish, confirm Realtime / standard reports.
 
 ## Legal copy
 
@@ -110,3 +132,4 @@ Update privacy / cookies pages to mention Google Analytics / Tag Manager and opt
 - `config/analytics.php`, `resources/views/welcome.blade.php`
 - `resources/js/analytics/*`, `CookieConsentBanner.jsx`, cart/checkout/product/order hooks
 - `static-site/www/php/analytics.php`, `js/serra-analytics.js`, `css/serra-consent.css`
+- `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json` (merge-import reference; already applied in GTM)

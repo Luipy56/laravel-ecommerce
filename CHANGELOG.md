@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.31] - 2026-11-11
+
+### Changed
+- **Analytics docs:** record GTM Merge import complete (17 elements), Preview/DebugView validation passed, container still unpublished, purchase test still pending. See `docs/analytics-ga4-gtm.md`.
+
 ## [0.2.30] - 2026-11-11
 
 ### Changed

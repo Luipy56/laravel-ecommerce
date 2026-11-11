@@ -20,7 +20,7 @@
 ## Identifiers (verify in Google Admin)
 
 - GA4 Measurement ID: `G-TS9QP8HY4H`
-- GTM container (from setup notes): `GTM-P3JR3DMB`
+- GTM container: `GTM-KGM5ZJLJ` (do **not** use the old placeholder `GTM-P3JR3DMB`)
 
 Confirm both belong to Serralleria Solidària before enabling.
 
@@ -30,7 +30,7 @@ Shop (Laravel / Docker app):
 
 ```env
 ANALYTICS_ENABLED=true
-GTM_CONTAINER_ID=GTM-P3JR3DMB
+GTM_CONTAINER_ID=GTM-KGM5ZJLJ
 GA4_MEASUREMENT_ID=G-TS9QP8HY4H
 ```
 
@@ -38,7 +38,7 @@ Marketing static PHP-FPM (`.env.static`):
 
 ```env
 STATIC_ANALYTICS_ENABLED=1
-STATIC_GTM_CONTAINER_ID=GTM-P3JR3DMB
+STATIC_GTM_CONTAINER_ID=GTM-KGM5ZJLJ
 STATIC_GA4_MEASUREMENT_ID=G-TS9QP8HY4H
 ```
 
@@ -69,14 +69,23 @@ Ecommerce payloads clear prior `ecommerce` before each push (GA4 recommended pat
 
 ## What Luipy must do in GTM
 
-1. Open container `GTM-P3JR3DMB` (or create if the ID was only a placeholder).
-2. Add **GA4 Configuration** tag with `G-TS9QP8HY4H`, trigger All Pages (Consent Mode aware).
-3. Add GA4 Event tags for each ecommerce / custom event above (or one GA4 Event tag using `{{Event}}` where applicable).
-4. Enable **Consent Overview** / built-in Consent Mode support; require `analytics_storage` for analytics tags.
-5. **Preview** on stage/prod URL, then **Publish**.
-6. Validate in GA4 **DebugView** and Realtime (no production purchase tests without sandbox).
+### Already done in GTM (by Luipy)
 
-Until tags are published, the site will push `dataLayer` events but GA4 will not show them.
+- Container `GTM-KGM5ZJLJ`
+- Tag **GA4 - Serralleria Solidària - Configuración** + trigger Initialization / All Pages
+- Container **not published** yet (correct until the site loads GTM)
+
+### Still required in GTM (before/at publish)
+
+1. **Consent:** In Admin → Container settings / Consent Overview, enable Consent Mode. On the GA4 Configuration tag, require `analytics_storage` = granted (so it does not fire before cookie accept).
+2. **SPA page views:** Shop is React. Add a GA4 Event tag `page_view` fired on custom event `serra_page_view` (and/or History Change). Do **not** rely only on the first full page load.
+3. **Ecommerce:** GA4 Event tags (or one GA4 Event using the Data Layer event name) for: `view_item_list`, `select_item`, `view_item`, `add_to_cart`, `remove_from_cart`, `view_cart`, `begin_checkout`, `add_shipping_info`, `add_payment_info`, `purchase`, `generate_lead`, `view_search_results`. Ecommerce parameter from Data Layer: `ecommerce`.
+4. **Avoid duplicates:** Do not also install the GA4 snippet (`gtag.js` with `G-TS9QP8HY4H`) in the website HTML. Code loads **only** GTM.
+5. **User-provided data / ads settings:** Prefer leave “datos proporcionados por el usuario” **off** unless legal review says otherwise (PII risk). Enhanced measurement / auto events are OK if they do not duplicate custom tags.
+6. **Publish** only after Luipy authorizes **and** the site is deployed with `ANALYTICS_ENABLED=true` + `GTM_CONTAINER_ID=GTM-KGM5ZJLJ`.
+7. Validate: GTM Preview → site → accept analytics cookies → GA4 DebugView / Realtime.
+
+Until the site loads GTM **and** the container is published, GA4 will show “no data yet”.
 
 ## Legal copy
 

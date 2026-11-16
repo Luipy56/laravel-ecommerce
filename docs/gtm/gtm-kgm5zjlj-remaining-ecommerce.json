@@ -80,7 +80,7 @@
         "consentSettings": {
           "consentStatus": "NEEDED",
           "consentType": {
-            "type": "list",
+            "type": "LIST",
             "list": [
               {
                 "type": "TEMPLATE",
@@ -142,7 +142,7 @@
         "consentSettings": {
           "consentStatus": "NEEDED",
           "consentType": {
-            "type": "list",
+            "type": "LIST",
             "list": [
               {
                 "type": "TEMPLATE",
@@ -204,7 +204,7 @@
         "consentSettings": {
           "consentStatus": "NEEDED",
           "consentType": {
-            "type": "list",
+            "type": "LIST",
             "list": [
               {
                 "type": "TEMPLATE",

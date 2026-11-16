@@ -28,6 +28,27 @@ Route::get('/robots.txt', function () {
     return response($content, 200)->header('Content-Type', 'text/plain');
 })->name('robots');
 
+// GSC / legacy URLs (also enforced in docker/nginx/*.conf for php-fpm 404s before Laravel).
+Route::permanentRedirect('/index.php', '/');
+foreach ([
+    'avislegal',
+    'blog',
+    'blog-mestrejaments',
+    'blog-parts-d-un-pany',
+    'blog-tipus-de-claus',
+    'contacte',
+    'cookies',
+    'modal',
+    'nosaltres',
+    'privacitat',
+    'serveis',
+    'solidaritat',
+    'webs',
+] as $legacyMarketingPhp) {
+    Route::permanentRedirect('/'.$legacyMarketingPhp.'.php', '/web/'.$legacyMarketingPhp);
+}
+Route::permanentRedirect('/qui-som.php', '/web/nosaltres');
+
 Route::middleware('web')->group(function () {
     Route::get('/', [SpaShellController::class, 'home'])->name('spa.home');
     Route::get('/products', [SpaShellController::class, 'products'])->name('spa.products');

@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.2.35] - 2026-11-17
+
+### Fixed
+- **SEO / GSC:** apex `/index.php` permanently redirects to `/` (stops self-canonical duplicate).
+- **SEO / GSC:** legacy apex marketing `*.php` URLs permanently redirect to `/web/{slug}` (nginx + Laravel); `qui-som.php` maps to `/web/nosaltres`.
+- **PHPUnit:** set `APP_BASE_PATH` in `tests/bootstrap.php` so a symlinked `vendor/` cannot boot another env tree.
+
+## [0.2.34] - 2026-11-11
+
+### Fixed
+- **GTM import JSON:** `consentType.type` enum corrected from lowercase `list` to `LIST` in `docs/gtm/gtm-kgm5zjlj-remaining-ecommerce.json` (reimport-safe).
+
+### Changed
+- **Redmine hub #7469:** description aligned to production deploy `0.2.30` on `prod` and integration tip (see ticket; not stored in repo).
+
+## [0.2.33] - 2026-11-11
+
+### Changed
+- **Analytics docs:** note that Redmine `#8465` issue description mirrors the full Textile technical documentation for offline/Redmine-first reading.
+
+## [0.2.32] - 2026-11-11
+
+### Added
+- **Analytics docs pack:** `docs/analytics/` (architecture, configuration, events, consent, testing, operations, pending purchase validation). Reconcile `docs/analytics-ga4-gtm.md` as entry pointer. Redmine `#8465`.
+
+## [0.2.31] - 2026-11-11
+
+### Changed
+- **Analytics docs:** record GTM Merge import complete (17 elements), Preview/DebugView validation passed, container still unpublished, purchase test still pending. See `docs/analytics-ga4-gtm.md`.
+
 ## [0.2.30] - 2026-11-11
 
 ### Changed

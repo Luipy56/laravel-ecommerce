@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.36] - 2026-11-17
+
+### Fixed
+- **SEO / GSC:** production nginx redirects use `https://$host/...` so Location is not http behind the TLS edge.
+
 ## [0.2.35] - 2026-11-17
 
 ### Fixed

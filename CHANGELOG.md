@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.35] - 2026-11-17
+
+### Fixed
+- **SEO / GSC:** apex `/index.php` permanently redirects to `/` (stops self-canonical duplicate).
+- **SEO / GSC:** legacy apex marketing `*.php` URLs permanently redirect to `/web/{slug}` (nginx + Laravel); `qui-som.php` maps to `/web/nosaltres`.
+- **PHPUnit:** set `APP_BASE_PATH` in `tests/bootstrap.php` so a symlinked `vendor/` cannot boot another env tree.
+
 ## [0.2.34] - 2026-11-11
 
 ### Fixed

@@ -14,6 +14,12 @@ declare(strict_types=1);
 
 $projectRoot = dirname(__DIR__);
 
+// When vendor/ is a symlink into another tree (e.g. stage on the VPS), Laravel's
+// Application::inferBasePath() would otherwise boot that other tree's routes/config.
+$_ENV['APP_BASE_PATH'] = $projectRoot;
+$_SERVER['APP_BASE_PATH'] = $projectRoot;
+putenv('APP_BASE_PATH='.$projectRoot);
+
 require $projectRoot.'/vendor/autoload.php';
 
 if (is_file($projectRoot.'/.env')) {

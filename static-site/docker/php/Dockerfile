@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Dedicated PHP-FPM for the marketing site — NOT the Laravel app image.
-FROM php:8.2-fpm-bookworm
+FROM php:8.2.36-fpm-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgd-dev \
